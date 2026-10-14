@@ -1,0 +1,12 @@
+{
+  "app": "node bin/hold.ts",
+  "context": {
+    "senderEmail": "rogerjeasybavibidila@gmail.com",
+    "passkeyRelyingPartyId": "localhost",
+    "@aws-cdk/core:checkSecretUsage": true,
+    "@aws-cdk/aws-iam:minimizePolicies": true,
+    "@aws-cdk/aws-s3:createDefaultLoggingPolicy": true,
+    "@aws-cdk/aws-s3:serverAccessLogsUseBucketPolicy": true,
+    "@aws-cdk/core:validateAgainstDefaultRules": true
+  }
+}

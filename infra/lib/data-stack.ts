@@ -1,0 +1,111 @@
+import { CfnOutput, Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
+import type { App, StackProps } from 'aws-cdk-lib'
+import * as ec2 from 'aws-cdk-lib/aws-ec2'
+import * as rds from 'aws-cdk-lib/aws-rds'
+import * as s3 from 'aws-cdk-lib/aws-s3'
+import {
+  ACCOUNT,
+  DATABASE_ADMIN_USER,
+  DATABASE_APP_USER,
+  DATABASE_MAX_CAPACITY,
+  DATABASE_MIN_CAPACITY,
+  DATABASE_NAME,
+  EVIDENCE_RETENTION_DAYS,
+  name,
+  secretName,
+} from './settings.ts'
+
+// Hold's stateful resources: its own Aurora cluster and its two photograph buckets. Everything here is retained if
+// the stack is deleted, and the stack itself has termination protection.
+
+export type DataResources = {
+  readonly stack: Stack
+  readonly cluster: rds.DatabaseCluster
+  readonly appUserSecret: rds.DatabaseSecret
+  readonly evidenceBucket: s3.Bucket
+  readonly displayBucket: s3.Bucket
+}
+
+function createDatabase(stack: Stack) {
+  // The account's default VPC. Its subnets are public, but the cluster takes no public address and its security
+  // group lets nothing in. Hold reaches it only through the RDS Data API, over HTTPS and signed with IAM.
+  const vpc = ec2.Vpc.fromLookup(stack, 'DefaultVpc', { isDefault: true })
+  const securityGroup = new ec2.SecurityGroup(stack, 'DatabaseSecurityGroup', {
+    vpc,
+    securityGroupName: name('database'),
+    description: 'Hold database. No inbound rules: access is through the RDS Data API only.',
+    allowAllOutbound: false,
+  })
+
+  const cluster = new rds.DatabaseCluster(stack, 'Database', {
+    clusterIdentifier: name('database'),
+    engine: rds.DatabaseClusterEngine.auroraPostgres({ version: rds.AuroraPostgresEngineVersion.VER_17_9 }),
+    writer: rds.ClusterInstance.serverlessV2('Writer', { instanceIdentifier: name('database', 'writer'), publiclyAccessible: false }),
+    serverlessV2MinCapacity: DATABASE_MIN_CAPACITY,
+    serverlessV2MaxCapacity: DATABASE_MAX_CAPACITY,
+    enableDataApi: true,
+    defaultDatabaseName: DATABASE_NAME,
+    credentials: rds.Credentials.fromGeneratedSecret(DATABASE_ADMIN_USER, { secretName: secretName('database', 'admin') }),
+    vpc,
+    vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
+    securityGroups: [securityGroup],
+    storageEncrypted: true,
+    backup: { retention: Duration.days(7) },
+    deletionProtection: true,
+    removalPolicy: RemovalPolicy.RETAIN,
+  })
+
+  // The application's own login. Migrations create the role with this password and grant it only what it needs.
+  const appUserSecret = new rds.DatabaseSecret(stack, 'AppUserSecret', {
+    secretName: secretName('database', 'app'),
+    username: DATABASE_APP_USER,
+    dbname: DATABASE_NAME,
+    masterSecret: cluster.secret,
+  })
+  appUserSecret.applyRemovalPolicy(RemovalPolicy.RETAIN)
+
+  return { cluster, appUserSecret }
+}
+
+function createEvidenceBucket(stack: Stack): s3.Bucket {
+  // Object Lock can only be switched on when a bucket is created (tech-stack.md section 16, item 8).
+  return new s3.Bucket(stack, 'EvidenceBucket', {
+    bucketName: name('evidence', ACCOUNT),
+    objectLockEnabled: true,
+    objectLockDefaultRetention: s3.ObjectLockRetention.governance(Duration.days(EVIDENCE_RETENTION_DAYS)),
+    versioned: true,
+    encryption: s3.BucketEncryption.KMS_MANAGED,
+    bucketKeyEnabled: true,
+    blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+    enforceSSL: true,
+    lifecycleRules: [{ id: 'abort-incomplete-uploads', abortIncompleteMultipartUploadAfter: Duration.days(7) }],
+    removalPolicy: RemovalPolicy.RETAIN,
+  })
+}
+
+function createDisplayBucket(stack: Stack): s3.Bucket {
+  // Smaller, face-blurred copies, served through short-lived signed links. They can be made again from the evidence.
+  return new s3.Bucket(stack, 'DisplayBucket', {
+    bucketName: name('display', ACCOUNT),
+    encryption: s3.BucketEncryption.KMS_MANAGED,
+    bucketKeyEnabled: true,
+    blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+    enforceSSL: true,
+    lifecycleRules: [{ id: 'abort-incomplete-uploads', abortIncompleteMultipartUploadAfter: Duration.days(7) }],
+    removalPolicy: RemovalPolicy.RETAIN,
+  })
+}
+
+export function createDataStack(app: App, props: StackProps): DataResources {
+  const stack = new Stack(app, 'HoldData', { ...props, terminationProtection: true, description: 'Hold: database and photograph storage' })
+  const { cluster, appUserSecret } = createDatabase(stack)
+  const evidenceBucket = createEvidenceBucket(stack)
+  const displayBucket = createDisplayBucket(stack)
+
+  new CfnOutput(stack, 'DatabaseClusterArn', { value: cluster.clusterArn })
+  new CfnOutput(stack, 'DatabaseAppSecretArn', { value: appUserSecret.secretArn })
+  new CfnOutput(stack, 'EvidenceBucketName', { value: evidenceBucket.bucketName })
+  new CfnOutput(stack, 'DisplayBucketName', { value: displayBucket.bucketName })
+
+  return { stack, cluster, appUserSecret, evidenceBucket, displayBucket }
+}
