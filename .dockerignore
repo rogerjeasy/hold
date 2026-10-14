@@ -1,0 +1,18 @@
+# Nothing local, built or secret goes into the image.
+**/node_modules
+**/.next
+**/.env
+**/.env.*
+!**/.env.example
+**/test-results
+**/playwright-report
+**/coverage
+**/*.tsbuildinfo
+infra/cdk.out
+packages/paypal/trials/recordings
+eval/results
+.git
+.github
+.claude
+.superpowers
+CLAUDE.local.md
