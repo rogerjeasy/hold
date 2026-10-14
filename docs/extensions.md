@@ -1,0 +1,1328 @@
+# Hold: extensions
+
+Six additions built on top of the spine, in build order. PayPal AI Hackathon 2026. Draft 1, 13 October 2026.
+
+Read `project-description.md` for what Hold is, `architecture.md` for how it is built and `tech-stack.md` for the tools. This document specifies what is added once the spine works: what each addition does, what it changes in the design, which PayPal calls it makes, how its agent is contained, and how to tell that it is finished.
+
+**None of these changes what Hold is.** Hold remains a deposit and damage system for small rental shops, built on a PayPal hold and a shared evidence pack. Each addition makes one of Hold's existing promises stronger, or carries the same rental into one more moment.
+
+**Contents**
+
+1. Summary
+2. Why these six
+3. Rules every extension obeys
+4. Shared foundations
+5. Extension 0: the accuracy scorecard
+6. Extension 1: the operations agent and the morning queue
+7. Extension 2: the Clean Record and the trust ladder
+8. Extension 3: renting through your own assistant
+9. Extension 4: an advocate for each side
+10. Extension 5: the incident desk
+11. Where each change lands in the existing design
+12. Build order, gates and cut line
+13. The video
+14. Risks and open questions
+15. How certain each part is
+
+---
+
+## 1. Summary
+
+| # | Extension | In one sentence | The existing promise it strengthens |
+|---|---|---|---|
+| 0 | **The accuracy scorecard** | The comparison's measured accuracy is published with its sample sizes, and a release that makes it worse does not ship. | "Honest about the AI's limits" |
+| 1 | **The operations agent** | Every night an agent checks each hold, claim, invoice and dispute against PayPal and gives the owner a short queue of decisions to approve. | "A hold never lapses unnoticed" |
+| 2 | **The Clean Record** | A renter's clean returns lower their next hold, at any Hold shop, by a ladder the shop publishes. | "A clean record the shop can reward" |
+| 3 | **Renting through your own assistant** | A traveller's AI assistant finds, quotes, books and manages a rental through an MCP server, while the person approves the money in PayPal. | The roadmap's "bookable by AI assistants" |
+| 4 | **An advocate for each side** | In a contested claim, each side may give an agent written limits, and the two agents settle from the same evidence, inside those limits. | "A real right to reply" |
+| 5 | **The incident desk** | A renter reports damage, a fault or a theft during the rental, with photographs, and can agree a small matter before the return. | "The conversation is about a photograph" |
+
+**Three ideas carry all six.**
+
+1. **Detect with code, explain with the model.** Which holds are about to lapse, which hold a renter is entitled to, whether an offer is inside its limits: plain code answers these. The model investigates, argues, drafts and explains.
+2. **A mandate is an approval given in advance.** Hold's rule is that a person decides. A person may decide at the moment, or earlier, by writing limits an agent must stay inside. Both are recorded the same way.
+3. **One gateway for every agent.** The owner's assistant, the operations agent, a renter's outside assistant and the two advocates all reach Hold through the same checked, logged, tiered tool gateway. No agent has a private door.
+
+---
+
+## 2. Why these six
+
+### 2.1 What the judges score
+
+From the official rules, checked on 13 October 2026.
+
+- Five criteria, equally weighted: Technological Implementation, Design, Potential Impact, Innovation, Presentation.
+- Ties are broken in that order, so Technological Implementation decides a close result.
+- A project can win one Grand Prize and one Sponsor Prize, or one Honorable Mention and one Sponsor Prize. Honorable Mentions do not add up.
+
+Hold is built for the Grand Prize. Each extension is chosen because it lifts at least two of the five criteria, and because it would also make Hold a strong candidate for one Honorable Mention if the Grand Prize goes elsewhere.
+
+| Extension | Tech | Design | Impact | Innovation | Presentation | Honorable Mention it also supports |
+|---|---|---|---|---|---|---|
+| 0 Scorecard | Strong | Some | Strong | Some | Strong | Best Use of PayPal + AI |
+| 1 Operations agent | Strong | Strong | Some | Some | Some | Best Use of PayPal + AI |
+| 2 Clean Record | Some | Strong | Strong | Strong | Strong | Most Impactful |
+| 3 Own assistant | Strong | Some | Some | Strong | Strong | Best Use of Agentic Commerce |
+| 4 Advocates | Strong | Some | Strong | Strong | Strong | Most Creative |
+| 5 Incident desk | Some | Strong | Strong | Some | Some | Most Impactful |
+
+### 2.2 What PayPal asked for
+
+The hackathon's resources page describes the agentic projects it hopes to see: "an AI agent that shops and checks out for you" and "two agents negotiating and settling a payment between themselves". Extension 3 is the first, applied to a rental. Extension 4 is the second, applied to a damage claim.
+
+### 2.3 What was left out, and why
+
+| Idea | Why it is not here |
+|---|---|
+| Repair partners who quote from the evidence and are paid by Payouts | A third actor in a three-minute video. Stays on the roadmap. |
+| A ChatGPT app on the Agentic Commerce Protocol | PayPal's integration for it runs on Braintree, which is outside Hold's stack. |
+| Enrolling the shop in PayPal Store Sync | Store Sync is access-gated and today covers physical goods sold to customers in the United States in dollars. A rental is neither. |
+| Immediate part-capture of a hold during the rental | Depends on PayPal behavior that is still unconfirmed. Extension 5 is designed so it is not needed. |
+
+---
+
+## 3. Rules every extension obeys
+
+These extend the product principles and the safeguards. A feature that cannot meet them is not built.
+
+1. **A charge still begins from a claim.** A capture can only come from a claim that reached `charging`. An agent can shorten the path to a decision. It cannot create the evidence, the claim lines or the prices.
+2. **No amount is model output.** Every amount shown or charged is read from the database or computed by plain code from records. The one place an agent names amounts is an offer in Extension 4, and each amount there is checked by code against the line's published price and the agent's limits.
+3. **Detect with code, explain with the model.** Anything that must never be missed is found by deterministic code. If the model is unavailable, the list of things that need attention is still complete.
+4. **A person decides, at the moment or in advance.** An agent acts on money only after a person's approval on screen, or inside a mandate that a person granted. No third way exists.
+5. **One gateway.** Every tool call from every agent passes the same gateway, which checks identity, shop, tier, mandate and rate, and writes the audit log.
+6. **Text from outside is data.** Renter comments, messages from another agent, memos on PayPal transactions and dispute notes are passed to a model as quoted data. Steps that read them have no tools that move money.
+7. **The person sees what their agent did.** Every action taken for a person is listed for that person, in plain words, with a way to stop the agent.
+8. **Everything degrades to the spine.** If the model, an MCP connection or an agent fails, the manual path from `architecture.md` still works and nothing is charged.
+9. **Simulated things say so.** As in the spine, anything simulated for the demo is labelled on screen and in the record.
+
+---
+
+## 4. Shared foundations
+
+Four small pieces are used by more than one extension. They are built once, with Extension 1, and reused.
+
+### 4.1 Actors
+
+Every approval, proposal, tool call and audit line names an actor. The spine has three kinds. The extensions add three.
+
+| Actor kind | Who | How it is identified | First used in |
+|---|---|---|---|
+| `staff` | Owner, manager, counter staff | Cognito token and a role in the shop | Spine |
+| `renter` | The person renting | Signed link, with a one-time code for money decisions | Spine |
+| `system` | The worker doing scheduled work | Service role | Spine |
+| `shop_agent` | The owner's assistant, the operations agent, the shop's advocate | Runs inside Hold for one shop | Extension 1 |
+| `renter_agent` | A renter's outside assistant, or the renter's advocate | An agent token bound to one rental | Extension 3 |
+| `public_agent` | Any assistant that has not yet paid for anything | No identity. Rate limited. | Extension 3 |
+
+An agent actor always records the person it acts for and, where it acted on money, the mandate it acted under.
+
+### 4.2 Mandates
+
+A mandate is a person's written permission for an agent to act within limits. It is the same kind of record as an approval, made earlier.
+
+| Property | Rule |
+|---|---|
+| **Granted by a person** | An owner on a signed-in screen, or a renter after a one-time code |
+| **Bounded** | Each kind has a fixed, typed set of limits. Free text is never a limit. |
+| **Expiring** | Every mandate has an end date |
+| **Revocable** | The person can end it at any time. Revocation takes effect at the agent's next action. |
+| **Private** | A mandate's limits are shown only to the person who granted it and to code. They are never shown to the other side or placed in the other side's agent context. |
+| **Checked by plain code** | `withinMandate(action, mandate, now)` in `packages/domain` decides. The model is never asked whether it is allowed. |
+| **Recorded** | Each action taken under a mandate stores the mandate's ID. The approval record's method is `mandate`. |
+
+| Mandate kind | Granted by | Lets which agent do what | Limits | Used in |
+|---|---|---|---|---|
+| `ops_standing_rule` | Owner | The operations agent carry out one kind of proposal without asking | Proposal kind, conditions, daily count | Extension 1 |
+| `agent_hold` | Renter with a saved PayPal method | The renter's own assistant accept a hold | Maximum amount, shops, end date | Extension 3, optional |
+| `settlement_shop` | Owner | The shop's advocate agree a contested claim | Lowest share of the claim, rounds, largest claim, whether a final tap is needed | Extension 4 |
+| `settlement_renter` | Renter | The renter's advocate agree a contested claim | Highest total, whether a final tap is needed | Extension 4 |
+
+No mandate kind permits a charge that a claim does not already justify, and none can be added without a change to `packages/domain` and its tests.
+
+### 4.3 Proposals
+
+The spine's assistant can already propose a release or an extension for the owner to confirm. The extensions make the proposal a first-class record.
+
+```mermaid
+stateDiagram-v2
+    [*] --> pending
+    pending --> approved
+    pending --> rejected
+    pending --> expired
+    pending --> superseded
+    approved --> executing
+    executing --> executed
+    executing --> failed
+    failed --> executing
+    executed --> [*]
+    rejected --> [*]
+    expired --> [*]
+    superseded --> [*]
+```
+
+- **A proposal names records, not amounts.** Its payload holds IDs. The amount shown to the owner and the amount sent to PayPal are both read from the database at that moment.
+- **A proposal carries its preconditions.** It stores a fingerprint of the state it was written against, such as the hold's state and current authorization ID. At approval the state is read again. If it changed, the proposal becomes `superseded` and nothing is executed.
+- **One live proposal per subject and kind.** A unique key on shop, kind, subject and precondition fingerprint makes a repeated agent run write nothing new.
+- **Approval uses the existing path.** An approved proposal writes an approval record and an execution through the outbox, with an idempotency key, exactly as a click on the hold screen does.
+
+| Proposal kind | What approval does | Executed through |
+|---|---|---|
+| `release_hold` | Voids the authorization | Direct REST |
+| `request_replacement_hold` | Sends the renter a link to approve a new hold, or uses their saved method | Direct REST |
+| `send_invoice` | Creates and sends an invoice for a decided balance | Agent Toolkit function, called by code |
+| `refund_part` | Refunds part of a capture | Agent Toolkit function, called by code |
+| `respond_to_dispute` | Uploads the evidence pack and the drafted note | Direct REST |
+| `send_message` | Sends a drafted message to a renter | SES |
+| `note` | Nothing. It informs the owner. | |
+
+There is no proposal kind for a capture. A test enumerates the kinds and fails if any maps to one.
+
+### 4.4 Tool tiers and the gateway
+
+Each tool is declared with a tier. The gateway refuses a call whose actor is not entitled to that tier.
+
+| Tier | Meaning | Example |
+|---|---|---|
+| `read` | Returns records the actor may see | `get_hold`, PayPal's `list_transaction` |
+| `draft` | Produces text for a person to send or discard | `draft_message_to_renter` |
+| `propose` | Writes a proposal | `propose_release` |
+| `notify` | Sends a fixed-template message without approval, rate capped | A return-due reminder |
+| `act_under_mandate` | Acts on money inside a live mandate | `submit_offer` |
+
+There is no tier above these. For each call the gateway checks, in order: the actor and the person it acts for, the shop, the tier, the mandate where the tier requires one, the rate limit, and the shape of the arguments. It then writes one audit line with the actor, tool, subject, outcome and duration.
+
+### 4.5 New packages
+
+```
+packages/
+  domain/      adds: mandates, proposals, detectors, ladder, negotiation referee,
+               incident rules. Still pure code.
+  mcp/         Hold's MCP server: tool definitions, agent tokens, quotes
+  ops/         the operations agent run and the PayPal MCP client
+  negotiate/   the two advocates' runners. The referee is in domain.
+  trust/       the Clean Record: outcome records, credential signing and checking
+```
+
+The dependency rule is unchanged. `domain` depends on nothing. The new packages depend on `domain` and never on each other.
+
+### 4.6 New tables
+
+All carry `shop_id` and row-level security, except where noted.
+
+| Table | Key contents | Extension |
+|---|---|---|
+| `mandates` | Kind, grantor, agent, limits, valid from and until, revoked at, how it was granted | 1, 3, 4 |
+| `proposals` | Kind, subject, payload of IDs, reason, references, precondition fingerprint, state, proposer, decider, decision reason | 1 |
+| `exceptions` | Kind, subject, detected at, resolved at, fingerprint | 1 |
+| `ops_runs` | Trigger, started, completed, state, budget used, model and prompt version, counts | 1 |
+| `eval_runs` | Data set version, pipeline version, measures, results key. No `shop_id`. | 0 |
+| `finding_outcomes` | Finding, final verdict, who decided, when | 0 |
+| `rental_outcomes` | Renter key, item category, closed at, outcome class, hold amount released | 2 |
+| `trust_ladders`, `trust_rungs` | Version, published at. Clean returns needed, window, share of the hold, largest item value, whether a saved method is needed | 2 |
+| `renter_consents` | Renter key, what was consented to, when, withdrawn at. No `shop_id`. | 2 |
+| `quotes` | Item type, period, fee, hold amount, price list and wear policy versions, expiry | 3 |
+| `agent_sessions` | Rental, token fingerprint, scopes, client label, last used, revoked at | 3 |
+| `negotiations` | Claim, both mandate IDs, state, round, deadline, transcript head fingerprint | 4 |
+| `negotiation_moves` | Negotiation, side, move, line amounts, grounds, evidence references, previous move fingerprint | 4 |
+| `incidents` | Rental item, kind, state, description, triage result, model and prompt version | 5 |
+
+---
+
+## 5. Extension 0: the accuracy scorecard
+
+### 5.1 What it is
+
+The spine already plans an evaluation set for the comparison. This extension turns its results into a product feature. The numbers are published, each with its sample size, in the owner's view, on a public page and in the README. A release that makes them worse does not ship.
+
+### 5.2 Why it is first
+
+- The comparison is the main technical risk in `architecture.md`. Everything else in this document rests on it.
+- A claim that an AI is accurate, with no numbers, convinces no judge and no renter. Numbers with sample sizes do.
+- It is the cheapest extension. The evaluation set has to exist anyway.
+
+### 5.3 The evaluation set
+
+One case is one pair: a handover photograph and a return photograph of the same view. The sizes below are targets for the first version, for the e-bike item type.
+
+| Group | Pairs | What it tests |
+|---|---|---|
+| Clean, easy | 30 | Same light, same angle |
+| Clean, hard | 30 | Wet, dirty, shadows, reflections, a different time of day, a slightly different angle |
+| Ordinary wear | 20 | Marks the wear policy says are not damage |
+| Damage | 40 | Scratch, dent, crack, bent part, missing accessory. Small and large. Good and poor light. |
+| A known mark is present | 15 | A mark already in the item passport must not be charged |
+| Wrong item or reused photograph | 10 | The identity and reuse checks |
+
+- **Each damage pair has its region labelled,** so a finding in the wrong place does not count as found.
+- **Labels live in a manifest beside the images** in `eval/`, with the photographs. All photographs are taken for this project and show no people.
+- **Two halves.** A tuning half is used when adjusting prompts and thresholds. A gate half is never looked at while tuning and is the only half that is published. This keeps the published numbers honest.
+
+### 5.4 The measures
+
+| Measure | Definition |
+|---|---|
+| **Damage found** | Labelled damage for which the pipeline produced a damage or missing finding that overlaps the labelled region, divided by all labelled damage |
+| **Clean returns wrongly flagged** | Clean pairs that ended in the result "Findings", divided by all clean pairs. This is the error that harms renters. |
+| **Sent to a person** | Pairs that ended in "Needs a person", divided by all pairs. Reported separately. Deferring is not counted as an error or as a success. |
+| **Known marks respected** | Pairs with a known mark where no claim line was drafted for it, divided by all such pairs |
+| **Agreement between the two looks** | Damage findings the second look confirmed, divided by all damage findings from the first look |
+| **Confidence holds up** | For each confidence level, the share of findings at that level that were correct |
+| **Cost and time** | Model cost and elapsed time for one comparison, median and slowest tenth |
+
+**Every number is shown with its count.** A share is printed as "57 of 60", never as a bare percentage. Where a count is zero, the page says what that can and cannot support. Sixty clean pairs with none wrongly flagged supports "below about 6 percent", not "never".
+
+### 5.5 Where the numbers appear
+
+- **The owner's view.** A page titled "How reliable is the comparison", with the measures, their counts, the date of the run and the pipeline version.
+- **Each finding.** Beside its confidence level: how often findings at that level were correct in testing.
+- **A public page and the README.** The same table, so a renter or a judge can read it without signing in.
+- **The evidence pack.** The pipeline version and the run it was last measured in.
+
+### 5.6 The release gate
+
+The pipeline in GitHub Actions runs the gate half whenever a prompt, a threshold, the model ID or the comparison code changes.
+
+- The run is stored in `eval_runs` with the model ID, prompt version and thresholds.
+- The build fails if clean returns wrongly flagged rises above its limit, or if damage found falls by more than its tolerance against the last accepted run.
+- **The limits are set after the first run, not before.** The gate's job is to stop the comparison getting worse without anyone noticing.
+
+### 5.7 The field record
+
+Testing is not the same as a shop. Every real decision is also a label.
+
+- When a claim closes, each of its findings gets a row in `finding_outcomes`: upheld, removed by staff, removed after the renter contested, or reduced.
+- The owner's view shows the share of findings a person removed, by month.
+- A sharp rise raises an alarm, because it means the comparison and the shop's staff have started to disagree.
+
+### 5.8 What it changes
+
+| Area | Change |
+|---|---|
+| Data | `eval_runs`, `finding_outcomes` |
+| Code | `eval/` gains the manifest format, the runner's report and the gate. `apps/web` gains the scorecard page. |
+| PayPal | None |
+| AI | None new. This measures the AI already in the spine. |
+
+### 5.9 Done when
+
+- **X0.1** The gate half has at least the pair counts in 5.3, each with a label and, for damage, a region.
+- **X0.2** One command runs the set and writes an `eval_runs` row and a report that lists every measure in 5.4 with its counts.
+- **X0.3** The scorecard page, the README table and the run's report show the same numbers.
+- **X0.4** A deliberately weakened prompt makes the pipeline fail the gate in continuous integration.
+- **X0.5** Closing a claim writes one `finding_outcomes` row for each of its findings.
+- **X0.6** No number appears anywhere without its count.
+
+### 5.10 In the video
+
+Four seconds on the scorecard while the damage comparison runs, with the real numbers on screen.
+
+### 5.11 Size
+
+About one day beyond the evaluation set that the spine already needs. Never cut.
+
+---
+
+## 6. Extension 1: the operations agent and the morning queue
+
+### 6.1 What it is
+
+An agent that works while the shop is closed. After the nightly reconciliation it looks at every hold, claim, invoice and dispute, checks each against PayPal, and prepares a short queue. Each entry says what should happen, why in one line, and what PayPal reference proves it. The owner approves or rejects each one in a single screen. Approved entries are executed through the same path as a click.
+
+### 6.2 Why it matters
+
+- **For the owner.** Tomás does not read a ledger. He reads six lines over coffee.
+- **For robustness.** The spine already reconciles and raises alarms. Alarms tell a person something is wrong. This tells them what to do and does it when they agree.
+- **For the judges.** It uses PayPal's own remote MCP server as working plumbing, across transactions, insights, invoices, disputes and tracking, with the hold lifecycle behind approval.
+
+### 6.3 How it works
+
+```mermaid
+flowchart LR
+    rec["Nightly reconciliation"]
+    det["Detectors<br/>plain code"]
+    exc["Exceptions"]
+    agent["Operations agent<br/>Claude with read tools"]
+    ppmcp["PayPal MCP server<br/>read tools"]
+    prop["Proposals and<br/>automatic reminders"]
+    owner["Owner approves<br/>or rejects"]
+    outbox["Outbox and executions"]
+    pp["PayPal"]
+
+    rec --> det
+    det --> exc
+    exc --> agent
+    agent --> ppmcp
+    agent --> prop
+    prop --> owner
+    owner --> outbox
+    outbox --> pp
+```
+
+**Step 1. Detectors find the exceptions.** Plain code in `packages/domain`, run over the shop's records, decides what needs attention. This is the complete list. The model cannot shorten it.
+
+| Detector | Condition | What may be proposed |
+|---|---|---|
+| Clean return not confirmed | The comparison is clean, the hold is still placed, and no staff member confirmed within the shop's set time | `release_hold` |
+| Hold near the end of its life | The rental is open and validity ends within three days with no replacement started | `request_replacement_hold` |
+| Hold at risk | The hold has been `at_risk` for more than an hour, so its renewal was refused and the capture has not completed | `send_invoice`, `send_message` |
+| Return overdue | The rental is past its end time | Reminder, automatic |
+| Claim reply due soon | A claim is `presented` and its reply period ends within a day | Reminder, automatic |
+| Balance above the hold | A decided claim exceeds the reserved amount and no invoice exists | `send_invoice` |
+| Capture failed | The hold is `capture_failed` after its retry | `send_invoice`, then `release_hold` |
+| Invoice unpaid | An invoice has been sent and unpaid for the shop's set time | Invoice reminder, automatic |
+| Dispute open | A dispute is open with no response and a due date | `respond_to_dispute` |
+| Incident waiting | An incident from Extension 5 has waited for staff longer than the shop's set time | `note` |
+| Reconciliation difference | The nightly comparison with PayPal found a difference it could not apply | `note` |
+
+**Step 2. The agent investigates each exception.** It has read tools only: Hold's records and PayPal's remote MCP server. For each exception it confirms the facts against PayPal, chooses among the proposal kinds that detector allows, writes the one-line reason with its references, and drafts any message or dispute note.
+
+**Step 3. The agent may add observations.** It can raise things no detector looks for, such as an item damaged in three rentals running. An observation can only become a `note`. It is labelled as raised by the agent.
+
+**Step 4. The queue is ordered.** By deadline first, then by money at stake. The morning brief opens with one sentence: how many decisions, and how many expire today.
+
+**Step 5. The owner decides.** Each entry shows what will happen in plain words, the amount read from the database, and the PayPal reference. The owner approves, rejects with a reason, or postpones. Several `release_hold` entries can be approved together. Nothing else can.
+
+**Step 6. Execution.** An approved proposal is re-checked against its preconditions, then written to the outbox as an execution with an idempotency key.
+
+### 6.4 Tiers
+
+| Tier | What | Examples |
+|---|---|---|
+| **Automatic** | Fixed-template messages that move no money. At most one of each kind per renter per day. The shop can switch each kind off. | Return-due, reply-due and invoice reminders |
+| **Needs approval** | Anything that moves, returns or requests money, or speaks for the shop to PayPal | Release, replacement hold, invoice, part refund, dispute response |
+| **Never** | A charge | No proposal kind exists |
+
+**Standing rules.** An owner may let one kind of approval-tier proposal run without asking, under stated conditions. This is an `ops_standing_rule` mandate. The only kind offered in the hackathon build is releasing a hold when the comparison was clean and nobody confirmed it within the set time. It is off by default.
+
+### 6.5 Learning from a rejection
+
+When the owner rejects a proposal with a reason, the agent drafts a rule from it, such as "do not propose invoices under 10 euros". The owner sees the drafted rule and confirms or discards it. Confirmed rules are a visible list in the shop's settings. The agent's memory is that list and nothing else.
+
+### 6.6 PayPal calls
+
+| Need | Capability | Reached through |
+|---|---|---|
+| Confirm transactions, orders and refunds | `list_transaction`, `get_order`, `get_refund` | PayPal remote MCP server, read tools |
+| Headline numbers for the brief | `get_merchant_insights` | PayPal remote MCP server |
+| Read disputes, invoices and tracking | `list_disputes`, `get_dispute`, `list_invoices`, `get_invoice`, `get_shipment_tracking` | PayPal remote MCP server |
+| Release a hold | Payments v2, void | Direct REST, after approval |
+| Replacement hold | Orders v2, authorize | Direct REST, after approval |
+| Invoice a balance | Invoicing v2, create and send | Agent Toolkit function called by code, after approval |
+| Remind about an invoice | `send_invoice_reminder` | Agent Toolkit function called by code, automatic tier |
+| Refund part of a charge | Payments v2, refund | Agent Toolkit function called by code, after approval |
+| Answer a dispute | Disputes v1, provide evidence | Direct REST, after approval |
+
+**How the MCP server is connected.** The worker runs an MCP client and connects to `https://mcp.sandbox.paypal.com/http` with the shop's own access token. It lists the server's tools, keeps only those on Hold's read allowlist, and offers them to the model through Hold's gateway. Two reasons:
+
+- Every PayPal tool call is checked and logged by the same gateway as every other tool.
+- The shop's PayPal token stays inside Hold. It is not handed to the model provider to make the connection.
+
+PayPal's write tools, such as `create_invoice`, `create_refund` and `accept_dispute_claim`, are never offered to the model. Hold calls the equivalent functions itself after approval.
+
+**Tool names are resolved at run time.** PayPal's reference page and the toolkit's README spell some names differently, for example `list_transaction` and `list_transactions`. The allowlist is matched against what the server actually lists, and the worker refuses to start a run if a required tool is missing.
+
+### 6.7 What the AI does and does not do
+
+| Does | Does not |
+|---|---|
+| Confirms each exception against PayPal | Decide which exceptions exist |
+| Chooses among the proposals a detector allows | Invent a proposal kind |
+| Writes the one-line reason and its references | Supply an amount |
+| Drafts messages and dispute notes | Send or submit them |
+| Drafts a rule from a rejection | Make the rule active |
+| Raises observations as notes | Turn an observation into an action |
+
+**The reach of a run that has been manipulated.** Memos on PayPal transactions, dispute notes and renter comments are text from outside. If one of them steered the agent completely, the worst it could do is write a proposal of an allowed kind for a real exception, which a person must still approve, or send one rate-capped template reminder. It has no other tool.
+
+**Run limits.** Each run has a ceiling on tool calls, tokens and elapsed time. If a ceiling is reached, the remaining exceptions go to the queue with a fixed reason that says they were not investigated.
+
+**Dispute notes pass the number guard.** A drafted dispute response is checked like any message about money. Every amount in it must match the claim record.
+
+### 6.8 Failure handling
+
+| Failure | What happens |
+|---|---|
+| Claude is unavailable | The queue is built from the detectors alone, each entry with a fixed reason |
+| PayPal's MCP server is unavailable | The agent uses Hold's own records, and each entry says PayPal could not be checked |
+| The state changed before approval | The proposal becomes `superseded`. The owner is told why. |
+| An execution fails | The spine's handling applies: retry, then the fallback for that action, then tell the owner |
+| The run is repeated | The unique key on proposals means nothing is written twice |
+
+### 6.9 What it changes
+
+| Area | Change |
+|---|---|
+| Data | `exceptions`, `proposals`, `ops_runs`, `mandates` |
+| Code | `packages/ops`. Detectors, proposals and mandates in `packages/domain`. The gateway gains tiers. |
+| Queues | `ops-agent`, ordered per shop |
+| Schedules | One run per shop after reconciliation. Extra runs when a dispute opens, a hold becomes at risk or a capture fails. |
+| Screens | The morning queue, built on AG Grid, grouped by kind. The rules list in shop settings. |
+| Assistant | The owner's assistant from the spine uses the same proposals. `propose_release` and `propose_extension` now write proposal records. |
+
+### 6.10 Tests
+
+- **Detectors.** For each detector, a seeded state that must raise it and a near-miss that must not. Property tests: one exception for each true condition, none otherwise.
+- **Proposals.** Approval of each kind against a fake PayPal. Approval of a stale proposal must be refused.
+- **Containment.** A seeded renter comment and a seeded transaction memo that instruct the agent to release every hold. The run must produce no proposal outside the detectors' list.
+- **Agent quality.** A set of seeded shop states with the proposals a careful owner would expect. Measured: the share of exceptions given the expected proposal kind, and the share of reasons whose references resolve.
+
+### 6.11 Done when
+
+- **X1.1** In a seeded shop with one case of each detector, a run records exactly one exception per case and one proposal or automatic reminder for each.
+- **X1.2** Running again writes no new exception or proposal.
+- **X1.3** A test lists every proposal kind and fails if any leads to a capture.
+- **X1.4** Approving a `release_hold` proposal voids the authorization in the sandbox, the verified `PAYMENT.AUTHORIZATION.VOIDED` event marks the hold released, and the renter is told.
+- **X1.5** Approving a proposal whose hold has already been released is refused as superseded.
+- **X1.6** With the Claude key removed, the queue still lists every exception.
+- **X1.7** Every PayPal MCP tool call appears in the audit log with its shop, run and tool name.
+- **X1.8** The containment test in 6.10 passes.
+- **X1.9** A rejection with a reason produces a drafted rule. Once confirmed, the next run does not make that proposal.
+- **X1.10** Amounts on the queue screen equal the database values for the records they name.
+
+### 6.12 In the video
+
+Fifteen seconds. Tomás opens the morning queue, reads six lines, approves five and rejects one with a reason.
+
+### 6.13 Size
+
+About three days. Its foundations, which are proposals, tiers and mandates, are reused by Extensions 3 and 4.
+
+---
+
+## 7. Extension 2: the Clean Record and the trust ladder
+
+### 7.1 What it is
+
+Every rental that ends well adds to the renter's Clean Record. A shop publishes a trust ladder: so many clean returns earn so much off the hold. At the next booking, at that shop or at any other Hold shop, the renter's hold is lower, and the page says why. The record belongs to the renter, carries no personal details, and can be checked by anyone they show it to.
+
+### 7.2 Why it matters
+
+- **For the renter.** A hold is not a charge, but it still ties up money. A student or a traveller with a small balance may not have 300 euros to reserve. The ladder turns careful behavior into access.
+- **For the shop.** Lower holds for proven renters mean fewer bookings lost at the word "hold", with protection kept where the risk is.
+- **For PayPal.** The record is keyed to a PayPal payer, so a renter's reputation travels with their PayPal wallet from shop to shop.
+
+### 7.3 The rule that makes it safe
+
+**Trust only ever lowers a hold.** A poor history, or no history, means the shop's ordinary hold applies. Three things follow.
+
+- Nobody is ever charged more, or held for more, because of who they are or what they did before.
+- Opening a new PayPal account to escape a bad record gains nothing. The new account starts at the ordinary hold.
+- Hold needs no score, no model and no judgment about a person. It counts clean returns.
+
+### 7.4 The record
+
+When a rental closes, Hold writes one `rental_outcomes` row.
+
+| Outcome | Meaning | Effect on the ladder |
+|---|---|---|
+| `clean` | The hold was released in full with no claim | Counts as a clean return |
+| `settled` | A claim was accepted or decided, and paid | Neutral. Accidents happen, and the renter paid. |
+| `unpaid` | A decided claim, or an invoice for one, is past due | No reduction until it is paid |
+| `open` | The rental has a claim or dispute still in progress | Not counted yet |
+
+**Opening a PayPal dispute never counts against a renter.** The right to dispute is PayPal's protection for buyers. Only an amount that was finally decided and left unpaid affects the record.
+
+**The renter key.** The record is keyed by a keyed hash of the renter's PayPal payer ID, made with a secret only Hold has. The payer ID itself is not stored in the record or shown to any shop.
+
+**What only counts.** To stop a record being built cheaply, a rental counts only if its fee was captured through PayPal and it met the shop's minimum fee and length.
+
+### 7.5 The ladder
+
+A shop publishes its ladder the way it publishes its price list: versioned, visible to renters before they book, and applied to everyone the same way.
+
+| Example rung | Clean returns in the last 24 months | Share of the ordinary hold | Largest item value covered |
+|---|---|---|---|
+| 0 | Fewer than 3 | All of it | Any |
+| 1 | 3 | Three quarters | Up to 2,000 euros |
+| 2 | 5 | Half | Up to 2,000 euros |
+| 3 | 10, with a saved PayPal method | None | Up to 1,000 euros |
+
+- **Plain code decides.** `holdFor(itemType, ladder, record)` in `packages/domain` returns the amount, the rung and the sentence shown to the renter.
+- **The value cover stops a known trick.** A renter cannot build a record on helmets and then take an expensive e-bike with no hold.
+- **The top rung needs a saved method.** With no hold at all, a later claim is collected through the renter's saved PayPal method, after the same claim, reply and approval steps as any other. This rung depends on saved payment methods, which are optional in the spine. Without them the lowest share a ladder can offer is above zero.
+- **The rental remembers.** Each rental stores the ladder version and rung applied, as it stores the price list version.
+- **Which history counts.** A shop chooses between its own history only, or its own plus the Hold network. A renter's history at other shops is used only with their consent.
+
+**The sentence the renter reads.** "Your hold is 150 euros, not 300, because you have returned 5 rentals in good condition in the last 24 months."
+
+### 7.6 Consent and control
+
+- **Asked once, in a sentence.** At the first booking: "Use my record of clean returns to lower future holds at Hold shops." It is off until the renter turns it on.
+- **A shop never sees where else a renter rented.** It sees the rung reached and the counts behind it.
+- **The renter can see and delete the record** from any rental link. Deleting it returns them to the ordinary hold.
+- **No personal details in the record.** No name, no email, no payer ID, no shop names, no amounts.
+
+### 7.7 The credential
+
+Inside Hold, a shop reads the record directly. The credential is how the record leaves Hold.
+
+- **Format.** A compact signed token. Its contents are the renter key, the counts for each outcome, the window, the number of different shops, an issue date and a short expiry.
+- **Signature.** Made with an asymmetric key in AWS KMS. The public key is published at a well-known address, so anyone can check a credential without asking Hold.
+- **Use.** The renter's link shows the record with a QR code. A verify page checks the signature and expiry and shows the counts.
+- **Fresh on demand.** A credential is short-lived and reissued whenever the renter opens it, so a withdrawn consent or an unpaid claim is reflected quickly.
+
+### 7.8 Helping the owner set the ladder
+
+- **A simulation in plain code.** Replays a candidate ladder over the shop's past rentals and reports how much hold would have been lowered, and how many past claims would have exceeded the lowered hold.
+- **The assistant drafts.** From the shop's own damage and recovery figures and PayPal's `get_merchant_insights`, the owner's assistant suggests a ladder and explains the simulation in words.
+- **The owner publishes.** As with the price list, nothing takes effect unreviewed. The assistant sets no amount.
+
+### 7.9 The figure the renter sees
+
+"Deposits never taken from you: 1,240 euros across 6 rentals." It is the sum of holds released without a capture, read from the money log.
+
+### 7.10 PayPal calls
+
+| Need | Capability | Reached through |
+|---|---|---|
+| Know who the renter is | The payer on the captured fee order | Orders v2, read-back |
+| Place the lowered hold | Orders v2, authorize, for the ladder's amount | Direct REST |
+| The top rung | Payment Method Tokens v3, and an order with the saved method if a claim is approved | Direct REST. Optional. |
+| Figures for the ladder draft | `get_merchant_insights` | PayPal remote MCP server |
+
+**When the renter is known.** The ladder needs the payer before the hold amount is fixed. With the "at the counter" strategy the fee is paid first, so the payer is known by pickup. With the "combined" strategy a new walk-in is unknown until they approve, so the ordinary hold applies and the rental still counts toward their record.
+
+### 7.11 What it changes
+
+| Area | Change |
+|---|---|
+| Data | `rental_outcomes`, `trust_ladders`, `trust_rungs`, `renter_consents`. `holds` gains the ordinary amount, the ladder version and the rung. |
+| Code | `packages/trust`. The ladder and its invariants in `packages/domain`. |
+| State machines | None. The outcome row is written in the transaction that closes the rental. |
+| Screens | The ladder editor and simulation for the owner. The Clean Record and the reason for the hold amount for the renter. A trust ledger on AG Grid. |
+
+### 7.12 Tests
+
+- **Properties of the ladder.** For any record and any ladder: the amount is never above the ordinary hold, never below zero, and never rises as clean returns rise.
+- **Isolation.** A shop that uses only its own history must not be affected by another shop's rows. A renter without consent must be treated as having no history elsewhere.
+- **The credential.** A changed credential, an expired one and one signed by another key must all fail.
+- **The simulation.** Its totals must equal a direct recomputation.
+
+### 7.13 Done when
+
+- **X2.1** A renter with five clean returns at shop A, with consent given, books at shop B. The authorization PayPal reports is for the ladder's amount, the page shows the reason, and the rental stores the ladder version and rung.
+- **X2.2** The same renter without consent is offered shop B's ordinary hold.
+- **X2.3** The property tests in 7.12 pass.
+- **X2.4** A credential verifies with the published key. A changed one fails.
+- **X2.5** A test confirms the credential contains no name, email, payer ID, shop identifier or amount.
+- **X2.6** Deleting the record returns the next booking to the ordinary hold.
+- **X2.7** Opening a dispute leaves the record unchanged. An unpaid decided claim removes the reduction, and paying it restores it.
+- **X2.8** The "never taken from you" figure equals the sum of released holds in the money log.
+
+### 7.14 In the video
+
+Ten seconds. Priya books again. The hold reads 150 euros, with the sentence explaining why.
+
+### 7.15 Size
+
+About two days.
+
+---
+
+## 8. Extension 3: renting through your own assistant
+
+### 8.1 What it is
+
+Hold exposes an MCP server. A traveller's own AI assistant can find a shop, read its damage prices, get a quote, make a booking and hand the person a PayPal link to approve. Once the fee is paid, the assistant receives a token for that one rental and can follow the hold, read the condition report, ask for an extension, and read and prepare a reply to a claim. The person approves every movement of money in PayPal's own pages.
+
+### 8.2 Why it matters
+
+- **For the renter.** Priya plans her trip with an assistant. Renting a bike becomes one more thing it arranges, and the assistant can read the price list and the evidence for her.
+- **For the shop.** A new way to be found and booked, with no extra work.
+- **For the judges.** It is the hackathon's own example, an agent that shops and checks out for you, with the payment held where PayPal says it belongs: with the buyer.
+
+### 8.3 The tools
+
+**Open to any assistant.** No identity. Rate limited.
+
+| Tool | Returns |
+|---|---|
+| `find_shops` | Shops by place and kind of item |
+| `get_shop` | Hours, location, languages, how holds work at this shop |
+| `check_availability` | Item types free for a period, each with its fee and ordinary hold |
+| `get_damage_prices` | The published price list, the wear policy and the hold terms |
+| `quote_rental` | A quote: fee, hold amount, the versions of the price list and wear policy, and an expiry |
+| `create_booking` | A booking awaiting payment, a PayPal approval link, a QR code and a booking secret |
+| `get_booking` | Whether the fee is paid. Once it is, the agent token for the rental. |
+
+**Open to the assistant of the renter who paid.** Each call carries the agent token.
+
+| Tool | Returns or does | Needs the person |
+|---|---|---|
+| `get_rental` | Status, pickup details, return time | No |
+| `get_hold` | The hold's state, amount and the dates it is kept valid | No |
+| `get_hold_approval_link` | The PayPal link or QR code to approve the hold at pickup | The person approves in PayPal |
+| `get_condition_report` | The handover photographs and the list of known marks | No |
+| `request_extension` | The price of extra days and a PayPal link to pay for them | The person approves in PayPal |
+| `get_claim` | The claim lines, the photographs, the prices and the reply date | No |
+| `draft_claim_reply` | Saves a reply for the person to review | No |
+| `submit_claim_reply` | Accepts or contests a claim | Yes, or a mandate |
+| `report_incident` | Opens an incident. See Extension 5. | No |
+| `get_negotiation`, `submit_offer` | Take the renter's side in Extension 4 | A mandate |
+| `get_record` | The evidence pack | No |
+
+**No tool takes an amount.** A quote is priced by Hold and referred to by its ID. A booking is made from a quote. An assistant cannot propose a fee or a hold.
+
+**When the person is needed.** A tool that needs the person returns `human_confirmation_required` with a link. The person confirms there, with the one-time code the spine already uses.
+
+### 8.4 One booking
+
+```mermaid
+sequenceDiagram
+    participant R as Renter
+    participant A as Renter's assistant
+    participant M as Hold MCP server
+    participant PP as PayPal
+    participant WK as worker
+    participant S as Staff
+
+    R->>A: book me an e-bike for three days
+    A->>M: check_availability, get_damage_prices
+    A->>M: quote_rental
+    M-->>A: fee 120.00, hold 300.00, price list version, expiry
+    A->>R: here is the price, the hold and what damage would cost
+    R->>A: go ahead
+    A->>M: create_booking with the quote ID
+    M->>PP: create the fee order
+    M-->>A: approval link, QR code, booking secret
+    A->>R: approve the rental fee in PayPal
+    R->>PP: approve
+    PP->>WK: CHECKOUT.ORDER.APPROVED
+    WK->>PP: capture the fee order
+    PP->>WK: PAYMENT.CAPTURE.COMPLETED
+    A->>M: get_booking with the booking secret
+    M-->>A: paid, agent token for this rental
+    Note over R,S: at pickup
+    S->>R: show the hold QR code
+    R->>PP: approve the hold
+    PP->>WK: PAYMENT.AUTHORIZATION.CREATED
+```
+
+### 8.5 Identity
+
+A renter has no account, so the usual sign-in for MCP servers does not fit. Hold uses the identity it already trusts: the PayPal payment.
+
+| Stage | Who the assistant is to Hold | What it can do |
+|---|---|---|
+| Before payment | Nobody. A `public_agent`. | Read public information, quote, book. Rate limited. |
+| After payment | The assistant of the PayPal payer who paid | Whatever its agent token's scopes allow, on that one rental |
+
+- **The booking secret.** Returned once, when the booking is made. Only its fingerprint is stored. The agent token is given only to a caller that presents it, and only after the verified `PAYMENT.CAPTURE.COMPLETED` event.
+- **The agent token.** Signed, bound to one rental, scoped, expiring and revocable, like a renter link. It is passed as a tool argument, so that any MCP client can use it without special setup.
+- **The assistant's name.** Taken from what the client declares when it connects. It is shown to the renter and marked as not verified.
+- **The renter is told.** The renter's own link shows "An assistant is connected to this rental", a list of everything it did, and a button to disconnect it.
+
+### 8.6 Defenses
+
+| Threat | Defense |
+|---|---|
+| An assistant books every bike and pays for none | An unpaid booking holds its item for fifteen minutes. A cap on unpaid bookings per caller and per shop. |
+| An assistant reads someone else's rental | The agent token names one rental. A token for one rental is refused on another. |
+| An assistant accepts a claim the person never saw | Accepting or contesting needs the person's confirmation or a mandate |
+| Text from the shop steers the renter's assistant | Shop-written text is returned in labelled fields as the merchant's words. Hold's tool results contain no instructions. |
+| Text from the assistant steers Hold | Everything an assistant sends is stored as data. No Hold model acts on it with tools. |
+| A stolen agent token | Short life, narrow scopes, revocation by the renter, and no scope that moves money |
+
+### 8.7 A mandate to accept the hold, optional
+
+A returning renter with a saved PayPal method can let their assistant accept holds for them: up to a stated amount, at named shops, until a stated date. This is the `agent_hold` mandate. Under it, the hold is placed from the saved method with no approval step, and the renter is told at once.
+
+It depends on saved payment methods, which are optional in the spine and need PayPal's approval for a real merchant. It is built only if the sandbox trial in `tech-stack.md` succeeds.
+
+### 8.8 PayPal calls
+
+| Need | Capability | Confirmed by |
+|---|---|---|
+| The fee | Orders v2, create with intent to capture, and the approval link PayPal returns | |
+| Capture when the person approves with no Hold page open | Orders v2, capture, started by the approval event | `CHECKOUT.ORDER.APPROVED`, then `PAYMENT.CAPTURE.COMPLETED` |
+| The hold at pickup | Orders v2, authorize, as in the spine | `PAYMENT.AUTHORIZATION.CREATED` |
+| An extension | Orders v2, capture, for the extra fee | `PAYMENT.CAPTURE.COMPLETED` |
+| A mandated hold | An order with the saved method. Optional. | `PAYMENT.AUTHORIZATION.CREATED` |
+
+When the person approves from a link their assistant gave them, no Hold page may be open. PayPal's redirect to Hold's return page captures the fee. The approval event is the backstop if the redirect is lost.
+
+### 8.9 The same contract as PayPal's Cart API, optional and last
+
+PayPal publishes a Cart API for agentic commerce with four operations: create a cart, read it, replace it, and complete checkout. Hold's quote and booking map onto them, with the PayPal order ID as the payment token. Exposing those four routes would let Hold be tested with PayPal's own Postman collection.
+
+This is listed so the mapping is known. It is built only if everything else in this document is finished. It would not make a Hold shop part of Store Sync, which today covers physical goods sold to customers in the United States in dollars.
+
+### 8.10 What it changes
+
+| Area | Change |
+|---|---|
+| Data | `quotes`, `agent_sessions` |
+| Code | `packages/mcp`, served by `web` at `/mcp` over streamable HTTP |
+| State machines | Rental gains `pending_payment` before `booked`, and `abandoned`. This also covers a web booking that is never paid. |
+| Schedules | Expiry of unpaid bookings |
+| Screens | "An assistant is connected" on the renter's link. A page where a judge can talk to a hosted assistant that uses the same MCP tools. |
+| Interfaces | Replaces the planned interface in `architecture.md` section 13.4 |
+
+**The hosted assistant is a client, not a shortcut.** It connects to the same MCP server with the same tools as any outside assistant. It exists so a judge can see the flow without setting up an MCP client.
+
+### 8.11 Tests
+
+- **Contract.** Every tool's input and output shape, checked against its schema.
+- **Boundaries.** A token for one rental used on another must fail. A booking secret used before payment must return no token.
+- **Money.** A test lists every tool and fails if any leads to a capture of a hold, or accepts an amount as input.
+- **Limits.** The unpaid booking cap and the rate limits.
+- **Two clients.** The flow is run with the hosted assistant and with one outside MCP client.
+
+### 8.12 Done when
+
+- **X3.1** An MCP client given only the server's address can list the tools, get a quote, make a booking and receive a PayPal approval link.
+- **X3.2** After approval in the sandbox, `get_booking` reports paid and returns an agent token, and the rental appears in the staff view.
+- **X3.3** The fee and hold in a quote equal the database values, and no tool accepts an amount.
+- **X3.4** An unpaid booking expires after fifteen minutes and its item is available again.
+- **X3.5** An agent token for one rental is refused on another.
+- **X3.6** `submit_claim_reply` without a mandate returns `human_confirmation_required` and changes nothing.
+- **X3.7** After the renter disconnects the assistant, its next call is refused.
+- **X3.8** The renter's link lists every action the assistant took.
+- **X3.9** The fee is captured when the redirect is blocked, through the approval event alone.
+
+### 8.13 In the video
+
+Twenty seconds near the start. Priya asks her assistant for an e-bike. It reads out the fee, the hold and the price of a scratch, and shows a PayPal QR code.
+
+### 8.14 Size
+
+About three days. Cut first: the Cart API contract. Cut second: the mandated hold.
+
+---
+
+## 9. Extension 4: an advocate for each side
+
+### 9.1 What it is
+
+When a renter contests a claim, they can ask an advocate to argue it for them, and tell it the most they are willing to pay. The shop has an advocate too, with limits the owner set in advance. The two advocates exchange itemized offers. Each concession must point at the evidence: this line overlaps a known mark, that one was uncertain. A referee written in plain code checks every move. If the advocates agree, each person confirms with one tap and PayPal captures the agreed amount. If they do not, the owner decides, as in the spine.
+
+### 9.2 Why it matters
+
+- **For the renter.** Priya is on holiday, has never contested a damage claim, and may not share a language with the shop. Her advocate reads the same photographs and the same price list the shop has, and knows which lines are weak.
+- **For the shop.** A contested claim usually waits for the owner. Most end in a reduction the owner would have agreed to anyway. This settles them in a minute.
+- **For Hold's promise.** "A person decides" stays true. Each person decides their limits before the advocates speak, and by default each confirms the result.
+
+### 9.3 Why advocates and not a single number
+
+A simpler design exists: each side names a figure privately, and if they overlap, split the difference. It was rejected. It produces a number with no reasons. Hold's product is an itemized claim in which every line can be traced to a photograph. The advocates' work is to decide which lines stand, and to say why.
+
+### 9.4 The mandates
+
+**The shop's,** set once by the owner in shop settings. Kind `settlement_shop`.
+
+| Limit | Meaning | Default |
+|---|---|---|
+| Lowest share | The smallest part of the claim's total the advocate may agree to | Set by the owner |
+| Largest claim | Claims above this go straight to the owner | The staff approval limit |
+| Rounds | The most offers each side may make | 6 |
+| Evidence required | Whether each reduction must cite the evidence | Yes |
+| Final tap | Whether the owner or a manager confirms the result | Yes |
+
+**The renter's,** set on the claim screen after a one-time code. Kind `settlement_renter`.
+
+| Limit | Meaning | Default |
+|---|---|---|
+| Highest total | The most the advocate may agree to pay | Set by the renter |
+| Final tap | Whether the renter confirms the result | Yes |
+| End | When the mandate stops | The end of the claim's reply period |
+
+The renter sets it in a sentence: "My advocate may agree to pay up to 30 euros. Ask me before agreeing."
+
+**Each side's limits are private.** The renter's advocate never sees the shop's lowest share. The shop's advocate never sees the renter's highest total. The two run as separate model calls with separate contexts.
+
+### 9.5 What can be negotiated
+
+Only the amounts on the claim's existing lines.
+
+- A line's amount can stay at its published price, be lowered, or be waived.
+- No line can be added. No line can go above its published price.
+- An offer is a full list of line amounts. Its total is their sum.
+
+### 9.6 Grounds
+
+Every lowered or waived line must name a ground and point to records in this rental's evidence. Code checks what it can. The rest is recorded for the people who read the transcript.
+
+| Ground | Meaning | What code checks |
+|---|---|---|
+| `known_mark` | The damage was already on the item | A mark on that view, first seen before this rental, lies within the referee's distance of the finding's region |
+| `ordinary_wear` | The wear policy covers it | The clause cited exists in the wear policy version the renter agreed to |
+| `uncertain_evidence` | The photographs do not settle it | The finding's confidence is below the highest level, or its alignment or lighting score is poor |
+| `renter_photo` | A photograph from the renter bears on it | The photograph cited belongs to this claim |
+| `evidence_stands` | Used by the shop's advocate to keep a line | Both looks confirmed the finding |
+| `goodwill` | A reduction with no evidence behind it | Refused unless the shop's mandate allows it |
+
+The comparison already removes clear matches with known marks before a claim exists. The `known_mark` ground is for near misses, and for lines a person added by hand.
+
+This is what makes the result follow the evidence. A line both looks confirmed, with no known mark near it, gives the shop's advocate no ground to concede. A line the second look doubted gives the renter's advocate a strong one.
+
+### 9.7 The referee
+
+The referee is plain code in `packages/domain`. It is not a model. It accepts or refuses each move.
+
+1. Moves alternate. The shop's advocate opens with the claim as presented.
+2. A move is an offer, an acceptance of the other side's last offer, or a pass.
+3. Each line amount is between zero and the line's published price.
+4. The shop's offers never rise in total. The renter's offers never fall. This guarantees an end.
+5. Every offer is inside its own side's mandate.
+6. Every lowered line cites a ground whose checks pass.
+7. Each side has a limited number of offers and a time limit for each.
+8. A refused move is returned to its own advocate with the reason. The other side learns nothing. After two refusals in a row, that side passes.
+9. A pass, the round limit, the time limit or a mandate that has ended or been revoked sends the claim to the owner.
+10. Agreement is an acceptance of the last offer on the table.
+
+**One negotiation per claim.** A claim that fails to settle goes to the owner and cannot be negotiated again. Nobody can probe the other side's limit by trying several times.
+
+**The transcript.** Each move stores the fingerprint of the move before it, so the sequence cannot be reordered or trimmed. The transcript shows the offers and their grounds. It never shows either side's limits. It is added to the evidence pack.
+
+### 9.8 One negotiation
+
+```mermaid
+sequenceDiagram
+    participant R as Renter
+    participant RA as Renter's advocate
+    participant REF as Referee, plain code
+    participant SA as Shop's advocate
+    participant O as Owner
+    participant WK as worker
+    participant PP as PayPal
+
+    R->>REF: contest with an advocate, pay up to 30.00
+    REF->>SA: open. Claim is two lines, 35.00 and 15.00
+    SA->>REF: offer 50.00, evidence stands on both lines
+    REF->>RA: your move
+    RA->>REF: offer 0.00 on line two, known mark. 20.00 on line one
+    REF->>SA: your move
+    SA->>REF: offer 35.00. Waive line two, known mark
+    REF->>RA: your move
+    RA->>REF: offer 28.00 on line one, uncertain evidence
+    REF->>SA: your move
+    SA->>REF: accept 28.00
+    REF->>R: agreed at 28.00, confirm
+    REF->>O: agreed at 28.00, confirm
+    R->>REF: confirm
+    O->>REF: confirm
+    REF->>WK: claim reaches charging
+    WK->>PP: capture 28.00 as the final capture
+    PP->>WK: PAYMENT.CAPTURE.COMPLETED
+```
+
+### 9.9 Settling
+
+- **Agreement** moves the claim to `agreed`.
+- **Confirmation.** Each side whose mandate asks for a final tap confirms. On the shop's side that is the owner or a manager, as for any decision on a contested claim. If both mandates waive the tap, the claim moves on at once.
+- **Charging.** The claim moves to `charging` and the spine takes over: renew the hold if its assured period has passed and it has not been renewed, capture the agreed total as the final capture at once, confirm the remainder was released.
+- **The approval record** names both mandates and the fingerprint of the last move. Its method is `mandate`.
+- **No agreement,** or a person declines the result: the claim moves to `escalated`. The owner decides with the transcript and the neutral summary from the spine.
+- **The hold's life still rules.** A negotiation's deadline is the earlier of the reply period's end and the hold's validity, less a margin. The rule in `architecture.md` section 7.5 is unchanged.
+
+### 9.10 When only one side has an advocate
+
+| Who has one | What happens |
+|---|---|
+| Both | The negotiation above |
+| The renter only | The advocate writes the renter's reply: which lines it contests, on which grounds, with which evidence. The owner decides as in the spine. |
+| The shop only | Nothing changes. The renter replies as in the spine. |
+| Neither | The spine |
+
+### 9.11 Who runs the renter's advocate
+
+In the hackathon build Hold runs both advocates, and Hold's customer is the shop. That is a real tension, and the design answers it openly.
+
+- **The rules are code, and public.** The referee is in the open repository, with its tests.
+- **The renter's advocate can be replaced.** Through Extension 3, a renter's own assistant can take the renter's side with `get_negotiation` and `submit_offer`. It meets the same referee.
+- **Its instructions are published.** The prompt for the renter's advocate is in the repository.
+- **The renter's own limit binds it.** No result can exceed what the renter wrote.
+- **By default the renter confirms.** The advocate's agreement is a recommendation until then.
+
+### 9.12 PayPal calls
+
+| Need | Capability | Confirmed by |
+|---|---|---|
+| Keep capture assured | Payments v2, reauthorize, if the assured period has passed | Read-back |
+| Take the agreed amount | Payments v2, capture as the final capture | `PAYMENT.CAPTURE.COMPLETED` |
+| Confirm the rest was released | Payments v2, show authorization | |
+| A claim captured early under section 7.5, then agreed lower | Payments v2, refund the difference | `PAYMENT.CAPTURE.REFUNDED` |
+
+### 9.13 What the AI does and does not do
+
+| Does | Does not |
+|---|---|
+| Reads the photographs, findings, marks and policies | See the other side's limits |
+| Chooses which lines to press or concede, and on what ground | Decide whether a move is allowed |
+| Writes a short argument for each move | Add a line or raise a price |
+| Accepts an offer inside its mandate | Capture anything. The claim does, after confirmation. |
+
+**The argument text is guarded.** Any amount in an advocate's written argument must equal a line amount in the same move. If not, the text is dropped and the move stands on its amounts and grounds. An advocate cannot write its limit into the transcript.
+
+**Text from the other side is data.** Each advocate receives the other's arguments as quoted text. Its only tools are the three moves.
+
+### 9.14 What it changes
+
+| Area | Change |
+|---|---|
+| Data | `negotiations`, `negotiation_moves`. `mandates` gains the two settlement kinds. |
+| Code | `packages/negotiate` for the advocates. The referee in `packages/domain`. |
+| State machines | Claim gains `negotiating`, `agreed` and `escalated`. See section 11. |
+| Queues | `negotiations`, ordered per rental |
+| Evidence pack | A new section: the transcript |
+| Screens | A third choice on the renter's claim screen. The owner's settlement limits. A transcript both sides can read. |
+
+### 9.15 Tests
+
+- **Properties of the referee.** For any two mandates and any sequence of moves, including hostile ones:
+  - a settled total is never above the renter's highest total
+  - a settled total is never below the shop's lowest share of the claim
+  - no line is above its published price
+  - the amount captured is never above the reserved amount
+  - the negotiation ends within its round limit
+  - no settlement exists unless both mandates were live at the moment of agreement
+- **Privacy.** A test searches every message sent to one advocate for the other side's limits and must find none.
+- **Hostile input.** An outside assistant sending malformed offers. A renter comment that instructs the shop's advocate to accept. An argument text that states a limit.
+- **Quality.** A set of claims with known evidence strength. Measured: how often the waived lines are the weak ones, the share that settle, and the number of rounds.
+
+### 9.16 Done when
+
+- **X4.1** In the seeded contested claim, two advocates reach agreement, both people confirm, PayPal captures the agreed total in the sandbox and the remainder is released.
+- **X4.2** The property tests in 9.15 pass.
+- **X4.3** With limits that do not overlap, the claim reaches `escalated` within the round limit, and the owner's screen shows the transcript.
+- **X4.4** The privacy test in 9.15 passes.
+- **X4.5** A lowered line with a ground whose check fails is refused, and the other side receives nothing.
+- **X4.6** Revoking a mandate during a negotiation sends the claim to the owner with nothing captured.
+- **X4.7** A claim that was escalated cannot enter `negotiating` again.
+- **X4.8** The evidence pack for a settled claim contains the transcript, and its chain of fingerprints verifies.
+- **X4.9** An outside assistant with a mandate can take the renter's side through the MCP server and is held to the same rules.
+
+### 9.17 In the video
+
+Thirty seconds. The scratch claim is contested. Four moves appear on screen, each with its ground. Both phones show "Agreed: 28 euros." Then: 28 captured, 272 released.
+
+### 9.18 Size
+
+About three days. Cut first: the outside assistant taking the renter's side. Cut second: waiving the final tap.
+
+---
+
+## 10. Extension 5: the incident desk
+
+### 10.1 What it is
+
+During a rental, the renter's link has one more button: "Something happened". The renter describes it and takes photographs. Hold sorts the report into one of four kinds and offers the right next step. Small damage can be agreed on the spot at the published price and is charged once, at the return. A mechanical fault is the shop's matter. A theft or loss gets clear steps and a person. Every report is dated, locked and added to the item's history.
+
+### 10.2 Why it matters
+
+- **For the renter.** The worst moment of a rental is not knowing what a mishap will cost. Hold answers that in a minute, from the price list they already agreed to.
+- **For the shop.** Staff learn about a problem while the renter can still be reached, and a reported scratch is not an argument at the counter.
+- **For the product.** The spine covers booking, handover and return. This covers the days in between.
+
+### 10.3 The four kinds
+
+| Kind | Example | What the renter is offered | Who decides |
+|---|---|---|---|
+| **Small damage** | A scratch that matches a price list entry | Agree it now at the published price, or leave it for the return | The renter agrees. Staff confirm at return. |
+| **Mechanical fault** | A battery that will not charge | Logged as the shop's matter. Staff are told at once. | Staff: swap, collect or compensate |
+| **Theft or loss** | The bike is gone | Fixed steps: where, when, the lock and keys, a police report number later. Staff are told at once. | The owner, through the ordinary claim |
+| **Anything unsafe or unclear** | A cracked frame. Someone was hurt. | A fixed message: stop using the item, the shop will contact you. Emergency numbers where relevant. | A person |
+
+**Hold never tells a renter an item is safe to keep using.** Sorting a report as small damage only decides which price list entry applies. Anything that could bear on safety goes to a person with a fixed message.
+
+### 10.4 Agreeing small damage before the return
+
+1. The renter photographs the damage. The camera shows the handover photograph of that view faintly, as in a return session.
+2. Hold matches it to a price list entry and shows the published price.
+3. The renter agrees, with the one-time code used for any money decision.
+4. The agreed line is stored on the incident. Nothing is charged.
+5. At the return, the comparison recognises the mark as reported during the rental and links it to the agreed line.
+6. A staff member confirms the line after seeing the item. They may lower or remove it. They cannot raise it.
+7. The line is charged with any others in the one final capture, and the rest of the hold is released.
+
+- **A named person still approves every charge.** The renter's agreement does not replace the staff member's confirmation.
+- **Damage found at return that was not reported** goes through the ordinary claim.
+- **Damage that has grown since the report** is sent to a person. The agreed line covers what was photographed.
+- **An honesty reduction, if the shop offers one.** A shop may publish a reduction for damage the renter reports themselves, as part of its price list. It is the same for everyone and is off unless the shop sets it.
+
+**Why nothing is charged before the return.** Taking part of a hold during a rental, and keeping the rest, depends on PayPal behavior that has not been confirmed. One final capture at the return uses only behavior the spine already relies on.
+
+### 10.5 The incident's life
+
+```mermaid
+stateDiagram-v2
+    [*] --> reported
+    reported --> triaged
+    triaged --> agreed
+    triaged --> shop_matter
+    triaged --> awaiting_staff
+    awaiting_staff --> agreed
+    awaiting_staff --> shop_matter
+    awaiting_staff --> claim_opened
+    agreed --> resolved
+    shop_matter --> resolved
+    claim_opened --> resolved
+    reported --> withdrawn
+    triaged --> withdrawn
+    resolved --> [*]
+    withdrawn --> [*]
+```
+
+### 10.6 Evidence
+
+- **An incident's photographs are a capture session** of kind `incident`: locked, fingerprinted, timed by the server and added to the item's chain.
+- **They are renter-supplied.** As in the spine, they are labelled so and are never the baseline for a comparison. The handover report the renter confirmed remains the baseline.
+- **The mark.** An incident adds a mark to the item with the status "reported during this rental". At the return, step 7 of the comparison checks findings against these marks as well as older ones.
+- **Reporting something does not make it old.** A mark first seen during a rental belongs to that rental.
+
+### 10.7 PayPal calls
+
+| Need | Capability | Reached through |
+|---|---|---|
+| The agreed line, at return | Payments v2, capture as the final capture, with the other lines | Direct REST |
+| Keep the charge for a theft or loss assured | Payments v2, reauthorize, at the moment of charging, if the assured period has passed | Direct REST |
+| Compensation for a fault | Payments v2, refund part of the fee | A `refund_part` proposal in the morning queue |
+| Loss above the hold | Invoicing v2 | A `send_invoice` proposal in the morning queue |
+
+Nothing is called when the report is made.
+
+### 10.8 What the AI does and does not do
+
+| Does | Does not |
+|---|---|
+| Sorts the report into one of the four kinds, with a confidence | Say an item is safe |
+| Matches small damage to a price list entry | Set the price. Plain code reads it. |
+| Writes the confirmation in the renter's language, through the number guard | Charge anything |
+| Sends anything doubtful to a person | Decide a theft, a loss or a fault |
+
+The sorting step has no tools. The renter's description is passed as quoted data.
+
+### 10.9 What it changes
+
+| Area | Change |
+|---|---|
+| Data | `incidents`. Capture sessions gain the kind `incident`. Marks gain the status "reported during this rental" and a link to the incident. Claim lines gain the source `agreed_in_rental`. |
+| Code | Incident rules in `packages/domain`. Comparison step 7 reads incident marks. |
+| Routes | `/r/{token}/incident` |
+| Operations agent | A detector for incidents waiting too long |
+| Screens | "Something happened" on the renter's link. An incidents list for staff. |
+
+### 10.10 Done when
+
+- **X5.1** A renter reports a scratch with a photograph, is shown the published price, agrees with a one-time code, and no PayPal call is made.
+- **X5.2** At the return, the comparison labels that mark as reported during the rental and links it to the agreed line.
+- **X5.3** A staff member can lower or remove the agreed line and cannot raise it.
+- **X5.4** The final capture equals the confirmed lines, and the remainder is released.
+- **X5.5** A report sorted as unsafe shows only the fixed message and alerts staff.
+- **X5.6** A report of a fault adds a mark that no claim line can be drafted from.
+- **X5.7** The incident's photographs are locked and extend the item's chain.
+- **X5.8** With Claude unavailable, the report is still stored and staff are alerted.
+
+### 10.11 In the video
+
+Shown only if built. Eight seconds: the scratch is reported from the roadside, and at the return it is already agreed.
+
+### 10.12 Size
+
+About two days. First to be cut.
+
+---
+
+## 11. Where each change lands in the existing design
+
+`architecture.md` has been updated to match. This table is the index.
+
+| Section of `architecture.md` | Change | From |
+|---|---|---|
+| 1. Summary | Three more decisions: mandates, detectors, one gateway | All |
+| 4. Services and stores | `web` serves the MCP server. `worker` runs the operations agent and negotiations. | 1, 3, 4 |
+| 5. Code structure | `mcp`, `ops`, `negotiate`, `trust` | 1 to 4 |
+| 6. Domain model | New concepts and the tables in 4.6 | All |
+| 7.1 State machines | Rental: `pending_payment`, `abandoned`. Claim: `negotiating`, `agreed`, `escalated`. | 3, 4 |
+| 7.3 Approval rules | Approval in advance by mandate | 1, 3, 4 |
+| 10.2 Comparison pipeline | Step 7 also reads marks reported during the rental | 5 |
+| 10.5 The owner's assistant | Proposals become records. Tools gain tiers. | 1 |
+| 10.6 Defense against manipulation | Agents from outside, advocates, the operations agent | 1, 3, 4 |
+| 10.8 Measuring the comparison | Published scorecard, release gate, field record | 0 |
+| 11.8 Flows added by the extensions | Pointers to the four new flows | 1, 3, 4, 5 |
+| 12.5 Assistants | The agent token and when it is issued | 3 |
+| 13 Interfaces | The MCP server replaces the planned interface. New renter routes. | 3, 5 |
+| 14.7 Queues and schedules | `ops-agent`, `negotiations`. Booking expiry and the nightly run. | 1, 3, 4 |
+| 19 Testing | The tests in each extension | All |
+| 20.3 Demo mode | Seeded history, the hosted assistant, a seeded contested claim | 2, 3, 4 |
+| 21 Decision record | Decisions 17 to 24 | All |
+| 22 Risks | The risks in section 14 below | All |
+
+**The claim state machine after the extensions.**
+
+```mermaid
+stateDiagram-v2
+    [*] --> draft
+    draft --> awaiting_approval
+    draft --> waived
+    awaiting_approval --> approved
+    awaiting_approval --> waived
+    approved --> presented
+    presented --> accepted
+    presented --> contested
+    presented --> lapsed
+    contested --> negotiating
+    contested --> decided
+    negotiating --> agreed
+    negotiating --> escalated
+    agreed --> charging
+    agreed --> escalated
+    escalated --> decided
+    accepted --> charging
+    lapsed --> charging
+    decided --> charging
+    decided --> waived
+    charging --> charged
+    charging --> charge_failed
+    charge_failed --> charging
+    charged --> adjusted
+    charged --> closed
+    adjusted --> closed
+    waived --> closed
+    closed --> [*]
+```
+
+No new state moves a claim backwards. A failed negotiation goes forward to `escalated`, never back to `contested`.
+
+---
+
+## 12. Build order, gates and cut line
+
+### 12.1 The order
+
+| Step | What | Depends on |
+|---|---|---|
+| A | The day-one trials in `tech-stack.md` section 16, and the first photographs | Nothing |
+| B | The spine in `architecture.md` section 22.4, end to end in the sandbox | A |
+| 0 | The accuracy scorecard | The comparison |
+| 1 | The operations agent, with the shared foundations in section 4 | B |
+| 2 | The Clean Record | B |
+| 3 | Renting through your own assistant | B, and the gateway from 1 |
+| 4 | An advocate for each side | B, and mandates from 1. Step 3 for the outside assistant only. |
+| 5 | The incident desk | B |
+
+Extensions 2 and 5 share nothing with 1, 3 and 4 beyond the spine. A second person can build them alongside.
+
+### 12.2 Gates
+
+- **Nothing in this document starts until the spine runs end to end** on the "at the counter" strategy: fee, hold, handover, return, comparison, claim, capture, release.
+- **Nothing ships if the scorecard's gate fails.**
+- **An extension is finished when every line of its "Done when" passes** and the spine's end-to-end tests still pass.
+- **The next extension does not start while the one before it is unfinished.** A half-built extension is worth less than none.
+
+### 12.3 A calendar, as a proposal
+
+The deadline is Thursday 12 November 2026 at 12:00 pm Pacific Time. This assumes one person building with AI coding tools.
+
+| Dates | Work |
+|---|---|
+| 13 to 16 October | Step A. Trials, photographs, a first run of a bare comparison. |
+| 17 to 28 October | Step B. The spine. |
+| 29 October | Extension 0 |
+| 30 October to 1 November | Extension 1 |
+| 2 to 3 November | Extension 2 |
+| 4 to 6 November | Extension 3 |
+| 7 to 9 November | Extension 4 |
+| 10 November | Freeze. Deploy, seed, reset script, README, the judges' quick start. |
+| 11 November | Video and submission form. Submit. |
+| 12 November, morning | Spare |
+
+Extension 5 fits only if earlier steps finish early or a second person builds it.
+
+### 12.4 The cut line
+
+If time runs short, cut in this order, and cut whole things.
+
+1. Extension 5.
+2. In Extension 3: the Cart API contract, then the mandated hold.
+3. In Extension 4: the outside assistant as the renter's advocate, then waiving the final tap.
+4. In Extension 2: the top rung with no hold.
+5. Extension 4 as a whole, leaving the renter's advocate that only drafts a reply.
+
+Never cut: the spine, the scorecard, the morning queue.
+
+**The stop line is the end of 9 November.** Anything not finished then is removed from the build, the README and the video. Nothing is shown half-working.
+
+---
+
+## 13. The video
+
+One story, as in `project-description.md`: one bike, one scratch, one photograph that settles it. Each extension is a short beat inside that story. This is a proposal for the three minutes.
+
+| Time | Beat | Shows |
+|---|---|---|
+| 0:00 to 0:15 | The word "deposit", and a customer hesitating | The problem |
+| 0:15 to 0:35 | Priya asks her assistant for an e-bike. It reads out the fee, the hold and the price of a scratch, and shows a PayPal QR code. | Extension 3 |
+| 0:35 to 0:55 | Jonas places the hold and takes six photographs | The spine |
+| 0:55 to 1:10 | A clean return. "Nothing was charged." | The spine |
+| 1:10 to 1:20 | Priya books again. The hold is 150 euros, with the reason. | Extension 2 |
+| 1:20 to 1:45 | A return with a scratch. The mark outlined, matched to the price list. The scorecard beside it. | The spine, Extension 0 |
+| 1:45 to 2:15 | Priya contests through her advocate. Four moves, each with its ground. Agreed at 28 euros. 28 captured, 272 released. | Extension 4 |
+| 2:15 to 2:30 | Tomás's morning queue. Five approved, one rejected. | Extension 1 |
+| 2:30 to 2:45 | The item passport and the evidence pack | The spine |
+| 2:45 to 3:00 | Who it is for, and the close | |
+
+---
+
+## 14. Risks and open questions
+
+### 14.1 Risks
+
+| Risk | Likelihood | Effect | Mitigation |
+|---|---|---|---|
+| The extensions crowd out the spine | High | No working product | The gates in 12.2 and the stop line in 12.4 |
+| Negotiation looks like the AI deciding a charge | Medium | It weakens Hold's central promise | Final tap by default, limits set by people, the referee in plain code, the framing as the renter's advocate |
+| Hold runs both advocates | Certain | A fair question about whose side Hold is on | The answers in 9.11, stated openly |
+| The scorecard's numbers are poor | Medium | A weak figure in public | Publish them anyway with the deferral rate. A system that defers honestly is the product. Raise thresholds so wrong flags stay rare. |
+| An outside assistant misuses the MCP server | Medium | Blocked inventory, noise | Expiring bookings, caps, rate limits, no scope that moves money |
+| A record is built up between a renter and a friendly shop | Low | A hold lower than deserved | PayPal-captured fees only, minimum fee and length, value cover, own-history setting |
+| The operations agent is steered by text in a PayPal memo | Low | An unwanted proposal | It can only propose allowed kinds for real exceptions, and a person approves |
+| PayPal's remote MCP server behaves differently in the sandbox | Medium | The agent has fewer read tools | Hold's own records and direct REST reads cover the same facts |
+| Too many beats in three minutes | Medium | A confusing video | One story. A beat that does not fit is cut from the video even if it is built. |
+
+### 14.2 Open questions
+
+| Question | Why it matters | Blocks the hackathon build |
+|---|---|---|
+| Is a renter's PayPal payer ID the same at two different sandbox business accounts? | The Clean Record is keyed on it across shops | Extension 2 across shops. If not, the key falls back to the email PayPal provides. |
+| Does the sandbox MCP server accept a shop's access token from a server with no browser? | The operations agent runs unattended | Extension 1's PayPal reads through MCP. Direct REST is the fallback. |
+| Which tool names does the sandbox MCP server list? | PayPal's pages spell some differently | No. Names are resolved at run time. |
+| Can a hold be placed from a saved PayPal method with nobody present, in the sandbox? | The top rung and the mandated hold | Only those two optional parts |
+| Does the `CHECKOUT.ORDER.APPROVED` event arrive reliably in the sandbox? | It is the backstop for capturing a fee approved from an assistant's link | No. The redirect is the main path. |
+| What must a renter be told before delegating to an advocate, in each country? | Consent wording | No |
+| How should records from shops with little history be weighted? | Stops a new or friendly shop inflating a record | No |
+| Should the renter's advocate be run by a party other than Hold? | Independence | No. Section 9.11 covers the hackathon build. |
+
+---
+
+## 15. How certain each part is
+
+**Checked against the source on 13 October 2026**
+
+- The hackathon's deadline, judging period, five criteria and their order for breaking ties, and the limit of one Grand Prize or one Honorable Mention plus one Sponsor Prize. From the official rules.
+- The two agentic examples quoted in section 2.2. From the hackathon's resources page.
+- PayPal's agent tools reference lists tools for the catalog, disputes, invoices, payments, reporting, shipment tracking and subscriptions. It lists none to authorize, void, reauthorize, save a payment method, pay out or submit dispute evidence.
+- The tool names used in section 6.6 appear in that reference or in the toolkit's README, which spell some of them differently.
+- The remote MCP server's sandbox address, its two transports and that it accepts an access token as a bearer token.
+- The toolkit's listed adapters: Vercel AI SDK, OpenAI Agents SDK, LangChain, Amazon Bedrock and MCP for TypeScript. The pages checked list none for the Anthropic SDK.
+- PayPal's Cart API has four operations: create, read, replace and complete checkout.
+- Store Sync covers physical goods sold to customers in the United States in dollars, and access is by request.
+- Agent Ready is for Braintree merchants and names two protocols.
+- PayPal's own description of its WebMCP work says the buyer remains in charge of approving the payment.
+
+**Written from general knowledge and to be confirmed**
+
+- That a PayPal payer ID is the same across merchants.
+- That an order can be authorized from a saved PayPal method with nobody present.
+- The `CHECKOUT.ORDER.APPROVED` event name and its timing.
+- That AWS KMS asymmetric keys suit signing the credential, and the choice of signing algorithm.
+- That MCP clients in common use can connect to a remote server with no sign-in step.
+
+**Estimates and proposals**
+
+- Every size in days, the calendar in 12.3 and the video timings in section 13.
+- The pair counts in 5.3 and the example ladder in 7.5.
+
+**Not yet built**
+
+- Nothing in this document has been built or run. Every "Done when" line is a test to be written.
