@@ -1,0 +1,19 @@
+{
+  "name": "@hold/paypal",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "trial:baseline": "node --env-file-if-exists=../../.env trials/baseline-hold.ts",
+    "trial:combined": "node --env-file-if-exists=../../.env trials/combined-hold.ts",
+    "trial:renewal": "node --env-file-if-exists=../../.env trials/renewal-hold.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "3.1151.0",
+    "@hold/domain": "workspace:*",
+    "zod": "^4.6.7"
+  }
+}
