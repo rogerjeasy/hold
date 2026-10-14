@@ -14,5 +14,13 @@ export default async function Page() {
   const context = await requireShop()
   const listed = await (await getServices()).identity.listPasskeys((await readAccessToken()) ?? '')
   const required = context.role === 'owner' || context.role === 'manager' || context.passkeyNeeded
-  return <SecurityScreen shopName={context.shop.name} passkeys={listed.ok ? listed.value : undefined} required={required} />
+  return (
+    <SecurityScreen
+      shopName={context.shop.name}
+      passkeys={listed.ok ? listed.value : undefined}
+      required={required}
+      emailCodeSession={context.factor !== 'passkey'}
+      email={context.person.email}
+    />
+  )
 }

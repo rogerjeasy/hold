@@ -1115,7 +1115,8 @@
         "no_passkey": "There is no passkey for this address yet. Sign in with the emailed code, then add one.",
         "invitation_closed": "This invitation can no longer be used.",
         "missing": "Enter your work email first.",
-        "invalid": "Enter your work email first."
+        "invalid": "Enter your work email first.",
+        "confirm_first": "Adding another passkey needs one you already have. Confirm with it first."
       }
     },
     "invite": {
@@ -1226,7 +1227,8 @@
       "none": "You have no passkey yet.",
       "unnamed": "Passkey {number}",
       "added": "Added {date}",
-      "how": "Your device keeps the passkey. Hold and its sign-in service keep only the public half, which cannot sign you in on its own."
+      "how": "Your device keeps the passkey. Hold and its sign-in service keep only the public half, which cannot sign you in on its own.",
+      "confirmToAdd": "Adding another passkey needs one you already have, so nobody who reaches your inbox can add their own."
     },
     "staff": {
       "title": "Staff",

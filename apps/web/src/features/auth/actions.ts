@@ -10,7 +10,7 @@ import type { AuthFormState, CodeFormState, PasskeyFormState } from './auth-form
 import { parseAuthInput, readText, signInFields, signUpFields, type AuthField } from './auth-input'
 import { parseCode } from './code-input'
 import { readLocale } from './locale-input'
-import { clearAttempt, clearSession, currentAttempt, readAccessToken, readRefreshToken, writeAttempt, writeSession } from './session-cookies'
+import { clearAttempt, clearSession, currentAttempt, readAccessToken, readRefreshToken, sessionFactor, writeAttempt, writeSession } from './session-cookies'
 import { answerCode, answerPasskey, beginInvitation, beginPasskey, beginSignIn, beginSignUp, resendCode } from './sign-in-flow'
 import type { Begun, FlowDependencies, ProofOutcome, Requester } from './sign-in-flow'
 import { readTimeZone } from './time-zone-input'
@@ -140,10 +140,20 @@ export async function finishPasskeySignIn(response: string): Promise<PasskeyForm
   return { problem: finished.problem }
 }
 
+// A person's first passkey can be added from a session an emailed code proved: there is nothing stronger yet. Once
+// they have one, adding another needs a session that passkey proved. Otherwise someone who reached their inbox could
+// add a passkey of their own and pass every passkey check after it.
+async function mayAddPasskey(accessToken: string): Promise<boolean> {
+  const existing = await (await getServices()).identity.listPasskeys(accessToken)
+  if (!existing.ok) return false
+  return existing.value.length === 0 || (await sessionFactor()) === 'passkey'
+}
+
 // Registering a passkey needs a signed-in session. The options come from the identity service and go to the device.
 export async function startPasskeyRegistration(): Promise<PasskeyFormState> {
   const accessToken = await readAccessToken()
   if (accessToken === undefined) return { problem: 'attempt_over' }
+  if (!(await mayAddPasskey(accessToken))) return { problem: 'confirm_first' }
   const started = await (await getServices()).identity.startPasskeyRegistration(accessToken)
   return started.ok ? { creationOptions: started.value.creationOptions } : { problem: 'unavailable' }
 }
@@ -151,6 +161,8 @@ export async function startPasskeyRegistration(): Promise<PasskeyFormState> {
 export async function finishPasskeyRegistration(response: string): Promise<PasskeyFormState> {
   const accessToken = await readAccessToken()
   if (accessToken === undefined || response.length > 20_000) return { problem: 'attempt_over' }
+  // Checked again here: the two halves are separate requests.
+  if (!(await mayAddPasskey(accessToken))) return { problem: 'confirm_first' }
   const finished = await (await getServices()).identity.finishPasskeyRegistration(accessToken, response)
   return finished.ok ? { registered: true } : { problem: 'unavailable' }
 }

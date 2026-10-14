@@ -12,7 +12,7 @@ import { makePasskey, passkeysSupported } from './passkey-browser'
 export function AddPasskey() {
   const t = useTranslations('auth.passkey')
   const router = useRouter()
-  const [state, setState] = useState<'idle' | 'pending' | 'added' | 'unsupported' | 'cancelled' | 'unavailable'>('idle')
+  const [state, setState] = useState<'idle' | 'pending' | 'added' | 'unsupported' | 'cancelled' | 'unavailable' | 'confirm_first'>('idle')
 
   async function add() {
     if (!passkeysSupported()) {
@@ -23,7 +23,7 @@ export function AddPasskey() {
     try {
       const started = await startPasskeyRegistration()
       if (started.creationOptions === undefined) {
-        setState('unavailable')
+        setState(started.problem === 'confirm_first' ? 'confirm_first' : 'unavailable')
         return
       }
       const made = await makePasskey(started.creationOptions)
@@ -32,7 +32,7 @@ export function AddPasskey() {
         return
       }
       const finished = await finishPasskeyRegistration(made)
-      setState(finished.registered === true ? 'added' : 'unavailable')
+      setState(finished.registered === true ? 'added' : finished.problem === 'confirm_first' ? 'confirm_first' : 'unavailable')
       router.refresh()
     } catch (error) {
       setState(error instanceof DOMException ? 'cancelled' : 'unavailable')
@@ -50,7 +50,7 @@ export function AddPasskey() {
           {t('added')}
         </p>
       ) : null}
-      {state === 'unsupported' || state === 'cancelled' || state === 'unavailable' ? (
+      {state === 'unsupported' || state === 'cancelled' || state === 'unavailable' || state === 'confirm_first' ? (
         <p role="alert" className="text-[0.9375rem] text-destructive">
           {t(`problems.${state}`)}
         </p>

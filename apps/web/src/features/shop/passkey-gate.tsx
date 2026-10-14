@@ -12,12 +12,14 @@ type PasskeyGateProps = {
   email: string
   // The page to come back to after confirming.
   returnTo: string
+  // What the confirmation is for, when it is not a change to prices, staff or PayPal.
+  confirmBody?: string
   children: ReactNode
 }
 
 // Shows what changes the shop only once the person has proven it is them with a passkey. The server checks the same
 // thing again on every change, so this is a courtesy, not the control.
-export function PasskeyGate({ needed, hasPasskey, email, returnTo, children }: PasskeyGateProps) {
+export function PasskeyGate({ needed, hasPasskey, email, returnTo, confirmBody, children }: PasskeyGateProps) {
   const t = useTranslations('shop.passkeyGate')
   if (!needed) return children
 
@@ -27,7 +29,7 @@ export function PasskeyGate({ needed, hasPasskey, email, returnTo, children }: P
         <ShieldCheck aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-primary" />
         <div>
           <h2 className="font-semibold">{t('title')}</h2>
-          <p className="mt-1 text-muted-foreground">{hasPasskey ? t('confirmBody') : t('addBody')}</p>
+          <p className="mt-1 text-muted-foreground">{hasPasskey ? (confirmBody ?? t('confirmBody')) : t('addBody')}</p>
         </div>
       </div>
       {hasPasskey ? (

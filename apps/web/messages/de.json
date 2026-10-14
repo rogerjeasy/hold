@@ -1115,7 +1115,8 @@
         "no_passkey": "Für diese Adresse gibt es noch keinen Passkey. Melden Sie sich mit dem Code aus der E-Mail an und fügen Sie dann einen hinzu.",
         "invitation_closed": "Diese Einladung gilt nicht mehr.",
         "missing": "Geben Sie zuerst Ihre geschäftliche E-Mail ein.",
-        "invalid": "Geben Sie zuerst Ihre geschäftliche E-Mail ein."
+        "invalid": "Geben Sie zuerst Ihre geschäftliche E-Mail ein.",
+        "confirm_first": "Für einen weiteren Passkey braucht es einen, den Sie schon haben. Bestätigen Sie zuerst damit."
       }
     },
     "invite": {
@@ -1226,7 +1227,8 @@
       "none": "Sie haben noch keinen Passkey.",
       "unnamed": "Passkey {number}",
       "added": "Hinzugefügt am {date}",
-      "how": "Ihr Gerät bewahrt den Passkey auf. Hold und sein Anmeldedienst behalten nur den öffentlichen Teil, mit dem sich allein niemand anmelden kann."
+      "how": "Ihr Gerät bewahrt den Passkey auf. Hold und sein Anmeldedienst behalten nur den öffentlichen Teil, mit dem sich allein niemand anmelden kann.",
+      "confirmToAdd": "Für einen weiteren Passkey braucht es einen, den Sie schon haben. So kann niemand, der an Ihre E-Mails kommt, einen eigenen hinzufügen."
     },
     "staff": {
       "title": "Team",

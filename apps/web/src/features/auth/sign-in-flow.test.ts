@@ -221,8 +221,20 @@ describe('passkeys', () => {
     expect(await answerPasskey(flow, started.attempt, JSON.stringify({ id: 'someone-elses' }), from())).toEqual({ kind: 'failed', failure: 'wrong' })
   })
 
-  it('says when an address has no passkey', async () => {
-    expect(await beginPasskey(flow, { email: 'nokey@shop.example', language: 'en', page: 'signIn' }, from())).toEqual({ ok: false, notice: 'no_passkey' })
+  it('answers an address with no passkey, or no account, exactly as one with a passkey', async () => {
+    await ownerWithPasskey('haskey@shop.example')
+    const withKey = await beginPasskey(flow, { email: 'haskey@shop.example', language: 'en', page: 'signIn' }, from())
+    const without = await beginPasskey(flow, { email: 'nokey@shop.example', language: 'en', page: 'signIn' }, from())
+    if (!withKey.ok || !without.ok) throw new Error('Expected both to be answered.')
+
+    const shape = (options: string) => Object.keys(JSON.parse(options) as object).filter((key) => key !== 'rpId').sort()
+    expect(shape(without.requestOptions)).toEqual(shape(withKey.requestOptions))
+    expect(withKey.requestOptions).not.toContain('credential-haskey')
+    expect(await answerPasskey(flow, without.attempt, JSON.stringify({ id: 'anything' }), from())).toEqual({ kind: 'failed', failure: 'wrong' })
+  })
+
+  it('tells a signed-in person confirming with their own passkey that they have none', async () => {
+    expect(await beginPasskey(flow, { email: 'nokey@shop.example', language: 'en', page: 'confirm', returnTo: '/shop' }, from())).toEqual({ ok: false, notice: 'no_passkey' })
   })
 
   it('does not take a code attempt as a passkey', async () => {

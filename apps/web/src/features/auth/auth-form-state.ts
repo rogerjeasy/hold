@@ -23,7 +23,7 @@ export const initialCodeFormState: CodeFormState = {}
 
 // What the server answers the passkey steps with. The browser does the part in between.
 export type PasskeyFormState = {
-  problem?: CodeFailure | CodeProblem | 'email'
+  problem?: CodeFailure | CodeProblem | 'email' | 'confirm_first'
   // WebAuthn's JSON, for navigator.credentials.get or create.
   requestOptions?: string
   creationOptions?: string

@@ -1115,7 +1115,8 @@
         "no_passkey": "Aún no hay llave de acceso para esta dirección. Entra con el código del correo y añade una.",
         "invitation_closed": "Esta invitación ya no sirve.",
         "missing": "Escribe primero tu correo de trabajo.",
-        "invalid": "Escribe primero tu correo de trabajo."
+        "invalid": "Escribe primero tu correo de trabajo.",
+        "confirm_first": "Para añadir otra llave de acceso hace falta una que ya tengas. Confirma primero con ella."
       }
     },
     "invite": {
@@ -1226,7 +1227,8 @@
       "none": "Aún no tienes ninguna llave de acceso.",
       "unnamed": "Llave de acceso {number}",
       "added": "Añadida el {date}",
-      "how": "Tu dispositivo guarda la llave de acceso. Hold y su servicio de inicio de sesión guardan solo la parte pública, que por sí sola no permite entrar."
+      "how": "Tu dispositivo guarda la llave de acceso. Hold y su servicio de inicio de sesión guardan solo la parte pública, que por sí sola no permite entrar.",
+      "confirmToAdd": "Para añadir otra llave de acceso hace falta una que ya tengas, así nadie que llegue a tu correo puede añadir la suya."
     },
     "staff": {
       "title": "Equipo",

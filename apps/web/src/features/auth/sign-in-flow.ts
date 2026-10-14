@@ -1,4 +1,5 @@
 import 'server-only'
+import { randomBytes } from 'node:crypto'
 import type { Identity, IdentityFailure, Tokens } from '@hold/auth'
 import { acceptInvitation, findInvitation, registerOwner } from '@hold/db'
 import type { Database, RateLimit } from '@hold/db'
@@ -214,6 +215,21 @@ export async function answerCode(dependencies: FlowDependencies, attempt: Attemp
   return 'kind' in result ? result : afterProof(dependencies, attempt, result)
 }
 
+// The browser's options, made the same for every address: the list of the account's credentials is left out, so it
+// reveals neither that the account exists nor which passkeys it has. The device offers whichever passkey it holds
+// for Hold, and the identity service checks it belongs to the address.
+function withoutCredentialList(requestOptions: string): string {
+  const parsed = JSON.parse(requestOptions) as Record<string, unknown>
+  delete parsed['allowCredentials']
+  return JSON.stringify(parsed)
+}
+
+// What an address with no passkey, or no account, is answered with on the sign-in page: options of the same shape,
+// for an attempt that can only fail as a passkey that is not recognized would.
+function decoyOptions(): string {
+  return JSON.stringify({ challenge: randomBytes(32).toString('base64url'), userVerification: 'required', timeout: 60_000 })
+}
+
 // Asks the browser for a passkey: to sign in, or to confirm an owner who is signed in already.
 export async function beginPasskey(
   dependencies: FlowDependencies,
@@ -222,25 +238,27 @@ export async function beginPasskey(
 ): Promise<PasskeyBegun> {
   if (!(await withinLimits(dependencies, requester))) return { ok: false, notice: 'busy' }
   const started = await dependencies.identity.startPasskeySignIn(input.email)
-  if (!started.ok) {
-    logFailure('start_passkey', started.error)
-    return { ok: false, notice: notice(started.error) }
-  }
-  const attempt: Attempt = {
+  const base: Attempt = {
     page: input.page,
     step: 'answer_passkey',
     email: input.email,
-    session: started.value.session,
     language: input.language,
     expiresAt: attemptExpiry(dependencies.now()),
     ...(input.returnTo === undefined ? {} : { returnTo: input.returnTo }),
   }
-  return { ok: true, attempt, requestOptions: started.value.requestOptions }
+  if (started.ok) return { ok: true, attempt: { ...base, session: started.value.session }, requestOptions: withoutCredentialList(started.value.requestOptions) }
+  logFailure('start_passkey', started.error)
+  // On the sign-in page, a missing passkey gets the same answer as a present one, so the page cannot be used to find
+  // accounts. A signed-in person confirming with their own passkey is told plainly.
+  if (started.error.kind === 'no_passkey' && input.page === 'signIn') return { ok: true, attempt: base, requestOptions: decoyOptions() }
+  return { ok: false, notice: notice(started.error) }
 }
 
 export async function answerPasskey(dependencies: FlowDependencies, attempt: Attempt, response: string, requester: Requester): Promise<ProofOutcome> {
   if (!(await withinLimits(dependencies, requester))) return { kind: 'failed', failure: 'busy' }
-  if (attempt.step !== 'answer_passkey' || attempt.session === undefined) return { kind: 'failed', failure: 'attempt_over' }
+  if (attempt.step !== 'answer_passkey') return { kind: 'failed', failure: 'attempt_over' }
+  // A decoy attempt has no session. It fails exactly as a passkey Hold does not recognize.
+  if (attempt.session === undefined) return { kind: 'failed', failure: 'wrong' }
   const answered = await dependencies.identity.answerPasskey(attempt.email, response, { session: attempt.session })
   if (answered.ok) return { kind: 'signed_in', tokens: answered.value }
   logFailure('answer_passkey', answered.error)

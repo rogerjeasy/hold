@@ -1115,7 +1115,8 @@
         "no_passkey": "Il n'y a pas encore de clé d'accès pour cette adresse. Connectez-vous avec le code reçu par e-mail, puis ajoutez-en une.",
         "invitation_closed": "Cette invitation n'est plus utilisable.",
         "missing": "Saisissez d'abord votre e-mail professionnel.",
-        "invalid": "Saisissez d'abord votre e-mail professionnel."
+        "invalid": "Saisissez d'abord votre e-mail professionnel.",
+        "confirm_first": "Pour ajouter une autre clé d'accès, il faut une clé que vous avez déjà. Confirmez d'abord avec elle."
       }
     },
     "invite": {
@@ -1226,7 +1227,8 @@
       "none": "Vous n'avez pas encore de clé d'accès.",
       "unnamed": "Clé d'accès {number}",
       "added": "Ajoutée le {date}",
-      "how": "Votre appareil garde la clé d'accès. Hold et son service de connexion n'en gardent que la partie publique, qui ne permet pas de vous connecter à elle seule."
+      "how": "Votre appareil garde la clé d'accès. Hold et son service de connexion n'en gardent que la partie publique, qui ne permet pas de vous connecter à elle seule.",
+      "confirmToAdd": "Pour ajouter une autre clé d'accès, il faut une clé que vous avez déjà, pour que personne ayant accès à vos e-mails ne puisse ajouter la sienne."
     },
     "staff": {
       "title": "Équipe",
