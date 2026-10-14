@@ -1,0 +1,1314 @@
+{
+  "meta": {
+    "siteName": "Hold",
+    "tagline": "The deposit that never leaves your account.",
+    "home": {
+      "title": "Hold: the deposit that never leaves your account",
+      "description": "Hold reserves a rental deposit with PayPal and charges nothing. At return, photographs taken at handover and at return are compared, and a person approves every charge."
+    },
+    "howItWorks": {
+      "title": "How Hold works",
+      "description": "One rental in four moments: reserve, hand over, return and settle."
+    },
+    "forShops": {
+      "title": "Hold for rental shops",
+      "description": "Protect every item without charging the people who bring it back."
+    },
+    "forRenters": {
+      "title": "Hold for renters",
+      "description": "Keep your money while you rent, and see exactly what you could be charged for."
+    },
+    "ai": {
+      "title": "What the AI does in Hold",
+      "description": "The AI compares photographs. A person decides every charge."
+    },
+    "paypal": {
+      "title": "What PayPal does in Hold",
+      "description": "A PayPal authorization hold reserves the deposit without charging it."
+    },
+    "demo": {
+      "title": "The Hold demo shop",
+      "description": "Three sample rentals in the PayPal sandbox: a clean return, a scratch and a contested claim."
+    },
+    "signIn": {
+      "title": "Sign in to Hold",
+      "description": "Owners and counter staff sign in with a code sent by email. Renters need no account."
+    },
+    "signUp": {
+      "title": "Create a shop account",
+      "description": "Open a Hold account for your rental shop. No password to set, and no hardware to buy."
+    },
+    "shop": {
+      "title": "Your shop"
+    },
+    "invite": {
+      "title": "An invitation"
+    }
+  },
+  "nav": {
+    "main": "Main",
+    "home": "Hold, home page",
+    "howItWorks": "How it works",
+    "forShops": "For shops",
+    "forRenters": "For renters",
+    "ai": "The AI",
+    "paypal": "PayPal",
+    "demo": "Open the demo shop",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "menuTitle": "Menu",
+    "skip": "Skip to content",
+    "signIn": "Sign in",
+    "yourShop": "Your shop"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch"
+  },
+  "theme": {
+    "toDark": "Switch to dark theme",
+    "toLight": "Switch to light theme"
+  },
+  "doors": {
+    "shops": {
+      "label": "For shops",
+      "action": "Open the demo shop"
+    },
+    "renters": {
+      "label": "For renters",
+      "action": "See the renter's view"
+    }
+  },
+  "hero": {
+    "title": "One photograph settles it.",
+    "lead": "Hold reserves the deposit with PayPal and charges nothing. At return it compares each photograph with the one taken at handover. The shop and the renter see the same result, and a person approves every charge."
+  },
+  "evidence": {
+    "handover": "Handover",
+    "return": "Return",
+    "slider": "Slide between the handover photograph and the return photograph",
+    "handoverAlt": "A blue bicycle frame photographed at handover",
+    "returnAlt": "The same bicycle frame photographed at return",
+    "outcome": "Return outcome",
+    "damage": "Scratched frame",
+    "clean": "Clean return",
+    "newTag": "New",
+    "findings": {
+      "new": {
+        "title": "Scratched frame, {amount}",
+        "note": "New since handover. Priced from the published list."
+      },
+      "none": {
+        "title": "No new marks",
+        "note": "Nothing to charge. The hold is released at the counter."
+      },
+      "old": {
+        "title": "Down tube scuff, not charged",
+        "note": "Already there at handover."
+      }
+    },
+    "summary": "{reserved} reserved · {taken} taken · {released} released",
+    "example": "Example rental. Illustrative photographs."
+  },
+  "bothSides": {
+    "title": "The shop and the renter look at the same thing.",
+    "lead": "Jonas reviews the claim on his phone. Priya gets the same two photographs, the same price list and the same amount on hers, before anything is taken. She can accept, or disagree and reach a person.",
+    "photo": {
+      "handover": "Handover",
+      "return": "Return"
+    },
+    "finding": {
+      "scratch": "Scratched frame",
+      "scuff": "Down tube scuff"
+    },
+    "shop": {
+      "caption": "Jonas, at the counter",
+      "context": "Return",
+      "item": "E-bike 14",
+      "title": "{count, plural, one {# new mark found} other {# new marks found}}",
+      "newNote": "New since handover",
+      "oldNote": "Already there at handover",
+      "approve": "Approve claim · {amount}",
+      "change": "Change or dismiss"
+    },
+    "renter": {
+      "caption": "Priya, the renter",
+      "context": "Your rental",
+      "shopName": "Ribeira Bikes",
+      "title": "The shop is asking for {amount}",
+      "newNote": "From the price list you accepted",
+      "oldNote": "Was there before you. Not charged.",
+      "ifAccept": "If you accept:",
+      "ifAcceptResult": "{taken} taken, {released} released",
+      "accept": "Accept",
+      "disagree": "I disagree"
+    },
+    "hold": {
+      "title": "Hold {number}",
+      "reserved": "Reserved",
+      "taken": "Taken",
+      "released": "Released"
+    }
+  },
+  "steps": {
+    "title": "One rental, four moments.",
+    "lead": "Staff and renters use the phone they already carry. Nobody installs anything, and the shop buys no hardware.",
+    "items": {
+      "reserve": {
+        "title": "Reserve",
+        "body": "The renter approves a hold in PayPal. The money is reserved in their own account. Nothing is charged.",
+        "state": "{amount} reserved"
+      },
+      "handOver": {
+        "title": "Hand over",
+        "body": "Staff take guided photographs of the item. Marks already on it are noted, and the renter confirms the report.",
+        "state": "{count} photographs"
+      },
+      "return": {
+        "title": "Return",
+        "body": "The same photographs again. Hold compares each one with its handover twin and outlines what changed.",
+        "state": "{count} pairs compared"
+      },
+      "settle": {
+        "title": "Settle",
+        "body": "Nothing new: the hold is released on the spot. Damage: a person approves an itemized claim, and only that amount is taken.",
+        "state": "{taken} taken · {released} released"
+      }
+    }
+  },
+  "audiences": {
+    "shops": {
+      "label": "For shops",
+      "title": "Protect every item without charging the people who bring it back.",
+      "imageAlt": "Rental bicycles stored on racks in a shop's back room",
+      "action": "Open the demo shop",
+      "points": {
+        "refund": "No refund to issue after a clean return, and no customer asking where it is.",
+        "photographs": "Dated photographs of every item, before and after every rental.",
+        "oldMarks": "Old marks stay on the item's record, so nobody is charged for someone else's scratch.",
+        "evidence": "The full evidence pack is already assembled if a charge is disputed."
+      }
+    },
+    "renters": {
+      "label": "For renters",
+      "title": "Keep your money while you rent.",
+      "imageAlt": "A rider's view over the handlebars, crossing a wooden bridge between trees",
+      "action": "See the renter's view",
+      "points": {
+        "notCharge": "A hold is not a charge. Return the item as it left and no payment ever happened.",
+        "prices": "Damage prices are published before you rent. Nothing is invented afterwards.",
+        "see": "You see the photographs and the claim before anything is taken.",
+        "reply": "Disagreeing is as easy as accepting, and it reaches a person."
+      }
+    }
+  },
+  "ai": {
+    "title": "The AI compares. A person decides.",
+    "lead": "Automated damage charging made rental customers angry because nobody could be asked. Hold is built the other way round.",
+    "does": {
+      "title": "What the AI does",
+      "items": {
+        "checks": "Checks each photograph as it is taken, and asks for a retake when it is blurred or dark.",
+        "compares": "Compares handover with return and outlines what changed.",
+        "classifies": "Tells ordinary wear from damage, and says how sure it is.",
+        "matches": "Matches damage to the shop's published price list."
+      }
+    },
+    "never": {
+      "title": "What it never does",
+      "items": {
+        "charge": "Decide to charge anyone. A person does.",
+        "price": "Set a price. The published list does.",
+        "doubt": "Hide its doubt. When it cannot tell, it says so and a person looks.",
+        "status": "Decide what a payment's status is. PayPal's record does."
+      }
+    }
+  },
+  "paypal": {
+    "title": "Reserved is not charged. PayPal makes that real.",
+    "lead": "The whole product rests on the difference between reserving money and taking it, and on being able to take a part and release the rest.",
+    "caption": "What each rental need uses in PayPal",
+    "needHeading": "Rental need",
+    "capabilityHeading": "PayPal capability",
+    "rows": {
+      "hold": {
+        "need": "The deposit is reserved without being charged",
+        "capability": "Authorization hold"
+      },
+      "release": {
+        "need": "A clean return frees the full amount",
+        "capability": "Release of the hold"
+      },
+      "capture": {
+        "need": "Damage is charged for that amount only",
+        "capability": "Partial capture, remainder released"
+      },
+      "renewal": {
+        "need": "A long rental keeps its protection",
+        "capability": "Renewal, up to 29 days"
+      },
+      "events": {
+        "need": "Hold knows the true state of every payment",
+        "capability": "Live payment notifications"
+      },
+      "fee": {
+        "need": "The renter pays the rental fee",
+        "capability": "Checkout"
+      },
+      "refund": {
+        "need": "A claim is corrected after review",
+        "capability": "Refund"
+      },
+      "dispute": {
+        "need": "A renter disputes a charge",
+        "capability": "Disputes, with the evidence pack attached"
+      }
+    },
+    "note": "This build runs in the PayPal sandbox with test money."
+  },
+  "closing": {
+    "title": "Try a return yourself.",
+    "lead": "The demo shop has three sample rentals: a clean return, a scratch and a contested claim. Every PayPal call is real, in the sandbox."
+  },
+  "footer": {
+    "tagline": "The deposit that never leaves your account.",
+    "product": "Product",
+    "forYou": "For you",
+    "about": "About this build",
+    "aboutBody": "Built for the PayPal AI Hackathon 2026. Hold is not an insurer and does not hold customers' money. Funds stay in the renter's own account until a claim is approved.",
+    "rights": "© {year} Hold",
+    "credits": "Photographs from Unsplash by Florian, Nuno Alves and Krzysztof Kowalik. The marks on the frame are illustrative."
+  },
+  "pages": {
+    "howItWorks": {
+      "title": "One rental, four moments.",
+      "lead": "Staff and renters use the phone they already carry. Nobody installs anything, and the shop buys no hardware.",
+      "stepsHeading": "The four moments",
+      "comparison": {
+        "title": "What the comparison shows.",
+        "lead": "Drag between the two photographs. A new mark is outlined and priced from the shop's published list. A mark that was already there is noted and never charged."
+      },
+      "contested": {
+        "title": "If the renter disagrees.",
+        "lead": "Contesting a claim is as easy as accepting one.",
+        "items": {
+          "reply": {
+            "title": "The renter replies on the same screen",
+            "body": "They say what they disagree with and can add their own photographs."
+          },
+          "owner": {
+            "title": "The owner decides",
+            "body": "Hold sets out both positions side by side. A named person makes the final decision and can lower or drop the charge."
+          },
+          "record": {
+            "title": "The record is already complete",
+            "body": "If a dispute is later raised with PayPal, the photographs, the price list and every decision are in one evidence pack."
+          }
+        }
+      },
+      "figures": {
+        "reserved": "reserved in the renter's own account",
+        "photographs": "photographs at handover, repeated at return",
+        "seconds": "seconds for a guided handover at the counter",
+        "charged": "charged when the item comes back as it left"
+      },
+      "moments": {
+        "reserve": {
+          "who": "The renter, on their own phone",
+          "body": "Priya books an e-bike for three days. She pays the rental fee, reads the damage price list and approves a hold in PayPal. The money is reserved in her own account, and nothing is charged.",
+          "points": {
+            "a": "The rental fee is paid. The deposit is only held. The page says which is which in one sentence.",
+            "b": "The damage prices are shown and agreed before anything is approved.",
+            "c": "The hold is placed at pickup, so it is fresh for the whole rental."
+          }
+        },
+        "handOver": {
+          "who": "Staff, at the counter",
+          "body": "Jonas opens the rental on his phone and is led through six views of the bike. It takes about forty seconds. Priya gets the condition report on her phone and confirms it.",
+          "points": {
+            "a": "An outline shows how to frame each view, one after another.",
+            "b": "A blurred or dark photograph is caught at once and taken again.",
+            "c": "Marks already on the item are recorded, so nobody is charged for them later."
+          }
+        },
+        "return": {
+          "who": "Staff, at the counter",
+          "body": "Jonas takes the same six photographs. Hold lines each one up with its twin from the handover and outlines what changed. Drag between the two photographs to see it.",
+          "points": {
+            "a": "The return repeats the handover shot for shot.",
+            "b": "Each difference gets one of three answers: no change, ordinary wear or damage.",
+            "c": "When the photographs do not allow a confident answer, Hold says so and a person looks at the item."
+          }
+        },
+        "settle": {
+          "who": "A person decides, then PayPal",
+          "body": "A clean return ends at the counter. Damage becomes an itemized claim that a person approves, and the renter sees it before anything is taken.",
+          "points": {
+            "a": "Nothing new: one confirmation releases the whole hold and tells the renter.",
+            "b": "Damage: staff or the owner can accept, reduce, remove or add items before anything is charged.",
+            "c": "Only the approved amount is taken. The rest is released at once."
+          }
+        }
+      },
+      "reserveScreen": {
+        "caption": "Priya, before she collects the bike",
+        "item": "E-bike, {days} days",
+        "fee": "Rental fee",
+        "feeState": "Paid",
+        "hold": "Hold",
+        "holdState": "Reserved, not charged",
+        "promise": "If the bike comes back as it left, the hold is released the moment you return it.",
+        "approve": "Approve the hold in PayPal"
+      },
+      "holdCard": {
+        "note": "Placed when Priya collects the bike, in her own PayPal account."
+      },
+      "captureScreen": {
+        "caption": "Jonas, at handover",
+        "context": "Handover",
+        "progress": "{current} of {total}",
+        "hint": "Sharp and well lit",
+        "shutter": "Take photograph",
+        "views": {
+          "frameLeft": "Frame, left side",
+          "frameRight": "Frame, right side",
+          "frontWheel": "Front wheel",
+          "rearWheel": "Rear wheel",
+          "display": "Display",
+          "battery": "Battery"
+        }
+      },
+      "report": {
+        "title": "Condition report",
+        "noted": "{count, plural, one {# mark already there, noted} other {# marks already there, noted}}",
+        "confirmed": "Confirmed by Priya · {time}"
+      },
+      "outcomes": {
+        "phone": "On Priya's phone",
+        "clean": {
+          "title": "Nothing new. Released at the counter.",
+          "message": "Your bike is back safely. The {amount} hold has been released. Nothing was charged."
+        },
+        "damage": {
+          "title": "One new mark. Only that is taken.",
+          "message": "Scratched frame, {taken}, from the price list you accepted. The other {released} has been released."
+        }
+      },
+      "faq": {
+        "title": "Asked at the counter.",
+        "lead": "Short answers to what staff and renters ask first."
+      }
+    },
+    "forShops": {
+      "title": "Protect every item without charging the people who bring it back.",
+      "lead": "Many customers walk away at the moment a deposit is mentioned. A hold protects the item and leaves their money where it is.",
+      "action": "Open the demo shop",
+      "benefitsHeading": "What changes at the counter.",
+      "change": {
+        "title": "Before Hold, and with it.",
+        "lead": "The same three people, the same rentals.",
+        "caption": "What changes for each person in the shop",
+        "who": "Who",
+        "before": "Before Hold",
+        "after": "With Hold",
+        "rows": {
+          "owner": {
+            "who": "The owner",
+            "before": "Chooses between scaring customers with a deposit and carrying the risk without one.",
+            "after": "Protects every item without charging anyone who returns it intact."
+          },
+          "staff": {
+            "who": "The counter staff",
+            "before": "Judges condition by eye under pressure and absorbs the customer's anger.",
+            "after": "Follows a short guided routine and points to a photograph."
+          },
+          "business": {
+            "who": "The business",
+            "before": "Loses damage costs it cannot prove and collects bad reviews for those it can.",
+            "after": "Recovers what it is owed with evidence both sides have seen."
+          }
+        }
+      },
+      "types": {
+        "title": "Built for shops like these.",
+        "lead": "Items worth protecting, but cheap enough to rent casually. The only equipment is the phone your staff already carry.",
+        "items": {
+          "bikes": {
+            "title": "Bikes, e-bikes and scooters",
+            "body": "Visitors paying with foreign cards, and a fleet where one damaged e-bike costs a week's earnings."
+          },
+          "cameras": {
+            "title": "Cameras, lenses and audio",
+            "body": "High-value items where a mark on the glass has to be dated."
+          },
+          "outdoor": {
+            "title": "Ski, surf, kayak and camping gear",
+            "body": "Seasonal staff and a queue at the counter."
+          },
+          "events": {
+            "title": "Party and event equipment",
+            "body": "Many items per rental, each with its own price list."
+          },
+          "tools": {
+            "title": "Tools and small equipment",
+            "body": "Ordinary wear has to be told apart from damage, the same way every time."
+          },
+          "family": {
+            "title": "Baby equipment, instruments and formalwear",
+            "body": "Renters who want to know exactly what they could be charged for."
+          }
+        }
+      },
+      "secondaryAction": "See how it works",
+      "benefitsLead": "A hold replaces the deposit. The photographs replace the argument.",
+      "today": {
+        "title": "Today",
+        "itemsOut": "Items out",
+        "dueBack": "Due back today",
+        "holds": "Holds in place",
+        "claims": "Claims awaiting a decision",
+        "attention": "Needs attention",
+        "claim": "Hold {number} · a claim of {amount} awaits approval",
+        "claimAction": "Review",
+        "expiring": "Hold {number} · day {day} of {max}",
+        "expiringAction": "Replace",
+        "caption": "Example shop. Illustrative figures."
+      },
+      "setup": {
+        "title": "Set up once, in plain words.",
+        "lead": "You write the rules the way you would say them at the counter. Hold turns them into a list every renter can read before they rent.",
+        "items": {
+          "prices": {
+            "title": "The damage price list",
+            "body": "What each kind of damage, loss or lateness costs. A claim can never exceed it."
+          },
+          "wear": {
+            "title": "The wear policy",
+            "body": "What you count as ordinary wear. Hold applies it the same way to every customer."
+          },
+          "photos": {
+            "title": "The photo plan",
+            "body": "The views to capture for each type of item. Hold suggests a plan and you adjust it."
+          },
+          "amounts": {
+            "title": "Hold amounts that fit the item",
+            "body": "A helmet and an e-bike do not need the same protection."
+          }
+        }
+      },
+      "passport": {
+        "title": "Every item keeps its own record.",
+        "lead": "Each rental adds a dated set of photographs. Every mark has a first-seen date, so nobody pays for someone else's scratch.",
+        "label": "Item passport",
+        "caption": "Example item. Illustrative photographs.",
+        "entries": {
+          "scuff": {
+            "title": "Down tube scuff, first seen",
+            "note": "Recorded at a handover. Never charged since."
+          },
+          "handover": {
+            "title": "Handover, hold {number}",
+            "note": "{count} photographs. Nothing new since the last return."
+          },
+          "scratch": {
+            "title": "Scratched frame, new",
+            "note": "{amount} from the price list. Approved by a person."
+          }
+        },
+        "points": {
+          "old": "Old damage stays old, whoever rents the item next.",
+          "maintenance": "You see which items wear fastest and which are due for repair.",
+          "resale": "A documented history supports a better resale price and a stronger insurance claim."
+        }
+      },
+      "safeguards": {
+        "title": "No charge without a person.",
+        "lead": "These checks are built into the product. They do not depend on anyone remembering them.",
+        "items": {
+          "approval": {
+            "title": "No automatic charges",
+            "body": "Every charge against a hold is approved by a named person."
+          },
+          "second": {
+            "title": "A second approval for large claims",
+            "body": "Above an amount you choose, the owner must agree."
+          },
+          "cap": {
+            "title": "A cap by design",
+            "body": "A claim cannot exceed the published price list for the damage found."
+          },
+          "records": {
+            "title": "Records that cannot be swapped",
+            "body": "Photographs are dated when they are taken and cannot be replaced afterwards."
+          }
+        }
+      }
+    },
+    "forRenters": {
+      "title": "Keep your money while you rent.",
+      "lead": "A hold reserves the deposit in your own account. Return the item as it left and no payment ever happened: nothing to refund, nothing to wait for and nothing lost to currency conversion.",
+      "action": "See how it works",
+      "benefitsHeading": "You see what the shop sees.",
+      "assurances": {
+        "title": "What you can count on.",
+        "lead": "These hold for every renter, whoever they are.",
+        "items": {
+          "informed": {
+            "title": "Told before you pay",
+            "body": "You see that a hold will be placed, how much it is, how long it can last and what each kind of damage costs."
+          },
+          "noSurprise": {
+            "title": "No surprise charges",
+            "body": "You can only be charged for damage that is on the published list, shown in the photographs and approved by a person."
+          },
+          "reply": {
+            "title": "A real right to reply",
+            "body": "Contesting a claim is as easy as accepting one, and it reaches a human being."
+          },
+          "consistent": {
+            "title": "The same rules for everyone",
+            "body": "One wear policy and one price list apply to every renter."
+          },
+          "privacy": {
+            "title": "Photographs of items, not people",
+            "body": "Faces are blurred. Records are kept only as long as needed."
+          },
+          "notInsurer": {
+            "title": "Your money stays yours",
+            "body": "Hold is not an insurer and does not hold your money. The funds stay in your own account until a claim is approved."
+          }
+        }
+      },
+      "benefitsLead": "The same two photographs, the same price list and the same amount, on your own phone, before anything is taken.",
+      "statement": {
+        "title": "A deposit leaves your account. A hold does not.",
+        "lead": "The same three-day rental, as it appears in your account.",
+        "later": "Days later",
+        "out": "Out of your account during the rental",
+        "deposit": {
+          "label": "With a deposit",
+          "charged": "Deposit charged",
+          "returned": "Bike returned, refund requested",
+          "refunded": "Refund arrives",
+          "waiting": "Waiting",
+          "foot": "Your money is gone for the whole trip. With a foreign card you can lose on the exchange rate in both directions."
+        },
+        "hold": {
+          "label": "With a hold",
+          "placed": "Hold placed",
+          "reserved": "{amount} reserved",
+          "released": "Bike returned, hold released",
+          "taken": "{amount} taken",
+          "foot": "Nothing left your account, so there is nothing to refund and nothing to wait for."
+        }
+      },
+      "prices": {
+        "title": "The prices are published before you rent.",
+        "lead": "You read the damage price list when you book and agree to it when you approve the hold. Nothing is invented afterwards.",
+        "points": {
+          "cap": "A claim can never be higher than the list.",
+          "wear": "Ordinary wear is not damage, and the wear policy is the same for everyone.",
+          "old": "A mark that was there before you is on the item's record. You are never charged for it."
+        }
+      },
+      "faq": {
+        "title": "Before you approve a hold.",
+        "lead": "Short answers to what renters ask first."
+      }
+    },
+    "ai": {
+      "title": "The AI compares. A person decides.",
+      "lead": "Automated damage charging made rental customers angry because nobody could be asked. Hold is built the other way round: the AI gathers and compares, a person decides, and the renter sees everything.",
+      "listsHeading": "What the AI does, and what it never does",
+      "limits": {
+        "title": "Honest about its limits.",
+        "lead": "Lighting, dirt and reflections can mislead any comparison.",
+        "items": {
+          "confidence": {
+            "title": "It states its confidence",
+            "body": "Each finding says how sure the comparison is, in words a renter can read."
+          },
+          "retake": {
+            "title": "It asks for a retake",
+            "body": "A blurred or dark photograph is caught on the phone, while it is still easy to take again."
+          },
+          "defers": {
+            "title": "It defers to a person",
+            "body": "When it cannot tell wear from damage, it says so and a person looks. The manual path always works."
+          }
+        }
+      },
+      "pipeline": {
+        "title": "Seven steps. The model gets one.",
+        "lead": "The cheapest reliable method goes first. Anything that must not be missed is found by plain code, and still works when the model is down.",
+        "actors": {
+          "code": "Plain code",
+          "model": "The AI model",
+          "person": "A person"
+        },
+        "steps": {
+          "quality": {
+            "title": "Check the photograph",
+            "body": "On the phone, as it is taken. A blurred, dark or badly framed shot is rejected at once."
+          },
+          "normalize": {
+            "title": "Even it out",
+            "body": "Orientation, size and exposure are corrected."
+          },
+          "align": {
+            "title": "Line it up",
+            "body": "The return photograph is aligned with its twin from the handover."
+          },
+          "regions": {
+            "title": "Find what changed",
+            "body": "Areas that differ are marked as hints for the next step."
+          },
+          "judge": {
+            "title": "Judge",
+            "body": "The model looks at both photographs and a close crop of each area. It answers no change, wear or damage, and says how sure it is."
+          },
+          "price": {
+            "title": "Price",
+            "body": "Each finding is matched to the shop's published list. An amount is never the model's output."
+          },
+          "decide": {
+            "title": "Decide",
+            "body": "A named person accepts, reduces, removes or adds. Only then can anything be charged."
+          }
+        }
+      },
+      "findings": {
+        "title": "Every difference gets a plain answer.",
+        "lead": "Each one comes with its confidence, in words a renter can read.",
+        "caption": "Example findings. Illustrative photographs.",
+        "high": "High confidence",
+        "low": "Low confidence",
+        "items": {
+          "damage": {
+            "verdict": "Damage",
+            "title": "Scratched frame",
+            "body": "Not there at handover. Matched to the price list and sent to a person."
+          },
+          "wear": {
+            "verdict": "Ordinary wear",
+            "title": "Light tyre wear",
+            "body": "Covered by the shop's wear policy. Never charged."
+          },
+          "same": {
+            "verdict": "No change",
+            "title": "Down tube scuff",
+            "body": "Already there at handover. It stays on the item's record and is never charged."
+          },
+          "unsure": {
+            "verdict": "Cannot tell",
+            "title": "Glare on the brake",
+            "body": "The photograph does not allow an answer. A person looks at the item itself."
+          }
+        }
+      },
+      "accuracy": {
+        "title": "Measured, not claimed.",
+        "lead": "The comparison is tested on pairs of photographs whose true answer is known: clean returns, ordinary wear and real damage, in good light and bad.",
+        "items": {
+          "counts": {
+            "title": "Published as counts",
+            "body": "Each result is a number of pairs out of the pairs tested, never a bare percentage."
+          },
+          "renter": {
+            "title": "The renter's number comes first",
+            "body": "How often a clean return was wrongly flagged is the headline figure."
+          },
+          "worse": {
+            "title": "It cannot quietly get worse",
+            "body": "A new version that does worse on the test is not released."
+          }
+        },
+        "status": {
+          "title": "The scorecard is not published yet.",
+          "body": "It appears here, with every count, once the evaluation set has been run."
+        }
+      },
+      "agents": {
+        "title": "An agent acts only inside limits a person wrote.",
+        "lead": "A renter or an owner may let an AI agent act for them. Every tool call passes one gateway. It checks who is asking, for which shop and under which written limit, then records the call.",
+        "caption": "What an agent's tools may do",
+        "tiers": {
+          "read": {
+            "name": "Read",
+            "body": "Returns records the person may see."
+          },
+          "draft": {
+            "name": "Draft",
+            "body": "Writes text for a person to send or discard."
+          },
+          "propose": {
+            "name": "Propose",
+            "body": "Prepares a decision for a person to approve."
+          },
+          "notify": {
+            "name": "Notify",
+            "body": "Sends a fixed message, such as a reminder that a return is due."
+          },
+          "mandate": {
+            "name": "Act under a mandate",
+            "body": "Acts inside limits a person wrote in advance, and can be stopped at any time."
+          },
+          "charge": {
+            "name": "Charge",
+            "body": "There is no such tier. No tool takes an amount, and no agent can start a charge."
+          }
+        }
+      }
+    },
+    "paypal": {
+      "title": "Reserved is not charged. PayPal makes that real.",
+      "lead": "The whole product rests on the difference between reserving money and taking it, and on being able to take a part and release the rest.",
+      "tableHeading": "What each rental need uses",
+      "advantages": {
+        "title": "Why a PayPal hold, not a card hold.",
+        "lead": "Three differences matter to a rental shop.",
+        "items": {
+          "days": {
+            "title": "It lasts as long as real rentals do",
+            "body": "A PayPal hold can stay open for up to 29 days. Many card holds expire in about a week."
+          },
+          "wallet": {
+            "title": "No card handed over",
+            "body": "A renter paying from a PayPal wallet does not give a card to a shop they have never visited."
+          },
+          "truth": {
+            "title": "PayPal's record is the truth",
+            "body": "A hold counts as placed, taken or released only after PayPal confirms it. Hold never guesses a payment's status."
+          }
+        }
+      },
+      "lifecycle": {
+        "title": "The life of one hold.",
+        "lead": "Four calls to PayPal. Hold records each step only after PayPal confirms it.",
+        "call": "PayPal call",
+        "steps": {
+          "order": {
+            "title": "The deposit becomes its own order",
+            "body": "It is separate from the rental fee, and it is created to reserve, not to charge."
+          },
+          "authorize": {
+            "title": "The renter approves, and the hold is placed",
+            "body": "{amount} is reserved in the renter's own account. No payment has happened."
+          },
+          "renew": {
+            "title": "A late charge is still assured",
+            "body": "If a charge comes after the first three days, Hold renews the hold just before it. PayPal gives it a new identifier, and Hold follows it."
+          },
+          "capture": {
+            "title": "Only the approved claim is taken",
+            "body": "{taken} is taken as the final capture. PayPal releases the other {released}."
+          },
+          "void": {
+            "title": "The whole hold is released",
+            "body": "All {amount} is freed at the counter. No payment ever happened."
+          }
+        },
+        "idempotency": "Every call that moves money carries its own request identifier, so a retry never takes it twice."
+      },
+      "table": {
+        "title": "What each rental need uses.",
+        "lead": "Eight needs and eight PayPal capabilities. Each one does a necessary job."
+      },
+      "length": {
+        "caption": "How long a hold can stay open",
+        "paypal": "A PayPal hold",
+        "card": "Many card holds",
+        "days": "{count} days",
+        "about": "About {count} days",
+        "rental": "A three-week rental ends here"
+      },
+      "truth": {
+        "title": "Hold never guesses a payment's status.",
+        "lead": "A hold counts as placed, taken or released only when PayPal says so.",
+        "items": {
+          "verify": {
+            "title": "The notification is verified",
+            "body": "Its signature is checked before a single field is read."
+          },
+          "read": {
+            "title": "The payment is read back",
+            "body": "Hold asks PayPal for the payment itself and trusts that answer, not the message."
+          },
+          "log": {
+            "title": "Then it is written down",
+            "body": "One permanent line in the money log, linked to the PayPal event that confirmed it."
+          }
+        }
+      }
+    },
+    "demo": {
+      "title": "Try a return yourself.",
+      "lead": "The demo shop has three sample rentals. Every PayPal call is real, in the sandbox, with test money.",
+      "status": {
+        "title": "The demo shop is not open yet.",
+        "body": "It opens when the first build is deployed. Sign-in details for the demo owner and staff will be listed here."
+      },
+      "samples": {
+        "title": "Three sample rentals.",
+        "lead": "One tap loads a set of sample photographs in place of the camera. The rest of the flow is real.",
+        "items": {
+          "clean": {
+            "title": "A clean return",
+            "body": "The comparison finds nothing new and the hold is released in seconds.",
+            "result": "Released in full"
+          },
+          "scratch": {
+            "title": "A scratch",
+            "body": "The new mark is outlined, matched to the price list, approved by a person and charged in part. The rest is released.",
+            "result": "Taken in part"
+          },
+          "contested": {
+            "title": "A contested claim",
+            "body": "The renter replies, the owner reviews both sides and adjusts the charge.",
+            "result": "Held until the owner decides"
+          }
+        }
+      },
+      "action": "See how it works",
+      "cast": {
+        "title": "Three people, three ways in.",
+        "lead": "Sign-in details for each of them will be listed here when the demo shop opens.",
+        "items": {
+          "owner": {
+            "title": "Tomás, the owner",
+            "body": "Writes the price list and the wear policy, sees the whole shop and decides contested claims."
+          },
+          "staff": {
+            "title": "Jonas, at the counter",
+            "body": "Runs the handover and the return, and approves a claim within his limit."
+          },
+          "renter": {
+            "title": "Priya, the renter",
+            "body": "Has no account. She opens a link, sees the photographs and the claim, and accepts or disagrees."
+          }
+        }
+      },
+      "honest": {
+        "title": "What is real, and what is simulated.",
+        "lead": "Anything simulated is labelled on the screen and in the record.",
+        "real": {
+          "title": "Real",
+          "items": {
+            "paypal": "Every PayPal call, made in the sandbox.",
+            "comparison": "The comparison of each pair of photographs.",
+            "approval": "Every approval, recorded with the person's name."
+          }
+        },
+        "simulated": {
+          "title": "Simulated",
+          "items": {
+            "money": "The money. Sandbox accounts hold test funds only.",
+            "camera": "The camera. One tap loads sample photographs in its place.",
+            "people": "The people. Tomás, Jonas and Priya are demo sign-ins."
+          }
+        }
+      }
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "This page does not exist.",
+      "body": "The address may be mistyped, or the page may have moved.",
+      "home": "Back to the home page"
+    },
+    "generic": {
+      "title": "Something went wrong.",
+      "body": "The page could not be shown. Nothing was charged and nothing was changed.",
+      "retry": "Try again"
+    }
+  },
+  "holdMeter": {
+    "summary": "{reserved} reserved, {taken} taken, {released} released",
+    "open": "{reserved} reserved, nothing taken"
+  },
+  "priceList": {
+    "title": "Damage price list",
+    "items": {
+      "scratchedFrame": "Scratched frame",
+      "missingCharger": "Missing charger",
+      "bentWheel": "Bent wheel"
+    },
+    "wear": "Ordinary wear, such as light tyre wear or small scuffs on the pedals, is never charged.",
+    "agreed": "Agreed by the renter before the hold is approved.",
+    "example": "Example price list."
+  },
+  "faq": {
+    "items": {
+      "charge": {
+        "q": "Is a hold a charge?",
+        "a": "No. A hold reserves the amount in the renter's own PayPal account. Nothing is taken unless a person approves a claim."
+      },
+      "length": {
+        "q": "How long can a hold stay open?",
+        "a": "Up to 29 days. Hold keeps it valid during the rental and flags any hold that is close to its end before it lapses."
+      },
+      "beyond": {
+        "q": "What if the damage costs more than the hold?",
+        "a": "The hold is taken in full and the balance is billed separately, with the same photographs attached."
+      },
+      "app": {
+        "q": "Does anyone need an app or an account?",
+        "a": "No. Staff open Hold in the browser on the phone they already carry. The renter gets a link."
+      },
+      "dark": {
+        "q": "What if a photograph is too dark to judge?",
+        "a": "Hold asks for it again while the item is still at the counter. If it still cannot tell, it says so and a person looks at the item itself."
+      },
+      "wear": {
+        "q": "Who decides what counts as ordinary wear?",
+        "a": "The shop does, once, in plain words. Hold applies that policy the same way to every renter."
+      },
+      "release": {
+        "q": "When is the hold released?",
+        "a": "The moment staff confirm a clean return, usually while you are still at the counter. Your phone tells you that nothing was charged."
+      },
+      "chargedFor": {
+        "q": "What can I be charged for?",
+        "a": "Only damage that is on the published price list, shown in the photographs and approved by a person. A claim can never be higher than the list."
+      },
+      "disagree": {
+        "q": "What if I disagree with a claim?",
+        "a": "You say so on the same screen and can add your own photographs. A named person at the shop looks at both sides and can lower or drop the charge."
+      },
+      "photographs": {
+        "q": "What happens to the photographs?",
+        "a": "They show the item, not you. Faces are blurred, and records are kept only as long as the shop's policy and the law require."
+      }
+    }
+  },
+  "auth": {
+    "passwordless": "No password. Hold emails you a code that works once.",
+    "sending": "Sending…",
+    "fields": {
+      "name": "Your name",
+      "shopName": "Shop name",
+      "email": "Work email"
+    },
+    "problems": {
+      "name": {
+        "missing": "Enter your name.",
+        "invalid": "Use 100 characters or fewer."
+      },
+      "shopName": {
+        "missing": "Enter your shop's name.",
+        "invalid": "Use 100 characters or fewer."
+      },
+      "email": {
+        "missing": "Enter your email address.",
+        "invalid": "That does not look like an email address. Check it and try again."
+      }
+    },
+    "signIn": {
+      "title": "Sign in to your shop.",
+      "lead": "For owners and counter staff.",
+      "submit": "Email me a code",
+      "switch": "New to Hold?",
+      "switchAction": "Create a shop account",
+      "aside": {
+        "title": "Your shop, as you left it.",
+        "lead": "Items out, holds in place and the claims waiting for a decision, on the phone you already carry."
+      }
+    },
+    "signUp": {
+      "title": "Open your shop on Hold.",
+      "lead": "For the owner of a rental shop. It takes about a minute, and the only equipment is your phone.",
+      "submit": "Create my shop account",
+      "switch": "Already have an account?",
+      "switchAction": "Sign in",
+      "aside": {
+        "title": "Three steps to your first protected rental.",
+        "steps": {
+          "email": {
+            "title": "Confirm your email",
+            "body": "Hold emails you a code. There is no password to set."
+          },
+          "paypal": {
+            "title": "Connect your shop's PayPal account",
+            "body": "Holds stay in your renters' own accounts, and approved claims are paid into yours. Hold never keeps the money."
+          },
+          "prices": {
+            "title": "Write your price list",
+            "body": "What each kind of damage costs, in plain words. Renters read it before they rent."
+          }
+        }
+      }
+    },
+    "notes": {
+      "title": "Not the owner?",
+      "staff": {
+        "title": "Counter staff",
+        "body": "You do not sign up. The shop's owner invites you, and you sign in with that email address."
+      },
+      "renter": {
+        "title": "Renting something?",
+        "body": "You need no account. Open the link the shop sent you.",
+        "action": "See what a hold means for you"
+      }
+    },
+    "notices": {
+      "busy": {
+        "title": "Too many attempts.",
+        "body": "Wait a few minutes, then try again."
+      },
+      "unavailable": {
+        "title": "Sign-in could not be reached.",
+        "body": "Nothing was sent. Try again in a moment."
+      },
+      "no_passkey": {
+        "title": "No passkey for this address.",
+        "body": "Sign in with an emailed code, then add a passkey on your shop's security page."
+      },
+      "invitation_closed": {
+        "title": "This invitation can no longer be used.",
+        "body": "Ask the shop to send you a new one."
+      }
+    },
+    "code": {
+      "title": "Check your email.",
+      "lead": "We sent a code to {email}. It works once, within ten minutes.",
+      "field": "Code from the email",
+      "submit": "Continue",
+      "checking": "Checking…",
+      "resend": "Send a new code",
+      "sending": "Sending…",
+      "startOver": "Use a different email",
+      "resent": {
+        "title": "A new code is on its way.",
+        "body": "Use the code in the newest email."
+      },
+      "problems": {
+        "missing": "Enter the code from the email.",
+        "invalid": "The code is the digits in the email. Check it and try again.",
+        "wrong": "That code is not right. Check it and try again.",
+        "expired": "That code has expired. Send a new one.",
+        "attempt_over": "This code can no longer be used. Send a new one, or start again.",
+        "second_factor": "This account also asks for a code from an authenticator app, which Hold does not take yet.",
+        "busy": "Too many attempts. Wait a few minutes, then try again.",
+        "unavailable": "Hold could not check the code just now. Try again in a moment.",
+        "no_passkey": "There is no passkey for this address. Use the emailed code.",
+        "invitation_closed": "This invitation can no longer be used. Ask the shop for a new one."
+      }
+    },
+    "passkey": {
+      "signIn": "Sign in with a passkey",
+      "waiting": "Waiting for your device…",
+      "add": "Add a passkey on this device",
+      "added": "Passkey added.",
+      "problems": {
+        "email": "Enter your work email first, then use your passkey.",
+        "unsupported": "This browser cannot use passkeys. Use the emailed code, or a newer browser.",
+        "cancelled": "The passkey was not used. Try again when you are ready.",
+        "unavailable": "Hold could not reach its sign-in service. Try again in a moment.",
+        "wrong": "That passkey is not one Hold knows for this address.",
+        "expired": "That took too long. Try again.",
+        "attempt_over": "That took too long. Try again.",
+        "second_factor": "This account asks for a code Hold does not take. Contact the shop's owner.",
+        "busy": "Too many attempts. Wait a few minutes, then try again.",
+        "no_passkey": "There is no passkey for this address yet. Sign in with the emailed code, then add one.",
+        "invitation_closed": "This invitation can no longer be used.",
+        "missing": "Enter your work email first.",
+        "invalid": "Enter your work email first."
+      }
+    },
+    "invite": {
+      "title": "Join {shop} on Hold.",
+      "lead": "You are invited as {role}. Hold will email a code to {email} to confirm it is you.",
+      "submit": "Email me a code",
+      "switch": "Already work here?",
+      "switchAction": "Sign in",
+      "aside": {
+        "title": "What working with Hold looks like.",
+        "lead": "Photographs at handover and at return, a hold in the renter's own PayPal account, and a person approving every charge."
+      },
+      "closed": {
+        "title": "This invitation cannot be used.",
+        "lead": "Invitations work once, for seven days.",
+        "body": "Ask the shop's owner to send you a new one.",
+        "accepted": "This invitation was already accepted.",
+        "revoked": "The shop withdrew this invitation.",
+        "expired": "This invitation has expired.",
+        "missing": "There is no invitation at this address."
+      }
+    }
+  },
+  "shop": {
+    "label": "Your shop",
+    "signedInAs": "Signed in as {email}.",
+    "otherShops": "Your other shops",
+    "switchShop": "Work in this shop",
+    "signOut": "Sign out",
+    "noShop": {
+      "title": "No shop yet.",
+      "body": "This account has no shop. Create one on the sign-up page with the same email, or ask a shop's owner to invite you."
+    },
+    "nav": {
+      "label": "Shop pages",
+      "home": "Overview",
+      "security": "Security",
+      "staff": "Staff",
+      "prices": "Prices",
+      "paypal": "PayPal"
+    },
+    "setup": {
+      "title": "Set up your shop",
+      "done": "Done.",
+      "toDo": "To do.",
+      "passkey": {
+        "title": "Add a passkey",
+        "body": "Your fingerprint, face or PIN on this device. Hold asks for it before anyone changes prices, staff or PayPal.",
+        "action": "Go to security"
+      },
+      "prices": {
+        "title": "Write your price list",
+        "body": "What each kind of damage costs, in plain words. Renters read it before they rent.",
+        "action": "Go to prices"
+      },
+      "paypal": {
+        "title": "Connect your shop's PayPal account",
+        "body": "Holds stay in your renters' own accounts, and approved claims are paid into yours.",
+        "action": "Go to PayPal"
+      },
+      "staff": {
+        "title": "Invite your staff",
+        "body": "Each person signs in with their own email, with the role and approval limit you give them.",
+        "action": "Go to staff"
+      }
+    },
+    "passkeyGate": {
+      "title": "Confirm it is you.",
+      "confirmBody": "Changing prices, staff or PayPal needs your passkey, not only an emailed code.",
+      "addBody": "Changing prices, staff or PayPal needs a passkey. Add one on this device first.",
+      "confirm": "Confirm with my passkey",
+      "add": "Add a passkey"
+    },
+    "results": {
+      "signed_out": "Your session has ended. Sign in again.",
+      "no_shop": "This account has no shop.",
+      "role": "Your role in this shop does not allow this.",
+      "passkey_needed": "Confirm with your passkey first.",
+      "invalid": "Something in the form is missing or too long. Check it and try again.",
+      "unavailable": "That did not work. Try again in a moment.",
+      "role_not_invitable": "You cannot invite someone with that role.",
+      "currency_unset": "Publish your price list first, so approval limits have a currency.",
+      "limit_invalid": "The approval limit is not an amount. Use digits, such as 150 or 150.00.",
+      "email_failed": "The invitation email could not be sent, so nothing was kept. Check the address and try again.",
+      "not_open": "That invitation is no longer open.",
+      "currency_unknown": "Choose a currency from the list.",
+      "rows_mismatched": "Every price needs a description, a kind and an amount.",
+      "amount_invalid": "Price {row} is not an amount. Use digits, such as 35 or 35.50.",
+      "threshold_invalid": "The approval threshold is not an amount. Use digits, such as 200 or 200.00.",
+      "no_entries": "Add at least one price.",
+      "too_many_entries": "A price list can have up to 60 prices.",
+      "description_missing": "Price {row} needs a description.",
+      "description_too_long": "The description of price {row} is too long.",
+      "description_repeated": "Price {row} repeats another description. Make each one different.",
+      "amount_zero": "Price {row} is zero. Remove it, or give it an amount.",
+      "wrong_currency": "Price {row} is in another currency.",
+      "wear_policy_missing": "Say what counts as ordinary wear.",
+      "wear_policy_too_long": "The wear policy is too long.",
+      "currency_fixed": "The currency is fixed once a price list is published.",
+      "paypal_refused": "PayPal did not accept these credentials. Check that you copied both from the same sandbox app.",
+      "paypal_unavailable": "PayPal could not be reached. Nothing was kept. Try again in a moment."
+    },
+    "security": {
+      "title": "Security",
+      "lead": "A passkey signs you in with your fingerprint, face or PIN, on a device you hold.",
+      "leadRequired": "Your role lets you change prices, staff or PayPal, so Hold asks for a passkey before you do: your fingerprint, face or PIN on a device you hold. An emailed code alone is not enough.",
+      "unavailable": "Your passkeys could not be listed just now.",
+      "none": "You have no passkey yet.",
+      "unnamed": "Passkey {number}",
+      "added": "Added {date}",
+      "how": "Your device keeps the passkey. Hold and its sign-in service keep only the public half, which cannot sign you in on its own."
+    },
+    "staff": {
+      "title": "Staff",
+      "team": "Who works here",
+      "limit": "approves claims up to {amount}",
+      "roles": {
+        "owner": "Owner",
+        "manager": "Manager",
+        "counter_staff": "Counter staff",
+        "read_only": "Read-only"
+      },
+      "open": {
+        "title": "Invitations waiting",
+        "expires": "expires {date}",
+        "withdraw": "Withdraw",
+        "withdrawFor": "Withdraw the invitation for {email}",
+        "withdrawn": "Invitation withdrawn."
+      },
+      "invite": {
+        "title": "Invite someone",
+        "lead": "They receive an email with a link. It works once, for seven days, and only for the address you enter.",
+        "email": "Their work email",
+        "role": "Role",
+        "limit": "Largest claim they may approve, in {currency}",
+        "limitNeedsCurrency": "Counter staff can approve claims once your price list sets the shop's currency. Until then they approve nothing.",
+        "submit": "Send the invitation",
+        "sending": "Sending…",
+        "sent": "Invitation sent."
+      }
+    },
+    "prices": {
+      "title": "Prices",
+      "none": "No price list is published yet. Renters see it before they rent, and every claim is priced from it.",
+      "current": "Version {version} is published, since {date}. Publishing again makes a new version. Rentals already booked keep the version their renter agreed to.",
+      "readOnly": "Only the owner or a manager can publish prices.",
+      "currency": "Currency",
+      "threshold": "Claims above this go to the owner or a manager, in {currency}",
+      "thresholdHelp": "Optional. Leave it empty and each staff member's own limit decides.",
+      "entries": "Prices",
+      "description": "Price {number}: what it is for",
+      "category": "Kind",
+      "amount": "Amount, in {currency}",
+      "remove": "Remove price {number}",
+      "add": "Add a price",
+      "wear": "What counts as ordinary wear",
+      "wearHelp": "Renters are never charged for this. Say it in plain words.",
+      "publish": "Publish this price list",
+      "publishing": "Publishing…",
+      "publishHelp": "The currency is fixed once the first price list is published.",
+      "published": "Price list published.",
+      "categories": {
+        "damage": "Damage",
+        "loss": "Loss",
+        "lateness": "Late return",
+        "cleaning": "Cleaning"
+      }
+    },
+    "paypal": {
+      "title": "PayPal",
+      "lead": "Holds are placed in your renters' own PayPal accounts, and approved claims are paid into your shop's. Hold never keeps the money.",
+      "notConnected": "Not connected yet.",
+      "isConnected": "Connected since {date}.",
+      "connectTitle": "Connect a PayPal sandbox app",
+      "reconnectTitle": "Connect a different sandbox app",
+      "steps": {
+        "app": "At developer.paypal.com, open Apps & Credentials, choose Sandbox, and open the app of your shop's sandbox business account.",
+        "copy": "Copy its client ID and its secret.",
+        "paste": "Paste both below. Hold checks them with PayPal before keeping them."
+      },
+      "clientId": "Client ID",
+      "clientSecret": "Secret",
+      "connect": "Check and connect",
+      "checking": "Checking with PayPal…",
+      "connected": "Connected. PayPal accepted the credentials.",
+      "sandboxOnly": "This build connects sandbox accounts only. The credentials are kept in AWS Secrets Manager and are never shown again.",
+      "ownerOnly": "Only the shop's owner can connect PayPal."
+    }
+  },
+  "emails": {
+    "invitation": {
+      "subject": "You are invited to {shop} on Hold",
+      "body": "{inviter} invites you to work at {shop} on Hold, as {role}.\n\nOpen this link to accept. It works once, for seven days:\n{link}\n\nHold will email you a code to confirm the address is yours. If you did not expect this, you can ignore it."
+    }
+  }
+}

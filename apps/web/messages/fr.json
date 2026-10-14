@@ -1,0 +1,1314 @@
+{
+  "meta": {
+    "siteName": "Hold",
+    "tagline": "La caution qui ne quitte jamais votre compte.",
+    "home": {
+      "title": "Hold : la caution qui ne quitte jamais votre compte",
+      "description": "Hold réserve la caution d'une location avec PayPal et ne débite rien. Au retour, les photographies de la remise sont comparées à celles du retour, et une personne approuve chaque débit."
+    },
+    "howItWorks": {
+      "title": "Comment fonctionne Hold",
+      "description": "Une location en quatre moments : réserver, remettre, rendre et régler."
+    },
+    "forShops": {
+      "title": "Hold pour les loueurs",
+      "description": "Protégez chaque article sans débiter ceux qui le rapportent."
+    },
+    "forRenters": {
+      "title": "Hold pour les clients",
+      "description": "Gardez votre argent pendant la location et voyez exactement ce qui pourrait vous être facturé."
+    },
+    "ai": {
+      "title": "Ce que fait l'IA dans Hold",
+      "description": "L'IA compare des photographies. Une personne décide de chaque débit."
+    },
+    "paypal": {
+      "title": "Ce que fait PayPal dans Hold",
+      "description": "Une autorisation PayPal réserve la caution sans la débiter."
+    },
+    "demo": {
+      "title": "La boutique de démonstration Hold",
+      "description": "Trois locations d'exemple dans l'environnement de test PayPal : un retour sans dommage, une rayure et une réclamation contestée."
+    },
+    "signIn": {
+      "title": "Se connecter à Hold",
+      "description": "Les propriétaires et le personnel du comptoir se connectent avec un code reçu par e-mail. Les clients n'ont pas besoin de compte."
+    },
+    "signUp": {
+      "title": "Créer un compte loueur",
+      "description": "Ouvrez un compte Hold pour votre boutique de location. Aucun mot de passe à créer, aucun matériel à acheter."
+    },
+    "shop": {
+      "title": "Votre boutique"
+    },
+    "invite": {
+      "title": "Une invitation"
+    }
+  },
+  "nav": {
+    "main": "Principale",
+    "home": "Hold, page d'accueil",
+    "howItWorks": "Fonctionnement",
+    "forShops": "Pour les loueurs",
+    "forRenters": "Pour les clients",
+    "ai": "L'IA",
+    "paypal": "PayPal",
+    "demo": "Ouvrir la boutique de démo",
+    "openMenu": "Ouvrir le menu",
+    "closeMenu": "Fermer le menu",
+    "menuTitle": "Menu",
+    "skip": "Aller au contenu",
+    "signIn": "Connexion",
+    "yourShop": "Votre boutique"
+  },
+  "language": {
+    "label": "Langue",
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch"
+  },
+  "theme": {
+    "toDark": "Passer au thème sombre",
+    "toLight": "Passer au thème clair"
+  },
+  "doors": {
+    "shops": {
+      "label": "Pour les loueurs",
+      "action": "Ouvrir la boutique de démo"
+    },
+    "renters": {
+      "label": "Pour les clients",
+      "action": "Voir ce que voit le client"
+    }
+  },
+  "hero": {
+    "title": "Une photo règle tout.",
+    "lead": "Hold réserve la caution avec PayPal et ne débite rien. Au retour, il compare chaque photographie à celle prise à la remise. Le loueur et le client voient le même résultat, et une personne approuve chaque débit."
+  },
+  "evidence": {
+    "handover": "Remise",
+    "return": "Retour",
+    "slider": "Faites glisser entre la photographie de la remise et la photographie du retour",
+    "handoverAlt": "Un cadre de vélo bleu photographié à la remise",
+    "returnAlt": "Le même cadre de vélo photographié au retour",
+    "outcome": "Résultat du retour",
+    "damage": "Cadre rayé",
+    "clean": "Retour sans dommage",
+    "newTag": "Nouveau",
+    "findings": {
+      "new": {
+        "title": "Cadre rayé, {amount}",
+        "note": "Nouveau depuis la remise. Prix de la liste publiée."
+      },
+      "none": {
+        "title": "Aucune nouvelle marque",
+        "note": "Rien à facturer. L'autorisation est libérée au comptoir."
+      },
+      "old": {
+        "title": "Éraflure sur le tube diagonal, non facturée",
+        "note": "Déjà présente à la remise."
+      }
+    },
+    "summary": "{reserved} réservés · {taken} prélevés · {released} libérés",
+    "example": "Location d'exemple. Photographies illustratives."
+  },
+  "bothSides": {
+    "title": "Le loueur et le client regardent la même chose.",
+    "lead": "Jonas examine la réclamation sur son téléphone. Priya reçoit sur le sien les deux mêmes photographies, la même liste de prix et le même montant, avant tout prélèvement. Elle peut accepter, ou contester et joindre une personne.",
+    "photo": {
+      "handover": "Remise",
+      "return": "Retour"
+    },
+    "finding": {
+      "scratch": "Cadre rayé",
+      "scuff": "Éraflure du tube diagonal"
+    },
+    "shop": {
+      "caption": "Jonas, au comptoir",
+      "context": "Retour",
+      "item": "Vélo électrique 14",
+      "title": "{count, plural, one {# nouvelle marque trouvée} other {# nouvelles marques trouvées}}",
+      "newNote": "Nouveau depuis la remise",
+      "oldNote": "Déjà présente à la remise",
+      "approve": "Approuver la réclamation · {amount}",
+      "change": "Modifier ou écarter"
+    },
+    "renter": {
+      "caption": "Priya, la cliente",
+      "context": "Votre location",
+      "shopName": "Ribeira Bikes",
+      "title": "Le loueur demande {amount}",
+      "newNote": "D'après la liste de prix que vous avez acceptée",
+      "oldNote": "Présente avant vous. Non facturée.",
+      "ifAccept": "Si vous acceptez :",
+      "ifAcceptResult": "{taken} prélevés, {released} libérés",
+      "accept": "Accepter",
+      "disagree": "Je conteste"
+    },
+    "hold": {
+      "title": "Autorisation {number}",
+      "reserved": "Réservé",
+      "taken": "Prélevé",
+      "released": "Libéré"
+    }
+  },
+  "steps": {
+    "title": "Une location, quatre moments.",
+    "lead": "Le personnel et les clients utilisent le téléphone qu'ils ont déjà. Personne n'installe rien, et le loueur n'achète aucun matériel.",
+    "items": {
+      "reserve": {
+        "title": "Réserver",
+        "body": "Le client approuve une autorisation dans PayPal. L'argent est réservé sur son propre compte. Rien n'est débité.",
+        "state": "{amount} réservés"
+      },
+      "handOver": {
+        "title": "Remettre",
+        "body": "Le personnel prend des photographies guidées de l'article. Les marques déjà présentes sont notées et le client confirme l'état des lieux.",
+        "state": "{count} photographies"
+      },
+      "return": {
+        "title": "Rendre",
+        "body": "Les mêmes photographies à nouveau. Hold compare chacune à sa jumelle de la remise et entoure ce qui a changé.",
+        "state": "{count} paires comparées"
+      },
+      "settle": {
+        "title": "Régler",
+        "body": "Rien de nouveau : l'autorisation est libérée sur-le-champ. Un dommage : une personne approuve une réclamation détaillée, et seul ce montant est prélevé.",
+        "state": "{taken} prélevés · {released} libérés"
+      }
+    }
+  },
+  "audiences": {
+    "shops": {
+      "label": "Pour les loueurs",
+      "title": "Protégez chaque article sans débiter ceux qui le rapportent.",
+      "imageAlt": "Des vélos de location rangés sur des étagères dans une arrière-boutique",
+      "action": "Ouvrir la boutique de démo",
+      "points": {
+        "refund": "Aucun remboursement à émettre après un retour sans dommage, et aucun client qui demande où il en est.",
+        "photographs": "Des photographies datées de chaque article, avant et après chaque location.",
+        "oldMarks": "Les anciennes marques restent dans l'historique de l'article : personne ne paie la rayure d'un autre.",
+        "evidence": "Le dossier de preuves complet est déjà constitué si un débit est contesté."
+      }
+    },
+    "renters": {
+      "label": "Pour les clients",
+      "title": "Gardez votre argent pendant la location.",
+      "imageAlt": "La vue du cycliste par-dessus le guidon, sur un pont de bois entre les arbres",
+      "action": "Voir ce que voit le client",
+      "points": {
+        "notCharge": "Une autorisation n'est pas un débit. Rendez l'article tel qu'il est parti et aucun paiement n'a eu lieu.",
+        "prices": "Les prix des dommages sont publiés avant la location. Rien n'est inventé après coup.",
+        "see": "Vous voyez les photographies et la réclamation avant tout prélèvement.",
+        "reply": "Contester est aussi simple qu'accepter, et cela arrive à une personne."
+      }
+    }
+  },
+  "ai": {
+    "title": "L'IA compare. Une personne décide.",
+    "lead": "La facturation automatique des dommages a mis les clients en colère parce qu'il n'y avait personne à qui s'adresser. Hold est construit à l'inverse.",
+    "does": {
+      "title": "Ce que fait l'IA",
+      "items": {
+        "checks": "Vérifie chaque photographie à la prise de vue et en demande une autre si elle est floue ou sombre.",
+        "compares": "Compare la remise au retour et entoure ce qui a changé.",
+        "classifies": "Distingue l'usure normale du dommage, et dit à quel point elle en est sûre.",
+        "matches": "Associe le dommage à la liste de prix publiée par le loueur."
+      }
+    },
+    "never": {
+      "title": "Ce qu'elle ne fait jamais",
+      "items": {
+        "charge": "Décider de débiter quelqu'un. Une personne le fait.",
+        "price": "Fixer un prix. La liste publiée le fait.",
+        "doubt": "Cacher son doute. Quand elle ne sait pas, elle le dit et une personne regarde.",
+        "status": "Décider de l'état d'un paiement. Le registre de PayPal le fait."
+      }
+    }
+  },
+  "paypal": {
+    "title": "Réservé ne veut pas dire débité. PayPal le garantit.",
+    "lead": "Tout le produit repose sur la différence entre réserver de l'argent et le prélever, et sur la possibilité d'en prélever une partie et de libérer le reste.",
+    "caption": "Ce que chaque besoin de la location utilise dans PayPal",
+    "needHeading": "Besoin de la location",
+    "capabilityHeading": "Fonction PayPal",
+    "rows": {
+      "hold": {
+        "need": "La caution est réservée sans être débitée",
+        "capability": "Autorisation"
+      },
+      "release": {
+        "need": "Un retour sans dommage libère tout le montant",
+        "capability": "Libération de l'autorisation"
+      },
+      "capture": {
+        "need": "Le dommage est facturé pour ce seul montant",
+        "capability": "Capture partielle, le reste est libéré"
+      },
+      "renewal": {
+        "need": "Une longue location garde sa protection",
+        "capability": "Renouvellement, jusqu'à 29 jours"
+      },
+      "events": {
+        "need": "Hold connaît l'état réel de chaque paiement",
+        "capability": "Notifications de paiement en direct"
+      },
+      "fee": {
+        "need": "Le client paie le prix de la location",
+        "capability": "Checkout"
+      },
+      "refund": {
+        "need": "Une réclamation est corrigée après examen",
+        "capability": "Remboursement"
+      },
+      "dispute": {
+        "need": "Un client conteste un débit",
+        "capability": "Litiges, avec le dossier de preuves joint"
+      }
+    },
+    "note": "Cette version fonctionne dans l'environnement de test PayPal, avec de l'argent fictif."
+  },
+  "closing": {
+    "title": "Essayez un retour.",
+    "lead": "La boutique de démonstration propose trois locations d'exemple : un retour sans dommage, une rayure et une réclamation contestée. Chaque appel à PayPal est réel, dans l'environnement de test."
+  },
+  "footer": {
+    "tagline": "La caution qui ne quitte jamais votre compte.",
+    "product": "Produit",
+    "forYou": "Pour vous",
+    "about": "À propos de cette version",
+    "aboutBody": "Conçu pour le PayPal AI Hackathon 2026. Hold n'est pas un assureur et ne détient pas l'argent des clients. Les fonds restent sur le compte du client jusqu'à l'approbation d'une réclamation.",
+    "rights": "© {year} Hold",
+    "credits": "Photographies Unsplash de Florian, Nuno Alves et Krzysztof Kowalik. Les marques sur le cadre sont illustratives."
+  },
+  "pages": {
+    "howItWorks": {
+      "title": "Une location, quatre moments.",
+      "lead": "Le personnel et les clients utilisent le téléphone qu'ils ont déjà. Personne n'installe rien, et le loueur n'achète aucun matériel.",
+      "stepsHeading": "Les quatre moments",
+      "comparison": {
+        "title": "Ce que montre la comparaison.",
+        "lead": "Faites glisser entre les deux photographies. Une nouvelle marque est entourée et chiffrée d'après la liste publiée par le loueur. Une marque déjà présente est notée et n'est jamais facturée."
+      },
+      "contested": {
+        "title": "Si le client n'est pas d'accord.",
+        "lead": "Contester une réclamation est aussi simple que l'accepter.",
+        "items": {
+          "reply": {
+            "title": "Le client répond sur le même écran",
+            "body": "Il dit ce qu'il conteste et peut ajouter ses propres photographies."
+          },
+          "owner": {
+            "title": "Le propriétaire décide",
+            "body": "Hold présente les deux positions côte à côte. Une personne nommée prend la décision finale et peut réduire ou annuler le débit."
+          },
+          "record": {
+            "title": "Le dossier est déjà complet",
+            "body": "Si un litige est ensuite ouvert auprès de PayPal, les photographies, la liste de prix et chaque décision sont dans un seul dossier de preuves."
+          }
+        }
+      },
+      "figures": {
+        "reserved": "réservés sur le propre compte du client",
+        "photographs": "photographies à la remise, refaites au retour",
+        "seconds": "secondes pour une remise guidée au comptoir",
+        "charged": "débité quand l'article revient tel qu'il est parti"
+      },
+      "moments": {
+        "reserve": {
+          "who": "Le client, sur son propre téléphone",
+          "body": "Priya réserve un vélo électrique pour trois jours. Elle paie le prix de la location, lit la liste de prix des dommages et approuve une autorisation dans PayPal. L'argent est réservé sur son propre compte, et rien n'est débité.",
+          "points": {
+            "a": "Le prix de la location est payé. La caution est seulement réservée. La page distingue les deux en une phrase.",
+            "b": "Les prix des dommages sont affichés et acceptés avant toute approbation.",
+            "c": "L'autorisation est posée au retrait : elle couvre ainsi toute la location."
+          }
+        },
+        "handOver": {
+          "who": "Le personnel, au comptoir",
+          "body": "Jonas ouvre la location sur son téléphone et se laisse guider à travers six vues du vélo. Cela prend une quarantaine de secondes. Priya reçoit l'état des lieux sur son téléphone et le confirme.",
+          "points": {
+            "a": "Un contour montre comment cadrer chaque vue, l'une après l'autre.",
+            "b": "Une photographie floue ou sombre est repérée aussitôt et refaite.",
+            "c": "Les marques déjà présentes sur l'article sont notées : personne ne les paiera plus tard."
+          }
+        },
+        "return": {
+          "who": "Le personnel, au comptoir",
+          "body": "Jonas prend les six mêmes photographies. Hold aligne chacune sur sa jumelle de la remise et entoure ce qui a changé. Faites glisser entre les deux photographies pour le voir.",
+          "points": {
+            "a": "Le retour reprend la remise, vue par vue.",
+            "b": "Chaque différence reçoit l'une de trois réponses : aucun changement, usure normale ou dommage.",
+            "c": "Quand les photographies ne permettent pas de trancher, Hold le dit et une personne regarde l'article."
+          }
+        },
+        "settle": {
+          "who": "Une personne décide, puis PayPal",
+          "body": "Un retour sans dommage se termine au comptoir. Un dommage devient une réclamation détaillée qu'une personne approuve, et le client la voit avant tout prélèvement.",
+          "points": {
+            "a": "Rien de nouveau : une confirmation libère toute l'autorisation et prévient le client.",
+            "b": "Un dommage : le personnel ou le propriétaire peut accepter, réduire, retirer ou ajouter des lignes avant tout débit.",
+            "c": "Seul le montant approuvé est prélevé. Le reste est libéré aussitôt."
+          }
+        }
+      },
+      "reserveScreen": {
+        "caption": "Priya, avant de retirer le vélo",
+        "item": "Vélo électrique, {days} jours",
+        "fee": "Prix de la location",
+        "feeState": "Payé",
+        "hold": "Autorisation",
+        "holdState": "Réservé, non débité",
+        "promise": "Si le vélo revient tel qu'il est parti, l'autorisation est libérée dès que vous le rendez.",
+        "approve": "Approuver l'autorisation dans PayPal"
+      },
+      "holdCard": {
+        "note": "Posée quand Priya retire le vélo, sur son propre compte PayPal."
+      },
+      "captureScreen": {
+        "caption": "Jonas, à la remise",
+        "context": "Remise",
+        "progress": "{current} sur {total}",
+        "hint": "Nette et bien éclairée",
+        "shutter": "Prendre la photographie",
+        "views": {
+          "frameLeft": "Cadre, côté gauche",
+          "frameRight": "Cadre, côté droit",
+          "frontWheel": "Roue avant",
+          "rearWheel": "Roue arrière",
+          "display": "Écran",
+          "battery": "Batterie"
+        }
+      },
+      "report": {
+        "title": "État des lieux",
+        "noted": "{count, plural, one {# marque déjà présente, notée} other {# marques déjà présentes, notées}}",
+        "confirmed": "Confirmé par Priya · {time}"
+      },
+      "outcomes": {
+        "phone": "Sur le téléphone de Priya",
+        "clean": {
+          "title": "Rien de nouveau. Tout est libéré au comptoir.",
+          "message": "Votre vélo est bien rentré. L'autorisation de {amount} a été libérée. Rien n'a été débité."
+        },
+        "damage": {
+          "title": "Une nouvelle marque. Seul ce montant est prélevé.",
+          "message": "Cadre rayé, {taken}, d'après la liste de prix que vous avez acceptée. Les {released} restants ont été libérés."
+        }
+      },
+      "faq": {
+        "title": "Les questions du comptoir.",
+        "lead": "Des réponses courtes aux premières questions du personnel et des clients."
+      }
+    },
+    "forShops": {
+      "title": "Protégez chaque article sans débiter ceux qui le rapportent.",
+      "lead": "Beaucoup de clients renoncent dès qu'on parle de caution. Une autorisation protège l'article et laisse leur argent là où il est.",
+      "action": "Ouvrir la boutique de démo",
+      "benefitsHeading": "Ce qui change au comptoir.",
+      "change": {
+        "title": "Avant Hold, et avec Hold.",
+        "lead": "Les trois mêmes personnes, les mêmes locations.",
+        "caption": "Ce qui change pour chaque personne de la boutique",
+        "who": "Qui",
+        "before": "Avant Hold",
+        "after": "Avec Hold",
+        "rows": {
+          "owner": {
+            "who": "Le propriétaire",
+            "before": "Choisit entre effrayer les clients avec une caution et porter le risque sans elle.",
+            "after": "Protège chaque article sans débiter ceux qui le rendent intact."
+          },
+          "staff": {
+            "who": "Le personnel du comptoir",
+            "before": "Juge l'état à l'œil, sous pression, et encaisse la colère du client.",
+            "after": "Suit une courte routine guidée et montre une photographie."
+          },
+          "business": {
+            "who": "L'entreprise",
+            "before": "Perd les dommages qu'elle ne peut pas prouver et récolte de mauvais avis pour les autres.",
+            "after": "Récupère ce qui lui est dû, avec des preuves que les deux parties ont vues."
+          }
+        }
+      },
+      "types": {
+        "title": "Conçu pour des loueurs comme ceux-ci.",
+        "lead": "Des articles qui méritent d'être protégés, mais assez abordables pour être loués sans y penser. Le seul matériel est le téléphone que votre personnel a déjà.",
+        "items": {
+          "bikes": {
+            "title": "Vélos, vélos électriques et trottinettes",
+            "body": "Des visiteurs qui paient avec des cartes étrangères, et une flotte où un vélo électrique abîmé coûte une semaine de recettes."
+          },
+          "cameras": {
+            "title": "Appareils photo, objectifs et audio",
+            "body": "Des articles de valeur où une marque sur la lentille doit être datée."
+          },
+          "outdoor": {
+            "title": "Ski, surf, kayak et camping",
+            "body": "Du personnel saisonnier et une file d'attente au comptoir."
+          },
+          "events": {
+            "title": "Matériel de fête et d'événement",
+            "body": "Beaucoup d'articles par location, chacun avec sa liste de prix."
+          },
+          "tools": {
+            "title": "Outils et petit matériel",
+            "body": "L'usure normale doit être distinguée du dommage, de la même façon à chaque fois."
+          },
+          "family": {
+            "title": "Puériculture, instruments et tenues de soirée",
+            "body": "Des clients qui veulent savoir exactement ce qui pourrait leur être facturé."
+          }
+        }
+      },
+      "secondaryAction": "Voir le fonctionnement",
+      "benefitsLead": "Une autorisation remplace la caution. Les photographies remplacent la dispute.",
+      "today": {
+        "title": "Aujourd'hui",
+        "itemsOut": "Articles sortis",
+        "dueBack": "Retours prévus aujourd'hui",
+        "holds": "Autorisations en cours",
+        "claims": "Réclamations en attente de décision",
+        "attention": "À traiter",
+        "claim": "Autorisation {number} · une réclamation de {amount} attend une approbation",
+        "claimAction": "Examiner",
+        "expiring": "Autorisation {number} · jour {day} sur {max}",
+        "expiringAction": "Remplacer",
+        "caption": "Boutique d'exemple. Chiffres illustratifs."
+      },
+      "setup": {
+        "title": "Réglé une fois, avec des mots simples.",
+        "lead": "Vous écrivez les règles comme vous les diriez au comptoir. Hold en fait une liste que chaque client peut lire avant de louer.",
+        "items": {
+          "prices": {
+            "title": "La liste de prix des dommages",
+            "body": "Ce que coûte chaque type de dommage, de perte ou de retard. Une réclamation ne peut jamais la dépasser."
+          },
+          "wear": {
+            "title": "La politique d'usure",
+            "body": "Ce que vous considérez comme de l'usure normale. Hold l'applique de la même façon à chaque client."
+          },
+          "photos": {
+            "title": "Le plan de photos",
+            "body": "Les vues à prendre pour chaque type d'article. Hold propose un plan et vous l'ajustez."
+          },
+          "amounts": {
+            "title": "Des montants d'autorisation adaptés à l'article",
+            "body": "Un casque et un vélo électrique n'ont pas besoin de la même protection."
+          }
+        }
+      },
+      "passport": {
+        "title": "Chaque article garde son propre historique.",
+        "lead": "Chaque location ajoute un jeu de photographies datées. Chaque marque a une date de première apparition : personne ne paie la rayure d'un autre.",
+        "label": "Passeport de l'article",
+        "caption": "Article d'exemple. Photographies illustratives.",
+        "entries": {
+          "scuff": {
+            "title": "Éraflure du tube diagonal, première apparition",
+            "note": "Notée lors d'une remise. Jamais facturée depuis."
+          },
+          "handover": {
+            "title": "Remise, autorisation {number}",
+            "note": "{count} photographies. Rien de nouveau depuis le dernier retour."
+          },
+          "scratch": {
+            "title": "Cadre rayé, nouveau",
+            "note": "{amount} d'après la liste de prix. Approuvé par une personne."
+          }
+        },
+        "points": {
+          "old": "Un ancien dommage reste ancien, quel que soit le prochain client.",
+          "maintenance": "Vous voyez quels articles s'usent le plus vite et lesquels sont à réparer.",
+          "resale": "Un historique documenté soutient un meilleur prix de revente et une déclaration de sinistre plus solide."
+        }
+      },
+      "safeguards": {
+        "title": "Aucun débit sans une personne.",
+        "lead": "Ces contrôles font partie du produit. Ils ne dépendent de la mémoire de personne.",
+        "items": {
+          "approval": {
+            "title": "Aucun débit automatique",
+            "body": "Chaque débit sur une autorisation est approuvé par une personne nommée."
+          },
+          "second": {
+            "title": "Une seconde approbation pour les grosses réclamations",
+            "body": "Au-delà du montant que vous fixez, le propriétaire doit approuver."
+          },
+          "cap": {
+            "title": "Un plafond par conception",
+            "body": "Une réclamation ne peut pas dépasser la liste de prix publiée pour le dommage constaté."
+          },
+          "records": {
+            "title": "Des dossiers impossibles à remplacer",
+            "body": "Les photographies sont datées à la prise de vue et ne peuvent pas être remplacées ensuite."
+          }
+        }
+      }
+    },
+    "forRenters": {
+      "title": "Gardez votre argent pendant la location.",
+      "lead": "Une autorisation réserve la caution sur votre propre compte. Rendez l'article tel qu'il est parti et aucun paiement n'a eu lieu : rien à rembourser, rien à attendre et rien de perdu au change.",
+      "action": "Voir le fonctionnement",
+      "benefitsHeading": "Vous voyez ce que voit le loueur.",
+      "assurances": {
+        "title": "Ce sur quoi vous pouvez compter.",
+        "lead": "Cela vaut pour chaque client, quel qu'il soit.",
+        "items": {
+          "informed": {
+            "title": "Informé avant de payer",
+            "body": "Vous voyez qu'une autorisation sera posée, son montant, sa durée possible et le prix de chaque type de dommage."
+          },
+          "noSurprise": {
+            "title": "Aucun débit surprise",
+            "body": "Vous ne pouvez être débité que pour un dommage inscrit sur la liste publiée, visible sur les photographies et approuvé par une personne."
+          },
+          "reply": {
+            "title": "Un vrai droit de réponse",
+            "body": "Contester une réclamation est aussi simple que l'accepter, et cela arrive à un être humain."
+          },
+          "consistent": {
+            "title": "Les mêmes règles pour tous",
+            "body": "Une seule politique d'usure et une seule liste de prix s'appliquent à chaque client."
+          },
+          "privacy": {
+            "title": "Des photos d'objets, pas de personnes",
+            "body": "Les visages sont floutés. Les dossiers ne sont conservés que le temps nécessaire."
+          },
+          "notInsurer": {
+            "title": "Votre argent reste le vôtre",
+            "body": "Hold n'est pas un assureur et ne détient pas votre argent. Les fonds restent sur votre compte jusqu'à l'approbation d'une réclamation."
+          }
+        }
+      },
+      "benefitsLead": "Les deux mêmes photographies, la même liste de prix et le même montant, sur votre propre téléphone, avant tout prélèvement.",
+      "statement": {
+        "title": "Une caution quitte votre compte. Une autorisation, non.",
+        "lead": "La même location de trois jours, telle qu'elle apparaît sur votre compte.",
+        "later": "Des jours plus tard",
+        "out": "Sorti de votre compte pendant la location",
+        "deposit": {
+          "label": "Avec une caution",
+          "charged": "Caution débitée",
+          "returned": "Vélo rendu, remboursement demandé",
+          "refunded": "Le remboursement arrive",
+          "waiting": "En attente",
+          "foot": "Votre argent est parti pour tout le voyage. Avec une carte étrangère, vous pouvez perdre au change dans les deux sens."
+        },
+        "hold": {
+          "label": "Avec une autorisation",
+          "placed": "Autorisation posée",
+          "reserved": "{amount} réservés",
+          "released": "Vélo rendu, autorisation libérée",
+          "taken": "{amount} prélevés",
+          "foot": "Rien n'a quitté votre compte : rien à rembourser, rien à attendre."
+        }
+      },
+      "prices": {
+        "title": "Les prix sont publiés avant la location.",
+        "lead": "Vous lisez la liste de prix des dommages à la réservation et vous l'acceptez en approuvant l'autorisation. Rien n'est inventé après coup.",
+        "points": {
+          "cap": "Une réclamation ne peut jamais dépasser la liste.",
+          "wear": "L'usure normale n'est pas un dommage, et la politique d'usure est la même pour tous.",
+          "old": "Une marque présente avant vous figure dans l'historique de l'article. Elle ne vous est jamais facturée."
+        }
+      },
+      "faq": {
+        "title": "Avant d'approuver une autorisation.",
+        "lead": "Des réponses courtes aux premières questions des clients."
+      }
+    },
+    "ai": {
+      "title": "L'IA compare. Une personne décide.",
+      "lead": "La facturation automatique des dommages a mis les clients en colère parce qu'il n'y avait personne à qui s'adresser. Hold est construit à l'inverse : l'IA rassemble et compare, une personne décide, et le client voit tout.",
+      "listsHeading": "Ce que fait l'IA, et ce qu'elle ne fait jamais",
+      "limits": {
+        "title": "Honnête sur ses limites.",
+        "lead": "La lumière, la saleté et les reflets peuvent tromper n'importe quelle comparaison.",
+        "items": {
+          "confidence": {
+            "title": "Elle indique son degré de certitude",
+            "body": "Chaque constat dit à quel point la comparaison est sûre, dans des mots qu'un client peut lire."
+          },
+          "retake": {
+            "title": "Elle demande une nouvelle photo",
+            "body": "Une photographie floue ou sombre est repérée sur le téléphone, tant qu'il est encore facile de la refaire."
+          },
+          "defers": {
+            "title": "Elle s'en remet à une personne",
+            "body": "Quand elle ne peut pas distinguer l'usure du dommage, elle le dit et une personne regarde. La voie manuelle fonctionne toujours."
+          }
+        }
+      },
+      "pipeline": {
+        "title": "Sept étapes. Le modèle en a une.",
+        "lead": "La méthode fiable la moins coûteuse passe en premier. Tout ce qui ne doit pas être manqué est détecté par du code classique, et fonctionne encore quand le modèle est indisponible.",
+        "actors": {
+          "code": "Code classique",
+          "model": "Le modèle d'IA",
+          "person": "Une personne"
+        },
+        "steps": {
+          "quality": {
+            "title": "Vérifier la photographie",
+            "body": "Sur le téléphone, à la prise de vue. Une photo floue, sombre ou mal cadrée est refusée aussitôt."
+          },
+          "normalize": {
+            "title": "Uniformiser",
+            "body": "L'orientation, la taille et l'exposition sont corrigées."
+          },
+          "align": {
+            "title": "Aligner",
+            "body": "La photographie du retour est alignée sur sa jumelle de la remise."
+          },
+          "regions": {
+            "title": "Repérer ce qui a changé",
+            "body": "Les zones qui diffèrent sont marquées comme indices pour l'étape suivante."
+          },
+          "judge": {
+            "title": "Juger",
+            "body": "Le modèle regarde les deux photographies et un gros plan de chaque zone. Il répond aucun changement, usure ou dommage, et dit à quel point il en est sûr."
+          },
+          "price": {
+            "title": "Chiffrer",
+            "body": "Chaque constat est associé à la liste publiée par le loueur. Un montant ne vient jamais du modèle."
+          },
+          "decide": {
+            "title": "Décider",
+            "body": "Une personne nommée accepte, réduit, retire ou ajoute. Alors seulement, un débit devient possible."
+          }
+        }
+      },
+      "findings": {
+        "title": "Chaque différence reçoit une réponse claire.",
+        "lead": "Chacune indique son degré de certitude, dans des mots qu'un client peut lire.",
+        "caption": "Constats d'exemple. Photographies illustratives.",
+        "high": "Certitude élevée",
+        "low": "Certitude faible",
+        "items": {
+          "damage": {
+            "verdict": "Dommage",
+            "title": "Cadre rayé",
+            "body": "Absent à la remise. Associé à la liste de prix et transmis à une personne."
+          },
+          "wear": {
+            "verdict": "Usure normale",
+            "title": "Légère usure du pneu",
+            "body": "Couverte par la politique d'usure du loueur. Jamais facturée."
+          },
+          "same": {
+            "verdict": "Aucun changement",
+            "title": "Éraflure du tube diagonal",
+            "body": "Déjà présente à la remise. Elle reste dans l'historique de l'article et n'est jamais facturée."
+          },
+          "unsure": {
+            "verdict": "Indéterminé",
+            "title": "Reflet sur le frein",
+            "body": "La photographie ne permet pas de répondre. Une personne regarde l'article lui-même."
+          }
+        }
+      },
+      "accuracy": {
+        "title": "Mesuré, pas affirmé.",
+        "lead": "La comparaison est testée sur des paires de photographies dont la bonne réponse est connue : retours sans dommage, usure normale et vrais dommages, sous une bonne lumière comme sous une mauvaise.",
+        "items": {
+          "counts": {
+            "title": "Publié en nombres",
+            "body": "Chaque résultat est un nombre de paires sur les paires testées, jamais un simple pourcentage."
+          },
+          "renter": {
+            "title": "Le chiffre du client d'abord",
+            "body": "La fréquence à laquelle un retour sans dommage a été signalé à tort est le chiffre mis en avant."
+          },
+          "worse": {
+            "title": "Aucune dégradation silencieuse",
+            "body": "Une nouvelle version qui fait moins bien au test n'est pas mise en service."
+          }
+        },
+        "status": {
+          "title": "Le tableau de résultats n'est pas encore publié.",
+          "body": "Il paraîtra ici, avec chaque nombre, une fois le jeu d'évaluation exécuté."
+        }
+      },
+      "agents": {
+        "title": "Un agent n'agit que dans les limites écrites par une personne.",
+        "lead": "Un client ou un propriétaire peut laisser un agent d'IA agir pour lui. Chaque appel d'outil passe par une seule passerelle. Elle vérifie qui demande, pour quel loueur et dans quelle limite écrite, puis enregistre l'appel.",
+        "caption": "Ce que les outils d'un agent peuvent faire",
+        "tiers": {
+          "read": {
+            "name": "Lire",
+            "body": "Renvoie les dossiers que la personne peut voir."
+          },
+          "draft": {
+            "name": "Rédiger",
+            "body": "Écrit un texte qu'une personne envoie ou écarte."
+          },
+          "propose": {
+            "name": "Proposer",
+            "body": "Prépare une décision qu'une personne approuve."
+          },
+          "notify": {
+            "name": "Notifier",
+            "body": "Envoie un message fixe, comme le rappel d'un retour attendu."
+          },
+          "mandate": {
+            "name": "Agir sous mandat",
+            "body": "Agit dans des limites qu'une personne a écrites à l'avance, et peut être arrêté à tout moment."
+          },
+          "charge": {
+            "name": "Débiter",
+            "body": "Ce niveau n'existe pas. Aucun outil ne prend de montant, et aucun agent ne peut lancer un débit."
+          }
+        }
+      }
+    },
+    "paypal": {
+      "title": "Réservé ne veut pas dire débité. PayPal le garantit.",
+      "lead": "Tout le produit repose sur la différence entre réserver de l'argent et le prélever, et sur la possibilité d'en prélever une partie et de libérer le reste.",
+      "tableHeading": "Ce que chaque besoin de la location utilise",
+      "advantages": {
+        "title": "Pourquoi une autorisation PayPal plutôt qu'une empreinte de carte.",
+        "lead": "Trois différences comptent pour un loueur.",
+        "items": {
+          "days": {
+            "title": "Elle dure autant que les vraies locations",
+            "body": "Une autorisation PayPal peut rester ouverte jusqu'à 29 jours. Beaucoup d'empreintes de carte expirent en une semaine environ."
+          },
+          "wallet": {
+            "title": "Aucune carte à confier",
+            "body": "Un client qui paie depuis son compte PayPal ne confie pas sa carte à une boutique qu'il n'a jamais vue."
+          },
+          "truth": {
+            "title": "Le registre de PayPal fait foi",
+            "body": "Une autorisation n'est considérée comme posée, prélevée ou libérée qu'après confirmation de PayPal. Hold ne devine jamais l'état d'un paiement."
+          }
+        }
+      },
+      "lifecycle": {
+        "title": "La vie d'une autorisation.",
+        "lead": "Quatre appels à PayPal. Hold n'enregistre chaque étape qu'après confirmation de PayPal.",
+        "call": "Appel PayPal",
+        "steps": {
+          "order": {
+            "title": "La caution devient une commande à part",
+            "body": "Elle est distincte du prix de la location, et elle est créée pour réserver, pas pour débiter."
+          },
+          "authorize": {
+            "title": "Le client approuve, et l'autorisation est posée",
+            "body": "{amount} sont réservés sur le propre compte du client. Aucun paiement n'a eu lieu."
+          },
+          "renew": {
+            "title": "Un débit tardif reste garanti",
+            "body": "Si un débit intervient après les trois premiers jours, Hold renouvelle l'autorisation juste avant. PayPal lui donne un nouvel identifiant, et Hold le suit."
+          },
+          "capture": {
+            "title": "Seule la réclamation approuvée est prélevée",
+            "body": "{taken} sont prélevés en capture finale. PayPal libère les {released} restants."
+          },
+          "void": {
+            "title": "Toute l'autorisation est libérée",
+            "body": "Les {amount} sont libérés au comptoir. Aucun paiement n'a eu lieu."
+          }
+        },
+        "idempotency": "Chaque appel qui déplace de l'argent porte son propre identifiant de requête : une nouvelle tentative ne prélève jamais deux fois."
+      },
+      "table": {
+        "title": "Ce que chaque besoin de la location utilise.",
+        "lead": "Huit besoins et huit fonctions PayPal. Chacune remplit un rôle nécessaire."
+      },
+      "length": {
+        "caption": "Durée maximale d'une autorisation",
+        "paypal": "Une autorisation PayPal",
+        "card": "Beaucoup d'empreintes de carte",
+        "days": "{count} jours",
+        "about": "Environ {count} jours",
+        "rental": "Une location de trois semaines se termine ici"
+      },
+      "truth": {
+        "title": "Hold ne devine jamais l'état d'un paiement.",
+        "lead": "Une autorisation n'est considérée comme posée, prélevée ou libérée que lorsque PayPal le dit.",
+        "items": {
+          "verify": {
+            "title": "La notification est vérifiée",
+            "body": "Sa signature est contrôlée avant la lecture du moindre champ."
+          },
+          "read": {
+            "title": "Le paiement est relu",
+            "body": "Hold demande à PayPal le paiement lui-même et se fie à cette réponse, pas au message."
+          },
+          "log": {
+            "title": "Puis c'est consigné",
+            "body": "Une ligne permanente dans le journal des fonds, liée à l'événement PayPal qui l'a confirmée."
+          }
+        }
+      }
+    },
+    "demo": {
+      "title": "Essayez un retour.",
+      "lead": "La boutique de démonstration propose trois locations d'exemple. Chaque appel à PayPal est réel, dans l'environnement de test, avec de l'argent fictif.",
+      "status": {
+        "title": "La boutique de démonstration n'est pas encore ouverte.",
+        "body": "Elle ouvrira au déploiement de la première version. Les identifiants du propriétaire et du personnel de démonstration figureront ici."
+      },
+      "samples": {
+        "title": "Trois locations d'exemple.",
+        "lead": "Un appui charge un jeu de photographies d'exemple à la place de l'appareil photo. Le reste du parcours est réel.",
+        "items": {
+          "clean": {
+            "title": "Un retour sans dommage",
+            "body": "La comparaison ne trouve rien de nouveau et l'autorisation est libérée en quelques secondes.",
+            "result": "Libérée en totalité"
+          },
+          "scratch": {
+            "title": "Une rayure",
+            "body": "La nouvelle marque est entourée, associée à la liste de prix, approuvée par une personne et facturée en partie. Le reste est libéré.",
+            "result": "Prélevée en partie"
+          },
+          "contested": {
+            "title": "Une réclamation contestée",
+            "body": "Le client répond, le propriétaire examine les deux positions et ajuste le débit.",
+            "result": "Maintenue jusqu'à la décision du propriétaire"
+          }
+        }
+      },
+      "action": "Voir le fonctionnement",
+      "cast": {
+        "title": "Trois personnes, trois accès.",
+        "lead": "Les identifiants de chacune figureront ici à l'ouverture de la boutique de démonstration.",
+        "items": {
+          "owner": {
+            "title": "Tomás, le propriétaire",
+            "body": "Rédige la liste de prix et la politique d'usure, voit toute la boutique et tranche les réclamations contestées."
+          },
+          "staff": {
+            "title": "Jonas, au comptoir",
+            "body": "Mène la remise et le retour, et approuve une réclamation dans sa limite."
+          },
+          "renter": {
+            "title": "Priya, la cliente",
+            "body": "N'a pas de compte. Elle ouvre un lien, voit les photographies et la réclamation, puis accepte ou conteste."
+          }
+        }
+      },
+      "honest": {
+        "title": "Ce qui est réel, et ce qui est simulé.",
+        "lead": "Tout ce qui est simulé est signalé à l'écran et dans le dossier.",
+        "real": {
+          "title": "Réel",
+          "items": {
+            "paypal": "Chaque appel à PayPal, dans l'environnement de test.",
+            "comparison": "La comparaison de chaque paire de photographies.",
+            "approval": "Chaque approbation, enregistrée avec le nom de la personne."
+          }
+        },
+        "simulated": {
+          "title": "Simulé",
+          "items": {
+            "money": "L'argent. Les comptes de test ne contiennent que des fonds fictifs.",
+            "camera": "L'appareil photo. Un appui charge des photographies d'exemple à sa place.",
+            "people": "Les personnes. Tomás, Jonas et Priya sont des identifiants de démonstration."
+          }
+        }
+      }
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "Cette page n'existe pas.",
+      "body": "L'adresse est peut-être mal saisie, ou la page a été déplacée.",
+      "home": "Retour à la page d'accueil"
+    },
+    "generic": {
+      "title": "Une erreur s'est produite.",
+      "body": "La page n'a pas pu être affichée. Rien n'a été débité et rien n'a été modifié.",
+      "retry": "Réessayer"
+    }
+  },
+  "holdMeter": {
+    "summary": "{reserved} réservés, {taken} prélevés, {released} libérés",
+    "open": "{reserved} réservés, rien de prélevé"
+  },
+  "priceList": {
+    "title": "Liste de prix des dommages",
+    "items": {
+      "scratchedFrame": "Cadre rayé",
+      "missingCharger": "Chargeur manquant",
+      "bentWheel": "Roue voilée"
+    },
+    "wear": "L'usure normale, comme une légère usure des pneus ou de petites éraflures sur les pédales, n'est jamais facturée.",
+    "agreed": "Acceptée par le client avant l'approbation de l'autorisation.",
+    "example": "Liste de prix d'exemple."
+  },
+  "faq": {
+    "items": {
+      "charge": {
+        "q": "Une autorisation est-elle un débit ?",
+        "a": "Non. Une autorisation réserve le montant sur le propre compte PayPal du client. Rien n'est prélevé tant qu'une personne n'a pas approuvé une réclamation."
+      },
+      "length": {
+        "q": "Combien de temps peut durer une autorisation ?",
+        "a": "Jusqu'à 29 jours. Hold la maintient valide pendant la location et signale toute autorisation proche de son terme avant qu'elle n'expire."
+      },
+      "beyond": {
+        "q": "Et si le dommage coûte plus que l'autorisation ?",
+        "a": "L'autorisation est prélevée en totalité et le solde est facturé à part, avec les mêmes photographies jointes."
+      },
+      "app": {
+        "q": "Faut-il une application ou un compte ?",
+        "a": "Non. Le personnel ouvre Hold dans le navigateur du téléphone qu'il a déjà. Le client reçoit un lien."
+      },
+      "dark": {
+        "q": "Et si une photographie est trop sombre pour juger ?",
+        "a": "Hold la redemande tant que l'article est encore au comptoir. S'il ne peut toujours pas trancher, il le dit et une personne regarde l'article lui-même."
+      },
+      "wear": {
+        "q": "Qui décide de ce qui relève de l'usure normale ?",
+        "a": "Le loueur, une fois pour toutes, avec des mots simples. Hold applique cette politique de la même façon à chaque client."
+      },
+      "release": {
+        "q": "Quand l'autorisation est-elle libérée ?",
+        "a": "Dès que le personnel confirme un retour sans dommage, en général pendant que vous êtes encore au comptoir. Votre téléphone vous indique que rien n'a été débité."
+      },
+      "chargedFor": {
+        "q": "Que peut-on me facturer ?",
+        "a": "Uniquement un dommage inscrit sur la liste de prix publiée, visible sur les photographies et approuvé par une personne. Une réclamation ne peut jamais dépasser la liste."
+      },
+      "disagree": {
+        "q": "Et si je conteste une réclamation ?",
+        "a": "Vous le dites sur le même écran et pouvez ajouter vos propres photographies. Une personne nommée chez le loueur examine les deux positions et peut réduire ou annuler le débit."
+      },
+      "photographs": {
+        "q": "Que deviennent les photographies ?",
+        "a": "Elles montrent l'article, pas vous. Les visages sont floutés, et les dossiers ne sont conservés que le temps exigé par la politique du loueur et par la loi."
+      }
+    }
+  },
+  "auth": {
+    "passwordless": "Pas de mot de passe. Hold vous envoie par e-mail un code valable une seule fois.",
+    "sending": "Envoi…",
+    "fields": {
+      "name": "Votre nom",
+      "shopName": "Nom de la boutique",
+      "email": "E-mail professionnel"
+    },
+    "problems": {
+      "name": {
+        "missing": "Saisissez votre nom.",
+        "invalid": "Utilisez 100 caractères au plus."
+      },
+      "shopName": {
+        "missing": "Saisissez le nom de votre boutique.",
+        "invalid": "Utilisez 100 caractères au plus."
+      },
+      "email": {
+        "missing": "Saisissez votre adresse e-mail.",
+        "invalid": "Cela ne ressemble pas à une adresse e-mail. Vérifiez-la et réessayez."
+      }
+    },
+    "signIn": {
+      "title": "Connectez-vous à votre boutique.",
+      "lead": "Pour les propriétaires et le personnel du comptoir.",
+      "submit": "M'envoyer un code",
+      "switch": "Nouveau sur Hold ?",
+      "switchAction": "Créer un compte loueur",
+      "aside": {
+        "title": "Votre boutique, telle que vous l'avez laissée.",
+        "lead": "Les articles sortis, les autorisations en cours et les réclamations en attente d'une décision, sur le téléphone que vous avez déjà."
+      }
+    },
+    "signUp": {
+      "title": "Ouvrez votre boutique sur Hold.",
+      "lead": "Pour le propriétaire d'une boutique de location. Cela prend environ une minute, et le seul matériel est votre téléphone.",
+      "submit": "Créer mon compte loueur",
+      "switch": "Vous avez déjà un compte ?",
+      "switchAction": "Se connecter",
+      "aside": {
+        "title": "Trois étapes avant votre première location protégée.",
+        "steps": {
+          "email": {
+            "title": "Confirmez votre e-mail",
+            "body": "Hold vous envoie un code par e-mail. Aucun mot de passe à créer."
+          },
+          "paypal": {
+            "title": "Reliez le compte PayPal de votre boutique",
+            "body": "Les autorisations restent sur le compte de chaque client, et les réclamations approuvées sont versées sur le vôtre. Hold ne garde jamais l'argent."
+          },
+          "prices": {
+            "title": "Rédigez votre liste de prix",
+            "body": "Ce que coûte chaque type de dommage, en mots simples. Les clients la lisent avant de louer."
+          }
+        }
+      }
+    },
+    "notes": {
+      "title": "Vous n'êtes pas le propriétaire ?",
+      "staff": {
+        "title": "Personnel du comptoir",
+        "body": "Vous ne vous inscrivez pas. Le propriétaire de la boutique vous invite, et vous vous connectez avec cette adresse e-mail."
+      },
+      "renter": {
+        "title": "Vous louez quelque chose ?",
+        "body": "Vous n'avez pas besoin de compte. Ouvrez le lien que le loueur vous a envoyé.",
+        "action": "Voir ce qu'une autorisation signifie pour vous"
+      }
+    },
+    "notices": {
+      "busy": {
+        "title": "Trop de tentatives.",
+        "body": "Patientez quelques minutes, puis réessayez."
+      },
+      "unavailable": {
+        "title": "La connexion est injoignable.",
+        "body": "Rien n'a été envoyé. Réessayez dans un instant."
+      },
+      "no_passkey": {
+        "title": "Aucune clé d'accès pour cette adresse.",
+        "body": "Connectez-vous avec un code reçu par e-mail, puis ajoutez une clé d'accès sur la page sécurité de votre boutique."
+      },
+      "invitation_closed": {
+        "title": "Cette invitation n'est plus utilisable.",
+        "body": "Demandez à la boutique de vous en envoyer une nouvelle."
+      }
+    },
+    "code": {
+      "title": "Consultez vos e-mails.",
+      "lead": "Nous avons envoyé un code à {email}. Il est valable une seule fois, pendant dix minutes.",
+      "field": "Code reçu par e-mail",
+      "submit": "Continuer",
+      "checking": "Vérification…",
+      "resend": "Envoyer un nouveau code",
+      "sending": "Envoi…",
+      "startOver": "Utiliser une autre adresse",
+      "resent": {
+        "title": "Un nouveau code arrive.",
+        "body": "Utilisez le code de l'e-mail le plus récent."
+      },
+      "problems": {
+        "missing": "Saisissez le code reçu par e-mail.",
+        "invalid": "Le code est la suite de chiffres de l'e-mail. Vérifiez-le et réessayez.",
+        "wrong": "Ce code n'est pas le bon. Vérifiez-le et réessayez.",
+        "expired": "Ce code a expiré. Demandez-en un nouveau.",
+        "attempt_over": "Ce code n'est plus utilisable. Demandez-en un nouveau, ou recommencez.",
+        "second_factor": "Ce compte demande aussi un code d'une application d'authentification, que Hold n'accepte pas encore.",
+        "busy": "Trop de tentatives. Patientez quelques minutes, puis réessayez.",
+        "unavailable": "Hold n'a pas pu vérifier le code pour l'instant. Réessayez dans un instant.",
+        "no_passkey": "Aucune clé d'accès pour cette adresse. Utilisez le code reçu par e-mail.",
+        "invitation_closed": "Cette invitation n'est plus utilisable. Demandez-en une nouvelle à la boutique."
+      }
+    },
+    "passkey": {
+      "signIn": "Se connecter avec une clé d'accès",
+      "waiting": "En attente de votre appareil…",
+      "add": "Ajouter une clé d'accès sur cet appareil",
+      "added": "Clé d'accès ajoutée.",
+      "problems": {
+        "email": "Saisissez d'abord votre e-mail professionnel, puis utilisez votre clé d'accès.",
+        "unsupported": "Ce navigateur ne prend pas en charge les clés d'accès. Utilisez le code reçu par e-mail, ou un navigateur plus récent.",
+        "cancelled": "La clé d'accès n'a pas été utilisée. Réessayez quand vous êtes prêt.",
+        "unavailable": "Hold n'a pas pu joindre son service de connexion. Réessayez dans un instant.",
+        "wrong": "Cette clé d'accès n'est pas une clé que Hold connaît pour cette adresse.",
+        "expired": "Cela a pris trop de temps. Réessayez.",
+        "attempt_over": "Cela a pris trop de temps. Réessayez.",
+        "second_factor": "Ce compte demande un code que Hold n'accepte pas. Contactez le propriétaire de la boutique.",
+        "busy": "Trop de tentatives. Patientez quelques minutes, puis réessayez.",
+        "no_passkey": "Il n'y a pas encore de clé d'accès pour cette adresse. Connectez-vous avec le code reçu par e-mail, puis ajoutez-en une.",
+        "invitation_closed": "Cette invitation n'est plus utilisable.",
+        "missing": "Saisissez d'abord votre e-mail professionnel.",
+        "invalid": "Saisissez d'abord votre e-mail professionnel."
+      }
+    },
+    "invite": {
+      "title": "Rejoignez {shop} sur Hold.",
+      "lead": "Vous êtes invité en tant que {role}. Hold enverra un code à {email} pour confirmer que c'est bien vous.",
+      "submit": "M'envoyer un code",
+      "switch": "Vous travaillez déjà ici ?",
+      "switchAction": "Se connecter",
+      "aside": {
+        "title": "Travailler avec Hold, concrètement.",
+        "lead": "Des photos à la remise et au retour, une autorisation sur le compte PayPal du client lui-même, et une personne qui approuve chaque débit."
+      },
+      "closed": {
+        "title": "Cette invitation ne peut pas être utilisée.",
+        "lead": "Une invitation est valable une seule fois, pendant sept jours.",
+        "body": "Demandez au propriétaire de la boutique de vous en envoyer une nouvelle.",
+        "accepted": "Cette invitation a déjà été acceptée.",
+        "revoked": "La boutique a retiré cette invitation.",
+        "expired": "Cette invitation a expiré.",
+        "missing": "Il n'y a aucune invitation à cette adresse."
+      }
+    }
+  },
+  "shop": {
+    "label": "Votre boutique",
+    "signedInAs": "Connecté avec {email}.",
+    "otherShops": "Vos autres boutiques",
+    "switchShop": "Travailler dans cette boutique",
+    "signOut": "Se déconnecter",
+    "noShop": {
+      "title": "Pas encore de boutique.",
+      "body": "Ce compte n'a pas de boutique. Créez-en une sur la page d'inscription avec la même adresse, ou demandez au propriétaire d'une boutique de vous inviter."
+    },
+    "nav": {
+      "label": "Pages de la boutique",
+      "home": "Aperçu",
+      "security": "Sécurité",
+      "staff": "Équipe",
+      "prices": "Prix",
+      "paypal": "PayPal"
+    },
+    "setup": {
+      "title": "Préparez votre boutique",
+      "done": "Fait.",
+      "toDo": "À faire.",
+      "passkey": {
+        "title": "Ajoutez une clé d'accès",
+        "body": "Votre empreinte, votre visage ou votre code PIN sur cet appareil. Hold la demande avant que quiconque modifie les prix, l'équipe ou PayPal.",
+        "action": "Aller à la sécurité"
+      },
+      "prices": {
+        "title": "Rédigez votre liste de prix",
+        "body": "Ce que coûte chaque type de dommage, en mots simples. Les clients la lisent avant de louer.",
+        "action": "Aller aux prix"
+      },
+      "paypal": {
+        "title": "Reliez le compte PayPal de votre boutique",
+        "body": "Les autorisations restent sur le compte de chaque client, et les réclamations approuvées sont versées sur le vôtre.",
+        "action": "Aller à PayPal"
+      },
+      "staff": {
+        "title": "Invitez votre équipe",
+        "body": "Chaque personne se connecte avec sa propre adresse, avec le rôle et la limite d'approbation que vous lui donnez.",
+        "action": "Aller à l'équipe"
+      }
+    },
+    "passkeyGate": {
+      "title": "Confirmez que c'est bien vous.",
+      "confirmBody": "Pour modifier les prix, l'équipe ou PayPal, il faut votre clé d'accès, pas seulement un code reçu par e-mail.",
+      "addBody": "Pour modifier les prix, l'équipe ou PayPal, il faut une clé d'accès. Ajoutez-en d'abord une sur cet appareil.",
+      "confirm": "Confirmer avec ma clé d'accès",
+      "add": "Ajouter une clé d'accès"
+    },
+    "results": {
+      "signed_out": "Votre session est terminée. Reconnectez-vous.",
+      "no_shop": "Ce compte n'a pas de boutique.",
+      "role": "Votre rôle dans cette boutique ne le permet pas.",
+      "passkey_needed": "Confirmez d'abord avec votre clé d'accès.",
+      "invalid": "Un champ du formulaire manque ou est trop long. Vérifiez-le et réessayez.",
+      "unavailable": "Cela n'a pas fonctionné. Réessayez dans un instant.",
+      "role_not_invitable": "Vous ne pouvez pas inviter quelqu'un avec ce rôle.",
+      "currency_unset": "Publiez d'abord votre liste de prix, pour que les limites d'approbation aient une devise.",
+      "limit_invalid": "La limite d'approbation n'est pas un montant. Utilisez des chiffres, comme 150 ou 150,00.",
+      "email_failed": "L'e-mail d'invitation n'a pas pu être envoyé, donc rien n'a été conservé. Vérifiez l'adresse et réessayez.",
+      "not_open": "Cette invitation n'est plus ouverte.",
+      "currency_unknown": "Choisissez une devise dans la liste.",
+      "rows_mismatched": "Chaque prix a besoin d'une description, d'un type et d'un montant.",
+      "amount_invalid": "Le prix {row} n'est pas un montant. Utilisez des chiffres, comme 35 ou 35,50.",
+      "threshold_invalid": "Le seuil d'approbation n'est pas un montant. Utilisez des chiffres, comme 200 ou 200,00.",
+      "no_entries": "Ajoutez au moins un prix.",
+      "too_many_entries": "Une liste de prix peut contenir jusqu'à 60 prix.",
+      "description_missing": "Le prix {row} a besoin d'une description.",
+      "description_too_long": "La description du prix {row} est trop longue.",
+      "description_repeated": "Le prix {row} reprend une autre description. Rendez chacune différente.",
+      "amount_zero": "Le prix {row} est à zéro. Retirez-le ou donnez-lui un montant.",
+      "wrong_currency": "Le prix {row} est dans une autre devise.",
+      "wear_policy_missing": "Indiquez ce qui compte comme usure normale.",
+      "wear_policy_too_long": "La politique d'usure est trop longue.",
+      "currency_fixed": "La devise est fixée dès qu'une liste de prix est publiée.",
+      "paypal_refused": "PayPal n'a pas accepté ces identifiants. Vérifiez que vous avez copié les deux depuis la même app sandbox.",
+      "paypal_unavailable": "PayPal est injoignable. Rien n'a été conservé. Réessayez dans un instant."
+    },
+    "security": {
+      "title": "Sécurité",
+      "lead": "Une clé d'accès vous connecte avec votre empreinte, votre visage ou votre code PIN, sur un appareil que vous avez avec vous.",
+      "leadRequired": "Votre rôle vous permet de modifier les prix, l'équipe ou PayPal, donc Hold vous demande une clé d'accès avant : votre empreinte, votre visage ou votre code PIN sur un appareil que vous avez avec vous. Un code reçu par e-mail ne suffit pas.",
+      "unavailable": "Vos clés d'accès n'ont pas pu être affichées pour l'instant.",
+      "none": "Vous n'avez pas encore de clé d'accès.",
+      "unnamed": "Clé d'accès {number}",
+      "added": "Ajoutée le {date}",
+      "how": "Votre appareil garde la clé d'accès. Hold et son service de connexion n'en gardent que la partie publique, qui ne permet pas de vous connecter à elle seule."
+    },
+    "staff": {
+      "title": "Équipe",
+      "team": "Qui travaille ici",
+      "limit": "approuve les réclamations jusqu'à {amount}",
+      "roles": {
+        "owner": "Propriétaire",
+        "manager": "Responsable",
+        "counter_staff": "Personnel du comptoir",
+        "read_only": "Lecture seule"
+      },
+      "open": {
+        "title": "Invitations en attente",
+        "expires": "expire le {date}",
+        "withdraw": "Retirer",
+        "withdrawFor": "Retirer l'invitation de {email}",
+        "withdrawn": "Invitation retirée."
+      },
+      "invite": {
+        "title": "Inviter quelqu'un",
+        "lead": "La personne reçoit un e-mail avec un lien. Il est valable une seule fois, pendant sept jours, et seulement pour l'adresse que vous saisissez.",
+        "email": "Son e-mail professionnel",
+        "role": "Rôle",
+        "limit": "Plus grosse réclamation qu'elle peut approuver, en {currency}",
+        "limitNeedsCurrency": "Le personnel du comptoir pourra approuver des réclamations quand votre liste de prix aura fixé la devise de la boutique. D'ici là, il n'approuve rien.",
+        "submit": "Envoyer l'invitation",
+        "sending": "Envoi…",
+        "sent": "Invitation envoyée."
+      }
+    },
+    "prices": {
+      "title": "Prix",
+      "none": "Aucune liste de prix n'est encore publiée. Les clients la voient avant de louer, et chaque réclamation est calculée à partir d'elle.",
+      "current": "La version {version} est publiée depuis le {date}. Publier à nouveau crée une nouvelle version. Les locations déjà réservées gardent la version acceptée par leur client.",
+      "readOnly": "Seul le propriétaire ou un responsable peut publier les prix.",
+      "currency": "Devise",
+      "threshold": "Les réclamations au-dessus de ce montant vont au propriétaire ou à un responsable, en {currency}",
+      "thresholdHelp": "Facultatif. Laissez vide et c'est la limite de chaque membre de l'équipe qui décide.",
+      "entries": "Prix",
+      "description": "Prix {number} : à quoi il correspond",
+      "category": "Type",
+      "amount": "Montant, en {currency}",
+      "remove": "Retirer le prix {number}",
+      "add": "Ajouter un prix",
+      "wear": "Ce qui compte comme usure normale",
+      "wearHelp": "Les clients ne sont jamais débités pour cela. Dites-le en mots simples.",
+      "publish": "Publier cette liste de prix",
+      "publishing": "Publication…",
+      "publishHelp": "La devise est fixée dès la publication de la première liste de prix.",
+      "published": "Liste de prix publiée.",
+      "categories": {
+        "damage": "Dommage",
+        "loss": "Perte",
+        "lateness": "Retour en retard",
+        "cleaning": "Nettoyage"
+      }
+    },
+    "paypal": {
+      "title": "PayPal",
+      "lead": "Les autorisations sont placées sur le compte PayPal de chaque client, et les réclamations approuvées sont versées sur celui de votre boutique. Hold ne garde jamais l'argent.",
+      "notConnected": "Pas encore relié.",
+      "isConnected": "Relié depuis le {date}.",
+      "connectTitle": "Reliez une app sandbox PayPal",
+      "reconnectTitle": "Reliez une autre app sandbox",
+      "steps": {
+        "app": "Sur developer.paypal.com, ouvrez Apps & Credentials, choisissez Sandbox et ouvrez l'app du compte professionnel sandbox de votre boutique.",
+        "copy": "Copiez son client ID et son secret.",
+        "paste": "Collez-les tous les deux ci-dessous. Hold les vérifie auprès de PayPal avant de les conserver."
+      },
+      "clientId": "Client ID",
+      "clientSecret": "Secret",
+      "connect": "Vérifier et relier",
+      "checking": "Vérification auprès de PayPal…",
+      "connected": "Relié. PayPal a accepté les identifiants.",
+      "sandboxOnly": "Cette version ne relie que des comptes sandbox. Les identifiants sont conservés dans AWS Secrets Manager et ne sont plus jamais affichés.",
+      "ownerOnly": "Seul le propriétaire de la boutique peut relier PayPal."
+    }
+  },
+  "emails": {
+    "invitation": {
+      "subject": "Vous êtes invité à rejoindre {shop} sur Hold",
+      "body": "{inviter} vous invite à travailler chez {shop} avec Hold, en tant que {role}.\n\nOuvrez ce lien pour accepter. Il est valable une seule fois, pendant sept jours :\n{link}\n\nHold vous enverra un code pour confirmer que l'adresse est bien la vôtre. Si vous ne vous attendiez pas à ce message, vous pouvez l'ignorer."
+    }
+  }
+}

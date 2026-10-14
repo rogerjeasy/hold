@@ -1,0 +1,1314 @@
+{
+  "meta": {
+    "siteName": "Hold",
+    "tagline": "Die Kaution, die Ihr Konto nie verlässt.",
+    "home": {
+      "title": "Hold: die Kaution, die Ihr Konto nie verlässt",
+      "description": "Hold reserviert die Kaution einer Miete über PayPal und bucht nichts ab. Bei der Rückgabe werden die Fotos der Übergabe mit denen der Rückgabe verglichen, und ein Mensch genehmigt jede Abbuchung."
+    },
+    "howItWorks": {
+      "title": "So funktioniert Hold",
+      "description": "Eine Miete in vier Momenten: reservieren, übergeben, zurückgeben und abrechnen."
+    },
+    "forShops": {
+      "title": "Hold für Verleihe",
+      "description": "Schützen Sie jeden Artikel, ohne denen etwas abzubuchen, die ihn zurückbringen."
+    },
+    "forRenters": {
+      "title": "Hold für Mietende",
+      "description": "Behalten Sie Ihr Geld während der Miete und sehen Sie genau, was Ihnen berechnet werden könnte."
+    },
+    "ai": {
+      "title": "Was die KI in Hold tut",
+      "description": "Die KI vergleicht Fotos. Ein Mensch entscheidet über jede Abbuchung."
+    },
+    "paypal": {
+      "title": "Was PayPal in Hold tut",
+      "description": "Eine PayPal-Autorisierung reserviert die Kaution, ohne sie abzubuchen."
+    },
+    "demo": {
+      "title": "Der Hold-Demo-Verleih",
+      "description": "Drei Beispielmieten in der PayPal-Sandbox: eine saubere Rückgabe, ein Kratzer und eine angefochtene Forderung."
+    },
+    "signIn": {
+      "title": "Bei Hold anmelden",
+      "description": "Inhaberinnen, Inhaber und das Personal am Tresen melden sich mit einem Code per E-Mail an. Mietende brauchen kein Konto."
+    },
+    "signUp": {
+      "title": "Verleih-Konto anlegen",
+      "description": "Eröffnen Sie ein Hold-Konto für Ihren Verleih. Kein Passwort, keine Geräte."
+    },
+    "shop": {
+      "title": "Ihr Verleih"
+    },
+    "invite": {
+      "title": "Eine Einladung"
+    }
+  },
+  "nav": {
+    "main": "Hauptnavigation",
+    "home": "Hold, Startseite",
+    "howItWorks": "So funktioniert es",
+    "forShops": "Für Verleihe",
+    "forRenters": "Für Mietende",
+    "ai": "Die KI",
+    "paypal": "PayPal",
+    "demo": "Demo-Verleih öffnen",
+    "openMenu": "Menü öffnen",
+    "closeMenu": "Menü schließen",
+    "menuTitle": "Menü",
+    "skip": "Zum Inhalt springen",
+    "signIn": "Anmelden",
+    "yourShop": "Ihr Verleih"
+  },
+  "language": {
+    "label": "Sprache",
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch"
+  },
+  "theme": {
+    "toDark": "Zum dunklen Design wechseln",
+    "toLight": "Zum hellen Design wechseln"
+  },
+  "doors": {
+    "shops": {
+      "label": "Für Verleihe",
+      "action": "Demo-Verleih öffnen"
+    },
+    "renters": {
+      "label": "Für Mietende",
+      "action": "Die Sicht der Mietenden ansehen"
+    }
+  },
+  "hero": {
+    "title": "Ein Foto klärt es.",
+    "lead": "Hold reserviert die Kaution über PayPal und bucht nichts ab. Bei der Rückgabe vergleicht es jedes Foto mit dem von der Übergabe. Verleih und Mietende sehen dasselbe Ergebnis, und ein Mensch genehmigt jede Abbuchung."
+  },
+  "evidence": {
+    "handover": "Übergabe",
+    "return": "Rückgabe",
+    "slider": "Zwischen dem Foto der Übergabe und dem Foto der Rückgabe schieben",
+    "handoverAlt": "Ein blauer Fahrradrahmen, fotografiert bei der Übergabe",
+    "returnAlt": "Derselbe Fahrradrahmen, fotografiert bei der Rückgabe",
+    "outcome": "Ergebnis der Rückgabe",
+    "damage": "Zerkratzter Rahmen",
+    "clean": "Saubere Rückgabe",
+    "newTag": "Neu",
+    "findings": {
+      "new": {
+        "title": "Zerkratzter Rahmen, {amount}",
+        "note": "Neu seit der Übergabe. Preis aus der veröffentlichten Liste."
+      },
+      "none": {
+        "title": "Keine neuen Spuren",
+        "note": "Nichts zu berechnen. Die Reservierung wird am Tresen freigegeben."
+      },
+      "old": {
+        "title": "Schramme am Unterrohr, nicht berechnet",
+        "note": "War schon bei der Übergabe da."
+      }
+    },
+    "summary": "{reserved} reserviert · {taken} abgebucht · {released} freigegeben",
+    "example": "Beispielmiete. Fotos zur Veranschaulichung."
+  },
+  "bothSides": {
+    "title": "Verleih und Mietende sehen dasselbe.",
+    "lead": "Jonas prüft die Forderung auf seinem Telefon. Priya erhält auf ihrem dieselben zwei Fotos, dieselbe Preisliste und denselben Betrag, bevor irgendetwas abgebucht wird. Sie kann zustimmen oder widersprechen und einen Menschen erreichen.",
+    "photo": {
+      "handover": "Übergabe",
+      "return": "Rückgabe"
+    },
+    "finding": {
+      "scratch": "Zerkratzter Rahmen",
+      "scuff": "Schramme am Unterrohr"
+    },
+    "shop": {
+      "caption": "Jonas, am Tresen",
+      "context": "Rückgabe",
+      "item": "E-Bike 14",
+      "title": "{count, plural, one {# neue Spur gefunden} other {# neue Spuren gefunden}}",
+      "newNote": "Neu seit der Übergabe",
+      "oldNote": "War schon bei der Übergabe da",
+      "approve": "Forderung genehmigen · {amount}",
+      "change": "Ändern oder verwerfen"
+    },
+    "renter": {
+      "caption": "Priya, die Mieterin",
+      "context": "Ihre Miete",
+      "shopName": "Ribeira Bikes",
+      "title": "Der Verleih fordert {amount}",
+      "newNote": "Aus der Preisliste, der Sie zugestimmt haben",
+      "oldNote": "War schon vor Ihnen da. Nicht berechnet.",
+      "ifAccept": "Wenn Sie zustimmen:",
+      "ifAcceptResult": "{taken} abgebucht, {released} freigegeben",
+      "accept": "Zustimmen",
+      "disagree": "Ich widerspreche"
+    },
+    "hold": {
+      "title": "Reservierung {number}",
+      "reserved": "Reserviert",
+      "taken": "Abgebucht",
+      "released": "Freigegeben"
+    }
+  },
+  "steps": {
+    "title": "Eine Miete, vier Momente.",
+    "lead": "Personal und Mietende nutzen das Telefon, das sie ohnehin dabeihaben. Niemand installiert etwas, und der Verleih kauft keine Geräte.",
+    "items": {
+      "reserve": {
+        "title": "Reservieren",
+        "body": "Die mietende Person genehmigt eine Reservierung in PayPal. Das Geld wird auf ihrem eigenen Konto reserviert. Nichts wird abgebucht.",
+        "state": "{amount} reserviert"
+      },
+      "handOver": {
+        "title": "Übergeben",
+        "body": "Das Personal macht geführte Fotos des Artikels. Vorhandene Spuren werden vermerkt, und die mietende Person bestätigt das Protokoll.",
+        "state": "{count} Fotos"
+      },
+      "return": {
+        "title": "Zurückgeben",
+        "body": "Noch einmal dieselben Fotos. Hold vergleicht jedes mit seinem Gegenstück von der Übergabe und umrandet, was sich geändert hat.",
+        "state": "{count} Paare verglichen"
+      },
+      "settle": {
+        "title": "Abrechnen",
+        "body": "Nichts Neues: Die Reservierung wird sofort freigegeben. Ein Schaden: Ein Mensch genehmigt eine aufgeschlüsselte Forderung, und nur dieser Betrag wird abgebucht.",
+        "state": "{taken} abgebucht · {released} freigegeben"
+      }
+    }
+  },
+  "audiences": {
+    "shops": {
+      "label": "Für Verleihe",
+      "title": "Schützen Sie jeden Artikel, ohne denen etwas abzubuchen, die ihn zurückbringen.",
+      "imageAlt": "Mietfahrräder auf Regalen im Lagerraum eines Verleihs",
+      "action": "Demo-Verleih öffnen",
+      "points": {
+        "refund": "Keine Rückerstattung nach einer sauberen Rückgabe, und niemand fragt, wo sie bleibt.",
+        "photographs": "Datierte Fotos von jedem Artikel, vor und nach jeder Miete.",
+        "oldMarks": "Alte Spuren bleiben im Verlauf des Artikels, so zahlt niemand für den Kratzer eines anderen.",
+        "evidence": "Das vollständige Beweispaket liegt schon bereit, falls eine Abbuchung angefochten wird."
+      }
+    },
+    "renters": {
+      "label": "Für Mietende",
+      "title": "Behalten Sie Ihr Geld, während Sie mieten.",
+      "imageAlt": "Blick über den Lenker beim Fahren über eine Holzbrücke zwischen Bäumen",
+      "action": "Die Sicht der Mietenden ansehen",
+      "points": {
+        "notCharge": "Eine Reservierung ist keine Abbuchung. Geben Sie den Artikel so zurück, wie er war, und es gab nie eine Zahlung.",
+        "prices": "Die Preise für Schäden werden vor der Miete veröffentlicht. Nichts wird nachträglich erfunden.",
+        "see": "Sie sehen die Fotos und die Forderung, bevor irgendetwas abgebucht wird.",
+        "reply": "Widersprechen ist so einfach wie zustimmen, und es erreicht einen Menschen."
+      }
+    }
+  },
+  "ai": {
+    "title": "Die KI vergleicht. Ein Mensch entscheidet.",
+    "lead": "Automatische Schadensabbuchungen haben Mietkunden verärgert, weil niemand ansprechbar war. Hold ist umgekehrt gebaut.",
+    "does": {
+      "title": "Was die KI tut",
+      "items": {
+        "checks": "Prüft jedes Foto bei der Aufnahme und bittet um ein neues, wenn es unscharf oder dunkel ist.",
+        "compares": "Vergleicht Übergabe und Rückgabe und umrandet, was sich geändert hat.",
+        "classifies": "Unterscheidet normale Abnutzung von Schäden und sagt, wie sicher sie ist.",
+        "matches": "Ordnet den Schaden der veröffentlichten Preisliste des Verleihs zu."
+      }
+    },
+    "never": {
+      "title": "Was sie nie tut",
+      "items": {
+        "charge": "Entscheiden, jemandem etwas abzubuchen. Das tut ein Mensch.",
+        "price": "Einen Preis festlegen. Das tut die veröffentlichte Liste.",
+        "doubt": "Ihre Zweifel verbergen. Wenn sie es nicht erkennen kann, sagt sie es, und ein Mensch sieht nach.",
+        "status": "Über den Status einer Zahlung entscheiden. Das tut der Datensatz von PayPal."
+      }
+    }
+  },
+  "paypal": {
+    "title": "Reserviert heißt nicht abgebucht. PayPal macht das möglich.",
+    "lead": "Das ganze Produkt beruht auf dem Unterschied zwischen Geld reservieren und Geld abbuchen, und darauf, einen Teil abbuchen und den Rest freigeben zu können.",
+    "caption": "Was jeder Bedarf der Miete bei PayPal nutzt",
+    "needHeading": "Bedarf der Miete",
+    "capabilityHeading": "PayPal-Funktion",
+    "rows": {
+      "hold": {
+        "need": "Die Kaution wird reserviert, ohne abgebucht zu werden",
+        "capability": "Autorisierung"
+      },
+      "release": {
+        "need": "Eine saubere Rückgabe gibt den ganzen Betrag frei",
+        "capability": "Freigabe der Autorisierung"
+      },
+      "capture": {
+        "need": "Ein Schaden wird nur in seiner Höhe abgebucht",
+        "capability": "Teilabbuchung, der Rest wird freigegeben"
+      },
+      "renewal": {
+        "need": "Eine lange Miete bleibt geschützt",
+        "capability": "Verlängerung, bis zu 29 Tage"
+      },
+      "events": {
+        "need": "Hold kennt den wahren Stand jeder Zahlung",
+        "capability": "Zahlungs­benachrichtigungen in Echtzeit"
+      },
+      "fee": {
+        "need": "Die mietende Person zahlt den Mietpreis",
+        "capability": "Checkout"
+      },
+      "refund": {
+        "need": "Eine Forderung wird nach Prüfung korrigiert",
+        "capability": "Rückerstattung"
+      },
+      "dispute": {
+        "need": "Eine Abbuchung wird angefochten",
+        "capability": "Konfliktlösung, mit beigefügtem Beweispaket"
+      }
+    },
+    "note": "Diese Version läuft in der PayPal-Sandbox mit Testgeld."
+  },
+  "closing": {
+    "title": "Probieren Sie eine Rückgabe aus.",
+    "lead": "Der Demo-Verleih hat drei Beispielmieten: eine saubere Rückgabe, einen Kratzer und eine angefochtene Forderung. Jeder PayPal-Aufruf ist echt, in der Sandbox."
+  },
+  "footer": {
+    "tagline": "Die Kaution, die Ihr Konto nie verlässt.",
+    "product": "Produkt",
+    "forYou": "Für Sie",
+    "about": "Über diese Version",
+    "aboutBody": "Entwickelt für den PayPal AI Hackathon 2026. Hold ist kein Versicherer und verwahrt kein Kundengeld. Das Geld bleibt auf dem eigenen Konto der mietenden Person, bis eine Forderung genehmigt ist.",
+    "rights": "© {year} Hold",
+    "credits": "Fotos von Unsplash: Florian, Nuno Alves und Krzysztof Kowalik. Die Spuren am Rahmen dienen der Veranschaulichung."
+  },
+  "pages": {
+    "howItWorks": {
+      "title": "Eine Miete, vier Momente.",
+      "lead": "Personal und Mietende nutzen das Telefon, das sie ohnehin dabeihaben. Niemand installiert etwas, und der Verleih kauft keine Geräte.",
+      "stepsHeading": "Die vier Momente",
+      "comparison": {
+        "title": "Was der Vergleich zeigt.",
+        "lead": "Schieben Sie zwischen den beiden Fotos hin und her. Eine neue Spur wird umrandet und nach der veröffentlichten Liste des Verleihs bepreist. Eine Spur, die schon da war, wird vermerkt und nie berechnet."
+      },
+      "contested": {
+        "title": "Wenn die mietende Person widerspricht.",
+        "lead": "Einer Forderung zu widersprechen ist so einfach, wie ihr zuzustimmen.",
+        "items": {
+          "reply": {
+            "title": "Die Antwort erfolgt auf demselben Bildschirm",
+            "body": "Die mietende Person sagt, womit sie nicht einverstanden ist, und kann eigene Fotos hinzufügen."
+          },
+          "owner": {
+            "title": "Die Inhaberin oder der Inhaber entscheidet",
+            "body": "Hold stellt beide Positionen nebeneinander. Eine namentlich genannte Person trifft die endgültige Entscheidung und kann die Abbuchung senken oder streichen."
+          },
+          "record": {
+            "title": "Die Akte ist schon vollständig",
+            "body": "Wird später ein Konflikt bei PayPal gemeldet, liegen die Fotos, die Preisliste und jede Entscheidung in einem einzigen Beweispaket."
+          }
+        }
+      },
+      "figures": {
+        "reserved": "auf dem eigenen Konto der mietenden Person reserviert",
+        "photographs": "Fotos bei der Übergabe, wiederholt bei der Rückgabe",
+        "seconds": "Sekunden für eine geführte Übergabe am Tresen",
+        "charged": "abgebucht, wenn der Artikel so zurückkommt, wie er war"
+      },
+      "moments": {
+        "reserve": {
+          "who": "Die mietende Person, am eigenen Telefon",
+          "body": "Priya bucht ein E-Bike für drei Tage. Sie zahlt den Mietpreis, liest die Preisliste für Schäden und genehmigt eine Reservierung in PayPal. Das Geld wird auf ihrem eigenen Konto reserviert, und nichts wird abgebucht.",
+          "points": {
+            "a": "Der Mietpreis wird bezahlt. Die Kaution wird nur reserviert. Die Seite sagt in einem Satz, was was ist.",
+            "b": "Die Preise für Schäden werden gezeigt und akzeptiert, bevor irgendetwas genehmigt wird.",
+            "c": "Die Reservierung wird bei der Abholung gesetzt und ist so für die ganze Miete frisch."
+          }
+        },
+        "handOver": {
+          "who": "Das Personal, am Tresen",
+          "body": "Jonas öffnet die Miete auf seinem Telefon und wird durch sechs Ansichten des Fahrrads geführt. Das dauert etwa vierzig Sekunden. Priya erhält das Zustands­protokoll auf ihrem Telefon und bestätigt es.",
+          "points": {
+            "a": "Ein Umriss zeigt, wie jede Ansicht auszurichten ist, eine nach der anderen.",
+            "b": "Ein unscharfes oder dunkles Foto fällt sofort auf und wird neu gemacht.",
+            "c": "Spuren, die schon am Artikel sind, werden festgehalten, damit sie später niemandem berechnet werden."
+          }
+        },
+        "return": {
+          "who": "Das Personal, am Tresen",
+          "body": "Jonas macht dieselben sechs Fotos. Hold richtet jedes an seinem Gegenstück von der Übergabe aus und umrandet, was sich geändert hat. Schieben Sie zwischen den beiden Fotos hin und her, um es zu sehen.",
+          "points": {
+            "a": "Die Rückgabe wiederholt die Übergabe Foto für Foto.",
+            "b": "Jeder Unterschied bekommt eine von drei Antworten: keine Änderung, normale Abnutzung oder Schaden.",
+            "c": "Wenn die Fotos keine sichere Antwort erlauben, sagt Hold das, und ein Mensch sieht sich den Artikel an."
+          }
+        },
+        "settle": {
+          "who": "Ein Mensch entscheidet, dann PayPal",
+          "body": "Eine saubere Rückgabe endet am Tresen. Aus einem Schaden wird eine auf­geschlüsselte Forderung, die ein Mensch genehmigt, und die mietende Person sieht sie, bevor irgendetwas abgebucht wird.",
+          "points": {
+            "a": "Nichts Neues: Eine Bestätigung gibt die ganze Reservierung frei und informiert die mietende Person.",
+            "b": "Ein Schaden: Personal, Inhaberin oder Inhaber können Posten annehmen, senken, streichen oder ergänzen, bevor irgendetwas abgebucht wird.",
+            "c": "Nur der genehmigte Betrag wird abgebucht. Der Rest wird sofort freigegeben."
+          }
+        }
+      },
+      "reserveScreen": {
+        "caption": "Priya, bevor sie das Fahrrad abholt",
+        "item": "E-Bike, {days} Tage",
+        "fee": "Mietpreis",
+        "feeState": "Bezahlt",
+        "hold": "Reservierung",
+        "holdState": "Reserviert, nicht abgebucht",
+        "promise": "Kommt das Fahrrad so zurück, wie es war, wird die Reservierung bei der Rückgabe sofort freigegeben.",
+        "approve": "Reservierung in PayPal genehmigen"
+      },
+      "holdCard": {
+        "note": "Gesetzt, wenn Priya das Fahrrad abholt, auf ihrem eigenen PayPal-Konto."
+      },
+      "captureScreen": {
+        "caption": "Jonas, bei der Übergabe",
+        "context": "Übergabe",
+        "progress": "{current} von {total}",
+        "hint": "Scharf und gut beleuchtet",
+        "shutter": "Foto aufnehmen",
+        "views": {
+          "frameLeft": "Rahmen, linke Seite",
+          "frameRight": "Rahmen, rechte Seite",
+          "frontWheel": "Vorderrad",
+          "rearWheel": "Hinterrad",
+          "display": "Display",
+          "battery": "Akku"
+        }
+      },
+      "report": {
+        "title": "Zustands­protokoll",
+        "noted": "{count, plural, one {# vorhandene Spur vermerkt} other {# vorhandene Spuren vermerkt}}",
+        "confirmed": "Von Priya bestätigt · {time}"
+      },
+      "outcomes": {
+        "phone": "Auf Priyas Telefon",
+        "clean": {
+          "title": "Nichts Neues. Am Tresen freigegeben.",
+          "message": "Ihr Fahrrad ist gut zurück. Die Reservierung über {amount} wurde freigegeben. Nichts wurde abgebucht."
+        },
+        "damage": {
+          "title": "Eine neue Spur. Nur dafür wird abgebucht.",
+          "message": "Zerkratzter Rahmen, {taken}, aus der Preisliste, der Sie zugestimmt haben. Die übrigen {released} wurden freigegeben."
+        }
+      },
+      "faq": {
+        "title": "Am Tresen gefragt.",
+        "lead": "Kurze Antworten auf das, was Personal und Mietende zuerst fragen."
+      }
+    },
+    "forShops": {
+      "title": "Schützen Sie jeden Artikel, ohne denen etwas abzubuchen, die ihn zurückbringen.",
+      "lead": "Viele Kundinnen und Kunden gehen, sobald von einer Kaution die Rede ist. Eine Reservierung schützt den Artikel und lässt ihr Geld, wo es ist.",
+      "action": "Demo-Verleih öffnen",
+      "benefitsHeading": "Was sich am Tresen ändert.",
+      "change": {
+        "title": "Vor Hold, und mit Hold.",
+        "lead": "Dieselben drei Personen, dieselben Mieten.",
+        "caption": "Was sich für jede Person im Verleih ändert",
+        "who": "Wer",
+        "before": "Vor Hold",
+        "after": "Mit Hold",
+        "rows": {
+          "owner": {
+            "who": "Die Inhaberin oder der Inhaber",
+            "before": "Wählt zwischen einer Kaution, die Kundschaft abschreckt, und dem Risiko ohne sie.",
+            "after": "Schützt jeden Artikel, ohne denen etwas abzubuchen, die ihn unversehrt zurückgeben."
+          },
+          "staff": {
+            "who": "Das Personal am Tresen",
+            "before": "Beurteilt den Zustand unter Druck nach Augenmaß und bekommt den Ärger ab.",
+            "after": "Folgt einem kurzen, geführten Ablauf und zeigt auf ein Foto."
+          },
+          "business": {
+            "who": "Das Geschäft",
+            "before": "Verliert Schadenskosten, die es nicht belegen kann, und erntet schlechte Bewertungen für die übrigen.",
+            "after": "Bekommt, was ihm zusteht, mit Belegen, die beide Seiten gesehen haben."
+          }
+        }
+      },
+      "types": {
+        "title": "Gemacht für Verleihe wie diese.",
+        "lead": "Artikel, die Schutz verdienen, aber günstig genug sind, um sie spontan zu mieten. Das einzige Gerät ist das Telefon, das Ihr Personal schon dabeihat.",
+        "items": {
+          "bikes": {
+            "title": "Fahrräder, E-Bikes und Roller",
+            "body": "Gäste, die mit ausländischen Karten zahlen, und eine Flotte, in der ein beschädigtes E-Bike den Verdienst einer Woche kostet."
+          },
+          "cameras": {
+            "title": "Kameras, Objektive und Audio",
+            "body": "Wertvolle Artikel, bei denen eine Spur auf dem Glas ein Datum braucht."
+          },
+          "outdoor": {
+            "title": "Ski, Surf, Kajak und Camping",
+            "body": "Saisonkräfte und eine Schlange am Tresen."
+          },
+          "events": {
+            "title": "Party- und Eventausstattung",
+            "body": "Viele Artikel pro Miete, jeder mit eigener Preisliste."
+          },
+          "tools": {
+            "title": "Werkzeuge und Kleingeräte",
+            "body": "Normale Abnutzung muss von Schäden unterschieden werden, jedes Mal auf dieselbe Weise."
+          },
+          "family": {
+            "title": "Babyausstattung, Instrumente und Festkleidung",
+            "body": "Mietende, die genau wissen wollen, was ihnen berechnet werden könnte."
+          }
+        }
+      },
+      "secondaryAction": "So funktioniert es",
+      "benefitsLead": "Eine Reservierung ersetzt die Kaution. Die Fotos ersetzen den Streit.",
+      "today": {
+        "title": "Heute",
+        "itemsOut": "Artikel unterwegs",
+        "dueBack": "Rückgabe heute",
+        "holds": "Aktive Reservierungen",
+        "claims": "Forderungen zur Entscheidung",
+        "attention": "Braucht Aufmerksamkeit",
+        "claim": "Reservierung {number} · Forderung über {amount} wartet auf Genehmigung",
+        "claimAction": "Prüfen",
+        "expiring": "Reservierung {number} · Tag {day} von {max}",
+        "expiringAction": "Ersetzen",
+        "caption": "Beispiel­verleih. Zahlen zur Veranschau­lichung."
+      },
+      "setup": {
+        "title": "Einmal einrichten, in einfachen Worten.",
+        "lead": "Sie schreiben die Regeln so, wie Sie sie am Tresen sagen würden. Hold macht daraus eine Liste, die alle Mietenden vor der Miete lesen können.",
+        "items": {
+          "prices": {
+            "title": "Die Preisliste für Schäden",
+            "body": "Was jede Art von Schaden, Verlust oder Verspätung kostet. Eine Forderung kann nie darüber liegen."
+          },
+          "wear": {
+            "title": "Die Abnutzungs­regel",
+            "body": "Was für Sie als normale Abnutzung gilt. Hold wendet sie auf alle Kundinnen und Kunden gleich an."
+          },
+          "photos": {
+            "title": "Der Fotoplan",
+            "body": "Die Ansichten, die für jede Artikelart aufzunehmen sind. Hold schlägt einen Plan vor, und Sie passen ihn an."
+          },
+          "amounts": {
+            "title": "Beträge, die zum Artikel passen",
+            "body": "Ein Helm und ein E-Bike brauchen nicht denselben Schutz."
+          }
+        }
+      },
+      "passport": {
+        "title": "Jeder Artikel hat seinen eigenen Verlauf.",
+        "lead": "Jede Miete fügt einen datierten Satz Fotos hinzu. Jede Spur hat ein Datum, an dem sie zuerst gesehen wurde, so zahlt niemand für den Kratzer eines anderen.",
+        "label": "Artikelpass",
+        "caption": "Beispiel­artikel. Fotos zur Veranschau­lichung.",
+        "entries": {
+          "scuff": {
+            "title": "Schramme am Unterrohr, erstmals gesehen",
+            "note": "Bei einer Übergabe festgehalten. Seither nie berechnet."
+          },
+          "handover": {
+            "title": "Übergabe, Reservierung {number}",
+            "note": "{count} Fotos. Nichts Neues seit der letzten Rückgabe."
+          },
+          "scratch": {
+            "title": "Zerkratzter Rahmen, neu",
+            "note": "{amount} aus der Preisliste. Von einem Menschen genehmigt."
+          }
+        },
+        "points": {
+          "old": "Alte Schäden bleiben alt, wer auch immer den Artikel als Nächstes mietet.",
+          "maintenance": "Sie sehen, welche Artikel sich am schnellsten abnutzen und welche zur Reparatur müssen.",
+          "resale": "Ein dokumentierter Verlauf stützt einen besseren Preis beim Wiederverkauf und einen stärkeren Anspruch bei der Versicherung."
+        }
+      },
+      "safeguards": {
+        "title": "Keine Abbuchung ohne einen Menschen.",
+        "lead": "Diese Prüfungen sind ins Produkt eingebaut. Sie hängen nicht davon ab, dass jemand daran denkt.",
+        "items": {
+          "approval": {
+            "title": "Keine automatischen Abbuchungen",
+            "body": "Jede Abbuchung von einer Reservierung wird von einer namentlich genannten Person genehmigt."
+          },
+          "second": {
+            "title": "Eine zweite Genehmigung für große Forderungen",
+            "body": "Über einem Betrag, den Sie festlegen, muss die Inhaberin oder der Inhaber zustimmen."
+          },
+          "cap": {
+            "title": "Eine eingebaute Obergrenze",
+            "body": "Eine Forderung kann die veröffent­lichte Preisliste für den gefundenen Schaden nicht übersteigen."
+          },
+          "records": {
+            "title": "Aufzeichnungen, die niemand austauschen kann",
+            "body": "Fotos werden bei der Aufnahme datiert und lassen sich danach nicht ersetzen."
+          }
+        }
+      }
+    },
+    "forRenters": {
+      "title": "Behalten Sie Ihr Geld, während Sie mieten.",
+      "lead": "Eine Reservierung hält die Kaution auf Ihrem eigenen Konto fest. Geben Sie den Artikel so zurück, wie er war, und es gab nie eine Zahlung: nichts zu erstatten, nichts abzuwarten und kein Verlust beim Währungstausch.",
+      "action": "So funktioniert es",
+      "benefitsHeading": "Sie sehen, was der Verleih sieht.",
+      "assurances": {
+        "title": "Worauf Sie sich verlassen können.",
+        "lead": "Das gilt für alle Mietenden, wer immer sie sind.",
+        "items": {
+          "informed": {
+            "title": "Informiert, bevor Sie zahlen",
+            "body": "Sie sehen, dass eine Reservierung erfolgt, wie hoch sie ist, wie lange sie dauern kann und was jede Art von Schaden kostet."
+          },
+          "noSurprise": {
+            "title": "Keine überraschenden Abbuchungen",
+            "body": "Ihnen kann nur ein Schaden berechnet werden, der auf der veröffentlichten Liste steht, auf den Fotos zu sehen ist und von einem Menschen genehmigt wurde."
+          },
+          "reply": {
+            "title": "Ein echtes Recht auf Antwort",
+            "body": "Einer Forderung zu widersprechen ist so einfach, wie ihr zuzustimmen, und es erreicht einen Menschen."
+          },
+          "consistent": {
+            "title": "Dieselben Regeln für alle",
+            "body": "Eine Abnutzungsregel und eine Preisliste gelten für alle Mietenden."
+          },
+          "privacy": {
+            "title": "Fotos von Gegenständen, nicht von Menschen",
+            "body": "Gesichter werden unkenntlich gemacht. Aufzeichnungen bleiben nur so lange wie nötig."
+          },
+          "notInsurer": {
+            "title": "Ihr Geld bleibt Ihres",
+            "body": "Hold ist kein Versicherer und verwahrt Ihr Geld nicht. Es bleibt auf Ihrem eigenen Konto, bis eine Forderung genehmigt ist."
+          }
+        }
+      },
+      "benefitsLead": "Dieselben zwei Fotos, dieselbe Preisliste und derselbe Betrag, auf Ihrem eigenen Telefon, bevor irgendetwas abgebucht wird.",
+      "statement": {
+        "title": "Eine Kaution verlässt Ihr Konto. Eine Reservierung nicht.",
+        "lead": "Dieselbe Miete über drei Tage, wie sie auf Ihrem Konto erscheint.",
+        "later": "Tage später",
+        "out": "Fehlt während der Miete auf Ihrem Konto",
+        "deposit": {
+          "label": "Mit Kaution",
+          "charged": "Kaution abgebucht",
+          "returned": "Fahrrad zurück, Rückerstattung beantragt",
+          "refunded": "Rückerstattung trifft ein",
+          "waiting": "Warten",
+          "foot": "Ihr Geld ist für die ganze Reise weg. Mit einer ausländischen Karte können Sie beim Wechselkurs in beide Richtungen verlieren."
+        },
+        "hold": {
+          "label": "Mit Reservierung",
+          "placed": "Reservierung gesetzt",
+          "reserved": "{amount} reserviert",
+          "released": "Fahrrad zurück, Reservierung freigegeben",
+          "taken": "{amount} abgebucht",
+          "foot": "Nichts hat Ihr Konto verlassen. Es gibt also nichts zu erstatten und nichts abzuwarten."
+        }
+      },
+      "prices": {
+        "title": "Die Preise werden vor der Miete veröffent­licht.",
+        "lead": "Sie lesen die Preisliste für Schäden bei der Buchung und stimmen ihr zu, wenn Sie die Reservierung genehmigen. Nichts wird nachträglich erfunden.",
+        "points": {
+          "cap": "Eine Forderung kann nie höher sein als die Liste.",
+          "wear": "Normale Abnutzung ist kein Schaden, und die Abnutzungs­regel ist für alle gleich.",
+          "old": "Eine Spur, die schon vor Ihnen da war, steht im Verlauf des Artikels. Sie wird Ihnen nie berechnet."
+        }
+      },
+      "faq": {
+        "title": "Bevor Sie eine Reservierung genehmigen.",
+        "lead": "Kurze Antworten auf das, was Mietende zuerst fragen."
+      }
+    },
+    "ai": {
+      "title": "Die KI vergleicht. Ein Mensch entscheidet.",
+      "lead": "Automatische Schadensabbuchungen haben Mietkunden verärgert, weil niemand ansprechbar war. Hold ist umgekehrt gebaut: Die KI sammelt und vergleicht, ein Mensch entscheidet, und die mietende Person sieht alles.",
+      "listsHeading": "Was die KI tut und was sie nie tut",
+      "limits": {
+        "title": "Ehrlich über ihre Grenzen.",
+        "lead": "Licht, Schmutz und Spiegelungen können jeden Vergleich täuschen.",
+        "items": {
+          "confidence": {
+            "title": "Sie nennt ihre Sicherheit",
+            "body": "Jeder Befund sagt, wie sicher der Vergleich ist, in Worten, die Mietende lesen können."
+          },
+          "retake": {
+            "title": "Sie bittet um ein neues Foto",
+            "body": "Ein unscharfes oder dunkles Foto fällt schon am Telefon auf, solange es sich noch leicht wiederholen lässt."
+          },
+          "defers": {
+            "title": "Sie überlässt es einem Menschen",
+            "body": "Wenn sie Abnutzung nicht von Schaden unterscheiden kann, sagt sie es, und ein Mensch sieht nach. Der manuelle Weg funktioniert immer."
+          }
+        }
+      },
+      "pipeline": {
+        "title": "Sieben Schritte. Das Modell bekommt einen.",
+        "lead": "Die günstigste zuverlässige Methode kommt zuerst. Was nicht übersehen werden darf, findet einfacher Code, und das funktioniert auch, wenn das Modell ausfällt.",
+        "actors": {
+          "code": "Einfacher Code",
+          "model": "Das KI-Modell",
+          "person": "Ein Mensch"
+        },
+        "steps": {
+          "quality": {
+            "title": "Foto prüfen",
+            "body": "Am Telefon, bei der Aufnahme. Ein unscharfes, dunkles oder schlecht ausgerichtetes Foto wird sofort abgelehnt."
+          },
+          "normalize": {
+            "title": "Angleichen",
+            "body": "Drehung, Größe und Belichtung werden korrigiert."
+          },
+          "align": {
+            "title": "Ausrichten",
+            "body": "Das Foto der Rückgabe wird an seinem Gegenstück von der Übergabe ausgerichtet."
+          },
+          "regions": {
+            "title": "Änderungen finden",
+            "body": "Bereiche, die abweichen, werden als Hinweise für den nächsten Schritt markiert."
+          },
+          "judge": {
+            "title": "Beurteilen",
+            "body": "Das Modell sieht sich beide Fotos und einen engen Ausschnitt jedes Bereichs an. Es antwortet mit keine Änderung, Abnutzung oder Schaden und sagt, wie sicher es ist."
+          },
+          "price": {
+            "title": "Bepreisen",
+            "body": "Jeder Befund wird der veröffent­lichten Liste des Verleihs zugeordnet. Ein Betrag kommt nie vom Modell."
+          },
+          "decide": {
+            "title": "Entscheiden",
+            "body": "Eine namentlich genannte Person nimmt an, senkt, streicht oder ergänzt. Erst dann kann etwas abgebucht werden."
+          }
+        }
+      },
+      "findings": {
+        "title": "Jeder Unterschied bekommt eine klare Antwort.",
+        "lead": "Jede nennt ihre Sicherheit, in Worten, die Mietende lesen können.",
+        "caption": "Beispiel­befunde. Fotos zur Veranschau­lichung.",
+        "high": "Hohe Sicherheit",
+        "low": "Geringe Sicherheit",
+        "items": {
+          "damage": {
+            "verdict": "Schaden",
+            "title": "Zerkratzter Rahmen",
+            "body": "War bei der Übergabe nicht da. Der Preisliste zugeordnet und an einen Menschen weitergegeben."
+          },
+          "wear": {
+            "verdict": "Normale Abnutzung",
+            "title": "Leicht abgefahrener Reifen",
+            "body": "Von der Abnutzungs­regel des Verleihs gedeckt. Nie berechnet."
+          },
+          "same": {
+            "verdict": "Keine Änderung",
+            "title": "Schramme am Unterrohr",
+            "body": "War schon bei der Übergabe da. Sie bleibt im Verlauf des Artikels und wird nie berechnet."
+          },
+          "unsure": {
+            "verdict": "Nicht erkennbar",
+            "title": "Spiegelung an der Bremse",
+            "body": "Das Foto erlaubt keine Antwort. Ein Mensch sieht sich den Artikel selbst an."
+          }
+        }
+      },
+      "accuracy": {
+        "title": "Gemessen, nicht behauptet.",
+        "lead": "Der Vergleich wird an Fotopaaren getestet, deren richtige Antwort bekannt ist: saubere Rückgaben, normale Abnutzung und echte Schäden, bei gutem und bei schlechtem Licht.",
+        "items": {
+          "counts": {
+            "title": "Als Anzahl veröffent­licht",
+            "body": "Jedes Ergebnis ist eine Anzahl von Paaren aus den getesteten Paaren, nie ein bloßer Prozentwert."
+          },
+          "renter": {
+            "title": "Die Zahl für Mietende kommt zuerst",
+            "body": "Wie oft eine saubere Rückgabe fälschlich beanstandet wurde, ist die wichtigste Zahl."
+          },
+          "worse": {
+            "title": "Er wird nicht unbemerkt schlechter",
+            "body": "Eine neue Version, die im Test schlechter abschneidet, wird nicht ausgeliefert."
+          }
+        },
+        "status": {
+          "title": "Die Auswertung ist noch nicht veröffent­licht.",
+          "body": "Sie erscheint hier mit allen Zahlen, sobald der Testsatz durchgelaufen ist."
+        }
+      },
+      "agents": {
+        "title": "Ein Agent handelt nur in Grenzen, die ein Mensch geschrieben hat.",
+        "lead": "Mietende und Inhaberinnen oder Inhaber können einen KI-Agenten für sich handeln lassen. Jeder Tool-Aufruf läuft durch ein einziges Gateway. Es prüft, wer fragt, für welchen Verleih und unter welcher schriftlichen Grenze, und hält den Aufruf dann fest.",
+        "caption": "Was die Tools eines Agenten dürfen",
+        "tiers": {
+          "read": {
+            "name": "Lesen",
+            "body": "Liefert Aufzeichnungen, die die Person sehen darf."
+          },
+          "draft": {
+            "name": "Entwerfen",
+            "body": "Schreibt Text, den ein Mensch sendet oder verwirft."
+          },
+          "propose": {
+            "name": "Vorschlagen",
+            "body": "Bereitet eine Entscheidung vor, die ein Mensch genehmigt."
+          },
+          "notify": {
+            "name": "Benach­richtigen",
+            "body": "Sendet eine feste Nachricht, etwa die Erinnerung an eine fällige Rückgabe."
+          },
+          "mandate": {
+            "name": "Unter Mandat handeln",
+            "body": "Handelt in Grenzen, die ein Mensch vorab geschrieben hat, und lässt sich jederzeit stoppen."
+          },
+          "charge": {
+            "name": "Abbuchen",
+            "body": "Diese Stufe gibt es nicht. Kein Tool nimmt einen Betrag an, und kein Agent kann eine Abbuchung auslösen."
+          }
+        }
+      }
+    },
+    "paypal": {
+      "title": "Reserviert heißt nicht abgebucht. PayPal macht das möglich.",
+      "lead": "Das ganze Produkt beruht auf dem Unterschied zwischen Geld reservieren und Geld abbuchen, und darauf, einen Teil abbuchen und den Rest freigeben zu können.",
+      "tableHeading": "Was jeder Bedarf der Miete nutzt",
+      "advantages": {
+        "title": "Warum eine PayPal-Reservierung statt einer Karten­reservierung.",
+        "lead": "Drei Unterschiede zählen für einen Verleih.",
+        "items": {
+          "days": {
+            "title": "Sie hält so lange wie echte Mieten",
+            "body": "Eine PayPal-Reservierung kann bis zu 29 Tage offen bleiben. Viele Kartenreservierungen verfallen nach etwa einer Woche."
+          },
+          "wallet": {
+            "title": "Keine Karte aus der Hand geben",
+            "body": "Wer aus dem PayPal-Konto zahlt, gibt seine Karte keinem Verleih, den er noch nie besucht hat."
+          },
+          "truth": {
+            "title": "Der Datensatz von PayPal gilt",
+            "body": "Eine Reservierung gilt erst als gesetzt, abgebucht oder freigegeben, wenn PayPal es bestätigt. Hold rät nie den Status einer Zahlung."
+          }
+        }
+      },
+      "lifecycle": {
+        "title": "Das Leben einer Reservierung.",
+        "lead": "Vier Aufrufe bei PayPal. Hold vermerkt jeden Schritt erst, wenn PayPal ihn bestätigt.",
+        "call": "PayPal-Aufruf",
+        "steps": {
+          "order": {
+            "title": "Die Kaution wird eine eigene Bestellung",
+            "body": "Sie ist vom Mietpreis getrennt und wird angelegt, um zu reservieren, nicht um abzubuchen."
+          },
+          "authorize": {
+            "title": "Die mietende Person genehmigt, und die Reservierung wird gesetzt",
+            "body": "{amount} werden auf dem eigenen Konto der mietenden Person reserviert. Es gab keine Zahlung."
+          },
+          "renew": {
+            "title": "Auch eine späte Belastung ist abgesichert",
+            "body": "Kommt eine Belastung nach den ersten drei Tagen, verlängert Hold die Reservierung unmittelbar davor. PayPal gibt ihr eine neue Kennung, und Hold folgt ihr."
+          },
+          "capture": {
+            "title": "Nur die genehmigte Forderung wird abgebucht",
+            "body": "{taken} werden abschließend abgebucht. PayPal gibt die übrigen {released} frei."
+          },
+          "void": {
+            "title": "Die ganze Reservierung wird freigegeben",
+            "body": "Die vollen {amount} werden am Tresen frei. Es gab nie eine Zahlung."
+          }
+        },
+        "idempotency": "Jeder Aufruf, der Geld bewegt, trägt eine eigene Anfragekennung, so bucht eine Wiederholung nie doppelt ab."
+      },
+      "table": {
+        "title": "Was jeder Bedarf der Miete nutzt.",
+        "lead": "Acht Bedarfe und acht PayPal-Funktionen. Jede erfüllt eine notwendige Aufgabe."
+      },
+      "length": {
+        "caption": "Wie lange eine Reservierung offen bleiben kann",
+        "paypal": "Eine PayPal-Reservierung",
+        "card": "Viele Karten­reservierungen",
+        "days": "{count} Tage",
+        "about": "Etwa {count} Tage",
+        "rental": "Eine dreiwöchige Miete endet hier"
+      },
+      "truth": {
+        "title": "Hold rät nie den Status einer Zahlung.",
+        "lead": "Eine Reservierung gilt erst als gesetzt, abgebucht oder freigegeben, wenn PayPal es sagt.",
+        "items": {
+          "verify": {
+            "title": "Die Benach­richtigung wird geprüft",
+            "body": "Ihre Signatur wird geprüft, bevor ein einziges Feld gelesen wird."
+          },
+          "read": {
+            "title": "Die Zahlung wird direkt abgefragt",
+            "body": "Hold fragt bei PayPal die Zahlung selbst ab und vertraut dieser Antwort, nicht der Nachricht."
+          },
+          "log": {
+            "title": "Dann wird es festgehalten",
+            "body": "Eine dauerhafte Zeile im Geldprotokoll, verknüpft mit dem PayPal-Ereignis, das sie bestätigt hat."
+          }
+        }
+      }
+    },
+    "demo": {
+      "title": "Probieren Sie eine Rückgabe aus.",
+      "lead": "Der Demo-Verleih hat drei Beispielmieten. Jeder PayPal-Aufruf ist echt, in der Sandbox und mit Testgeld.",
+      "status": {
+        "title": "Der Demo-Verleih ist noch nicht geöffnet.",
+        "body": "Er öffnet, sobald die erste Version bereitgestellt ist. Die Zugangsdaten für die Demo-Inhaberin und das Demo-Personal stehen dann hier."
+      },
+      "samples": {
+        "title": "Drei Beispiel­mieten.",
+        "lead": "Ein Tippen lädt einen Satz Beispielfotos anstelle der Kamera. Der Rest des Ablaufs ist echt.",
+        "items": {
+          "clean": {
+            "title": "Eine saubere Rückgabe",
+            "body": "Der Vergleich findet nichts Neues, und die Reservierung wird in Sekunden freigegeben.",
+            "result": "Ganz freigegeben"
+          },
+          "scratch": {
+            "title": "Ein Kratzer",
+            "body": "Die neue Spur wird umrandet, der Preisliste zugeordnet, von einem Menschen genehmigt und zum Teil abgebucht. Der Rest wird freigegeben.",
+            "result": "Zum Teil abgebucht"
+          },
+          "contested": {
+            "title": "Eine angefochtene Forderung",
+            "body": "Die mietende Person antwortet, die Inhaberin oder der Inhaber prüft beide Seiten und passt die Abbuchung an.",
+            "result": "Reserviert, bis der Inhaber entscheidet"
+          }
+        }
+      },
+      "action": "So funktioniert es",
+      "cast": {
+        "title": "Drei Personen, drei Zugänge.",
+        "lead": "Die Zugangsdaten für jede von ihnen stehen hier, sobald der Demo-Verleih öffnet.",
+        "items": {
+          "owner": {
+            "title": "Tomás, der Inhaber",
+            "body": "Schreibt die Preisliste und die Abnutzungs­regel, sieht den ganzen Verleih und entscheidet über angefochtene Forderungen."
+          },
+          "staff": {
+            "title": "Jonas, am Tresen",
+            "body": "Führt Übergabe und Rückgabe durch und genehmigt eine Forderung innerhalb seines Limits."
+          },
+          "renter": {
+            "title": "Priya, die Mieterin",
+            "body": "Hat kein Konto. Sie öffnet einen Link, sieht die Fotos und die Forderung und stimmt zu oder widerspricht."
+          }
+        }
+      },
+      "honest": {
+        "title": "Was echt ist und was simuliert.",
+        "lead": "Alles Simulierte ist auf dem Bildschirm und in den Aufzeichnungen gekennzeichnet.",
+        "real": {
+          "title": "Echt",
+          "items": {
+            "paypal": "Jeder PayPal-Aufruf, in der Sandbox ausgeführt.",
+            "comparison": "Der Vergleich jedes Fotopaars.",
+            "approval": "Jede Genehmigung, mit dem Namen der Person festgehalten."
+          }
+        },
+        "simulated": {
+          "title": "Simuliert",
+          "items": {
+            "money": "Das Geld. Sandbox-Konten enthalten nur Testgeld.",
+            "camera": "Die Kamera. Ein Tippen lädt an ihrer Stelle Beispielfotos.",
+            "people": "Die Personen. Tomás, Jonas und Priya sind Demo-Zugänge."
+          }
+        }
+      }
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "Diese Seite gibt es nicht.",
+      "body": "Vielleicht ist die Adresse falsch geschrieben, oder die Seite wurde verschoben.",
+      "home": "Zurück zur Startseite"
+    },
+    "generic": {
+      "title": "Etwas ist schiefgegangen.",
+      "body": "Die Seite konnte nicht angezeigt werden. Nichts wurde abgebucht und nichts wurde geändert.",
+      "retry": "Erneut versuchen"
+    }
+  },
+  "holdMeter": {
+    "summary": "{reserved} reserviert, {taken} abgebucht, {released} freigegeben",
+    "open": "{reserved} reserviert, nichts abgebucht"
+  },
+  "priceList": {
+    "title": "Preisliste für Schäden",
+    "items": {
+      "scratchedFrame": "Zerkratzter Rahmen",
+      "missingCharger": "Fehlendes Ladegerät",
+      "bentWheel": "Verbogenes Laufrad"
+    },
+    "wear": "Normale Abnutzung, etwa leicht abgefahrene Reifen oder kleine Schrammen an den Pedalen, wird nie berechnet.",
+    "agreed": "Die mietende Person stimmt zu, bevor sie die Reservierung genehmigt.",
+    "example": "Beispiel­preisliste."
+  },
+  "faq": {
+    "items": {
+      "charge": {
+        "q": "Ist eine Reservierung eine Abbuchung?",
+        "a": "Nein. Der Betrag wird auf dem eigenen PayPal-Konto der mietenden Person nur reserviert. Abgebucht wird erst, wenn ein Mensch eine Forderung genehmigt."
+      },
+      "length": {
+        "q": "Wie lange kann eine Reservierung offen bleiben?",
+        "a": "Bis zu 29 Tage. Hold hält sie während der Miete gültig und meldet jede Reservierung, die bald endet, bevor sie verfällt."
+      },
+      "beyond": {
+        "q": "Was, wenn der Schaden mehr kostet als die Reservierung?",
+        "a": "Die Reservierung wird ganz abgebucht, und der Rest wird getrennt in Rechnung gestellt, mit denselben Fotos als Beleg."
+      },
+      "app": {
+        "q": "Braucht jemand eine App oder ein Konto?",
+        "a": "Nein. Das Personal öffnet Hold im Browser auf dem Telefon, das es ohnehin dabeihat. Die mietende Person bekommt einen Link."
+      },
+      "dark": {
+        "q": "Was, wenn ein Foto zu dunkel für ein Urteil ist?",
+        "a": "Hold bittet um ein neues, solange der Artikel noch am Tresen ist. Lässt es sich dann immer noch nicht erkennen, sagt Hold das, und ein Mensch sieht sich den Artikel selbst an."
+      },
+      "wear": {
+        "q": "Wer entscheidet, was als normale Abnutzung gilt?",
+        "a": "Der Verleih, einmal und in einfachen Worten. Hold wendet diese Regel auf alle Mietenden gleich an."
+      },
+      "release": {
+        "q": "Wann wird die Reservierung freigegeben?",
+        "a": "Sobald das Personal eine saubere Rückgabe bestätigt, meist noch während Sie am Tresen stehen. Ihr Telefon zeigt Ihnen, dass nichts abgebucht wurde."
+      },
+      "chargedFor": {
+        "q": "Wofür kann mir etwas berechnet werden?",
+        "a": "Nur für Schäden, die auf der veröffent­lichten Preisliste stehen, auf den Fotos zu sehen sind und von einem Menschen genehmigt wurden. Eine Forderung kann nie höher sein als die Liste."
+      },
+      "disagree": {
+        "q": "Was, wenn ich einer Forderung widerspreche?",
+        "a": "Sie sagen es auf demselben Bildschirm und können eigene Fotos hinzufügen. Eine namentlich genannte Person im Verleih prüft beide Seiten und kann die Abbuchung senken oder streichen."
+      },
+      "photographs": {
+        "q": "Was geschieht mit den Fotos?",
+        "a": "Sie zeigen den Artikel, nicht Sie. Gesichter werden unkenntlich gemacht, und Aufzeichnungen bleiben nur so lange, wie die Regeln des Verleihs und das Gesetz es verlangen."
+      }
+    }
+  },
+  "auth": {
+    "passwordless": "Kein Passwort. Hold schickt Ihnen per E-Mail einen Code, der einmal gilt.",
+    "sending": "Wird gesendet…",
+    "fields": {
+      "name": "Ihr Name",
+      "shopName": "Name des Verleihs",
+      "email": "Geschäftliche E-Mail"
+    },
+    "problems": {
+      "name": {
+        "missing": "Geben Sie Ihren Namen ein.",
+        "invalid": "Verwenden Sie höchstens 100 Zeichen."
+      },
+      "shopName": {
+        "missing": "Geben Sie den Namen Ihres Verleihs ein.",
+        "invalid": "Verwenden Sie höchstens 100 Zeichen."
+      },
+      "email": {
+        "missing": "Geben Sie Ihre E-Mail-Adresse ein.",
+        "invalid": "Das sieht nicht nach einer E-Mail-Adresse aus. Bitte prüfen und erneut versuchen."
+      }
+    },
+    "signIn": {
+      "title": "Melden Sie sich bei Ihrem Verleih an.",
+      "lead": "Für Inhaberinnen, Inhaber und das Personal am Tresen.",
+      "submit": "Code per E-Mail senden",
+      "switch": "Neu bei Hold?",
+      "switchAction": "Verleih-Konto anlegen",
+      "aside": {
+        "title": "Ihr Verleih, so wie Sie ihn verlassen haben.",
+        "lead": "Artikel unterwegs, laufende Reservierungen und Forderungen, die auf eine Entscheidung warten, auf dem Telefon, das Sie ohnehin dabeihaben."
+      }
+    },
+    "signUp": {
+      "title": "Eröffnen Sie Ihren Verleih bei Hold.",
+      "lead": "Für alle, die einen Verleih führen. Es dauert etwa eine Minute, und das einzige Gerät ist Ihr Telefon.",
+      "submit": "Verleih-Konto anlegen",
+      "switch": "Sie haben schon ein Konto?",
+      "switchAction": "Anmelden",
+      "aside": {
+        "title": "Drei Schritte bis zur ersten geschützten Miete.",
+        "steps": {
+          "email": {
+            "title": "E-Mail bestätigen",
+            "body": "Hold schickt Ihnen einen Code per E-Mail. Sie legen kein Passwort fest."
+          },
+          "paypal": {
+            "title": "PayPal-Konto des Verleihs verbinden",
+            "body": "Reservierungen bleiben auf dem eigenen Konto der Mietenden, genehmigte Forderungen gehen auf Ihres. Hold verwahrt nie Geld."
+          },
+          "prices": {
+            "title": "Preisliste schreiben",
+            "body": "Was jede Art von Schaden kostet, in einfachen Worten. Mietende lesen sie, bevor sie mieten."
+          }
+        }
+      }
+    },
+    "notes": {
+      "title": "Sie führen den Verleih nicht selbst?",
+      "staff": {
+        "title": "Personal am Tresen",
+        "body": "Sie registrieren sich nicht. Die Inhaberin oder der Inhaber lädt Sie ein, und Sie melden sich mit dieser E-Mail-Adresse an."
+      },
+      "renter": {
+        "title": "Sie mieten etwas?",
+        "body": "Sie brauchen kein Konto. Öffnen Sie den Link, den der Verleih Ihnen geschickt hat.",
+        "action": "Was eine Reservierung für Sie bedeutet"
+      }
+    },
+    "notices": {
+      "busy": {
+        "title": "Zu viele Versuche.",
+        "body": "Warten Sie ein paar Minuten und versuchen Sie es dann erneut."
+      },
+      "unavailable": {
+        "title": "Die Anmeldung ist nicht erreichbar.",
+        "body": "Es wurde nichts gesendet. Versuchen Sie es gleich noch einmal."
+      },
+      "no_passkey": {
+        "title": "Kein Passkey für diese Adresse.",
+        "body": "Melden Sie sich mit einem Code per E-Mail an und fügen Sie dann auf der Sicherheitsseite Ihres Verleihs einen Passkey hinzu."
+      },
+      "invitation_closed": {
+        "title": "Diese Einladung gilt nicht mehr.",
+        "body": "Bitten Sie den Verleih um eine neue."
+      }
+    },
+    "code": {
+      "title": "Sehen Sie in Ihre E-Mails.",
+      "lead": "Wir haben einen Code an {email} geschickt. Er gilt einmal, zehn Minuten lang.",
+      "field": "Code aus der E-Mail",
+      "submit": "Weiter",
+      "checking": "Wird geprüft…",
+      "resend": "Neuen Code senden",
+      "sending": "Wird gesendet…",
+      "startOver": "Andere E-Mail-Adresse verwenden",
+      "resent": {
+        "title": "Ein neuer Code ist unterwegs.",
+        "body": "Verwenden Sie den Code aus der neuesten E-Mail."
+      },
+      "problems": {
+        "missing": "Geben Sie den Code aus der E-Mail ein.",
+        "invalid": "Der Code besteht aus den Ziffern in der E-Mail. Bitte prüfen und erneut versuchen.",
+        "wrong": "Dieser Code stimmt nicht. Bitte prüfen und erneut versuchen.",
+        "expired": "Dieser Code ist abgelaufen. Fordern Sie einen neuen an.",
+        "attempt_over": "Dieser Code gilt nicht mehr. Fordern Sie einen neuen an oder beginnen Sie von vorn.",
+        "second_factor": "Dieses Konto verlangt zusätzlich einen Code aus einer Authenticator-App. Den nimmt Hold noch nicht an.",
+        "busy": "Zu viele Versuche. Warten Sie ein paar Minuten und versuchen Sie es dann erneut.",
+        "unavailable": "Hold konnte den Code gerade nicht prüfen. Versuchen Sie es gleich noch einmal.",
+        "no_passkey": "Für diese Adresse gibt es keinen Passkey. Verwenden Sie den Code aus der E-Mail.",
+        "invitation_closed": "Diese Einladung gilt nicht mehr. Bitten Sie den Verleih um eine neue."
+      }
+    },
+    "passkey": {
+      "signIn": "Mit Passkey anmelden",
+      "waiting": "Warten auf Ihr Gerät…",
+      "add": "Passkey auf diesem Gerät hinzufügen",
+      "added": "Passkey hinzugefügt.",
+      "problems": {
+        "email": "Geben Sie zuerst Ihre geschäftliche E-Mail ein und verwenden Sie dann Ihren Passkey.",
+        "unsupported": "Dieser Browser unterstützt keine Passkeys. Verwenden Sie den Code aus der E-Mail oder einen neueren Browser.",
+        "cancelled": "Der Passkey wurde nicht verwendet. Versuchen Sie es erneut, wenn Sie so weit sind.",
+        "unavailable": "Hold konnte die Anmeldung nicht erreichen. Versuchen Sie es gleich noch einmal.",
+        "wrong": "Dieser Passkey ist Hold für diese Adresse nicht bekannt.",
+        "expired": "Das hat zu lange gedauert. Versuchen Sie es erneut.",
+        "attempt_over": "Das hat zu lange gedauert. Versuchen Sie es erneut.",
+        "second_factor": "Dieses Konto verlangt einen Code, den Hold nicht annimmt. Wenden Sie sich an die Inhaberin oder den Inhaber des Verleihs.",
+        "busy": "Zu viele Versuche. Warten Sie ein paar Minuten und versuchen Sie es dann erneut.",
+        "no_passkey": "Für diese Adresse gibt es noch keinen Passkey. Melden Sie sich mit dem Code aus der E-Mail an und fügen Sie dann einen hinzu.",
+        "invitation_closed": "Diese Einladung gilt nicht mehr.",
+        "missing": "Geben Sie zuerst Ihre geschäftliche E-Mail ein.",
+        "invalid": "Geben Sie zuerst Ihre geschäftliche E-Mail ein."
+      }
+    },
+    "invite": {
+      "title": "Willkommen bei {shop} auf Hold.",
+      "lead": "Sie sind eingeladen als {role}. Hold schickt einen Code an {email}, um zu bestätigen, dass Sie es sind.",
+      "submit": "Code per E-Mail senden",
+      "switch": "Arbeiten Sie schon hier?",
+      "switchAction": "Anmelden",
+      "aside": {
+        "title": "So arbeiten Sie mit Hold.",
+        "lead": "Fotos bei der Übergabe und bei der Rückgabe, eine Reservierung auf dem PayPal-Konto der Mietenden selbst, und jede Belastung genehmigt ein Mensch."
+      },
+      "closed": {
+        "title": "Diese Einladung lässt sich nicht verwenden.",
+        "lead": "Einladungen gelten einmal, sieben Tage lang.",
+        "body": "Bitten Sie die Inhaberin oder den Inhaber des Verleihs um eine neue.",
+        "accepted": "Diese Einladung wurde bereits angenommen.",
+        "revoked": "Der Verleih hat diese Einladung zurückgezogen.",
+        "expired": "Diese Einladung ist abgelaufen.",
+        "missing": "Unter dieser Adresse gibt es keine Einladung."
+      }
+    }
+  },
+  "shop": {
+    "label": "Ihr Verleih",
+    "signedInAs": "Angemeldet als {email}.",
+    "otherShops": "Ihre weiteren Verleihe",
+    "switchShop": "In diesem Verleih arbeiten",
+    "signOut": "Abmelden",
+    "noShop": {
+      "title": "Noch kein Verleih.",
+      "body": "Zu diesem Konto gehört noch kein Verleih. Legen Sie einen auf der Registrierungsseite mit derselben E-Mail-Adresse an, oder lassen Sie sich von einem Verleih einladen."
+    },
+    "nav": {
+      "label": "Seiten des Verleihs",
+      "home": "Übersicht",
+      "security": "Sicherheit",
+      "staff": "Team",
+      "prices": "Preise",
+      "paypal": "PayPal"
+    },
+    "setup": {
+      "title": "Richten Sie Ihren Verleih ein",
+      "done": "Erledigt.",
+      "toDo": "Offen.",
+      "passkey": {
+        "title": "Passkey hinzufügen",
+        "body": "Ihr Fingerabdruck, Ihr Gesicht oder Ihre PIN auf diesem Gerät. Hold fragt danach, bevor jemand Preise, Team oder PayPal ändert.",
+        "action": "Zur Sicherheit"
+      },
+      "prices": {
+        "title": "Preisliste schreiben",
+        "body": "Was jede Art von Schaden kostet, in einfachen Worten. Mietende lesen sie, bevor sie mieten.",
+        "action": "Zu den Preisen"
+      },
+      "paypal": {
+        "title": "PayPal-Konto des Verleihs verbinden",
+        "body": "Reservierungen bleiben auf dem eigenen Konto der Mietenden, genehmigte Forderungen gehen auf Ihres.",
+        "action": "Zu PayPal"
+      },
+      "staff": {
+        "title": "Team einladen",
+        "body": "Jede Person meldet sich mit der eigenen E-Mail an, mit der Rolle und dem Genehmigungslimit, die Sie vergeben.",
+        "action": "Zum Team"
+      }
+    },
+    "passkeyGate": {
+      "title": "Bestätigen Sie, dass Sie es sind.",
+      "confirmBody": "Um Preise, Team oder PayPal zu ändern, braucht es Ihren Passkey, nicht nur einen Code per E-Mail.",
+      "addBody": "Um Preise, Team oder PayPal zu ändern, braucht es einen Passkey. Fügen Sie zuerst einen auf diesem Gerät hinzu.",
+      "confirm": "Mit meinem Passkey bestätigen",
+      "add": "Passkey hinzufügen"
+    },
+    "results": {
+      "signed_out": "Ihre Sitzung ist beendet. Melden Sie sich erneut an.",
+      "no_shop": "Zu diesem Konto gehört kein Verleih.",
+      "role": "Ihre Rolle in diesem Verleih erlaubt das nicht.",
+      "passkey_needed": "Bestätigen Sie zuerst mit Ihrem Passkey.",
+      "invalid": "Im Formular fehlt etwas oder ist zu lang. Bitte prüfen und erneut versuchen.",
+      "unavailable": "Das hat nicht geklappt. Versuchen Sie es gleich noch einmal.",
+      "role_not_invitable": "Sie können niemanden mit dieser Rolle einladen.",
+      "currency_unset": "Veröffentlichen Sie zuerst Ihre Preisliste, damit Genehmigungslimits eine Währung haben.",
+      "limit_invalid": "Das Genehmigungslimit ist kein Betrag. Verwenden Sie Ziffern, etwa 150 oder 150,00.",
+      "email_failed": "Die Einladung konnte nicht verschickt werden, deshalb wurde nichts gespeichert. Prüfen Sie die Adresse und versuchen Sie es erneut.",
+      "not_open": "Diese Einladung ist nicht mehr offen.",
+      "currency_unknown": "Wählen Sie eine Währung aus der Liste.",
+      "rows_mismatched": "Jeder Preis braucht eine Beschreibung, eine Art und einen Betrag.",
+      "amount_invalid": "Preis {row} ist kein Betrag. Verwenden Sie Ziffern, etwa 35 oder 35,50.",
+      "threshold_invalid": "Die Genehmigungsschwelle ist kein Betrag. Verwenden Sie Ziffern, etwa 200 oder 200,00.",
+      "no_entries": "Fügen Sie mindestens einen Preis hinzu.",
+      "too_many_entries": "Eine Preisliste kann bis zu 60 Preise haben.",
+      "description_missing": "Preis {row} braucht eine Beschreibung.",
+      "description_too_long": "Die Beschreibung von Preis {row} ist zu lang.",
+      "description_repeated": "Preis {row} wiederholt eine andere Beschreibung. Machen Sie jede eindeutig.",
+      "amount_zero": "Preis {row} ist null. Entfernen Sie ihn oder geben Sie einen Betrag an.",
+      "wrong_currency": "Preis {row} ist in einer anderen Währung.",
+      "wear_policy_missing": "Beschreiben Sie, was als normale Abnutzung gilt.",
+      "wear_policy_too_long": "Die Regel zur Abnutzung ist zu lang.",
+      "currency_fixed": "Die Währung steht fest, sobald eine Preisliste veröffentlicht ist.",
+      "paypal_refused": "PayPal hat diese Zugangsdaten nicht angenommen. Prüfen Sie, ob Sie beide aus derselben Sandbox-App kopiert haben.",
+      "paypal_unavailable": "PayPal ist nicht erreichbar. Es wurde nichts gespeichert. Versuchen Sie es gleich noch einmal."
+    },
+    "security": {
+      "title": "Sicherheit",
+      "lead": "Mit einem Passkey melden Sie sich per Fingerabdruck, Gesicht oder PIN an, auf einem Gerät, das Sie bei sich haben.",
+      "leadRequired": "Ihre Rolle erlaubt Ihnen, Preise, Team oder PayPal zu ändern. Deshalb fragt Hold vorher nach einem Passkey: Ihr Fingerabdruck, Ihr Gesicht oder Ihre PIN auf einem Gerät, das Sie bei sich haben. Ein Code per E-Mail allein reicht nicht.",
+      "unavailable": "Ihre Passkeys lassen sich gerade nicht anzeigen.",
+      "none": "Sie haben noch keinen Passkey.",
+      "unnamed": "Passkey {number}",
+      "added": "Hinzugefügt am {date}",
+      "how": "Ihr Gerät bewahrt den Passkey auf. Hold und sein Anmeldedienst behalten nur den öffentlichen Teil, mit dem sich allein niemand anmelden kann."
+    },
+    "staff": {
+      "title": "Team",
+      "team": "Wer hier arbeitet",
+      "limit": "genehmigt Forderungen bis {amount}",
+      "roles": {
+        "owner": "Inhaber",
+        "manager": "Leitung",
+        "counter_staff": "Thekenpersonal",
+        "read_only": "Nur lesen"
+      },
+      "open": {
+        "title": "Offene Einladungen",
+        "expires": "läuft ab am {date}",
+        "withdraw": "Zurückziehen",
+        "withdrawFor": "Einladung für {email} zurückziehen",
+        "withdrawn": "Einladung zurückgezogen."
+      },
+      "invite": {
+        "title": "Jemanden einladen",
+        "lead": "Die Person erhält eine E-Mail mit einem Link. Er gilt einmal, sieben Tage lang, und nur für die Adresse, die Sie eingeben.",
+        "email": "Geschäftliche E-Mail der Person",
+        "role": "Rolle",
+        "limit": "Größte Forderung, die sie genehmigen darf, in {currency}",
+        "limitNeedsCurrency": "Thekenpersonal kann Forderungen genehmigen, sobald Ihre Preisliste die Währung des Verleihs festlegt. Bis dahin genehmigt es nichts.",
+        "submit": "Einladung senden",
+        "sending": "Wird gesendet…",
+        "sent": "Einladung gesendet."
+      }
+    },
+    "prices": {
+      "title": "Preise",
+      "none": "Es ist noch keine Preisliste veröffentlicht. Mietende sehen sie vor dem Mieten, und jede Forderung wird danach berechnet.",
+      "current": "Version {version} ist seit dem {date} veröffentlicht. Erneut veröffentlichen erstellt eine neue Version. Bereits gebuchte Mieten behalten die Version, der ihre Mietenden zugestimmt haben.",
+      "readOnly": "Nur Inhaber oder Leitung können Preise veröffentlichen.",
+      "currency": "Währung",
+      "threshold": "Forderungen darüber gehen an Inhaber oder Leitung, in {currency}",
+      "thresholdHelp": "Freiwillig. Bleibt das Feld leer, entscheidet das Limit jeder einzelnen Person.",
+      "entries": "Preise",
+      "description": "Preis {number}: wofür",
+      "category": "Art",
+      "amount": "Betrag, in {currency}",
+      "remove": "Preis {number} entfernen",
+      "add": "Preis hinzufügen",
+      "wear": "Was als normale Abnutzung gilt",
+      "wearHelp": "Dafür wird Mietenden nie etwas belastet. Beschreiben Sie es in einfachen Worten.",
+      "publish": "Diese Preisliste veröffentlichen",
+      "publishing": "Wird veröffentlicht…",
+      "publishHelp": "Die Währung steht fest, sobald die erste Preisliste veröffentlicht ist.",
+      "published": "Preisliste veröffentlicht.",
+      "categories": {
+        "damage": "Schaden",
+        "loss": "Verlust",
+        "lateness": "Verspätete Rückgabe",
+        "cleaning": "Reinigung"
+      }
+    },
+    "paypal": {
+      "title": "PayPal",
+      "lead": "Reservierungen liegen auf dem PayPal-Konto der Mietenden, genehmigte Forderungen gehen auf das Konto Ihres Verleihs. Hold verwahrt nie Geld.",
+      "notConnected": "Noch nicht verbunden.",
+      "isConnected": "Verbunden seit dem {date}.",
+      "connectTitle": "PayPal-Sandbox-App verbinden",
+      "reconnectTitle": "Eine andere Sandbox-App verbinden",
+      "steps": {
+        "app": "Öffnen Sie auf developer.paypal.com Apps & Credentials, wählen Sie Sandbox und öffnen Sie die App des Sandbox-Geschäftskontos Ihres Verleihs.",
+        "copy": "Kopieren Sie die Client ID und das Secret.",
+        "paste": "Fügen Sie beides unten ein. Hold prüft es bei PayPal, bevor es gespeichert wird."
+      },
+      "clientId": "Client ID",
+      "clientSecret": "Secret",
+      "connect": "Prüfen und verbinden",
+      "checking": "Wird bei PayPal geprüft…",
+      "connected": "Verbunden. PayPal hat die Zugangsdaten angenommen.",
+      "sandboxOnly": "Diese Version verbindet nur Sandbox-Konten. Die Zugangsdaten liegen in AWS Secrets Manager und werden nie wieder angezeigt.",
+      "ownerOnly": "Nur der Inhaber des Verleihs kann PayPal verbinden."
+    }
+  },
+  "emails": {
+    "invitation": {
+      "subject": "Einladung zu {shop} auf Hold",
+      "body": "{inviter} lädt Sie ein, bei {shop} mit Hold zu arbeiten, als {role}.\n\nÖffnen Sie diesen Link, um anzunehmen. Er gilt einmal, sieben Tage lang:\n{link}\n\nHold schickt Ihnen einen Code, um zu bestätigen, dass die Adresse Ihnen gehört. Wenn Sie diese E-Mail nicht erwartet haben, können Sie sie ignorieren."
+    }
+  }
+}

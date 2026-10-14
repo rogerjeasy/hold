@@ -1,0 +1,14 @@
+# Photograph credits
+
+All four files come from Unsplash, whose license allows free commercial use without attribution. Credit is given anyway, here and in the site footer.
+
+| File | Source | Photographer | Edits |
+|---|---|---|---|
+| `frame-handover.jpg` | https://unsplash.com/photos/blue-bicycle-frame-handlebars-and-front-wheel-on-black-LEOTyGdbpu4 | Florian (falmdesign) | Cropped to 21:9. The tyre maker's name and two frame badges retouched out. A faint scuff drawn on the down tube. |
+| `frame-return.jpg` | Same photograph | Florian (falmdesign) | As above, plus a scratch drawn on the down tube. |
+| `shop.jpg` | https://unsplash.com/photos/multiple-bicycles-stored-on-shelves-in-a-garage-XwZKcZes8xo | Nuno Alves | Cropped to 16:9. |
+| `renter.jpg` | https://unsplash.com/photos/a-person-riding-a-bike-with-a-cell-phone-in-their-hand-IQpw1eRRGjo | Krzysztof Kowalik | Cropped to 16:9. |
+
+The scratch and the scuff on the frame are drawn on. They are not real damage. The site says "Illustrative photographs" beside them.
+
+Replace `frame-handover.jpg` and `frame-return.jpg` with a real handover and return pair before submission. `docs/tech-stack.md` section 16, item 4 asks for that pair. Keep the 21:9 crop, and update the mark positions in `src/features/marketing/evidence-photo.ts`.

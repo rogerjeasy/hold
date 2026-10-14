@@ -1,0 +1,168 @@
+'use server'
+
+import { takeRateToken } from '@hold/db'
+import { headers } from 'next/headers'
+import { redirect } from '@/i18n/navigation'
+import { linkRoutes, routes, shopRoutes } from '@/lib/routes'
+import { getServices } from '@/server/services'
+import type { Attempt, AttemptPage } from './attempt'
+import type { AuthFormState, CodeFormState, PasskeyFormState } from './auth-form-state'
+import { parseAuthInput, readText, signInFields, signUpFields, type AuthField } from './auth-input'
+import { parseCode } from './code-input'
+import { readLocale } from './locale-input'
+import { clearAttempt, clearSession, currentAttempt, readAccessToken, readRefreshToken, writeAttempt, writeSession } from './session-cookies'
+import { answerCode, answerPasskey, beginInvitation, beginPasskey, beginSignIn, beginSignUp, resendCode } from './sign-in-flow'
+import type { Begun, FlowDependencies, ProofOutcome, Requester } from './sign-in-flow'
+import { readTimeZone } from './time-zone-input'
+
+// The server functions behind the sign-in, sign-up and invitation pages. Each checks its input with the same
+// function the browser used, then hands the work to sign-in-flow.ts and keeps the cookies.
+
+async function dependencies(): Promise<FlowDependencies> {
+  const { identity, database } = await getServices()
+  return { identity, database, now: () => new Date(), allow: (limit, subject) => takeRateToken(database, limit, subject) }
+}
+
+const LOOPBACK = new Set(['::1', '127.0.0.1', '::ffff:127.0.0.1'])
+
+// The caller's network address. The load balancer in front of the app adds it last to x-forwarded-for, so the last
+// entry is the one to trust: anything before it the caller could have written. A loopback address means a request
+// from the developer's own machine, which has no load balancer.
+async function requester(): Promise<Requester> {
+  const forwarded = (await headers()).get('x-forwarded-for')?.split(',').at(-1)?.trim()
+  return { network: forwarded === undefined || forwarded === '' || LOOPBACK.has(forwarded) ? undefined : forwarded }
+}
+
+function pageRoute(attempt: Pick<Attempt, 'page' | 'invitation'>): string {
+  if (attempt.page === 'invite' && attempt.invitation !== undefined) return `${linkRoutes.invite}/${attempt.invitation.token}`
+  return attempt.page === 'signUp' ? routes.signUp : routes.signIn
+}
+
+function goTo(href: string, locale: string): never {
+  return redirect({ href, locale: readLocale(locale) })
+}
+
+function problemsOf(fields: readonly AuthField[], data: FormData) {
+  const input = Object.fromEntries(fields.map((field) => [field, data.get(field)]))
+  const parsed = parseAuthInput(fields, input)
+  const values = Object.fromEntries(fields.map((field) => [field, readText(input[field])]))
+  return { parsed, values }
+}
+
+async function continueWith(begun: Begun, values: AuthFormState['values']): Promise<AuthFormState> {
+  if (!begun.ok) return { values, problems: {}, notice: begun.notice }
+  await writeAttempt(begun.attempt)
+  return goTo(pageRoute(begun.attempt), begun.attempt.language)
+}
+
+export async function requestSignIn(_previous: AuthFormState, data: FormData): Promise<AuthFormState> {
+  const { parsed, values } = problemsOf(signInFields, data)
+  if (!parsed.ok) return { values, problems: parsed.problems }
+  const begun = await beginSignIn(await dependencies(), { email: parsed.value.email, language: readLocale(data.get('locale')) }, await requester())
+  return continueWith(begun, values)
+}
+
+export async function requestSignUp(_previous: AuthFormState, data: FormData): Promise<AuthFormState> {
+  const { parsed, values } = problemsOf(signUpFields, data)
+  if (!parsed.ok) return { values, problems: parsed.problems }
+  const begun = await beginSignUp(
+    await dependencies(),
+    { ...parsed.value, timeZone: readTimeZone(data.get('timeZone')), language: readLocale(data.get('locale')) },
+    await requester(),
+  )
+  return continueWith(begun, values)
+}
+
+export async function requestInvitationCode(_previous: AuthFormState, data: FormData): Promise<AuthFormState> {
+  const { parsed, values } = problemsOf(['name'], data)
+  if (!parsed.ok) return { values, problems: parsed.problems }
+  const token = readText(data.get('token'))
+  const begun = await beginInvitation(await dependencies(), { token, name: parsed.value.name, language: readLocale(data.get('locale')) }, await requester())
+  return continueWith(begun, values)
+}
+
+async function finish(outcome: ProofOutcome, attempt: Attempt, factor: 'email_code' | 'passkey'): Promise<CodeFormState> {
+  if (outcome.kind === 'failed') return { problem: outcome.failure }
+  if (outcome.kind === 'next_code') {
+    await writeAttempt(outcome.attempt)
+    return { resent: true }
+  }
+  await writeSession(outcome.tokens, factor)
+  return goTo(attempt.returnTo ?? shopRoutes.home, attempt.language)
+}
+
+export async function submitCode(_previous: CodeFormState, data: FormData): Promise<CodeFormState> {
+  const parsed = parseCode(data.get('code'))
+  if (!parsed.ok) return { problem: parsed.problem }
+  const attempt = await currentAttempt()
+  if (attempt === undefined) return { problem: 'attempt_over' }
+  return finish(await answerCode(await dependencies(), attempt, parsed.code, await requester()), attempt, 'email_code')
+}
+
+export async function sendNewCode(): Promise<CodeFormState> {
+  const attempt = await currentAttempt()
+  if (attempt === undefined) return { problem: 'attempt_over' }
+  const begun = await resendCode(await dependencies(), attempt, await requester())
+  if (!begun.ok) return { problem: begun.notice }
+  await writeAttempt(begun.attempt)
+  return { resent: true }
+}
+
+// Back to the form, to use a different address.
+export async function startOver(data: FormData): Promise<void> {
+  const attempt = await currentAttempt()
+  await clearAttempt()
+  const page = data.get('page')
+  const fallback: AttemptPage = page === 'signUp' ? 'signUp' : 'signIn'
+  goTo(attempt === undefined ? pageRoute({ page: fallback }) : pageRoute(attempt), readLocale(data.get('locale')))
+}
+
+// The first half of a passkey sign-in. The browser asks the person's device with the options this returns.
+export async function startPasskeySignIn(input: { email: string; locale: string; returnTo?: string }): Promise<PasskeyFormState> {
+  const parsed = parseAuthInput(['email'], { email: input.email })
+  if (!parsed.ok) return { problem: 'email' }
+  const confirming = input.returnTo !== undefined && input.returnTo.startsWith(shopRoutes.home)
+  const begun = await beginPasskey(
+    await dependencies(),
+    { email: parsed.value.email, language: readLocale(input.locale), page: confirming ? 'confirm' : 'signIn', ...(confirming ? { returnTo: input.returnTo } : {}) },
+    await requester(),
+  )
+  if (!begun.ok) return { problem: begun.notice }
+  await writeAttempt(begun.attempt)
+  return { requestOptions: begun.requestOptions }
+}
+
+// The second half: the device's answer. Signs the person in with a session a passkey proved.
+export async function finishPasskeySignIn(response: string): Promise<PasskeyFormState> {
+  const attempt = await currentAttempt()
+  if (attempt === undefined || response.length > 20_000) return { problem: 'attempt_over' }
+  const finished = await finish(await answerPasskey(await dependencies(), attempt, response, await requester()), attempt, 'passkey')
+  return { problem: finished.problem }
+}
+
+// Registering a passkey needs a signed-in session. The options come from the identity service and go to the device.
+export async function startPasskeyRegistration(): Promise<PasskeyFormState> {
+  const accessToken = await readAccessToken()
+  if (accessToken === undefined) return { problem: 'attempt_over' }
+  const started = await (await getServices()).identity.startPasskeyRegistration(accessToken)
+  return started.ok ? { creationOptions: started.value.creationOptions } : { problem: 'unavailable' }
+}
+
+export async function finishPasskeyRegistration(response: string): Promise<PasskeyFormState> {
+  const accessToken = await readAccessToken()
+  if (accessToken === undefined || response.length > 20_000) return { problem: 'attempt_over' }
+  const finished = await (await getServices()).identity.finishPasskeyRegistration(accessToken, response)
+  return finished.ok ? { registered: true } : { problem: 'unavailable' }
+}
+
+export async function signOut(data: FormData): Promise<void> {
+  const refreshToken = await readRefreshToken()
+  if (refreshToken !== undefined) {
+    const { identity } = await getServices()
+    // Ends the session at the identity service too, so a copied refresh token stops working.
+    const revoked = await identity.signOut(refreshToken)
+    if (!revoked.ok) console.warn(JSON.stringify({ event: 'identity_failure', step: 'sign_out', kind: revoked.error.kind }))
+  }
+  await clearSession()
+  goTo(routes.home, readLocale(data.get('locale')))
+}

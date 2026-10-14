@@ -1,0 +1,1314 @@
+{
+  "meta": {
+    "siteName": "Hold",
+    "tagline": "La fianza que nunca sale de tu cuenta.",
+    "home": {
+      "title": "Hold: la fianza que nunca sale de tu cuenta",
+      "description": "Hold reserva la fianza de un alquiler con PayPal y no cobra nada. En la devolución se comparan las fotografías de la entrega con las de la devolución, y una persona aprueba cada cargo."
+    },
+    "howItWorks": {
+      "title": "Cómo funciona Hold",
+      "description": "Un alquiler en cuatro momentos: reservar, entregar, devolver y liquidar."
+    },
+    "forShops": {
+      "title": "Hold para tiendas de alquiler",
+      "description": "Protege cada artículo sin cobrar a quien lo devuelve."
+    },
+    "forRenters": {
+      "title": "Hold para clientes",
+      "description": "Conserva tu dinero mientras alquilas y mira exactamente qué te podrían cobrar."
+    },
+    "ai": {
+      "title": "Qué hace la IA en Hold",
+      "description": "La IA compara fotografías. Una persona decide cada cargo."
+    },
+    "paypal": {
+      "title": "Qué hace PayPal en Hold",
+      "description": "Una retención de autorización de PayPal reserva la fianza sin cobrarla."
+    },
+    "demo": {
+      "title": "La tienda de demostración de Hold",
+      "description": "Tres alquileres de ejemplo en el entorno de pruebas de PayPal: una devolución limpia, un arañazo y una reclamación impugnada."
+    },
+    "signIn": {
+      "title": "Entrar en Hold",
+      "description": "Los dueños y el personal del mostrador entran con un código enviado por correo. Los clientes no necesitan cuenta."
+    },
+    "signUp": {
+      "title": "Crear una cuenta de tienda",
+      "description": "Abre una cuenta de Hold para tu tienda de alquiler. Sin contraseña que crear y sin equipo que comprar."
+    },
+    "shop": {
+      "title": "Tu tienda"
+    },
+    "invite": {
+      "title": "Una invitación"
+    }
+  },
+  "nav": {
+    "main": "Principal",
+    "home": "Hold, página de inicio",
+    "howItWorks": "Cómo funciona",
+    "forShops": "Para tiendas",
+    "forRenters": "Para clientes",
+    "ai": "La IA",
+    "paypal": "PayPal",
+    "demo": "Abrir la tienda de demostración",
+    "openMenu": "Abrir el menú",
+    "closeMenu": "Cerrar el menú",
+    "menuTitle": "Menú",
+    "skip": "Ir al contenido",
+    "signIn": "Entrar",
+    "yourShop": "Tu tienda"
+  },
+  "language": {
+    "label": "Idioma",
+    "en": "English",
+    "es": "Español",
+    "fr": "Français",
+    "de": "Deutsch"
+  },
+  "theme": {
+    "toDark": "Cambiar al tema oscuro",
+    "toLight": "Cambiar al tema claro"
+  },
+  "doors": {
+    "shops": {
+      "label": "Para tiendas",
+      "action": "Abrir la tienda de demostración"
+    },
+    "renters": {
+      "label": "Para clientes",
+      "action": "Ver lo que ve el cliente"
+    }
+  },
+  "hero": {
+    "title": "Una fotografía lo resuelve.",
+    "lead": "Hold reserva la fianza con PayPal y no cobra nada. En la devolución compara cada fotografía con la que se tomó en la entrega. La tienda y el cliente ven el mismo resultado, y una persona aprueba cada cargo."
+  },
+  "evidence": {
+    "handover": "Entrega",
+    "return": "Devolución",
+    "slider": "Desliza entre la fotografía de la entrega y la fotografía de la devolución",
+    "handoverAlt": "Un cuadro de bicicleta azul fotografiado en la entrega",
+    "returnAlt": "El mismo cuadro de bicicleta fotografiado en la devolución",
+    "outcome": "Resultado de la devolución",
+    "damage": "Cuadro arañado",
+    "clean": "Devolución limpia",
+    "newTag": "Nueva",
+    "findings": {
+      "new": {
+        "title": "Cuadro arañado, {amount}",
+        "note": "Nueva desde la entrega. Precio de la lista publicada."
+      },
+      "none": {
+        "title": "Sin marcas nuevas",
+        "note": "Nada que cobrar. La retención se libera en el mostrador."
+      },
+      "old": {
+        "title": "Roce en el tubo diagonal, sin cargo",
+        "note": "Ya estaba en la entrega."
+      }
+    },
+    "summary": "{reserved} reservados · {taken} cobrados · {released} liberados",
+    "example": "Alquiler de ejemplo. Fotografías ilustrativas."
+  },
+  "bothSides": {
+    "title": "La tienda y el cliente miran lo mismo.",
+    "lead": "Jonas revisa la reclamación en su teléfono. Priya recibe en el suyo las mismas dos fotografías, la misma lista de precios y el mismo importe, antes de que se cobre nada. Puede aceptar, o no estar de acuerdo y hablar con una persona.",
+    "photo": {
+      "handover": "Entrega",
+      "return": "Devolución"
+    },
+    "finding": {
+      "scratch": "Cuadro arañado",
+      "scuff": "Roce en el tubo diagonal"
+    },
+    "shop": {
+      "caption": "Jonas, en el mostrador",
+      "context": "Devolución",
+      "item": "Bici eléctrica 14",
+      "title": "{count, plural, one {# marca nueva encontrada} other {# marcas nuevas encontradas}}",
+      "newNote": "Nueva desde la entrega",
+      "oldNote": "Ya estaba en la entrega",
+      "approve": "Aprobar reclamación · {amount}",
+      "change": "Cambiar o descartar"
+    },
+    "renter": {
+      "caption": "Priya, la clienta",
+      "context": "Tu alquiler",
+      "shopName": "Ribeira Bikes",
+      "title": "La tienda pide {amount}",
+      "newNote": "De la lista de precios que aceptaste",
+      "oldNote": "Estaba antes de ti. Sin cargo.",
+      "ifAccept": "Si aceptas:",
+      "ifAcceptResult": "{taken} cobrados, {released} liberados",
+      "accept": "Aceptar",
+      "disagree": "No estoy de acuerdo"
+    },
+    "hold": {
+      "title": "Retención {number}",
+      "reserved": "Reservado",
+      "taken": "Cobrado",
+      "released": "Liberado"
+    }
+  },
+  "steps": {
+    "title": "Un alquiler, cuatro momentos.",
+    "lead": "El personal y los clientes usan el teléfono que ya llevan. Nadie instala nada y la tienda no compra ningún equipo.",
+    "items": {
+      "reserve": {
+        "title": "Reservar",
+        "body": "El cliente aprueba una retención en PayPal. El dinero queda reservado en su propia cuenta. No se cobra nada.",
+        "state": "{amount} reservados"
+      },
+      "handOver": {
+        "title": "Entregar",
+        "body": "El personal toma fotografías guiadas del artículo. Se anotan las marcas que ya tenía y el cliente confirma el informe.",
+        "state": "{count} fotografías"
+      },
+      "return": {
+        "title": "Devolver",
+        "body": "Las mismas fotografías otra vez. Hold compara cada una con su pareja de la entrega y señala lo que ha cambiado.",
+        "state": "{count} pares comparados"
+      },
+      "settle": {
+        "title": "Liquidar",
+        "body": "Nada nuevo: la retención se libera en el acto. Daño: una persona aprueba una reclamación detallada y solo se cobra ese importe.",
+        "state": "{taken} cobrados · {released} liberados"
+      }
+    }
+  },
+  "audiences": {
+    "shops": {
+      "label": "Para tiendas",
+      "title": "Protege cada artículo sin cobrar a quien lo devuelve.",
+      "imageAlt": "Bicicletas de alquiler guardadas en estantes en la trastienda",
+      "action": "Abrir la tienda de demostración",
+      "points": {
+        "refund": "Ningún reembolso que emitir tras una devolución limpia, ni clientes preguntando dónde está.",
+        "photographs": "Fotografías fechadas de cada artículo, antes y después de cada alquiler.",
+        "oldMarks": "Las marcas antiguas quedan en el historial del artículo, así nadie paga el arañazo de otro.",
+        "evidence": "El expediente de pruebas completo ya está reunido si se disputa un cargo."
+      }
+    },
+    "renters": {
+      "label": "Para clientes",
+      "title": "Conserva tu dinero mientras alquilas.",
+      "imageAlt": "Vista del ciclista sobre el manillar, cruzando un puente de madera entre árboles",
+      "action": "Ver lo que ve el cliente",
+      "points": {
+        "notCharge": "Una retención no es un cargo. Devuelve el artículo como salió y nunca hubo pago.",
+        "prices": "Los precios por daños se publican antes de alquilar. Nada se inventa después.",
+        "see": "Ves las fotografías y la reclamación antes de que se cobre nada.",
+        "reply": "No estar de acuerdo es tan fácil como aceptar, y llega a una persona."
+      }
+    }
+  },
+  "ai": {
+    "title": "La IA compara. Una persona decide.",
+    "lead": "El cobro automático de daños enfadó a los clientes de alquiler porque no había a quién preguntar. Hold está construido al revés.",
+    "does": {
+      "title": "Qué hace la IA",
+      "items": {
+        "checks": "Revisa cada fotografía al tomarla y pide repetirla si sale borrosa u oscura.",
+        "compares": "Compara la entrega con la devolución y señala lo que ha cambiado.",
+        "classifies": "Distingue el desgaste normal del daño y dice lo segura que está.",
+        "matches": "Relaciona el daño con la lista de precios publicada por la tienda."
+      }
+    },
+    "never": {
+      "title": "Qué no hace nunca",
+      "items": {
+        "charge": "Decidir cobrar a alguien. Lo decide una persona.",
+        "price": "Fijar un precio. Lo fija la lista publicada.",
+        "doubt": "Ocultar sus dudas. Cuando no puede saberlo, lo dice y una persona lo mira.",
+        "status": "Decidir el estado de un pago. Lo decide el registro de PayPal."
+      }
+    }
+  },
+  "paypal": {
+    "title": "Reservado no es cobrado. PayPal lo hace real.",
+    "lead": "Todo el producto se apoya en la diferencia entre reservar dinero y cobrarlo, y en poder cobrar una parte y liberar el resto.",
+    "caption": "Qué usa de PayPal cada necesidad del alquiler",
+    "needHeading": "Necesidad del alquiler",
+    "capabilityHeading": "Función de PayPal",
+    "rows": {
+      "hold": {
+        "need": "La fianza se reserva sin cobrarse",
+        "capability": "Retención de autorización"
+      },
+      "release": {
+        "need": "Una devolución limpia libera todo el importe",
+        "capability": "Liberación de la retención"
+      },
+      "capture": {
+        "need": "El daño se cobra solo por ese importe",
+        "capability": "Captura parcial, el resto se libera"
+      },
+      "renewal": {
+        "need": "Un alquiler largo conserva su protección",
+        "capability": "Renovación, hasta 29 días"
+      },
+      "events": {
+        "need": "Hold conoce el estado real de cada pago",
+        "capability": "Notificaciones de pago en vivo"
+      },
+      "fee": {
+        "need": "El cliente paga el precio del alquiler",
+        "capability": "Checkout"
+      },
+      "refund": {
+        "need": "Una reclamación se corrige tras revisarla",
+        "capability": "Reembolso"
+      },
+      "dispute": {
+        "need": "Un cliente disputa un cargo",
+        "capability": "Disputas, con el expediente de pruebas adjunto"
+      }
+    },
+    "note": "Esta versión funciona en el entorno de pruebas de PayPal con dinero de prueba."
+  },
+  "closing": {
+    "title": "Prueba una devolución.",
+    "lead": "La tienda de demostración tiene tres alquileres de ejemplo: una devolución limpia, un arañazo y una reclamación impugnada. Cada llamada a PayPal es real, en el entorno de pruebas."
+  },
+  "footer": {
+    "tagline": "La fianza que nunca sale de tu cuenta.",
+    "product": "Producto",
+    "forYou": "Para ti",
+    "about": "Sobre esta versión",
+    "aboutBody": "Creado para el PayPal AI Hackathon 2026. Hold no es una aseguradora y no guarda el dinero de los clientes. Los fondos permanecen en la cuenta del cliente hasta que se aprueba una reclamación.",
+    "rights": "© {year} Hold",
+    "credits": "Fotografías de Unsplash, de Florian, Nuno Alves y Krzysztof Kowalik. Las marcas del cuadro son ilustrativas."
+  },
+  "pages": {
+    "howItWorks": {
+      "title": "Un alquiler, cuatro momentos.",
+      "lead": "El personal y los clientes usan el teléfono que ya llevan. Nadie instala nada y la tienda no compra ningún equipo.",
+      "stepsHeading": "Los cuatro momentos",
+      "comparison": {
+        "title": "Qué muestra la comparación.",
+        "lead": "Desliza entre las dos fotografías. Una marca nueva queda señalada y se le pone el precio de la lista publicada por la tienda. Una marca que ya estaba se anota y nunca se cobra."
+      },
+      "contested": {
+        "title": "Si el cliente no está de acuerdo.",
+        "lead": "Impugnar una reclamación es tan fácil como aceptarla.",
+        "items": {
+          "reply": {
+            "title": "El cliente responde en la misma pantalla",
+            "body": "Dice con qué no está de acuerdo y puede añadir sus propias fotografías."
+          },
+          "owner": {
+            "title": "El dueño decide",
+            "body": "Hold presenta las dos posturas una junto a otra. Una persona con nombre toma la decisión final y puede reducir o anular el cargo."
+          },
+          "record": {
+            "title": "El expediente ya está completo",
+            "body": "Si después se abre una disputa en PayPal, las fotografías, la lista de precios y cada decisión están en un solo expediente de pruebas."
+          }
+        }
+      },
+      "figures": {
+        "reserved": "reservados en la cuenta del propio cliente",
+        "photographs": "fotografías en la entrega, repetidas en la devolución",
+        "seconds": "segundos para una entrega guiada en el mostrador",
+        "charged": "cobrados cuando el artículo vuelve como salió"
+      },
+      "moments": {
+        "reserve": {
+          "who": "El cliente, en su propio teléfono",
+          "body": "Priya alquila una bici eléctrica para tres días. Paga el precio del alquiler, lee la lista de precios por daños y aprueba una retención en PayPal. El dinero queda reservado en su propia cuenta y no se cobra nada.",
+          "points": {
+            "a": "El precio del alquiler se paga. La fianza solo se retiene. La página lo distingue en una sola frase.",
+            "b": "Los precios por daños se muestran y se aceptan antes de aprobar nada.",
+            "c": "La retención se hace en la recogida, así sigue vigente todo el alquiler."
+          }
+        },
+        "handOver": {
+          "who": "El personal, en el mostrador",
+          "body": "Jonas abre el alquiler en su teléfono y una guía lo lleva por seis vistas de la bici. Tarda unos cuarenta segundos. Priya recibe el informe de estado en su teléfono y lo confirma.",
+          "points": {
+            "a": "Una silueta muestra cómo encuadrar cada vista, una tras otra.",
+            "b": "Una fotografía borrosa u oscura se detecta al instante y se repite.",
+            "c": "Las marcas que el artículo ya tenía quedan anotadas, así nadie las paga después."
+          }
+        },
+        "return": {
+          "who": "El personal, en el mostrador",
+          "body": "Jonas toma las mismas seis fotografías. Hold alinea cada una con su pareja de la entrega y señala lo que ha cambiado. Desliza entre las dos fotografías para verlo.",
+          "points": {
+            "a": "La devolución repite la entrega foto por foto.",
+            "b": "Cada diferencia recibe una de tres respuestas: sin cambios, desgaste normal o daño.",
+            "c": "Cuando las fotografías no permiten una respuesta segura, Hold lo dice y una persona mira el artículo."
+          }
+        },
+        "settle": {
+          "who": "Decide una persona, después PayPal",
+          "body": "Una devolución limpia termina en el mostrador. El daño se convierte en una reclamación detallada que aprueba una persona, y el cliente la ve antes de que se cobre nada.",
+          "points": {
+            "a": "Nada nuevo: una confirmación libera toda la retención y avisa al cliente.",
+            "b": "Daño: el personal o el dueño pueden aceptar, reducir, quitar o añadir conceptos antes de que se cobre nada.",
+            "c": "Solo se cobra el importe aprobado. El resto se libera al momento."
+          }
+        }
+      },
+      "reserveScreen": {
+        "caption": "Priya, antes de recoger la bici",
+        "item": "Bici eléctrica, {days} días",
+        "fee": "Precio del alquiler",
+        "feeState": "Pagado",
+        "hold": "Retención",
+        "holdState": "Reservada, no cobrada",
+        "promise": "Si la bici vuelve como salió, la retención se libera en cuanto la devuelves.",
+        "approve": "Aprobar la retención en PayPal"
+      },
+      "holdCard": {
+        "note": "Hecha cuando Priya recoge la bici, en su propia cuenta de PayPal."
+      },
+      "captureScreen": {
+        "caption": "Jonas, en la entrega",
+        "context": "Entrega",
+        "progress": "{current} de {total}",
+        "hint": "Nítida y bien iluminada",
+        "shutter": "Tomar fotografía",
+        "views": {
+          "frameLeft": "Cuadro, lado izquierdo",
+          "frameRight": "Cuadro, lado derecho",
+          "frontWheel": "Rueda delantera",
+          "rearWheel": "Rueda trasera",
+          "display": "Pantalla",
+          "battery": "Batería"
+        }
+      },
+      "report": {
+        "title": "Informe de estado",
+        "noted": "{count, plural, one {# marca que ya estaba, anotada} other {# marcas que ya estaban, anotadas}}",
+        "confirmed": "Confirmado por Priya · {time}"
+      },
+      "outcomes": {
+        "phone": "En el teléfono de Priya",
+        "clean": {
+          "title": "Nada nuevo. Se libera en el mostrador.",
+          "message": "Tu bici ha vuelto bien. La retención de {amount} se ha liberado. No se ha cobrado nada."
+        },
+        "damage": {
+          "title": "Una marca nueva. Solo se cobra eso.",
+          "message": "Cuadro arañado, {taken}, de la lista de precios que aceptaste. Los otros {released} se han liberado."
+        }
+      },
+      "faq": {
+        "title": "Preguntas en el mostrador.",
+        "lead": "Respuestas breves a lo primero que preguntan el personal y los clientes."
+      }
+    },
+    "forShops": {
+      "title": "Protege cada artículo sin cobrar a quien lo devuelve.",
+      "lead": "Muchos clientes se van en cuanto se menciona una fianza. Una retención protege el artículo y deja su dinero donde está.",
+      "action": "Abrir la tienda de demostración",
+      "benefitsHeading": "Qué cambia en el mostrador.",
+      "change": {
+        "title": "Antes de Hold, y con Hold.",
+        "lead": "Las mismas tres personas, los mismos alquileres.",
+        "caption": "Qué cambia para cada persona de la tienda",
+        "who": "Quién",
+        "before": "Antes de Hold",
+        "after": "Con Hold",
+        "rows": {
+          "owner": {
+            "who": "El dueño",
+            "before": "Elige entre asustar a los clientes con una fianza y asumir el riesgo sin ella.",
+            "after": "Protege cada artículo sin cobrar a nadie que lo devuelva intacto."
+          },
+          "staff": {
+            "who": "El personal del mostrador",
+            "before": "Juzga el estado a ojo, con prisa, y aguanta el enfado del cliente.",
+            "after": "Sigue una rutina guiada y breve, y señala una fotografía."
+          },
+          "business": {
+            "who": "El negocio",
+            "before": "Pierde los daños que no puede demostrar y recibe malas reseñas por los que sí.",
+            "after": "Recupera lo que se le debe con pruebas que ambas partes han visto."
+          }
+        }
+      },
+      "types": {
+        "title": "Pensado para tiendas como estas.",
+        "lead": "Artículos que merece la pena proteger, pero baratos de alquilar. El único equipo es el teléfono que tu personal ya lleva.",
+        "items": {
+          "bikes": {
+            "title": "Bicis, bicis eléctricas y patinetes",
+            "body": "Visitantes que pagan con tarjetas extranjeras y una flota en la que una bici eléctrica dañada cuesta las ganancias de una semana."
+          },
+          "cameras": {
+            "title": "Cámaras, objetivos y audio",
+            "body": "Artículos de mucho valor en los que una marca en el cristal tiene que tener fecha."
+          },
+          "outdoor": {
+            "title": "Esquí, surf, kayak y acampada",
+            "body": "Personal de temporada y cola en el mostrador."
+          },
+          "events": {
+            "title": "Material para fiestas y eventos",
+            "body": "Muchos artículos por alquiler, cada uno con su lista de precios."
+          },
+          "tools": {
+            "title": "Herramientas y maquinaria pequeña",
+            "body": "El desgaste normal tiene que distinguirse del daño, siempre de la misma forma."
+          },
+          "family": {
+            "title": "Artículos de bebé, instrumentos y ropa de etiqueta",
+            "body": "Clientes que quieren saber exactamente qué les podrían cobrar."
+          }
+        }
+      },
+      "secondaryAction": "Ver cómo funciona",
+      "benefitsLead": "Una retención sustituye a la fianza. Las fotografías sustituyen a la discusión.",
+      "today": {
+        "title": "Hoy",
+        "itemsOut": "Artículos alquilados",
+        "dueBack": "Vuelven hoy",
+        "holds": "Retenciones activas",
+        "claims": "Reclamaciones por decidir",
+        "attention": "Requiere atención",
+        "claim": "Retención {number} · una reclamación de {amount} espera aprobación",
+        "claimAction": "Revisar",
+        "expiring": "Retención {number} · día {day} de {max}",
+        "expiringAction": "Reemplazar",
+        "caption": "Tienda de ejemplo. Cifras ilustrativas."
+      },
+      "setup": {
+        "title": "Se configura una vez, con palabras sencillas.",
+        "lead": "Escribes las reglas como las dirías en el mostrador. Hold las convierte en una lista que cada cliente puede leer antes de alquilar.",
+        "items": {
+          "prices": {
+            "title": "La lista de precios por daños",
+            "body": "Cuánto cuesta cada tipo de daño, pérdida o retraso. Una reclamación nunca puede superarla."
+          },
+          "wear": {
+            "title": "La política de desgaste",
+            "body": "Qué consideras desgaste normal. Hold lo aplica de la misma forma a cada cliente."
+          },
+          "photos": {
+            "title": "El plan de fotografías",
+            "body": "Las vistas que hay que tomar de cada tipo de artículo. Hold propone un plan y tú lo ajustas."
+          },
+          "amounts": {
+            "title": "Retenciones a la medida del artículo",
+            "body": "Un casco y una bici eléctrica no necesitan la misma protección."
+          }
+        }
+      },
+      "passport": {
+        "title": "Cada artículo guarda su propio historial.",
+        "lead": "Cada alquiler añade un juego de fotografías fechadas. Cada marca tiene la fecha en que se vio por primera vez, así nadie paga el arañazo de otro.",
+        "label": "Pasaporte del artículo",
+        "caption": "Artículo de ejemplo. Fotografías ilustrativas.",
+        "entries": {
+          "scuff": {
+            "title": "Roce en el tubo diagonal, visto por primera vez",
+            "note": "Anotado en una entrega. Nunca se ha cobrado."
+          },
+          "handover": {
+            "title": "Entrega, retención {number}",
+            "note": "{count} fotografías. Nada nuevo desde la última devolución."
+          },
+          "scratch": {
+            "title": "Cuadro arañado, nuevo",
+            "note": "{amount} de la lista de precios. Aprobado por una persona."
+          }
+        },
+        "points": {
+          "old": "El daño antiguo sigue siendo antiguo, alquile quien alquile después.",
+          "maintenance": "Ves qué artículos se desgastan más rápido y cuáles necesitan reparación.",
+          "resale": "Un historial documentado respalda un mejor precio de reventa y una reclamación al seguro más sólida."
+        }
+      },
+      "safeguards": {
+        "title": "Ningún cargo sin una persona.",
+        "lead": "Estos controles forman parte del producto. No dependen de que alguien se acuerde.",
+        "items": {
+          "approval": {
+            "title": "Sin cargos automáticos",
+            "body": "Cada cargo contra una retención lo aprueba una persona con nombre."
+          },
+          "second": {
+            "title": "Segunda aprobación para reclamaciones grandes",
+            "body": "Por encima del importe que elijas, debe aprobarla el dueño."
+          },
+          "cap": {
+            "title": "Un tope por diseño",
+            "body": "Una reclamación no puede superar la lista de precios publicada para el daño encontrado."
+          },
+          "records": {
+            "title": "Registros que no se pueden sustituir",
+            "body": "Las fotografías se fechan al tomarlas y no se pueden reemplazar después."
+          }
+        }
+      }
+    },
+    "forRenters": {
+      "title": "Conserva tu dinero mientras alquilas.",
+      "lead": "Una retención reserva la fianza en tu propia cuenta. Devuelve el artículo como salió y nunca hubo pago: nada que reembolsar, nada que esperar y nada perdido en el cambio de divisa.",
+      "action": "Ver cómo funciona",
+      "benefitsHeading": "Ves lo que ve la tienda.",
+      "assurances": {
+        "title": "Con qué puedes contar.",
+        "lead": "Vale para cada cliente, sea quien sea.",
+        "items": {
+          "informed": {
+            "title": "Lo sabes antes de pagar",
+            "body": "Ves que se hará una retención, de cuánto es, cuánto puede durar y cuánto cuesta cada tipo de daño."
+          },
+          "noSurprise": {
+            "title": "Sin cargos sorpresa",
+            "body": "Solo te pueden cobrar un daño que esté en la lista publicada, se vea en las fotografías y lo apruebe una persona."
+          },
+          "reply": {
+            "title": "Un derecho real a responder",
+            "body": "Impugnar una reclamación es tan fácil como aceptarla, y llega a un ser humano."
+          },
+          "consistent": {
+            "title": "Las mismas reglas para todos",
+            "body": "Una sola política de desgaste y una sola lista de precios valen para cada cliente."
+          },
+          "privacy": {
+            "title": "Fotografías de objetos, no de personas",
+            "body": "Las caras se difuminan. Los registros se guardan solo el tiempo necesario."
+          },
+          "notInsurer": {
+            "title": "Tu dinero sigue siendo tuyo",
+            "body": "Hold no es una aseguradora y no guarda tu dinero. Los fondos permanecen en tu cuenta hasta que se aprueba una reclamación."
+          }
+        }
+      },
+      "benefitsLead": "Las mismas dos fotografías, la misma lista de precios y el mismo importe, en tu propio teléfono, antes de que se cobre nada.",
+      "statement": {
+        "title": "Una fianza sale de tu cuenta. Una retención no.",
+        "lead": "El mismo alquiler de tres días, tal como aparece en tu cuenta.",
+        "later": "Días después",
+        "out": "Fuera de tu cuenta durante el alquiler",
+        "deposit": {
+          "label": "Con fianza",
+          "charged": "Fianza cobrada",
+          "returned": "Bici devuelta, reembolso solicitado",
+          "refunded": "Llega el reembolso",
+          "waiting": "En espera",
+          "foot": "Te quedas sin tu dinero durante todo el viaje. Con una tarjeta extranjera puedes perder en el cambio de divisa a la ida y a la vuelta."
+        },
+        "hold": {
+          "label": "Con retención",
+          "placed": "Retención hecha",
+          "reserved": "{amount} reservados",
+          "released": "Bici devuelta, retención liberada",
+          "taken": "{amount} cobrados",
+          "foot": "Nada salió de tu cuenta, así que no hay nada que reembolsar ni nada que esperar."
+        }
+      },
+      "prices": {
+        "title": "Los precios se publican antes de alquilar.",
+        "lead": "Lees la lista de precios por daños al alquilar y la aceptas al aprobar la retención. Nada se inventa después.",
+        "points": {
+          "cap": "Una reclamación nunca puede superar la lista.",
+          "wear": "El desgaste normal no es daño, y la política de desgaste es la misma para todos.",
+          "old": "Una marca que estaba antes de ti consta en el historial del artículo. Nunca te la cobran."
+        }
+      },
+      "faq": {
+        "title": "Antes de aprobar una retención.",
+        "lead": "Respuestas breves a lo primero que preguntan los clientes."
+      }
+    },
+    "ai": {
+      "title": "La IA compara. Una persona decide.",
+      "lead": "El cobro automático de daños enfadó a los clientes de alquiler porque no había a quién preguntar. Hold está construido al revés: la IA reúne y compara, una persona decide y el cliente lo ve todo.",
+      "listsHeading": "Qué hace la IA y qué no hace nunca",
+      "limits": {
+        "title": "Sincera sobre sus límites.",
+        "lead": "La luz, la suciedad y los reflejos pueden engañar a cualquier comparación.",
+        "items": {
+          "confidence": {
+            "title": "Dice lo segura que está",
+            "body": "Cada hallazgo indica lo segura que es la comparación, con palabras que un cliente puede leer."
+          },
+          "retake": {
+            "title": "Pide repetir la foto",
+            "body": "Una fotografía borrosa u oscura se detecta en el teléfono, cuando todavía es fácil repetirla."
+          },
+          "defers": {
+            "title": "Cede ante una persona",
+            "body": "Cuando no puede distinguir el desgaste del daño, lo dice y una persona lo mira. La vía manual funciona siempre."
+          }
+        }
+      },
+      "pipeline": {
+        "title": "Siete pasos. El modelo hace uno.",
+        "lead": "El método fiable más barato va primero. Todo lo que no se puede pasar por alto lo encuentra código convencional, y sigue funcionando cuando el modelo no está disponible.",
+        "actors": {
+          "code": "Código convencional",
+          "model": "El modelo de IA",
+          "person": "Una persona"
+        },
+        "steps": {
+          "quality": {
+            "title": "Revisar la fotografía",
+            "body": "En el teléfono, al tomarla. Una toma borrosa, oscura o mal encuadrada se rechaza al instante."
+          },
+          "normalize": {
+            "title": "Igualarla",
+            "body": "Se corrigen la orientación, el tamaño y la exposición."
+          },
+          "align": {
+            "title": "Alinearla",
+            "body": "La fotografía de la devolución se alinea con su pareja de la entrega."
+          },
+          "regions": {
+            "title": "Buscar lo que ha cambiado",
+            "body": "Las zonas que difieren se marcan como pistas para el paso siguiente."
+          },
+          "judge": {
+            "title": "Valorar",
+            "body": "El modelo mira las dos fotografías y un recorte ampliado de cada zona. Responde sin cambios, desgaste o daño, y dice lo seguro que está."
+          },
+          "price": {
+            "title": "Poner precio",
+            "body": "Cada hallazgo se relaciona con la lista publicada por la tienda. Un importe nunca sale del modelo."
+          },
+          "decide": {
+            "title": "Decidir",
+            "body": "Una persona con nombre acepta, reduce, quita o añade. Solo entonces se puede cobrar algo."
+          }
+        }
+      },
+      "findings": {
+        "title": "Cada diferencia recibe una respuesta clara.",
+        "lead": "Cada una indica su nivel de confianza, con palabras que un cliente puede leer.",
+        "caption": "Hallazgos de ejemplo. Fotografías ilustrativas.",
+        "high": "Confianza alta",
+        "low": "Confianza baja",
+        "items": {
+          "damage": {
+            "verdict": "Daño",
+            "title": "Cuadro arañado",
+            "body": "No estaba en la entrega. Se relaciona con la lista de precios y pasa a una persona."
+          },
+          "wear": {
+            "verdict": "Desgaste normal",
+            "title": "Ligero desgaste del neumático",
+            "body": "Lo cubre la política de desgaste de la tienda. Nunca se cobra."
+          },
+          "same": {
+            "verdict": "Sin cambios",
+            "title": "Roce en el tubo diagonal",
+            "body": "Ya estaba en la entrega. Queda en el historial del artículo y nunca se cobra."
+          },
+          "unsure": {
+            "verdict": "No se puede saber",
+            "title": "Reflejo en el freno",
+            "body": "La fotografía no permite una respuesta. Una persona mira el propio artículo."
+          }
+        }
+      },
+      "accuracy": {
+        "title": "Medido, no afirmado.",
+        "lead": "La comparación se prueba con pares de fotografías cuya respuesta correcta se conoce: devoluciones limpias, desgaste normal y daños reales, con buena y mala luz.",
+        "items": {
+          "counts": {
+            "title": "Se publica en recuentos",
+            "body": "Cada resultado es un número de pares sobre los pares probados, nunca un porcentaje a secas."
+          },
+          "renter": {
+            "title": "La cifra del cliente va primero",
+            "body": "La cifra principal es cuántas veces una devolución limpia se señaló por error."
+          },
+          "worse": {
+            "title": "No puede empeorar sin que se note",
+            "body": "Una versión nueva que rinde peor en la prueba no se publica."
+          }
+        },
+        "status": {
+          "title": "La tabla de resultados aún no está publicada.",
+          "body": "Aparecerá aquí, con todos los recuentos, cuando se haya ejecutado el conjunto de evaluación."
+        }
+      },
+      "agents": {
+        "title": "Un agente solo actúa dentro de límites escritos por una persona.",
+        "lead": "Un cliente o un dueño pueden dejar que un agente de IA actúe por ellos. Cada llamada a una herramienta pasa por una única pasarela. Comprueba quién lo pide, para qué tienda y bajo qué límite escrito, y después registra la llamada.",
+        "caption": "Qué pueden hacer las herramientas de un agente",
+        "tiers": {
+          "read": {
+            "name": "Leer",
+            "body": "Devuelve los registros que la persona puede ver."
+          },
+          "draft": {
+            "name": "Redactar",
+            "body": "Escribe un texto para que una persona lo envíe o lo descarte."
+          },
+          "propose": {
+            "name": "Proponer",
+            "body": "Prepara una decisión para que una persona la apruebe."
+          },
+          "notify": {
+            "name": "Avisar",
+            "body": "Envía un mensaje fijo, como un recordatorio de que toca una devolución."
+          },
+          "mandate": {
+            "name": "Actuar bajo mandato",
+            "body": "Actúa dentro de límites que una persona escribió de antemano y se puede detener en cualquier momento."
+          },
+          "charge": {
+            "name": "Cobrar",
+            "body": "Ese nivel no existe. Ninguna herramienta acepta un importe y ningún agente puede iniciar un cargo."
+          }
+        }
+      }
+    },
+    "paypal": {
+      "title": "Reservado no es cobrado. PayPal lo hace real.",
+      "lead": "Todo el producto se apoya en la diferencia entre reservar dinero y cobrarlo, y en poder cobrar una parte y liberar el resto.",
+      "tableHeading": "Qué usa cada necesidad del alquiler",
+      "advantages": {
+        "title": "Por qué una retención de PayPal y no una de tarjeta.",
+        "lead": "Tres diferencias importan a una tienda de alquiler.",
+        "items": {
+          "days": {
+            "title": "Dura lo que duran los alquileres reales",
+            "body": "Una retención de PayPal puede seguir abierta hasta 29 días. Muchas retenciones de tarjeta caducan en una semana."
+          },
+          "wallet": {
+            "title": "Sin entregar la tarjeta",
+            "body": "Quien paga desde su cuenta de PayPal no da su tarjeta a una tienda que nunca ha visitado."
+          },
+          "truth": {
+            "title": "El registro de PayPal es la verdad",
+            "body": "Una retención cuenta como hecha, cobrada o liberada solo cuando PayPal lo confirma. Hold nunca adivina el estado de un pago."
+          }
+        }
+      },
+      "lifecycle": {
+        "title": "La vida de una retención.",
+        "lead": "Cuatro llamadas a PayPal. Hold registra cada paso solo cuando PayPal lo confirma.",
+        "call": "Llamada a PayPal",
+        "steps": {
+          "order": {
+            "title": "La fianza pasa a ser un pedido propio",
+            "body": "Va aparte del precio del alquiler y se crea para reservar, no para cobrar."
+          },
+          "authorize": {
+            "title": "El cliente aprueba y se hace la retención",
+            "body": "{amount} quedan reservados en la cuenta del propio cliente. No ha habido ningún pago."
+          },
+          "renew": {
+            "title": "Un cargo tardío sigue asegurado",
+            "body": "Si un cargo llega después de los tres primeros días, Hold renueva la retención justo antes. PayPal le da un identificador nuevo y Hold lo sigue."
+          },
+          "capture": {
+            "title": "Solo se cobra la reclamación aprobada",
+            "body": "{taken} se cobran como captura final. PayPal libera los otros {released}."
+          },
+          "void": {
+            "title": "Se libera toda la retención",
+            "body": "Los {amount} completos se liberan en el mostrador. Nunca hubo pago."
+          }
+        },
+        "idempotency": "Cada llamada que mueve dinero lleva su propio identificador de solicitud, así un reintento nunca cobra dos veces."
+      },
+      "table": {
+        "title": "Qué usa cada necesidad del alquiler.",
+        "lead": "Ocho necesidades y ocho funciones de PayPal. Cada una hace un trabajo necesario."
+      },
+      "length": {
+        "caption": "Cuánto tiempo puede seguir abierta una retención",
+        "paypal": "Una retención de PayPal",
+        "card": "Muchas retenciones de tarjeta",
+        "days": "{count} días",
+        "about": "Unos {count} días",
+        "rental": "Un alquiler de tres semanas termina aquí"
+      },
+      "truth": {
+        "title": "Hold nunca adivina el estado de un pago.",
+        "lead": "Una retención cuenta como hecha, cobrada o liberada solo cuando PayPal lo dice.",
+        "items": {
+          "verify": {
+            "title": "La notificación se verifica",
+            "body": "Se comprueba su firma antes de leer un solo campo."
+          },
+          "read": {
+            "title": "El pago se vuelve a consultar",
+            "body": "Hold pide a PayPal el pago en sí y se fía de esa respuesta, no del mensaje."
+          },
+          "log": {
+            "title": "Después se deja por escrito",
+            "body": "Una línea permanente en el registro de dinero, vinculada al evento de PayPal que lo confirmó."
+          }
+        }
+      }
+    },
+    "demo": {
+      "title": "Prueba una devolución.",
+      "lead": "La tienda de demostración tiene tres alquileres de ejemplo. Cada llamada a PayPal es real, en el entorno de pruebas y con dinero de prueba.",
+      "status": {
+        "title": "La tienda de demostración aún no está abierta.",
+        "body": "Se abrirá cuando se despliegue la primera versión. Aquí aparecerán los datos de acceso del dueño y del personal de demostración."
+      },
+      "samples": {
+        "title": "Tres alquileres de ejemplo.",
+        "lead": "Un toque carga un juego de fotografías de ejemplo en lugar de la cámara. El resto del proceso es real.",
+        "items": {
+          "clean": {
+            "title": "Una devolución limpia",
+            "body": "La comparación no encuentra nada nuevo y la retención se libera en segundos.",
+            "result": "Liberada por completo"
+          },
+          "scratch": {
+            "title": "Un arañazo",
+            "body": "La marca nueva se señala, se relaciona con la lista de precios, la aprueba una persona y se cobra en parte. El resto se libera.",
+            "result": "Cobrada en parte"
+          },
+          "contested": {
+            "title": "Una reclamación impugnada",
+            "body": "El cliente responde, el dueño revisa las dos posturas y ajusta el cargo.",
+            "result": "Retenida hasta que decida el dueño"
+          }
+        }
+      },
+      "action": "Ver cómo funciona",
+      "cast": {
+        "title": "Tres personas, tres formas de entrar.",
+        "lead": "Los datos de acceso de cada una aparecerán aquí cuando abra la tienda de demostración.",
+        "items": {
+          "owner": {
+            "title": "Tomás, el dueño",
+            "body": "Escribe la lista de precios y la política de desgaste, ve toda la tienda y decide las reclamaciones impugnadas."
+          },
+          "staff": {
+            "title": "Jonas, en el mostrador",
+            "body": "Hace la entrega y la devolución, y aprueba una reclamación dentro de su límite."
+          },
+          "renter": {
+            "title": "Priya, la clienta",
+            "body": "No tiene cuenta. Abre un enlace, ve las fotografías y la reclamación, y acepta o dice que no está de acuerdo."
+          }
+        }
+      },
+      "honest": {
+        "title": "Qué es real y qué es simulado.",
+        "lead": "Todo lo simulado se indica en la pantalla y en el registro.",
+        "real": {
+          "title": "Real",
+          "items": {
+            "paypal": "Cada llamada a PayPal, hecha en el entorno de pruebas.",
+            "comparison": "La comparación de cada par de fotografías.",
+            "approval": "Cada aprobación, registrada con el nombre de la persona."
+          }
+        },
+        "simulated": {
+          "title": "Simulado",
+          "items": {
+            "money": "El dinero. Las cuentas del entorno de pruebas solo tienen fondos de prueba.",
+            "camera": "La cámara. Un toque carga fotografías de ejemplo en su lugar.",
+            "people": "Las personas. Tomás, Jonas y Priya son usuarios de demostración."
+          }
+        }
+      }
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "Esta página no existe.",
+      "body": "Puede que la dirección esté mal escrita o que la página se haya movido.",
+      "home": "Volver a la página de inicio"
+    },
+    "generic": {
+      "title": "Algo ha fallado.",
+      "body": "No se ha podido mostrar la página. No se ha cobrado nada y no ha cambiado nada.",
+      "retry": "Intentar de nuevo"
+    }
+  },
+  "holdMeter": {
+    "summary": "{reserved} reservados, {taken} cobrados, {released} liberados",
+    "open": "{reserved} reservados, nada cobrado"
+  },
+  "priceList": {
+    "title": "Lista de precios por daños",
+    "items": {
+      "scratchedFrame": "Cuadro arañado",
+      "missingCharger": "Cargador perdido",
+      "bentWheel": "Rueda doblada"
+    },
+    "wear": "El desgaste normal, como un ligero desgaste de los neumáticos o pequeños roces en los pedales, nunca se cobra.",
+    "agreed": "Aceptada por el cliente antes de aprobar la retención.",
+    "example": "Lista de precios de ejemplo."
+  },
+  "faq": {
+    "items": {
+      "charge": {
+        "q": "¿Una retención es un cargo?",
+        "a": "No. Una retención reserva el importe en la cuenta de PayPal del propio cliente. No se cobra nada salvo que una persona apruebe una reclamación."
+      },
+      "length": {
+        "q": "¿Cuánto tiempo puede seguir abierta una retención?",
+        "a": "Hasta 29 días. Hold la mantiene válida durante el alquiler y avisa de cualquier retención que esté a punto de caducar."
+      },
+      "beyond": {
+        "q": "¿Y si el daño cuesta más que la retención?",
+        "a": "La retención se cobra entera y el resto se factura aparte, con las mismas fotografías adjuntas."
+      },
+      "app": {
+        "q": "¿Hace falta una app o una cuenta?",
+        "a": "No. El personal abre Hold en el navegador del teléfono que ya lleva. El cliente recibe un enlace."
+      },
+      "dark": {
+        "q": "¿Y si una fotografía es demasiado oscura para valorarla?",
+        "a": "Hold pide repetirla mientras el artículo sigue en el mostrador. Si aun así no puede saberlo, lo dice y una persona mira el propio artículo."
+      },
+      "wear": {
+        "q": "¿Quién decide qué es desgaste normal?",
+        "a": "La tienda, una sola vez y con palabras sencillas. Hold aplica esa política de la misma forma a cada cliente."
+      },
+      "release": {
+        "q": "¿Cuándo se libera la retención?",
+        "a": "En cuanto el personal confirma una devolución limpia, normalmente mientras sigues en el mostrador. Tu teléfono te avisa de que no se ha cobrado nada."
+      },
+      "chargedFor": {
+        "q": "¿Qué me pueden cobrar?",
+        "a": "Solo un daño que esté en la lista de precios publicada, se vea en las fotografías y lo apruebe una persona. Una reclamación nunca puede superar la lista."
+      },
+      "disagree": {
+        "q": "¿Y si no estoy de acuerdo con una reclamación?",
+        "a": "Lo dices en la misma pantalla y puedes añadir tus propias fotografías. Una persona con nombre de la tienda revisa las dos posturas y puede reducir o anular el cargo."
+      },
+      "photographs": {
+        "q": "¿Qué pasa con las fotografías?",
+        "a": "Muestran el artículo, no a ti. Las caras se difuminan y los registros se guardan solo el tiempo que exigen la política de la tienda y la ley."
+      }
+    }
+  },
+  "auth": {
+    "passwordless": "Sin contraseña. Hold te envía por correo un código que sirve una sola vez.",
+    "sending": "Enviando…",
+    "fields": {
+      "name": "Tu nombre",
+      "shopName": "Nombre de la tienda",
+      "email": "Correo de trabajo"
+    },
+    "problems": {
+      "name": {
+        "missing": "Escribe tu nombre.",
+        "invalid": "Usa 100 caracteres como máximo."
+      },
+      "shopName": {
+        "missing": "Escribe el nombre de tu tienda.",
+        "invalid": "Usa 100 caracteres como máximo."
+      },
+      "email": {
+        "missing": "Escribe tu dirección de correo.",
+        "invalid": "Eso no parece una dirección de correo. Revísala e inténtalo de nuevo."
+      }
+    },
+    "signIn": {
+      "title": "Entra en tu tienda.",
+      "lead": "Para dueños y personal del mostrador.",
+      "submit": "Enviarme un código",
+      "switch": "¿Aún no usas Hold?",
+      "switchAction": "Crear una cuenta de tienda",
+      "aside": {
+        "title": "Tu tienda, tal como la dejaste.",
+        "lead": "Los artículos alquilados, las retenciones activas y las reclamaciones que esperan una decisión, en el teléfono que ya llevas."
+      }
+    },
+    "signUp": {
+      "title": "Abre tu tienda en Hold.",
+      "lead": "Para quien tiene una tienda de alquiler. Lleva cerca de un minuto, y el único equipo es tu teléfono.",
+      "submit": "Crear mi cuenta de tienda",
+      "switch": "¿Ya tienes cuenta?",
+      "switchAction": "Entrar",
+      "aside": {
+        "title": "Tres pasos hasta tu primer alquiler protegido.",
+        "steps": {
+          "email": {
+            "title": "Confirma tu correo",
+            "body": "Hold te envía un código por correo. No hay contraseña que crear."
+          },
+          "paypal": {
+            "title": "Conecta la cuenta de PayPal de tu tienda",
+            "body": "Las retenciones se quedan en la cuenta de cada cliente, y las reclamaciones aprobadas se pagan en la tuya. Hold nunca guarda el dinero."
+          },
+          "prices": {
+            "title": "Escribe tu lista de precios",
+            "body": "Lo que cuesta cada tipo de daño, con palabras sencillas. Los clientes la leen antes de alquilar."
+          }
+        }
+      }
+    },
+    "notes": {
+      "title": "¿No eres el dueño?",
+      "staff": {
+        "title": "Personal del mostrador",
+        "body": "No te registras. El dueño de la tienda te invita, y entras con esa dirección de correo."
+      },
+      "renter": {
+        "title": "¿Vas a alquilar algo?",
+        "body": "No necesitas cuenta. Abre el enlace que te envió la tienda.",
+        "action": "Ver qué significa una retención para ti"
+      }
+    },
+    "notices": {
+      "busy": {
+        "title": "Demasiados intentos.",
+        "body": "Espera unos minutos y vuelve a intentarlo."
+      },
+      "unavailable": {
+        "title": "No se pudo conectar con el inicio de sesión.",
+        "body": "No se ha enviado nada. Inténtalo de nuevo en un momento."
+      },
+      "no_passkey": {
+        "title": "No hay llave de acceso para esta dirección.",
+        "body": "Entra con un código por correo y añade una llave de acceso en la página de seguridad de tu tienda."
+      },
+      "invitation_closed": {
+        "title": "Esta invitación ya no sirve.",
+        "body": "Pide a la tienda que te envíe otra."
+      }
+    },
+    "code": {
+      "title": "Revisa tu correo.",
+      "lead": "Hemos enviado un código a {email}. Sirve una sola vez, durante diez minutos.",
+      "field": "Código del correo",
+      "submit": "Continuar",
+      "checking": "Comprobando…",
+      "resend": "Enviar un código nuevo",
+      "sending": "Enviando…",
+      "startOver": "Usar otro correo",
+      "resent": {
+        "title": "Un código nuevo va de camino.",
+        "body": "Usa el código del correo más reciente."
+      },
+      "problems": {
+        "missing": "Escribe el código del correo.",
+        "invalid": "El código son las cifras del correo. Revísalo e inténtalo de nuevo.",
+        "wrong": "Ese código no es correcto. Revísalo e inténtalo de nuevo.",
+        "expired": "Ese código ha caducado. Pide uno nuevo.",
+        "attempt_over": "Este código ya no sirve. Pide uno nuevo o empieza de nuevo.",
+        "second_factor": "Esta cuenta pide también un código de una app de autenticación, que Hold aún no acepta.",
+        "busy": "Demasiados intentos. Espera unos minutos y vuelve a intentarlo.",
+        "unavailable": "Hold no ha podido comprobar el código ahora. Inténtalo de nuevo en un momento.",
+        "no_passkey": "No hay llave de acceso para esta dirección. Usa el código del correo.",
+        "invitation_closed": "Esta invitación ya no sirve. Pide otra a la tienda."
+      }
+    },
+    "passkey": {
+      "signIn": "Entrar con una llave de acceso",
+      "waiting": "Esperando a tu dispositivo…",
+      "add": "Añadir una llave de acceso en este dispositivo",
+      "added": "Llave de acceso añadida.",
+      "problems": {
+        "email": "Escribe primero tu correo de trabajo y luego usa tu llave de acceso.",
+        "unsupported": "Este navegador no admite llaves de acceso. Usa el código del correo o un navegador más reciente.",
+        "cancelled": "No se usó la llave de acceso. Vuelve a intentarlo cuando quieras.",
+        "unavailable": "Hold no ha podido conectar con el inicio de sesión. Inténtalo de nuevo en un momento.",
+        "wrong": "Esa llave de acceso no es una que Hold conozca para esta dirección.",
+        "expired": "Ha tardado demasiado. Inténtalo de nuevo.",
+        "attempt_over": "Ha tardado demasiado. Inténtalo de nuevo.",
+        "second_factor": "Esta cuenta pide un código que Hold no acepta. Habla con quien lleva la tienda.",
+        "busy": "Demasiados intentos. Espera unos minutos y vuelve a intentarlo.",
+        "no_passkey": "Aún no hay llave de acceso para esta dirección. Entra con el código del correo y añade una.",
+        "invitation_closed": "Esta invitación ya no sirve.",
+        "missing": "Escribe primero tu correo de trabajo.",
+        "invalid": "Escribe primero tu correo de trabajo."
+      }
+    },
+    "invite": {
+      "title": "Únete a {shop} en Hold.",
+      "lead": "Te invitan como {role}. Hold enviará un código a {email} para confirmar que eres tú.",
+      "submit": "Enviarme un código",
+      "switch": "¿Ya trabajas aquí?",
+      "switchAction": "Entrar",
+      "aside": {
+        "title": "Así se trabaja con Hold.",
+        "lead": "Fotos en la entrega y en la devolución, una retención en la cuenta de PayPal del propio cliente y una persona que aprueba cada cargo."
+      },
+      "closed": {
+        "title": "Esta invitación no se puede usar.",
+        "lead": "Las invitaciones sirven una sola vez, durante siete días.",
+        "body": "Pide a quien lleva la tienda que te envíe otra.",
+        "accepted": "Esta invitación ya se aceptó.",
+        "revoked": "La tienda retiró esta invitación.",
+        "expired": "Esta invitación ha caducado.",
+        "missing": "No hay ninguna invitación en esta dirección."
+      }
+    }
+  },
+  "shop": {
+    "label": "Tu tienda",
+    "signedInAs": "Has entrado como {email}.",
+    "otherShops": "Tus otras tiendas",
+    "switchShop": "Trabajar en esta tienda",
+    "signOut": "Cerrar sesión",
+    "noShop": {
+      "title": "Aún no hay tienda.",
+      "body": "Esta cuenta no tiene tienda. Crea una en la página de registro con el mismo correo, o pide a quien lleva una tienda que te invite."
+    },
+    "nav": {
+      "label": "Páginas de la tienda",
+      "home": "Resumen",
+      "security": "Seguridad",
+      "staff": "Equipo",
+      "prices": "Precios",
+      "paypal": "PayPal"
+    },
+    "setup": {
+      "title": "Prepara tu tienda",
+      "done": "Hecho.",
+      "toDo": "Pendiente.",
+      "passkey": {
+        "title": "Añade una llave de acceso",
+        "body": "Tu huella, tu cara o tu PIN en este dispositivo. Hold la pide antes de que nadie cambie precios, equipo o PayPal.",
+        "action": "Ir a seguridad"
+      },
+      "prices": {
+        "title": "Escribe tu lista de precios",
+        "body": "Lo que cuesta cada tipo de daño, con palabras sencillas. Los clientes la leen antes de alquilar.",
+        "action": "Ir a precios"
+      },
+      "paypal": {
+        "title": "Conecta la cuenta de PayPal de tu tienda",
+        "body": "Las retenciones se quedan en la cuenta de cada cliente, y las reclamaciones aprobadas se pagan en la tuya.",
+        "action": "Ir a PayPal"
+      },
+      "staff": {
+        "title": "Invita a tu equipo",
+        "body": "Cada persona entra con su propio correo, con el papel y el límite de aprobación que le des.",
+        "action": "Ir a equipo"
+      }
+    },
+    "passkeyGate": {
+      "title": "Confirma que eres tú.",
+      "confirmBody": "Para cambiar precios, equipo o PayPal hace falta tu llave de acceso, no solo un código por correo.",
+      "addBody": "Para cambiar precios, equipo o PayPal hace falta una llave de acceso. Añade una en este dispositivo primero.",
+      "confirm": "Confirmar con mi llave de acceso",
+      "add": "Añadir una llave de acceso"
+    },
+    "results": {
+      "signed_out": "Tu sesión ha terminado. Vuelve a entrar.",
+      "no_shop": "Esta cuenta no tiene tienda.",
+      "role": "Tu papel en esta tienda no lo permite.",
+      "passkey_needed": "Confirma primero con tu llave de acceso.",
+      "invalid": "Falta algo en el formulario o es demasiado largo. Revísalo e inténtalo de nuevo.",
+      "unavailable": "No ha funcionado. Inténtalo de nuevo en un momento.",
+      "role_not_invitable": "No puedes invitar a alguien con ese papel.",
+      "currency_unset": "Publica primero tu lista de precios, para que los límites de aprobación tengan moneda.",
+      "limit_invalid": "El límite de aprobación no es un importe. Usa cifras, como 150 o 150,00.",
+      "email_failed": "No se pudo enviar el correo de invitación, así que no se ha guardado nada. Revisa la dirección e inténtalo de nuevo.",
+      "not_open": "Esa invitación ya no está abierta.",
+      "currency_unknown": "Elige una moneda de la lista.",
+      "rows_mismatched": "Cada precio necesita una descripción, un tipo y un importe.",
+      "amount_invalid": "El precio {row} no es un importe. Usa cifras, como 35 o 35,50.",
+      "threshold_invalid": "El umbral de aprobación no es un importe. Usa cifras, como 200 o 200,00.",
+      "no_entries": "Añade al menos un precio.",
+      "too_many_entries": "Una lista de precios puede tener hasta 60 precios.",
+      "description_missing": "El precio {row} necesita una descripción.",
+      "description_too_long": "La descripción del precio {row} es demasiado larga.",
+      "description_repeated": "El precio {row} repite otra descripción. Haz que cada una sea distinta.",
+      "amount_zero": "El precio {row} es cero. Quítalo o dale un importe.",
+      "wrong_currency": "El precio {row} está en otra moneda.",
+      "wear_policy_missing": "Explica qué cuenta como desgaste normal.",
+      "wear_policy_too_long": "La política de desgaste es demasiado larga.",
+      "currency_fixed": "La moneda queda fijada en cuanto se publica una lista de precios.",
+      "paypal_refused": "PayPal no ha aceptado estas credenciales. Comprueba que copiaste las dos de la misma app de sandbox.",
+      "paypal_unavailable": "No se pudo conectar con PayPal. No se ha guardado nada. Inténtalo de nuevo en un momento."
+    },
+    "security": {
+      "title": "Seguridad",
+      "lead": "Una llave de acceso te deja entrar con tu huella, tu cara o tu PIN, en un dispositivo que llevas contigo.",
+      "leadRequired": "Tu papel te permite cambiar precios, equipo o PayPal, así que Hold te pide una llave de acceso antes: tu huella, tu cara o tu PIN en un dispositivo que llevas contigo. Un código por correo no basta.",
+      "unavailable": "No se han podido mostrar tus llaves de acceso ahora.",
+      "none": "Aún no tienes ninguna llave de acceso.",
+      "unnamed": "Llave de acceso {number}",
+      "added": "Añadida el {date}",
+      "how": "Tu dispositivo guarda la llave de acceso. Hold y su servicio de inicio de sesión guardan solo la parte pública, que por sí sola no permite entrar."
+    },
+    "staff": {
+      "title": "Equipo",
+      "team": "Quién trabaja aquí",
+      "limit": "aprueba reclamaciones de hasta {amount}",
+      "roles": {
+        "owner": "Propietario",
+        "manager": "Encargado",
+        "counter_staff": "Personal de mostrador",
+        "read_only": "Solo lectura"
+      },
+      "open": {
+        "title": "Invitaciones pendientes",
+        "expires": "caduca el {date}",
+        "withdraw": "Retirar",
+        "withdrawFor": "Retirar la invitación de {email}",
+        "withdrawn": "Invitación retirada."
+      },
+      "invite": {
+        "title": "Invitar a alguien",
+        "lead": "Recibe un correo con un enlace. Sirve una sola vez, durante siete días, y solo para la dirección que escribas.",
+        "email": "Su correo de trabajo",
+        "role": "Papel",
+        "limit": "La mayor reclamación que puede aprobar, en {currency}",
+        "limitNeedsCurrency": "El personal de mostrador podrá aprobar reclamaciones cuando tu lista de precios fije la moneda de la tienda. Hasta entonces no aprueba nada.",
+        "submit": "Enviar la invitación",
+        "sending": "Enviando…",
+        "sent": "Invitación enviada."
+      }
+    },
+    "prices": {
+      "title": "Precios",
+      "none": "Aún no hay ninguna lista de precios publicada. Los clientes la ven antes de alquilar, y cada reclamación se calcula con ella.",
+      "current": "La versión {version} está publicada desde el {date}. Publicar de nuevo crea otra versión. Los alquileres ya reservados mantienen la versión que aceptó su cliente.",
+      "readOnly": "Solo el propietario o un encargado pueden publicar precios.",
+      "currency": "Moneda",
+      "threshold": "Las reclamaciones por encima de esto van al propietario o a un encargado, en {currency}",
+      "thresholdHelp": "Opcional. Si lo dejas vacío, decide el límite de cada persona del equipo.",
+      "entries": "Precios",
+      "description": "Precio {number}: para qué es",
+      "category": "Tipo",
+      "amount": "Importe, en {currency}",
+      "remove": "Quitar el precio {number}",
+      "add": "Añadir un precio",
+      "wear": "Qué cuenta como desgaste normal",
+      "wearHelp": "Nunca se cobra a los clientes por esto. Explícalo con palabras sencillas.",
+      "publish": "Publicar esta lista de precios",
+      "publishing": "Publicando…",
+      "publishHelp": "La moneda queda fijada en cuanto se publica la primera lista de precios.",
+      "published": "Lista de precios publicada.",
+      "categories": {
+        "damage": "Daño",
+        "loss": "Pérdida",
+        "lateness": "Devolución tardía",
+        "cleaning": "Limpieza"
+      }
+    },
+    "paypal": {
+      "title": "PayPal",
+      "lead": "Las retenciones se hacen en la cuenta de PayPal de cada cliente, y las reclamaciones aprobadas se pagan en la de tu tienda. Hold nunca guarda el dinero.",
+      "notConnected": "Aún no está conectada.",
+      "isConnected": "Conectada desde el {date}.",
+      "connectTitle": "Conecta una app de sandbox de PayPal",
+      "reconnectTitle": "Conecta otra app de sandbox",
+      "steps": {
+        "app": "En developer.paypal.com, abre Apps & Credentials, elige Sandbox y abre la app de la cuenta de empresa de sandbox de tu tienda.",
+        "copy": "Copia su client ID y su secret.",
+        "paste": "Pega los dos aquí abajo. Hold los comprueba con PayPal antes de guardarlos."
+      },
+      "clientId": "Client ID",
+      "clientSecret": "Secret",
+      "connect": "Comprobar y conectar",
+      "checking": "Comprobando con PayPal…",
+      "connected": "Conectada. PayPal aceptó las credenciales.",
+      "sandboxOnly": "Esta versión solo conecta cuentas de sandbox. Las credenciales se guardan en AWS Secrets Manager y no se vuelven a mostrar.",
+      "ownerOnly": "Solo el propietario de la tienda puede conectar PayPal."
+    }
+  },
+  "emails": {
+    "invitation": {
+      "subject": "Te invitan a {shop} en Hold",
+      "body": "{inviter} te invita a trabajar en {shop} con Hold, como {role}.\n\nAbre este enlace para aceptar. Sirve una sola vez, durante siete días:\n{link}\n\nHold te enviará un código para confirmar que la dirección es tuya. Si no esperabas este correo, puedes ignorarlo."
+    }
+  }
+}

@@ -1,0 +1,254 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  /* An ink-coloured surface that flips with the theme: the second door and the renter's button. */
+  --color-contrast: var(--contrast);
+  --color-contrast-foreground: var(--contrast-foreground);
+  /* The dark band stays dark in both themes. */
+  --color-band: var(--band);
+  --color-band-foreground: var(--band-foreground);
+  --color-band-muted: var(--band-muted);
+  --color-band-border: var(--band-border);
+  --color-band-accent: var(--band-accent);
+  /* Anything drawn on top of a photograph keeps one set of colours in both themes. */
+  --color-photo: var(--photo);
+  --color-photo-foreground: var(--photo-foreground);
+  --color-photo-scrim: var(--photo-scrim);
+  --color-mark: var(--mark);
+  --color-mark-foreground: var(--mark-foreground);
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-device: 2.125rem;
+  --radius-screen: 1.5625rem;
+
+  --container-page: 80rem;
+  /* Half the page, for a screen split down the middle whose two halves keep to the page's edges. */
+  --container-half-page: 40rem;
+  --container-prose: 34rem;
+  --container-device: 18rem;
+
+  --text-display: clamp(3.375rem, 1.4rem + 6vw, 6.25rem);
+  --text-display--line-height: 0.9;
+  --text-display--letter-spacing: -0.05em;
+  --text-display--font-weight: 800;
+  --text-closing: clamp(3rem, 1.5rem + 5vw, 5.25rem);
+  --text-closing--line-height: 0.92;
+  --text-closing--letter-spacing: -0.05em;
+  --text-closing--font-weight: 800;
+  --text-headline: clamp(2.375rem, 1.5rem + 3vw, 3.75rem);
+  --text-headline--line-height: 0.96;
+  --text-headline--letter-spacing: -0.045em;
+  --text-headline--font-weight: 800;
+  --text-title: clamp(1.75rem, 1.4rem + 1.2vw, 2.25rem);
+  --text-title--line-height: 1;
+  --text-title--letter-spacing: -0.04em;
+  --text-title--font-weight: 800;
+  --text-lead: 1.125rem;
+  --text-lead--line-height: 1.55;
+
+  --aspect-evidence: 21 / 9;
+  --aspect-evidence-tall: 4 / 5;
+  --aspect-thumbnail: 4 / 3;
+}
+
+:root {
+  --background: #f2f0ea;
+  --foreground: #141412;
+  --card: #ffffff;
+  --card-foreground: #141412;
+  --popover: #ffffff;
+  --popover-foreground: #141412;
+  --primary: #b93f08;
+  --primary-foreground: #ffffff;
+  --secondary: #e6e3da;
+  --secondary-foreground: #141412;
+  --muted: #e9e6dd;
+  --muted-foreground: #5c5952;
+  --accent: #e6e3da;
+  --accent-foreground: #141412;
+  --destructive: #a32a1a;
+  --success: #1b6b45;
+  --border: #d8d4ca;
+  --border-strong: #b4afa3;
+  --input: #b4afa3;
+  --ring: #b93f08;
+  --contrast: #141412;
+  --contrast-foreground: #f2f0ea;
+  --band: #141412;
+  --band-foreground: #f2efe8;
+  --band-muted: #a6a298;
+  --band-border: #34342f;
+  --band-accent: #ff6a2b;
+  --photo: #17191a;
+  --photo-foreground: #f2efe8;
+  --photo-scrim: rgb(10 10 9 / 0.78);
+  --mark: #ff6a2b;
+  --mark-foreground: #1c0d04;
+  --radius: 0.125rem;
+}
+
+.dark {
+  --background: #0e0e0d;
+  --foreground: #f2efe8;
+  --card: #181816;
+  --card-foreground: #f2efe8;
+  --popover: #181816;
+  --popover-foreground: #f2efe8;
+  --primary: #ff6a2b;
+  --primary-foreground: #1c0d04;
+  --secondary: #23231f;
+  --secondary-foreground: #f2efe8;
+  --muted: #1c1c1a;
+  --muted-foreground: #a6a298;
+  --accent: #23231f;
+  --accent-foreground: #f2efe8;
+  --destructive: #ff8a75;
+  --success: #6fcf9d;
+  --border: #2a2a27;
+  --border-strong: #47473f;
+  --input: #47473f;
+  --ring: #ff6a2b;
+  --contrast: #f2efe8;
+  --contrast-foreground: #0e0e0d;
+  --band: #181816;
+}
+
+@utility label {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/*
+ * The evidence photograph keeps its 21:9 frame at every width, so marks drawn over it stay in place.
+ * On phones the stage is taller than the frame: the canvas overflows it and is shifted so both marks stay in view.
+ */
+@utility evidence-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  aspect-ratio: 1400 / 600;
+  max-width: none;
+  @media (width < 40rem) {
+    transform: translateX(-17.14%);
+  }
+}
+
+/*
+ * One long word (German has many) can be wider than a phone, in a large headline or a narrow table cell.
+ * The element may shrink below its content and break the word as a last resort. Automatic hyphenation is off because
+ * it also splits words that fit, such as "photo-graph" in the hero. Translations mark good break points with a soft hyphen.
+ */
+@utility wrap-long-words {
+  min-width: 0;
+  overflow-wrap: break-word;
+}
+
+/*
+ * The logo is the name set in lowercase. Its tracking is named so the filled o can stay centred under it.
+ */
+@utility wordmark {
+  --wordmark-tracking: -0.045em;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: var(--wordmark-tracking);
+  white-space: nowrap;
+}
+
+/*
+ * The o keeps what is inside it. A disc sits behind the font's own o, resting on the baseline, larger than the
+ * counter and smaller than the bowl, so only the counter shows it. Every size is in em, so it holds at any type size.
+ * The letter carries its tracking on its right edge, so the disc moves right by half of it to stay centred.
+ */
+@utility held-o {
+  display: inline-grid;
+  justify-items: center;
+  align-items: baseline;
+  &::before {
+    content: "";
+    grid-area: 1 / 1;
+    width: 0.36em;
+    height: 0.42em;
+    border-radius: 50%;
+    background: var(--primary);
+    transform: translate(calc(var(--wordmark-tracking) / -2), -0.053em);
+  }
+  & > * {
+    grid-area: 1 / 1;
+  }
+}
+
+@utility figures {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    line-height: 1.55;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
