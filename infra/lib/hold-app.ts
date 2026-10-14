@@ -1,5 +1,6 @@
 import { App, Tags } from 'aws-cdk-lib'
 import { createDataStack } from './data-stack.ts'
+import { createDeliveryStack } from './delivery-stack.ts'
 import { createIdentityStack } from './identity-stack.ts'
 import { createRegistryStack } from './registry-stack.ts'
 import { ACCOUNT, REGION, TAGS } from './settings.ts'
@@ -21,5 +22,6 @@ export function createHoldApp(app: App, options: HoldAppOptions) {
     identity: createIdentityStack(app, { env, senderEmail: options.senderEmail, passkeyRelyingPartyId: options.passkeyRelyingPartyId }),
     work: createWorkStack(app, { env }),
     registry: createRegistryStack(app, { env }),
+    delivery: createDeliveryStack(app, { env }),
   }
 }

@@ -34,3 +34,8 @@ export function name(...parts: readonly string[]): string {
 export function secretName(...parts: readonly string[]): string {
   return [PREFIX, ...parts].join('/')
 }
+
+// The repository GitHub Actions deploys from. Only its main branch may take the deploy role.
+export const GITHUB_REPOSITORY = 'rogerjeasy/hold'
+// The account's CDK bootstrap, shared with the other projects. Its roles do the deploying.
+export const CDK_BOOTSTRAP_QUALIFIER = 'hnb659fds'

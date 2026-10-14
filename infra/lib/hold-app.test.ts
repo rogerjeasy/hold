@@ -15,7 +15,8 @@ const data = Template.fromStack(stacks.data.stack)
 const identity = Template.fromStack(stacks.identity.stack)
 const work = Template.fromStack(stacks.work.stack)
 const registry = Template.fromStack(stacks.registry.stack)
-const all = [data, identity, work, registry]
+const delivery = Template.fromStack(stacks.delivery.stack)
+const all = [data, identity, work, registry, delivery]
 
 // Resource types whose names live inside another Hold resource, such as a group inside Hold's own user pool.
 // Their names cannot meet another project's, so they need no prefix.
@@ -188,5 +189,39 @@ describe('queues', () => {
 describe('the image registry', () => {
   it('keeps each tag pointing at one build', () => {
     registry.hasResourceProperties('AWS::ECR::Repository', { RepositoryName: 'hold-app', ImageTagMutability: 'IMMUTABLE' })
+  })
+})
+
+describe('delivery', () => {
+  it('lets only the main branch of Hold’s repository take the deploy role, through GitHub’s OpenID Connect', () => {
+    delivery.hasResourceProperties('AWS::IAM::Role', {
+      RoleName: 'hold-github-deploy',
+      AssumeRolePolicyDocument: Match.objectLike({
+        Statement: [
+          Match.objectLike({
+            Action: 'sts:AssumeRoleWithWebIdentity',
+            Condition: {
+              StringEquals: {
+                'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
+                'token.actions.githubusercontent.com:sub': 'repo:rogerjeasy/hold:ref:refs/heads/main',
+              },
+            },
+          }),
+        ],
+      }),
+    })
+  })
+
+  it('refers to the account’s GitHub identity provider instead of making a second', () => {
+    delivery.resourceCountIs('Custom::AWSCDKOpenIdConnectProvider', 0)
+    delivery.resourceCountIs('AWS::IAM::OIDCProvider', 0)
+  })
+
+  it('reaches only Hold’s image repository, database and database secrets', () => {
+    const policy = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
+    expect(policy).toContain('repository/hold-app')
+    expect(policy).toContain('cluster:hold-database')
+    expect(policy).toContain('secret:hold/database/admin-*')
+    expect(policy).not.toContain('"Resource":"*","Action":"ecr:PutImage"')
   })
 })
