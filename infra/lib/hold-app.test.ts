@@ -259,6 +259,22 @@ describe('delivery', () => {
     expect(statements).toMatch(/"Effect":"Deny"[^}]*iam:DeleteRolePermissionsBoundary|iam:DeleteRolePermissionsBoundary[^}]*"Effect":"Deny"/)
   })
 
+  it('keeps the boundary to what the app needs, and lets it hand on only the scheduler’s role', () => {
+    const boundary = JSON.stringify(Object.values(delivery.findResources('AWS::IAM::ManagedPolicy'))[0])
+    for (const broad of ['"sqs:*"', '"s3:*"', '"cognito-idp:*"', '"secretsmanager:*"', '"rds-data:*"', '"scheduler:*"', 'cloudformation:', 'iam:CreateRole', 'cognito-idp:AdminInitiateAuth', 'cognito-idp:AdminSetUserPassword']) {
+      expect(boundary).not.toContain(broad)
+    }
+    expect(boundary).toContain('role/hold-scheduler')
+    expect(boundary).toContain('"iam:PassedToService":"scheduler.amazonaws.com"')
+    expect(boundary).not.toContain('role/hold-*')
+  })
+
+  it('lets CloudFormation change only roles that carry Hold’s tag, and never hand a role on', () => {
+    const statements = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
+    expect(statements).toMatch(/iam:UpdateAssumeRolePolicy[^}]*aws:ResourceTag\/project/)
+    expect(statements).toMatch(/"Effect":"Deny"[^}]*iam:PassRole|iam:PassRole[^}]*"Effect":"Deny"/)
+  })
+
   it('never lets the project tag be set on something that already exists', () => {
     const statements = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
     expect(statements).toContain('"ec2:CreateAction":"CreateSecurityGroup"')

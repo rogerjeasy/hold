@@ -57,24 +57,36 @@ const statement = (actions: string[], resources: string[], conditions?: Conditio
 const deny = (actions: string[], resources: string[], conditions?: Conditions) =>
   new iam.PolicyStatement({ effect: iam.Effect.DENY, actions, resources, ...(conditions === undefined ? {} : { conditions }) })
 
-// The most any role of Hold's may do, whatever its own policy says: Hold's queues, buckets, secrets, database,
-// schedules, images and user pool, sending email, and Claude on Bedrock. It cannot touch IAM beyond handing Hold's
-// own roles to the services that run them.
+// The most any role of Hold's may do, whatever its own policy says: exactly what the app needs and no more. Hold's
+// queues to send to and read, objects in its buckets, its secrets to read and the shops' PayPal credentials to keep,
+// its database through the Data API, its schedules, its image, sending email, Claude on Bedrock, its own logs, and
+// putting a person in a group of its user pool. The only role it may hand on is the scheduler's, to the scheduler.
+// Nothing here manages IAM, CloudFormation or any resource of another project.
 function permissionsBoundary(stack: Stack): iam.ManagedPolicy {
   return new iam.ManagedPolicy(stack, 'PermissionsBoundary', {
     managedPolicyName: PERMISSIONS_BOUNDARY,
     description: "The most any of Hold's roles may do: Hold's own resources, and nothing of other projects",
     statements: [
-      statement(['sqs:*'], [at.sqs]),
-      statement(['s3:*'], [at.buckets, at.objects]),
-      statement(['secretsmanager:GetSecretValue', 'secretsmanager:DescribeSecret', 'secretsmanager:CreateSecret', 'secretsmanager:PutSecretValue'], [at.secrets('*')]),
-      statement(['rds-data:*'], [at.cluster]),
-      statement(['scheduler:*'], [at.scheduleGroup, at.schedules]),
+      statement(['sqs:SendMessage', 'sqs:ReceiveMessage', 'sqs:DeleteMessage', 'sqs:ChangeMessageVisibility', 'sqs:GetQueueAttributes', 'sqs:GetQueueUrl'], [at.sqs]),
+      statement(['s3:GetObject', 's3:PutObject'], [at.objects]),
+      statement(['s3:ListBucket'], [at.buckets]),
+      statement(['secretsmanager:GetSecretValue', 'secretsmanager:DescribeSecret'], [at.secrets('*')]),
+      statement(['secretsmanager:CreateSecret', 'secretsmanager:PutSecretValue', 'secretsmanager:TagResource'], [at.secrets('paypal/*')]),
+      statement(['rds-data:ExecuteStatement', 'rds-data:BatchExecuteStatement', 'rds-data:BeginTransaction', 'rds-data:CommitTransaction', 'rds-data:RollbackTransaction'], [at.cluster]),
+      statement(['scheduler:CreateSchedule', 'scheduler:UpdateSchedule', 'scheduler:DeleteSchedule', 'scheduler:GetSchedule'], [at.schedules]),
       statement(['ecr:BatchGetImage', 'ecr:GetDownloadUrlForLayer', 'ecr:BatchCheckLayerAvailability'], [at.repository]),
-      statement(['ecr:GetAuthorizationToken', 'ses:SendEmail', 'ses:SendRawEmail', 'bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream', 'logs:CreateLogStream', 'logs:PutLogEvents', 'cloudwatch:PutMetricData'], ['*']),
-      statement(['cognito-idp:*'], [at.userPools], { StringEquals: HOLD_TAG }),
+      statement(['ecr:GetAuthorizationToken'], ['*']),
+      statement(['ses:SendEmail', 'ses:SendRawEmail'], [`arn:aws:ses:${REGION}:${ACCOUNT}:identity/*`]),
+      statement(['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream'], [`arn:aws:bedrock:${REGION}::foundation-model/*`, `arn:aws:bedrock:*:${ACCOUNT}:inference-profile/*`]),
+      statement(['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'], [
+        `arn:aws:logs:${REGION}:${ACCOUNT}:log-group:/aws/apprunner/${PREFIX}-*`,
+        `arn:aws:logs:${REGION}:${ACCOUNT}:log-group:/aws/lambda/${PREFIX}-*`,
+        `arn:aws:logs:${REGION}:${ACCOUNT}:log-group:/${PREFIX}/*`,
+      ]),
+      statement(['cloudwatch:PutMetricData'], ['*'], { StringEquals: { 'cloudwatch:namespace': 'Hold' } }),
+      statement(['cognito-idp:AdminAddUserToGroup'], [at.userPools], { StringEquals: HOLD_TAG }),
       statement(['kms:Decrypt', 'kms:GenerateDataKey'], ['*'], { StringEquals: { 'kms:ViaService': [`secretsmanager.${REGION}.amazonaws.com`, `s3.${REGION}.amazonaws.com`, `sqs.${REGION}.amazonaws.com`] } }),
-      statement(['iam:PassRole'], [at.role(`${PREFIX}-*`)]),
+      statement(['iam:PassRole'], [at.role(name('scheduler'))], { StringEquals: { 'iam:PassedToService': 'scheduler.amazonaws.com' } }),
     ],
   })
 }
@@ -138,11 +150,16 @@ function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineR
   )
   add(deny(['cognito-idp:TagResource', 'cognito-idp:UntagResource'], ['*'], { 'ForAnyValue:StringEquals': { 'aws:TagKeys': ['project'] } }))
 
-  // Roles: only Hold's, only with the boundary, and the boundary can never be taken off.
-  const withBoundary = { StringEquals: { 'iam:PermissionsBoundary': boundary.managedPolicyArn } }
-  add(statement(['iam:CreateRole', 'iam:PutRolePolicy', 'iam:DeleteRolePolicy', 'iam:PutRolePermissionsBoundary'], [at.role(`${PREFIX}-*`)], withBoundary))
-  add(statement(['iam:DeleteRole', 'iam:GetRole', 'iam:UpdateRole', 'iam:UpdateAssumeRolePolicy', 'iam:TagRole', 'iam:UntagRole', 'iam:GetRolePolicy', 'iam:ListRolePolicies', 'iam:ListAttachedRolePolicies', 'iam:ListRoleTags'], [at.role(`${PREFIX}-*`)]))
-  add(deny(['iam:DeleteRolePermissionsBoundary', 'iam:AttachRolePolicy', 'iam:CreatePolicy', 'iam:CreatePolicyVersion', 'iam:SetDefaultPolicyVersion'], ['*']))
+  // Roles: only Hold's, created with the project tag and the boundary, and changed only while they carry both. The
+  // boundary can never be taken off, the project tag never changed, and no role handed on.
+  const withBoundary = { 'iam:PermissionsBoundary': boundary.managedPolicyArn }
+  add(statement(['iam:CreateRole'], [at.role(`${PREFIX}-*`)], { StringEquals: { ...withBoundary, ...HOLD_REQUEST_TAG } }))
+  add(statement(['iam:TagRole'], [at.role(`${PREFIX}-*`)], { StringEquals: HOLD_REQUEST_TAG }))
+  add(statement(['iam:PutRolePolicy', 'iam:DeleteRolePolicy', 'iam:PutRolePermissionsBoundary'], [at.role(`${PREFIX}-*`)], { StringEquals: { ...withBoundary, ...HOLD_TAG } }))
+  add(statement(['iam:DeleteRole', 'iam:UpdateRole', 'iam:UpdateAssumeRolePolicy', 'iam:TagRole', 'iam:UntagRole'], [at.role(`${PREFIX}-*`)], { StringEquals: HOLD_TAG }))
+  add(statement(['iam:GetRole', 'iam:GetRolePolicy', 'iam:ListRolePolicies', 'iam:ListAttachedRolePolicies', 'iam:ListRoleTags'], [at.role(`${PREFIX}-*`)]))
+  add(deny(['iam:UntagRole'], ['*'], { 'ForAnyValue:StringEquals': { 'aws:TagKeys': ['project'] } }))
+  add(deny(['iam:DeleteRolePermissionsBoundary', 'iam:AttachRolePolicy', 'iam:PassRole', 'iam:CreatePolicy', 'iam:CreatePolicyVersion', 'iam:SetDefaultPolicyVersion', 'iam:CreateUser', 'iam:CreateAccessKey'], ['*']))
   // The pipeline's own roles, and the boundary, change only by an administrator's hand.
   add(deny(['iam:*'], [...pipelineRoles.map(at.role), boundary.managedPolicyArn]))
   return role
