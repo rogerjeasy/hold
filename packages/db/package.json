@@ -1,0 +1,25 @@
+{
+  "name": "@hold/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.9",
+    "drizzle-kit": "0.31.11"
+  },
+  "dependencies": {
+    "@aws-sdk/client-rds-data": "3.1151.0",
+    "@aws-sdk/client-secrets-manager": "3.1151.0",
+    "@hold/domain": "workspace:*",
+    "drizzle-orm": "0.45.4"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./testing": "./src/testing/test-database.ts",
+    "./data-api": "./src/data-api.ts"
+  },
+  "scripts": {
+    "migrations:generate": "drizzle-kit generate",
+    "migrate:aurora": "node scripts/migrate-aurora.ts"
+  }
+}
