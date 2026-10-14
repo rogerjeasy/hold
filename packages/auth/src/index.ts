@@ -1,0 +1,6 @@
+export { createCognitoIdentity } from './cognito/cognito-identity.ts'
+export type { CognitoSettings } from './cognito/cognito-identity.ts'
+export { createFakeIdentity } from './fake/fake-identity.ts'
+export type { FakeIdentity, FakeIdentityOptions } from './fake/fake-identity.ts'
+export { ACCOUNT_TYPES } from './identity.ts'
+export type { AccountType, Attempt, Identity, IdentityFailure, IdentityResult, Passkey, PasskeyAttempt, SignedInPerson, Tokens } from './identity.ts'

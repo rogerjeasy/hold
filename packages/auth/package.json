@@ -1,0 +1,14 @@
+{
+  "name": "@hold/auth",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-cognito-identity-provider": "3.1151.0",
+    "@hold/domain": "workspace:*",
+    "aws-jwt-verify": "5.2.1"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}

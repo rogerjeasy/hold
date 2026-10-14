@@ -1,0 +1,12 @@
+{
+  "name": "@hold/notify",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-sesv2": "3.1151.0"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}
