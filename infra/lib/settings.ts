@@ -37,5 +37,11 @@ export function secretName(...parts: readonly string[]): string {
 
 // The repository GitHub Actions deploys from. Only its main branch may take the deploy role.
 export const GITHUB_REPOSITORY = 'rogerjeasy/hold'
-// The account's CDK bootstrap, shared with the other projects. Its roles do the deploying.
+// The account's CDK bootstrap, shared with the other projects. Hold uses only its bucket, under a prefix of its own,
+// and deploys with the caller's credentials and Hold's own CloudFormation role, never the bootstrap's roles, which
+// could deploy any stack in the account (infra/lib/delivery-stack.ts).
 export const CDK_BOOTSTRAP_QUALIFIER = 'hnb659fds'
+export const CDK_ASSETS_BUCKET = `cdk-${CDK_BOOTSTRAP_QUALIFIER}-assets-${ACCOUNT}-${REGION}`
+export const CDK_ASSETS_PREFIX = 'hold/'
+// The stacks GitHub Actions deploys. HoldDelivery, which holds the pipeline's own roles, is not among them.
+export const PIPELINE_STACKS = ['HoldData', 'HoldIdentity', 'HoldWork', 'HoldRegistry'] as const

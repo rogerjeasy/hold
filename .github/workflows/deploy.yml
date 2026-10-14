@@ -2,6 +2,8 @@
 # infrastructure. GitHub signs in to AWS through OpenID Connect as hold-github-deploy (infra/lib/delivery-stack.ts),
 # which only the main branch of this repository can take. No AWS key is stored in GitHub. The ARNs come from the
 # repository's variables, which hold no secret.
+# The account is shared, so the pipeline deploys only Hold's resource stacks, through Hold's own CloudFormation role.
+# HoldDelivery, which holds the pipeline's roles, is deployed only by an administrator.
 name: Deploy
 
 on:
@@ -69,6 +71,11 @@ jobs:
           docker push "$REGISTRY/hold-app:$COMMIT"
 
       - name: Show what the deploy will change
-        run: pnpm --filter @hold/infra exec cdk diff --all
+        run: pnpm --filter @hold/infra exec cdk diff $STACKS
+        env:
+          STACKS: HoldData HoldIdentity HoldWork HoldRegistry
       - name: Deploy the stacks
-        run: pnpm --filter @hold/infra exec cdk deploy --all --require-approval never
+        run: pnpm --filter @hold/infra exec cdk deploy $STACKS --role-arn "$CLOUDFORMATION_ROLE" --require-approval never
+        env:
+          STACKS: HoldData HoldIdentity HoldWork HoldRegistry
+          CLOUDFORMATION_ROLE: ${{ vars.AWS_CLOUDFORMATION_ROLE_ARN }}

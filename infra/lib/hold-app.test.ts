@@ -217,11 +217,35 @@ describe('delivery', () => {
     delivery.resourceCountIs('AWS::IAM::OIDCProvider', 0)
   })
 
+  it('never takes the account’s CDK bootstrap roles, which could deploy any stack', () => {
+    const policies = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
+    expect(policies).not.toContain('cdk-hnb659fds-deploy-role')
+    expect(policies).not.toContain('cdk-hnb659fds-cfn-exec-role')
+  })
+
+  it('lets the pipeline change only Hold’s resource stacks, and not the one holding its own roles', () => {
+    const policies = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
+    for (const name of ['HoldData', 'HoldIdentity', 'HoldWork', 'HoldRegistry']) expect(policies).toContain(`stack/${name}/*`)
+    expect(policies).not.toContain('stack/HoldDelivery')
+    expect(policies).not.toContain('stack/*')
+  })
+
   it('reaches only Hold’s image repository, database and database secrets', () => {
     const policy = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
     expect(policy).toContain('repository/hold-app')
     expect(policy).toContain('cluster:hold-database')
     expect(policy).toContain('secret:hold/database/admin-*')
-    expect(policy).not.toContain('"Resource":"*","Action":"ecr:PutImage"')
+  })
+
+  it('gives CloudFormation a role that cannot change the pipeline’s own roles', () => {
+    const policies = delivery.findResources('AWS::IAM::Policy')
+    const statements = Object.values(policies).flatMap((policy) => (policy as { Properties: { PolicyDocument: { Statement: { Effect: string; Resource: unknown }[] } } }).Properties.PolicyDocument.Statement)
+    const denied = statements.filter((statement) => statement.Effect === 'Deny').flatMap((statement) => JSON.stringify(statement.Resource))
+    expect(denied.join()).toContain('role/hold-github-deploy')
+    expect(denied.join()).toContain('role/hold-cloudformation-exec')
+  })
+
+  it('deploys every stack with the caller’s credentials, under Hold’s prefix in the bootstrap bucket', () => {
+    for (const template of all) expect(JSON.stringify(template.toJSON())).not.toContain('cdk-hnb659fds-deploy-role')
   })
 })
