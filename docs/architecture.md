@@ -1554,14 +1554,16 @@ These are targets, not measured results.
 
 ### 20.2 Deployment
 
-1. A push to the main branch starts the pipeline in GitHub Actions.
-2. Lint, type-check and tests run.
-3. The Docker image is built and pushed to ECR.
-4. Database migrations run as a one-off task.
-5. The CDK deploys infrastructure changes.
-6. Services roll forward one task at a time, with health checks and automatic rollback.
+1. Every pull request and every push to main runs **CI** (`.github/workflows/ci.yml`): lint, type-check and the unit tests (`pnpm check`), the end-to-end suite against the in-process fakes, and a build of the container image. CI needs no AWS access and no secret.
+2. Once CI passes on main, **Deploy** (`.github/workflows/deploy.yml`) runs. It can also be started by hand.
+3. Database migrations run through the Data API as `hold_admin` (`pnpm --filter @hold/db migrate:aurora`).
+4. The image is built and pushed to ECR, tagged with the commit. Tags are immutable.
+5. The CDK shows its diff, then deploys every stack.
+6. Once the App Runner service exists, it rolls forward to the new image, with health checks and automatic rollback.
 
-GitHub signs in to AWS through OpenID Connect. No AWS keys are stored in GitHub.
+GitHub signs in to AWS through OpenID Connect as `hold-github-deploy`, made by the HoldDelivery stack. Only a workflow on the main branch of `rogerjeasy/hold` can take it. It may take the CDK bootstrap's roles, push to `hold-app`, and run statements on `hold-database` with the two database secrets, and nothing else. No AWS key is stored in GitHub. The ARNs it needs are repository variables, which hold no secret.
+
+**The image** (`Dockerfile`) is the web app's standalone build, run by `apps/web/serve.ts` instead of the server.js Next.js generates. That server names a host, and then treats each language rewrite as a request to another site, which loops. `serve.ts` starts it the way `next start` does.
 
 ### 20.3 Demo mode
 

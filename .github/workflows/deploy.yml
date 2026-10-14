@@ -1,0 +1,74 @@
+# Deploys main once CI has passed on it (architecture.md section 20.2): migrations, then the image, then the
+# infrastructure. GitHub signs in to AWS through OpenID Connect as hold-github-deploy (infra/lib/delivery-stack.ts),
+# which only the main branch of this repository can take. No AWS key is stored in GitHub. The ARNs come from the
+# repository's variables, which hold no secret.
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+# One deploy at a time, and never one cut short: a migration or a CloudFormation update must finish.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  deploy:
+    name: Migrate, push the image and deploy the stacks
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The commit CI passed on, not whatever main points to now.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Sign in to AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Migrate the database
+        run: pnpm --filter @hold/db migrate:aurora
+        env:
+          HOLD_AWS_REGION: ${{ env.AWS_REGION }}
+          HOLD_DATABASE_CLUSTER_ARN: ${{ vars.HOLD_DATABASE_CLUSTER_ARN }}
+          HOLD_DATABASE_ADMIN_SECRET_ARN: ${{ vars.HOLD_DATABASE_ADMIN_SECRET_ARN }}
+          HOLD_DATABASE_APP_SECRET_ARN: ${{ vars.HOLD_DATABASE_APP_SECRET_ARN }}
+
+      - name: Sign in to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Tagged with the commit alone: the repository's tags are immutable, so a tag names one build forever.
+      - name: Build and push the image
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          COMMIT: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          docker build --tag "$REGISTRY/hold-app:$COMMIT" .
+          docker push "$REGISTRY/hold-app:$COMMIT"
+
+      - name: Show what the deploy will change
+        run: pnpm --filter @hold/infra exec cdk diff --all
+      - name: Deploy the stacks
+        run: pnpm --filter @hold/infra exec cdk deploy --all --require-approval never

@@ -329,8 +329,8 @@ In the hackathon build, the owner pastes their sandbox app's client ID and secre
 
 ## 12. Infrastructure, delivery and monitoring
 
-- **AWS CDK in TypeScript** defines every resource, so the environment can be recreated from the repository. The code is in `infra/`. The account's existing CDK bootstrap is shared, and Hold's stacks are `HoldData`, `HoldIdentity`, `HoldWork` and `HoldRegistry`.
-- **GitHub Actions** builds, tests and deploys, signing in to AWS through OpenID Connect with no stored keys.
+- **AWS CDK in TypeScript** defines every resource, so the environment can be recreated from the repository. The code is in `infra/`. The account's existing CDK bootstrap is shared, and Hold's stacks are `HoldData`, `HoldIdentity`, `HoldWork`, `HoldRegistry` and `HoldDelivery`.
+- **GitHub Actions** builds, tests and deploys, signing in to AWS through OpenID Connect with no stored keys. CI runs on every pull request; Deploy runs on main once CI passes (`architecture.md` section 20.2). The role is `hold-github-deploy`, in the HoldDelivery stack, and uses the account's existing GitHub identity provider.
 - **AWS Secrets Manager** holds PayPal credentials. Claude on Bedrock is reached with the task's IAM role, so no Claude key is stored.
 - **Amazon CloudWatch** for logs, metrics and alarms. Alarms on failed captures, holds about to lapse, failed webhooks and queue backlogs.
 - **AWS WAF** on the App Runner service is optional, for rate limiting on the public renter links.
