@@ -1561,11 +1561,13 @@ These are targets, not measured results.
 5. The CDK shows its diff, then deploys every stack.
 6. Once the App Runner service exists, it rolls forward to the new image, with health checks and automatic rollback.
 
-GitHub signs in to AWS through OpenID Connect as `hold-github-deploy`, made by the HoldDelivery stack. Only a workflow on the main branch of `rogerjeasy/hold` can take it. The account is shared, so it reaches nothing beyond Hold:
-- It never takes the account's CDK bootstrap roles, which could deploy any stack. Hold's stacks are synthesized with the caller's own credentials and keep their templates under `hold/` in the bootstrap bucket.
-- It may change only the four resource stacks (`HoldData`, `HoldIdentity`, `HoldWork`, `HoldRegistry`), through change sets that CloudFormation carries out as `hold-cloudformation-exec`. That role reaches Hold's resources by name, or by the `project=hold` tag for security groups and user pools, and is denied any change to the two pipeline roles.
-- HoldDelivery itself is deployed only by an administrator, so a commit on main cannot widen what the pipeline may do.
-- Beyond deploying, it may push to `hold-app` and run statements on `hold-database` with the two database secrets. No AWS key is stored in GitHub. The ARNs it needs are repository variables, which hold no secret.
+GitHub signs in to AWS through OpenID Connect as `hold-github-deploy`, made by the HoldDelivery stack. Only a workflow on the main branch of `rogerjeasy/hold` can take it, named by GitHub's immutable subject (owner and repository ids as well as names), so a renamed or recreated repository does not match. The account is shared, so nothing the pipeline holds reaches beyond Hold:
+- It never takes the account's CDK bootstrap roles, which could deploy any stack. Hold's stacks are synthesized with the caller's own credentials and keep their templates under `hold/` in the bootstrap bucket, the only prefix it may list.
+- It may change only the four resource stacks (`HoldData`, `HoldIdentity`, `HoldWork`, `HoldRegistry`), through change sets that CloudFormation carries out as `hold-cloudformation-exec`.
+- That CloudFormation role manages Hold's resources and reads none of their contents: no objects, messages, user accounts or credentials, except the database logins' secrets, which attaching the cluster needs. Security groups and user pools are reached by the `project=hold` tag, which may be set only while one is created and never changed after.
+- Every role it makes or changes must carry `hold-permissions-boundary`, which it can neither change nor remove. The boundary caps any Hold role at Hold's own resources, so no template can make a role that reaches further.
+- HoldDelivery itself, with both roles and the boundary, is deployed only by an administrator, so a commit on main cannot widen what the pipeline may do.
+- Beyond deploying, the pipeline may push to `hold-app` and run statements on `hold-database` with the two database secrets. No AWS key is stored in GitHub. The ARNs it needs are repository variables, which hold no secret.
 
 **The image** (`Dockerfile`) is the web app's standalone build, run by `apps/web/serve.ts` instead of the server.js Next.js generates. That server names a host, and then treats each language rewrite as a request to another site, which loops. `serve.ts` starts it the way `next start` does.
 

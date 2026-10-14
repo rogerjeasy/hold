@@ -35,8 +35,13 @@ export function secretName(...parts: readonly string[]): string {
   return [PREFIX, ...parts].join('/')
 }
 
-// The repository GitHub Actions deploys from. Only its main branch may take the deploy role.
+// The repository GitHub Actions deploys from. Only its main branch may take the deploy role. The repository uses
+// GitHub's immutable subject, which names the owner and the repository by their ids as well, so a renamed or
+// recreated repository of the same name does not match.
 export const GITHUB_REPOSITORY = 'rogerjeasy/hold'
+export const GITHUB_DEPLOY_SUBJECT = 'repo:rogerjeasy@58919295/hold@1418569084:ref:refs/heads/main'
+// Every role Hold's stacks make carries this boundary, so none can reach beyond Hold (infra/lib/delivery-stack.ts).
+export const PERMISSIONS_BOUNDARY = 'hold-permissions-boundary'
 // The account's CDK bootstrap, shared with the other projects. Hold uses only its bucket, under a prefix of its own,
 // and deploys with the caller's credentials and Hold's own CloudFormation role, never the bootstrap's roles, which
 // could deploy any stack in the account (infra/lib/delivery-stack.ts).

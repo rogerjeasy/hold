@@ -203,7 +203,7 @@ describe('delivery', () => {
             Condition: {
               StringEquals: {
                 'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
-                'token.actions.githubusercontent.com:sub': 'repo:rogerjeasy/hold:ref:refs/heads/main',
+                'token.actions.githubusercontent.com:sub': 'repo:rogerjeasy@58919295/hold@1418569084:ref:refs/heads/main',
               },
             },
           }),
@@ -243,6 +243,35 @@ describe('delivery', () => {
     const denied = statements.filter((statement) => statement.Effect === 'Deny').flatMap((statement) => JSON.stringify(statement.Resource))
     expect(denied.join()).toContain('role/hold-github-deploy')
     expect(denied.join()).toContain('role/hold-cloudformation-exec')
+  })
+
+  it('caps every role the resource stacks make with Hold’s permissions boundary', () => {
+    for (const template of [data, identity, work, registry]) {
+      for (const role of Object.values(template.findResources('AWS::IAM::Role'))) {
+        expect(JSON.stringify(role)).toContain('policy/hold-permissions-boundary')
+      }
+    }
+  })
+
+  it('lets CloudFormation make roles only with the boundary, and never take it off', () => {
+    const statements = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
+    expect(statements).toContain('iam:PermissionsBoundary')
+    expect(statements).toMatch(/"Effect":"Deny"[^}]*iam:DeleteRolePermissionsBoundary|iam:DeleteRolePermissionsBoundary[^}]*"Effect":"Deny"/)
+  })
+
+  it('never lets the project tag be set on something that already exists', () => {
+    const statements = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
+    expect(statements).toContain('"ec2:CreateAction":"CreateSecurityGroup"')
+    expect(statements).toContain('"aws:TagKeys":["project"]')
+  })
+
+  it('gives CloudFormation no way to read what Hold’s resources hold', () => {
+    const exec = Object.entries(delivery.findResources('AWS::IAM::Policy')).find(([key]) => key.startsWith('CloudFormationRole'))?.[1]
+    const allowed = JSON.stringify((exec as { Properties: { PolicyDocument: { Statement: { Effect: string }[] } } }).Properties.PolicyDocument.Statement.filter((entry) => entry.Effect === 'Allow'))
+    for (const action of ['s3:GetObject', 's3:*', 'sqs:ReceiveMessage', 'sqs:*', 'secretsmanager:*', 'cognito-idp:*', 'cognito-idp:AdminInitiateAuth', 'rds:*', 'ecr:*']) {
+      expect(allowed).not.toContain(`"${action}"`)
+    }
+    expect(allowed).not.toContain('secret:hold/paypal')
   })
 
   it('deploys every stack with the caller’s credentials, under Hold’s prefix in the bootstrap bucket', () => {
