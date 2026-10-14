@@ -105,9 +105,15 @@ async function signUpOrSignIn(dependencies: FlowDependencies, base: AttemptBase)
   return { ok: false, notice: notice(signedUp.error) }
 }
 
+// Every address reaches the code step, whatever the identity service said about it, except when it is asked too
+// often. An account the service refused, or one it does not know, gets an attempt with no session, which fails as a
+// wrong code would. The failure is logged.
 export async function beginSignIn(dependencies: FlowDependencies, input: { readonly email: string; readonly language: string }, requester: Requester): Promise<Begun> {
   if (!(await withinLimits(dependencies, requester, input.email))) return { ok: false, notice: 'busy' }
-  return startSignIn(dependencies, { page: 'signIn', email: input.email, language: input.language })
+  const base: AttemptBase = { page: 'signIn', email: input.email, language: input.language }
+  const begun = await startSignIn(dependencies, base)
+  if (begun.ok || begun.notice === 'busy') return begun
+  return { ok: true, attempt: { ...base, step: 'answer_sign_in', expiresAt: attemptExpiry(dependencies.now()) } }
 }
 
 // The new shop is added to the account once the person is proven: one person may own several shops.
@@ -148,7 +154,8 @@ async function tokensFor(dependencies: FlowDependencies, attempt: Attempt, code:
   const { identity } = dependencies
   if (attempt.step === 'answer_passkey') return { kind: 'failed', failure: 'attempt_over' }
   if (attempt.step === 'answer_sign_in') {
-    if (attempt.session === undefined) return { kind: 'failed', failure: 'attempt_over' }
+    // An attempt begun without a session fails as a wrong code would, so it looks like any other.
+    if (attempt.session === undefined) return { kind: 'failed', failure: 'wrong' }
     const answered = await identity.answerSignInCode(attempt.email, code, { session: attempt.session })
     if (answered.ok) return answered.value
     logFailure('answer_sign_in_code', answered.error)
@@ -248,9 +255,10 @@ export async function beginPasskey(
   }
   if (started.ok) return { ok: true, attempt: { ...base, session: started.value.session }, requestOptions: withoutCredentialList(started.value.requestOptions) }
   logFailure('start_passkey', started.error)
-  // On the sign-in page, a missing passkey gets the same answer as a present one, so the page cannot be used to find
-  // accounts. A signed-in person confirming with their own passkey is told plainly.
-  if (started.error.kind === 'no_passkey' && input.page === 'signIn') return { ok: true, attempt: base, requestOptions: decoyOptions() }
+  // On the sign-in page, every refusal gets the same answer as a passkey that exists, so the page cannot be used to
+  // find accounts: no passkey, no account, or one the service refused. Only too many requests is said plainly.
+  // A signed-in person confirming with their own passkey is told what happened.
+  if (input.page === 'signIn' && started.error.kind !== 'too_many_requests') return { ok: true, attempt: base, requestOptions: decoyOptions() }
   return { ok: false, notice: notice(started.error) }
 }
 

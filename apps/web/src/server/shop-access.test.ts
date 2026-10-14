@@ -86,6 +86,16 @@ describe('a shop action', () => {
     expect(await shopActions.inviteStaff(null, form(invite))).toEqual({ ok: false, failure: 'passkey_needed' })
   })
 
+  it('does not count a passkey record carried over from another account’s session', async () => {
+    await signIn('attacker@elsewhere.example', 'passkey')
+    const carried = { factor: jar.get('hold_factor'), refresh: jar.get('hold_refresh') }
+    await signIn('owner@douro.example', 'email_code')
+    jar.set('hold_factor', carried.factor ?? '')
+    jar.set('hold_refresh', carried.refresh ?? '')
+
+    expect(await shopActions.inviteStaff(null, form(invite))).toEqual({ ok: false, failure: 'passkey_needed' })
+  })
+
   it('refuses fields it does not know', async () => {
     await signIn('owner@douro.example', 'passkey')
     expect(await shopActions.inviteStaff(null, form({ ...invite, shopId: 'someone-elses' }))).toMatchObject({ ok: false, failure: 'invalid' })

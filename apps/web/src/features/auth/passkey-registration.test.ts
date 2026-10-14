@@ -1,5 +1,6 @@
 // @vitest-environment node
 import type { FakeIdentity } from '@hold/auth'
+import { registerOwner } from '@hold/db'
 import { describe, expect, it, vi } from 'vitest'
 
 process.env['HOLD_ENVIRONMENT'] = 'test'
@@ -16,7 +17,7 @@ vi.mock('next/headers', () => ({
   headers: () => Promise.resolve(new Headers()),
 }))
 
-const { startPasskeyRegistration, finishPasskeyRegistration } = await import('./actions')
+const { startPasskeyRegistration, finishPasskeyRegistration, startPasskeySignIn } = await import('./actions')
 const { writeSession } = await import('./session-cookies')
 const { getServices, TEST_SIGN_IN_CODE } = await import('@/server/services')
 
@@ -49,5 +50,24 @@ describe('adding a passkey', () => {
 
     await signIn('second@shop.example', 'passkey')
     expect(await finishPasskeyRegistration(JSON.stringify({ id: 'second-key' }))).toEqual({ registered: true })
+  })
+})
+
+describe('confirming with a passkey', () => {
+  it('is open only to the person signed in: anyone else gets the same answer as signing in', async () => {
+    jar.clear()
+    const signedOut = await startPasskeySignIn({ email: 'nobody-has-this@shop.example', locale: 'en', returnTo: '/shop' })
+    expect(signedOut.problem).toBeUndefined()
+    expect(signedOut.requestOptions).toBeDefined()
+  })
+
+  it('uses the signed-in person’s own address, whatever the page sent', async () => {
+    await signIn('confirming@shop.example', 'email_code')
+    const { identity, database } = await getServices()
+    const verified = await identity.verifyAccessToken(jar.get('hold_access') ?? '')
+    if (!verified.ok) throw new Error('Not signed in.')
+    await registerOwner(database, { subject: verified.value.subject, email: 'confirming@shop.example', name: 'C', language: 'en', shop: { name: 'C shop', timeZone: 'UTC' } })
+    // The person has no passkey, which a confirmation may say plainly, since it is their own account.
+    expect(await startPasskeySignIn({ email: 'someone-else@shop.example', locale: 'en', returnTo: '/shop' })).toEqual({ problem: 'no_passkey' })
   })
 })

@@ -1,6 +1,6 @@
 'use server'
 
-import { takeRateToken } from '@hold/db'
+import { findPerson, takeRateToken } from '@hold/db'
 import { headers } from 'next/headers'
 import { redirect } from '@/i18n/navigation'
 import { linkRoutes, routes, shopRoutes } from '@/lib/routes'
@@ -117,14 +117,27 @@ export async function startOver(data: FormData): Promise<void> {
   goTo(attempt === undefined ? pageRoute({ page: fallback }) : pageRoute(attempt), readLocale(data.get('locale')))
 }
 
+// The address of the person signed in on this browser, as the database knows it. Nothing when nobody is.
+async function signedInEmail(): Promise<string | undefined> {
+  const accessToken = await readAccessToken()
+  if (accessToken === undefined) return undefined
+  const { identity, database } = await getServices()
+  const verified = await identity.verifyAccessToken(accessToken)
+  return verified.ok ? (await findPerson(database, verified.value.subject))?.email : undefined
+}
+
 // The first half of a passkey sign-in. The browser asks the person's device with the options this returns.
+// Confirming, for a person already signed in, uses their own address, whatever the page sent. Anyone else is signing
+// in, and gets the same answer for every address.
 export async function startPasskeySignIn(input: { email: string; locale: string; returnTo?: string }): Promise<PasskeyFormState> {
-  const parsed = parseAuthInput(['email'], { email: input.email })
+  const ownEmail = input.returnTo?.startsWith(shopRoutes.home) === true ? await signedInEmail() : undefined
+  const parsed = parseAuthInput(['email'], { email: ownEmail ?? input.email })
   if (!parsed.ok) return { problem: 'email' }
-  const confirming = input.returnTo !== undefined && input.returnTo.startsWith(shopRoutes.home)
   const begun = await beginPasskey(
     await dependencies(),
-    { email: parsed.value.email, language: readLocale(input.locale), page: confirming ? 'confirm' : 'signIn', ...(confirming ? { returnTo: input.returnTo } : {}) },
+    ownEmail === undefined
+      ? { email: parsed.value.email, language: readLocale(input.locale), page: 'signIn' }
+      : { email: parsed.value.email, language: readLocale(input.locale), page: 'confirm', returnTo: input.returnTo },
     await requester(),
   )
   if (!begun.ok) return { problem: begun.notice }
@@ -144,9 +157,10 @@ export async function finishPasskeySignIn(response: string): Promise<PasskeyForm
 // they have one, adding another needs a session that passkey proved. Otherwise someone who reached their inbox could
 // add a passkey of their own and pass every passkey check after it.
 async function mayAddPasskey(accessToken: string): Promise<boolean> {
-  const existing = await (await getServices()).identity.listPasskeys(accessToken)
-  if (!existing.ok) return false
-  return existing.value.length === 0 || (await sessionFactor()) === 'passkey'
+  const { identity } = await getServices()
+  const [verified, existing] = await Promise.all([identity.verifyAccessToken(accessToken), identity.listPasskeys(accessToken)])
+  if (!verified.ok || !existing.ok) return false
+  return existing.value.length === 0 || (await sessionFactor(verified.value.subject)) === 'passkey'
 }
 
 // Registering a passkey needs a signed-in session. The options come from the identity service and go to the device.

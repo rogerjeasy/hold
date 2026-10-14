@@ -130,6 +130,15 @@ describe('signing in', () => {
     expect((await answerCode(flow, second, identity.lastCodeFor('resend@shop.example') ?? '', from())).kind).toBe('signed_in')
   })
 
+  it('takes any refusal by the identity service to the same code step, which then fails as a wrong code', async () => {
+    const refusing: Identity = { ...identity, startSignIn: () => Promise.resolve({ ok: false, error: { kind: 'rejected', detail: 'NotAuthorizedException' } }) }
+    const begun = await beginSignIn({ ...flow, identity: refusing }, { email: 'disabled@shop.example', language: 'en' }, from())
+
+    expect(begun).toMatchObject({ ok: true, attempt: { step: 'answer_sign_in' } })
+    if (!begun.ok) throw new Error('Expected the code step.')
+    expect(await answerCode(flow, begun.attempt, '12345678', from())).toEqual({ kind: 'failed', failure: 'wrong' })
+  })
+
   it('says to wait when the identity service has had too many requests', async () => {
     const busy: Identity = { ...identity, startSignIn: () => Promise.resolve({ ok: false, error: { kind: 'too_many_requests' } }) }
 
@@ -231,6 +240,13 @@ describe('passkeys', () => {
     expect(shape(without.requestOptions)).toEqual(shape(withKey.requestOptions))
     expect(withKey.requestOptions).not.toContain('credential-haskey')
     expect(await answerPasskey(flow, without.attempt, JSON.stringify({ id: 'anything' }), from())).toEqual({ kind: 'failed', failure: 'wrong' })
+  })
+
+  it('answers every refusal on the sign-in page with the same decoy', async () => {
+    const refusing: Identity = { ...identity, startPasskeySignIn: () => Promise.resolve({ ok: false, error: { kind: 'attempt_expired' } }) }
+    const begun = await beginPasskey({ ...flow, identity: refusing }, { email: 'unconfirmed@shop.example', language: 'en', page: 'signIn' }, from())
+
+    expect(begun).toMatchObject({ ok: true })
   })
 
   it('tells a signed-in person confirming with their own passkey that they have none', async () => {

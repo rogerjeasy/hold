@@ -11,7 +11,8 @@ import { seal, unseal } from './sealed'
 
 export type SignInFactor = 'email_code' | 'passkey'
 
-const factorSchema = z.object({ factor: z.enum(['email_code', 'passkey']), session: z.string() }).strict()
+// Bound to the person and to the session, so it cannot be carried to another account's tokens.
+const factorSchema = z.object({ factor: z.enum(['email_code', 'passkey']), subject: z.string(), session: z.string() }).strict()
 
 // Names the session the factor belongs to without keeping the refresh token itself in a second place.
 function sessionFingerprint(refreshToken: string): string {
@@ -24,13 +25,20 @@ async function baseOptions() {
 
 export async function writeSession(tokens: Tokens, factor: SignInFactor): Promise<void> {
   const store = await cookies()
-  const { cookieKey } = await getServices()
+  const { cookieKey, identity } = await getServices()
+  const verified = await identity.verifyAccessToken(tokens.accessToken)
   const options = await baseOptions()
   // The browser drops the access token when it lapses, and the refresh token then gets a new one.
   store.set(COOKIE_NAMES.access, tokens.accessToken, { ...options, maxAge: tokens.expiresInSeconds })
   if (tokens.refreshToken !== undefined) {
     store.set(COOKIE_NAMES.refresh, tokens.refreshToken, { ...options, maxAge: REFRESH_SECONDS })
-    store.set(COOKIE_NAMES.factor, seal({ factor, session: sessionFingerprint(tokens.refreshToken) }, cookieKey), { ...options, maxAge: REFRESH_SECONDS })
+  }
+  // A session whose person cannot be named keeps no record of a passkey, and so counts as an emailed code.
+  if (tokens.refreshToken !== undefined && verified.ok) {
+    const record = { factor, subject: verified.value.subject, session: sessionFingerprint(tokens.refreshToken) }
+    store.set(COOKIE_NAMES.factor, seal(record, cookieKey), { ...options, maxAge: REFRESH_SECONDS })
+  } else {
+    store.delete(COOKIE_NAMES.factor)
   }
   store.set(COOKIE_NAMES.signedIn, '1', { ...options, httpOnly: false, maxAge: REFRESH_SECONDS })
   store.delete(COOKIE_NAMES.attempt)
@@ -49,14 +57,16 @@ export async function readAccessToken(): Promise<string | undefined> {
   return (await cookies()).get(COOKIE_NAMES.access)?.value
 }
 
-// How the current session was proven. An emailed code unless a passkey proved this very session.
-export async function sessionFactor(): Promise<SignInFactor> {
+// How the current session was proven, for the person its access token names. An emailed code unless a passkey proved
+// this very session for this very person: a record from another account's session counts for nothing.
+export async function sessionFactor(subject: string): Promise<SignInFactor> {
   const store = await cookies()
   const sealed = store.get(COOKIE_NAMES.factor)?.value
   const refreshToken = store.get(COOKIE_NAMES.refresh)?.value
   if (sealed === undefined || refreshToken === undefined) return 'email_code'
   const parsed = factorSchema.safeParse(unseal(sealed, (await getServices()).cookieKey))
-  return parsed.success && parsed.data.session === sessionFingerprint(refreshToken) ? parsed.data.factor : 'email_code'
+  const matches = parsed.success && parsed.data.subject === subject && parsed.data.session === sessionFingerprint(refreshToken)
+  return matches ? parsed.data.factor : 'email_code'
 }
 
 export async function chosenShopId(): Promise<string | undefined> {

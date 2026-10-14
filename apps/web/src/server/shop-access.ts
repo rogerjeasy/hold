@@ -47,7 +47,7 @@ export async function shopAccess(): Promise<ShopAccess> {
     staff: await staffRoleOf(transaction, person.userId),
   }))
   if (loaded.settings === undefined || loaded.staff === undefined) return { kind: 'no_shop', person }
-  const factor = await sessionFactor()
+  const factor = await sessionFactor(verified.value.subject)
   const threshold = loaded.settings.ownerApprovalThresholdCents
   const currency = loaded.settings.currency ?? 'XXX'
   const strongNeeded = needsStrongSignIn(loaded.staff.role, money(loaded.staff.approvalLimitCents, currency), threshold === null ? undefined : money(threshold, currency))
