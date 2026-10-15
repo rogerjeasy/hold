@@ -15,3 +15,5 @@ export type { Acceptance, AcceptanceResult, InvitationForLink, NewInvitation, Op
 export * from './schema/index.ts'
 export { DATABASE_ROLES, inShop, outsideShop } from './scope.ts'
 export type { Database, DatabaseRole, Scope, Transaction } from './scope.ts'
+export { addItems, changeStatus, editItem, itemCatalog, itemPassport, saveItemType } from './item-repository.ts'
+export type { AddItemsResult, BindingRental, CatalogItem, CatalogType, ChangeStatusResult, EditItemResult, ItemCatalog, ItemPassport, NewItems, PassportMark, PassportRental, PassportSession, SaveItemTypeResult } from './item-repository.ts'

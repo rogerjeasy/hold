@@ -1,4 +1,4 @@
-import { CLAIM_STATES, HOLD_STATES, PRICE_CATEGORIES, RENTAL_STATES, STAFF_ROLES } from '@hold/domain'
+import { CLAIM_STATES, HOLD_STATES, ITEM_CATEGORIES, ITEM_STATUSES, PRICE_CATEGORIES, RENTAL_STATES, STAFF_ROLES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
 import { check, text } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
@@ -48,6 +48,8 @@ export const holdState = oneOf(HOLD_STATES)
 export const claimState = oneOf(CLAIM_STATES)
 export const staffRole = oneOf(STAFF_ROLES)
 export const priceCategory = oneOf(PRICE_CATEGORIES)
+export const itemCategory = oneOf(ITEM_CATEGORIES)
+export const itemStatus = oneOf(ITEM_STATUSES)
 export const paypalMode = oneOf(PAYPAL_MODES)
 export const placementStrategy = oneOf(PLACEMENT_STRATEGIES)
 export const authorizationState = oneOf(AUTHORIZATION_STATES)

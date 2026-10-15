@@ -1,6 +1,6 @@
 import { boolean, integer, jsonb, pgTable, real, text, unique } from 'drizzle-orm/pg-core'
 import { shopIsolation } from './access.ts'
-import { items, priceEntries } from './catalog.ts'
+import { items, photoPlans, priceEntries } from './catalog.ts'
 import { at, createdAt, id, reference } from './columns.ts'
 import { allowed, CAPTURE_SESSION_KINDS, captureSessionKind, COMPARISON_STATES, comparisonState, FINDING_CLASSES, findingClass, MARK_STATUSES, markStatus } from './enums.ts'
 import { rentalItems, rentals } from './rentals.ts'
@@ -18,6 +18,10 @@ export const captureSessions = pgTable(
       .notNull()
       .references(() => rentalItems.id),
     kind: captureSessionKind().notNull(),
+    // The plan the photographs were taken to. A return is compared view by view with a handover of the same plan.
+    photoPlanId: reference()
+      .notNull()
+      .references(() => photoPlans.id),
     // A staff member, or nobody when the renter took the photographs through their link.
     actorUserId: reference().references(() => users.id),
     startedAt: createdAt(),

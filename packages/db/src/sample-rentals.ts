@@ -1,5 +1,5 @@
-import { addDays, HOLD_ASSURED_DAYS, HOLD_VALIDITY_DAYS, shopDay } from '@hold/domain'
-import type { ClaimState, HoldState, RentalState } from '@hold/domain'
+import { addDays, HOLD_ASSURED_DAYS, HOLD_VALIDITY_DAYS, shopDay, suggestedPhotoPlan, viewKeys } from '@hold/domain'
+import type { ClaimState, HoldState, ItemCategory, RentalState } from '@hold/domain'
 import { and, asc, desc, eq, isNotNull, sql } from 'drizzle-orm'
 import {
   approvals,
@@ -28,13 +28,27 @@ import type { Transaction } from './scope.ts'
 
 type SampleItem = 'hybrid' | 'ebike' | 'kayak' | 'gravel' | 'seat' | 'emtb'
 
-const CATALOG: Record<SampleItem, { readonly name: string; readonly holdCents: number; readonly feeCents: number; readonly valueCents: number }> = {
-  hybrid: { name: 'Hybrid bike', holdCents: 250_00, feeCents: 25_00, valueCents: 900_00 },
-  ebike: { name: 'E-bike', holdCents: 300_00, feeCents: 45_00, valueCents: 2400_00 },
-  kayak: { name: 'Tandem kayak', holdCents: 450_00, feeCents: 60_00, valueCents: 1300_00 },
-  gravel: { name: 'Gravel bike', holdCents: 300_00, feeCents: 35_00, valueCents: 1600_00 },
-  seat: { name: 'Child seat', holdCents: 50_00, feeCents: 8_00, valueCents: 120_00 },
-  emtb: { name: 'E-mountain bike', holdCents: 500_00, feeCents: 70_00, valueCents: 4200_00 },
+// Each sample rental's fee is one day of each of its items.
+const CATALOG: Record<
+  SampleItem,
+  { readonly name: string; readonly category: ItemCategory; readonly holdCents: number; readonly dayRateCents: number; readonly valueCents: number }
+> = {
+  hybrid: { name: 'Hybrid bike', category: 'bike', holdCents: 250_00, dayRateCents: 25_00, valueCents: 900_00 },
+  ebike: { name: 'E-bike', category: 'e_bike', holdCents: 300_00, dayRateCents: 45_00, valueCents: 2400_00 },
+  kayak: { name: 'Tandem kayak', category: 'water', holdCents: 450_00, dayRateCents: 60_00, valueCents: 1300_00 },
+  gravel: { name: 'Gravel bike', category: 'bike', holdCents: 300_00, dayRateCents: 35_00, valueCents: 1600_00 },
+  seat: { name: 'Child seat', category: 'other', holdCents: 50_00, dayRateCents: 8_00, valueCents: 120_00 },
+  emtb: { name: 'E-mountain bike', category: 'e_bike', holdCents: 500_00, dayRateCents: 70_00, valueCents: 4200_00 },
+}
+
+// The suggested plan for a category, worded in English like the rest of the samples: "frame_left" reads "Frame left".
+function samplePlan(category: ItemCategory) {
+  const views = suggestedPhotoPlan(category).map((view) => {
+    const words = view.key.replace(/_/g, ' ')
+    return { label: words.charAt(0).toUpperCase() + words.slice(1), outline: view.outline, required: view.required }
+  })
+  const keys = viewKeys(views)
+  return views.map((view, index) => ({ ...view, key: keys[index] ?? view.label }))
 }
 
 // A moment as days, hours and minutes from the start of the shop's day, or as minutes from now. Today's handovers
@@ -120,8 +134,6 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
   const inMonth = (at: Date) => new Date(Math.min(Math.max(at.getTime(), day.monthStart.getTime()), now.getTime() - MINUTE))
   const { currency } = terms
 
-  const [plan] = await transaction.insert(photoPlans).values({ shopId, name: 'Sample photo plan', views: [], createdAt: now }).returning({ id: photoPlans.id })
-  if (plan === undefined) throw new Error('The sample photo plan was not created.')
   const typeIds = new Map<SampleItem, string>()
   const typeOf = (key: SampleItem) => {
     const typeId = typeIds.get(key)
@@ -129,9 +141,25 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
     return typeId
   }
   for (const [key, item] of Object.entries(CATALOG) as [SampleItem, (typeof CATALOG)[SampleItem]][]) {
+    const [plan] = await transaction
+      .insert(photoPlans)
+      .values({ shopId, name: item.name, views: samplePlan(item.category), createdAt: now })
+      .returning({ id: photoPlans.id })
+    if (plan === undefined) throw new Error('A sample photo plan was not created.')
     const [type] = await transaction
       .insert(itemTypes)
-      .values({ shopId, name: item.name, currency, valueCents: item.valueCents, holdCents: item.holdCents, photoPlanId: plan.id, createdAt: now })
+      .values({
+        shopId,
+        name: item.name,
+        category: item.category,
+        currency,
+        valueCents: item.valueCents,
+        holdCents: item.holdCents,
+        dayRateCents: item.dayRateCents,
+        photoPlanId: plan.id,
+        simulated: true,
+        createdAt: now,
+      })
       .returning({ id: itemTypes.id })
     if (type === undefined) throw new Error('A sample item type was not created.')
     typeIds.set(key, type.id)
@@ -147,7 +175,7 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
     const startsAt = moment(sample.starts)
     const endsAt = moment(sample.ends)
     const reservedCents = sample.items.reduce((sum, key) => sum + CATALOG[key].holdCents, 0)
-    const feeCents = sample.items.reduce((sum, key) => sum + CATALOG[key].feeCents, 0)
+    const feeCents = sample.items.reduce((sum, key) => sum + CATALOG[key].dayRateCents, 0)
 
     const [rental] = await transaction
       .insert(rentals)
@@ -163,7 +191,7 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
       numbered.set(key, number)
       const [item] = await transaction
         .insert(items)
-        .values({ shopId, itemTypeId: typeOf(key), label: `${CATALOG[key].name} ${String(number)}`, createdAt: now })
+        .values({ shopId, itemTypeId: typeOf(key), label: `${CATALOG[key].name} ${String(number)}`, simulated: true, createdAt: now })
         .returning({ id: items.id })
       if (item === undefined) throw new Error('A sample item was not created.')
       await transaction.insert(rentalItems).values({ shopId, rentalId: rental.id, itemId: item.id })

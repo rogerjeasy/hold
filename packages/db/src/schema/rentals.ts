@@ -2,6 +2,7 @@ import { HOLD_STATES, RENTAL_STATES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
 import { boolean, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
+import type { Accessory } from '@hold/domain'
 import { appRole, shopIsolation, workerRole } from './access.ts'
 import { items, priceLists, wearPolicies } from './catalog.ts'
 import { at, cents, createdAt, currency, id, reference } from './columns.ts'
@@ -55,8 +56,6 @@ export const rentals = pgTable(
   },
   (table) => [allowed(table.state, RENTAL_STATES), shopIsolation(table.shopId)],
 )
-
-export type Accessory = { readonly name: string; readonly count: number }
 
 export const rentalItems = pgTable(
   'rental_items',

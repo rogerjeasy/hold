@@ -71,6 +71,13 @@
       "when": 1791979256687,
       "tag": "0009_simulated_rentals",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792082035294,
+      "tag": "0010_items_and_photo_plans",
+      "breakpoints": true
     }
   ]
 }

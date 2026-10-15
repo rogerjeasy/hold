@@ -1,8 +1,8 @@
-import { is, sql } from 'drizzle-orm'
+import { eq, is, sql } from 'drizzle-orm'
 import { getTableConfig, PgTable } from 'drizzle-orm/pg-core'
 import { beforeAll, describe, expect, it } from 'vitest'
 import * as schema from './schema/index.ts'
-import { photoPlans, renters, rentals, shops, staffRoles, users } from './schema/index.ts'
+import { itemTypes, photoPlans, renters, rentals, shops, staffRoles, users } from './schema/index.ts'
 import { inShop } from './scope.ts'
 import type { Scope, Transaction } from './scope.ts'
 import { createTestDatabase } from './testing/test-database.ts'
@@ -118,7 +118,10 @@ describe('a transaction scoped to one shop', () => {
   })
 
   it('cannot move a row into another shop', async () => {
-    expect(await refusal(inShop(database, ownerOfA, (transaction) => transaction.update(photoPlans).set({ shopId: SHOP_B })))).toMatch(/row-level security/)
+    // Photo plans are never updated at all (migration 0010), so an updatable table shows the policy at work.
+    const [plan] = await database.select({ id: photoPlans.id }).from(photoPlans).where(eq(photoPlans.shopId, SHOP_A))
+    await database.insert(itemTypes).values({ shopId: SHOP_A, name: 'E-bike', category: 'e_bike', currency: 'CHF', valueCents: 1, holdCents: 1, dayRateCents: 1, photoPlanId: plan?.id ?? '' })
+    expect(await refusal(inShop(database, ownerOfA, (transaction) => transaction.update(itemTypes).set({ shopId: SHOP_B })))).toMatch(/row-level security/)
   })
 
   it('cannot delete anything', async () => {
