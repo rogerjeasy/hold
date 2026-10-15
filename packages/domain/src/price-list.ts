@@ -1,5 +1,6 @@
 import { amountText } from './currency.ts'
 import type { Money } from './money.ts'
+import { slugOf } from './slug.ts'
 
 // A shop's published prices for damage, loss and lateness, and what it counts as ordinary wear. A renter agrees to
 // one version at booking, and a claim is priced from that version alone (architecture.md section 7.2).
@@ -51,13 +52,7 @@ export function checkPriceList(draft: PriceListDraft): readonly PriceListProblem
 
 // A stable code for an entry, from its description: "Deep scratch on the frame" becomes "deep-scratch-on-the-frame".
 export function priceCode(description: string, index: number): string {
-  const slug = description
-    .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 48)
+  const slug = slugOf(description)
   return slug === '' ? `entry-${String(index + 1)}` : slug
 }
 
