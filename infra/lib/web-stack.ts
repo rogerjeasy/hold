@@ -75,7 +75,8 @@ function settings(props: WebStackProps): apprunner.CfnService.KeyValuePairProper
 }
 
 export function createWebStack(app: App, props: WebStackProps): WebResources {
-  const stack = new Stack(app, 'HoldWeb', { ...props, description: 'Hold: the web app' })
+  // App Runner gives each new service a new address, so deleting this stack would break every link to Hold.
+  const stack = new Stack(app, 'HoldWeb', { ...props, terminationProtection: true, description: 'Hold: the web app' })
 
   const accessRole = new iam.Role(stack, 'AccessRole', {
     roleName: name('web', 'access'),

@@ -1334,7 +1334,7 @@ The CDK code is in `infra/`, as five stacks:
 | `HoldIdentity` | The Cognito pool `hold-staff` for owners and staff, its groups and its web client. Codes go out through the SES identity `rogerjeasybavibidila@gmail.com`, which is verified outside the stack | Termination protection, deletion protection on the pool |
 | `HoldWork` | The spine's queues and their dead-letter queues and alarms, the schedule group, the role the scheduler uses | |
 | `HoldRegistry` | The image repository | Retained |
-| `HoldWeb` | The App Runner service `hold-web`, its instance role and the role it pulls the image with, and a scaling limit of two instances. Its address is App Runner's own, https://p99faar3kp.us-east-1.awsapprunner.com, the stack's `ServiceUrl` output | |
+| `HoldWeb` | The App Runner service `hold-web`, its instance role and the role it pulls the image with, and a scaling limit of two instances. Its address is App Runner's own, https://p99faar3kp.us-east-1.awsapprunner.com, the stack's `ServiceUrl` output | Termination protection, because a new service would get a new address. Set once by an administrator, since the pipeline may not change it |
 
 The worker's compute is added with its code. The web app's address is known only once the service exists, so it goes into `infra/cdk.json` as `webPublicUrl` after the first deploy, and the links in Hold's emails use it from the next one.
 

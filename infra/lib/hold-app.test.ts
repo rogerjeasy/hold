@@ -220,6 +220,10 @@ describe('the web app', () => {
     expect(image).toContain(`:${IMAGE_TAG}`)
   })
 
+  it('cannot be deleted by accident, since a new service would get a new address', () => {
+    expect(stacks.web.stack.terminationProtection).toBe(true)
+  })
+
   it('stops at two instances, so a burst of traffic cannot run up the bill through judging', () => {
     web.hasResourceProperties('AWS::AppRunner::AutoScalingConfiguration', { AutoScalingConfigurationName: 'hold-web', MaxSize: 2 })
   })
