@@ -104,7 +104,7 @@ function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineR
   const add = (policy: iam.PolicyStatement) => role.addToPolicy(policy)
 
   // Reading configuration is not a risk, and several services describe only account-wide.
-  add(statement(['ec2:Describe*', 'rds:Describe*', 'apprunner:Describe*', 'apprunner:List*', 'cloudwatch:DescribeAlarms', 'cognito-idp:DescribeUserPool', 'cognito-idp:DescribeUserPoolClient', 'cognito-idp:GetGroup', 'cognito-idp:GetUserPoolMfaConfig', 'cognito-idp:ListUserPoolClients', 'cognito-idp:ListGroups', 'cognito-idp:ListTagsForResource', 'secretsmanager:GetRandomPassword'], ['*']))
+  add(statement(['ec2:Describe*', 'rds:Describe*', 'apprunner:ListServices', 'apprunner:ListAutoScalingConfigurations', 'cloudwatch:DescribeAlarms', 'cognito-idp:DescribeUserPool', 'cognito-idp:DescribeUserPoolClient', 'cognito-idp:GetGroup', 'cognito-idp:GetUserPoolMfaConfig', 'cognito-idp:ListUserPoolClients', 'cognito-idp:ListGroups', 'cognito-idp:ListTagsForResource', 'secretsmanager:GetRandomPassword'], ['*']))
   add(statement(['ssm:GetParameters'], [`arn:aws:ssm:${REGION}:${ACCOUNT}:parameter/cdk-bootstrap/*`]))
 
   // Managing Hold's resources, without reading what they hold.
@@ -128,10 +128,11 @@ function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineR
   // Encryption with AWS-managed keys, through the services that use them, for their own resources only.
   add(statement(['kms:DescribeKey', 'kms:CreateGrant'], ['*'], { StringEquals: { 'kms:ViaService': [`rds.${REGION}.amazonaws.com`, `secretsmanager.${REGION}.amazonaws.com`] }, Bool: { 'kms:GrantIsForAWSResource': true } }))
 
-  // App Runner: a service may be made only with the project tag, and only Hold's are changed after.
+  // App Runner: a service may be made only with the project tag, and only Hold's are described or changed after.
+  // Describing a service shows its settings, so another project's is never described.
   add(statement(['apprunner:CreateService'], ['*'], { StringEquals: HOLD_REQUEST_TAG }))
-  add(statement(['apprunner:UpdateService', 'apprunner:DeleteService', 'apprunner:TagResource', 'apprunner:UntagResource'], [`${at.services}/*`]))
-  add(statement(['apprunner:CreateAutoScalingConfiguration', 'apprunner:DeleteAutoScalingConfiguration', 'apprunner:TagResource', 'apprunner:UntagResource'], [`${at.scaling}/*`]))
+  add(statement(['apprunner:DescribeService', 'apprunner:ListOperations', 'apprunner:UpdateService', 'apprunner:DeleteService', 'apprunner:TagResource', 'apprunner:UntagResource', 'apprunner:ListTagsForResource'], [`${at.services}/*`]))
+  add(statement(['apprunner:CreateAutoScalingConfiguration', 'apprunner:DescribeAutoScalingConfiguration', 'apprunner:DeleteAutoScalingConfiguration', 'apprunner:TagResource', 'apprunner:UntagResource', 'apprunner:ListTagsForResource'], [`${at.scaling}/*`]))
 
   // Security groups: the project tag may be set only while one is created, and never changed after, so a group of
   // another project cannot be brought into reach by tagging it.

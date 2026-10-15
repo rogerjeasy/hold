@@ -365,6 +365,18 @@ describe('delivery', () => {
     expect(statements).not.toContain('"apprunner:*"')
   })
 
+  it('never lets CloudFormation describe another project’s App Runner service, whose settings it would read', () => {
+    const statements = Object.values(delivery.findResources('AWS::IAM::Policy'))
+      .flatMap((policy) => (policy as { Properties: { PolicyDocument: { Statement: Record<string, unknown>[] } } }).Properties.PolicyDocument.Statement)
+      .filter((statement) => statement['Effect'] === 'Allow')
+    const describing = statements.filter((statement) => [statement['Action']].flat().some((action) => /^apprunner:(Describe|List|Get)/.test(String(action)) && !/^apprunner:List(Services|AutoScalingConfigurations)$/.test(String(action))))
+
+    expect(describing.length).toBeGreaterThan(0)
+    for (const statement of describing) {
+      for (const resource of [statement['Resource']].flat()) expect(String(resource)).toMatch(/:(service|autoscalingconfiguration)\/hold-\*\/\*$/)
+    }
+  })
+
   it('never lets the project tag be set on something that already exists', () => {
     const statements = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
     expect(statements).toContain('"ec2:CreateAction":"CreateSecurityGroup"')
