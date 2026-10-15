@@ -4,6 +4,7 @@ import type {
   Authorization,
   AuthorizationStatus,
   Capture,
+  FeePayment,
   HoldOrder,
   HoldOrderStatus,
   PayPalFailure,
@@ -18,16 +19,25 @@ import type {
 export type FakePayPal = PayPalHolds & {
   // Stands in for the renter approving the hold on PayPal's page.
   approveOrder(orderId: string): void
+  // Where an order sends the renter back, and what it is for: what a simulated approval page needs.
+  orderLinks(orderId: string): { readonly returnUrl: string; readonly cancelUrl: string; readonly amount: Money; readonly description: string } | undefined
 }
 
 export type FakePayPalOptions = {
   readonly now: () => Date
+  // Where the renter is sent to approve an order. The test app points it at its own simulated approval page.
+  readonly approvalUrl?: (orderId: string) => string
 }
 
 type FakeOrder = {
   readonly orderId: string
   readonly amount: Money
   status: HoldOrderStatus
+  readonly returnUrl: string
+  readonly cancelUrl: string
+  readonly description: string
+  // Set when a fee order is captured.
+  payment: FeePayment | undefined
 }
 
 type FakeAuthorization = {
@@ -43,7 +53,7 @@ type FakeAuthorization = {
   renewedBy: string | undefined
 }
 
-const FAKE_PAYER_ID = 'FAKEPAYER0001'
+const FAKE_PAYER = { payerId: 'FAKEPAYER0001', email: 'renter@fake-paypal.test', name: 'Fake Renter' }
 
 function failure(kind: PayPalFailureKind, description: string, issue?: string): PayPalResult<never> {
   const error: PayPalFailure = { kind, issue, description, debugId: undefined }
@@ -73,8 +83,8 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
     return {
       orderId: order.orderId,
       status: order.status,
-      approvalUrl: awaiting ? `https://fake-paypal.test/approve/${order.orderId}` : undefined,
-      payerId: awaiting ? undefined : FAKE_PAYER_ID,
+      approvalUrl: awaiting ? (options.approvalUrl?.(order.orderId) ?? `https://fake-paypal.test/approve/${order.orderId}`) : undefined,
+      payerId: awaiting ? undefined : FAKE_PAYER.payerId,
     }
   }
 
@@ -114,11 +124,45 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
 
     createHoldOrder(input) {
       const order = once('create', input.idempotencyKey, () => {
-        const created: FakeOrder = { orderId: nextId('FAKE-ORDER'), amount: input.amount, status: 'awaiting_approval' }
+        const created: FakeOrder = { orderId: nextId('FAKE-ORDER'), amount: input.amount, status: 'awaiting_approval', returnUrl: input.returnUrl, cancelUrl: input.cancelUrl, description: input.description, payment: undefined }
         orders.set(created.orderId, created)
         return created
       })
       return Promise.resolve(ok(toHoldOrder(order)))
+    },
+
+    orderLinks(orderId) {
+      const order = orders.get(orderId)
+      return order === undefined ? undefined : { returnUrl: order.returnUrl, cancelUrl: order.cancelUrl, amount: order.amount, description: order.description }
+    },
+
+    createFeeOrder(input) {
+      const order = once('create', input.idempotencyKey, () => {
+        const created: FakeOrder = { orderId: nextId('FAKE-ORDER'), amount: input.amount, status: 'awaiting_approval', returnUrl: input.returnUrl, cancelUrl: input.cancelUrl, description: input.description, payment: undefined }
+        orders.set(created.orderId, created)
+        return created
+      })
+      return Promise.resolve(ok(toHoldOrder(order)))
+    },
+
+    captureFeeOrder(input) {
+      const result = once('capture-order', input.idempotencyKey, (): PayPalResult<FeePayment> => {
+        const order = orders.get(input.orderId)
+        if (order === undefined) return failure('not_found', 'No such order.')
+        // A second capture of a captured order reads it instead, as the REST adapter does with ORDER_ALREADY_CAPTURED.
+        if (order.payment !== undefined) return ok(order.payment)
+        if (order.status !== 'approved') return failure('order_not_approved', 'The renter has not approved the order.')
+        order.payment = { orderId: order.orderId, captureId: nextId('FAKE-CAPTURE'), status: 'completed', amount: order.amount, payer: FAKE_PAYER }
+        order.status = 'completed'
+        return ok(order.payment)
+      })
+      return Promise.resolve(result)
+    },
+
+    readFeePayment(orderId) {
+      const order = orders.get(orderId)
+      if (order === undefined) return Promise.resolve(failure('not_found', 'No such order.'))
+      return Promise.resolve(order.payment === undefined ? failure('not_paid', 'The order has no capture.') : ok(order.payment))
     },
 
     readHoldOrder(orderId) {

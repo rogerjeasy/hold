@@ -65,6 +65,21 @@ export const captureSchema = z.object({
   create_time: timeSchema,
 })
 
+// An order read back after its fee was captured: who paid, and the capture.
+export const feeOrderSchema = z.object({
+  id: z.string().min(1),
+  status: z.string(),
+  payer: z
+    .object({
+      payer_id: z.string().min(1),
+      email_address: z.string().min(1).optional(),
+      name: z.object({ given_name: z.string().optional(), surname: z.string().optional() }).optional(),
+    })
+    .optional(),
+  purchase_units: z.array(z.object({ payments: z.object({ captures: z.array(captureSchema.omit({ final_capture: true }).extend({ final_capture: z.boolean().default(true) })).optional() }).optional() })).optional(),
+})
+
 export type PayPalOrder = z.infer<typeof orderSchema>
+export type PayPalFeeOrder = z.infer<typeof feeOrderSchema>
 export type PayPalAuthorization = z.infer<typeof authorizationSchema>
 export type PayPalCapture = z.infer<typeof captureSchema>

@@ -79,6 +79,8 @@ const KIND_BY_ISSUE: ReadonlyMap<string, PayPalFailureKind> = new Map([
   ['MAX_CAPTURE_AMOUNT_EXCEEDED', 'amount_exceeds_hold'],
   ['REAUTHORIZATION_TOO_SOON', 'renewal_too_soon'],
   ['INVALID_RESOURCE_ID', 'not_found'],
+  // Asking again for a capture already made: Hold reads the order instead.
+  ['ORDER_ALREADY_CAPTURED', 'already_captured'],
 ])
 
 function parseJson(text: string): unknown {

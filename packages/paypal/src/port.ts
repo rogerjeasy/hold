@@ -43,6 +43,8 @@ export type PayPalFailureKind =
   | 'hold_expired'
   | 'hold_voided'
   | 'hold_already_captured'
+  // A fee order captured already, perhaps by an earlier attempt.
+  | 'already_captured'
   | 'amount_exceeds_hold'
   // A renewal was asked for inside the assured period.
   | 'renewal_too_soon'
@@ -53,6 +55,8 @@ export type PayPalFailureKind =
   | 'unavailable'
   // PayPal answered with something Hold could not read. Treated as nothing having happened.
   | 'unexpected_response'
+  // The fee order exists but no payment was captured on it.
+  | 'not_paid'
 
 export type PayPalFailure = {
   readonly kind: PayPalFailureKind
@@ -97,7 +101,28 @@ export type CaptureFromHoldInput = {
   readonly idempotencyKey: string
 }
 
+export type CreateFeeOrderInput = CreateHoldOrderInput
+
+// The person who paid, as PayPal knows them. This is who the renter is (architecture.md section 12.3).
+export type Payer = { readonly payerId: string; readonly email: string; readonly name: string | undefined }
+
+// A rental fee PayPal captured.
+export type FeePayment = {
+  readonly orderId: string
+  readonly captureId: string
+  readonly status: CaptureStatus
+  readonly amount: Money
+  readonly payer: Payer
+}
+
+export type CaptureFeeInput = { readonly orderId: string; readonly idempotencyKey: string }
+
 export type PayPalHolds = {
+  // The rental fee: an ordinary order, captured once the renter approves it.
+  createFeeOrder(input: CreateFeeOrderInput): Promise<PayPalResult<HoldOrder>>
+  // Captures an approved fee order, then reads it back: PayPal's record is the truth.
+  captureFeeOrder(input: CaptureFeeInput): Promise<PayPalResult<FeePayment>>
+  readFeePayment(orderId: string): Promise<PayPalResult<FeePayment>>
   createHoldOrder(input: CreateHoldOrderInput): Promise<PayPalResult<HoldOrder>>
   readHoldOrder(orderId: string): Promise<PayPalResult<HoldOrder>>
   // Authorizes an order the renter has approved. This is the moment the money is reserved.

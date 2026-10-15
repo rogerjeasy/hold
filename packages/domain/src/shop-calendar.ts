@@ -58,3 +58,24 @@ export function shopDay(timeZone: string, now: Date): ShopDay {
     part: partOf(today.hour),
   }
 }
+
+// A date and time as a form sends it, read on the shop's clock: "2026-10-16T10:00" in Lisbon is 09:00 UTC in summer.
+// Nothing for text that is not a real date and time.
+export function atShopTime(timeZone: string, local: string): Date | undefined {
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(local)
+  if (match === null) return undefined
+  const [year, month, day, hour, minute] = match.slice(1).map(Number) as [number, number, number, number, number]
+  const asUtc = Date.UTC(year, month - 1, day, hour, minute)
+  const check = new Date(asUtc)
+  if (check.getUTCMonth() !== month - 1 || check.getUTCDate() !== day || hour > 23 || minute > 59) return undefined
+  // Checked twice, so an instant next to a change of offset is placed by the offset in force at it.
+  const first = asUtc - offsetAt(timeZone, new Date(asUtc))
+  return new Date(asUtc - offsetAt(timeZone, new Date(first)))
+}
+
+// The shop's clock at an instant, in the form a date and time field takes.
+export function shopTimeText(timeZone: string, instant: Date): string {
+  const clock = wallClock(timeZone, instant)
+  const two = (value: number) => String(value).padStart(2, '0')
+  return `${String(clock.year)}-${two(clock.month)}-${two(clock.day)}T${two(clock.hour)}:${two(clock.minute)}`
+}

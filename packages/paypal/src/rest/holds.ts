@@ -6,6 +6,8 @@ import type {
   AuthorizationStatus,
   Capture,
   CaptureStatus,
+  CreateHoldOrderInput,
+  FeePayment,
   HoldOrder,
   HoldOrderStatus,
   PayPalHolds,
@@ -17,9 +19,10 @@ import {
   authorizationSchema,
   authorizedOrderSchema,
   captureSchema,
+  feeOrderSchema,
   orderSchema,
 } from './schemas.ts'
-import type { PayPalAuthorization, PayPalCapture, PayPalOrder } from './schemas.ts'
+import type { PayPalAuthorization, PayPalCapture, PayPalFeeOrder, PayPalOrder } from './schemas.ts'
 
 const ORDERS_PATH = '/v2/checkout/orders'
 const AUTHORIZATIONS_PATH = '/v2/payments/authorizations'
@@ -91,6 +94,21 @@ function toCapture(capture: PayPalCapture): Capture {
   }
 }
 
+function toFeePayment(order: PayPalFeeOrder, debugId: string | undefined): PayPalResult<FeePayment> {
+  const capture = order.purchase_units?.[0]?.payments?.captures?.[0]
+  if (capture === undefined) return fail({ kind: 'not_paid', issue: undefined, description: `Order ${order.id} has no capture.`, debugId })
+  // A captured order always names who paid. Without that, Hold cannot say who the renter is.
+  if (order.payer?.email_address === undefined) return fail({ kind: 'unexpected_response', issue: undefined, description: `Order ${order.id} names no payer.`, debugId })
+  const name = [order.payer.name?.given_name, order.payer.name?.surname].filter((part) => part !== undefined && part !== '').join(' ')
+  return ok({
+    orderId: order.id,
+    captureId: capture.id,
+    status: CAPTURE_STATUS[capture.status],
+    amount: capture.amount,
+    payer: { payerId: order.payer.payer_id, email: order.payer.email_address, name: name === '' ? undefined : name },
+  })
+}
+
 function mapped<From, To>(result: PayPalResult<From>, map: (value: From) => To): PayPalResult<To> {
   return result.ok ? ok(map(result.value)) : result
 }
@@ -100,7 +118,39 @@ function authorizationPath(authorizationId: string, action?: string): string {
   return action === undefined ? path : `${path}/${action}`
 }
 
+const orderPath = (orderId: string) => `${ORDERS_PATH}/${encodeURIComponent(orderId)}`
+
 export function createRestPayPalHolds(client: PayPalClient): PayPalHolds {
+  async function createOrder(intent: 'AUTHORIZE' | 'CAPTURE', input: CreateHoldOrderInput): Promise<PayPalResult<HoldOrder>> {
+    const reply = await client.send({
+      method: 'POST',
+      path: ORDERS_PATH,
+      idempotencyKey: input.idempotencyKey,
+      body: {
+        intent,
+        purchase_units: [{ custom_id: input.rentalReference, description: input.description, amount: toPayPalAmount(input.amount) }],
+        payment_source: {
+          paypal: {
+            experience_context: {
+              return_url: input.returnUrl,
+              cancel_url: input.cancelUrl,
+              user_action: 'PAY_NOW',
+              // Nothing is shipped for a rental, so the renter is not asked for an address.
+              shipping_preference: 'NO_SHIPPING',
+            },
+          },
+        },
+      },
+    })
+    return mapped(read(orderSchema, reply), toHoldOrder)
+  }
+
+  async function readFeePayment(orderId: string): Promise<PayPalResult<FeePayment>> {
+    const reply = await client.send({ method: 'GET', path: orderPath(orderId) })
+    const order = read(feeOrderSchema, reply)
+    return order.ok ? toFeePayment(order.value, reply.ok ? reply.value.debugId : undefined) : order
+  }
+
   async function readAuthorization(authorizationId: string): Promise<PayPalResult<Authorization>> {
     const reply = await client.send({ method: 'GET', path: authorizationPath(authorizationId) })
     return mapped(read(authorizationSchema, reply), toAuthorization)
@@ -108,40 +158,31 @@ export function createRestPayPalHolds(client: PayPalClient): PayPalHolds {
 
   return {
     async createHoldOrder(input) {
-      const reply = await client.send({
-        method: 'POST',
-        path: ORDERS_PATH,
-        idempotencyKey: input.idempotencyKey,
-        body: {
-          intent: 'AUTHORIZE',
-          purchase_units: [
-            { custom_id: input.rentalReference, description: input.description, amount: toPayPalAmount(input.amount) },
-          ],
-          payment_source: {
-            paypal: {
-              experience_context: {
-                return_url: input.returnUrl,
-                cancel_url: input.cancelUrl,
-                user_action: 'PAY_NOW',
-                // Nothing is shipped for a hold, so the renter is not asked for an address.
-                shipping_preference: 'NO_SHIPPING',
-              },
-            },
-          },
-        },
-      })
-      return mapped(read(orderSchema, reply), toHoldOrder)
+      return createOrder('AUTHORIZE', input)
     },
 
+    async createFeeOrder(input) {
+      return createOrder('CAPTURE', input)
+    },
+
+    async captureFeeOrder(input) {
+      const reply = await client.send({ method: 'POST', path: `${orderPath(input.orderId)}/capture`, idempotencyKey: input.idempotencyKey })
+      if (!reply.ok && reply.error.kind !== 'already_captured') return reply
+      // The capture's reply is not the record. The order is read back, whether this call or an earlier one captured it.
+      return readFeePayment(input.orderId)
+    },
+
+    readFeePayment,
+
     async readHoldOrder(orderId) {
-      const reply = await client.send({ method: 'GET', path: `${ORDERS_PATH}/${encodeURIComponent(orderId)}` })
+      const reply = await client.send({ method: 'GET', path: orderPath(orderId) })
       return mapped(read(orderSchema, reply), toHoldOrder)
     },
 
     async placeHold(input) {
       const reply = await client.send({
         method: 'POST',
-        path: `${ORDERS_PATH}/${encodeURIComponent(input.orderId)}/authorize`,
+        path: `${orderPath(input.orderId)}/authorize`,
         idempotencyKey: input.idempotencyKey,
       })
       const authorized = read(authorizedOrderSchema, reply)

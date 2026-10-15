@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { shopDay } from './shop-calendar.ts'
+import { atShopTime, shopDay, shopTimeText } from './shop-calendar.ts'
 
 describe('the shop’s day', () => {
   it('runs from midnight to midnight in the shop’s time zone', () => {
@@ -26,5 +26,23 @@ describe('the shop’s day', () => {
     expect(shopDay('Europe/Lisbon', new Date('2026-10-14T13:00:00Z')).part).toBe('afternoon')
     expect(shopDay('Europe/Lisbon', new Date('2026-10-14T19:00:00Z')).part).toBe('evening')
     expect(shopDay('Europe/Lisbon', new Date('2026-10-14T02:00:00Z')).part).toBe('night')
+  })
+})
+
+describe('a time on the shop’s clock', () => {
+  it('becomes the instant it names, in summer and in winter', () => {
+    expect(atShopTime('Europe/Lisbon', '2026-10-16T10:00')).toEqual(new Date('2026-10-16T09:00:00Z'))
+    expect(atShopTime('Europe/Lisbon', '2026-11-16T10:00')).toEqual(new Date('2026-11-16T10:00:00Z'))
+    expect(atShopTime('America/New_York', '2026-10-16T18:30')).toEqual(new Date('2026-10-16T22:30:00Z'))
+  })
+
+  it('is nothing for text that is not a date and a time', () => {
+    expect(atShopTime('Europe/Lisbon', '2026-13-01T10:00')).toBeUndefined()
+    expect(atShopTime('Europe/Lisbon', 'tomorrow')).toBeUndefined()
+    expect(atShopTime('Europe/Lisbon', '2026-02-30T10:00')).toBeUndefined()
+  })
+
+  it('is read back as the shop’s clock shows it', () => {
+    expect(shopTimeText('Europe/Lisbon', new Date('2026-10-16T09:00:00Z'))).toBe('2026-10-16T10:00')
   })
 })

@@ -251,3 +251,37 @@ describe('releasing a hold', () => {
     expect(await kindOf(paypal.releaseHold({ authorizationId: 'FAKE-AUTH-9999', idempotencyKey: key() }))).toBe('not_found')
   })
 })
+
+describe('a rental fee in the fake', () => {
+  const FEE: Money = { cents: 120_00, currency: 'EUR' }
+  const order = (fake: FakePayPal) =>
+    fake.createFeeOrder({ amount: FEE, rentalReference: 'rental-1', description: 'Rental fee', returnUrl: 'https://hold.test/paid', cancelUrl: 'https://hold.test/r', idempotencyKey: key() })
+
+  it('cannot be captured before the renter approves it', async () => {
+    const created = valueOf(await order(paypal))
+    expect(await paypal.captureFeeOrder({ orderId: created.orderId, idempotencyKey: key() })).toMatchObject({ ok: false, error: { kind: 'order_not_approved' } })
+    expect(await paypal.readFeePayment(created.orderId)).toMatchObject({ ok: false, error: { kind: 'not_paid' } })
+  })
+
+  it('is captured once approved, names who paid, and gives the same answer to a repeated key', async () => {
+    const created = valueOf(await order(paypal))
+    paypal.approveOrder(created.orderId)
+    const first = valueOf(await paypal.captureFeeOrder({ orderId: created.orderId, idempotencyKey: 'fee-capture-1' }))
+    expect(first).toMatchObject({ orderId: created.orderId, status: 'completed', amount: FEE, payer: { payerId: 'FAKEPAYER0001' } })
+    expect(valueOf(await paypal.captureFeeOrder({ orderId: created.orderId, idempotencyKey: 'fee-capture-1' }))).toEqual(first)
+    expect(valueOf(await paypal.captureFeeOrder({ orderId: created.orderId, idempotencyKey: 'fee-capture-2' }))).toEqual(first)
+    expect(valueOf(await paypal.readFeePayment(created.orderId))).toEqual(first)
+  })
+
+  it('remembers where the order sends the renter back, and what it is for', async () => {
+    const created = valueOf(await order(paypal))
+    expect(paypal.orderLinks(created.orderId)).toEqual({ returnUrl: 'https://hold.test/paid', cancelUrl: 'https://hold.test/r', amount: FEE, description: 'Rental fee' })
+    expect(paypal.orderLinks('FAKE-ORDER-9999')).toBeUndefined()
+  })
+
+  it('sends the renter to the approval address it was given', async () => {
+    const fake = createFakePayPal({ now: () => now, approvalUrl: (orderId) => `https://hold.test/simulated-paypal/${orderId}` })
+    const created = valueOf(await order(fake))
+    expect(created.approvalUrl).toBe(`https://hold.test/simulated-paypal/${created.orderId}`)
+  })
+})
