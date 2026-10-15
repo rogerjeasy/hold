@@ -35,7 +35,9 @@ export const CLAIM_REPLY_DECISIONS = ['accept', 'contest'] as const
 export const APPROVAL_SUBJECTS = ['claim', 'release', 'refund'] as const
 export const APPROVAL_DECISIONS = ['approved', 'rejected', 'waived'] as const
 export const APPROVAL_METHODS = ['on_screen', 'mandate'] as const
-export const EXECUTION_ACTIONS = ['renew', 'release', 'capture', 'refund', 'invoice'] as const
+export const EXECUTION_ACTIONS = ['renew', 'release', 'capture', 'refund', 'invoice', 'fee_capture'] as const
+// Who made a booking: staff at the counter or on the phone, or the renter on the shop's page.
+export const BOOKING_CHANNELS = ['staff', 'shop_page'] as const
 export const EXECUTION_STATES = ['pending', 'submitted', 'confirmed', 'failed'] as const
 export const VERIFICATION_STATES = ['pending', 'verified', 'rejected', 'simulated'] as const
 export const PROCESSING_STATES = ['pending', 'applied', 'ignored', 'failed'] as const
@@ -69,3 +71,4 @@ export const processingState = oneOf(PROCESSING_STATES)
 export const moneyEventKind = oneOf(MONEY_EVENT_KINDS)
 export const invoiceState = oneOf(INVOICE_STATES)
 export const outboxState = oneOf(OUTBOX_STATES)
+export const bookingChannel = oneOf(BOOKING_CHANNELS)

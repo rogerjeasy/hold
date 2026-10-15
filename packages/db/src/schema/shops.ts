@@ -33,6 +33,8 @@ export const shops = pgTable(
   {
     id: id(),
     name: text().notNull(),
+    // The shop's own address for renters, /s/{slug}. Made from its name when it is created, and numbered if taken.
+    slug: text().notNull().unique(),
     timeZone: text().notNull(),
     // Both are set when the owner writes the first price list, not at sign-up.
     currency: currency(),

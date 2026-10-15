@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { sql } from 'drizzle-orm'
+import { slugOf } from '@hold/domain'
 import type { StaffRole } from '@hold/domain'
 import { auditLog, shops, staffRoles } from './schema/index.ts'
 import { inShop, outsideShop } from './scope.ts'
@@ -27,7 +28,9 @@ export function registerOwner(database: Database, owner: NewOwner, newId: () => 
       .from(sql`hold_register_user(${owner.subject}, ${owner.email}, ${owner.name}, ${owner.language}) as registered(id)`)
     if (registered === undefined) throw new Error('hold_register_user returned no row.')
     const { userId } = registered
-    await transaction.insert(shops).values({ id: shopId, name: owner.shop.name, timeZone: owner.shop.timeZone })
+    const [address] = await transaction.select({ slug: sql<string>`hold_free_shop_slug(${slugOf(owner.shop.name) || 'shop'})` }).from(sql`(select 1) as one`)
+    if (address === undefined) throw new Error('hold_free_shop_slug returned no row.')
+    await transaction.insert(shops).values({ id: shopId, name: owner.shop.name, slug: address.slug, timeZone: owner.shop.timeZone })
     await transaction.insert(staffRoles).values({ shopId, userId, role: 'owner' })
     await transaction.insert(auditLog).values({
       shopId,

@@ -38,8 +38,8 @@ beforeAll(async () => {
   ])
   const shop = { timeZone: 'Europe/Zurich', currency: 'CHF', ownerApprovalThresholdCents: 200_00 }
   await database.insert(shops).values([
-    { ...shop, id: SHOP_A, name: 'Shop A' },
-    { ...shop, id: SHOP_B, name: 'Shop B' },
+    { ...shop, id: SHOP_A, name: 'Shop A', slug: 'shop-a' },
+    { ...shop, id: SHOP_B, name: 'Shop B', slug: 'shop-b' },
   ])
   await database.insert(staffRoles).values([
     { shopId: SHOP_A, userId: OWNER_A, role: 'owner' },
@@ -174,6 +174,7 @@ describe('renters', () => {
       endsAt: new Date('2026-10-23T17:00:00Z'),
       currency: 'CHF',
       feeCents: 90_00,
+      holdCents: 300_00,
       priceListId: String(priceList?.id),
       wearPolicyId: String(wearPolicy?.id),
     })

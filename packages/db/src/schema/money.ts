@@ -12,9 +12,11 @@ export const executions = pgTable(
   {
     id: id(),
     shopId: shopReference(),
-    holdId: reference()
+    rentalId: reference()
       .notNull()
-      .references(() => holds.id),
+      .references(() => rentals.id),
+    // Every action on a hold names it. Capturing the rental fee comes before any hold.
+    holdId: reference().references(() => holds.id),
     action: executionAction().notNull(),
     // Sent to PayPal as PayPal-Request-Id, so a retry cannot act twice.
     idempotencyKey: text().notNull().unique(),

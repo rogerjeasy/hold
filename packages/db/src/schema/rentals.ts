@@ -6,7 +6,7 @@ import type { Accessory } from '@hold/domain'
 import { appRole, shopIsolation, workerRole } from './access.ts'
 import { items, priceLists, wearPolicies } from './catalog.ts'
 import { at, cents, createdAt, currency, id, reference } from './columns.ts'
-import { allowed, AUTHORIZATION_STATES, authorizationState, holdState, PLACEMENT_STRATEGIES, placementStrategy, rentalState } from './enums.ts'
+import { allowed, AUTHORIZATION_STATES, authorizationState, BOOKING_CHANNELS, bookingChannel, holdState, PLACEMENT_STRATEGIES, placementStrategy, rentalState } from './enums.ts'
 import { shopReference } from './shops.ts'
 
 // A renter is the PayPal payer who approved an order. Not tied to one shop, so it has no shop_id.
@@ -42,6 +42,14 @@ export const rentals = pgTable(
     endsAt: at().notNull(),
     currency: currency().notNull(),
     feeCents: cents().notNull(),
+    // The hold the renter agreed to at booking, placed at pickup: each item's hold, read from its type.
+    holdCents: cents().notNull(),
+    // Whom staff booked for, so the link can be sent. The renter is who PayPal says paid, set in renterId.
+    contactName: text(),
+    contactEmail: text(),
+    // The renter's language, for the link and its emails.
+    language: text().notNull().default('en'),
+    bookedThrough: bookingChannel().notNull().default('staff'),
     priceListId: reference()
       .notNull()
       .references(() => priceLists.id),
@@ -54,7 +62,7 @@ export const rentals = pgTable(
     simulated: boolean().notNull().default(false),
     createdAt: createdAt(),
   },
-  (table) => [allowed(table.state, RENTAL_STATES), shopIsolation(table.shopId)],
+  (table) => [allowed(table.state, RENTAL_STATES), allowed(table.bookedThrough, BOOKING_CHANNELS), shopIsolation(table.shopId)],
 )
 
 export const rentalItems = pgTable(
@@ -68,6 +76,9 @@ export const rentalItems = pgTable(
     itemId: reference()
       .notNull()
       .references(() => items.id),
+    // The item's day rate and hold as the renter agreed them at booking, whatever its type says later.
+    dayRateCents: cents().notNull(),
+    holdCents: cents().notNull(),
     accessoriesOut: jsonb().$type<readonly Accessory[]>().notNull().default([]),
     accessoriesBack: jsonb().$type<readonly Accessory[]>(),
   },

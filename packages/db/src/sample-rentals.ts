@@ -179,7 +179,7 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
 
     const [rental] = await transaction
       .insert(rentals)
-      .values({ shopId, renterId: renter.id, startsAt, endsAt, currency, feeCents, priceListId: terms.priceListId, wearPolicyId: terms.wearPolicyId, state: sample.state, simulated: true, createdAt: inMonth(startsAt) })
+      .values({ shopId, renterId: renter.id, startsAt, endsAt, currency, feeCents, holdCents: reservedCents, priceListId: terms.priceListId, wearPolicyId: terms.wearPolicyId, state: sample.state, simulated: true, createdAt: inMonth(startsAt) })
       .returning({ id: rentals.id })
     if (rental === undefined) throw new Error('A sample rental was not created.')
     const reference = (kind: string) => `SIMULATED-${rental.id}-${kind}`
@@ -194,7 +194,7 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
         .values({ shopId, itemTypeId: typeOf(key), label: `${CATALOG[key].name} ${String(number)}`, simulated: true, createdAt: now })
         .returning({ id: items.id })
       if (item === undefined) throw new Error('A sample item was not created.')
-      await transaction.insert(rentalItems).values({ shopId, rentalId: rental.id, itemId: item.id })
+      await transaction.insert(rentalItems).values({ shopId, rentalId: rental.id, itemId: item.id, dayRateCents: CATALOG[key].dayRateCents, holdCents: CATALOG[key].holdCents })
     }
     await transaction.insert(moneyEvents).values({ shopId, rentalId: rental.id, kind: 'fee_captured', currency, amountCents: feeCents, paypalReference: reference('fee'), occurredAt: inMonth(startsAt) })
 

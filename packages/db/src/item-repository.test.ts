@@ -150,10 +150,10 @@ async function rentItem(itemId: string, state: 'booked' | 'out' | 'closed', star
   if (list === undefined || wear === undefined) throw new Error('No terms.')
   const [rental] = await database
     .insert(rentals)
-    .values({ shopId, renterId, startsAt, endsAt: new Date(startsAt.getTime() + 86_400_000), currency: 'EUR', feeCents: 45_00, priceListId: list.id, wearPolicyId: wear.id, state })
+    .values({ shopId, renterId, startsAt, endsAt: new Date(startsAt.getTime() + 86_400_000), currency: 'EUR', feeCents: 45_00, holdCents: 300_00, priceListId: list.id, wearPolicyId: wear.id, state })
     .returning({ id: rentals.id })
   if (rental === undefined) throw new Error('No rental.')
-  await database.insert(rentalItems).values({ shopId, rentalId: rental.id, itemId })
+  await database.insert(rentalItems).values({ shopId, rentalId: rental.id, itemId, dayRateCents: 45_00, holdCents: 300_00 })
   return rental.id
 }
 
