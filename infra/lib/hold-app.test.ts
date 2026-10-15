@@ -353,8 +353,13 @@ describe('delivery', () => {
     const allowed = passing.filter((statement) => statement['Effect'] === 'Allow' && JSON.stringify(statement).includes('role/hold-web'))
     expect(allowed).toHaveLength(1)
     expect(JSON.stringify(allowed[0]?.['Resource'])).toMatch(/role\/hold-web".*role\/hold-web-access"|role\/hold-web-access".*role\/hold-web"/)
-    // App Runner checks the pass itself and sets no iam:PassedToService, so the condition applies only when one is set.
-    expect(allowed[0]?.['Condition']).toEqual({ StringEqualsIfExists: { 'iam:PassedToService': ['apprunner.amazonaws.com', 'build.apprunner.amazonaws.com', 'tasks.apprunner.amazonaws.com'] } })
+    // App Runner checks the pass with a service name of its own choosing, so none is named here. Both roles trust App
+    // Runner alone, so no other service could use them.
+    expect(allowed[0]?.['Condition']).toBeUndefined()
+    for (const role of resourcesOfType(web, 'AWS::IAM::Role')) {
+      const principals = (role.Properties?.['AssumeRolePolicyDocument'] as { Statement: { Principal: { Service: string } }[] }).Statement.map((statement) => statement.Principal.Service)
+      for (const principal of principals) expect(principal).toMatch(/^(build|tasks)\.apprunner\.amazonaws\.com$/)
+    }
     const denied = passing.find((statement) => statement['Effect'] === 'Deny')
     expect(JSON.stringify(denied?.['NotResource'])).toContain('role/hold-web-access')
   })
