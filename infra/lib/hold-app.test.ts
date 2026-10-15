@@ -431,10 +431,26 @@ describe('delivery', () => {
     // administrator makes Hold's keys instead.
     expect(statements).not.toContain('kms:CreateKey')
     expect(statements).not.toMatch(/"Effect":"Allow"[^}]*kms:TagResource|kms:TagResource[^}]*"Effect":"Allow"/)
-    expect(statements).toMatch(/kms:CreateGrant[^}]*aws:ResourceTag\/project/)
     expect(statements).not.toContain('kms:PutKeyPolicy')
     expect(statements).not.toContain('"lambda:*"')
     expect(statements).not.toContain('"kms:*"')
+  })
+
+  it('lets CloudFormation grant Cognito only the right to encrypt codes, so no grant can let anyone decrypt them', () => {
+    const granting = Object.values(delivery.findResources('AWS::IAM::Policy'))
+      .flatMap((policy) => (policy as { Properties: { PolicyDocument: { Statement: Record<string, unknown>[] } } }).Properties.PolicyDocument.Statement)
+      .filter((statement) => statement['Effect'] === 'Allow' && [statement['Action']].flat().includes('kms:CreateGrant'))
+    // The other grant is RDS's and Secrets Manager's, on their own AWS-managed keys for the database.
+    const managedByServices = granting.filter((statement) => JSON.stringify(statement['Condition']).includes('"kms:GrantIsForAWSResource":true'))
+    expect(managedByServices).toHaveLength(1)
+    granting.splice(granting.indexOf(managedByServices[0] ?? {}), 1)
+
+    expect(granting).toHaveLength(1)
+    expect(granting[0]?.['Action']).toBe('kms:CreateGrant')
+    expect(granting[0]?.['Condition']).toEqual({
+      StringEquals: { 'aws:ResourceTag/project': 'hold', 'kms:GranteePrincipal': 'cognito-idp.us-east-1.amazonaws.com' },
+      'ForAllValues:StringEquals': { 'kms:GrantOperations': ['Encrypt', 'GenerateDataKey'] },
+    })
   })
 
   it('never lets CloudFormation describe another project’s App Runner service, whose settings it would read', () => {

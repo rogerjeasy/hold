@@ -142,8 +142,15 @@ function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineR
   add(statement(['s3:GetObject'], [`arn:aws:s3:::${CDK_ASSETS_BUCKET}/${CDK_ASSETS_PREFIX}*`]))
   // Keys: an administrator makes Hold's, because tagging a key as it is made needs kms:TagResource, which would let
   // this role tag another project's key as Hold's too. Setting one on the user pool makes Cognito's grant on it, so
-  // that is all it may do with a key, and only with one tagged as Hold's.
-  add(statement(['kms:DescribeKey', 'kms:CreateGrant'], [at.keys], { StringEquals: HOLD_TAG }))
+  // that is all it may do with a key, and only with one tagged as Hold's. The grant can go only to Cognito and only
+  // to encrypt, so no grant it makes can let anyone, itself included, decrypt a code.
+  add(statement(['kms:DescribeKey'], [at.keys], { StringEquals: HOLD_TAG }))
+  add(
+    statement(['kms:CreateGrant'], [at.keys], {
+      StringEquals: { ...HOLD_TAG, 'kms:GranteePrincipal': `cognito-idp.${REGION}.amazonaws.com` },
+      'ForAllValues:StringEquals': { 'kms:GrantOperations': ['Encrypt', 'GenerateDataKey'] },
+    }),
+  )
   add(deny(['kms:TagResource', 'kms:UntagResource'], ['*'], { 'ForAnyValue:StringEquals': { 'aws:TagKeys': ['project'] } }))
 
   // App Runner: a service may be made only with the project tag, and only Hold's are described or changed after.
