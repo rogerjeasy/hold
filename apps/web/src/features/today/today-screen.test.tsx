@@ -50,7 +50,7 @@ const busy: ShopToday = {
   rentals: { total: 11, simulated: 11 },
 }
 
-const allDone = { passkey: true, paypal: true, prices: true, staff: 2 }
+const allDone = { passkey: true, paypal: true, prices: true, items: 3, staff: 2 }
 
 function show(today: ShopToday, options: { setup?: typeof allDone; samples?: 'offer' | 'needs_prices' | 'none' } = {}) {
   return renderWithIntl(
@@ -138,10 +138,11 @@ describe('the Today page', () => {
   })
 
   it('lists what is left to set up until it is done', () => {
-    show(empty, { setup: { passkey: true, paypal: false, prices: false, staff: 1 } })
+    show(empty, { setup: { passkey: true, paypal: false, prices: false, items: 0, staff: 1 } })
     const steps = screen.getByRole('region', { name: 'Set up your shop' })
-    expect(steps).toHaveTextContent('1 of 4 done')
+    expect(steps).toHaveTextContent('1 of 5 done')
     expect(within(steps).getByRole('link', { name: 'Go to PayPal' })).toHaveAttribute('href', '/shop/paypal')
+    expect(within(steps).getByRole('link', { name: 'Go to items' })).toHaveAttribute('href', '/shop/items')
   })
 
   it('leaves the setup out once everything is done', () => {

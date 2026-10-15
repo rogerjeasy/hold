@@ -1,8 +1,8 @@
 import type { ShopToday } from '@hold/db'
 import { useTranslations } from 'next-intl'
-import { Panel } from './panel'
-import type { ShopClock } from './use-shop-format'
-import { useShopFormat } from './use-shop-format'
+import { Panel } from '@/components/ui/panel'
+import type { ShopClock } from '@/hooks/use-shop-format'
+import { useShopFormat } from '@/hooks/use-shop-format'
 
 const figures = ['fees', 'released', 'claimed', 'recovered'] as const
 

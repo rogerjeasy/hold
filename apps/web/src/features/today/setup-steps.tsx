@@ -2,19 +2,20 @@ import { CircleCheck, CircleDashed } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { shopRoutes } from '@/lib/routes'
-import { Panel } from './panel'
+import { Panel } from '@/components/ui/panel'
 
-export type SetupStatus = { readonly passkey: boolean; readonly paypal: boolean; readonly prices: boolean; readonly staff: number }
+export type SetupStatus = { readonly passkey: boolean; readonly paypal: boolean; readonly prices: boolean; readonly items: number; readonly staff: number }
 
 const steps = [
   { key: 'passkey', href: shopRoutes.security },
   { key: 'prices', href: shopRoutes.prices },
+  { key: 'items', href: shopRoutes.items },
   { key: 'paypal', href: shopRoutes.paypal },
   { key: 'staff', href: shopRoutes.staff },
 ] as const
 
 export function setupDone(setup: SetupStatus) {
-  return { passkey: setup.passkey, prices: setup.prices, paypal: setup.paypal, staff: setup.staff > 1 }
+  return { passkey: setup.passkey, prices: setup.prices, items: setup.items > 0, paypal: setup.paypal, staff: setup.staff > 1 }
 }
 
 // What is left before the shop can take its first hold. Shown until every step is done.

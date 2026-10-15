@@ -1,6 +1,5 @@
 // @vitest-environment node
 import { acceptInvitation, auditLog, createInvitation, inShop, registerOwner } from '@hold/db'
-import type { FakeIdentity } from '@hold/auth'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // The test environment's services: the fake identity, a database in memory and a mailer that keeps what it sends.
@@ -24,35 +23,11 @@ vi.mock('next-intl/server', () => ({
 
 const shopActions = await import('@/features/shop/actions')
 const { isShopAction } = await import('./shop-access')
-const { getServices, TEST_SIGN_IN_CODE } = await import('./services')
-const { writeSession } = await import('@/features/auth/session-cookies')
+const { getServices } = await import('./services')
+const { form, signIn: signInTo } = await import('@/test/shop-session')
+const signIn = (email: string, factor: 'email_code' | 'passkey') => signInTo(jar, email, factor)
 
 vi.setConfig({ testTimeout: 30_000 })
-
-function form(fields: Record<string, string>): FormData {
-  const data = new FormData()
-  for (const [name, value] of Object.entries(fields)) data.set(name, value)
-  return data
-}
-
-// Signs a person in with the fake identity and keeps their session in the jar, as the browser would.
-async function signIn(email: string, factor: 'email_code' | 'passkey') {
-  const { identity } = await getServices()
-  const fake = identity as FakeIdentity
-  if ((await fake.startSignIn(email)).ok && fake.lastCodeFor(email) === undefined) {
-    await fake.signUp(email)
-    await fake.confirmSignUp(email, TEST_SIGN_IN_CODE, undefined)
-  }
-  const started = await fake.startSignIn(email)
-  if (!started.ok) throw new Error('No sign-in.')
-  const tokens = await fake.answerSignInCode(email, TEST_SIGN_IN_CODE, started.value)
-  if (!tokens.ok) throw new Error('No tokens.')
-  jar.clear()
-  await writeSession(tokens.value, factor)
-  const verified = await fake.verifyAccessToken(tokens.value.accessToken)
-  if (!verified.ok) throw new Error('No subject.')
-  return verified.value.subject
-}
 
 let shopId: string
 
@@ -69,10 +44,15 @@ beforeEach(() => {
 const invite = { email: 'staff@douro.example', role: 'counter_staff', approvalLimit: '', locale: 'en' }
 
 describe('every shop action', () => {
-  it('is built by shopAction, so none skips the checks', () => {
-    const exported = Object.entries(shopActions)
-    expect(exported.length).toBeGreaterThan(0)
-    expect(exported.filter(([, value]) => !isShopAction(value)).map(([name]) => name)).toEqual([])
+  it('is built by shopAction, in every feature, so none skips the checks', async () => {
+    // Signing in and signing up come before any shop, so the auth feature's actions are the one exception.
+    const files = import.meta.glob<Record<string, unknown>>(['/src/features/*/actions.ts', '!/src/features/auth/actions.ts'])
+    expect(Object.keys(files)).toEqual(expect.arrayContaining(['/src/features/shop/actions.ts', '/src/features/items/actions.ts']))
+    for (const [file, load] of Object.entries(files)) {
+      const exported = Object.entries(await load())
+      expect(exported.length, file).toBeGreaterThan(0)
+      expect(exported.filter(([, value]) => !isShopAction(value)).map(([name]) => `${file} ${name}`)).toEqual([])
+    }
   })
 })
 

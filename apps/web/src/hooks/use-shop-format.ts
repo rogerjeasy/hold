@@ -14,6 +14,8 @@ export function useShopFormat({ timeZone, currency }: ShopClock) {
     time: (at: Date) => format.dateTime(at, { hour: '2-digit', minute: '2-digit', timeZone }),
     // A moment within the week, such as "Tue 18:00".
     when: (at: Date) => format.dateTime(at, { weekday: 'short', hour: '2-digit', minute: '2-digit', timeZone }),
+    // A day of the year, such as "14 Oct".
+    day: (at: Date) => format.dateTime(at, { day: 'numeric', month: 'short', timeZone }),
     date: (at: Date) => format.dateTime(at, { weekday: 'long', day: 'numeric', month: 'long', timeZone }),
     month: (at: Date) => format.dateTime(at, { month: 'long', timeZone }),
   }

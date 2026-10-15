@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { expect } from './test'
+import { expect, test } from './test'
 
 // The widths AGENTS.md section 9 names. Tablets are also checked on their side.
 export const viewports = [
@@ -77,4 +77,17 @@ export async function expectTouchTargets(page: Page): Promise<void> {
       })
   }, MIN_TOUCH_TARGET)
   expect(small, 'controls smaller than 44 by 44 pixels').toEqual([])
+}
+
+// Every check above, at every width, on the page as it stands. For signed-in pages that take setting up first.
+export async function expectFitsEveryWidth(page: Page): Promise<void> {
+  for (const viewport of viewports) {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height })
+    await test.step(`fits ${viewport.name}`, async () => {
+      await expectNoSidewaysScroll(page)
+      await expectNothingOutsideViewport(page)
+      await expectNoClippedText(page)
+      await expectTouchTargets(page)
+    })
+  }
 }

@@ -1,7 +1,7 @@
 import type { PartOfDay } from '@hold/domain'
 import { useTranslations } from 'next-intl'
-import type { ShopClock } from './use-shop-format'
-import { useShopFormat } from './use-shop-format'
+import type { ShopClock } from '@/hooks/use-shop-format'
+import { useShopFormat } from '@/hooks/use-shop-format'
 
 type TodayHeaderProps = {
   readonly name: string

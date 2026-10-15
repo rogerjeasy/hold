@@ -1,9 +1,9 @@
 import type { ActivityLine } from '@hold/db'
 import { useTranslations } from 'next-intl'
-import { Panel } from './panel'
-import { SampleTag } from './sample-tag'
-import type { ShopClock } from './use-shop-format'
-import { useShopFormat } from './use-shop-format'
+import { Panel } from '@/components/ui/panel'
+import { SampleTag } from '@/components/ui/sample-tag'
+import type { ShopClock } from '@/hooks/use-shop-format'
+import { useShopFormat } from '@/hooks/use-shop-format'
 
 // The latest lines of the shop's audit trail, in words.
 export function ActivityList({ lines, day, clock }: { lines: readonly ActivityLine[]; day: { start: Date }; clock: ShopClock }) {

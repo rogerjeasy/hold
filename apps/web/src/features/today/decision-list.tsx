@@ -4,10 +4,10 @@ import type { LucideIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 import type { Decision } from './decisions'
-import { Panel } from './panel'
-import { SampleTag } from './sample-tag'
-import type { ShopClock } from './use-shop-format'
-import { useShopFormat } from './use-shop-format'
+import { Panel } from '@/components/ui/panel'
+import { SampleTag } from '@/components/ui/sample-tag'
+import type { ShopClock } from '@/hooks/use-shop-format'
+import { useShopFormat } from '@/hooks/use-shop-format'
 
 const icons: Record<Decision['kind'], LucideIcon> = { claim: Scale, hold_ending: Lock, late: Clock, contested: MessageSquareQuote }
 

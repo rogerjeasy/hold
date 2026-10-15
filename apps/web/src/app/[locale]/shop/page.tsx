@@ -1,5 +1,5 @@
 import { shopDay } from '@hold/domain'
-import { currentPriceList, findPayPalAccount, inShop, listStaff, shopToday } from '@hold/db'
+import { currentPriceList, findPayPalAccount, inShop, itemCatalog, listStaff, shopToday } from '@hold/db'
 import type { Metadata } from 'next'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { readAccessToken } from '@/features/auth/session-cookies'
@@ -30,6 +30,7 @@ export default async function Page() {
       paypal: await findPayPalAccount(transaction, context.shop.id, config.paypalMode),
       prices: await currentPriceList(transaction),
       staff: await listStaff(transaction),
+      catalog: await itemCatalog(transaction),
       today: await shopToday(transaction, { now, day }),
     })),
     identity.listPasskeys((await readAccessToken()) ?? ''),
@@ -38,6 +39,8 @@ export default async function Page() {
     passkey: passkeys.ok && passkeys.value.length > 0,
     paypal: loaded.paypal !== undefined,
     prices: loaded.prices !== undefined,
+    // The shop's own items, not the samples, and none it has retired.
+    items: loaded.catalog.items.filter((item) => !item.simulated && item.status !== 'retired').length,
     staff: loaded.staff.length,
   }
   // Only the owner may add sample rentals, and only to a shop with none (features/shop/actions.ts checks both again).

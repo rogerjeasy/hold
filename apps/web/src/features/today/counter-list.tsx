@@ -2,10 +2,10 @@ import type { CounterVisit } from '@hold/db'
 import { ArrowDownLeft, ArrowUpRight, Check } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Fragment } from 'react'
-import { Panel } from './panel'
-import { SampleTag } from './sample-tag'
-import type { ShopClock } from './use-shop-format'
-import { useShopFormat } from './use-shop-format'
+import { Panel } from '@/components/ui/panel'
+import { SampleTag } from '@/components/ui/sample-tag'
+import type { ShopClock } from '@/hooks/use-shop-format'
+import { useShopFormat } from '@/hooks/use-shop-format'
 
 const HELD = new Set(['placed', 'renewing', 'at_risk'])
 // One grid for the column heads and the rows from lg, so they line up. Below lg each row stacks.

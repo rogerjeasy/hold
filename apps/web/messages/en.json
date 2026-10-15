@@ -1153,6 +1153,7 @@
     "nav": {
       "label": "Shop pages",
       "home": "Today",
+      "items": "Items",
       "security": "Security",
       "staff": "Staff",
       "prices": "Prices",
@@ -1172,6 +1173,11 @@
         "title": "Write your price list",
         "body": "What each kind of damage costs, in plain words. Renters read it before they rent.",
         "action": "Go to prices"
+      },
+      "items": {
+        "title": "Add your items",
+        "body": "Each kind of thing you rent, with its hold, its day rate and the views photographed at every handover.",
+        "action": "Go to items"
       },
       "paypal": {
         "title": "Connect your shop's PayPal account",
@@ -1287,6 +1293,298 @@
         "loss": "Loss",
         "lateness": "Late return",
         "cleaning": "Cleaning"
+      }
+    },
+    "items": {
+      "title": "Items",
+      "lead": "What you rent, what is held while it is out, and the record each item keeps.",
+      "newType": "New item type",
+      "readOnly": "Only the owner or a manager can add item types and items.",
+      "needsPrices": {
+        "title": "Publish your price list first",
+        "body": "It sets the shop's currency, which every hold and day rate is in.",
+        "action": "Go to prices"
+      },
+      "empty": {
+        "title": "No items yet",
+        "body": "Start with one kind of thing you rent, such as a city e-bike. Give it a hold, a day rate and the views staff photograph at each handover. Then add the items themselves."
+      },
+      "summary": {
+        "label": "Your items at a glance",
+        "total": "Items",
+        "totalNote": "{types, plural, one {in # type} other {in # types}}",
+        "available": "Available",
+        "availableNote": "Ready to rent now",
+        "out": "Out now",
+        "outNote": "{overdue, plural, =0 {None overdue} one {# overdue} other {# overdue}}",
+        "repair": "In repair",
+        "repairNote": "Not offered to renters until fixed"
+      },
+      "filter": {
+        "label": "Show items",
+        "all": "All",
+        "available": "Available",
+        "booked": "Booked",
+        "out": "Out",
+        "in_repair": "In repair",
+        "retired": "Retired",
+        "none": "No items here."
+      },
+      "standing": {
+        "available": "Available",
+        "booked": "Booked",
+        "out": "Out",
+        "overdue": "Overdue",
+        "checking": "Being checked",
+        "in_repair": "In repair",
+        "retired": "Retired"
+      },
+      "rentalNote": {
+        "booked": "From {when}",
+        "out": "Due back {when}",
+        "overdue": "Was due {when}",
+        "checking": "Returned, photographs being compared"
+      },
+      "categories": {
+        "bike": "Bike",
+        "e_bike": "E-bike",
+        "scooter": "Scooter",
+        "water": "Kayak, board or boat",
+        "snow": "Ski or snowboard",
+        "camera": "Camera, lens or audio",
+        "camping": "Tent or camping gear",
+        "event": "Party or event equipment",
+        "tool": "Tool or machine",
+        "other": "Something else"
+      },
+      "outlines": {
+        "whole_side": "Whole side",
+        "front": "From the front",
+        "rear": "From behind",
+        "top": "From above",
+        "detail": "Close-up"
+      },
+      "suggestedViews": {
+        "frame_left": "Frame, left side",
+        "frame_right": "Frame, right side",
+        "front_wheel": "Front wheel",
+        "rear_wheel": "Rear wheel",
+        "saddle": "Saddle",
+        "handlebar": "Handlebar",
+        "display": "Display",
+        "battery": "Battery",
+        "deck_left": "Deck, left side",
+        "deck_right": "Deck, right side",
+        "front": "Front",
+        "rear": "Rear",
+        "deck": "Deck, from above",
+        "hull": "Hull, underneath",
+        "side_left": "Left side",
+        "side_right": "Right side",
+        "bow": "Bow",
+        "stern": "Stern",
+        "top_sheet": "Top sheet",
+        "base": "Base",
+        "edges": "Edges",
+        "bindings": "Bindings",
+        "back": "Back",
+        "top": "Top",
+        "lens_glass": "Lens glass",
+        "mount": "Mount",
+        "whole": "The whole item",
+        "fabric": "Fabric",
+        "zips": "Zips",
+        "poles": "Poles",
+        "detail": "Any detail",
+        "working_end": "Working end",
+        "cable": "Cable and plug",
+        "serial_plate": "Serial plate"
+      },
+      "type": {
+        "hold": "Hold",
+        "dayRate": "Per day",
+        "value": "Value",
+        "views": "{count, plural, one {# view} other {# views}}",
+        "photoPlan": "Photo plan",
+        "kit": "Kit",
+        "noKit": "Nothing else goes out",
+        "kitItem": "{count} × {name}",
+        "edit": "Edit type",
+        "editNamed": "Edit {name}",
+        "count": "{count, plural, =0 {No items} one {# item} other {# items}}",
+        "noItems": "No items of this type yet.",
+        "sampleNote": "Sample type. Its items belong to the sample rentals."
+      },
+      "columns": {
+        "item": "Item",
+        "size": "Size",
+        "serial": "Serial number",
+        "standing": "Where it is"
+      },
+      "add": {
+        "open": "Add items",
+        "title": "Add {name} items",
+        "count": "How many",
+        "size": "Size",
+        "sizeHelp": "Optional, such as M or 54 cm.",
+        "serial": "Serial number",
+        "serialHelp": "Optional, and only when adding one item.",
+        "submit": "Add items",
+        "adding": "Adding…",
+        "added": "Items added."
+      },
+      "form": {
+        "newTitle": "New item type",
+        "editTitle": "Edit {name}",
+        "back": "Back to items",
+        "readOnly": "Only the owner or a manager can change item types.",
+        "name": "Name",
+        "nameHelp": "What staff and renters call it, such as City e-bike. New items are numbered after it.",
+        "category": "Kind",
+        "amounts": "Amounts",
+        "amountsHelp": "The hold is what a renter has reserved while the item is out. It is never more than the item is worth.",
+        "value": "Value to replace, in {currency}",
+        "hold": "Hold while it is out, in {currency}",
+        "dayRate": "Fee per day, in {currency}",
+        "kit": "Kit",
+        "kitHelp": "What goes out with each item and is counted back at the return, such as a charger or a lock.",
+        "kitName": "Kit item {number}",
+        "kitCount": "How many of kit item {number}",
+        "kitRemove": "Remove kit item {number}",
+        "kitAdd": "Add to the kit",
+        "plan": "Photo plan",
+        "planHelp": "The views staff photograph, in this order, at every handover and return. Each return is compared with its handover view by view.",
+        "planChangeNote": "Changing the views starts a new photo plan. Rentals already photographed keep the plan they were taken with.",
+        "viewLabel": "View {number}",
+        "outline": "Framing of view {number}",
+        "required": "Required",
+        "requiredOf": "View {number} is required",
+        "moveUp": "Move view {number} up",
+        "moveDown": "Move view {number} down",
+        "viewRemove": "Remove view {number}",
+        "viewAdd": "Add a view",
+        "suggest": "Use the views suggested for this kind",
+        "suggestHelp": "Replaces the views below.",
+        "save": "Save item type",
+        "saving": "Saving…",
+        "saved": "Item type saved.",
+        "passkeyBody": "Changing an item type's hold, day rate or photo plan needs your passkey."
+      },
+      "passport": {
+        "label": "Item passport",
+        "back": "All items",
+        "since": "In the shop since {date}",
+        "details": "Details",
+        "type": "Type",
+        "size": "Size",
+        "serial": "Serial number",
+        "none": "Not given",
+        "marks": {
+          "title": "Known marks",
+          "empty": "No marks recorded. A mark seen at a handover is added here, so no later renter is charged for it.",
+          "firstSeen": "First seen {date}",
+          "open": "Still there",
+          "repaired": "Repaired"
+        },
+        "rentals": {
+          "title": "Rentals",
+          "empty": "Not rented yet.",
+          "period": "{start} to {end}",
+          "renterUnknown": "Renter not known yet",
+          "claim": "Claim of {amount}",
+          "states": {
+            "pending_payment": "Fee not paid yet",
+            "booked": "Booked",
+            "awaiting_hold": "Waiting for the hold",
+            "ready": "Ready for handover",
+            "out": "Out",
+            "overdue": "Overdue",
+            "returned": "Returned",
+            "inspecting": "Being checked",
+            "settling": "Settling",
+            "closed": "Closed",
+            "cancelled": "Cancelled",
+            "abandoned": "Not paid, released"
+          }
+        },
+        "sessions": {
+          "title": "Photo sessions",
+          "empty": "No photographs yet. Each handover and return adds a sealed set here, chained to the set before it, so no earlier record can be swapped.",
+          "kinds": {
+            "handover": "Handover",
+            "return": "Return",
+            "packing": "Packing",
+            "unboxing": "Unboxing",
+            "send_back": "Sending back"
+          },
+          "photographs": "{count, plural, one {# photograph} other {# photographs}}",
+          "sealed": "Sealed {date}",
+          "open": "Not sealed yet",
+          "fingerprint": "Fingerprint {value}"
+        },
+        "plan": {
+          "title": "Photo plan",
+          "lead": "The views photographed at each handover and return of this item.",
+          "optional": "Optional"
+        },
+        "edit": {
+          "label": "Label",
+          "size": "Size",
+          "serial": "Serial number",
+          "save": "Save details",
+          "saving": "Saving…",
+          "saved": "Details saved."
+        },
+        "status": {
+          "title": "Status",
+          "since": "Since {date}",
+          "note": "Note",
+          "repair": "Send to repair",
+          "repairNote": "What needs repair",
+          "back": "Back in service",
+          "retire": "Retire this item",
+          "retireNote": "Why it is retired",
+          "retireHelp": "A retired item is never rented again. Its record stays.",
+          "saving": "Saving…",
+          "saved": "Status changed.",
+          "readOnly": "Only staff can change an item's status."
+        }
+      },
+      "results": {
+        "currency_unset": "Publish your price list first. It sets the currency of every hold and day rate.",
+        "currency_mismatch": "Amounts must be in the shop's currency.",
+        "rows_mismatched": "Every view needs a label and a framing, and every kit item a name and a number.",
+        "value_invalid": "The value is not an amount. Use digits, such as 2400 or 2400.00.",
+        "hold_invalid": "The hold is not an amount. Use digits, such as 300 or 300.00.",
+        "day_rate_invalid": "The day rate is not an amount. Use digits, such as 45 or 45.00.",
+        "name_missing": "Give the item type a name.",
+        "name_too_long": "The name is too long. Keep it under 60 characters.",
+        "name_taken": "Another item type already has this name.",
+        "value_zero": "Give the value it costs to replace the item.",
+        "hold_zero": "The hold cannot be zero.",
+        "day_rate_zero": "The day rate cannot be zero.",
+        "hold_above_value": "The hold is more than the item is worth. Lower the hold, or correct the value.",
+        "wrong_currency": "Amounts must be in the shop's currency.",
+        "too_many_accessories": "A kit can have up to 10 things.",
+        "accessory_name_missing": "Kit item {row} needs a name.",
+        "accessory_name_too_long": "The name of kit item {row} is too long.",
+        "accessory_repeated": "Kit item {row} repeats another. Count it once, with a number.",
+        "accessory_count_invalid": "Kit item {row} needs a number from 1 to 20.",
+        "no_views": "Add at least one view to photograph.",
+        "too_many_views": "A photo plan can have up to 12 views.",
+        "no_required_view": "Make at least one view required.",
+        "view_label_missing": "View {row} needs a label.",
+        "view_label_too_long": "The label of view {row} is too long.",
+        "view_label_repeated": "View {row} repeats another label. Make each one different.",
+        "not_found": "That is not in this shop.",
+        "count_invalid": "Add from 1 to 50 items at a time.",
+        "serial_needs_one": "A serial number belongs to one item. Add one item at a time to give it one.",
+        "label_taken": "Another item already has this label.",
+        "label_missing": "Give the item a label.",
+        "transition_not_allowed": "A retired item cannot be brought back.",
+        "with_renter": "A renter has this item. Send it to repair once it is back.",
+        "rental_under_way": "A rental still needs this item. Retire it once that rental is over.",
+        "role_may_not_retire": "Only the owner or a manager can retire an item."
       }
     },
     "paypal": {
@@ -1452,7 +1750,6 @@
       }
     },
     "sample": {
-      "label": "Sample",
       "noticeTitle": "This shop holds sample rentals.",
       "noticeBody": "They are simulated to show a working day. No PayPal money moved, and each one is marked as a sample here and in the records.",
       "offerTitle": "See a working day",
@@ -1465,5 +1762,8 @@
     "setup": {
       "progress": "{done} of {total} done"
     }
+  },
+  "sample": {
+    "label": "Sample"
   }
 }

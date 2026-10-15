@@ -1,9 +1,9 @@
 import { HOLD_VALIDITY_DAYS } from '@hold/domain'
 import { useTranslations } from 'next-intl'
 import type { HoldSummary } from './decisions'
-import { Panel } from './panel'
-import type { ShopClock } from './use-shop-format'
-import { useShopFormat } from './use-shop-format'
+import { Panel } from '@/components/ui/panel'
+import type { ShopClock } from '@/hooks/use-shop-format'
+import { useShopFormat } from '@/hooks/use-shop-format'
 
 const standings = [
   { key: 'assured', swatch: 'bg-foreground' },

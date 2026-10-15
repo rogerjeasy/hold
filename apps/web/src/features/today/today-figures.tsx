@@ -1,23 +1,10 @@
 import type { ShopToday } from '@hold/db'
-import { cn } from 'cn'
 import { useTranslations } from 'next-intl'
 import { useId } from 'react'
+import { Figure } from '@/components/ui/figure'
 import type { HoldSummary } from './decisions'
-import type { ShopClock } from './use-shop-format'
-import { useShopFormat } from './use-shop-format'
-
-function Figure({ label, value, note, urgent = false }: { label: string; value: string; note: string; urgent?: boolean }) {
-  return (
-    <div className="min-w-0 p-4 odd:border-r max-xl:nth-[-n+2]:border-b md:p-5 xl:not-last:border-r">
-      <dt className="text-sm font-medium text-muted-foreground">{label}</dt>
-      <dd className="mt-2 text-figure wrap-long-words">
-        {/* The colour sits on its own element: merged with the size, cn would keep only one of them. */}
-        <span className={cn(urgent && 'text-primary')}>{value}</span>
-      </dd>
-      <dd className="mt-1.5 text-[0.8125rem] text-muted-foreground">{note}</dd>
-    </div>
-  )
-}
+import type { ShopClock } from '@/hooks/use-shop-format'
+import { useShopFormat } from '@/hooks/use-shop-format'
 
 // The four numbers an owner looks at first: what is out, what comes back, what is held and what waits on them.
 export function TodayFigures({ today, holds, clock }: { today: ShopToday; holds: HoldSummary; clock: ShopClock }) {

@@ -4,9 +4,14 @@ import { CircleAlert, CircleCheck } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { ShopActionResult } from '@/server/shop-access'
 
+// A feature whose refusals have their own words. Reasons it does not word, such as a missing passkey, are worded once
+// in shop.results.
+type Results = 'shop.results' | 'shop.items.results'
+
 // What a shop action answered, in plain words. A refusal can name a row of the form, as "amount_invalid:2".
-export function ActionMessage({ result, success }: { result: ShopActionResult<unknown> | null; success: string }) {
-  const t = useTranslations('shop.results')
+export function ActionMessage({ result, success, results = 'shop.results' }: { result: ShopActionResult<unknown> | null; success: string; results?: Results }) {
+  const own = useTranslations(results)
+  const shared = useTranslations('shop.results')
   if (result === null) return null
   if (result.ok) {
     return (
@@ -16,9 +21,11 @@ export function ActionMessage({ result, success }: { result: ShopActionResult<un
       </p>
     )
   }
-  const [reason, row] = result.failure === 'refused' ? result.reason.split(':') : [result.failure]
-  const key = (reason ?? 'unavailable') as Parameters<typeof t>[0]
-  const message = t.has(key) ? t(key, { row: row === undefined ? '' : String(Number(row) + 1) }) : t('unavailable')
+  const [reason = 'unavailable', row] = result.failure === 'refused' ? result.reason.split(':') : [result.failure]
+  const values = { row: row === undefined ? '' : String(Number(row) + 1) }
+  const ownKey = reason as Parameters<typeof own>[0]
+  const sharedKey = reason as Parameters<typeof shared>[0]
+  const message = own.has(ownKey) ? own(ownKey, values) : shared.has(sharedKey) ? shared(sharedKey, values) : shared('unavailable')
   return (
     <p role="alert" className="flex gap-1.5 text-[0.9375rem] text-destructive">
       <CircleAlert aria-hidden="true" className="mt-0.5 size-4.5 shrink-0" />

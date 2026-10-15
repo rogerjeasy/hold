@@ -281,9 +281,9 @@ Every table except `users` and `renters` carries a `shop_id`.
 | `locations` | Address, opening hours |
 | `staff_roles` | User, shop, role, approval limit |
 | `paypal_accounts` | Shop, merchant ID, credential reference, webhook ID, mode |
-| `item_types` | Name, value, hold amount, photo plan |
-| `items` | Type, label or serial, status, chain head fingerprint |
-| `photo_plans` | Ordered views with labels, outlines and whether each is required |
+| `item_types` | Name, kind, value to replace, hold amount, day rate, kit, photo plan, whether it is a sample |
+| `items` | Type, label, size, serial, status with its note and date, chain head fingerprint, whether it is a sample |
+| `photo_plans` | Ordered views with keys, labels, outlines and whether each is required. Never changed once saved. |
 | `price_lists` | Version, effective date, published text |
 | `price_entries` | Code, description, amount, category |
 | `wear_policies` | Version, rules |
@@ -292,7 +292,7 @@ Every table except `users` and `renters` carries a `shop_id`.
 | `rental_items` | Rental, item, accessories out, accessories back |
 | `holds` | Rental, reserved amount, placement strategy, state, current authorization |
 | `authorizations` | Hold, PayPal authorization ID, amount, created, assured until, valid until, state |
-| `capture_sessions` | Rental item, kind, actor, started, completed, manifest fingerprint |
+| `capture_sessions` | Rental item, kind, the photo plan used, actor, started, completed, manifest fingerprint |
 | `photos` | Session, view, evidence key, display key, fingerprint, received time, quality scores |
 | `marks` | Item, view, region, description, first seen session, status |
 | `comparisons` | Handover session, return session, alignment scores, state, model and version used |
@@ -312,10 +312,23 @@ Every table except `users` and `renters` carries a `shop_id`.
 | `outbox` | Pending messages written in the same transaction as state changes |
 | `audit_log` | Who did what, when, from where |
 
-**What the migrations hold so far.** Every table above, with `rentals.simulated` added in `0009`, except `locations`, `shipments` and `disputes`, which arrive with the features that use them. The schema is in `packages/db/src/schema`, the migrations in `packages/db/migrations`.
+**What the migrations hold so far.** Every table above, with `rentals.simulated` added in `0009` and the item columns in `0010`, except `locations`, `shipments` and `disputes`, which arrive with the features that use them. The schema is in `packages/db/src/schema`, the migrations in `packages/db/migrations`.
 
 **Tables added by the extensions.** `mandates`, `proposals`, `exceptions`, `ops_runs`, `eval_runs`, `finding_outcomes`, `rental_outcomes`, `trust_ladders`, `trust_rungs`, `renter_consents`, `quotes`, `agent_sessions`, `negotiations`, `negotiation_moves` and `incidents`. Their contents are listed in `extensions.md` section 4.6.
 
+
+### 6.4 Items, their kit and their photo plan
+
+The rules are plain code in `packages/domain` (`item-type.ts`, `item.ts`, `photo-plan.ts`). The tables are written by `packages/db/src/item-repository.ts`, and the pages are in section 13.6.
+
+- **An item type** has a name, a kind, the value to replace one item, the hold while one is out, the fee for one day and a kit. The kind is one of `bike`, `e_bike`, `scooter`, `water`, `snow`, `camera`, `camping`, `event`, `tool` and `other`. The kit is up to ten things, such as a charger or a lock, each with a count. They are handed over with each item and counted back at the return. All three amounts are in the shop's currency, so a type can be made only after the first price list is published. The hold is never more than the value. A shop's own type names are unique, whatever their case.
+- **The day rate** is what a rental's fee is worked out from at booking. The fee is then kept on the rental, so a later change to the rate changes no booking.
+- **A photo plan** is one to twelve views, at least one of them required. Each view has a label, a framing outline (`whole_side`, `front`, `rear`, `top` or `detail`) and a key made from its label. Photographs are filed under that key. Each kind has a suggested plan that the shop adjusts; the e-bike's is the six views the guided handover shows. **A plan is never changed once saved.** An edit to a type's views saves a new plan and points the type at it. Each capture session records the plan it was taken with, so a return is always compared view by view with its handover. The service roles may not update `photo_plans` at all.
+- **An item** is named after its type and numbered on from the highest number in use, as in "City e-bike 5". It has an optional size and serial number, and a label unique within the shop.
+- **An item's status** is what the shop says about it: `in_service`, `in_repair` or `retired`, with a note and the date it changed. A retired item never comes back. An item a renter has cannot go to repair, and an item a booking, hold or comparison still needs cannot be retired.
+- **Where an item stands** is not stored. It is read from its status and the rental that binds it (`bindingRental`): `available`, `booked`, `out`, `overdue`, `checking` (returned, being compared), `in_repair` or `retired`.
+- **Who may change what.** The owner or a manager creates and edits types, with a passkey where their role needs one, because the amounts are what renters are held and charged. They also add and rename items, which needs no passkey. Counter staff may send an item to repair and back, since they see a flat tyre first. Only the owner or a manager may retire an item. Read-only members see everything and change nothing.
+- **Sample types and items** made for a demonstration (section 20.3) are marked `simulated`, stand apart from the unique names, and cannot be changed.
 ---
 
 ## 7. The hold core
@@ -739,6 +752,8 @@ Each item carries a list of marks.
 - When the item is repaired, the mark is closed.
 
 This is what guarantees that nobody pays for an earlier renter's damage.
+
+The passport is the page `/shop/items/{id}` (section 13.6). It shows the item's marks, its rentals and its sealed photo sessions in chain order, read by `itemPassport` in `packages/db`.
 
 ### 9.5 The evidence pack
 
@@ -1280,11 +1295,14 @@ Served by `web` under `/shop`. Each page asks `shopAccess` itself; the frame aro
 | Route | Purpose |
 |---|---|
 | `/shop` | Today: the day's figures (items out, due back, held on PayPal, claims to decide), what needs a decision, the handovers and returns at the counter with a line for now, the holds by where they stand, the month so far from the money log, and the latest audit lines. Until the shop is set up, its setup steps. |
+| `/shop/items` | The item types, each with its terms, kit, photo plan and items, and where each item stands. Four figures on top: items, available, out now, in repair. Filters by standing, each its own address (`?show=`). |
+| `/shop/items/new`, `/shop/items/types/{id}` | Creating and editing an item type, with its kit and its photo plan. The plan starts from the suggestion for the kind. |
+| `/shop/items/{id}` | The item passport (section 9.4): where it is, its rentals, its known marks, its chain of photo sessions, its photo plan, its details and its status. Another shop's item answers 404. |
 | `/shop/prices`, `/shop/paypal`, `/shop/staff`, `/shop/security` | The shop's settings |
 
 - **One frame.** `app/[locale]/shop/layout.tsx` puts every shop page in the shop's frame (`features/shell`): a dark sidebar with the shop switcher, the menu, PayPal's state and mode, the language and theme, and the account menu. It is a rail of icons from `md` to `lg` and a top bar with a menu sheet below `md`. The public pages keep the site's header and footer through the `(site)` route group, which is not part of their address.
 - **What the page reads.** `shopToday` in `packages/db` returns plain counts and rows. Where a hold stands (assured, valid, ending) and the order of the decisions come from `holdStanding` and `holdDay` in the domain. Times show on the shop's clock (`shopDay`), whoever reads them.
-- **Rentals, holds and claims** join the menu as their own pages are built with the spine.
+- **Items** follow Today in the menu. **Rentals, holds and claims** join the menu before them as their own pages are built with the spine.
 - **After the extensions,** `/shop/calendar`, the rental calendar on Bryntum Scheduler, and `/shop/insights`, the owner's dashboard on AG Studio, join the menu. `extensions.md` section 12.5.
 
 ---
@@ -1426,6 +1444,7 @@ Every queue has a dead-letter queue and an alarm on it.
 | **A forged webhook** | Signature verification and reading the resource back from PayPal. |
 | **A replayed request** | Idempotency keys at every layer. |
 | **One shop reads another's data** | Shop checks in the service and row-level security in the database. |
+| **A row is tied to another shop's row by its id** | PostgreSQL checks a foreign key without row-level security, so a guessed id would pass it. Every repository function reads the row it refers to inside the caller's shop first, and answers "not found" when it is not there. Tested in `item-repository.test.ts` and `items.spec.ts`. |
 | **A credential leaks** | Secrets only in Secrets Manager. Each service has its own minimal IAM role. |
 | **A hold lapses unnoticed** | Hold upkeep, the at-risk state, alarms and reconciliation. |
 

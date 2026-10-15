@@ -1153,6 +1153,7 @@
     "nav": {
       "label": "Seiten des Verleihs",
       "home": "Heute",
+      "items": "Artikel",
       "security": "Sicherheit",
       "staff": "Team",
       "prices": "Preise",
@@ -1172,6 +1173,11 @@
         "title": "Preisliste schreiben",
         "body": "Was jede Art von Schaden kostet, in einfachen Worten. Mietende lesen sie, bevor sie mieten.",
         "action": "Zu den Preisen"
+      },
+      "items": {
+        "title": "Artikel hinzufügen",
+        "body": "Jede Art von Ware, die Sie vermieten, mit Reservierung, Tagespreis und den Ansichten, die bei jeder Übergabe fotografiert werden.",
+        "action": "Zu den Artikeln"
       },
       "paypal": {
         "title": "PayPal-Konto des Verleihs verbinden",
@@ -1287,6 +1293,298 @@
         "loss": "Verlust",
         "lateness": "Verspätete Rückgabe",
         "cleaning": "Reinigung"
+      }
+    },
+    "items": {
+      "title": "Artikel",
+      "lead": "Was Sie vermieten, was reserviert ist, solange es verliehen ist, und der Verlauf, den jeder Artikel führt.",
+      "newType": "Neuer Artikeltyp",
+      "readOnly": "Nur Inhaber oder Leitung können Artikeltypen und Artikel hinzufügen.",
+      "needsPrices": {
+        "title": "Veröffentlichen Sie zuerst Ihre Preisliste",
+        "body": "Sie legt die Währung des Verleihs fest, in der jede Reservierung und jeder Tagespreis steht.",
+        "action": "Zu den Preisen"
+      },
+      "empty": {
+        "title": "Noch keine Artikel",
+        "body": "Beginnen Sie mit einer Art von Ware, die Sie vermieten, zum Beispiel einem City-E-Bike. Legen Sie Reservierung, Tagespreis und die Ansichten fest, die das Personal bei jeder Übergabe fotografiert. Danach fügen Sie die Artikel selbst hinzu."
+      },
+      "summary": {
+        "label": "Ihre Artikel auf einen Blick",
+        "total": "Artikel",
+        "totalNote": "{types, plural, one {in # Typ} other {in # Typen}}",
+        "available": "Verfügbar",
+        "availableNote": "Sofort mietbar",
+        "out": "Gerade verliehen",
+        "outNote": "{overdue, plural, =0 {Keiner überfällig} one {# überfällig} other {# überfällig}}",
+        "repair": "In Reparatur",
+        "repairNote": "Wird erst nach der Reparatur wieder vermietet"
+      },
+      "filter": {
+        "label": "Artikel anzeigen",
+        "all": "Alle",
+        "available": "Verfügbar",
+        "booked": "Gebucht",
+        "out": "Verliehen",
+        "in_repair": "In Reparatur",
+        "retired": "Ausgemustert",
+        "none": "Hier sind keine Artikel."
+      },
+      "standing": {
+        "available": "Verfügbar",
+        "booked": "Gebucht",
+        "out": "Verliehen",
+        "overdue": "Überfällig",
+        "checking": "Wird geprüft",
+        "in_repair": "In Reparatur",
+        "retired": "Ausgemustert"
+      },
+      "rentalNote": {
+        "booked": "Ab {when}",
+        "out": "Rückgabe fällig {when}",
+        "overdue": "Rückgabe war {when} fällig",
+        "checking": "Zurückgegeben, Fotos werden verglichen"
+      },
+      "categories": {
+        "bike": "Fahrrad",
+        "e_bike": "E-Bike",
+        "scooter": "Roller",
+        "water": "Kajak, Board oder Boot",
+        "snow": "Ski oder Snowboard",
+        "camera": "Kamera, Objektiv oder Audio",
+        "camping": "Zelt oder Campingausrüstung",
+        "event": "Party- oder Veranstaltungsausrüstung",
+        "tool": "Werkzeug oder Maschine",
+        "other": "Etwas anderes"
+      },
+      "outlines": {
+        "whole_side": "Ganze Seite",
+        "front": "Von vorn",
+        "rear": "Von hinten",
+        "top": "Von oben",
+        "detail": "Nahaufnahme"
+      },
+      "suggestedViews": {
+        "frame_left": "Rahmen, linke Seite",
+        "frame_right": "Rahmen, rechte Seite",
+        "front_wheel": "Vorderrad",
+        "rear_wheel": "Hinterrad",
+        "saddle": "Sattel",
+        "handlebar": "Lenker",
+        "display": "Display",
+        "battery": "Akku",
+        "deck_left": "Deck, linke Seite",
+        "deck_right": "Deck, rechte Seite",
+        "front": "Vorderseite",
+        "rear": "Rückseite",
+        "deck": "Deck, von oben",
+        "hull": "Rumpf, Unterseite",
+        "side_left": "Linke Seite",
+        "side_right": "Rechte Seite",
+        "bow": "Bug",
+        "stern": "Heck",
+        "top_sheet": "Topsheet",
+        "base": "Belag",
+        "edges": "Kanten",
+        "bindings": "Bindung",
+        "back": "Rückseite",
+        "top": "Oberseite",
+        "lens_glass": "Objektivglas",
+        "mount": "Halterung",
+        "whole": "Der ganze Artikel",
+        "fabric": "Stoff",
+        "zips": "Reißverschlüsse",
+        "poles": "Stangen",
+        "detail": "Beliebiges Detail",
+        "working_end": "Arbeitsseite",
+        "cable": "Kabel und Stecker",
+        "serial_plate": "Typenschild"
+      },
+      "type": {
+        "hold": "Reservierung",
+        "dayRate": "Pro Tag",
+        "value": "Wert",
+        "views": "{count, plural, one {# Ansicht} other {# Ansichten}}",
+        "photoPlan": "Fotoplan",
+        "kit": "Zubehör",
+        "noKit": "Nichts geht sonst mit hinaus",
+        "kitItem": "{count} × {name}",
+        "edit": "Typ bearbeiten",
+        "editNamed": "{name} bearbeiten",
+        "count": "{count, plural, =0 {Keine Artikel} one {# Artikel} other {# Artikel}}",
+        "noItems": "Von diesem Typ gibt es noch keine Artikel.",
+        "sampleNote": "Beispieltyp. Seine Artikel gehören zu den Beispielvermietungen."
+      },
+      "columns": {
+        "item": "Artikel",
+        "size": "Größe",
+        "serial": "Seriennummer",
+        "standing": "Wo er ist"
+      },
+      "add": {
+        "open": "Artikel hinzufügen",
+        "title": "{name}: Artikel hinzufügen",
+        "count": "Wie viele",
+        "size": "Größe",
+        "sizeHelp": "Freiwillig, zum Beispiel M oder 54 cm.",
+        "serial": "Seriennummer",
+        "serialHelp": "Freiwillig, und nur wenn Sie einen einzelnen Artikel hinzufügen.",
+        "submit": "Artikel hinzufügen",
+        "adding": "Wird hinzugefügt…",
+        "added": "Artikel hinzugefügt."
+      },
+      "form": {
+        "newTitle": "Neuer Artikeltyp",
+        "editTitle": "{name} bearbeiten",
+        "back": "Zurück zu den Artikeln",
+        "readOnly": "Nur Inhaber oder Leitung können Artikeltypen ändern.",
+        "name": "Name",
+        "nameHelp": "Wie Personal und Mietende ihn nennen, zum Beispiel City-E-Bike. Neue Artikel werden danach nummeriert.",
+        "category": "Art",
+        "amounts": "Beträge",
+        "amountsHelp": "Die Reservierung ist der Betrag, den eine mietende Person reserviert hat, solange der Artikel verliehen ist. Sie liegt nie über dem Wert des Artikels.",
+        "value": "Wiederbeschaffungswert, in {currency}",
+        "hold": "Reservierung, solange er verliehen ist, in {currency}",
+        "dayRate": "Preis pro Tag, in {currency}",
+        "kit": "Zubehör",
+        "kitHelp": "Was mit jedem Artikel hinausgeht und bei der Rückgabe nachgezählt wird, zum Beispiel ein Ladegerät oder ein Schloss.",
+        "kitName": "Zubehörteil {number}",
+        "kitCount": "Anzahl von Zubehörteil {number}",
+        "kitRemove": "Zubehörteil {number} entfernen",
+        "kitAdd": "Zum Zubehör hinzufügen",
+        "plan": "Fotoplan",
+        "planHelp": "Die Ansichten, die das Personal bei jeder Übergabe und Rückgabe in dieser Reihenfolge fotografiert. Jede Rückgabe wird Ansicht für Ansicht mit der Übergabe verglichen.",
+        "planChangeNote": "Wenn Sie die Ansichten ändern, beginnt ein neuer Fotoplan. Mieten, die schon fotografiert wurden, behalten den Plan, mit dem sie aufgenommen wurden.",
+        "viewLabel": "Ansicht {number}",
+        "outline": "Bildausschnitt von Ansicht {number}",
+        "required": "Pflicht",
+        "requiredOf": "Ansicht {number} ist Pflicht",
+        "moveUp": "Ansicht {number} nach oben",
+        "moveDown": "Ansicht {number} nach unten",
+        "viewRemove": "Ansicht {number} entfernen",
+        "viewAdd": "Ansicht hinzufügen",
+        "suggest": "Für diese Art vorgeschlagene Ansichten verwenden",
+        "suggestHelp": "Ersetzt die Ansichten darunter.",
+        "save": "Artikeltyp speichern",
+        "saving": "Wird gespeichert…",
+        "saved": "Artikeltyp gespeichert.",
+        "passkeyBody": "Zum Ändern von Reservierung, Tagespreis oder Fotoplan eines Artikeltyps brauchen Sie Ihren Passkey."
+      },
+      "passport": {
+        "label": "Artikelpass",
+        "back": "Alle Artikel",
+        "since": "Im Verleih seit {date}",
+        "details": "Angaben",
+        "type": "Typ",
+        "size": "Größe",
+        "serial": "Seriennummer",
+        "none": "Nicht angegeben",
+        "marks": {
+          "title": "Bekannte Spuren",
+          "empty": "Keine Spuren festgehalten. Eine Spur, die bei einer Übergabe gesehen wird, wird hier ergänzt, damit späteren Mietenden nichts dafür berechnet wird.",
+          "firstSeen": "Zuerst gesehen am {date}",
+          "open": "Noch vorhanden",
+          "repaired": "Repariert"
+        },
+        "rentals": {
+          "title": "Mieten",
+          "empty": "Noch nicht vermietet.",
+          "period": "{start} bis {end}",
+          "renterUnknown": "Mietende Person noch nicht bekannt",
+          "claim": "Forderung über {amount}",
+          "states": {
+            "pending_payment": "Mietpreis noch nicht bezahlt",
+            "booked": "Gebucht",
+            "awaiting_hold": "Wartet auf die Reservierung",
+            "ready": "Bereit zur Übergabe",
+            "out": "Verliehen",
+            "overdue": "Überfällig",
+            "returned": "Zurückgegeben",
+            "inspecting": "Wird geprüft",
+            "settling": "Wird abgerechnet",
+            "closed": "Abgeschlossen",
+            "cancelled": "Storniert",
+            "abandoned": "Nicht bezahlt, freigegeben"
+          }
+        },
+        "sessions": {
+          "title": "Fotoaufnahmen",
+          "empty": "Noch keine Fotos. Jede Übergabe und jede Rückgabe fügt hier einen versiegelten Satz hinzu, verkettet mit dem Satz davor, sodass keine frühere Aufzeichnung ausgetauscht werden kann.",
+          "kinds": {
+            "handover": "Übergabe",
+            "return": "Rückgabe",
+            "packing": "Verpacken",
+            "unboxing": "Auspacken",
+            "send_back": "Rücksendung"
+          },
+          "photographs": "{count, plural, one {# Foto} other {# Fotos}}",
+          "sealed": "Versiegelt am {date}",
+          "open": "Noch nicht versiegelt",
+          "fingerprint": "Fingerabdruck {value}"
+        },
+        "plan": {
+          "title": "Fotoplan",
+          "lead": "Die Ansichten, die bei jeder Übergabe und Rückgabe dieses Artikels fotografiert werden.",
+          "optional": "Freiwillig"
+        },
+        "edit": {
+          "label": "Bezeichnung",
+          "size": "Größe",
+          "serial": "Seriennummer",
+          "save": "Angaben speichern",
+          "saving": "Wird gespeichert…",
+          "saved": "Angaben gespeichert."
+        },
+        "status": {
+          "title": "Stand",
+          "since": "Seit {date}",
+          "note": "Notiz",
+          "repair": "In die Reparatur geben",
+          "repairNote": "Was repariert werden muss",
+          "back": "Wieder im Einsatz",
+          "retire": "Diesen Artikel ausmustern",
+          "retireNote": "Warum er ausgemustert wird",
+          "retireHelp": "Ein ausgemusterter Artikel wird nie wieder vermietet. Sein Verlauf bleibt erhalten.",
+          "saving": "Wird gespeichert…",
+          "saved": "Stand geändert.",
+          "readOnly": "Nur das Personal kann den Stand eines Artikels ändern."
+        }
+      },
+      "results": {
+        "currency_unset": "Veröffentlichen Sie zuerst Ihre Preisliste. Sie legt die Währung jeder Reservierung und jedes Tagespreises fest.",
+        "currency_mismatch": "Beträge müssen in der Währung des Verleihs stehen.",
+        "rows_mismatched": "Jede Ansicht braucht eine Bezeichnung und einen Bildausschnitt, und jedes Zubehörteil einen Namen und eine Anzahl.",
+        "value_invalid": "Der Wert ist kein Betrag. Verwenden Sie Ziffern, zum Beispiel 2400 oder 2400.00.",
+        "hold_invalid": "Die Reservierung ist kein Betrag. Verwenden Sie Ziffern, zum Beispiel 300 oder 300.00.",
+        "day_rate_invalid": "Der Tagespreis ist kein Betrag. Verwenden Sie Ziffern, zum Beispiel 45 oder 45.00.",
+        "name_missing": "Geben Sie dem Artikeltyp einen Namen.",
+        "name_too_long": "Der Name ist zu lang. Verwenden Sie höchstens 60 Zeichen.",
+        "name_taken": "Ein anderer Artikeltyp hat diesen Namen schon.",
+        "value_zero": "Geben Sie an, was es kostet, den Artikel zu ersetzen.",
+        "hold_zero": "Die Reservierung darf nicht null sein.",
+        "day_rate_zero": "Der Tagespreis darf nicht null sein.",
+        "hold_above_value": "Die Reservierung liegt über dem Wert des Artikels. Senken Sie die Reservierung oder korrigieren Sie den Wert.",
+        "wrong_currency": "Beträge müssen in der Währung des Verleihs stehen.",
+        "too_many_accessories": "Zubehör darf aus bis zu 10 Teilen bestehen.",
+        "accessory_name_missing": "Zubehörteil {row} braucht einen Namen.",
+        "accessory_name_too_long": "Der Name von Zubehörteil {row} ist zu lang.",
+        "accessory_repeated": "Zubehörteil {row} wiederholt ein anderes. Zählen Sie es einmal, mit einer Anzahl.",
+        "accessory_count_invalid": "Zubehörteil {row} braucht eine Anzahl von 1 bis 20.",
+        "no_views": "Fügen Sie mindestens eine Ansicht zum Fotografieren hinzu.",
+        "too_many_views": "Ein Fotoplan darf bis zu 12 Ansichten haben.",
+        "no_required_view": "Machen Sie mindestens eine Ansicht zur Pflicht.",
+        "view_label_missing": "Ansicht {row} braucht eine Bezeichnung.",
+        "view_label_too_long": "Die Bezeichnung von Ansicht {row} ist zu lang.",
+        "view_label_repeated": "Ansicht {row} wiederholt eine andere Bezeichnung. Wählen Sie für jede eine andere.",
+        "not_found": "Das gehört nicht zu diesem Verleih.",
+        "count_invalid": "Fügen Sie 1 bis 50 Artikel auf einmal hinzu.",
+        "serial_needs_one": "Eine Seriennummer gehört zu einem Artikel. Fügen Sie einen Artikel einzeln hinzu, um ihm eine zu geben.",
+        "label_taken": "Ein anderer Artikel hat diese Bezeichnung schon.",
+        "label_missing": "Geben Sie dem Artikel eine Bezeichnung.",
+        "transition_not_allowed": "Ein ausgemusterter Artikel kann nicht zurückgeholt werden.",
+        "with_renter": "Eine mietende Person hat diesen Artikel. Geben Sie ihn in die Reparatur, sobald er zurück ist.",
+        "rental_under_way": "Eine Miete braucht diesen Artikel noch. Mustern Sie ihn aus, sobald diese Miete vorbei ist.",
+        "role_may_not_retire": "Nur Inhaber oder Leitung können einen Artikel ausmustern."
       }
     },
     "paypal": {
@@ -1452,7 +1750,6 @@
       }
     },
     "sample": {
-      "label": "Beispiel",
       "noticeTitle": "Dieser Laden enthält Beispielvermietungen.",
       "noticeBody": "Sie sind simuliert, um einen Arbeitstag zu zeigen. Es wurde kein PayPal-Geld bewegt, und jede ist hier und in den Aufzeichnungen als Beispiel gekennzeichnet.",
       "offerTitle": "Einen Arbeitstag ansehen",
@@ -1465,5 +1762,8 @@
     "setup": {
       "progress": "{done} von {total} erledigt"
     }
+  },
+  "sample": {
+    "label": "Beispiel"
   }
 }

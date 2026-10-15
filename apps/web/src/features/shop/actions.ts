@@ -7,15 +7,11 @@ import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
 import { linkRoutes } from '@/lib/routes'
 import { getServices } from '@/server/services'
-import { Refusal, shopAction, withLocale } from '@/server/shop-access'
+import { list, Refusal, shopAction, withLocale } from '@/server/shop-access'
 
 // Every server function that changes a shop. Each is built by shopAction, which checks who is asking, their role and
 // their passkey before the work below runs, and writes the audit line after it. A test checks that this file exports
 // nothing else.
-
-// A field a form may send once or many times, read as a list either way.
-const list = <Item extends z.ZodType<string>>(item: Item) =>
-  z.union([item, z.array(item)]).transform((value): z.infer<Item>[] => (Array.isArray(value) ? value : [value]))
 
 export const inviteStaff = shopAction(
   {

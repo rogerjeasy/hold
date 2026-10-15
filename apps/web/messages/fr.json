@@ -1153,6 +1153,7 @@
     "nav": {
       "label": "Pages de la boutique",
       "home": "Aujourd’hui",
+      "items": "Articles",
       "security": "Sécurité",
       "staff": "Équipe",
       "prices": "Prix",
@@ -1172,6 +1173,11 @@
         "title": "Rédigez votre liste de prix",
         "body": "Ce que coûte chaque type de dommage, en mots simples. Les clients la lisent avant de louer.",
         "action": "Aller aux prix"
+      },
+      "items": {
+        "title": "Ajoutez vos articles",
+        "body": "Chaque type de chose que vous louez, avec son empreinte, son prix par jour et les vues photographiées à chaque remise.",
+        "action": "Aller aux articles"
       },
       "paypal": {
         "title": "Reliez le compte PayPal de votre boutique",
@@ -1287,6 +1293,298 @@
         "loss": "Perte",
         "lateness": "Retour en retard",
         "cleaning": "Nettoyage"
+      }
+    },
+    "items": {
+      "title": "Articles",
+      "lead": "Ce que vous louez, ce qui est réservé pendant qu'il est sorti, et l'historique que garde chaque article.",
+      "newType": "Nouveau type d'article",
+      "readOnly": "Seuls le propriétaire ou un responsable peuvent ajouter des types d'article et des articles.",
+      "needsPrices": {
+        "title": "Publiez d'abord votre liste de prix",
+        "body": "Elle fixe la devise de la boutique, dans laquelle sont exprimés chaque empreinte et chaque prix par jour.",
+        "action": "Aller aux prix"
+      },
+      "empty": {
+        "title": "Aucun article pour l'instant",
+        "body": "Commencez par un type de chose que vous louez, comme un vélo électrique de ville. Donnez-lui une empreinte, un prix par jour et les vues que le personnel photographie à chaque remise. Ajoutez ensuite les articles eux-mêmes."
+      },
+      "summary": {
+        "label": "Vos articles en un coup d'œil",
+        "total": "Articles",
+        "totalNote": "{types, plural, one {dans # type} other {dans # types}}",
+        "available": "Disponibles",
+        "availableNote": "Prêts à louer maintenant",
+        "out": "Sortis",
+        "outNote": "{overdue, plural, =0 {Aucun en retard} one {# en retard} other {# en retard}}",
+        "repair": "En réparation",
+        "repairNote": "Pas proposé à la location avant réparation"
+      },
+      "filter": {
+        "label": "Afficher les articles",
+        "all": "Tous",
+        "available": "Disponibles",
+        "booked": "Réservés",
+        "out": "Sortis",
+        "in_repair": "En réparation",
+        "retired": "Retirés",
+        "none": "Aucun article ici."
+      },
+      "standing": {
+        "available": "Disponible",
+        "booked": "Réservé",
+        "out": "Sorti",
+        "overdue": "En retard",
+        "checking": "En vérification",
+        "in_repair": "En réparation",
+        "retired": "Retiré"
+      },
+      "rentalNote": {
+        "booked": "À partir du {when}",
+        "out": "Retour attendu {when}",
+        "overdue": "Retour prévu {when}",
+        "checking": "Rendu, photographies en cours de comparaison"
+      },
+      "categories": {
+        "bike": "Vélo",
+        "e_bike": "Vélo électrique",
+        "scooter": "Trottinette",
+        "water": "Kayak, planche ou bateau",
+        "snow": "Ski ou snowboard",
+        "camera": "Appareil photo, objectif ou audio",
+        "camping": "Tente ou matériel de camping",
+        "event": "Matériel de fête ou d'événement",
+        "tool": "Outil ou machine",
+        "other": "Autre chose"
+      },
+      "outlines": {
+        "whole_side": "Côté entier",
+        "front": "De face",
+        "rear": "Par derrière",
+        "top": "Vu de dessus",
+        "detail": "Gros plan"
+      },
+      "suggestedViews": {
+        "frame_left": "Cadre, côté gauche",
+        "frame_right": "Cadre, côté droit",
+        "front_wheel": "Roue avant",
+        "rear_wheel": "Roue arrière",
+        "saddle": "Selle",
+        "handlebar": "Guidon",
+        "display": "Écran",
+        "battery": "Batterie",
+        "deck_left": "Plateau, côté gauche",
+        "deck_right": "Plateau, côté droit",
+        "front": "Avant",
+        "rear": "Arrière",
+        "deck": "Plateau, vu de dessus",
+        "hull": "Coque, dessous",
+        "side_left": "Côté gauche",
+        "side_right": "Côté droit",
+        "bow": "Proue",
+        "stern": "Poupe",
+        "top_sheet": "Face supérieure",
+        "base": "Semelle",
+        "edges": "Carres",
+        "bindings": "Fixations",
+        "back": "Dos",
+        "top": "Dessus",
+        "lens_glass": "Verre de l'objectif",
+        "mount": "Monture",
+        "whole": "L'article entier",
+        "fabric": "Toile",
+        "zips": "Fermetures à glissière",
+        "poles": "Arceaux",
+        "detail": "Un détail au choix",
+        "working_end": "Partie active",
+        "cable": "Câble et prise",
+        "serial_plate": "Plaque signalétique"
+      },
+      "type": {
+        "hold": "Empreinte",
+        "dayRate": "Par jour",
+        "value": "Valeur",
+        "views": "{count, plural, one {# vue} other {# vues}}",
+        "photoPlan": "Plan photo",
+        "kit": "Accessoires",
+        "noKit": "Rien d'autre ne sort",
+        "kitItem": "{count} × {name}",
+        "edit": "Modifier le type",
+        "editNamed": "Modifier {name}",
+        "count": "{count, plural, =0 {Aucun article} one {# article} other {# articles}}",
+        "noItems": "Aucun article de ce type pour l'instant.",
+        "sampleNote": "Type d'exemple. Ses articles appartiennent aux locations d'exemple."
+      },
+      "columns": {
+        "item": "Article",
+        "size": "Taille",
+        "serial": "Numéro de série",
+        "standing": "Où il est"
+      },
+      "add": {
+        "open": "Ajouter des articles",
+        "title": "Ajouter des articles {name}",
+        "count": "Combien",
+        "size": "Taille",
+        "sizeHelp": "Facultatif, par exemple M ou 54 cm.",
+        "serial": "Numéro de série",
+        "serialHelp": "Facultatif, et seulement pour l'ajout d'un seul article.",
+        "submit": "Ajouter des articles",
+        "adding": "Ajout…",
+        "added": "Articles ajoutés."
+      },
+      "form": {
+        "newTitle": "Nouveau type d'article",
+        "editTitle": "Modifier {name}",
+        "back": "Retour aux articles",
+        "readOnly": "Seuls le propriétaire ou un responsable peuvent modifier les types d'article.",
+        "name": "Nom",
+        "nameHelp": "Comment le personnel et les clients l'appellent, par exemple Vélo électrique de ville. Les nouveaux articles sont numérotés d'après lui.",
+        "category": "Catégorie",
+        "amounts": "Montants",
+        "amountsHelp": "L'empreinte est ce qu'un client a réservé pendant que l'article est sorti. Elle ne dépasse jamais la valeur de l'article.",
+        "value": "Valeur de remplacement, en {currency}",
+        "hold": "Empreinte pendant qu'il est sorti, en {currency}",
+        "dayRate": "Tarif par jour, en {currency}",
+        "kit": "Accessoires",
+        "kitHelp": "Ce qui sort avec chaque article et qui est recompté au retour, comme un chargeur ou un antivol.",
+        "kitName": "Accessoire {number}",
+        "kitCount": "Combien de l'accessoire {number}",
+        "kitRemove": "Retirer l'accessoire {number}",
+        "kitAdd": "Ajouter aux accessoires",
+        "plan": "Plan photo",
+        "planHelp": "Les vues que le personnel photographie, dans cet ordre, à chaque remise et à chaque retour. Chaque retour est comparé à sa remise vue par vue.",
+        "planChangeNote": "Modifier les vues commence un nouveau plan photo. Les locations déjà photographiées gardent le plan avec lequel elles ont été prises.",
+        "viewLabel": "Vue {number}",
+        "outline": "Cadrage de la vue {number}",
+        "required": "Obligatoire",
+        "requiredOf": "La vue {number} est obligatoire",
+        "moveUp": "Monter la vue {number}",
+        "moveDown": "Descendre la vue {number}",
+        "viewRemove": "Retirer la vue {number}",
+        "viewAdd": "Ajouter une vue",
+        "suggest": "Utiliser les vues suggérées pour cette catégorie",
+        "suggestHelp": "Remplace les vues ci-dessous.",
+        "save": "Enregistrer le type d'article",
+        "saving": "Enregistrement…",
+        "saved": "Type d'article enregistré.",
+        "passkeyBody": "Modifier l'empreinte, le tarif par jour ou le plan photo d'un type d'article demande votre clé d'accès."
+      },
+      "passport": {
+        "label": "Passeport de l'article",
+        "back": "Tous les articles",
+        "since": "Dans la boutique depuis le {date}",
+        "details": "Détails",
+        "type": "Type",
+        "size": "Taille",
+        "serial": "Numéro de série",
+        "none": "Non indiqué",
+        "marks": {
+          "title": "Marques connues",
+          "empty": "Aucune marque notée. Une marque vue lors d'une remise est ajoutée ici, pour qu'aucun client suivant n'ait à la payer.",
+          "firstSeen": "Vue pour la première fois le {date}",
+          "open": "Toujours là",
+          "repaired": "Réparée"
+        },
+        "rentals": {
+          "title": "Locations",
+          "empty": "Pas encore loué.",
+          "period": "Du {start} au {end}",
+          "renterUnknown": "Client pas encore connu",
+          "claim": "Réclamation de {amount}",
+          "states": {
+            "pending_payment": "Prix de la location non payé",
+            "booked": "Réservé",
+            "awaiting_hold": "En attente de l'empreinte",
+            "ready": "Prêt pour la remise",
+            "out": "Sorti",
+            "overdue": "En retard",
+            "returned": "Rendu",
+            "inspecting": "En vérification",
+            "settling": "En cours de règlement",
+            "closed": "Clos",
+            "cancelled": "Annulé",
+            "abandoned": "Non payé, libéré"
+          }
+        },
+        "sessions": {
+          "title": "Séances photo",
+          "empty": "Pas encore de photographies. Chaque remise et chaque retour ajoute ici un jeu scellé, chaîné au précédent, pour qu'aucun enregistrement antérieur ne puisse être remplacé.",
+          "kinds": {
+            "handover": "Remise",
+            "return": "Retour",
+            "packing": "Emballage",
+            "unboxing": "Déballage",
+            "send_back": "Renvoi"
+          },
+          "photographs": "{count, plural, one {# photographie} other {# photographies}}",
+          "sealed": "Scellé le {date}",
+          "open": "Pas encore scellé",
+          "fingerprint": "Empreinte numérique {value}"
+        },
+        "plan": {
+          "title": "Plan photo",
+          "lead": "Les vues photographiées à chaque remise et à chaque retour de cet article.",
+          "optional": "Facultative"
+        },
+        "edit": {
+          "label": "Libellé",
+          "size": "Taille",
+          "serial": "Numéro de série",
+          "save": "Enregistrer les détails",
+          "saving": "Enregistrement…",
+          "saved": "Détails enregistrés."
+        },
+        "status": {
+          "title": "Statut",
+          "since": "Depuis le {date}",
+          "note": "Note",
+          "repair": "Envoyer en réparation",
+          "repairNote": "Ce qui doit être réparé",
+          "back": "Remis en service",
+          "retire": "Retirer cet article",
+          "retireNote": "Pourquoi il est retiré",
+          "retireHelp": "Un article retiré n'est plus jamais loué. Son historique reste.",
+          "saving": "Enregistrement…",
+          "saved": "Statut modifié.",
+          "readOnly": "Seul le personnel peut modifier le statut d'un article."
+        }
+      },
+      "results": {
+        "currency_unset": "Publiez d'abord votre liste de prix. Elle fixe la devise de chaque empreinte et de chaque prix par jour.",
+        "currency_mismatch": "Les montants doivent être dans la devise de la boutique.",
+        "rows_mismatched": "Chaque vue a besoin d'un libellé et d'un cadrage, et chaque accessoire d'un nom et d'un nombre.",
+        "value_invalid": "La valeur n'est pas un montant. Utilisez des chiffres, par exemple 2400 ou 2400.00.",
+        "hold_invalid": "L'empreinte n'est pas un montant. Utilisez des chiffres, par exemple 300 ou 300.00.",
+        "day_rate_invalid": "Le tarif par jour n'est pas un montant. Utilisez des chiffres, par exemple 45 ou 45.00.",
+        "name_missing": "Donnez un nom au type d'article.",
+        "name_too_long": "Le nom est trop long. Gardez-le sous 60 caractères.",
+        "name_taken": "Un autre type d'article porte déjà ce nom.",
+        "value_zero": "Indiquez ce que coûte le remplacement de l'article.",
+        "hold_zero": "L'empreinte ne peut pas être nulle.",
+        "day_rate_zero": "Le tarif par jour ne peut pas être nul.",
+        "hold_above_value": "L'empreinte dépasse la valeur de l'article. Baissez l'empreinte ou corrigez la valeur.",
+        "wrong_currency": "Les montants doivent être dans la devise de la boutique.",
+        "too_many_accessories": "Les accessoires peuvent compter jusqu'à 10 éléments.",
+        "accessory_name_missing": "L'accessoire {row} a besoin d'un nom.",
+        "accessory_name_too_long": "Le nom de l'accessoire {row} est trop long.",
+        "accessory_repeated": "L'accessoire {row} en répète un autre. Comptez-le une seule fois, avec un nombre.",
+        "accessory_count_invalid": "L'accessoire {row} a besoin d'un nombre de 1 à 20.",
+        "no_views": "Ajoutez au moins une vue à photographier.",
+        "too_many_views": "Un plan photo peut compter jusqu'à 12 vues.",
+        "no_required_view": "Rendez au moins une vue obligatoire.",
+        "view_label_missing": "La vue {row} a besoin d'un libellé.",
+        "view_label_too_long": "Le libellé de la vue {row} est trop long.",
+        "view_label_repeated": "La vue {row} répète un autre libellé. Donnez-en un différent à chacune.",
+        "not_found": "Cela ne fait pas partie de cette boutique.",
+        "count_invalid": "Ajoutez de 1 à 50 articles à la fois.",
+        "serial_needs_one": "Un numéro de série appartient à un seul article. Ajoutez un article à la fois pour lui en donner un.",
+        "label_taken": "Un autre article porte déjà ce libellé.",
+        "label_missing": "Donnez un libellé à l'article.",
+        "transition_not_allowed": "Un article retiré ne peut pas être remis en service.",
+        "with_renter": "Un client a cet article. Envoyez-le en réparation une fois rentré.",
+        "rental_under_way": "Une location a encore besoin de cet article. Retirez-le quand cette location sera terminée.",
+        "role_may_not_retire": "Seuls le propriétaire ou un responsable peuvent retirer un article."
       }
     },
     "paypal": {
@@ -1452,7 +1750,6 @@
       }
     },
     "sample": {
-      "label": "Exemple",
       "noticeTitle": "Cette boutique contient des locations d’exemple.",
       "noticeBody": "Elles sont simulées pour montrer une journée de travail. Aucun argent n’a transité par PayPal, et chacune est signalée comme exemple ici et dans les registres.",
       "offerTitle": "Voir une journée de travail",
@@ -1465,5 +1762,8 @@
     "setup": {
       "progress": "{done} sur {total} faits"
     }
+  },
+  "sample": {
+    "label": "Exemple"
   }
 }
