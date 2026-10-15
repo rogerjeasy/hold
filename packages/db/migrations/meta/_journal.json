@@ -64,6 +64,13 @@
       "when": 1791967936843,
       "tag": "0008_invitation_and_rate_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791979256687,
+      "tag": "0009_simulated_rentals",
+      "breakpoints": true
     }
   ]
 }

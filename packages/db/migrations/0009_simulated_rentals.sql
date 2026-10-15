@@ -1,0 +1,1 @@
+ALTER TABLE "rentals" ADD COLUMN "simulated" boolean DEFAULT false NOT NULL;

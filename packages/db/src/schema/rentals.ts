@@ -1,6 +1,6 @@
 import { HOLD_STATES, RENTAL_STATES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
-import { jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
+import { boolean, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 import { appRole, shopIsolation, workerRole } from './access.ts'
 import { items, priceLists, wearPolicies } from './catalog.ts'
@@ -49,6 +49,8 @@ export const rentals = pgTable(
       .references(() => wearPolicies.id),
     state: rentalState().notNull().default('pending_payment'),
     paypalFeeOrderId: text().unique(),
+    // Sample data added for a demonstration. Its hold, claim and money rows are simulated too, and every screen says so.
+    simulated: boolean().notNull().default(false),
     createdAt: createdAt(),
   },
   (table) => [allowed(table.state, RENTAL_STATES), shopIsolation(table.shopId)],
