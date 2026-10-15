@@ -44,7 +44,6 @@ export function createHoldApp(app: App, options: HoldAppOptions) {
       userPool: identity.userPool,
       webClient: identity.webClient,
       cookieKey: identity.cookieKey,
-      senderEmail: options.senderEmail,
     }),
     delivery: createDeliveryStack(app, { env, synthesizer: synthesizer() }),
   }

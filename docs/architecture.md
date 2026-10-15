@@ -81,7 +81,7 @@ flowchart TB
     pp["PayPal sandbox<br/>REST APIs, webhooks, MCP server"]
     claude["Claude API<br/>vision and language"]
     rek["Amazon Rekognition<br/>face detection"]
-    mail["Amazon SES<br/>email"]
+    mail["SMTP account<br/>email"]
 
     owner --> hold
     staff --> hold
@@ -106,7 +106,7 @@ flowchart TB
 - **PayPal** reserves, captures and releases every dollar and reports every event.
 - **Claude** compares photographs and writes language.
 - **Rekognition** finds faces so they can be blurred.
-- **SES** delivers links and messages.
+- **An SMTP account** delivers codes, links and messages.
 
 ---
 
@@ -1311,7 +1311,7 @@ flowchart TB
         sqs["SQS hold-* queues"]
         eb["EventBridge Scheduler group hold-schedules"]
         sm["Secrets Manager hold/*"]
-        ses["SES"]
+        ses["Lambda hold-code-sender"]
         ecr["ECR hold-app"]
         bedrock["Claude on Amazon Bedrock"]
     end
@@ -1331,7 +1331,7 @@ The CDK code is in `infra/`, as five stacks:
 | Stack | Holds | Protection |
 |---|---|---|
 | `HoldData` | The Aurora cluster, its two logins, the evidence and display buckets | Termination protection. Every resource is retained if the stack is deleted |
-| `HoldIdentity` | The Cognito pool `hold-staff` for owners and staff, its groups and its web client. Codes go out through the SES identity `rogerjeasybavibidila@gmail.com`, which is verified outside the stack | Termination protection, deletion protection on the pool |
+| `HoldIdentity` | The Cognito pool `hold-staff` for owners and staff, its groups and its web client. Its codes go to the custom email sender `hold-code-sender`, a Lambda function, encrypted with the KMS key `alias/hold-code-key`, and out through the SMTP account in `hold/email/smtp`. The key and the secret are an administrator's. Cognito still names the SES identity `rogerjeasybavibidila@gmail.com`, verified outside the stack, which it requires but sends nothing through | Termination protection, deletion protection on the pool |
 | `HoldWork` | The spine's queues and their dead-letter queues and alarms, the schedule group, the role the scheduler uses | |
 | `HoldRegistry` | The image repository | Retained |
 | `HoldWeb` | The App Runner service `hold-web`, its instance role and the role it pulls the image with, and a scaling limit of two instances. Its address is App Runner's own, https://p99faar3kp.us-east-1.awsapprunner.com, the stack's `ServiceUrl` output | Termination protection, because a new service would get a new address. Set once by an administrator, since the pipeline may not change it |
@@ -1414,6 +1414,8 @@ Every queue has a dead-letter queue and an alarm on it.
 | **An invitation is guessed, reused or forwarded** | A 32-byte random token, stored only as a fingerprint, valid once for seven days. The code goes to the invited address, and the role is given only if the proven address matches. Tested in `shop-setup.test.ts` and `sign-in-flow.test.ts`. |
 | **Sample rentals pass for real ones** | Only the owner, only in a shop with no rentals, and once. Every sample rental is marked `simulated` in the record, its PayPal references start with `SIMULATED-`, its audit lines say so, and every screen marks it. No PayPal call is made. Tested in `shop-access.test.ts` and `shop-today.test.ts`. |
 | **Codes are requested to pester someone or run up cost** | Five code emails per address and forty requests per network in fifteen minutes, on top of Cognito's own limits. Tested in `sign-in-flow.test.ts`. |
+| **A sign-in code is read on its way to the person** | Cognito encrypts each code with Hold's own KMS key before handing it over. Only `hold-code-sender` may decrypt with it and only Hold's user pool may call it. The code and the address are never logged. Tested in `code-sender.test.ts` and `hold-app.test.ts`. |
+| **The SMTP password leaks** | Kept only in the secret `hold/email/smtp`, readable by the code sender and the web app alone. No template, image, setting or log holds it. |
 | **A shop's PayPal credentials leak** | Kept only in Secrets Manager, checked with PayPal before being kept, never shown again, never logged. |
 | **Someone finds out who has an account** | Every address gets the same "check your email" step, and a code for an address with no account is simply wrong. Passkey sign-in gives every address options of the same shape, with no list of credentials. Tested in `sign-in-flow.test.ts` and `fake-identity.test.ts`. |
 | **A passkey-proven record is carried to another account's session** | The record names the person and the session it belongs to, and is checked against the verified access token. Tested in `shop-access.test.ts`. |
@@ -1580,8 +1582,8 @@ These are targets, not measured results.
 GitHub signs in to AWS through OpenID Connect as `hold-github-deploy`, made by the HoldDelivery stack. Only a workflow on the main branch of `rogerjeasy/hold` can take it, named by GitHub's immutable subject (owner and repository ids as well as names), so a renamed or recreated repository does not match. The account is shared, so nothing the pipeline holds reaches beyond Hold:
 - It never takes the account's CDK bootstrap roles, which could deploy any stack. Hold's stacks are synthesized with the caller's own credentials and keep their templates under `hold/` in the bootstrap bucket, the only prefix it may list.
 - It may change only the five resource stacks (`HoldData`, `HoldIdentity`, `HoldWork`, `HoldRegistry`, `HoldWeb`), through change sets that CloudFormation carries out as `hold-cloudformation-exec`.
-- That CloudFormation role manages Hold's resources and reads none of their contents: no objects, messages, user accounts or credentials, except the database logins' secrets, which attaching the cluster needs. Security groups and user pools are reached by the `project=hold` tag, which may be set only while one is created and never changed after.
-- Every role it makes must carry the `project=hold` tag and `hold-permissions-boundary`, and it changes only roles that carry the tag. It can neither remove the boundary nor the tag, and can hand on only the web app's two roles, `hold-web` and `hold-web-access`, which trust App Runner alone. It creates an App Runner service only with the `project=hold` tag, and changes only services named `hold-*`. The boundary caps any Hold role at exactly what the app uses: sending and reading Hold's queues, reading and writing objects, reading Hold's secrets and keeping the shops' PayPal credentials, the database through the Data API, its schedules, its image, sending email, Claude on Bedrock, its own logs, and putting a person in a group of its user pool. The only role a Hold role may hand on is the scheduler's, to the scheduler.
+- That CloudFormation role manages Hold's resources and reads none of their contents: no objects, messages, user accounts or credentials, except the database logins' secrets, which attaching the cluster needs. The only objects it reads are its own templates and function code under `hold/` in the bootstrap bucket. It manages Lambda functions named `hold-*` and KMS keys that already carry `project=hold`, and never decrypts with one. It cannot make or tag a key, because tagging a key as it is made would let it tag another project's key too. Hold's one key, `alias/hold-code-key`, was made by an administrator, and setting it on the user pool, which makes Cognito's grant, is all the role may do with it. Security groups and user pools are reached by the `project=hold` tag, which may be set only while one is created and never changed after.
+- Every role it makes must carry the `project=hold` tag and `hold-permissions-boundary`, and it changes only roles that carry the tag. It can neither remove the boundary nor the tag, and can hand on only the web app's two roles, `hold-web` and `hold-web-access`, which trust App Runner alone, and the code sender's, `hold-code-sender`, which trusts Lambda alone. It creates an App Runner service only with the `project=hold` tag, and changes only services named `hold-*`. The boundary caps any Hold role at exactly what the app uses: sending and reading Hold's queues, reading and writing objects, reading Hold's secrets and keeping the shops' PayPal credentials, the database through the Data API, its schedules, its image, sending email, Claude on Bedrock, its own logs, putting a person in a group of its user pool, and decrypting with Hold's own keys. The only role a Hold role may hand on is the scheduler's, to the scheduler.
 - **What remains.** A template on main can still give a Hold role a trust policy naming another principal; the boundary keeps such a role to Hold's own resources. Main is where Hold's code comes from, so whoever can change it can already change what the app does with Hold's data.
 - HoldDelivery itself, with both roles and the boundary, is deployed only by an administrator, so a commit on main cannot widen what the pipeline may do.
 - Beyond deploying, the pipeline may push to `hold-app` and run statements on `hold-database` with the two database secrets. No AWS key is stored in GitHub. The ARNs it needs are repository variables, which hold no secret.
@@ -1658,7 +1660,7 @@ The first two are confirmed by short trials on day one. The third is confirmed o
 |---|---|---|
 | **Does the "combined" strategy work?** | Partly answered: the sandbox confirmed on 14 October 2026 that the remainder survives a partial capture and can be captured or released. Renewal after a partial capture is tried after day 4. | Yes. If renewal fails, combined holds are limited to short rentals. |
 | **What runs the worker?** | App Runner throttles CPU between requests, so it cannot poll queues or run scheduled work. Lambda functions fed by SQS are the likely answer, and suit the worker's short jobs. Comparisons that run for minutes fit Lambda's 15-minute limit. | Yes, before the first queue consumer is built |
-| **Is SES out of its sandbox?** | In the sandbox, SES sends only to verified addresses, so a judge would never receive a sign-in code. Production access is requested from AWS and can take a day. | Yes, before judging |
+| **Is SES out of its sandbox?** | Settled another way: email goes through Hold's SMTP account, so SES's sandbox no longer limits who receives a code (`tech-stack.md` section 9.1). | No |
 | **How accurate is the comparison in a real shop?** | Outdoor light, wet or dirty items and hurried photographs will all test it. | Yes. It decides how much is automatic and how much goes to a person. |
 | **How does Hold act on a real shop's PayPal account?** | Holding a shop's API credentials is not acceptable in production. PayPal's partner model is the likely answer. | No |
 | **Will shops be approved for saved payment methods?** | The "saved method" strategy needs it in production. | No, it is optional |

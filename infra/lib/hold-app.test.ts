@@ -4,7 +4,7 @@ import { App } from 'aws-cdk-lib'
 import { Match, Template } from 'aws-cdk-lib/assertions'
 import { describe, expect, it } from 'vitest'
 import { createHoldApp } from './hold-app.ts'
-import { DATABASE_NAME, EVIDENCE_RETENTION_DAYS, PREFIX } from './settings.ts'
+import { CODE_KEY_ARN, DATABASE_NAME, EVIDENCE_RETENTION_DAYS, PREFIX } from './settings.ts'
 import { QUEUES } from './work-stack.ts'
 
 // The default VPC lookup recorded by the first synth, so the tests build the same app with no AWS access.
@@ -166,6 +166,45 @@ describe('sign-in', () => {
     })
   })
 
+  it('hands every code to Hold’s own sender, encrypted with Hold’s own key, instead of sending it through SES', () => {
+    identity.hasResourceProperties('AWS::Cognito::UserPool', {
+      LambdaConfig: {
+        CustomEmailSender: { LambdaVersion: 'V1_0', LambdaArn: { 'Fn::GetAtt': [Match.stringLikeRegexp('^CodeSender'), 'Arn'] } },
+        KMSKeyID: CODE_KEY_ARN,
+      },
+    })
+    // The key is an administrator's (settings.ts), so the pipeline never has to make or tag one.
+    identity.resourceCountIs('AWS::KMS::Key', 0)
+  })
+
+  it('lets only Hold’s user pool call the code sender', () => {
+    identity.hasResourceProperties('AWS::Lambda::Permission', {
+      Action: 'lambda:InvokeFunction',
+      Principal: 'cognito-idp.amazonaws.com',
+      SourceArn: { 'Fn::GetAtt': [Match.stringLikeRegexp('^UserPool'), 'Arn'] },
+    })
+    identity.resourceCountIs('AWS::Lambda::Permission', 1)
+  })
+
+  it('names the SMTP login’s secret to the code sender, never the login itself', () => {
+    identity.hasResourceProperties('AWS::Lambda::Function', {
+      FunctionName: 'hold-code-sender',
+      Environment: { Variables: { HOLD_SMTP_SECRET: 'hold/email/smtp', HOLD_CODE_KEY_ARN: Match.anyValue() } },
+    })
+  })
+
+  it('lets the code sender decrypt codes, read the SMTP login and write its logs, and nothing else', () => {
+    const statements = Object.entries(identity.findResources('AWS::IAM::Policy'))
+      .filter(([key]) => key.startsWith('CodeSenderRole'))
+      .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: { Action: unknown; Resource: unknown }[] } } }).Properties.PolicyDocument.Statement)
+    const actions = new Set(statements.flatMap((statement) => [statement.Action].flat()))
+
+    expect(actions).toEqual(new Set(['kms:Decrypt', 'secretsmanager:GetSecretValue', 'secretsmanager:DescribeSecret', 'logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents']))
+    expect(JSON.stringify(statements)).toContain('secret:hold/email/smtp-??????')
+    identity.resourceCountIs('AWS::IAM::ManagedPolicy', 0)
+    for (const role of Object.values(identity.findResources('AWS::IAM::Role'))) expect(JSON.stringify(role)).not.toContain('ManagedPolicyArns')
+  })
+
   it('has the account types of tech-stack.md section 9.2 as groups', () => {
     for (const groupName of ['owner', 'staff', 'platform_admin']) {
       identity.hasResourceProperties('AWS::Cognito::UserPoolGroup', { GroupName: groupName })
@@ -230,11 +269,12 @@ describe('the web app', () => {
 
   it('is told where its services are, and names its secrets without holding them', () => {
     const names = variables().map((variable) => variable.Name)
-    for (const setting of ['HOLD_ENVIRONMENT', 'HOLD_AWS_REGION', 'HOLD_COGNITO_USER_POOL_ID', 'HOLD_COGNITO_CLIENT_ID', 'HOLD_DATABASE_CLUSTER_ARN', 'HOLD_DATABASE_SECRET_ARN', 'HOLD_DATABASE_NAME', 'HOLD_COOKIE_KEY_SECRET_ARN', 'HOLD_EMAIL_FROM', 'HOLD_PUBLIC_URL']) {
+    for (const setting of ['HOLD_ENVIRONMENT', 'HOLD_AWS_REGION', 'HOLD_COGNITO_USER_POOL_ID', 'HOLD_COGNITO_CLIENT_ID', 'HOLD_DATABASE_CLUSTER_ARN', 'HOLD_DATABASE_SECRET_ARN', 'HOLD_DATABASE_NAME', 'HOLD_COOKIE_KEY_SECRET_ARN', 'HOLD_SMTP_SECRET', 'HOLD_PUBLIC_URL']) {
       expect(names).toContain(setting)
     }
     expect(names).not.toContain('HOLD_COOKIE_KEY')
     expect(variables()).toContainEqual({ Name: 'HOLD_ENVIRONMENT', Value: 'production' })
+    expect(variables()).toContainEqual({ Name: 'HOLD_SMTP_SECRET', Value: 'hold/email/smtp' })
     expect(variables()).toContainEqual({ Name: 'HOLD_PUBLIC_URL', Value: 'https://abc123.us-east-1.awsapprunner.com' })
   })
 
@@ -245,7 +285,7 @@ describe('the web app', () => {
     expect(instancePolicy()).not.toMatch(/DatabaseSecret|database\/admin/)
   })
 
-  it('may do only what the web app does: query the database, read its secrets, keep PayPal credentials, send email and put a person in a group', () => {
+  it('may do only what the web app does: query the database, read its secrets, keep PayPal credentials and put a person in a group', () => {
     const statements = Object.entries(web.findResources('AWS::IAM::Policy'))
       .filter(([key]) => key.startsWith('InstanceRole'))
       .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: { Action: unknown }[] } } }).Properties.PolicyDocument.Statement)
@@ -262,11 +302,11 @@ describe('the web app', () => {
         'secretsmanager:CreateSecret',
         'secretsmanager:PutSecretValue',
         'secretsmanager:TagResource',
-        'ses:SendEmail',
         'cognito-idp:AdminAddUserToGroup',
       ]),
     )
     expect(instancePolicy()).toContain('secret:hold/paypal/shops/*')
+    expect(instancePolicy()).toContain('secret:hold/email/smtp-??????')
   })
 })
 
@@ -342,12 +382,16 @@ describe('delivery', () => {
     for (const broad of ['"sqs:*"', '"s3:*"', '"cognito-idp:*"', '"secretsmanager:*"', '"rds-data:*"', '"scheduler:*"', 'cloudformation:', 'iam:CreateRole', 'cognito-idp:AdminInitiateAuth', 'cognito-idp:AdminSetUserPassword']) {
       expect(boundary).not.toContain(broad)
     }
+    const decrypting = (JSON.parse(boundary) as { Properties: { PolicyDocument: { Statement: Record<string, unknown>[] } } }).Properties.PolicyDocument.Statement.find(
+      (statement) => statement['Resource'] === 'arn:aws:kms:us-east-1:707938860881:key/*',
+    )
+    expect(decrypting).toEqual({ Action: 'kms:Decrypt', Condition: { StringEquals: { 'aws:ResourceTag/project': 'hold' } }, Effect: 'Allow', Resource: 'arn:aws:kms:us-east-1:707938860881:key/*' })
     expect(boundary).toContain('role/hold-scheduler')
     expect(boundary).toContain('"iam:PassedToService":"scheduler.amazonaws.com"')
     expect(boundary).not.toContain('role/hold-*')
   })
 
-  it('lets CloudFormation change only roles that carry Hold’s tag, and hand on only the web app’s two roles, to App Runner', () => {
+  it('lets CloudFormation change only roles that carry Hold’s tag, and hand on only the web app’s two roles and the code sender’s', () => {
     const statements = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
     expect(statements).toMatch(/iam:UpdateAssumeRolePolicy[^}]*aws:ResourceTag\/project/)
 
@@ -356,7 +400,7 @@ describe('delivery', () => {
       .filter((statement) => [statement['Action']].flat().includes('iam:PassRole'))
     const allowed = passing.filter((statement) => statement['Effect'] === 'Allow' && JSON.stringify(statement).includes('role/hold-web'))
     expect(allowed).toHaveLength(1)
-    expect(JSON.stringify(allowed[0]?.['Resource'])).toMatch(/role\/hold-web".*role\/hold-web-access"|role\/hold-web-access".*role\/hold-web"/)
+    expect(new Set([allowed[0]?.['Resource']].flat())).toEqual(new Set(['role/hold-web', 'role/hold-web-access', 'role/hold-code-sender'].map((role) => `arn:aws:iam::707938860881:${role}`)))
     // App Runner checks the pass with a service name of its own choosing, so none is named here. Both roles trust App
     // Runner alone, so no other service could use them.
     expect(allowed[0]?.['Condition']).toBeUndefined()
@@ -364,8 +408,13 @@ describe('delivery', () => {
       const principals = (role.Properties?.['AssumeRolePolicyDocument'] as { Statement: { Principal: { Service: string } }[] }).Statement.map((statement) => statement.Principal.Service)
       for (const principal of principals) expect(principal).toMatch(/^(build|tasks)\.apprunner\.amazonaws\.com$/)
     }
+    identity.hasResourceProperties('AWS::IAM::Role', {
+      RoleName: 'hold-code-sender',
+      AssumeRolePolicyDocument: { Statement: [Match.objectLike({ Principal: { Service: 'lambda.amazonaws.com' } })] },
+    })
     const denied = passing.find((statement) => statement['Effect'] === 'Deny')
     expect(JSON.stringify(denied?.['NotResource'])).toContain('role/hold-web-access')
+    expect(JSON.stringify(denied?.['NotResource'])).toContain('role/hold-code-sender')
   })
 
   it('lets CloudFormation make only App Runner services that carry Hold’s tag, and change only Hold’s', () => {
@@ -373,6 +422,19 @@ describe('delivery', () => {
     expect(statements).toMatch(/apprunner:CreateService[^}]*aws:RequestTag\/project/)
     expect(statements).toContain('service/hold-*')
     expect(statements).not.toContain('"apprunner:*"')
+  })
+
+  it('lets CloudFormation manage only Hold’s Lambda functions and the keys that carry Hold’s tag, and never make or tag a key', () => {
+    const statements = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
+    expect(statements).toContain('function:hold-*')
+    // Tagging a key at creation needs kms:TagResource, which would let it tag another project's key too. An
+    // administrator makes Hold's keys instead.
+    expect(statements).not.toContain('kms:CreateKey')
+    expect(statements).not.toMatch(/"Effect":"Allow"[^}]*kms:TagResource|kms:TagResource[^}]*"Effect":"Allow"/)
+    expect(statements).toMatch(/kms:CreateGrant[^}]*aws:ResourceTag\/project/)
+    expect(statements).not.toContain('kms:PutKeyPolicy')
+    expect(statements).not.toContain('"lambda:*"')
+    expect(statements).not.toContain('"kms:*"')
   })
 
   it('never lets CloudFormation describe another project’s App Runner service, whose settings it would read', () => {
@@ -396,10 +458,14 @@ describe('delivery', () => {
   it('gives CloudFormation no way to read what Hold’s resources hold', () => {
     const exec = Object.entries(delivery.findResources('AWS::IAM::Policy')).find(([key]) => key.startsWith('CloudFormationRole'))?.[1]
     const allowed = JSON.stringify((exec as { Properties: { PolicyDocument: { Statement: { Effect: string }[] } } }).Properties.PolicyDocument.Statement.filter((entry) => entry.Effect === 'Allow'))
-    for (const action of ['s3:GetObject', 's3:*', 'sqs:ReceiveMessage', 'sqs:*', 'secretsmanager:*', 'cognito-idp:*', 'cognito-idp:AdminInitiateAuth', 'rds:*', 'ecr:*']) {
+    for (const action of ['s3:*', 'sqs:ReceiveMessage', 'sqs:*', 'secretsmanager:*', 'cognito-idp:*', 'cognito-idp:AdminInitiateAuth', 'rds:*', 'ecr:*', 'kms:Decrypt']) {
       expect(allowed).not.toContain(`"${action}"`)
     }
     expect(allowed).not.toContain('secret:hold/paypal')
+    expect(allowed).not.toContain('secret:hold/email')
+    // It reads objects only where the deploy keeps its templates and the code sender’s code, never Hold’s buckets.
+    const reads = (JSON.parse(allowed) as { Action: unknown; Resource: unknown }[]).filter((statement) => [statement.Action].flat().includes('s3:GetObject'))
+    expect(reads.flatMap((statement) => [statement.Resource].flat())).toEqual(['arn:aws:s3:::cdk-hnb659fds-assets-707938860881-us-east-1/hold/*'])
   })
 
   it('deploys every stack with the caller’s credentials, under Hold’s prefix in the bootstrap bucket', () => {

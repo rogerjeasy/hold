@@ -47,11 +47,14 @@ const at = {
   scheduleGroup: `arn:aws:scheduler:${REGION}:${ACCOUNT}:schedule-group/${PREFIX}-*`,
   schedules: `arn:aws:scheduler:${REGION}:${ACCOUNT}:schedule/${PREFIX}-*/*`,
   userPools: `arn:aws:cognito-idp:${REGION}:${ACCOUNT}:userpool/*`,
+  functions: `arn:aws:lambda:${REGION}:${ACCOUNT}:function:${PREFIX}-*`,
+  keys: `arn:aws:kms:${REGION}:${ACCOUNT}:key/*`,
   services: `arn:aws:apprunner:${REGION}:${ACCOUNT}:service/${PREFIX}-*`,
   scaling: `arn:aws:apprunner:${REGION}:${ACCOUNT}:autoscalingconfiguration/${PREFIX}-*`,
 }
-// The web app's two roles (infra/lib/web-stack.ts), the only ones CloudFormation may hand on, and only to App Runner.
-const WEB_ROLES = [name('web'), name('web', 'access')]
+// The only roles CloudFormation may hand on: the web app's two (infra/lib/web-stack.ts), which trust App Runner alone,
+// and the code sender's (infra/lib/code-sender.ts), which trusts Lambda alone.
+const PASSED_ROLES = [name('web'), name('web', 'access'), name('code', 'sender')]
 const HOLD_TAG = { 'aws:ResourceTag/project': PREFIX }
 const HOLD_REQUEST_TAG = { 'aws:RequestTag/project': PREFIX }
 
@@ -63,8 +66,8 @@ const deny = (actions: string[], resources: string[], conditions?: Conditions) =
 
 // The most any role of Hold's may do, whatever its own policy says: exactly what the app needs and no more. Hold's
 // queues to send to and read, objects in its buckets, its secrets to read and the shops' PayPal credentials to keep,
-// its database through the Data API, its schedules, its image, sending email, Claude on Bedrock, its own logs, and
-// putting a person in a group of its user pool. The only role it may hand on is the scheduler's, to the scheduler.
+// its database through the Data API, its schedules, its image, sending email, Claude on Bedrock, its own logs,
+// putting a person in a group of its user pool, and decrypting with its own keys, as the code sender does. The only role it may hand on is the scheduler's, to the scheduler.
 // Nothing here manages IAM, CloudFormation or any resource of another project.
 function permissionsBoundary(stack: Stack): iam.ManagedPolicy {
   return new iam.ManagedPolicy(stack, 'PermissionsBoundary', {
@@ -90,6 +93,7 @@ function permissionsBoundary(stack: Stack): iam.ManagedPolicy {
       statement(['cloudwatch:PutMetricData'], ['*'], { StringEquals: { 'cloudwatch:namespace': 'Hold' } }),
       statement(['cognito-idp:AdminAddUserToGroup'], [at.userPools], { StringEquals: HOLD_TAG }),
       statement(['kms:Decrypt', 'kms:GenerateDataKey'], ['*'], { StringEquals: { 'kms:ViaService': [`secretsmanager.${REGION}.amazonaws.com`, `s3.${REGION}.amazonaws.com`, `sqs.${REGION}.amazonaws.com`] } }),
+      statement(['kms:Decrypt'], [at.keys], { StringEquals: HOLD_TAG }),
       statement(['iam:PassRole'], [at.role(name('scheduler'))], { StringEquals: { 'iam:PassedToService': 'scheduler.amazonaws.com' } }),
     ],
   })
@@ -127,6 +131,20 @@ function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineR
   add(statement(['rds:CreateDBCluster', 'rds:ModifyDBCluster', 'rds:CreateDBInstance', 'rds:ModifyDBInstance'], [`arn:aws:rds:${REGION}:${ACCOUNT}:cluster-pg:default*`, `arn:aws:rds:${REGION}:${ACCOUNT}:pg:default*`, `arn:aws:rds:${REGION}:${ACCOUNT}:og:default*`]))
   // Encryption with AWS-managed keys, through the services that use them, for their own resources only.
   add(statement(['kms:DescribeKey', 'kms:CreateGrant'], ['*'], { StringEquals: { 'kms:ViaService': [`rds.${REGION}.amazonaws.com`, `secretsmanager.${REGION}.amazonaws.com`] }, Bool: { 'kms:GrantIsForAWSResource': true } }))
+
+  // The code sender: Hold's functions only, with their code read from Hold's prefix of the bootstrap bucket.
+  add(
+    statement(
+      ['lambda:CreateFunction', 'lambda:DeleteFunction', 'lambda:GetFunction', 'lambda:GetFunctionConfiguration', 'lambda:GetFunctionCodeSigningConfig', 'lambda:GetRuntimeManagementConfig', 'lambda:UpdateFunctionCode', 'lambda:UpdateFunctionConfiguration', 'lambda:AddPermission', 'lambda:RemovePermission', 'lambda:GetPolicy', 'lambda:TagResource', 'lambda:UntagResource', 'lambda:ListTags'],
+      [at.functions],
+    ),
+  )
+  add(statement(['s3:GetObject'], [`arn:aws:s3:::${CDK_ASSETS_BUCKET}/${CDK_ASSETS_PREFIX}*`]))
+  // Keys: an administrator makes Hold's, because tagging a key as it is made needs kms:TagResource, which would let
+  // this role tag another project's key as Hold's too. Setting one on the user pool makes Cognito's grant on it, so
+  // that is all it may do with a key, and only with one tagged as Hold's.
+  add(statement(['kms:DescribeKey', 'kms:CreateGrant'], [at.keys], { StringEquals: HOLD_TAG }))
+  add(deny(['kms:TagResource', 'kms:UntagResource'], ['*'], { 'ForAnyValue:StringEquals': { 'aws:TagKeys': ['project'] } }))
 
   // App Runner: a service may be made only with the project tag, and only Hold's are described or changed after.
   // Describing a service shows its settings, so another project's is never described.
@@ -171,8 +189,8 @@ function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineR
   add(deny(['iam:UntagRole'], ['*'], { 'ForAnyValue:StringEquals': { 'aws:TagKeys': ['project'] } }))
   // App Runner checks the pass with a service name of its own choosing, so none is named. The two roles trust App
   // Runner alone, which is what keeps them to it.
-  add(statement(['iam:PassRole'], WEB_ROLES.map(at.role)))
-  role.addToPolicy(new iam.PolicyStatement({ effect: iam.Effect.DENY, actions: ['iam:PassRole'], notResources: WEB_ROLES.map(at.role) }))
+  add(statement(['iam:PassRole'], PASSED_ROLES.map(at.role)))
+  role.addToPolicy(new iam.PolicyStatement({ effect: iam.Effect.DENY, actions: ['iam:PassRole'], notResources: PASSED_ROLES.map(at.role) }))
   add(deny(['iam:DeleteRolePermissionsBoundary', 'iam:AttachRolePolicy', 'iam:CreatePolicy', 'iam:CreatePolicyVersion', 'iam:SetDefaultPolicyVersion', 'iam:CreateUser', 'iam:CreateAccessKey'], ['*']))
   // The pipeline's own roles, and the boundary, change only by an administrator's hand.
   add(deny(['iam:*'], [...pipelineRoles.map(at.role), boundary.managedPolicyArn]))

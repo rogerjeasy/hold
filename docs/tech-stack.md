@@ -30,7 +30,7 @@ This document says what to build with and why. It is not a design or an implemen
 | Photo storage | Amazon S3 with Object Lock |
 | Face blurring | Amazon Rekognition |
 | Background work | Amazon SQS and EventBridge Scheduler |
-| Email | Amazon SES |
+| Email | Hold's SMTP account (a Gmail account with an app password), through `nodemailer`. Cognito hands its codes to Hold's own sender |
 | Secrets | AWS Secrets Manager |
 | Signing | An asymmetric key in AWS KMS, for the Clean Record credential |
 | Infrastructure as code | AWS CDK in TypeScript |
@@ -254,8 +254,9 @@ Photographs are Hold's evidence, so how they are stored matters as much as how t
 - **One Cognito user pool** for owners and staff.
 - **Passwordless sign-in** by emailed code or passkey, on Hold's own `/sign-in` and `/sign-up` pages, which call Cognito. Seasonal staff should not need a password. `architecture.md` section 12.1 says what is built so far.
 - **A passkey as the second factor** for owners, managers and anyone who can approve a claim above the shop's threshold, with user verification required, so the device and the person's fingerprint, face or PIN prove it together. Not an authenticator app: Cognito asks for one only after a password, and a person who turns one on can no longer sign in with an emailed code. Cognito's own MFA setting is off for that reason (`architecture.md` section 12.1, decision 31).
-- **Staff invitations** are sent by Hold through SES, from the same address. Hold's own emails go through the `Mailer` interface in `packages/notify`.
-- **Codes are sent through Amazon SES** from `rogerjeasybavibidila@gmail.com`, an identity verified in the account outside Hold's stacks. SES is still in its sandbox, so codes reach only verified addresses until production access is granted (`architecture.md` section 22.2).
+- **Codes go out through Hold's SMTP account, not SES.** SES stayed in its sandbox, where it sends only to verified addresses, and Hold has no domain of its own. So Cognito hands each sign-up and sign-in code to a custom email sender, the Lambda function `hold-code-sender` (`apps/worker/src/code-sender.ts`). Cognito encrypts the code with Hold's KMS key; the function decrypts it with the AWS Encryption SDK (`@aws-crypto/client-node`) and emails it through the SMTP account. It never logs the code or the address. Cognito still needs an SES identity, `rogerjeasybavibidila@gmail.com`, before it allows email codes at all, but sends nothing through it.
+- **Staff invitations** go through the same SMTP account, by the `Mailer` interface in `packages/notify`.
+- **The SMTP account** is a Gmail account with an app password, kept as the JSON secret `hold/email/smtp` (`host`, `port`, `user`, `password`). An administrator creates and fills it; no template, image or setting holds the password. Gmail sends up to about 500 messages a day, which covers judging. Mail comes from the Gmail address, which Gmail's own servers vouch for.
 - **Tokens** verified by each service with the `aws-jwt-verify` library.
 
 ### 9.2 What each person may do
@@ -321,7 +322,7 @@ In the hackathon build, the owner pastes their sandbox app's client ID and secre
   - reminding a renter that a return is due
   - closing a claim when the renter's reply period ends
   - nightly reconciliation against PayPal
-- **Amazon SES** sends email to renters and owners.
+- **Hold's SMTP account** sends email to renters and owners.
 
 **Hold upkeep is the scheduler's most important job.** A hold that lapses unnoticed leaves the shop unprotected. Every hold has a schedule created with it and removed when it ends.
 

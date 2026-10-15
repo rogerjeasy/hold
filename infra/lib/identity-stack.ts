@@ -2,6 +2,7 @@ import { CfnOutput, Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
 import type { App, StackProps } from 'aws-cdk-lib'
 import * as cognito from 'aws-cdk-lib/aws-cognito'
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
+import { createCodeSender } from './code-sender.ts'
 import { name, REGION, secretName } from './settings.ts'
 
 // Owners and staff (tech-stack.md section 9.1). A pool of Hold's own, so no account, message or setting is shared
@@ -28,6 +29,7 @@ export function createIdentityStack(app: App, props: IdentityStackProps): Identi
   const { senderEmail, passkeyRelyingPartyId, ...stackProps } = props
   const stack = new Stack(app, 'HoldIdentity', { ...stackProps, terminationProtection: true, description: 'Hold: owner and staff accounts' })
 
+  const codeSender = createCodeSender(stack)
   const userPool = new cognito.UserPool(stack, 'UserPool', {
     userPoolName: name('staff'),
     // Choice-based sign-in, so a person can sign in with a code sent by email, or a passkey, and never set a password.
@@ -47,7 +49,11 @@ export function createIdentityStack(app: App, props: IdentityStackProps): Identi
     // sign in with an emailed code. The second factor is the passkey above.
     mfa: cognito.Mfa.OFF,
     accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
+    // Codes go to Hold's own sender, which emails them through Hold's SMTP account, so they reach any address. Cognito
+    // still needs an SES identity for email codes to be allowed at all; it sends nothing through it.
     email: cognito.UserPoolEmail.withSES({ fromEmail: senderEmail, fromName: 'Hold', sesRegion: REGION }),
+    customSenderKmsKey: codeSender.key,
+    lambdaTriggers: { customEmailSender: codeSender.function },
     userVerification: {
       emailSubject: 'Your Hold code',
       emailBody: 'Your Hold code is {####}. Enter it on the page that asked for it. If you did not ask for it, you can ignore this email.',

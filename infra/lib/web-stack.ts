@@ -6,7 +6,7 @@ import type * as ecr from 'aws-cdk-lib/aws-ecr'
 import * as iam from 'aws-cdk-lib/aws-iam'
 import type * as rds from 'aws-cdk-lib/aws-rds'
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
-import { ACCOUNT, DATABASE_NAME, name, REGION, secretName } from './settings.ts'
+import { ACCOUNT, DATABASE_NAME, name, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
 
 // The web app on App Runner (tech-stack.md section 8): one container service with its own HTTPS address, no load
 // balancer, NAT gateway or VPC. It runs the image CI built from a commit, named by the deploy, and changes only
@@ -33,11 +33,10 @@ export type WebStackProps = StackProps & {
   readonly userPool: cognito.IUserPool
   readonly webClient: cognito.IUserPoolClient
   readonly cookieKey: secretsmanager.ISecret
-  readonly senderEmail: string
 }
 
-// What the running app may do, and no more: query the database as hold_app, read its two secrets, keep each shop's
-// PayPal credentials, send email from Hold's address and put a new owner in the owner group.
+// What the running app may do, and no more: query the database as hold_app, read its secrets, keep each shop's PayPal
+// credentials and put a new owner in the owner group. Email goes out through the SMTP account, not SES.
 function instanceRole(stack: Stack, props: WebStackProps): iam.Role {
   const role = new iam.Role(stack, 'InstanceRole', {
     roleName: name('web'),
@@ -51,9 +50,10 @@ function instanceRole(stack: Stack, props: WebStackProps): iam.Role {
       resources: [props.cluster.clusterArn],
     }),
   )
-  role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:GetSecretValue'], resources: [props.appUserSecret.secretArn, props.cookieKey.secretArn, paypalCredentials] }))
+  // Secrets Manager adds six random characters to a secret's name in its ARN.
+  const smtpLogin = `arn:aws:secretsmanager:${REGION}:${ACCOUNT}:secret:${SMTP_SECRET_NAME}-??????`
+  role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:GetSecretValue'], resources: [props.appUserSecret.secretArn, props.cookieKey.secretArn, paypalCredentials, smtpLogin] }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:CreateSecret', 'secretsmanager:PutSecretValue', 'secretsmanager:TagResource'], resources: [paypalCredentials] }))
-  role.addToPolicy(new iam.PolicyStatement({ actions: ['ses:SendEmail'], resources: [`arn:aws:ses:${REGION}:${ACCOUNT}:identity/${props.senderEmail}`] }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['cognito-idp:AdminAddUserToGroup'], resources: [props.userPool.userPoolArn] }))
   return role
 }
@@ -68,7 +68,7 @@ function settings(props: WebStackProps): apprunner.CfnService.KeyValuePairProper
     HOLD_DATABASE_SECRET_ARN: props.appUserSecret.secretArn,
     HOLD_DATABASE_NAME: DATABASE_NAME,
     HOLD_COOKIE_KEY_SECRET_ARN: props.cookieKey.secretArn,
-    HOLD_EMAIL_FROM: props.senderEmail,
+    HOLD_SMTP_SECRET: SMTP_SECRET_NAME,
     ...(props.publicUrl === undefined ? {} : { HOLD_PUBLIC_URL: props.publicUrl }),
   }
   return Object.entries(values).map(([key, value]) => ({ name: key, value }))

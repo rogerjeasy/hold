@@ -35,6 +35,14 @@ export function secretName(...parts: readonly string[]): string {
   return [PREFIX, ...parts].join('/')
 }
 
+// The SMTP account Hold sends email through: {host, port, user, password} as JSON. An administrator creates and
+// fills it from the Gmail app password, so the password is in no file, template or setting.
+export const SMTP_SECRET_NAME = secretName('email', 'smtp')
+
+// The KMS key Cognito encrypts sign-in codes with for the code sender (alias/hold-code-key). An administrator made it,
+// tagged project=hold and rotating, because the pipeline may not tag a key: that would let it claim another project's.
+export const CODE_KEY_ARN = 'arn:aws:kms:us-east-1:707938860881:key/ff9a40c3-97d9-4262-8954-20331622e005'
+
 // The repository GitHub Actions deploys from. Only its main branch may take the deploy role. The repository uses
 // GitHub's immutable subject, which names the owner and the repository by their ids as well, so a renamed or
 // recreated repository of the same name does not match.
