@@ -25,6 +25,6 @@ export default defineConfig({
     timeout: 60_000,
     // The built app runs against in-process fakes: an identity service that sends the code in e2e/support/sign-in.ts,
     // and a database in memory. The key seals cookies for this run only.
-    env: { HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: Buffer.alloc(32, 7).toString('base64') },
+    env: { HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: Buffer.alloc(32, 7).toString('base64'), HOLD_PUBLIC_URL: baseURL },
   },
 })

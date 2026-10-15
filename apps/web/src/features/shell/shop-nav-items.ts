@@ -1,4 +1,4 @@
-import { Bike, LayoutDashboard, ShieldCheck, Tag, Users, Wallet } from 'lucide-react'
+import { Bike, CalendarRange, LayoutDashboard, ShieldCheck, Tag, Users, Wallet } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { shopRoutes } from '@/lib/routes'
 
@@ -10,12 +10,13 @@ export type ShopNavGroup = {
   readonly items: readonly { readonly key: ShopNavKey; readonly icon: LucideIcon }[]
 }
 
-// The shop's pages, in menu order. Rentals, holds and claims join the first group, before items, as their pages are built.
+// The shop's pages, in menu order. Holds and claims join the first group, after rentals, as their pages are built.
 export const shopNavGroups: readonly ShopNavGroup[] = [
   {
     label: null,
     items: [
       { key: 'home', icon: LayoutDashboard },
+      { key: 'rentals', icon: CalendarRange },
       { key: 'items', icon: Bike },
     ],
   },

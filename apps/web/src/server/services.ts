@@ -9,8 +9,8 @@ import type { Database } from '@hold/db'
 import { createDataApiDatabase } from '@hold/db/data-api'
 import { createLazyMailer, createMemoryMailer, createSmtpMailer, loadSmtpSettings } from '@hold/notify'
 import type { Mailer } from '@hold/notify'
-import { createMemoryCredentialStore, createPayPalClient, createSecretsManagerCredentialStore } from '@hold/paypal'
-import type { CredentialStore, PayPalCredentials } from '@hold/paypal'
+import { createFakePayPal, createMemoryCredentialStore, createPayPalClient, createRestPayPalHolds, createSecretsManagerCredentialStore } from '@hold/paypal'
+import type { CredentialStore, FakePayPal, PayPalCredentials, PayPalHolds } from '@hold/paypal'
 
 // What a PayPal credential check found: the credentials work, PayPal refused them, or PayPal could not be reached.
 export type CredentialCheck = 'accepted' | 'refused' | 'unavailable'
@@ -24,6 +24,10 @@ export type Services = {
   readonly mailer: Mailer
   readonly paypalCredentials: CredentialStore
   readonly checkPayPalCredentials: (credentials: PayPalCredentials) => Promise<CredentialCheck>
+  // PayPal, acting in the shop account whose credentials the reference names.
+  readonly paypalFor: (credentialReference: string) => PayPalHolds
+  // The test environment's PayPal, whose orders a simulated approval page approves. Absent everywhere else.
+  readonly simulatedPayPal: FakePayPal | undefined
 }
 
 // The code the test environment's fake identity sends every time. The end-to-end tests type it.
@@ -51,6 +55,8 @@ async function build(): Promise<Services> {
   if (config.services === 'fake') {
     // Loaded only here, so a deployed server never has PGlite or the fakes in its path.
     const { createTestDatabase } = await import('@hold/db/testing')
+    // One PayPal for every shop, which sends the renter to Hold's own simulated approval page.
+    const simulatedPayPal = createFakePayPal({ now: () => new Date(), approvalUrl: (orderId) => `${config.publicUrl}/simulated-paypal/${orderId}` })
     return {
       config,
       cookieKey: await loadCookieKey(config.cookieKey, 'us-east-1'),
@@ -59,8 +65,11 @@ async function build(): Promise<Services> {
       mailer: createMemoryMailer(),
       paypalCredentials: createMemoryCredentialStore(),
       checkPayPalCredentials: (credentials) => Promise.resolve(credentials.clientSecret === TEST_REFUSED_PAYPAL_SECRET ? 'refused' : 'accepted'),
+      paypalFor: () => simulatedPayPal,
+      simulatedPayPal,
     }
   }
+  const paypalCredentials = createSecretsManagerCredentialStore(config.region)
   return {
     config,
     cookieKey: await loadCookieKey(config.cookieKey, config.region),
@@ -68,8 +77,20 @@ async function build(): Promise<Services> {
     database: createDataApiDatabase({ region: config.region, clusterArn: config.database.clusterArn, secretArn: config.database.secretArn, database: config.database.name }),
     // Through the SMTP account in Secrets Manager, read when the first email is sent.
     mailer: createLazyMailer(async () => createSmtpMailer(await loadSmtpSettings(config.smtpSecret, config.region))),
-    paypalCredentials: createSecretsManagerCredentialStore(config.region),
+    paypalCredentials,
     checkPayPalCredentials: checkWithPayPal,
+    paypalFor: (credentialReference) =>
+      createRestPayPalHolds(
+        createPayPalClient({
+          environment: config.paypalMode,
+          credentials: async () => {
+            const credentials = await paypalCredentials.read(credentialReference)
+            if (credentials === undefined) throw new Error('The shop’s PayPal credentials are missing.')
+            return credentials
+          },
+        }),
+      ),
+    simulatedPayPal: undefined,
   }
 }
 

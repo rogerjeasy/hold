@@ -95,6 +95,7 @@ Two services share one codebase:
 - **Languages.** Renters are often visitors. The interface uses `next-intl` for fixed text, and claim messages are written in the renter's language. The fixed text exists in English, Spanish, French and German, in `apps/web/messages`. English is the default. A test fails if a language is missing a key or a placeholder.
 - **Light and dark themes.** The page follows the device setting, and a switch in the header overrides it. `next-themes` sets the theme before the first paint, so there is no flash. It is the one dependency added beyond this list, because the alternative is a hand-written inline script doing the same job.
 - **Design tokens.** Colors, type sizes, radii and widths are named once in `apps/web/src/app/globals.css` and used through Tailwind. Each theme has its own palette, chosen by hand and checked for contrast in both. Components use token names, never raw color values.
+- **QR codes.** `qrcode` draws the renter's link as SVG on the server, for the renter to scan at the counter. It is the second dependency added beyond this list: a QR encoder by hand is several hundred lines of error correction for no gain.
 - **Type.** Archivo for headlines and text, JetBrains Mono for small labels and amounts. Both are served from the app itself through `next/font`.
 - **Components.** shadcn/ui on the Radix primitives. Buttons are at least 44 pixels tall. Shared primitives live in `src/components/ui`, the header and footer in `src/features/site`, the public pages in `src/features/marketing`, and sign-in and sign-up in `src/features/auth`.
 - **Language routing.** Next.js 16 root parameters carry the language. The older `setRequestLocale` call is deprecated in `next-intl` and is not used.
@@ -279,7 +280,7 @@ Renters do not sign up. That is a product decision, and the technology follows i
 
 - **Signed, expiring links.** Each rental has a link that carries a signed token for that rental only.
 - **Identity from PayPal.** The renter is the PayPal payer who approved the order. Their payer ID and email come from PayPal.
-- **Limited scope.** The link allows viewing the rental, confirming condition, extending, and accepting or contesting a claim. Nothing else.
+- **Limited scope.** The link allows viewing the rental, paying its fee, confirming condition, extending, and accepting or contesting a claim. Nothing else. Paying happens in PayPal, approved by the renter there.
 - **Sensitive actions re-confirm.** Contesting or accepting a claim sends a one-time code to the email PayPal provided.
 
 ### 9.4 Connecting the shop's PayPal account

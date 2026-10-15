@@ -1,9 +1,9 @@
 'use server'
 
 import { findPerson, takeRateToken } from '@hold/db'
-import { headers } from 'next/headers'
 import { redirect } from '@/i18n/navigation'
 import { linkRoutes, routes, shopRoutes } from '@/lib/routes'
+import { callerNetwork } from '@/server/network'
 import { getServices } from '@/server/services'
 import type { Attempt, AttemptPage } from './attempt'
 import type { AuthFormState, CodeFormState, PasskeyFormState } from './auth-form-state'
@@ -23,14 +23,8 @@ async function dependencies(): Promise<FlowDependencies> {
   return { identity, database, now: () => new Date(), allow: (limit, subject) => takeRateToken(database, limit, subject) }
 }
 
-const LOOPBACK = new Set(['::1', '127.0.0.1', '::ffff:127.0.0.1'])
-
-// The caller's network address. The load balancer in front of the app adds it last to x-forwarded-for, so the last
-// entry is the one to trust: anything before it the caller could have written. A loopback address means a request
-// from the developer's own machine, which has no load balancer.
 async function requester(): Promise<Requester> {
-  const forwarded = (await headers()).get('x-forwarded-for')?.split(',').at(-1)?.trim()
-  return { network: forwarded === undefined || forwarded === '' || LOOPBACK.has(forwarded) ? undefined : forwarded }
+  return { network: await callerNetwork() }
 }
 
 function pageRoute(attempt: Pick<Attempt, 'page' | 'invitation'>): string {

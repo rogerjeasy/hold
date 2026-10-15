@@ -1153,6 +1153,7 @@
     "nav": {
       "label": "Seiten des Verleihs",
       "home": "Heute",
+      "rentals": "Mieten",
       "items": "Artikel",
       "security": "Sicherheit",
       "staff": "Team",
@@ -1293,6 +1294,129 @@
         "loss": "Verlust",
         "lateness": "Verspätete Rückgabe",
         "cleaning": "Reinigung"
+      }
+    },
+    "rentals": {
+      "title": "Mieten",
+      "lead": "Jede Buchung, vom Mietpreis bis zur abgerechneten Reservierung.",
+      "new": "Neue Miete",
+      "readOnly": "Nur das Personal kann Mieten buchen.",
+      "empty": {
+        "title": "Noch keine Mieten",
+        "body": "Buchen Sie hier eine für eine mietende Person an der Theke oder am Telefon, oder teilen Sie die Seite Ihres Verleihs, damit Mietende selbst buchen."
+      },
+      "shopPage": "Die Seite Ihres Verleihs",
+      "shopPageNote": "Hier buchen Mietende selbst:",
+      "filter": {
+        "label": "Mieten anzeigen",
+        "all": "Alle",
+        "waiting": "Warten auf den Mietpreis",
+        "booked": "Gebucht",
+        "out": "Verliehen",
+        "returned": "Zurückgegeben",
+        "done": "Erledigt",
+        "none": "Hier sind keine Mieten."
+      },
+      "columns": {
+        "who": "Mietende Person",
+        "what": "Artikel",
+        "when": "Wann",
+        "fee": "Mietpreis",
+        "hold": "Reservierung",
+        "state": "Stand"
+      },
+      "notKnown": "Noch nicht bezahlt",
+      "fromShopPage": "Auf der Seite des Verleihs gebucht",
+      "period": "{start} bis {end}",
+      "needsPayPal": {
+        "title": "Verbinden Sie zuerst PayPal",
+        "body": "Mietende zahlen den Mietpreis auf das PayPal-Konto Ihres Verleihs, deshalb brauchen Buchungen es.",
+        "action": "Zu PayPal"
+      },
+      "needsItems": {
+        "title": "Fügen Sie zuerst Ihre Artikel hinzu",
+        "body": "Eine Buchung gilt für Artikel Ihrer Artikeltypen.",
+        "action": "Zu den Artikeln"
+      },
+      "form": {
+        "title": "Neue Miete",
+        "back": "Alle Mieten",
+        "renter": "Für wen",
+        "renterHelp": "Optional. Mit einer E-Mail-Adresse erhält die mietende Person den Link zum Bezahlen. Wer die mietende Person ist, kommt von PayPal, wenn sie bezahlt.",
+        "name": "Name",
+        "email": "E-Mail",
+        "language": "Sprache der mietenden Person",
+        "book": "Buchen",
+        "booking": "Wird gebucht…",
+        "booked": "Gebucht."
+      },
+      "detail": {
+        "label": "Miete",
+        "back": "Alle Mieten",
+        "terms": "Bedingungen",
+        "when": "Wann",
+        "items": "Artikel",
+        "fee": "Mietpreis",
+        "hold": "Reservierung bei der Abholung",
+        "prices": "Schadenspreise",
+        "pricesVersion": "Version {version}",
+        "bookedThrough": "Buchung",
+        "staff": "Durch das Personal",
+        "shopPage": "Auf der Seite des Verleihs",
+        "contact": "Kontakt",
+        "renter": "Mietende Person, wie PayPal sie nennt",
+        "progress": "Fortschritt",
+        "steps": {
+          "booked": "Gebucht",
+          "paid": "Mietpreis bezahlt",
+          "hold": "Reservierung erfolgt",
+          "out": "Übergeben",
+          "returned": "Zurückgegeben",
+          "settled": "Abgerechnet"
+        },
+        "done": "Erledigt",
+        "toDo": "Noch nicht",
+        "lapsedNote": "Die Zahlungsfrist ist abgelaufen, deshalb werden die Artikel nicht mehr freigehalten. Die mietende Person kann noch bezahlen, solange niemand sonst sie gebucht hat."
+      },
+      "link": {
+        "title": "Der Link der mietenden Person",
+        "body": "Hier sieht die mietende Person die Bedingungen und zahlt den Mietpreis. Zeigen Sie ihn an der Theke oder schicken Sie ihn.",
+        "show": "Link anzeigen",
+        "showing": "Link wird erstellt…",
+        "scan": "Mit dem Telefon der mietenden Person scannen",
+        "copy": "Link kopieren",
+        "copied": "Kopiert.",
+        "email": "Per E-Mail an {email} senden",
+        "emailing": "Wird gesendet…",
+        "emailed": "Gesendet an {email}.",
+        "paid": "Der Mietpreis ist bezahlt. Derselbe Link zeigt die Miete und fragt bei der Abholung nach der Reservierung."
+      },
+      "letGo": {
+        "title": "Diese Buchung aufgeben",
+        "body": "Der Mietpreis wurde nicht bezahlt. Wenn Sie aufgeben, werden die Artikel für andere Mietende frei.",
+        "action": "Diese Buchung aufgeben",
+        "confirm": "Ja, aufgeben",
+        "cancel": "Behalten",
+        "done": "Aufgegeben."
+      },
+      "results": {
+        "paypal_not_connected": "Verbinden Sie zuerst das PayPal-Konto Ihres Verleihs. Mietende zahlen den Mietpreis darauf.",
+        "period_invalid": "Wählen Sie Datum und Uhrzeit für Abholung und Rückgabe.",
+        "period_reversed": "Die Rückgabe muss nach der Abholung liegen.",
+        "starts_in_past": "Die Abholung darf nicht in der Vergangenheit liegen.",
+        "too_long": "Eine Miete kann bis zu vier Wochen dauern.",
+        "too_far_ahead": "Buchungen sind bis zu einem Jahr im Voraus möglich.",
+        "no_items": "Wählen Sie mindestens einen Artikel.",
+        "too_many_lines": "Wählen Sie bis zu zehn Arten von Artikeln.",
+        "count_invalid": "Zeile {row} braucht 1 bis 10 Artikel.",
+        "not_available": "Von Zeile {row} sind für diese Daten nicht genug frei.",
+        "no_price_list": "Veröffentlichen Sie zuerst Ihre Preisliste. Mietende stimmen ihr bei der Buchung zu.",
+        "currency_unset": "Veröffentlichen Sie zuerst Ihre Preisliste.",
+        "not_found": "Diese Miete gehört nicht zu diesem Verleih.",
+        "no_email": "Diese Buchung hat keine E-Mail-Adresse, an die gesendet werden kann.",
+        "email_failed": "Die E-Mail konnte nicht gesendet werden. Zeigen Sie stattdessen den Link.",
+        "transition_not_allowed": "Nur eine Buchung, deren Mietpreis nicht bezahlt wurde, kann aufgegeben werden.",
+        "rows_mismatched": "Jede Zeile braucht einen Artikel und eine Zahl."
       }
     },
     "items": {
@@ -1491,21 +1615,7 @@
           "empty": "Noch nicht vermietet.",
           "period": "{start} bis {end}",
           "renterUnknown": "Mietende Person noch nicht bekannt",
-          "claim": "Forderung über {amount}",
-          "states": {
-            "pending_payment": "Mietpreis noch nicht bezahlt",
-            "booked": "Gebucht",
-            "awaiting_hold": "Wartet auf die Reservierung",
-            "ready": "Bereit zur Übergabe",
-            "out": "Verliehen",
-            "overdue": "Überfällig",
-            "returned": "Zurückgegeben",
-            "inspecting": "Wird geprüft",
-            "settling": "Wird abgerechnet",
-            "closed": "Abgeschlossen",
-            "cancelled": "Storniert",
-            "abandoned": "Nicht bezahlt, freigegeben"
-          }
+          "claim": "Forderung über {amount}"
         },
         "sessions": {
           "title": "Fotoaufnahmen",
@@ -1612,6 +1722,10 @@
     "invitation": {
       "subject": "Einladung zu {shop} auf Hold",
       "body": "{inviter} lädt Sie ein, bei {shop} mit Hold zu arbeiten, als {role}.\n\nÖffnen Sie diesen Link, um anzunehmen. Er gilt einmal, sieben Tage lang:\n{link}\n\nHold schickt Ihnen einen Code, um zu bestätigen, dass die Adresse Ihnen gehört. Wenn Sie diese E-Mail nicht erwartet haben, können Sie sie ignorieren."
+    },
+    "renterLink": {
+      "subject": "Ihre Miete bei {shop}: Mietpreis bezahlen",
+      "body": "Ihre Miete bei {shop} ist gebucht und wartet auf die Bezahlung.\n\nÖffnen Sie diesen Link, um zu sehen, was Sie mieten, den Mietpreis, die Reservierung bei der Abholung und die Schadenspreise des Verleihs. Dann bezahlen Sie den Mietpreis mit PayPal:\n\n{link}\n\nDer Link gehört nur Ihnen. Bewahren Sie ihn auf, bis die Miete abgeschlossen ist."
     }
   },
   "shell": {
@@ -1765,5 +1879,127 @@
   },
   "sample": {
     "label": "Beispiel"
+  },
+  "rentalStates": {
+    "pending_payment": "Wartet auf den Mietpreis",
+    "booked": "Mietpreis bezahlt",
+    "awaiting_hold": "Wartet auf die Reservierung",
+    "ready": "Bereit zur Übergabe",
+    "out": "Verliehen",
+    "overdue": "Überfällig",
+    "returned": "Zurückgegeben",
+    "inspecting": "Wird geprüft",
+    "settling": "Wird abgerechnet",
+    "closed": "Abgeschlossen",
+    "cancelled": "Storniert",
+    "abandoned": "Mietpreis nicht bezahlt, aufgegeben",
+    "lapsed": "Zahlungsfrist abgelaufen"
+  },
+  "booking": {
+    "when": "Wann",
+    "starts": "Abholung",
+    "ends": "Rückgabe",
+    "check": "Freie Artikel anzeigen",
+    "periodInvalid": "Die Rückgabe muss nach der Abholung liegen, innerhalb von vier Wochen.",
+    "what": "Was",
+    "perDay": "{amount} pro Tag",
+    "holdEach": "{amount} Reservierung je Artikel",
+    "free": "{count, plural, =0 {Keiner frei} one {# frei} other {# frei}}",
+    "fewer": "Ein {name} weniger",
+    "more": "Ein {name} mehr",
+    "countOf": "Anzahl {name}",
+    "nothingFree": "Für diese Daten ist nichts frei. Versuchen Sie andere Daten.",
+    "noItems": "Es gibt noch nichts zu mieten.",
+    "totals": "Diese Buchung",
+    "days": "{count, plural, one {# Tag} other {# Tage}}",
+    "fee": "Mietpreis, jetzt zu bezahlen",
+    "feeNote": "Wird bei der Buchung mit PayPal bezahlt.",
+    "hold": "Reservierung bei der Abholung",
+    "holdNote": "Wird auf dem eigenen PayPal-Konto der mietenden Person reserviert, wenn die Artikel abgeholt werden. Keine Abbuchung.",
+    "pickSomething": "Wählen Sie mindestens einen Artikel."
+  },
+  "renter": {
+    "title": "Ihre Miete bei {shop}",
+    "lead": "Was Sie mieten, was es kostet und wie die Reservierung funktioniert.",
+    "what": "Was Sie mieten",
+    "when": "Wann",
+    "period": "{start} bis {end}",
+    "line": "{count} × {name}",
+    "lineTerms": "{rate} pro Tag · {hold} Reservierung je Artikel",
+    "twoAmounts": "Zwei Beträge, getrennt gehalten",
+    "fee": "Mietpreis",
+    "feeNow": "Wird jetzt mit PayPal bezahlt.",
+    "feePaid": "Mit PayPal bezahlt.",
+    "hold": "Reservierung",
+    "holdBody": "Wird bei der Abholung auf Ihrem eigenen PayPal-Konto gesetzt. Das ist keine Abbuchung. Kommt alles im gleichen Zustand zurück, wird die Reservierung bei der Rückgabe sofort freigegeben.",
+    "holdRules": "Eine Person im Verleih genehmigt jede Abbuchung. Sie sehen jede Forderung, bevor sie abgebucht wird, mit Fotos und Preis, und können widersprechen. Sie haben {hours} Stunden Zeit zu antworten.",
+    "prices": "Die Schadenspreise des Verleihs",
+    "pricesLead": "Eine Forderung kann nur für das erhoben werden, was auf dieser Liste steht.",
+    "wear": "Was als normale Abnutzung gilt",
+    "wearLead": "Dafür wird Ihnen nie etwas berechnet.",
+    "pay": "{amount} mit PayPal bezahlen",
+    "paying": "PayPal wird geöffnet…",
+    "agree": "Mit der Zahlung stimmen Sie der Reservierung und den obigen Preisen zu.",
+    "status": {
+      "pending_payment": "Wartet auf Ihre Zahlung",
+      "booked": "Gebucht. Ihr Mietpreis ist bezahlt.",
+      "next": "Als Nächstes: Bei der Abholung genehmigen Sie die Reservierung auf Ihrem Telefon.",
+      "lapsed": "Die Zahlungsfrist ist abgelaufen, und die Artikel wurden von jemand anderem gebucht. Wenden Sie sich an den Verleih, um neu zu buchen.",
+      "abandoned": "Diese Buchung wurde aufgegeben. Wenden Sie sich an den Verleih, um neu zu buchen.",
+      "other": "Ihre Miete: {state}"
+    },
+    "paid": {
+      "title": "Ihre Zahlung wird bestätigt",
+      "checking": "Wird bei PayPal geprüft…",
+      "done": "Zahlung bestätigt. Ihre Miete ist gebucht.",
+      "back": "Zu Ihrer Miete",
+      "retry": "Erneut versuchen"
+    },
+    "invalid": {
+      "title": "Dieser Link ist nicht nutzbar",
+      "body": "Vielleicht wurde er falsch getippt, oder er ist abgelaufen. Bitten Sie den Verleih um einen neuen."
+    },
+    "results": {
+      "link_invalid": "Dieser Link ist nicht nutzbar. Bitten Sie den Verleih um einen neuen.",
+      "scope": "Das kann dieser Link nicht.",
+      "rate_limited": "Zu viele Versuche aus diesem Netzwerk. Warten Sie eine Minute und versuchen Sie es erneut.",
+      "not_pending": "Diese Buchung wartet auf keine Zahlung.",
+      "payment_lapsed": "Die Zahlungsfrist ist abgelaufen, und die Artikel wurden von jemand anderem gebucht.",
+      "paypal_not_connected": "Der Verleih kann noch keine Zahlungen annehmen. Wenden Sie sich an den Verleih.",
+      "paypal_unavailable": "PayPal war nicht erreichbar. Es wurde nichts abgebucht. Versuchen Sie es gleich noch einmal.",
+      "not_approved": "PayPal hat Ihre Genehmigung noch nicht bestätigt. Es wurde nichts abgebucht.",
+      "declined": "PayPal hat die Zahlung abgelehnt. Es wurde nichts abgebucht.",
+      "order_mismatch": "Diese Zahlung gehört nicht zu dieser Miete. Es wurde nichts abgebucht.",
+      "amount_mismatch": "Der Betrag bei PayPal passte nicht zum Mietpreis. Der Verleih wurde informiert.",
+      "not_completed": "PayPal hat die Zahlung noch nicht abgeschlossen.",
+      "not_found": "Diese Miete gibt es nicht mehr."
+    },
+    "orderDescription": "{shop}: {items}, {days, plural, one {# Tag} other {# Tage}}"
+  },
+  "shopPage": {
+    "label": "Online buchen",
+    "title": "Bei {shop} mieten",
+    "lead": "Wählen Sie Ihre Daten und was Sie möchten. Den Mietpreis zahlen Sie jetzt. Die Reservierung wird bei der Abholung gesetzt und ist keine Abbuchung.",
+    "book": "Buchen und Mietpreis zahlen",
+    "booking": "Wird gebucht…",
+    "closed": {
+      "title": "Noch keine Online-Buchungen",
+      "body": "Dieser Verleih hat die Online-Buchung nicht eingerichtet. Wenden Sie sich direkt an den Verleih."
+    },
+    "results": {
+      "rate_limited": "Zu viele Buchungen aus diesem Netzwerk. Warten Sie einige Minuten und versuchen Sie es erneut.",
+      "not_found": "Diesen Verleih gibt es nicht."
+    },
+    "poweredBy": "Buchungen und Reservierungen von Hold, mit PayPal."
+  },
+  "simulatedPayPal": {
+    "label": "Simuliertes PayPal",
+    "notice": "Testumgebung. Es fließt kein Geld. Diese Seite ersetzt die Genehmigungsseite von PayPal.",
+    "title": "Zahlung genehmigen",
+    "amount": "Betrag",
+    "for": "Für",
+    "approve": "Genehmigen",
+    "cancel": "Abbrechen und zurück",
+    "unknown": "Diese Bestellung ist unbekannt."
   }
 }

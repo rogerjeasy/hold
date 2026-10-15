@@ -17,11 +17,18 @@ export type RoutePath = (typeof routes)[RouteKey]
 // check walks without signing in.
 export const shopRoutes = {
   home: '/shop',
+  rentals: '/shop/rentals',
   items: '/shop/items',
   security: '/shop/security',
   staff: '/shop/staff',
   prices: '/shop/prices',
   paypal: '/shop/paypal',
+} as const
+
+// Pages reached from the rentals page rather than from the menu.
+export const rentalRoutes = {
+  new: '/shop/rentals/new',
+  rental: (rentalId: string) => `/shop/rentals/${rentalId}`,
 } as const
 
 // Pages reached from the items page rather than from the menu, some named by the row they show.
@@ -34,4 +41,8 @@ export const itemRoutes = {
 // Pages reached by a link from an email, named by a token in their path. Not in the public list either.
 export const linkRoutes = {
   invite: '/invite',
+  // A renter's own rental, named by a signed token: /r/{token}.
+  renter: '/r',
+  // A shop's own page for renters, named by its address: /s/{slug}.
+  shopPage: '/s',
 } as const

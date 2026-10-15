@@ -1153,6 +1153,7 @@
     "nav": {
       "label": "Shop pages",
       "home": "Today",
+      "rentals": "Rentals",
       "items": "Items",
       "security": "Security",
       "staff": "Staff",
@@ -1293,6 +1294,129 @@
         "loss": "Loss",
         "lateness": "Late return",
         "cleaning": "Cleaning"
+      }
+    },
+    "rentals": {
+      "title": "Rentals",
+      "lead": "Every booking, from the fee to the settled hold.",
+      "new": "New rental",
+      "readOnly": "Only staff can book rentals.",
+      "empty": {
+        "title": "No rentals yet",
+        "body": "Book one here for a renter at the counter or on the phone, or share your shop's page so renters book themselves."
+      },
+      "shopPage": "Your shop's page",
+      "shopPageNote": "Renters book here themselves:",
+      "filter": {
+        "label": "Show rentals",
+        "all": "All",
+        "waiting": "Waiting for the fee",
+        "booked": "Booked",
+        "out": "Out",
+        "returned": "Returned",
+        "done": "Done",
+        "none": "No rentals here."
+      },
+      "columns": {
+        "who": "Renter",
+        "what": "Items",
+        "when": "When",
+        "fee": "Fee",
+        "hold": "Hold",
+        "state": "Where it stands"
+      },
+      "notKnown": "Not paid yet",
+      "fromShopPage": "Booked on the shop's page",
+      "period": "{start} to {end}",
+      "needsPayPal": {
+        "title": "Connect PayPal first",
+        "body": "Renters pay the fee into your shop's PayPal account, so bookings need it.",
+        "action": "Go to PayPal"
+      },
+      "needsItems": {
+        "title": "Add your items first",
+        "body": "A booking is for items of your item types.",
+        "action": "Go to items"
+      },
+      "form": {
+        "title": "New rental",
+        "back": "All rentals",
+        "renter": "For whom",
+        "renterHelp": "Optional. With an email, the renter is sent the link to pay. The renter's identity comes from PayPal when they pay.",
+        "name": "Name",
+        "email": "Email",
+        "language": "The renter's language",
+        "book": "Book",
+        "booking": "Booking…",
+        "booked": "Booked."
+      },
+      "detail": {
+        "label": "Rental",
+        "back": "All rentals",
+        "terms": "Terms",
+        "when": "When",
+        "items": "Items",
+        "fee": "Rental fee",
+        "hold": "Hold at pickup",
+        "prices": "Damage prices",
+        "pricesVersion": "Version {version}",
+        "bookedThrough": "Booked",
+        "staff": "By staff",
+        "shopPage": "On the shop's page",
+        "contact": "Contact",
+        "renter": "Renter, as PayPal names them",
+        "progress": "Progress",
+        "steps": {
+          "booked": "Booked",
+          "paid": "Fee paid",
+          "hold": "Hold placed",
+          "out": "Handed over",
+          "returned": "Returned",
+          "settled": "Settled"
+        },
+        "done": "Done",
+        "toDo": "Not yet",
+        "lapsedNote": "The time to pay ran out, so the items are no longer kept. The renter can still pay while nobody else has booked them."
+      },
+      "link": {
+        "title": "The renter's link",
+        "body": "The renter sees the terms and pays the fee here. Show it at the counter, or send it.",
+        "show": "Show the link",
+        "showing": "Making a link…",
+        "scan": "Scan with the renter's phone",
+        "copy": "Copy the link",
+        "copied": "Copied.",
+        "email": "Email it to {email}",
+        "emailing": "Sending…",
+        "emailed": "Sent to {email}.",
+        "paid": "The fee is paid. The same link shows the rental and, at pickup, asks for the hold."
+      },
+      "letGo": {
+        "title": "Let go of this booking",
+        "body": "The fee was not paid. Letting go frees the items for other renters.",
+        "action": "Let go of this booking",
+        "confirm": "Yes, let it go",
+        "cancel": "Keep it",
+        "done": "Let go."
+      },
+      "results": {
+        "paypal_not_connected": "Connect your shop's PayPal account first. Renters pay the fee into it.",
+        "period_invalid": "Choose a pick-up and a return date and time.",
+        "period_reversed": "The return must come after the pick-up.",
+        "starts_in_past": "The pick-up cannot be in the past.",
+        "too_long": "A rental can last up to four weeks.",
+        "too_far_ahead": "Bookings open up to a year ahead.",
+        "no_items": "Choose at least one item.",
+        "too_many_lines": "Choose up to ten kinds of item.",
+        "count_invalid": "Line {row} needs from 1 to 10 items.",
+        "not_available": "Not enough of line {row} are free for these dates.",
+        "no_price_list": "Publish your price list first. Renters agree to it when they book.",
+        "currency_unset": "Publish your price list first.",
+        "not_found": "That rental is not in this shop.",
+        "no_email": "This booking has no email to send to.",
+        "email_failed": "The email could not be sent. Show the link instead.",
+        "transition_not_allowed": "Only a booking whose fee was not paid can be let go.",
+        "rows_mismatched": "Every line needs an item and a number."
       }
     },
     "items": {
@@ -1491,21 +1615,7 @@
           "empty": "Not rented yet.",
           "period": "{start} to {end}",
           "renterUnknown": "Renter not known yet",
-          "claim": "Claim of {amount}",
-          "states": {
-            "pending_payment": "Fee not paid yet",
-            "booked": "Booked",
-            "awaiting_hold": "Waiting for the hold",
-            "ready": "Ready for handover",
-            "out": "Out",
-            "overdue": "Overdue",
-            "returned": "Returned",
-            "inspecting": "Being checked",
-            "settling": "Settling",
-            "closed": "Closed",
-            "cancelled": "Cancelled",
-            "abandoned": "Not paid, released"
-          }
+          "claim": "Claim of {amount}"
         },
         "sessions": {
           "title": "Photo sessions",
@@ -1612,6 +1722,10 @@
     "invitation": {
       "subject": "You are invited to {shop} on Hold",
       "body": "{inviter} invites you to work at {shop} on Hold, as {role}.\n\nOpen this link to accept. It works once, for seven days:\n{link}\n\nHold will email you a code to confirm the address is yours. If you did not expect this, you can ignore it."
+    },
+    "renterLink": {
+      "subject": "Your rental at {shop}: pay the fee",
+      "body": "Your rental at {shop} is booked and waits for its fee.\n\nOpen this link to see what you rent, the fee, the hold placed when you collect it, and the shop's damage prices. Then pay the fee with PayPal:\n\n{link}\n\nThe link is yours alone. Keep it until the rental is settled."
     }
   },
   "shell": {
@@ -1765,5 +1879,127 @@
   },
   "sample": {
     "label": "Sample"
+  },
+  "rentalStates": {
+    "pending_payment": "Waiting for the fee",
+    "booked": "Fee paid",
+    "awaiting_hold": "Waiting for the hold",
+    "ready": "Ready for handover",
+    "out": "Out",
+    "overdue": "Overdue",
+    "returned": "Returned",
+    "inspecting": "Being checked",
+    "settling": "Settling",
+    "closed": "Closed",
+    "cancelled": "Cancelled",
+    "abandoned": "Fee not paid, let go",
+    "lapsed": "Time to pay ran out"
+  },
+  "booking": {
+    "when": "When",
+    "starts": "Pick up",
+    "ends": "Bring back",
+    "check": "Show what is free",
+    "periodInvalid": "Bring back after picking up, within four weeks.",
+    "what": "What",
+    "perDay": "{amount} a day",
+    "holdEach": "{amount} hold each",
+    "free": "{count, plural, =0 {None free} one {# free} other {# free}}",
+    "fewer": "One fewer {name}",
+    "more": "One more {name}",
+    "countOf": "Number of {name}",
+    "nothingFree": "Nothing is free for these dates. Try other dates.",
+    "noItems": "There is nothing to rent yet.",
+    "totals": "This booking",
+    "days": "{count, plural, one {# day} other {# days}}",
+    "fee": "Rental fee, paid now",
+    "feeNote": "Paid with PayPal when the booking is made.",
+    "hold": "Hold at pickup",
+    "holdNote": "Reserved in the renter's own PayPal account when the items are collected. Not a charge.",
+    "pickSomething": "Choose at least one item."
+  },
+  "renter": {
+    "title": "Your rental at {shop}",
+    "lead": "What you rent, what it costs, and how the hold works.",
+    "what": "What you rent",
+    "when": "When",
+    "period": "{start} to {end}",
+    "line": "{count} × {name}",
+    "lineTerms": "{rate} a day · {hold} hold each",
+    "twoAmounts": "Two amounts, kept apart",
+    "fee": "Rental fee",
+    "feeNow": "Paid now with PayPal.",
+    "feePaid": "Paid with PayPal.",
+    "hold": "Hold",
+    "holdBody": "Placed when you collect, in your own PayPal account. This is not a charge. If everything comes back as it left, the hold is released the moment you return it.",
+    "holdRules": "A person at the shop approves every charge. You see any claim before it is taken, with the photographs and the price, and you can disagree. You have {hours} hours to reply.",
+    "prices": "The shop's damage prices",
+    "pricesLead": "A claim can only be for what is on this list.",
+    "wear": "What counts as ordinary wear",
+    "wearLead": "You are never charged for this.",
+    "pay": "Pay {amount} with PayPal",
+    "paying": "Opening PayPal…",
+    "agree": "By paying, you agree to the hold and the prices above.",
+    "status": {
+      "pending_payment": "Waiting for your payment",
+      "booked": "Booked. Your fee is paid.",
+      "next": "Next: at pickup, you approve the hold on your phone.",
+      "lapsed": "The time to pay ran out, and the items were booked by someone else. Contact the shop to book again.",
+      "abandoned": "This booking was let go. Contact the shop to book again.",
+      "other": "Your rental: {state}"
+    },
+    "paid": {
+      "title": "Confirming your payment",
+      "checking": "Checking with PayPal…",
+      "done": "Payment confirmed. Your rental is booked.",
+      "back": "See your rental",
+      "retry": "Try again"
+    },
+    "invalid": {
+      "title": "This link cannot be used",
+      "body": "It may be mistyped, or it has ended. Ask the shop for a new one."
+    },
+    "results": {
+      "link_invalid": "This link cannot be used. Ask the shop for a new one.",
+      "scope": "This link cannot do that.",
+      "rate_limited": "Too many tries from this network. Wait a minute and try again.",
+      "not_pending": "This booking is not waiting for a payment.",
+      "payment_lapsed": "The time to pay ran out, and the items were booked by someone else.",
+      "paypal_not_connected": "The shop cannot take payments yet. Contact the shop.",
+      "paypal_unavailable": "PayPal could not be reached. Nothing was charged. Try again in a moment.",
+      "not_approved": "PayPal has not confirmed your approval yet. Nothing was charged.",
+      "declined": "PayPal declined the payment. Nothing was charged.",
+      "order_mismatch": "This payment does not belong to this rental. Nothing was charged.",
+      "amount_mismatch": "PayPal's amount did not match the fee. The shop has been told.",
+      "not_completed": "PayPal has not completed the payment yet.",
+      "not_found": "This rental no longer exists."
+    },
+    "orderDescription": "{shop}: {items}, {days, plural, one {# day} other {# days}}"
+  },
+  "shopPage": {
+    "label": "Book online",
+    "title": "Rent from {shop}",
+    "lead": "Choose your dates and what you want. You pay the rental fee now. The hold is placed when you collect, and it is not a charge.",
+    "book": "Book and pay the fee",
+    "booking": "Booking…",
+    "closed": {
+      "title": "Not taking bookings online yet",
+      "body": "This shop has not set up online booking. Contact the shop directly."
+    },
+    "results": {
+      "rate_limited": "Too many bookings from this network. Wait a few minutes and try again.",
+      "not_found": "This shop does not exist."
+    },
+    "poweredBy": "Bookings and holds by Hold, with PayPal."
+  },
+  "simulatedPayPal": {
+    "label": "Simulated PayPal",
+    "notice": "Test environment. No money moves. This page stands in for PayPal's approval page.",
+    "title": "Approve the payment",
+    "amount": "Amount",
+    "for": "For",
+    "approve": "Approve",
+    "cancel": "Cancel and go back",
+    "unknown": "This order is not known."
   }
 }

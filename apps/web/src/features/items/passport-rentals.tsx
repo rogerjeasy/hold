@@ -10,6 +10,7 @@ import { formatMoney } from '@/lib/money'
 // Every rental the item has been in, newest first.
 export function PassportRentals({ rentals, clock }: { rentals: readonly PassportRental[]; clock: ShopClock }) {
   const t = useTranslations('shop.items.passport.rentals')
+  const states = useTranslations('rentalStates')
   const format = useShopFormat(clock)
   const locale = useLocale()
   return (
@@ -28,7 +29,7 @@ export function PassportRentals({ rentals, clock }: { rentals: readonly Passport
                 <p className="text-sm text-muted-foreground">{t('period', { start: format.day(rental.startsAt), end: format.day(rental.endsAt) })}</p>
               </div>
               <div className="text-sm sm:text-right">
-                <p className="font-semibold">{t(`states.${rental.state}`)}</p>
+                <p className="font-semibold">{states(rental.state)}</p>
                 {rental.claim === undefined ? null : <p className="text-muted-foreground">{t('claim', { amount: formatMoney(money(rental.claim.totalCents, rental.claim.currency), locale) })}</p>}
               </div>
             </li>

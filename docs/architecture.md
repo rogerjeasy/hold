@@ -277,7 +277,7 @@ Every table except `users` and `renters` carries a `shop_id`.
 | Table | Key contents |
 |---|---|
 | `users` | Cognito subject, contact details, language |
-| `shops` | Name, timezone, currency, approval thresholds, reply period |
+| `shops` | Name, address for renters (`slug`), timezone, currency, approval thresholds, reply period |
 | `locations` | Address, opening hours |
 | `staff_roles` | User, shop, role, approval limit |
 | `paypal_accounts` | Shop, merchant ID, credential reference, webhook ID, mode |
@@ -288,8 +288,8 @@ Every table except `users` and `renters` carries a `shop_id`.
 | `price_entries` | Code, description, amount, category |
 | `wear_policies` | Version, rules |
 | `renters` | PayPal payer ID, email, name, language |
-| `rentals` | Renter, period, fee, agreed price list and wear policy versions, state, whether it is a simulated sample |
-| `rental_items` | Rental, item, accessories out, accessories back |
+| `rentals` | Renter, period, fee, agreed hold, agreed price list and wear policy versions, state, the contact staff booked for and the renter's language, whether it was booked by staff or on the shop's page, whether it is a simulated sample |
+| `rental_items` | Rental, item, the day rate and hold agreed for it at booking, accessories out, accessories back |
 | `holds` | Rental, reserved amount, placement strategy, state, current authorization |
 | `authorizations` | Hold, PayPal authorization ID, amount, created, assured until, valid until, state |
 | `capture_sessions` | Rental item, kind, the photo plan used, actor, started, completed, manifest fingerprint |
@@ -301,7 +301,7 @@ Every table except `users` and `renters` carries a `shop_id`.
 | `claim_lines` | Claim, finding, price entry, amount, source |
 | `claim_replies` | Claim, renter decision, comment, added photos |
 | `approvals` | Subject, staff member, decision, changes made, method |
-| `executions` | Action, idempotency key, PayPal resource IDs, state, attempts |
+| `executions` | Rental, hold (absent for the fee), action, idempotency key, amount, PayPal resource IDs, state, attempts |
 | `paypal_events` | PayPal event ID, type, raw body, headers, verification state, processing state |
 | `money_events` | Rental, kind, amount, PayPal reference, time. Append-only. |
 | `invoices` | Rental, PayPal invoice ID, amount, state |
@@ -312,7 +312,7 @@ Every table except `users` and `renters` carries a `shop_id`.
 | `outbox` | Pending messages written in the same transaction as state changes |
 | `audit_log` | Who did what, when, from where |
 
-**What the migrations hold so far.** Every table above, with `rentals.simulated` added in `0009` and the item columns in `0010`, except `locations`, `shipments` and `disputes`, which arrive with the features that use them. The schema is in `packages/db/src/schema`, the migrations in `packages/db/migrations`.
+**What the migrations hold so far.** Every table above, with `rentals.simulated` added in `0009`, the item columns in `0010` and the booking columns in `0011`, except `locations`, `shipments` and `disputes`, which arrive with the features that use them. The schema is in `packages/db/src/schema`, the migrations in `packages/db/migrations`.
 
 **Tables added by the extensions.** `mandates`, `proposals`, `exceptions`, `ops_runs`, `eval_runs`, `finding_outcomes`, `rental_outcomes`, `trust_ladders`, `trust_rungs`, `renter_consents`, `quotes`, `agent_sessions`, `negotiations`, `negotiation_moves` and `incidents`. Their contents are listed in `extensions.md` section 4.6.
 
@@ -329,6 +329,19 @@ The rules are plain code in `packages/domain` (`item-type.ts`, `item.ts`, `photo
 - **Where an item stands** is not stored. It is read from its status and the rental that binds it (`bindingRental`): `available`, `booked`, `out`, `overdue`, `checking` (returned, being compared), `in_repair` or `retired`.
 - **Who may change what.** The owner or a manager creates and edits types, with a passkey where their role needs one, because the amounts are what renters are held and charged. They also add and rename items, which needs no passkey. Counter staff may send an item to repair and back, since they see a flat tyre first. Only the owner or a manager may retire an item. Read-only members see everything and change nothing.
 - **Sample types and items** made for a demonstration (section 20.3) are marked `simulated`, stand apart from the unique names, and cannot be changed.
+
+### 6.5 Bookings and the fee
+
+The rules are plain code in `packages/domain/src/booking.ts`. The tables are written by `booking-repository.ts`, `renter-repository.ts` and `fee-repository.ts` in `packages/db`.
+
+- **Two ways to book, one booking.** Staff book at the counter or on the phone (`/shop/rentals/new`), with an optional contact name and email. A renter books themselves on the shop's own page (`/s/{slug}`), with nobody signed in. Both choose a period on the shop's clock and a count of each item type, and both end at the renter's link, where the fee is paid. `rentals.booked_through` records which.
+- **The amounts come from the item types.** The fee is each item's day rate times the days, where each started 24 hours is a day and a rental is at least one. The hold is the sum of each item's hold. Both are stored on the rental, and each item's agreed day rate and hold on its `rental_items` row, so a later change to a type changes no booking. No form sends an amount.
+- **Limits.** A rental lasts at most 28 days, so the hold placed at pickup outlives it, its return and a claim's reply. It may start up to 15 minutes in the past, for a renter at the counter, and up to a year ahead. Up to ten kinds of item, ten of each.
+- **Which items.** The booking takes specific items, the first free ones of each type by label. An item is free for a period unless it is in repair or retired, or a rental that still needs it overlaps the period. An unpaid booking keeps its items for 15 minutes (`PENDING_PAYMENT_MINUTES`). An item out, or back and being checked, is kept until now at least; an overdue one until it comes back. The candidate items are locked while the booking is written, so two bookings made at once cannot take the same item.
+- **The renter's link.** Each booking issues a link with the scopes `view` and `pay` (section 12.3). Staff can show a new link as a QR code at any time, or email it to the contact. Each showing makes a new link, since only fingerprints are kept.
+- **Paying the fee.** The renter's link page shows what they rent, the fee and the hold apart, the price list and wear policy they agree to, and the reply period. Paying creates an order with intent to capture in the shop's own PayPal account, for the stored fee, and sends the renter to PayPal. An order already awaiting approval is reused. PayPal sends the renter back to `/r/{token}/paid`, which changes nothing on arrival and confirms by a POST: the order is read back and must be approved and must be the one this rental started; then the execution is recorded, the order captured with its key, and the order read back again. Only that read-back books the rental (section 7.6).
+- **After the time to pay.** A booking past its 15 minutes no longer keeps its items, but its renter may still pay while nobody else has taken them. Staff can let an unpaid booking go (`abandoned`). A paid booking is not cancelled here, since that would need its fee refunded.
+- **Who the renter is.** The payer PayPal names on the capture, through `hold_renter_for_payer`. Until then a rental shows the contact staff typed, or "not paid yet".
 ---
 
 ## 7. The hold core
@@ -536,6 +549,8 @@ Acting on a hold involves a database and an outside API, which cannot share a tr
 3. The worker calls PayPal with the idempotency key.
 4. The worker records PayPal's reply and marks the execution submitted.
 5. The execution is confirmed only when the matching PayPal event is verified, or the resource is read back from PayPal.
+
+**The rental fee** follows the same steps with the action `fee_capture`, which names the rental and no hold. Until the worker runs executions, the renter's request that wrote the execution and its outbox message goes on to call PayPal and record the read-back itself (`apps/web/src/server/fee-payment.ts`); the outbox message is there for the worker to finish it if that request does not. The capture's key is fixed by the rental and its order, so repeating it captures nothing twice, and the money log takes the capture's identifier once. PayPal's amount must equal the stored fee to the cent, or the execution fails and nothing is booked.
 
 **Idempotency at each layer**
 
@@ -1179,13 +1194,15 @@ Renters have no account. They act through links.
 | Property | How |
 |---|---|
 | **Bound to one rental** | The link's token names one rental and nothing else |
-| **Signed** | The token is signed by Hold. A changed token is rejected. |
+| **Signed** | The token is 32 random bytes and a 16-byte HMAC-SHA-256 of them, with a key derived from the app's secret for links alone (`packages/auth/src/renter/renter-link.ts`). A changed token is rejected before the database is asked. |
 | **Expiring** | Each link has an end date tied to the rental's life |
-| **Scoped** | View, confirm condition, extend, accept, contest. Each link carries only the scopes it needs. |
+| **Scoped** | View, pay, confirm condition, extend, accept, contest. Each link carries only the scopes it needs. A booking's link carries view and pay. |
 | **Revocable** | Only the token's fingerprint is stored. Removing it ends the link. |
 | **Stepped up for money decisions** | Accepting or contesting a claim requires a one-time code sent to the email PayPal provided |
 
 **Who the renter is.** The renter's identity is the PayPal payer who approved the order. Their payer ID, name and email come from PayPal and are not typed in.
+
+**How a link is checked.** Every renter request and page goes through `renterAction` or `renterAccess` in `apps/web/src/server/renter-access.ts`: the network is rate limited, the token's signature is checked, its link is read by fingerprint through `hold_renter_link` before any shop is chosen, the link must be live and carry the scope, and the work runs in transactions bound to the link's shop with no person named. A changed, unknown, expired and revoked link get the same answer. Renter pages are not indexed and send no referrer, so the token in their address never reaches another site.
 
 ### 12.4 Connecting the shop's PayPal account
 
@@ -1233,7 +1250,8 @@ Served by `web`. Each requires a valid signed link.
 | Route | Purpose |
 |---|---|
 | `/r/{token}` | The rental: status, hold, price list |
-| `/r/{token}/pay` | Pay the fee or approve the hold |
+| `/r/{token}/pay` | Approve the hold at pickup. The fee is paid from `/r/{token}` itself. |
+| `/r/{token}/paid` | Where PayPal returns the renter. Confirms the fee by a POST, never on arrival. |
 | `/r/{token}/condition` | Review and confirm the handover report |
 | `/r/{token}/session` | Guided photographs for shipped rentals |
 | `/r/{token}/claim` | See a claim, accept or contest it |
@@ -1273,6 +1291,8 @@ No tool takes an amount, and none can capture a hold. Accepting or contesting a 
 | `/sign-in` | Sign-in for owners and staff: a work email, then a code by email. It tells staff they are invited and renters that they need no account |
 | `/sign-up` | Sign-up for a shop's owner: name, shop name and work email, and the three steps that follow |
 | `/demo` | The demo shop's entry page. Until the demo is deployed it says so and describes the three sample rentals, the three people to sign in as, and what is real and what is simulated |
+| `/s/{slug}` | A shop's own page: a renter chooses dates and items, sees the prices and wear policy, and books with nobody signed in. Open only once the shop has PayPal connected, a price list and items. Bookings from it are limited per network (`apps/web/src/server/shop-page-access.ts`). |
+| `/simulated-paypal/{order}` | In the test environment only: stands in for PayPal's approval page, says so, and sends the renter back to the order's own return path. Everywhere else it is 404. |
 | `/accuracy` | The comparison's measured accuracy, with counts |
 | `/verify` | Checks a Clean Record credential |
 | `/.well-known/jwks.json` | The public key that credentials are signed with |
@@ -1295,6 +1315,9 @@ Served by `web` under `/shop`. Each page asks `shopAccess` itself; the frame aro
 | Route | Purpose |
 |---|---|
 | `/shop` | Today: the day's figures (items out, due back, held on PayPal, claims to decide), what needs a decision, the handovers and returns at the counter with a line for now, the holds by where they stand, the month so far from the money log, and the latest audit lines. Until the shop is set up, its setup steps. |
+| `/shop/rentals` | Every rental, newest first: who, items, period, fee, hold and where it stands, filtered by part of its life (`?show=`). The address of the shop's own page. |
+| `/shop/rentals/new` | Booking at the counter or on the phone: dates on the shop's clock in the address, then a counter per item type up to what is free, the fee and hold as they add up, and an optional contact who is emailed the link. Needs PayPal connected and items. |
+| `/shop/rentals/{id}` | One rental: its progress from booking to settlement, its terms, the renter's link as a QR code or by email, and letting go of an unpaid booking. |
 | `/shop/items` | The item types, each with its terms, kit, photo plan and items, and where each item stands. Four figures on top: items, available, out now, in repair. Filters by standing, each its own address (`?show=`). |
 | `/shop/items/new`, `/shop/items/types/{id}` | Creating and editing an item type, with its kit and its photo plan. The plan starts from the suggestion for the kind. |
 | `/shop/items/{id}` | The item passport (section 9.4): where it is, its rentals, its known marks, its chain of photo sessions, its photo plan, its details and its status. Another shop's item answers 404. |
@@ -1302,7 +1325,7 @@ Served by `web` under `/shop`. Each page asks `shopAccess` itself; the frame aro
 
 - **One frame.** `app/[locale]/shop/layout.tsx` puts every shop page in the shop's frame (`features/shell`): a dark sidebar with the shop switcher, the menu, PayPal's state and mode, the language and theme, and the account menu. It is a rail of icons from `md` to `lg` and a top bar with a menu sheet below `md`. The public pages keep the site's header and footer through the `(site)` route group, which is not part of their address.
 - **What the page reads.** `shopToday` in `packages/db` returns plain counts and rows. Where a hold stands (assured, valid, ending) and the order of the decisions come from `holdStanding` and `holdDay` in the domain. Times show on the shop's clock (`shopDay`), whoever reads them.
-- **Items** follow Today in the menu. **Rentals, holds and claims** join the menu before them as their own pages are built with the spine.
+- **Rentals** and **Items** follow Today in the menu. **Holds and claims** join the menu after Rentals as their own pages are built with the spine.
 - **After the extensions,** `/shop/calendar`, the rental calendar on Bryntum Scheduler, and `/shop/insights`, the owner's dashboard on AG Studio, join the menu. `extensions.md` section 12.5.
 
 ---
@@ -1444,6 +1467,10 @@ Every queue has a dead-letter queue and an alarm on it.
 | **A forged webhook** | Signature verification and reading the resource back from PayPal. |
 | **A replayed request** | Idempotency keys at every layer. |
 | **One shop reads another's data** | Shop checks in the service and row-level security in the database. |
+| **A renter link leaks through the address bar** | Renter pages send no referrer and are not indexed. Each link is bound to one rental and its scopes, expires 60 days after the rental, and cannot move money without the renter approving in PayPal. |
+| **Bookings are made to tie up a shop's items** | Bookings on a shop's page are limited to ten per network in fifteen minutes, and an unpaid booking keeps its items for fifteen minutes only. Tested in `booking-flow.test.ts`. |
+| **A renter pays one rental with another's order, or a changed amount** | The fee is read from the rental, never from the renter. A capture is made only for the order this rental started, after PayPal shows it approved, and PayPal's captured amount must equal the stored fee or nothing is booked. Tested in `booking-flow.test.ts` and `booking-repository.test.ts`. |
+| **Every server function skips a check** | Staff functions go through `shopAction`, renter functions through `renterAction`, shop-page functions through `shopPageAction`. A test fails on any export that does not. |
 | **A row is tied to another shop's row by its id** | PostgreSQL checks a foreign key without row-level security, so a guessed id would pass it. Every repository function reads the row it refers to inside the caller's shop first, and answers "not found" when it is not there. Tested in `item-repository.test.ts` and `items.spec.ts`. |
 | **A credential leaks** | Secrets only in Secrets Manager. Each service has its own minimal IAM role. |
 | **A hold lapses unnoticed** | Hold upkeep, the at-risk state, alarms and reconciliation. |

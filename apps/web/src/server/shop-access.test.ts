@@ -43,15 +43,19 @@ beforeEach(() => {
 
 const invite = { email: 'staff@douro.example', role: 'counter_staff', approvalLimit: '', locale: 'en' }
 
-describe('every shop action', () => {
-  it('is built by shopAction, in every feature, so none skips the checks', async () => {
+describe('every server function', () => {
+  it('is built by the wrapper for its caller, in every feature, so none skips the checks', async () => {
+    const { isRenterAction } = await import('./renter-access')
+    const { isShopPageAction } = await import('./shop-page-access')
+    // A renter acts through a link, someone on a shop's page through its address, everyone else as staff of a shop.
     // Signing in and signing up come before any shop, so the auth feature's actions are the one exception.
+    const wrapperFor = (file: string) => (file.includes('/renter/') ? isRenterAction : file.includes('/shop-page/') ? isShopPageAction : isShopAction)
     const files = import.meta.glob<Record<string, unknown>>(['/src/features/*/actions.ts', '!/src/features/auth/actions.ts'])
-    expect(Object.keys(files)).toEqual(expect.arrayContaining(['/src/features/shop/actions.ts', '/src/features/items/actions.ts']))
+    expect(Object.keys(files)).toEqual(expect.arrayContaining(['/src/features/shop/actions.ts', '/src/features/items/actions.ts', '/src/features/rentals/actions.ts', '/src/features/renter/actions.ts', '/src/features/shop-page/actions.ts']))
     for (const [file, load] of Object.entries(files)) {
       const exported = Object.entries(await load())
       expect(exported.length, file).toBeGreaterThan(0)
-      expect(exported.filter(([, value]) => !isShopAction(value)).map(([name]) => `${file} ${name}`)).toEqual([])
+      expect(exported.filter(([, value]) => !wrapperFor(file)(value)).map(([name]) => `${file} ${name}`)).toEqual([])
     }
   })
 })

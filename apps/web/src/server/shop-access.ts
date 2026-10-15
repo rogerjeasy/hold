@@ -1,13 +1,13 @@
 import 'server-only'
 import { money, needsStrongSignIn } from '@hold/domain'
 import type { StaffRole } from '@hold/domain'
-import { auditLog, findPerson, inShop, shopSettings, staffRoleOf } from '@hold/db'
+import { findPerson, inShop, shopSettings, staffRoleOf } from '@hold/db'
 import type { Person, ShopSettings, Transaction } from '@hold/db'
-import { revalidatePath } from 'next/cache'
 import { cache } from 'react'
 import { z } from 'zod'
 import { chosenShopId, readAccessToken, sessionFactor } from '@/features/auth/session-cookies'
 import type { SignInFactor } from '@/features/auth/session-cookies'
+import { actInScope, failedFields, formObject, Refusal } from './action'
 import { getServices } from './services'
 
 // The one way into a shop, for every signed-in page and every server function that changes a shop. It does the
@@ -83,23 +83,6 @@ export type ShopActionSpec<Input> = {
   readonly input: z.ZodType<Input>
 }
 
-// What an action hands back when it refuses on its own terms, such as a currency that is already fixed. Nothing it
-// wrote is kept: the transaction is rolled back.
-export class Refusal {
-  readonly reason: string
-  constructor(reason: string) {
-    this.reason = reason
-  }
-}
-
-class RolledBack extends Error {
-  readonly refusal: Refusal
-  constructor(refusal: Refusal) {
-    super(refusal.reason)
-    this.refusal = refusal
-  }
-}
-
 // Every server function built here. A test checks that each shop action file exports nothing else.
 const SHOP_ACTIONS = new WeakSet<object>()
 
@@ -119,52 +102,16 @@ export function shopAction<Input, Output>(
     if (!spec.roles.includes(context.role)) return { ok: false, failure: 'role' }
     if (spec.needsPasskey && context.passkeyNeeded) return { ok: false, failure: 'passkey_needed' }
     const parsed = spec.input.safeParse(formObject(data))
-    if (!parsed.success) return { ok: false, failure: 'invalid', fields: [...new Set(parsed.error.issues.map((issue) => issue.path.join('.')))] }
-    const { database } = await getServices()
+    if (!parsed.success) return { ok: false, failure: 'invalid', fields: failedFields(parsed.error) }
     const scope = { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId } as const
-    try {
-      const value = await inShop(database, scope, async (transaction) => {
-        const result = await act(context, parsed.data, transaction)
-        if (result instanceof Refusal) throw new RolledBack(result)
-        await transaction.insert(auditLog).values({
-          shopId: context.shop.id,
-          actorKind: 'person',
-          actorId: context.person.userId,
-          action: spec.name,
-          detail: { factor: context.factor },
-        })
-        return result
-      })
-      // The page that sent the form shows the change on its next render.
-      revalidatePath('/', 'layout')
-      return { ok: true, value }
-    } catch (error) {
-      if (error instanceof RolledBack) return { ok: false, failure: 'refused', reason: error.refusal.reason }
-      throw error
-    }
+    return actInScope(
+      scope,
+      (transaction) => act(context, parsed.data, transaction),
+      () => ({ actorKind: 'person', actorId: context.person.userId, action: spec.name, detail: { factor: context.factor } }),
+    )
   }
   SHOP_ACTIONS.add(action)
   return action
 }
 
-// A form as a plain object. A field sent more than once becomes a list, so a schema can take repeated rows.
-// Next.js adds its own fields to a server function's form, which start with "$ACTION" and are left out.
-export function formObject(data: FormData): Record<string, unknown> {
-  const object: Record<string, unknown> = {}
-  for (const key of new Set(data.keys())) {
-    if (key.startsWith('$ACTION')) continue
-    const values = data.getAll(key).filter((value): value is string => typeof value === 'string')
-    object[key] = values.length === 1 ? values[0] : values
-  }
-  return object
-}
-
-// Locale travels with every form, for the redirect after it. It is not part of any action's input.
-export const withLocale = <Shape extends z.ZodRawShape>(shape: Shape) => z.object({ ...shape, locale: z.string().max(5) }).strict()
-
-// A field a form may send once or many times, read as a list either way. A form with no such row sends none.
-export const list = <Item extends z.ZodType<string>>(item: Item) =>
-  z
-    .union([item, z.array(item)])
-    .optional()
-    .transform((value): z.infer<Item>[] => (value === undefined ? [] : Array.isArray(value) ? value : [value]))
+export { formObject, list, Refusal, withLocale } from './action'

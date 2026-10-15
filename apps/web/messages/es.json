@@ -1153,6 +1153,7 @@
     "nav": {
       "label": "Páginas de la tienda",
       "home": "Hoy",
+      "rentals": "Alquileres",
       "items": "Artículos",
       "security": "Seguridad",
       "staff": "Equipo",
@@ -1293,6 +1294,129 @@
         "loss": "Pérdida",
         "lateness": "Devolución tardía",
         "cleaning": "Limpieza"
+      }
+    },
+    "rentals": {
+      "title": "Alquileres",
+      "lead": "Cada reserva, desde el precio hasta la retención liquidada.",
+      "new": "Nuevo alquiler",
+      "readOnly": "Solo el personal puede reservar alquileres.",
+      "empty": {
+        "title": "Aún no hay alquileres",
+        "body": "Reserva uno aquí para un cliente en el mostrador o por teléfono, o comparte la página de tu tienda para que los clientes reserven solos."
+      },
+      "shopPage": "La página de tu tienda",
+      "shopPageNote": "Aquí reservan los clientes por su cuenta:",
+      "filter": {
+        "label": "Mostrar alquileres",
+        "all": "Todos",
+        "waiting": "Esperando el precio",
+        "booked": "Reservados",
+        "out": "Fuera",
+        "returned": "Devueltos",
+        "done": "Hechos",
+        "none": "No hay alquileres aquí."
+      },
+      "columns": {
+        "who": "Cliente",
+        "what": "Artículos",
+        "when": "Cuándo",
+        "fee": "Precio",
+        "hold": "Retención",
+        "state": "Estado"
+      },
+      "notKnown": "Aún sin pagar",
+      "fromShopPage": "Reservado en la página de la tienda",
+      "period": "{start} a {end}",
+      "needsPayPal": {
+        "title": "Conecta PayPal primero",
+        "body": "Los clientes pagan el precio en la cuenta de PayPal de tu tienda, así que las reservas lo necesitan.",
+        "action": "Ir a PayPal"
+      },
+      "needsItems": {
+        "title": "Añade primero tus artículos",
+        "body": "Una reserva es de artículos de tus tipos de artículo.",
+        "action": "Ir a artículos"
+      },
+      "form": {
+        "title": "Nuevo alquiler",
+        "back": "Todos los alquileres",
+        "renter": "Para quién",
+        "renterHelp": "Opcional. Con un correo, el cliente recibe el enlace para pagar. La identidad del cliente viene de PayPal cuando paga.",
+        "name": "Nombre",
+        "email": "Correo",
+        "language": "Idioma del cliente",
+        "book": "Reservar",
+        "booking": "Reservando…",
+        "booked": "Reservado."
+      },
+      "detail": {
+        "label": "Alquiler",
+        "back": "Todos los alquileres",
+        "terms": "Condiciones",
+        "when": "Cuándo",
+        "items": "Artículos",
+        "fee": "Precio del alquiler",
+        "hold": "Retención en la recogida",
+        "prices": "Precios de daños",
+        "pricesVersion": "Versión {version}",
+        "bookedThrough": "Reserva",
+        "staff": "Por el personal",
+        "shopPage": "En la página de la tienda",
+        "contact": "Contacto",
+        "renter": "Cliente, como lo nombra PayPal",
+        "progress": "Progreso",
+        "steps": {
+          "booked": "Reservado",
+          "paid": "Precio pagado",
+          "hold": "Retención hecha",
+          "out": "Entregado",
+          "returned": "Devuelto",
+          "settled": "Liquidado"
+        },
+        "done": "Hecho",
+        "toDo": "Aún no",
+        "lapsedNote": "El plazo de pago se agotó, así que los artículos ya no se guardan. El cliente aún puede pagar mientras nadie más los haya reservado."
+      },
+      "link": {
+        "title": "El enlace del cliente",
+        "body": "Aquí el cliente ve las condiciones y paga el precio. Muéstralo en el mostrador o envíalo.",
+        "show": "Mostrar el enlace",
+        "showing": "Creando el enlace…",
+        "scan": "Escanea con el teléfono del cliente",
+        "copy": "Copiar el enlace",
+        "copied": "Copiado.",
+        "email": "Enviar por correo a {email}",
+        "emailing": "Enviando…",
+        "emailed": "Enviado a {email}.",
+        "paid": "El precio está pagado. El mismo enlace muestra el alquiler y, en la recogida, pide la retención."
+      },
+      "letGo": {
+        "title": "Abandonar esta reserva",
+        "body": "No se pagó el precio. Al abandonarla, los artículos quedan libres para otros clientes.",
+        "action": "Abandonar esta reserva",
+        "confirm": "Sí, abandonar",
+        "cancel": "Mantenerla",
+        "done": "Abandonada."
+      },
+      "results": {
+        "paypal_not_connected": "Conecta primero la cuenta de PayPal de tu tienda. Los clientes pagan el precio en ella.",
+        "period_invalid": "Elige fecha y hora de recogida y de devolución.",
+        "period_reversed": "La devolución debe ser después de la recogida.",
+        "starts_in_past": "La recogida no puede ser en el pasado.",
+        "too_long": "Un alquiler puede durar hasta cuatro semanas.",
+        "too_far_ahead": "Se puede reservar con hasta un año de antelación.",
+        "no_items": "Elige al menos un artículo.",
+        "too_many_lines": "Elige hasta diez tipos de artículo.",
+        "count_invalid": "La línea {row} necesita de 1 a 10 artículos.",
+        "not_available": "No hay suficientes de la línea {row} libres en estas fechas.",
+        "no_price_list": "Publica primero tu lista de precios. Los clientes la aceptan al reservar.",
+        "currency_unset": "Publica primero tu lista de precios.",
+        "not_found": "Ese alquiler no es de esta tienda.",
+        "no_email": "Esta reserva no tiene ningún correo al que enviar.",
+        "email_failed": "No se pudo enviar el correo. Muestra el enlace en su lugar.",
+        "transition_not_allowed": "Solo se puede abandonar una reserva cuyo precio no se pagó.",
+        "rows_mismatched": "Cada línea necesita un artículo y un número."
       }
     },
     "items": {
@@ -1491,21 +1615,7 @@
           "empty": "Aún no se ha alquilado.",
           "period": "Del {start} al {end}",
           "renterUnknown": "Cliente aún desconocido",
-          "claim": "Reclamación de {amount}",
-          "states": {
-            "pending_payment": "Precio del alquiler sin pagar",
-            "booked": "Reservado",
-            "awaiting_hold": "Esperando la retención",
-            "ready": "Listo para la entrega",
-            "out": "Fuera",
-            "overdue": "Con retraso",
-            "returned": "Devuelto",
-            "inspecting": "En revisión",
-            "settling": "Liquidándose",
-            "closed": "Cerrado",
-            "cancelled": "Cancelado",
-            "abandoned": "Sin pagar, liberado"
-          }
+          "claim": "Reclamación de {amount}"
         },
         "sessions": {
           "title": "Sesiones de fotos",
@@ -1612,6 +1722,10 @@
     "invitation": {
       "subject": "Te invitan a {shop} en Hold",
       "body": "{inviter} te invita a trabajar en {shop} con Hold, como {role}.\n\nAbre este enlace para aceptar. Sirve una sola vez, durante siete días:\n{link}\n\nHold te enviará un código para confirmar que la dirección es tuya. Si no esperabas este correo, puedes ignorarlo."
+    },
+    "renterLink": {
+      "subject": "Tu alquiler en {shop}: paga el precio",
+      "body": "Tu alquiler en {shop} está reservado y espera el pago.\n\nAbre este enlace para ver lo que alquilas, el precio, la retención que se hace al recogerlo y los precios de daños de la tienda. Luego paga el precio con PayPal:\n\n{link}\n\nEl enlace es solo tuyo. Guárdalo hasta que se cierre el alquiler."
     }
   },
   "shell": {
@@ -1765,5 +1879,127 @@
   },
   "sample": {
     "label": "Muestra"
+  },
+  "rentalStates": {
+    "pending_payment": "Esperando el precio",
+    "booked": "Precio pagado",
+    "awaiting_hold": "Esperando la retención",
+    "ready": "Listo para la entrega",
+    "out": "Fuera",
+    "overdue": "Con retraso",
+    "returned": "Devuelto",
+    "inspecting": "En revisión",
+    "settling": "Liquidando",
+    "closed": "Cerrado",
+    "cancelled": "Cancelado",
+    "abandoned": "Precio sin pagar, abandonado",
+    "lapsed": "Plazo de pago agotado"
+  },
+  "booking": {
+    "when": "Cuándo",
+    "starts": "Recogida",
+    "ends": "Devolución",
+    "check": "Ver qué hay libre",
+    "periodInvalid": "La devolución debe ser después de la recogida, dentro de cuatro semanas.",
+    "what": "Qué",
+    "perDay": "{amount} al día",
+    "holdEach": "{amount} de retención por artículo",
+    "free": "{count, plural, =0 {Ninguno libre} one {# libre} other {# libres}}",
+    "fewer": "Un {name} menos",
+    "more": "Un {name} más",
+    "countOf": "Cantidad de {name}",
+    "nothingFree": "No hay nada libre en estas fechas. Prueba con otras fechas.",
+    "noItems": "Aún no hay nada que alquilar.",
+    "totals": "Esta reserva",
+    "days": "{count, plural, one {# día} other {# días}}",
+    "fee": "Precio del alquiler, se paga ahora",
+    "feeNote": "Se paga con PayPal al hacer la reserva.",
+    "hold": "Retención en la recogida",
+    "holdNote": "Se retiene en la cuenta de PayPal del propio cliente cuando recoge los artículos. No es un cobro.",
+    "pickSomething": "Elige al menos un artículo."
+  },
+  "renter": {
+    "title": "Tu alquiler en {shop}",
+    "lead": "Lo que alquilas, lo que cuesta y cómo funciona la retención.",
+    "what": "Lo que alquilas",
+    "when": "Cuándo",
+    "period": "{start} a {end}",
+    "line": "{count} × {name}",
+    "lineTerms": "{rate} al día · {hold} de retención por artículo",
+    "twoAmounts": "Dos importes, por separado",
+    "fee": "Precio del alquiler",
+    "feeNow": "Se paga ahora con PayPal.",
+    "feePaid": "Pagado con PayPal.",
+    "hold": "Retención",
+    "holdBody": "Se hace al recoger, en tu propia cuenta de PayPal. No es un cobro. Si todo vuelve igual que salió, la retención se libera en el momento de la devolución.",
+    "holdRules": "Una persona de la tienda aprueba cada cobro. Ves cualquier reclamación antes de que se cobre, con las fotografías y el precio, y puedes no estar de acuerdo. Tienes {hours} horas para responder.",
+    "prices": "Los precios de daños de la tienda",
+    "pricesLead": "Una reclamación solo puede ser por lo que aparece en esta lista.",
+    "wear": "Qué cuenta como desgaste normal",
+    "wearLead": "Nunca se te cobra por esto.",
+    "pay": "Pagar {amount} con PayPal",
+    "paying": "Abriendo PayPal…",
+    "agree": "Al pagar, aceptas la retención y los precios de arriba.",
+    "status": {
+      "pending_payment": "Esperando tu pago",
+      "booked": "Reservado. Ya has pagado el precio.",
+      "next": "Siguiente: al recoger, apruebas la retención en tu teléfono.",
+      "lapsed": "El plazo de pago se agotó y otra persona reservó los artículos. Contacta con la tienda para reservar de nuevo.",
+      "abandoned": "Esta reserva se abandonó. Contacta con la tienda para reservar de nuevo.",
+      "other": "Tu alquiler: {state}"
+    },
+    "paid": {
+      "title": "Confirmando tu pago",
+      "checking": "Comprobando con PayPal…",
+      "done": "Pago confirmado. Tu alquiler está reservado.",
+      "back": "Ver tu alquiler",
+      "retry": "Inténtalo de nuevo"
+    },
+    "invalid": {
+      "title": "Este enlace no se puede usar",
+      "body": "Puede que esté mal escrito o que haya caducado. Pide uno nuevo a la tienda."
+    },
+    "results": {
+      "link_invalid": "Este enlace no se puede usar. Pide uno nuevo a la tienda.",
+      "scope": "Este enlace no puede hacer eso.",
+      "rate_limited": "Demasiados intentos desde esta red. Espera un minuto e inténtalo de nuevo.",
+      "not_pending": "Esta reserva no está esperando un pago.",
+      "payment_lapsed": "El plazo de pago se agotó y otra persona reservó los artículos.",
+      "paypal_not_connected": "La tienda aún no puede cobrar pagos. Contacta con la tienda.",
+      "paypal_unavailable": "No se pudo contactar con PayPal. No se cobró nada. Inténtalo de nuevo en un momento.",
+      "not_approved": "PayPal aún no ha confirmado tu aprobación. No se cobró nada.",
+      "declined": "PayPal rechazó el pago. No se cobró nada.",
+      "order_mismatch": "Este pago no pertenece a este alquiler. No se cobró nada.",
+      "amount_mismatch": "El importe de PayPal no coincidía con el precio. Se ha avisado a la tienda.",
+      "not_completed": "PayPal aún no ha completado el pago.",
+      "not_found": "Este alquiler ya no existe."
+    },
+    "orderDescription": "{shop}: {items}, {days, plural, one {# día} other {# días}}"
+  },
+  "shopPage": {
+    "label": "Reservar en línea",
+    "title": "Alquila en {shop}",
+    "lead": "Elige tus fechas y lo que quieres. Pagas el precio del alquiler ahora. La retención se hace al recoger y no es un cobro.",
+    "book": "Reservar y pagar el precio",
+    "booking": "Reservando…",
+    "closed": {
+      "title": "Aún no admite reservas en línea",
+      "body": "Esta tienda no ha configurado la reserva en línea. Contacta directamente con la tienda."
+    },
+    "results": {
+      "rate_limited": "Demasiadas reservas desde esta red. Espera unos minutos e inténtalo de nuevo.",
+      "not_found": "Esta tienda no existe."
+    },
+    "poweredBy": "Reservas y retenciones de Hold, con PayPal."
+  },
+  "simulatedPayPal": {
+    "label": "PayPal simulado",
+    "notice": "Entorno de prueba. No se mueve dinero. Esta página sustituye a la página de aprobación de PayPal.",
+    "title": "Aprobar el pago",
+    "amount": "Importe",
+    "for": "Para",
+    "approve": "Aprobar",
+    "cancel": "Cancelar y volver",
+    "unknown": "Este pedido no se conoce."
   }
 }
