@@ -288,7 +288,7 @@ Every table except `users` and `renters` carries a `shop_id`.
 | `price_entries` | Code, description, amount, category |
 | `wear_policies` | Version, rules |
 | `renters` | PayPal payer ID, email, name, language |
-| `rentals` | Renter, period, fee, agreed price list and wear policy versions, state |
+| `rentals` | Renter, period, fee, agreed price list and wear policy versions, state, whether it is a simulated sample |
 | `rental_items` | Rental, item, accessories out, accessories back |
 | `holds` | Rental, reserved amount, placement strategy, state, current authorization |
 | `authorizations` | Hold, PayPal authorization ID, amount, created, assured until, valid until, state |
@@ -312,7 +312,7 @@ Every table except `users` and `renters` carries a `shop_id`.
 | `outbox` | Pending messages written in the same transaction as state changes |
 | `audit_log` | Who did what, when, from where |
 
-**What the migrations hold so far.** Every table above except `locations`, `shipments` and `disputes`, which arrive with the features that use them. The schema is in `packages/db/src/schema`, the migrations in `packages/db/migrations`.
+**What the migrations hold so far.** Every table above, with `rentals.simulated` added in `0009`, except `locations`, `shipments` and `disputes`, which arrive with the features that use them. The schema is in `packages/db/src/schema`, the migrations in `packages/db/migrations`.
 
 **Tables added by the extensions.** `mandates`, `proposals`, `exceptions`, `ops_runs`, `eval_runs`, `finding_outcomes`, `rental_outcomes`, `trust_ladders`, `trust_rungs`, `renter_consents`, `quotes`, `agent_sessions`, `negotiations`, `negotiation_moves` and `incidents`. Their contents are listed in `extensions.md` section 4.6.
 
@@ -1271,6 +1271,20 @@ The first nine routes are the public site. They take no sign-in, read no shop da
 - **Illustrations say so.** The phone screens, the owner's day, the item passport, the price list and the example findings are pictures of the product, not the product. Each carries a caption that says it is an example.
 - **Illustrative photographs.** The frame photograph is a stock photograph with the marks drawn on. The page says so beside it and in the footer. `apps/web/public/images/CREDITS.md` lists each source and edit.
 
+
+### 13.6 Pages for owners and staff
+
+Served by `web` under `/shop`. Each page asks `shopAccess` itself; the frame around them is not the access check.
+
+| Route | Purpose |
+|---|---|
+| `/shop` | Today: the day's figures (items out, due back, held on PayPal, claims to decide), what needs a decision, the handovers and returns at the counter with a line for now, the holds by where they stand, the month so far from the money log, and the latest audit lines. Until the shop is set up, its setup steps. |
+| `/shop/prices`, `/shop/paypal`, `/shop/staff`, `/shop/security` | The shop's settings |
+
+- **One frame.** `app/[locale]/shop/layout.tsx` puts every shop page in the shop's frame (`features/shell`): a dark sidebar with the shop switcher, the menu, PayPal's state and mode, the language and theme, and the account menu. It is a rail of icons from `md` to `lg` and a top bar with a menu sheet below `md`. The public pages keep the site's header and footer through the `(site)` route group, which is not part of their address.
+- **What the page reads.** `shopToday` in `packages/db` returns plain counts and rows. Where a hold stands (assured, valid, ending) and the order of the decisions come from `holdStanding` and `holdDay` in the domain. Times show on the shop's clock (`shopDay`), whoever reads them.
+- **Rentals, holds and claims** join the menu as their own pages are built with the spine.
+
 ---
 
 ## 14. Infrastructure on AWS
@@ -1397,6 +1411,7 @@ Every queue has a dead-letter queue and an alarm on it.
 | **Someone guesses a renter's link** | Long signed tokens, expiry, scopes, and a one-time code for money decisions. |
 | **A staff account is taken over** | Passwordless sign-in, a passkey before any change to prices, staff or PayPal, approval limits. Tested in `shop-access.test.ts`. |
 | **An invitation is guessed, reused or forwarded** | A 32-byte random token, stored only as a fingerprint, valid once for seven days. The code goes to the invited address, and the role is given only if the proven address matches. Tested in `shop-setup.test.ts` and `sign-in-flow.test.ts`. |
+| **Sample rentals pass for real ones** | Only the owner, only in a shop with no rentals, and once. Every sample rental is marked `simulated` in the record, its PayPal references start with `SIMULATED-`, its audit lines say so, and every screen marks it. No PayPal call is made. Tested in `shop-access.test.ts` and `shop-today.test.ts`. |
 | **Codes are requested to pester someone or run up cost** | Five code emails per address and forty requests per network in fifteen minutes, on top of Cognito's own limits. Tested in `sign-in-flow.test.ts`. |
 | **A shop's PayPal credentials leak** | Kept only in Secrets Manager, checked with PayPal before being kept, never shown again, never logged. |
 | **Someone finds out who has an account** | Every address gets the same "check your email" step, and a code for an address with no account is simply wrong. Passkey sign-in gives every address options of the same shape, with no list of credentials. Tested in `sign-in-flow.test.ts` and `fake-identity.test.ts`. |
@@ -1582,6 +1597,7 @@ Judges have no bike to photograph and cannot wait four days for a hold to age.
 - **Renewal and expiry.** PayPal allows renewal only from the fourth day, so it cannot be shown on a hold placed during the demo. The demo shows the upkeep plan for each hold and marks any simulated renewal as simulated.
 - **Honest labelling.** Anything simulated is marked as simulated on screen and in the record.
 - **Reset.** One command returns the shop to its starting state.
+- **Sample rentals in any shop.** While a shop has no rentals, its owner can add eleven sample rentals from the Today page (`addSampleRentals` in `features/shop/actions.ts`, built in `packages/db/src/sample-rentals.ts`). They use the shop's published price list, so a price list must come first. Every rental is marked `simulated`, every PayPal reference starts with `SIMULATED-`, every audit line carries `simulated: true`, and the page says so. Today's handovers and returns are set from the moment they are added, so the day reads the same at any hour. Only the sandbox exists today; a live mode must refuse sample rentals.
 - **For the extensions.** The seeded renter has a history of clean returns, so the trust ladder can be seen. A seeded contested claim can be settled by two advocates. The morning queue is seeded with one case for each detector. A hosted assistant uses the same MCP server as any outside assistant, so a judge needs no MCP client.
 
 ---

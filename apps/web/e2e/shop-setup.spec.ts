@@ -1,6 +1,6 @@
 import { addVirtualAuthenticator } from './support/passkey'
 import { expectNoClippedText, expectNoSidewaysScroll, expectNothingOutsideViewport, expectTouchTargets, viewports } from './support/responsive'
-import { newEmail, signUpAs } from './support/sign-in'
+import { expectInShop, newEmail, signUpAs } from './support/sign-in'
 import { expect, test } from './support/test'
 
 test('an owner adds a passkey, confirms with it, then sets up prices, staff and PayPal', async ({ page }) => {
@@ -38,9 +38,9 @@ test('an owner adds a passkey, confirms with it, then sets up prices, staff and 
   await page.getByRole('button', { name: 'Check and connect' }).click()
   await expect(page.getByText('Connected. PayPal accepted the credentials.')).toBeVisible()
 
-  await menu.getByRole('link', { name: 'Overview' }).click()
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ribeira Bikes')
-  await expect(page.getByText('Done.')).toHaveCount(3)
+  await menu.getByRole('link', { name: 'Today' }).click()
+  await expectInShop(page, 'Ribeira Bikes')
+  await expect(page.getByRole('region', { name: 'Set up your shop' }).getByText('Done.')).toHaveCount(3)
 })
 
 test('the header says "Your shop" once signed in', async ({ page }) => {
@@ -55,7 +55,7 @@ test('a made-up invitation link says so plainly', async ({ page }) => {
   await expect(page.getByText('There is no invitation at this address.')).toBeVisible()
 })
 
-for (const path of ['/shop/security', '/shop/staff', '/shop/prices', '/shop/paypal'] as const) {
+for (const path of ['/shop', '/shop/security', '/shop/staff', '/shop/prices', '/shop/paypal'] as const) {
   for (const viewport of viewports) {
     test(`${path} fits a ${viewport.name} wide screen`, async ({ page }) => {
       await signUpAs(page, `long-address-for-wrapping-${newEmail()}`, 'Ribeira Bicicletas e Caiaques do Douro Litoral')
@@ -68,3 +68,37 @@ for (const path of ['/shop/security', '/shop/staff', '/shop/prices', '/shop/payp
     })
   }
 }
+
+test('an owner fills an empty shop with sample rentals, each marked as a sample', async ({ page }) => {
+  await addVirtualAuthenticator(page)
+  await signUpAs(page, newEmail())
+  await expect(page.getByText('Publish a price list first. The sample claims use its prices.')).toBeVisible()
+
+  await page.goto('/shop/security')
+  await page.getByRole('button', { name: 'Add a passkey on this device' }).click()
+  await expect(page.getByText('Passkey added.')).toBeVisible()
+  await page.goto('/shop/prices')
+  await page.getByRole('button', { name: 'Confirm with my passkey' }).click()
+  await page.getByLabel('Currency').selectOption('EUR')
+  await page.getByLabel('Price 1: what it is for').fill('Deep scratch on the frame')
+  await page.getByLabel('Amount, in EUR').fill('35')
+  await page.getByLabel('What counts as ordinary wear').fill('Light scuffs on the tyres are ordinary wear.')
+  await page.getByRole('button', { name: 'Publish this price list' }).click()
+  await expect(page.getByText('Price list published.')).toBeVisible()
+
+  await page.goto('/shop')
+  await page.getByRole('button', { name: 'Add sample rentals' }).click()
+  await expect(page.getByRole('note')).toContainText('This shop holds sample rentals.')
+  await expect(page.getByRole('heading', { name: 'Claim of €35.00 for Priya Natarajan' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Today at the counter' }).getByRole('listitem')).toHaveCount(5)
+  await expect(page.getByRole('button', { name: 'Add sample rentals' })).toHaveCount(0)
+
+  // The full day, at every width.
+  for (const viewport of viewports) {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height })
+    await expectNoSidewaysScroll(page)
+    await expectNothingOutsideViewport(page)
+    await expectNoClippedText(page)
+    await expectTouchTargets(page)
+  }
+})

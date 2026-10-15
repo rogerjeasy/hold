@@ -39,7 +39,7 @@
       "description": "Open a Hold account for your rental shop. No password to set, and no hardware to buy."
     },
     "shop": {
-      "title": "Your shop"
+      "title": "Today"
     },
     "invite": {
       "title": "An invitation"
@@ -1152,11 +1152,12 @@
     },
     "nav": {
       "label": "Shop pages",
-      "home": "Overview",
+      "home": "Today",
       "security": "Security",
       "staff": "Staff",
       "prices": "Prices",
-      "paypal": "PayPal"
+      "paypal": "PayPal",
+      "settings": "Settings"
     },
     "setup": {
       "title": "Set up your shop",
@@ -1217,7 +1218,9 @@
       "wear_policy_too_long": "The wear policy is too long.",
       "currency_fixed": "The currency is fixed once a price list is published.",
       "paypal_refused": "PayPal did not accept these credentials. Check that you copied both from the same sandbox app.",
-      "paypal_unavailable": "PayPal could not be reached. Nothing was kept. Try again in a moment."
+      "paypal_unavailable": "PayPal could not be reached. Nothing was kept. Try again in a moment.",
+      "no_price_list": "Publish a price list first. The sample claims use its prices.",
+      "has_rentals": "This shop already has rentals, so no samples were added."
     },
     "security": {
       "title": "Security",
@@ -1311,6 +1314,156 @@
     "invitation": {
       "subject": "You are invited to {shop} on Hold",
       "body": "{inviter} invites you to work at {shop} on Hold, as {role}.\n\nOpen this link to accept. It works once, for seven days:\n{link}\n\nHold will email you a code to confirm the address is yours. If you did not expect this, you can ignore it."
+    }
+  },
+  "shell": {
+    "home": "Today at {shop}",
+    "shops": "Your shops",
+    "switchShop": "Switch shop, now {shop}",
+    "current": "Current",
+    "account": "Account of {name}",
+    "website": "Hold website",
+    "openMenu": "Open the shop menu",
+    "closeMenu": "Close the menu",
+    "menuTitle": "Shop menu",
+    "paypal": {
+      "connected": "PayPal connected · sandbox",
+      "notConnected": "PayPal not connected"
+    }
+  },
+  "today": {
+    "greeting": {
+      "morning": "Good morning, {name}",
+      "afternoon": "Good afternoon, {name}",
+      "evening": "Good evening, {name}",
+      "night": "Good evening, {name}"
+    },
+    "decisionsSummary": "{count, plural, =0 {No decisions are waiting.} one {# thing needs a decision.} other {# things need a decision.}}",
+    "returnsSummary": "{count, plural, =0 {No returns are due today.} one {# rental comes back today.} other {# rentals come back today.}}",
+    "figures": {
+      "label": "Today in figures",
+      "out": "Out now",
+      "outNote": "across {rentals, plural, =0 {no rentals} one {# rental} other {# rentals}}",
+      "due": "Due back today",
+      "dueNote": "{late, plural, =0 {None late} one {# late} other {# late}}",
+      "held": "Held on PayPal",
+      "heldNote": "{count, plural, =0 {No holds} one {# hold} other {# holds}}",
+      "claims": "Claims to decide",
+      "claimsNote": "{amount} in total",
+      "claimsNoteNone": "None waiting"
+    },
+    "renter": "A renter",
+    "decisions": {
+      "title": "Needs a decision",
+      "empty": "Nothing needs a decision.",
+      "emptyBody": "Claims to approve, holds near their end and late returns appear here.",
+      "claim": {
+        "title": "Claim of {amount} for {renter}",
+        "body": "{line}. Waiting for an approval.",
+        "bodyNoLine": "Waiting for an approval."
+      },
+      "hold_ending": {
+        "title": "The hold for {renter} ends {when}",
+        "body": "Release it or raise a claim before PayPal lets it lapse.",
+        "meter": "Day {day} of {max}"
+      },
+      "late": {
+        "title": "{renter} is late",
+        "body": "Due back {when}."
+      },
+      "contested": {
+        "title": "{renter} contested a claim of {amount}",
+        "quote": "The renter wrote"
+      }
+    },
+    "counter": {
+      "title": "Today at the counter",
+      "empty": "No handovers or returns today.",
+      "now": "Now {time}",
+      "handover": "Handover",
+      "return": "Return",
+      "columns": {
+        "time": "Time",
+        "visit": "Handover or return",
+        "renter": "Renter",
+        "hold": "Hold",
+        "status": "Status"
+      },
+      "done": "Done",
+      "due": "To do",
+      "hold": {
+        "none": "No hold",
+        "requested": "Waiting for the renter's approval",
+        "held": "{amount} held",
+        "assuredUntil": "{amount} · assured until {time}",
+        "released": "Released",
+        "captured": "Captured",
+        "other": "{amount}"
+      }
+    },
+    "holds": {
+      "title": "Holds on PayPal",
+      "total": "reserved across {count, plural, one {# hold} other {# holds}}",
+      "empty": "No holds on PayPal right now.",
+      "assured": "In the first three days",
+      "valid": "After day three, still valid",
+      "ending": "Ending within three days",
+      "note": "A capture is best assured in a hold's first three days. PayPal ends every hold on day {max}."
+    },
+    "month": {
+      "title": "{month} so far",
+      "fees": "Rental fees",
+      "released": "Released to renters",
+      "claimed": "Damage claimed",
+      "recovered": "Recovered"
+    },
+    "activity": {
+      "title": "Activity",
+      "actions": {
+        "shop": {
+          "created": "Shop created"
+        },
+        "prices": {
+          "published": "Price list published"
+        },
+        "staff": {
+          "invited": "Staff member invited",
+          "invitation_revoked": "Invitation withdrawn"
+        },
+        "paypal": {
+          "connected": "PayPal connected"
+        },
+        "sample_rentals": {
+          "added": "Sample rentals added"
+        },
+        "hold": {
+          "placed": "Hold placed",
+          "released": "Hold released",
+          "captured": "Hold captured"
+        },
+        "handover": {
+          "done": "Handover done"
+        },
+        "claim": {
+          "raised": "Claim raised",
+          "contested": "Claim contested by the renter"
+        },
+        "other": "Change recorded"
+      }
+    },
+    "sample": {
+      "label": "Sample",
+      "noticeTitle": "This shop holds sample rentals.",
+      "noticeBody": "They are simulated to show a working day. No PayPal money moved, and each one is marked as a sample here and in the records.",
+      "offerTitle": "See a working day",
+      "offerBody": "Add eleven sample rentals: items out, returns due today, claims to decide and a hold near its end. Each is marked as a sample and moves no money.",
+      "add": "Add sample rentals",
+      "adding": "Adding…",
+      "added": "Sample rentals added.",
+      "needsPrices": "Publish a price list first. The sample claims use its prices."
+    },
+    "setup": {
+      "progress": "{done} of {total} done"
     }
   }
 }

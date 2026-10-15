@@ -3,8 +3,6 @@ import { Archivo, JetBrains_Mono } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getTranslations } from 'next-intl/server'
 import type { ReactNode } from 'react'
-import { SiteFooter } from '@/features/site/site-footer'
-import { SiteHeader } from '@/features/site/site-header'
 import { SkipLink } from '@/features/site/skip-link'
 import { ThemeProvider } from '@/features/site/theme-provider'
 import { routing } from '@/i18n/routing'
@@ -36,11 +34,8 @@ export default async function LocaleLayout({ children }: { children: ReactNode }
         <NextIntlClientProvider>
           <ThemeProvider>
             <SkipLink />
-            <SiteHeader />
-            <main id="main" className="flex-1">
-              {children}
-            </main>
-            <SiteFooter year={new Date().getFullYear()} />
+            {/* Each part of the app brings its own frame: the public site's in (site), the shop's in shop. */}
+            {children}
           </ThemeProvider>
         </NextIntlClientProvider>
       </body>

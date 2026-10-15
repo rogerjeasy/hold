@@ -1,7 +1,7 @@
 'use server'
 
 import { checkPriceList, isShopCurrency, mayInvite, parseAmount, PRICE_CATEGORIES, STAFF_ROLES } from '@hold/domain'
-import { createInvitation, publishPriceList, revokeInvitation, savePayPalAccount } from '@hold/db'
+import { addSampleRentals as addSamples, createInvitation, publishPriceList, revokeInvitation, savePayPalAccount } from '@hold/db'
 import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
@@ -114,5 +114,15 @@ export const connectPayPal = shopAction(
     const reference = await paypalCredentials.save(context.shop.id, config.paypalMode, credentials)
     await savePayPalAccount(transaction, context.shop.id, config.paypalMode, reference)
     return {}
+  },
+)
+
+// A day of sample rentals for a demonstration (architecture.md section 20.3). Every row is marked simulated and moves
+// no money. It changes nothing a renter agreed to, so an emailed code is enough; only the owner may do it.
+export const addSampleRentals = shopAction(
+  { name: 'sample_rentals.added', roles: ['owner'], needsPasskey: false, input: withLocale({}) },
+  async (context, _input, transaction) => {
+    const added = await addSamples(transaction, { shopId: context.shop.id, userId: context.person.userId, timeZone: context.shop.timeZone, now: new Date() })
+    return added.ok ? { rentals: added.rentals } : new Refusal(added.reason)
   },
 )

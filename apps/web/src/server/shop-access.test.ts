@@ -130,3 +130,44 @@ describe('a shop action', () => {
     expect(refused).toEqual({ ok: false, failure: 'refused', reason: 'role_not_invitable' })
   })
 })
+
+describe('adding sample rentals', () => {
+  const sample = { locale: 'en' }
+  const prices = {
+    currency: 'EUR',
+    threshold: '',
+    wearPolicy: 'Light scuffs are ordinary wear.',
+    description: 'Deep scratch on the frame',
+    category: 'damage',
+    amount: '35',
+    locale: 'en',
+  }
+
+  it('refuses a caller who is not signed in', async () => {
+    expect(await shopActions.addSampleRentals(null, form(sample))).toEqual({ ok: false, failure: 'signed_out' })
+  })
+
+  it('refuses anyone but the owner', async () => {
+    await signIn('reader@douro.example', 'passkey')
+    expect(await shopActions.addSampleRentals(null, form(sample))).toEqual({ ok: false, failure: 'role' })
+  })
+
+  it('needs a published price list, whose prices the sample claims use', async () => {
+    const { database } = await getServices()
+    const subject = await signIn('sampler@douro.example', 'email_code')
+    await registerOwner(database, { subject, email: 'sampler@douro.example', name: 'Sampler', language: 'en', shop: { name: 'Douro Sails', timeZone: 'UTC' } })
+    expect(await shopActions.addSampleRentals(null, form(sample))).toEqual({ ok: false, failure: 'refused', reason: 'no_price_list' })
+  })
+
+  it('adds them once for an owner, with no passkey needed, and writes the audit line', async () => {
+    await signIn('sampler@douro.example', 'passkey')
+    expect(await shopActions.publishPrices(null, form(prices))).toMatchObject({ ok: true })
+    await signIn('sampler@douro.example', 'email_code')
+    expect(await shopActions.addSampleRentals(null, form(sample))).toEqual({ ok: true, value: { rentals: 11 } })
+    expect(await shopActions.addSampleRentals(null, form(sample))).toEqual({ ok: false, failure: 'refused', reason: 'has_rentals' })
+
+    const { database } = await getServices()
+    const lines = await database.select().from(auditLog)
+    expect(lines.filter((line) => line.action === 'sample_rentals.added')).toHaveLength(1)
+  })
+})

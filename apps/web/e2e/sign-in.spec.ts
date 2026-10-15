@@ -1,4 +1,4 @@
-import { newEmail, signUpAs, TEST_CODE } from './support/sign-in'
+import { expectInShop, newEmail, signUpAs, TEST_CODE } from './support/sign-in'
 import { expect, test } from './support/test'
 
 test('sign-in names a mistyped address without sending it', async ({ page }) => {
@@ -15,13 +15,15 @@ test('a new owner signs up with the emailed code and lands on their shop', async
   const email = newEmail()
   await signUpAs(page, email)
   await expect(page).toHaveURL(/\/shop$/)
-  await expect(page.getByText(`Signed in as ${email}.`)).toBeVisible()
+  // The account menu at the foot of the shop's menu names who is signed in.
+  await expect(page.getByRole('button', { name: 'Account of Tomás' })).toContainText(email)
 })
 
 test('an owner signs out, then signs back in with a new code', async ({ page }) => {
   const email = newEmail()
   await signUpAs(page, email)
-  await page.getByRole('button', { name: 'Sign out' }).click()
+  await page.getByRole('button', { name: 'Account of Tomás' }).click()
+  await page.getByRole('menuitem', { name: 'Sign out' }).click()
   await expect(page).toHaveURL(/:\d+\/$/)
   await page.goto('/shop')
   await expect(page).toHaveURL(/\/sign-in$/)
@@ -32,7 +34,7 @@ test('an owner signs out, then signs back in with a new code', async ({ page }) 
   await expect(page.getByText(`We sent a code to ${email}.`, { exact: false })).toBeVisible()
   await page.getByRole('textbox', { name: 'Code from the email' }).fill(TEST_CODE)
   await page.getByRole('button', { name: 'Continue' }).click()
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ribeira Bikes')
+  await expectInShop(page, 'Ribeira Bikes')
 })
 
 test('a wrong code is named, and the address can be changed', async ({ page }) => {
@@ -59,7 +61,7 @@ test('sign-up works by keyboard alone', async ({ page }) => {
   await expect(page.getByRole('textbox', { name: 'Code from the email' })).toBeFocused()
   await page.keyboard.type(TEST_CODE)
   await page.keyboard.press('Enter')
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ribeira Bikes')
+  await expectInShop(page, 'Ribeira Bikes')
 })
 
 test('the sign-in page reads in the visitor’s language', async ({ page }) => {

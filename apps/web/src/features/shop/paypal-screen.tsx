@@ -16,7 +16,7 @@ export function PayPalScreen({ shopName, connectedAt, isOwner, gate }: PayPalScr
   const format = useFormatter()
 
   return (
-    <ShopFrame shopName={shopName} current="paypal" title={t('title')}>
+    <ShopFrame shopName={shopName} title={t('title')}>
       <div className="grid max-w-prose gap-8">
         <p className="text-lead text-muted-foreground">{t('lead')}</p>
         {connectedAt === undefined ? (

@@ -37,6 +37,11 @@
   --color-band-muted: var(--band-muted);
   --color-band-border: var(--band-border);
   --color-band-accent: var(--band-accent);
+  /* A row in the dark band under the pointer, and the row of the current page. */
+  --color-band-hover: var(--band-hover);
+  --color-band-active: var(--band-active);
+  --color-band-success: var(--band-success);
+  --color-warning: var(--warning);
   /* Anything drawn on top of a photograph keeps one set of colours in both themes. */
   --color-photo: var(--photo);
   --color-photo-foreground: var(--photo-foreground);
@@ -58,6 +63,8 @@
   /* Half the page, for a screen split down the middle whose two halves keep to the page's edges. */
   --container-half-page: 40rem;
   --container-prose: 34rem;
+  /* The working area of a signed-in page, beside the shop's menu. */
+  --container-app: 77.5rem;
   --container-device: 18rem;
 
   --text-display: clamp(3.375rem, 1.4rem + 6vw, 6.25rem);
@@ -76,6 +83,16 @@
   --text-title--line-height: 1;
   --text-title--letter-spacing: -0.04em;
   --text-title--font-weight: 800;
+  /* The heading of a signed-in page: smaller than the public pages', which sell; these are worked in. */
+  --text-page-title: clamp(2rem, 1.55rem + 1.5vw, 2.875rem);
+  --text-page-title--line-height: 1;
+  --text-page-title--letter-spacing: -0.045em;
+  --text-page-title--font-weight: 800;
+  /* A figure on the Today page. */
+  --text-figure: clamp(1.625rem, 1.35rem + 0.9vw, 2.125rem);
+  --text-figure--line-height: 1.1;
+  --text-figure--letter-spacing: -0.04em;
+  --text-figure--font-weight: 800;
   --text-lead: 1.125rem;
   --text-lead--line-height: 1.55;
 
@@ -112,6 +129,10 @@
   --band-muted: #a6a298;
   --band-border: #34342f;
   --band-accent: #ff6a2b;
+  --band-hover: #1f1f1c;
+  --band-active: #2a2a26;
+  --band-success: #6fcf9d;
+  --warning: #8a5a00;
   --photo: #17191a;
   --photo-foreground: #f2efe8;
   --photo-scrim: rgb(10 10 9 / 0.78);
@@ -144,6 +165,9 @@
   --contrast: #f2efe8;
   --contrast-foreground: #0e0e0d;
   --band: #181816;
+  --band-hover: #22221f;
+  --band-active: #2e2e29;
+  --warning: #e6b450;
 }
 
 @utility label {

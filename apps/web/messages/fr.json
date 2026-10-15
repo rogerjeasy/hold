@@ -39,7 +39,7 @@
       "description": "Ouvrez un compte Hold pour votre boutique de location. Aucun mot de passe à créer, aucun matériel à acheter."
     },
     "shop": {
-      "title": "Votre boutique"
+      "title": "Aujourd’hui"
     },
     "invite": {
       "title": "Une invitation"
@@ -1152,11 +1152,12 @@
     },
     "nav": {
       "label": "Pages de la boutique",
-      "home": "Aperçu",
+      "home": "Aujourd’hui",
       "security": "Sécurité",
       "staff": "Équipe",
       "prices": "Prix",
-      "paypal": "PayPal"
+      "paypal": "PayPal",
+      "settings": "Réglages"
     },
     "setup": {
       "title": "Préparez votre boutique",
@@ -1217,7 +1218,9 @@
       "wear_policy_too_long": "La politique d'usure est trop longue.",
       "currency_fixed": "La devise est fixée dès qu'une liste de prix est publiée.",
       "paypal_refused": "PayPal n'a pas accepté ces identifiants. Vérifiez que vous avez copié les deux depuis la même app sandbox.",
-      "paypal_unavailable": "PayPal est injoignable. Rien n'a été conservé. Réessayez dans un instant."
+      "paypal_unavailable": "PayPal est injoignable. Rien n'a été conservé. Réessayez dans un instant.",
+      "no_price_list": "Publiez d’abord une grille tarifaire. Les réclamations d’exemple utilisent ses prix.",
+      "has_rentals": "Cette boutique a déjà des locations, aucun exemple n’a donc été ajouté."
     },
     "security": {
       "title": "Sécurité",
@@ -1311,6 +1314,156 @@
     "invitation": {
       "subject": "Vous êtes invité à rejoindre {shop} sur Hold",
       "body": "{inviter} vous invite à travailler chez {shop} avec Hold, en tant que {role}.\n\nOuvrez ce lien pour accepter. Il est valable une seule fois, pendant sept jours :\n{link}\n\nHold vous enverra un code pour confirmer que l'adresse est bien la vôtre. Si vous ne vous attendiez pas à ce message, vous pouvez l'ignorer."
+    }
+  },
+  "shell": {
+    "home": "Aujourd’hui chez {shop}",
+    "shops": "Vos boutiques",
+    "switchShop": "Changer de boutique, actuellement {shop}",
+    "current": "Actuelle",
+    "account": "Compte de {name}",
+    "website": "Site de Hold",
+    "openMenu": "Ouvrir le menu de la boutique",
+    "closeMenu": "Fermer le menu",
+    "menuTitle": "Menu de la boutique",
+    "paypal": {
+      "connected": "PayPal connecté · sandbox",
+      "notConnected": "PayPal non connecté"
+    }
+  },
+  "today": {
+    "greeting": {
+      "morning": "Bonjour, {name}",
+      "afternoon": "Bon après-midi, {name}",
+      "evening": "Bonsoir, {name}",
+      "night": "Bonsoir, {name}"
+    },
+    "decisionsSummary": "{count, plural, =0 {Aucune décision en attente.} one {# point attend une décision.} other {# points attendent une décision.}}",
+    "returnsSummary": "{count, plural, =0 {Aucun retour prévu aujourd’hui.} one {# location revient aujourd’hui.} other {# locations reviennent aujourd’hui.}}",
+    "figures": {
+      "label": "Aujourd’hui en chiffres",
+      "out": "Sortis",
+      "outNote": "sur {rentals, plural, =0 {aucune location} one {# location} other {# locations}}",
+      "due": "Retours du jour",
+      "dueNote": "{late, plural, =0 {Aucun retard} one {# en retard} other {# en retard}}",
+      "held": "Bloqué sur PayPal",
+      "heldNote": "{count, plural, =0 {Aucune empreinte} one {# empreinte} other {# empreintes}}",
+      "claims": "Réclamations à trancher",
+      "claimsNote": "{amount} au total",
+      "claimsNoteNone": "Aucune en attente"
+    },
+    "renter": "Un client",
+    "decisions": {
+      "title": "À décider",
+      "empty": "Rien n’attend de décision.",
+      "emptyBody": "Les réclamations à approuver, les empreintes proches de leur fin et les retours en retard apparaissent ici.",
+      "claim": {
+        "title": "Réclamation de {amount} pour {renter}",
+        "body": "{line}. En attente d’approbation.",
+        "bodyNoLine": "En attente d’approbation."
+      },
+      "hold_ending": {
+        "title": "L’empreinte de {renter} prend fin {when}",
+        "body": "Libérez-la ou faites une réclamation avant que PayPal ne la laisse expirer.",
+        "meter": "Jour {day} sur {max}"
+      },
+      "late": {
+        "title": "{renter} est en retard",
+        "body": "Retour prévu {when}."
+      },
+      "contested": {
+        "title": "{renter} a contesté une réclamation de {amount}",
+        "quote": "Le client a écrit"
+      }
+    },
+    "counter": {
+      "title": "Aujourd’hui au comptoir",
+      "empty": "Aucune remise ni aucun retour aujourd’hui.",
+      "now": "Maintenant {time}",
+      "handover": "Remise",
+      "return": "Retour",
+      "columns": {
+        "time": "Heure",
+        "visit": "Remise ou retour",
+        "renter": "Client",
+        "hold": "Empreinte",
+        "status": "État"
+      },
+      "done": "Fait",
+      "due": "À faire",
+      "hold": {
+        "none": "Aucune empreinte",
+        "requested": "En attente de l’accord du client",
+        "held": "{amount} bloqués",
+        "assuredUntil": "{amount} · garanti jusqu’à {time}",
+        "released": "Libérée",
+        "captured": "Encaissée",
+        "other": "{amount}"
+      }
+    },
+    "holds": {
+      "title": "Empreintes sur PayPal",
+      "total": "réservés sur {count, plural, one {# empreinte} other {# empreintes}}",
+      "empty": "Aucune empreinte sur PayPal pour l’instant.",
+      "assured": "Dans les trois premiers jours",
+      "valid": "Après le troisième jour, encore valides",
+      "ending": "Prennent fin sous trois jours",
+      "note": "Un encaissement est le mieux garanti dans les trois premiers jours d’une empreinte. PayPal met fin à chaque empreinte le jour {max}."
+    },
+    "month": {
+      "title": "{month} jusqu’ici",
+      "fees": "Frais de location",
+      "released": "Rendu aux clients",
+      "claimed": "Dommages réclamés",
+      "recovered": "Récupéré"
+    },
+    "activity": {
+      "title": "Activité",
+      "actions": {
+        "shop": {
+          "created": "Boutique créée"
+        },
+        "prices": {
+          "published": "Grille tarifaire publiée"
+        },
+        "staff": {
+          "invited": "Membre de l’équipe invité",
+          "invitation_revoked": "Invitation retirée"
+        },
+        "paypal": {
+          "connected": "PayPal connecté"
+        },
+        "sample_rentals": {
+          "added": "Locations d’exemple ajoutées"
+        },
+        "hold": {
+          "placed": "Empreinte posée",
+          "released": "Empreinte libérée",
+          "captured": "Empreinte encaissée"
+        },
+        "handover": {
+          "done": "Remise faite"
+        },
+        "claim": {
+          "raised": "Réclamation faite",
+          "contested": "Réclamation contestée par le client"
+        },
+        "other": "Modification enregistrée"
+      }
+    },
+    "sample": {
+      "label": "Exemple",
+      "noticeTitle": "Cette boutique contient des locations d’exemple.",
+      "noticeBody": "Elles sont simulées pour montrer une journée de travail. Aucun argent n’a transité par PayPal, et chacune est signalée comme exemple ici et dans les registres.",
+      "offerTitle": "Voir une journée de travail",
+      "offerBody": "Ajoutez onze locations d’exemple : articles sortis, retours du jour, réclamations à trancher et une empreinte proche de sa fin. Chacune est signalée comme exemple et ne déplace aucun argent.",
+      "add": "Ajouter des locations d’exemple",
+      "adding": "Ajout…",
+      "added": "Locations d’exemple ajoutées.",
+      "needsPrices": "Publiez d’abord une grille tarifaire. Les réclamations d’exemple utilisent ses prix."
+    },
+    "setup": {
+      "progress": "{done} sur {total} faits"
     }
   }
 }

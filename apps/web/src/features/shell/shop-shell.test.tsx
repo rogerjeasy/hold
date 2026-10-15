@@ -1,0 +1,69 @@
+import { screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { describe, expect, it } from 'vitest'
+import { navigation } from '@/test/navigation'
+import { renderWithIntl } from '@/test/render'
+import { ShopShell } from './shop-shell'
+
+const person = {
+  userId: 'user-1',
+  email: 'tomas@ribeirabikes.example',
+  name: 'Tomás Ribeiro',
+  shops: [
+    { shopId: 'shop-1', name: 'Ribeira Bikes', role: 'owner' as const },
+    { shopId: 'shop-2', name: 'Ribeira Kayaks', role: 'manager' as const },
+  ],
+}
+
+function shell(paypalConnected = true) {
+  return renderWithIntl(
+    <ShopShell person={person} shop={{ id: 'shop-1', name: 'Ribeira Bikes' }} role="owner" paypalConnected={paypalConnected}>
+      <p>The page</p>
+    </ShopShell>,
+  )
+}
+
+describe('the shop shell', () => {
+  it('holds the page in the main landmark', () => {
+    shell()
+    expect(screen.getByRole('main')).toHaveTextContent('The page')
+  })
+
+  it('marks the current page in the shop’s menu, and groups the settings', () => {
+    navigation.pathname = '/shop/prices'
+    shell()
+    const menu = screen.getAllByRole('navigation', { name: 'Shop pages' })[0]
+    if (menu === undefined) throw new Error('No shop menu.')
+    expect(within(menu).getByRole('link', { name: 'Prices' })).toHaveAttribute('aria-current', 'page')
+    expect(within(menu).getByRole('link', { name: 'Today' })).not.toHaveAttribute('aria-current')
+    expect(within(menu).getByText('Settings')).toBeInTheDocument()
+  })
+
+  it('names the shop, the person’s role in it, and offers the person’s other shops', async () => {
+    shell()
+    const switcher = screen.getAllByRole('button', { name: /Switch shop, now Ribeira Bikes/ })[0]
+    if (switcher === undefined) throw new Error('No shop switcher.')
+    expect(switcher).toHaveTextContent('Owner')
+    await userEvent.click(switcher)
+    expect(await screen.findByRole('menuitem', { name: /Ribeira Kayaks/ })).toBeInTheDocument()
+  })
+
+  it('offers the website and signing out from the account menu', async () => {
+    shell()
+    const account = screen.getAllByRole('button', { name: 'Account of Tomás Ribeiro' })[0]
+    if (account === undefined) throw new Error('No account menu.')
+    await userEvent.click(account)
+    expect(await screen.findByRole('menuitem', { name: 'Sign out' })).toBeInTheDocument()
+    expect(screen.getByRole('menuitem', { name: 'Hold website' })).toHaveAttribute('href', '/')
+  })
+
+  it('says whether PayPal is connected, and in which mode', () => {
+    shell(true)
+    expect(screen.getAllByRole('link', { name: 'PayPal connected · sandbox' })[0]).toHaveAttribute('href', '/shop/paypal')
+  })
+
+  it('says plainly when PayPal is not connected', () => {
+    shell(false)
+    expect(screen.getAllByRole('link', { name: 'PayPal not connected' })[0]).toBeInTheDocument()
+  })
+})

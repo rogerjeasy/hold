@@ -21,8 +21,37 @@ function flatten(tree: Tree, prefix = ''): Map<string, string> {
   return entries
 }
 
+// The names a message fills in: {name}, or {name, plural, ...}. The branches of a plural, such as "one {# item}", are
+// text in the reader's language, read for the placeholders inside them. Messages that quote braces are not used.
 function placeholders(text: string): string[] {
-  return [...text.matchAll(/\{(\w+)/g)].map((match) => match[1] ?? '').sort()
+  const names = new Set<string>()
+  let at = 0
+  // Reads one message up to the brace that closes it, or to the end.
+  function message(): void {
+    while (at < text.length && text[at] !== '}') {
+      if (text[at] === '{') argument()
+      else at += 1
+    }
+  }
+  // Reads {name} or {name, type, selector {message} ...}, from its opening brace to its closing one.
+  function argument(): void {
+    at += 1
+    const end = text.slice(at).search(/[,}]/)
+    names.add(text.slice(at, at + end).trim())
+    at += end
+    if (text[at] === ',') {
+      while (at < text.length && text[at] !== '}') {
+        if (text[at] === '{') {
+          at += 1
+          message()
+        }
+        at += 1
+      }
+    }
+    at += 1
+  }
+  message()
+  return [...names].sort()
 }
 
 const english = flatten(load(routing.defaultLocale))

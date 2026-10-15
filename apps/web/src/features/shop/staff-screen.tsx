@@ -27,7 +27,7 @@ export function StaffScreen({ shopName, currency, staff, invitations, invitableR
   const inviteId = useId()
 
   return (
-    <ShopFrame shopName={shopName} current="staff" title={t('title')}>
+    <ShopFrame shopName={shopName} title={t('title')}>
       <div className="grid max-w-prose gap-12">
         <section aria-labelledby={teamId}>
           <h2 id={teamId} className="text-title">

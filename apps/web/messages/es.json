@@ -39,7 +39,7 @@
       "description": "Abre una cuenta de Hold para tu tienda de alquiler. Sin contraseña que crear y sin equipo que comprar."
     },
     "shop": {
-      "title": "Tu tienda"
+      "title": "Hoy"
     },
     "invite": {
       "title": "Una invitación"
@@ -1152,11 +1152,12 @@
     },
     "nav": {
       "label": "Páginas de la tienda",
-      "home": "Resumen",
+      "home": "Hoy",
       "security": "Seguridad",
       "staff": "Equipo",
       "prices": "Precios",
-      "paypal": "PayPal"
+      "paypal": "PayPal",
+      "settings": "Ajustes"
     },
     "setup": {
       "title": "Prepara tu tienda",
@@ -1217,7 +1218,9 @@
       "wear_policy_too_long": "La política de desgaste es demasiado larga.",
       "currency_fixed": "La moneda queda fijada en cuanto se publica una lista de precios.",
       "paypal_refused": "PayPal no ha aceptado estas credenciales. Comprueba que copiaste las dos de la misma app de sandbox.",
-      "paypal_unavailable": "No se pudo conectar con PayPal. No se ha guardado nada. Inténtalo de nuevo en un momento."
+      "paypal_unavailable": "No se pudo conectar con PayPal. No se ha guardado nada. Inténtalo de nuevo en un momento.",
+      "no_price_list": "Publica primero una lista de precios. Las reclamaciones de muestra usan sus precios.",
+      "has_rentals": "Esta tienda ya tiene alquileres, así que no se añadió ninguna muestra."
     },
     "security": {
       "title": "Seguridad",
@@ -1311,6 +1314,156 @@
     "invitation": {
       "subject": "Te invitan a {shop} en Hold",
       "body": "{inviter} te invita a trabajar en {shop} con Hold, como {role}.\n\nAbre este enlace para aceptar. Sirve una sola vez, durante siete días:\n{link}\n\nHold te enviará un código para confirmar que la dirección es tuya. Si no esperabas este correo, puedes ignorarlo."
+    }
+  },
+  "shell": {
+    "home": "Hoy en {shop}",
+    "shops": "Tus tiendas",
+    "switchShop": "Cambiar de tienda, ahora {shop}",
+    "current": "Actual",
+    "account": "Cuenta de {name}",
+    "website": "Sitio web de Hold",
+    "openMenu": "Abrir el menú de la tienda",
+    "closeMenu": "Cerrar el menú",
+    "menuTitle": "Menú de la tienda",
+    "paypal": {
+      "connected": "PayPal conectado · sandbox",
+      "notConnected": "PayPal sin conectar"
+    }
+  },
+  "today": {
+    "greeting": {
+      "morning": "Buenos días, {name}",
+      "afternoon": "Buenas tardes, {name}",
+      "evening": "Buenas noches, {name}",
+      "night": "Buenas noches, {name}"
+    },
+    "decisionsSummary": "{count, plural, =0 {No hay decisiones pendientes.} one {# asunto necesita una decisión.} other {# asuntos necesitan una decisión.}}",
+    "returnsSummary": "{count, plural, =0 {Hoy no vuelve ningún alquiler.} one {Hoy vuelve # alquiler.} other {Hoy vuelven # alquileres.}}",
+    "figures": {
+      "label": "Hoy en cifras",
+      "out": "Fuera ahora",
+      "outNote": "en {rentals, plural, =0 {ningún alquiler} one {# alquiler} other {# alquileres}}",
+      "due": "Vuelven hoy",
+      "dueNote": "{late, plural, =0 {Ninguno con retraso} one {# con retraso} other {# con retraso}}",
+      "held": "Retenido en PayPal",
+      "heldNote": "{count, plural, =0 {Sin retenciones} one {# retención} other {# retenciones}}",
+      "claims": "Reclamaciones por decidir",
+      "claimsNote": "{amount} en total",
+      "claimsNoteNone": "Ninguna pendiente"
+    },
+    "renter": "Un cliente",
+    "decisions": {
+      "title": "Necesita una decisión",
+      "empty": "Nada necesita una decisión.",
+      "emptyBody": "Aquí aparecen las reclamaciones por aprobar, las retenciones a punto de vencer y las devoluciones con retraso.",
+      "claim": {
+        "title": "Reclamación de {amount} a {renter}",
+        "body": "{line}. Pendiente de aprobación.",
+        "bodyNoLine": "Pendiente de aprobación."
+      },
+      "hold_ending": {
+        "title": "La retención de {renter} vence el {when}",
+        "body": "Libérala o presenta una reclamación antes de que PayPal la deje caducar.",
+        "meter": "Día {day} de {max}"
+      },
+      "late": {
+        "title": "{renter} se ha retrasado",
+        "body": "Debía volver el {when}."
+      },
+      "contested": {
+        "title": "{renter} impugnó una reclamación de {amount}",
+        "quote": "El cliente escribió"
+      }
+    },
+    "counter": {
+      "title": "Hoy en el mostrador",
+      "empty": "Hoy no hay entregas ni devoluciones.",
+      "now": "Ahora {time}",
+      "handover": "Entrega",
+      "return": "Devolución",
+      "columns": {
+        "time": "Hora",
+        "visit": "Entrega o devolución",
+        "renter": "Cliente",
+        "hold": "Retención",
+        "status": "Estado"
+      },
+      "done": "Hecho",
+      "due": "Pendiente",
+      "hold": {
+        "none": "Sin retención",
+        "requested": "Esperando la aprobación del cliente",
+        "held": "{amount} retenidos",
+        "assuredUntil": "{amount} · garantizado hasta las {time}",
+        "released": "Liberada",
+        "captured": "Cobrada",
+        "other": "{amount}"
+      }
+    },
+    "holds": {
+      "title": "Retenciones en PayPal",
+      "total": "reservados en {count, plural, one {# retención} other {# retenciones}}",
+      "empty": "Ahora no hay retenciones en PayPal.",
+      "assured": "En los tres primeros días",
+      "valid": "Después del tercer día, aún válidas",
+      "ending": "Vencen en tres días o menos",
+      "note": "Un cobro está mejor garantizado en los tres primeros días de una retención. PayPal termina cada retención el día {max}."
+    },
+    "month": {
+      "title": "{month} hasta hoy",
+      "fees": "Tarifas de alquiler",
+      "released": "Liberado a clientes",
+      "claimed": "Daños reclamados",
+      "recovered": "Recuperado"
+    },
+    "activity": {
+      "title": "Actividad",
+      "actions": {
+        "shop": {
+          "created": "Tienda creada"
+        },
+        "prices": {
+          "published": "Lista de precios publicada"
+        },
+        "staff": {
+          "invited": "Empleado invitado",
+          "invitation_revoked": "Invitación retirada"
+        },
+        "paypal": {
+          "connected": "PayPal conectado"
+        },
+        "sample_rentals": {
+          "added": "Alquileres de muestra añadidos"
+        },
+        "hold": {
+          "placed": "Retención realizada",
+          "released": "Retención liberada",
+          "captured": "Retención cobrada"
+        },
+        "handover": {
+          "done": "Entrega hecha"
+        },
+        "claim": {
+          "raised": "Reclamación presentada",
+          "contested": "Reclamación impugnada por el cliente"
+        },
+        "other": "Cambio registrado"
+      }
+    },
+    "sample": {
+      "label": "Muestra",
+      "noticeTitle": "Esta tienda tiene alquileres de muestra.",
+      "noticeBody": "Están simulados para enseñar un día de trabajo. No se movió dinero de PayPal, y cada uno aparece como muestra aquí y en los registros.",
+      "offerTitle": "Ver un día de trabajo",
+      "offerBody": "Añade once alquileres de muestra: artículos fuera, devoluciones de hoy, reclamaciones por decidir y una retención a punto de vencer. Cada uno aparece como muestra y no mueve dinero.",
+      "add": "Añadir alquileres de muestra",
+      "adding": "Añadiendo…",
+      "added": "Alquileres de muestra añadidos.",
+      "needsPrices": "Publica primero una lista de precios. Las reclamaciones de muestra usan sus precios."
+    },
+    "setup": {
+      "progress": "{done} de {total} hechos"
     }
   }
 }

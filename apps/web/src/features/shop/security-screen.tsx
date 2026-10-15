@@ -20,7 +20,7 @@ export function SecurityScreen({ shopName, passkeys, required, emailCodeSession,
   const format = useFormatter()
 
   return (
-    <ShopFrame shopName={shopName} current="security" title={t('title')}>
+    <ShopFrame shopName={shopName} title={t('title')}>
       <div className="grid max-w-prose gap-6">
         <p className="text-lead text-muted-foreground">{required ? t('leadRequired') : t('lead')}</p>
         {passkeys === undefined ? (

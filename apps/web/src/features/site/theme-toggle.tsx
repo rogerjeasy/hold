@@ -6,7 +6,7 @@ import { useTheme } from 'next-themes'
 import { Button } from '@/components/ui/button'
 import { useMounted } from '@/hooks/use-mounted'
 
-export function ThemeToggle() {
+export function ThemeToggle({ className }: { className?: string }) {
   const t = useTranslations('theme')
   const { resolvedTheme, setTheme } = useTheme()
   const mounted = useMounted()
@@ -17,6 +17,7 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
+      className={className}
       aria-label={isDark ? t('toLight') : t('toDark')}
       onClick={() => {
         setTheme(isDark ? 'light' : 'dark')

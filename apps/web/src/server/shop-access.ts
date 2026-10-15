@@ -4,6 +4,7 @@ import type { StaffRole } from '@hold/domain'
 import { auditLog, findPerson, inShop, shopSettings, staffRoleOf } from '@hold/db'
 import type { Person, ShopSettings, Transaction } from '@hold/db'
 import { revalidatePath } from 'next/cache'
+import { cache } from 'react'
 import { z } from 'zod'
 import { chosenShopId, readAccessToken, sessionFactor } from '@/features/auth/session-cookies'
 import type { SignInFactor } from '@/features/auth/session-cookies'
@@ -29,8 +30,9 @@ export type ShopAccess =
   | { readonly kind: 'no_shop'; readonly person: Person | undefined }
   | { readonly kind: 'in_shop'; readonly context: ShopContext }
 
-// Who is asking and in which shop. Pages call this to decide what to show. It changes nothing.
-export async function shopAccess(): Promise<ShopAccess> {
+// Who is asking and in which shop. Pages call this to decide what to show. It changes nothing. Asked once per
+// request: the shop's frame and the page both need it.
+export const shopAccess = cache(async (): Promise<ShopAccess> => {
   const accessToken = await readAccessToken()
   if (accessToken === undefined) return { kind: 'signed_out' }
   const { identity, database } = await getServices()
@@ -63,7 +65,7 @@ export async function shopAccess(): Promise<ShopAccess> {
       passkeyNeeded: strongNeeded && factor !== 'passkey',
     },
   }
-}
+})
 
 export type ShopActionFailure = 'signed_out' | 'no_shop' | 'role' | 'passkey_needed' | 'invalid'
 

@@ -39,7 +39,7 @@
       "description": "Eröffnen Sie ein Hold-Konto für Ihren Verleih. Kein Passwort, keine Geräte."
     },
     "shop": {
-      "title": "Ihr Verleih"
+      "title": "Heute"
     },
     "invite": {
       "title": "Eine Einladung"
@@ -1152,11 +1152,12 @@
     },
     "nav": {
       "label": "Seiten des Verleihs",
-      "home": "Übersicht",
+      "home": "Heute",
       "security": "Sicherheit",
       "staff": "Team",
       "prices": "Preise",
-      "paypal": "PayPal"
+      "paypal": "PayPal",
+      "settings": "Einstellungen"
     },
     "setup": {
       "title": "Richten Sie Ihren Verleih ein",
@@ -1217,7 +1218,9 @@
       "wear_policy_too_long": "Die Regel zur Abnutzung ist zu lang.",
       "currency_fixed": "Die Währung steht fest, sobald eine Preisliste veröffentlicht ist.",
       "paypal_refused": "PayPal hat diese Zugangsdaten nicht angenommen. Prüfen Sie, ob Sie beide aus derselben Sandbox-App kopiert haben.",
-      "paypal_unavailable": "PayPal ist nicht erreichbar. Es wurde nichts gespeichert. Versuchen Sie es gleich noch einmal."
+      "paypal_unavailable": "PayPal ist nicht erreichbar. Es wurde nichts gespeichert. Versuchen Sie es gleich noch einmal.",
+      "no_price_list": "Veröffentlichen Sie zuerst eine Preisliste. Die Beispielforderungen verwenden ihre Preise.",
+      "has_rentals": "Dieser Laden hat schon Vermietungen, daher wurden keine Beispiele hinzugefügt."
     },
     "security": {
       "title": "Sicherheit",
@@ -1311,6 +1314,156 @@
     "invitation": {
       "subject": "Einladung zu {shop} auf Hold",
       "body": "{inviter} lädt Sie ein, bei {shop} mit Hold zu arbeiten, als {role}.\n\nÖffnen Sie diesen Link, um anzunehmen. Er gilt einmal, sieben Tage lang:\n{link}\n\nHold schickt Ihnen einen Code, um zu bestätigen, dass die Adresse Ihnen gehört. Wenn Sie diese E-Mail nicht erwartet haben, können Sie sie ignorieren."
+    }
+  },
+  "shell": {
+    "home": "Heute bei {shop}",
+    "shops": "Ihre Läden",
+    "switchShop": "Laden wechseln, jetzt {shop}",
+    "current": "Aktuell",
+    "account": "Konto von {name}",
+    "website": "Website von Hold",
+    "openMenu": "Ladenmenü öffnen",
+    "closeMenu": "Menü schließen",
+    "menuTitle": "Ladenmenü",
+    "paypal": {
+      "connected": "PayPal verbunden · Sandbox",
+      "notConnected": "PayPal nicht verbunden"
+    }
+  },
+  "today": {
+    "greeting": {
+      "morning": "Guten Morgen, {name}",
+      "afternoon": "Guten Tag, {name}",
+      "evening": "Guten Abend, {name}",
+      "night": "Guten Abend, {name}"
+    },
+    "decisionsSummary": "{count, plural, =0 {Keine Entscheidung steht an.} one {# Sache wartet auf eine Entscheidung.} other {# Sachen warten auf eine Entscheidung.}}",
+    "returnsSummary": "{count, plural, =0 {Heute kommt keine Vermietung zurück.} one {Heute kommt # Vermietung zurück.} other {Heute kommen # Vermietungen zurück.}}",
+    "figures": {
+      "label": "Heute in Zahlen",
+      "out": "Gerade verliehen",
+      "outNote": "in {rentals, plural, =0 {keiner Vermietung} one {# Vermietung} other {# Vermietungen}}",
+      "due": "Heute zurück",
+      "dueNote": "{late, plural, =0 {Keine verspätet} one {# verspätet} other {# verspätet}}",
+      "held": "Bei PayPal reserviert",
+      "heldNote": "{count, plural, =0 {Keine Reservierungen} one {# Reservierung} other {# Reservierungen}}",
+      "claims": "Offene Forderungen",
+      "claimsNote": "{amount} insgesamt",
+      "claimsNoteNone": "Keine offen"
+    },
+    "renter": "Ein Kunde",
+    "decisions": {
+      "title": "Wartet auf Entscheidung",
+      "empty": "Nichts wartet auf eine Entscheidung.",
+      "emptyBody": "Hier erscheinen Forderungen zur Freigabe, Reservierungen kurz vor dem Ende und verspätete Rückgaben.",
+      "claim": {
+        "title": "Forderung über {amount} an {renter}",
+        "body": "{line}. Wartet auf Freigabe.",
+        "bodyNoLine": "Wartet auf Freigabe."
+      },
+      "hold_ending": {
+        "title": "Die Reservierung für {renter} endet {when}",
+        "body": "Geben Sie sie frei oder stellen Sie eine Forderung, bevor PayPal sie verfallen lässt.",
+        "meter": "Tag {day} von {max}"
+      },
+      "late": {
+        "title": "{renter} ist verspätet",
+        "body": "Rückgabe war {when} fällig."
+      },
+      "contested": {
+        "title": "{renter} hat eine Forderung über {amount} bestritten",
+        "quote": "Der Kunde schrieb"
+      }
+    },
+    "counter": {
+      "title": "Heute an der Theke",
+      "empty": "Heute keine Übergaben und keine Rückgaben.",
+      "now": "Jetzt {time}",
+      "handover": "Übergabe",
+      "return": "Rückgabe",
+      "columns": {
+        "time": "Zeit",
+        "visit": "Übergabe oder Rückgabe",
+        "renter": "Kunde",
+        "hold": "Reservierung",
+        "status": "Stand"
+      },
+      "done": "Erledigt",
+      "due": "Offen",
+      "hold": {
+        "none": "Keine Reservierung",
+        "requested": "Wartet auf die Zustimmung des Kunden",
+        "held": "{amount} reserviert",
+        "assuredUntil": "{amount} · gesichert bis {time}",
+        "released": "Freigegeben",
+        "captured": "Eingezogen",
+        "other": "{amount}"
+      }
+    },
+    "holds": {
+      "title": "Reservierungen bei PayPal",
+      "total": "reserviert in {count, plural, one {# Reservierung} other {# Reservierungen}}",
+      "empty": "Gerade keine Reservierungen bei PayPal.",
+      "assured": "In den ersten drei Tagen",
+      "valid": "Nach dem dritten Tag, noch gültig",
+      "ending": "Enden in höchstens drei Tagen",
+      "note": "Ein Einzug ist in den ersten drei Tagen einer Reservierung am sichersten. PayPal beendet jede Reservierung an Tag {max}."
+    },
+    "month": {
+      "title": "{month} bisher",
+      "fees": "Mietgebühren",
+      "released": "An Kunden freigegeben",
+      "claimed": "Geforderte Schäden",
+      "recovered": "Eingenommen"
+    },
+    "activity": {
+      "title": "Aktivität",
+      "actions": {
+        "shop": {
+          "created": "Laden angelegt"
+        },
+        "prices": {
+          "published": "Preisliste veröffentlicht"
+        },
+        "staff": {
+          "invited": "Mitarbeiter eingeladen",
+          "invitation_revoked": "Einladung zurückgezogen"
+        },
+        "paypal": {
+          "connected": "PayPal verbunden"
+        },
+        "sample_rentals": {
+          "added": "Beispielvermietungen hinzugefügt"
+        },
+        "hold": {
+          "placed": "Reservierung gesetzt",
+          "released": "Reservierung freigegeben",
+          "captured": "Reservierung eingezogen"
+        },
+        "handover": {
+          "done": "Übergabe erledigt"
+        },
+        "claim": {
+          "raised": "Forderung gestellt",
+          "contested": "Forderung vom Kunden bestritten"
+        },
+        "other": "Änderung erfasst"
+      }
+    },
+    "sample": {
+      "label": "Beispiel",
+      "noticeTitle": "Dieser Laden enthält Beispielvermietungen.",
+      "noticeBody": "Sie sind simuliert, um einen Arbeitstag zu zeigen. Es wurde kein PayPal-Geld bewegt, und jede ist hier und in den Aufzeichnungen als Beispiel gekennzeichnet.",
+      "offerTitle": "Einen Arbeitstag ansehen",
+      "offerBody": "Fügen Sie elf Beispielvermietungen hinzu: verliehene Artikel, heutige Rückgaben, offene Forderungen und eine Reservierung kurz vor dem Ende. Jede ist als Beispiel gekennzeichnet und bewegt kein Geld.",
+      "add": "Beispielvermietungen hinzufügen",
+      "adding": "Wird hinzugefügt…",
+      "added": "Beispielvermietungen hinzugefügt.",
+      "needsPrices": "Veröffentlichen Sie zuerst eine Preisliste. Die Beispielforderungen verwenden ihre Preise."
+    },
+    "setup": {
+      "progress": "{done} von {total} erledigt"
     }
   }
 }

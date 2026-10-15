@@ -1,5 +1,6 @@
 'use client'
 
+import { cn } from 'cn'
 import { Globe } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
@@ -7,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { getPathname, usePathname } from '@/i18n/navigation'
 import { routing } from '@/i18n/routing'
 
-export function LanguageSwitcher() {
+export function LanguageSwitcher({ className }: { className?: string }) {
   const t = useTranslations('language')
   const current = useLocale()
   const pathname = usePathname()
@@ -15,7 +16,7 @@ export function LanguageSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" aria-label={t('label')} className="px-2.5">
+        <Button variant="ghost" aria-label={t('label')} className={cn('px-2.5', className)}>
           <Globe aria-hidden="true" />
           <span>{current.toUpperCase()}</span>
         </Button>

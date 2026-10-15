@@ -18,7 +18,7 @@ export function PricesScreen({ shopName, current, editor, canPublish, gate }: Pr
   const format = useFormatter()
 
   return (
-    <ShopFrame shopName={shopName} current="prices" title={t('title')}>
+    <ShopFrame shopName={shopName} title={t('title')}>
       <div className="grid max-w-3xl gap-10">
         <p className="max-w-prose text-lead text-muted-foreground">
           {current === undefined
