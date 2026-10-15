@@ -13,9 +13,14 @@ test('an owner adds a passkey, confirms with it, then sets up prices, staff and 
   await expect(page.getByText('Changing prices, staff or PayPal needs a passkey.', { exact: false })).toBeVisible()
   await page.getByRole('link', { name: 'Add a passkey' }).click()
   await page.getByRole('button', { name: 'Add a passkey on this device' }).click()
-  await expect(page.getByText('Passkey added.')).toBeVisible()
+  // The list is the lasting proof. "Passkey added." shows only until the page refreshes and asks for the passkey
+  // before adding another.
+  await expect(page.getByRole('listitem').filter({ hasText: 'Passkey 1' })).toBeVisible()
 
   await menu.getByRole('link', { name: 'Prices' }).click()
+  // The security page has a button of the same name, for adding another passkey. Wait until it has gone.
+  await expect(page).toHaveURL(/\/shop\/prices$/)
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Prices')
   await page.getByRole('button', { name: 'Confirm with my passkey' }).click()
   await expect(page).toHaveURL(/\/shop\/prices$/)
   await page.getByLabel('Currency').selectOption('CHF')
@@ -76,7 +81,7 @@ test('an owner fills an empty shop with sample rentals, each marked as a sample'
 
   await page.goto('/shop/security')
   await page.getByRole('button', { name: 'Add a passkey on this device' }).click()
-  await expect(page.getByText('Passkey added.')).toBeVisible()
+  await expect(page.getByRole('listitem').filter({ hasText: 'Passkey 1' })).toBeVisible()
   await page.goto('/shop/prices')
   await page.getByRole('button', { name: 'Confirm with my passkey' }).click()
   await page.getByLabel('Currency').selectOption('EUR')
