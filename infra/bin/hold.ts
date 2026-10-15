@@ -16,5 +16,17 @@ if (typeof passkeyRelyingPartyId !== 'string' || passkeyRelyingPartyId === '') {
   throw new Error('Set the passkey domain: -c passkeyRelyingPartyId=<domain>, or "passkeyRelyingPartyId" in cdk.json.')
 }
 
-createHoldApp(app, { senderEmail, passkeyRelyingPartyId })
+// The commit whose image the web app runs: the deploy passes -c webImageTag=<commit>, the image CI built and pushed.
+const webImageTag: unknown = app.node.tryGetContext('webImageTag')
+if (typeof webImageTag !== 'string' || !/^[0-9a-f]{40}$/.test(webImageTag)) {
+  throw new Error('Name the image the web app runs: -c webImageTag=<commit>, a commit whose image is in hold-app.')
+}
+
+// The web app's own address, "webPublicUrl" in cdk.json. App Runner gives it only once the service exists.
+const webPublicUrl: unknown = app.node.tryGetContext('webPublicUrl')
+if (webPublicUrl !== undefined && (typeof webPublicUrl !== 'string' || !webPublicUrl.startsWith('https://'))) {
+  throw new Error('"webPublicUrl" in cdk.json is the web app\'s https:// address.')
+}
+
+createHoldApp(app, { senderEmail, passkeyRelyingPartyId, webImageTag, webPublicUrl })
 app.synth()

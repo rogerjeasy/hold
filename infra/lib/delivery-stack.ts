@@ -47,7 +47,11 @@ const at = {
   scheduleGroup: `arn:aws:scheduler:${REGION}:${ACCOUNT}:schedule-group/${PREFIX}-*`,
   schedules: `arn:aws:scheduler:${REGION}:${ACCOUNT}:schedule/${PREFIX}-*/*`,
   userPools: `arn:aws:cognito-idp:${REGION}:${ACCOUNT}:userpool/*`,
+  services: `arn:aws:apprunner:${REGION}:${ACCOUNT}:service/${PREFIX}-*`,
+  scaling: `arn:aws:apprunner:${REGION}:${ACCOUNT}:autoscalingconfiguration/${PREFIX}-*`,
 }
+// The web app's two roles (infra/lib/web-stack.ts), the only ones CloudFormation may hand on, and only to App Runner.
+const WEB_ROLES = [name('web'), name('web', 'access')]
 const HOLD_TAG = { 'aws:ResourceTag/project': PREFIX }
 const HOLD_REQUEST_TAG = { 'aws:RequestTag/project': PREFIX }
 
@@ -100,7 +104,7 @@ function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineR
   const add = (policy: iam.PolicyStatement) => role.addToPolicy(policy)
 
   // Reading configuration is not a risk, and several services describe only account-wide.
-  add(statement(['ec2:Describe*', 'rds:Describe*', 'cloudwatch:DescribeAlarms', 'cognito-idp:DescribeUserPool', 'cognito-idp:DescribeUserPoolClient', 'cognito-idp:GetGroup', 'cognito-idp:GetUserPoolMfaConfig', 'cognito-idp:ListUserPoolClients', 'cognito-idp:ListGroups', 'cognito-idp:ListTagsForResource', 'secretsmanager:GetRandomPassword'], ['*']))
+  add(statement(['ec2:Describe*', 'rds:Describe*', 'apprunner:Describe*', 'apprunner:List*', 'cloudwatch:DescribeAlarms', 'cognito-idp:DescribeUserPool', 'cognito-idp:DescribeUserPoolClient', 'cognito-idp:GetGroup', 'cognito-idp:GetUserPoolMfaConfig', 'cognito-idp:ListUserPoolClients', 'cognito-idp:ListGroups', 'cognito-idp:ListTagsForResource', 'secretsmanager:GetRandomPassword'], ['*']))
   add(statement(['ssm:GetParameters'], [`arn:aws:ssm:${REGION}:${ACCOUNT}:parameter/cdk-bootstrap/*`]))
 
   // Managing Hold's resources, without reading what they hold.
@@ -123,6 +127,11 @@ function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineR
   add(statement(['rds:CreateDBCluster', 'rds:ModifyDBCluster', 'rds:CreateDBInstance', 'rds:ModifyDBInstance'], [`arn:aws:rds:${REGION}:${ACCOUNT}:cluster-pg:default*`, `arn:aws:rds:${REGION}:${ACCOUNT}:pg:default*`, `arn:aws:rds:${REGION}:${ACCOUNT}:og:default*`]))
   // Encryption with AWS-managed keys, through the services that use them, for their own resources only.
   add(statement(['kms:DescribeKey', 'kms:CreateGrant'], ['*'], { StringEquals: { 'kms:ViaService': [`rds.${REGION}.amazonaws.com`, `secretsmanager.${REGION}.amazonaws.com`] }, Bool: { 'kms:GrantIsForAWSResource': true } }))
+
+  // App Runner: a service may be made only with the project tag, and only Hold's are changed after.
+  add(statement(['apprunner:CreateService'], ['*'], { StringEquals: HOLD_REQUEST_TAG }))
+  add(statement(['apprunner:UpdateService', 'apprunner:DeleteService', 'apprunner:TagResource', 'apprunner:UntagResource'], [`${at.services}/*`]))
+  add(statement(['apprunner:CreateAutoScalingConfiguration', 'apprunner:DeleteAutoScalingConfiguration', 'apprunner:TagResource', 'apprunner:UntagResource'], [`${at.scaling}/*`]))
 
   // Security groups: the project tag may be set only while one is created, and never changed after, so a group of
   // another project cannot be brought into reach by tagging it.
@@ -151,7 +160,7 @@ function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineR
   add(deny(['cognito-idp:TagResource', 'cognito-idp:UntagResource'], ['*'], { 'ForAnyValue:StringEquals': { 'aws:TagKeys': ['project'] } }))
 
   // Roles: only Hold's, created with the project tag and the boundary, and changed only while they carry both. The
-  // boundary can never be taken off, the project tag never changed, and no role handed on.
+  // boundary can never be taken off, the project tag never changed, and no role handed on but the web app's two.
   const withBoundary = { 'iam:PermissionsBoundary': boundary.managedPolicyArn }
   add(statement(['iam:CreateRole'], [at.role(`${PREFIX}-*`)], { StringEquals: { ...withBoundary, ...HOLD_REQUEST_TAG } }))
   add(statement(['iam:TagRole'], [at.role(`${PREFIX}-*`)], { StringEquals: HOLD_REQUEST_TAG }))
@@ -159,7 +168,13 @@ function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineR
   add(statement(['iam:DeleteRole', 'iam:UpdateRole', 'iam:UpdateAssumeRolePolicy', 'iam:TagRole', 'iam:UntagRole'], [at.role(`${PREFIX}-*`)], { StringEquals: HOLD_TAG }))
   add(statement(['iam:GetRole', 'iam:GetRolePolicy', 'iam:ListRolePolicies', 'iam:ListAttachedRolePolicies', 'iam:ListRoleTags'], [at.role(`${PREFIX}-*`)]))
   add(deny(['iam:UntagRole'], ['*'], { 'ForAnyValue:StringEquals': { 'aws:TagKeys': ['project'] } }))
-  add(deny(['iam:DeleteRolePermissionsBoundary', 'iam:AttachRolePolicy', 'iam:PassRole', 'iam:CreatePolicy', 'iam:CreatePolicyVersion', 'iam:SetDefaultPolicyVersion', 'iam:CreateUser', 'iam:CreateAccessKey'], ['*']))
+  add(
+    statement(['iam:PassRole'], WEB_ROLES.map(at.role), {
+      StringEquals: { 'iam:PassedToService': ['apprunner.amazonaws.com', 'build.apprunner.amazonaws.com', 'tasks.apprunner.amazonaws.com'] },
+    }),
+  )
+  role.addToPolicy(new iam.PolicyStatement({ effect: iam.Effect.DENY, actions: ['iam:PassRole'], notResources: WEB_ROLES.map(at.role) }))
+  add(deny(['iam:DeleteRolePermissionsBoundary', 'iam:AttachRolePolicy', 'iam:CreatePolicy', 'iam:CreatePolicyVersion', 'iam:SetDefaultPolicyVersion', 'iam:CreateUser', 'iam:CreateAccessKey'], ['*']))
   // The pipeline's own roles, and the boundary, change only by an administrator's hand.
   add(deny(['iam:*'], [...pipelineRoles.map(at.role), boundary.managedPolicyArn]))
   return role

@@ -10,13 +10,20 @@ import { QUEUES } from './work-stack.ts'
 // The default VPC lookup recorded by the first synth, so the tests build the same app with no AWS access.
 const context = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'cdk.context.json'), 'utf8')) as Record<string, unknown>
 
-const stacks = createHoldApp(new App({ context }), { senderEmail: 'codes@example.com', passkeyRelyingPartyId: 'localhost' })
+const IMAGE_TAG = '0123456789abcdef0123456789abcdef01234567'
+const stacks = createHoldApp(new App({ context }), {
+  senderEmail: 'codes@example.com',
+  passkeyRelyingPartyId: 'localhost',
+  webImageTag: IMAGE_TAG,
+  webPublicUrl: 'https://abc123.us-east-1.awsapprunner.com',
+})
 const data = Template.fromStack(stacks.data.stack)
 const identity = Template.fromStack(stacks.identity.stack)
 const work = Template.fromStack(stacks.work.stack)
 const registry = Template.fromStack(stacks.registry.stack)
+const web = Template.fromStack(stacks.web.stack)
 const delivery = Template.fromStack(stacks.delivery.stack)
-const all = [data, identity, work, registry, delivery]
+const all = [data, identity, work, registry, web, delivery]
 
 // Resource types whose names live inside another Hold resource, such as a group inside Hold's own user pool.
 // Their names cannot meet another project's, so they need no prefix.
@@ -35,6 +42,8 @@ const NAME_PROPERTIES = [
   'RepositoryName',
   'AlarmName',
   'Name',
+  'ServiceName',
+  'AutoScalingConfigurationName',
 ]
 
 type Resource = { readonly Type: string; readonly DeletionPolicy?: string; readonly Properties?: Record<string, unknown> }
@@ -192,6 +201,71 @@ describe('the image registry', () => {
   })
 })
 
+describe('the web app', () => {
+  type Variable = { Name: string; Value: unknown }
+  const service = () => resourcesOfType(web, 'AWS::AppRunner::Service')[0]?.Properties ?? {}
+  const variables = () => (service()['SourceConfiguration'] as { ImageRepository: { ImageConfiguration: { RuntimeEnvironmentVariables: Variable[] } } }).ImageRepository.ImageConfiguration.RuntimeEnvironmentVariables
+  const instancePolicy = () => JSON.stringify(Object.entries(web.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('InstanceRole')))
+
+  it('runs on App Runner the image CI built from the commit, and changes only when a deploy names a new one', () => {
+    web.hasResourceProperties('AWS::AppRunner::Service', {
+      ServiceName: 'hold-web',
+      SourceConfiguration: {
+        AutoDeploymentsEnabled: false,
+        ImageRepository: Match.objectLike({ ImageRepositoryType: 'ECR', ImageConfiguration: Match.objectLike({ Port: '3000' }) }),
+      },
+    })
+    const image = JSON.stringify((service()['SourceConfiguration'] as { ImageRepository: { ImageIdentifier: unknown } }).ImageRepository.ImageIdentifier)
+    expect(image).toContain('HoldRegistry:ExportsOutputRefRepository')
+    expect(image).toContain(`:${IMAGE_TAG}`)
+  })
+
+  it('stops at two instances, so a burst of traffic cannot run up the bill through judging', () => {
+    web.hasResourceProperties('AWS::AppRunner::AutoScalingConfiguration', { AutoScalingConfigurationName: 'hold-web', MaxSize: 2 })
+  })
+
+  it('is told where its services are, and names its secrets without holding them', () => {
+    const names = variables().map((variable) => variable.Name)
+    for (const setting of ['HOLD_ENVIRONMENT', 'HOLD_AWS_REGION', 'HOLD_COGNITO_USER_POOL_ID', 'HOLD_COGNITO_CLIENT_ID', 'HOLD_DATABASE_CLUSTER_ARN', 'HOLD_DATABASE_SECRET_ARN', 'HOLD_DATABASE_NAME', 'HOLD_COOKIE_KEY_SECRET_ARN', 'HOLD_EMAIL_FROM', 'HOLD_PUBLIC_URL']) {
+      expect(names).toContain(setting)
+    }
+    expect(names).not.toContain('HOLD_COOKIE_KEY')
+    expect(variables()).toContainEqual({ Name: 'HOLD_ENVIRONMENT', Value: 'production' })
+    expect(variables()).toContainEqual({ Name: 'HOLD_PUBLIC_URL', Value: 'https://abc123.us-east-1.awsapprunner.com' })
+  })
+
+  it('logs in to the database as hold_app, never as the owner of the tables', () => {
+    const settings = JSON.stringify(variables())
+    expect(settings).toContain('AppUserSecret')
+    expect(settings).not.toMatch(/DatabaseSecret|database\/admin/)
+    expect(instancePolicy()).not.toMatch(/DatabaseSecret|database\/admin/)
+  })
+
+  it('may do only what the web app does: query the database, read its secrets, keep PayPal credentials, send email and put a person in a group', () => {
+    const statements = Object.entries(web.findResources('AWS::IAM::Policy'))
+      .filter(([key]) => key.startsWith('InstanceRole'))
+      .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: { Action: unknown }[] } } }).Properties.PolicyDocument.Statement)
+    const actions = new Set(statements.flatMap((statement) => [statement.Action].flat()))
+
+    expect(actions).toEqual(
+      new Set([
+        'rds-data:ExecuteStatement',
+        'rds-data:BatchExecuteStatement',
+        'rds-data:BeginTransaction',
+        'rds-data:CommitTransaction',
+        'rds-data:RollbackTransaction',
+        'secretsmanager:GetSecretValue',
+        'secretsmanager:CreateSecret',
+        'secretsmanager:PutSecretValue',
+        'secretsmanager:TagResource',
+        'ses:SendEmail',
+        'cognito-idp:AdminAddUserToGroup',
+      ]),
+    )
+    expect(instancePolicy()).toContain('secret:hold/paypal/shops/*')
+  })
+})
+
 describe('delivery', () => {
   it('lets only the main branch of Hold’s repository take the deploy role, through GitHub’s OpenID Connect', () => {
     delivery.hasResourceProperties('AWS::IAM::Role', {
@@ -225,7 +299,7 @@ describe('delivery', () => {
 
   it('lets the pipeline change only Hold’s resource stacks, and not the one holding its own roles', () => {
     const policies = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
-    for (const name of ['HoldData', 'HoldIdentity', 'HoldWork', 'HoldRegistry']) expect(policies).toContain(`stack/${name}/*`)
+    for (const name of ['HoldData', 'HoldIdentity', 'HoldWork', 'HoldRegistry', 'HoldWeb']) expect(policies).toContain(`stack/${name}/*`)
     expect(policies).not.toContain('stack/HoldDelivery')
     expect(policies).not.toContain('stack/*')
   })
@@ -246,7 +320,7 @@ describe('delivery', () => {
   })
 
   it('caps every role the resource stacks make with Hold’s permissions boundary', () => {
-    for (const template of [data, identity, work, registry]) {
+    for (const template of [data, identity, work, registry, web]) {
       for (const role of Object.values(template.findResources('AWS::IAM::Role'))) {
         expect(JSON.stringify(role)).toContain('policy/hold-permissions-boundary')
       }
@@ -269,10 +343,26 @@ describe('delivery', () => {
     expect(boundary).not.toContain('role/hold-*')
   })
 
-  it('lets CloudFormation change only roles that carry Hold’s tag, and never hand a role on', () => {
+  it('lets CloudFormation change only roles that carry Hold’s tag, and hand on only the web app’s two roles, to App Runner', () => {
     const statements = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
     expect(statements).toMatch(/iam:UpdateAssumeRolePolicy[^}]*aws:ResourceTag\/project/)
-    expect(statements).toMatch(/"Effect":"Deny"[^}]*iam:PassRole|iam:PassRole[^}]*"Effect":"Deny"/)
+
+    const passing = Object.values(delivery.findResources('AWS::IAM::Policy'))
+      .flatMap((policy) => (policy as { Properties: { PolicyDocument: { Statement: Record<string, unknown>[] } } }).Properties.PolicyDocument.Statement)
+      .filter((statement) => [statement['Action']].flat().includes('iam:PassRole'))
+    const allowed = passing.filter((statement) => statement['Effect'] === 'Allow' && JSON.stringify(statement).includes('role/hold-web'))
+    expect(allowed).toHaveLength(1)
+    expect(JSON.stringify(allowed[0]?.['Resource'])).toMatch(/role\/hold-web".*role\/hold-web-access"|role\/hold-web-access".*role\/hold-web"/)
+    expect(JSON.stringify(allowed[0]?.['Condition'])).toContain('apprunner.amazonaws.com')
+    const denied = passing.find((statement) => statement['Effect'] === 'Deny')
+    expect(JSON.stringify(denied?.['NotResource'])).toContain('role/hold-web-access')
+  })
+
+  it('lets CloudFormation make only App Runner services that carry Hold’s tag, and change only Hold’s', () => {
+    const statements = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
+    expect(statements).toMatch(/apprunner:CreateService[^}]*aws:RequestTag\/project/)
+    expect(statements).toContain('service/hold-*')
+    expect(statements).not.toContain('"apprunner:*"')
   })
 
   it('never lets the project tag be set on something that already exists', () => {

@@ -49,4 +49,4 @@ export const CDK_BOOTSTRAP_QUALIFIER = 'hnb659fds'
 export const CDK_ASSETS_BUCKET = `cdk-${CDK_BOOTSTRAP_QUALIFIER}-assets-${ACCOUNT}-${REGION}`
 export const CDK_ASSETS_PREFIX = 'hold/'
 // The stacks GitHub Actions deploys. HoldDelivery, which holds the pipeline's own roles, is not among them.
-export const PIPELINE_STACKS = ['HoldData', 'HoldIdentity', 'HoldWork', 'HoldRegistry'] as const
+export const PIPELINE_STACKS = ['HoldData', 'HoldIdentity', 'HoldWork', 'HoldRegistry', 'HoldWeb'] as const

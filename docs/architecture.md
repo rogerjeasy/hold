@@ -1326,7 +1326,7 @@ flowchart TB
     worker --> internet
 ```
 
-The CDK code is in `infra/`, as four stacks:
+The CDK code is in `infra/`, as five stacks:
 
 | Stack | Holds | Protection |
 |---|---|---|
@@ -1334,8 +1334,9 @@ The CDK code is in `infra/`, as four stacks:
 | `HoldIdentity` | The Cognito pool `hold-staff` for owners and staff, its groups and its web client. Codes go out through the SES identity `rogerjeasybavibidila@gmail.com`, which is verified outside the stack | Termination protection, deletion protection on the pool |
 | `HoldWork` | The spine's queues and their dead-letter queues and alarms, the schedule group, the role the scheduler uses | |
 | `HoldRegistry` | The image repository | Retained |
+| `HoldWeb` | The App Runner service `hold-web`, its instance role and the role it pulls the image with, and a scaling limit of two instances. Its address is App Runner's own, `https://<id>.us-east-1.awsapprunner.com`, the stack's `ServiceUrl` output | |
 
-The App Runner service and the worker's compute are added once there is an image to run.
+The worker's compute is added with its code. The web app's address is known only once the service exists, so it goes into `infra/cdk.json` as `webPublicUrl` after the first deploy, and the links in Hold's emails use it from the next one.
 
 ### 14.2 Containers
 
@@ -1354,7 +1355,7 @@ The App Runner service and the worker's compute are added once there is an image
 
 | Service | Runs on | Notes |
 |---|---|---|
-| web | App Runner | Health-checked, scales on requests. Deployed by pushing a new image tag |
+| web | App Runner, 1 vCPU and 2 GB, one to two instances | Checked by TCP on port 3000. Runs the image named by the deploy, never the newest pushed |
 | worker | To be chosen with its code | App Runner throttles CPU between requests, so it cannot poll queues. Lambda functions fed by SQS are the likely choice |
 
 ### 14.5 Data
@@ -1573,14 +1574,14 @@ These are targets, not measured results.
 2. Once CI passes on main, **Deploy** (`.github/workflows/deploy.yml`) runs. It can also be started by hand.
 3. Database migrations run through the Data API as `hold_admin` (`pnpm --filter @hold/db migrate:aurora`).
 4. The image is built and pushed to ECR, tagged with the commit. Tags are immutable.
-5. The CDK shows its diff, then deploys every stack.
-6. Once the App Runner service exists, it rolls forward to the new image, with health checks and automatic rollback.
+5. The CDK shows its diff, then deploys every stack, passing the commit as `webImageTag`.
+6. App Runner rolls `hold-web` forward to that commit's image, with health checks, and CloudFormation rolls back if it does not start.
 
 GitHub signs in to AWS through OpenID Connect as `hold-github-deploy`, made by the HoldDelivery stack. Only a workflow on the main branch of `rogerjeasy/hold` can take it, named by GitHub's immutable subject (owner and repository ids as well as names), so a renamed or recreated repository does not match. The account is shared, so nothing the pipeline holds reaches beyond Hold:
 - It never takes the account's CDK bootstrap roles, which could deploy any stack. Hold's stacks are synthesized with the caller's own credentials and keep their templates under `hold/` in the bootstrap bucket, the only prefix it may list.
-- It may change only the four resource stacks (`HoldData`, `HoldIdentity`, `HoldWork`, `HoldRegistry`), through change sets that CloudFormation carries out as `hold-cloudformation-exec`.
+- It may change only the five resource stacks (`HoldData`, `HoldIdentity`, `HoldWork`, `HoldRegistry`, `HoldWeb`), through change sets that CloudFormation carries out as `hold-cloudformation-exec`.
 - That CloudFormation role manages Hold's resources and reads none of their contents: no objects, messages, user accounts or credentials, except the database logins' secrets, which attaching the cluster needs. Security groups and user pools are reached by the `project=hold` tag, which may be set only while one is created and never changed after.
-- Every role it makes must carry the `project=hold` tag and `hold-permissions-boundary`, and it changes only roles that carry the tag. It can neither remove the boundary nor the tag, and can hand no role on. The boundary caps any Hold role at exactly what the app uses: sending and reading Hold's queues, reading and writing objects, reading Hold's secrets and keeping the shops' PayPal credentials, the database through the Data API, its schedules, its image, sending email, Claude on Bedrock, its own logs, and putting a person in a group of its user pool. The only role a Hold role may hand on is the scheduler's, to the scheduler.
+- Every role it makes must carry the `project=hold` tag and `hold-permissions-boundary`, and it changes only roles that carry the tag. It can neither remove the boundary nor the tag, and can hand on only the web app's two roles, `hold-web` and `hold-web-access`, and only to App Runner. It creates an App Runner service only with the `project=hold` tag, and changes only services named `hold-*`. The boundary caps any Hold role at exactly what the app uses: sending and reading Hold's queues, reading and writing objects, reading Hold's secrets and keeping the shops' PayPal credentials, the database through the Data API, its schedules, its image, sending email, Claude on Bedrock, its own logs, and putting a person in a group of its user pool. The only role a Hold role may hand on is the scheduler's, to the scheduler.
 - **What remains.** A template on main can still give a Hold role a trust policy naming another principal; the boundary keeps such a role to Hold's own resources. Main is where Hold's code comes from, so whoever can change it can already change what the app does with Hold's data.
 - HoldDelivery itself, with both roles and the boundary, is deployed only by an administrator, so a commit on main cannot widen what the pipeline may do.
 - Beyond deploying, the pipeline may push to `hold-app` and run statements on `hold-database` with the two database secrets. No AWS key is stored in GitHub. The ARNs it needs are repository variables, which hold no secret.

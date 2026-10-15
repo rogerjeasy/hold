@@ -70,12 +70,15 @@ jobs:
           docker build --tag "$REGISTRY/hold-app:$COMMIT" .
           docker push "$REGISTRY/hold-app:$COMMIT"
 
+      # The web app runs the image just pushed, named by the commit (infra/lib/web-stack.ts).
       - name: Show what the deploy will change
-        run: pnpm --filter @hold/infra exec cdk diff $STACKS
+        run: pnpm --filter @hold/infra exec cdk diff $STACKS -c webImageTag="$COMMIT"
         env:
-          STACKS: HoldData HoldIdentity HoldWork HoldRegistry
+          STACKS: HoldData HoldIdentity HoldWork HoldRegistry HoldWeb
+          COMMIT: ${{ github.event.workflow_run.head_sha || github.sha }}
       - name: Deploy the stacks
-        run: pnpm --filter @hold/infra exec cdk deploy $STACKS --role-arn "$CLOUDFORMATION_ROLE" --require-approval never
+        run: pnpm --filter @hold/infra exec cdk deploy $STACKS -c webImageTag="$COMMIT" --role-arn "$CLOUDFORMATION_ROLE" --require-approval never
         env:
-          STACKS: HoldData HoldIdentity HoldWork HoldRegistry
+          STACKS: HoldData HoldIdentity HoldWork HoldRegistry HoldWeb
+          COMMIT: ${{ github.event.workflow_run.head_sha || github.sha }}
           CLOUDFORMATION_ROLE: ${{ vars.AWS_CLOUDFORMATION_ROLE_ARN }}
