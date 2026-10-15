@@ -353,7 +353,8 @@ describe('delivery', () => {
     const allowed = passing.filter((statement) => statement['Effect'] === 'Allow' && JSON.stringify(statement).includes('role/hold-web'))
     expect(allowed).toHaveLength(1)
     expect(JSON.stringify(allowed[0]?.['Resource'])).toMatch(/role\/hold-web".*role\/hold-web-access"|role\/hold-web-access".*role\/hold-web"/)
-    expect(JSON.stringify(allowed[0]?.['Condition'])).toContain('apprunner.amazonaws.com')
+    // App Runner checks the pass itself and sets no iam:PassedToService, so the condition applies only when one is set.
+    expect(allowed[0]?.['Condition']).toEqual({ StringEqualsIfExists: { 'iam:PassedToService': ['apprunner.amazonaws.com', 'build.apprunner.amazonaws.com', 'tasks.apprunner.amazonaws.com'] } })
     const denied = passing.find((statement) => statement['Effect'] === 'Deny')
     expect(JSON.stringify(denied?.['NotResource'])).toContain('role/hold-web-access')
   })

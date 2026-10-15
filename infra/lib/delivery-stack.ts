@@ -169,9 +169,11 @@ function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineR
   add(statement(['iam:DeleteRole', 'iam:UpdateRole', 'iam:UpdateAssumeRolePolicy', 'iam:TagRole', 'iam:UntagRole'], [at.role(`${PREFIX}-*`)], { StringEquals: HOLD_TAG }))
   add(statement(['iam:GetRole', 'iam:GetRolePolicy', 'iam:ListRolePolicies', 'iam:ListAttachedRolePolicies', 'iam:ListRoleTags'], [at.role(`${PREFIX}-*`)]))
   add(deny(['iam:UntagRole'], ['*'], { 'ForAnyValue:StringEquals': { 'aws:TagKeys': ['project'] } }))
+  // App Runner checks the pass itself, without iam:PassedToService, so the service is named only where one is set.
+  // The two roles trust App Runner alone, which is the limit that holds either way.
   add(
     statement(['iam:PassRole'], WEB_ROLES.map(at.role), {
-      StringEquals: { 'iam:PassedToService': ['apprunner.amazonaws.com', 'build.apprunner.amazonaws.com', 'tasks.apprunner.amazonaws.com'] },
+      StringEqualsIfExists: { 'iam:PassedToService': ['apprunner.amazonaws.com', 'build.apprunner.amazonaws.com', 'tasks.apprunner.amazonaws.com'] },
     }),
   )
   role.addToPolicy(new iam.PolicyStatement({ effect: iam.Effect.DENY, actions: ['iam:PassRole'], notResources: WEB_ROLES.map(at.role) }))
