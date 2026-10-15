@@ -10,9 +10,10 @@ export type DataApiSettings = {
   readonly database: string
 }
 
-// Aurora pauses at zero capacity. While it resumes, every call fails with this for up to about half a minute.
+// Aurora pauses at zero capacity. While it resumes, every call fails with this, usually for under a minute, but a
+// deploy has seen it last longer than one. Three minutes of trying covers it.
 const RESUMING = 'DatabaseResumingException'
-const RESUME_ATTEMPTS = 12
+const RESUME_ATTEMPTS = 60
 const RESUME_WAIT_MILLISECONDS = 3_000
 
 function isResuming(error: unknown): boolean {
@@ -20,9 +21,9 @@ function isResuming(error: unknown): boolean {
 }
 
 // Deployed, the services reach Aurora through the RDS Data API: SQL over HTTPS, signed with IAM (decision 28).
-// Returned as the driver's own type, which migrations need. Repositories take it as a Database.
-export function createDataApiDatabase(settings: DataApiSettings) {
-  const client = new RDSDataClient({ region: settings.region })
+// Returned as the driver's own type, which migrations need. Repositories take it as a Database. The client is passed
+// in only by tests.
+export function createDataApiDatabase(settings: DataApiSettings, client = new RDSDataClient({ region: settings.region })) {
   // The call fails before any statement runs, so trying it again cannot run a statement twice.
   client.middlewareStack.add(
     (next) => async (args) => {
