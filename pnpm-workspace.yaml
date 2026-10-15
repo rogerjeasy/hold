@@ -12,4 +12,3 @@ minimumReleaseAgeExclude:
   - '@aws-sdk/client-rds-data@3.1151.0'
   - '@aws-sdk/client-secrets-manager@3.1151.0'
   - '@aws-sdk/client-cognito-identity-provider@3.1151.0'
-  - '@aws-sdk/client-sesv2@3.1151.0'

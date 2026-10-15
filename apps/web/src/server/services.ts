@@ -7,7 +7,7 @@ import { loadWebConfig } from '@hold/config'
 import type { CookieKeySource, WebConfig } from '@hold/config'
 import type { Database } from '@hold/db'
 import { createDataApiDatabase } from '@hold/db/data-api'
-import { createMemoryMailer, createSesMailer } from '@hold/notify'
+import { createLazyMailer, createMemoryMailer, createSmtpMailer, loadSmtpSettings } from '@hold/notify'
 import type { Mailer } from '@hold/notify'
 import { createMemoryCredentialStore, createPayPalClient, createSecretsManagerCredentialStore } from '@hold/paypal'
 import type { CredentialStore, PayPalCredentials } from '@hold/paypal'
@@ -66,7 +66,8 @@ async function build(): Promise<Services> {
     cookieKey: await loadCookieKey(config.cookieKey, config.region),
     identity: createCognitoIdentity({ region: config.region, ...config.cognito }),
     database: createDataApiDatabase({ region: config.region, clusterArn: config.database.clusterArn, secretArn: config.database.secretArn, database: config.database.name }),
-    mailer: createSesMailer({ region: config.region, from: config.emailFrom }),
+    // Through the SMTP account in Secrets Manager, read when the first email is sent.
+    mailer: createLazyMailer(async () => createSmtpMailer(await loadSmtpSettings(config.smtpSecret, config.region))),
     paypalCredentials: createSecretsManagerCredentialStore(config.region),
     checkPayPalCredentials: checkWithPayPal,
   }

@@ -2,5 +2,10 @@
   "name": "@hold/worker",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@aws-crypto/client-node": "^5.0.2",
+    "@hold/notify": "workspace:*",
+    "zod": "^4.6.7"
+  }
 }

@@ -27,8 +27,8 @@ const awsServices = z
     HOLD_COOKIE_KEY_SECRET_ARN: z.string().startsWith('arn:aws:secretsmanager:').optional(),
     // The address links in Hold's emails point to.
     HOLD_PUBLIC_URL: z.url().default('http://localhost:3210'),
-    // Hold's own emails come from this verified SES identity, the one Cognito sends codes from.
-    HOLD_EMAIL_FROM: z.email(),
+    // The Secrets Manager secret holding the SMTP account Hold's own emails go through, by name or ARN.
+    HOLD_SMTP_SECRET: z.string().min(1),
     // Only sandbox accounts are connected in the hackathon build.
     HOLD_PAYPAL_MODE: z.literal('sandbox').default('sandbox'),
   })
@@ -59,7 +59,7 @@ export type WebConfig =
       readonly database: { readonly clusterArn: string; readonly secretArn: string; readonly name: string }
       readonly cookieKey: CookieKeySource
       readonly publicUrl: string
-      readonly emailFrom: string
+      readonly smtpSecret: string
       readonly paypalMode: 'sandbox'
     }
   | {
@@ -93,7 +93,7 @@ export function loadWebConfig(environment: Readonly<Record<string, string | unde
         ? { kind: 'secret', secretArn: value.HOLD_COOKIE_KEY_SECRET_ARN }
         : { kind: 'value', key: value.HOLD_COOKIE_KEY ?? Buffer.alloc(0) },
     publicUrl: value.HOLD_PUBLIC_URL.replace(/\/$/, ''),
-    emailFrom: value.HOLD_EMAIL_FROM,
+    smtpSecret: value.HOLD_SMTP_SECRET,
     paypalMode: value.HOLD_PAYPAL_MODE,
   }
 }

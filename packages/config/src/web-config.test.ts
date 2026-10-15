@@ -9,7 +9,7 @@ const AWS = {
   HOLD_DATABASE_CLUSTER_ARN: 'arn:aws:rds:us-east-1:1:cluster:hold-database',
   HOLD_DATABASE_SECRET_ARN: 'arn:aws:secretsmanager:us-east-1:1:secret:hold/database/app',
   HOLD_COOKIE_KEY_SECRET_ARN: SECRET,
-  HOLD_EMAIL_FROM: 'hold@example.test',
+  HOLD_SMTP_SECRET: 'hold/email/smtp',
 }
 
 describe('loadWebConfig', () => {
@@ -21,6 +21,7 @@ describe('loadWebConfig', () => {
       cognito: { userPoolId: 'us-east-1_2kEqBx3YP', clientId: 'client' },
       database: { name: 'hold_db' },
       cookieKey: { kind: 'secret', secretArn: SECRET },
+      smtpSecret: 'hold/email/smtp',
       publicUrl: 'http://localhost:3210',
       paypalMode: 'sandbox',
     })
@@ -33,10 +34,8 @@ describe('loadWebConfig', () => {
   })
 
   it('names the missing settings without showing any value', () => {
-    expect(() => loadWebConfig({ ...AWS, HOLD_COGNITO_CLIENT_ID: undefined, HOLD_EMAIL_FROM: 'not-an-address' })).toThrow(
-      /HOLD_COGNITO_CLIENT_ID, HOLD_EMAIL_FROM/,
-    )
-    expect(() => loadWebConfig({ ...AWS, HOLD_EMAIL_FROM: 'not-an-address' })).not.toThrow(/not-an-address/)
+    expect(() => loadWebConfig({ ...AWS, HOLD_COGNITO_CLIENT_ID: undefined, HOLD_SMTP_SECRET: '' })).toThrow(/HOLD_COGNITO_CLIENT_ID, HOLD_SMTP_SECRET/)
+    expect(() => loadWebConfig({ ...AWS, HOLD_DATABASE_CLUSTER_ARN: 'not-an-arn' })).not.toThrow(/not-an-arn/)
   })
 
   it('needs one way to the cookie key', () => {
