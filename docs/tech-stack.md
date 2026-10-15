@@ -16,7 +16,7 @@ This document says what to build with and why. It is not a design or an implemen
 | Web app | Next.js, React, Tailwind CSS, shadcn/ui, installable to the home screen |
 | Camera capture | Browser camera with guided overlays |
 | Instant photo checks | OpenCV.js in the browser |
-| Data grid | AG Grid for the holds ledger and claims |
+| Owner dashboard | AG Studio from AG Grid, with custom widgets and the Studio Agent Framework |
 | Rental calendar | Bryntum Scheduler |
 | Checkout | PayPal JavaScript SDK v6 |
 | PayPal server side | Direct REST calls for the hold lifecycle, plus the Agent Toolkit and sandbox MCP server |
@@ -111,8 +111,10 @@ This is the screen staff use most, so it gets the most care.
 
 ### 4.2 Owner screens
 
-- **AG Grid** for the holds ledger: every hold with its amount, state, days remaining and renter, with sorting, filtering, grouping and export. Also for the claims list and damage reports.
-- **Bryntum Scheduler** for the rental calendar: items down the side, time across the top, bookings as bars. This is the natural picture of a rental business and shows availability, overdue returns and holds nearing expiry at a glance.
+- **Bryntum Scheduler** for the rental calendar: items down the side, time across the top, bookings as bars. This is the natural picture of a rental business and shows availability, overdue returns and holds nearing expiry at a glance. Each bar carries flags from the PayPal state of its rental, and the operations agent proposes moves when a booking is blocked. `extensions.md` section 12.5.
+- **AG Studio** from AG Grid for the owner's insights dashboard: money on hold, what was captured and released, damage and recovery, built from Hold's own records with custom widgets in Hold's theme. An insights agent on the Studio Agent Framework builds and edits widgets on request, with read access only. `extensions.md` section 12.5.
+- Lists such as holds, claims, the morning queue and the trust ledger are plain lists, which become card lists below `md`.
+- Both are built after the six extensions.
 
 ---
 
@@ -371,12 +373,23 @@ A project can win one sponsor prize. Using more than one tool means being consid
 
 | Tool | Use in Hold | Verdict |
 |---|---|---|
-| **AG Grid** | Holds ledger, claims list, damage reports, the morning approval queue, the trust ledger | Use. Best fit and largest sponsor prize |
-| **Bryntum** | Scheduler for the rental calendar | Use. A natural fit for a rental business |
-| **APIMatic** | Context plugins while coding the PayPal integration | Use during development |
-| **Postman** | Sandbox testing of the hold lifecycle, and a published collection for judges | Use |
+| **Bryntum** | The rental calendar on Bryntum Scheduler, with flags from PayPal state and moves proposed by the operations agent | Use. The prize page's own example is an equipment rental calendar that locks a booking only once its PayPal payment clears, which is Hold. Three winners. |
+| **AG Grid** | The owner's insights dashboard on AG Studio, with custom widgets and an insights agent on the Studio Agent Framework | Use. Largest sponsor prize. The judges ask for AG Studio, "not just AG Grid or AG Charts on their own", so plain data tables would not compete. |
+| **Postman** | Sandbox testing of the hold lifecycle, and a published collection for judges | Use. No prize. |
+| **APIMatic** | Context plugins while coding the PayPal integration | Not chosen for now |
+| **Channel3** | Could enrich item types from a product catalog. Not central to Hold. | Not chosen for now |
 | **Render** | Hosting | Not used, because hosting is on AWS |
-| **Channel3, Elastic, KERNEL, Zapier, Astropods** | No natural role | Skip |
+| **Elastic, KERNEL, Zapier, Astropods** | No natural role, and no prize | Skip |
+
+**What each prize asks for.** Read from the hackathon's sponsor pages on 15 October 2026.
+
+- **AG Grid,** 5,000, 2,000 and three times 1,000 USD: dashboard polish through custom widgets, theming and layout tools, and use of the Studio Agent Framework, such as a custom agent talking to Studio's built-in agents or a swapped-in harness.
+- **Bryntum,** three times 1,000 USD: the best use of Gantt, Scheduler or Calendar, "whether that's the cleanest timeline, the smartest resource booking, or an agent that drives the schedule itself".
+- **APIMatic,** three times 1,000 USD and six months of its Business plan: built around the Context Plugin for PayPal used by the coding agent.
+- **Channel3,** one prize of 1,500 USD: the API or MCP server called as a meaningful part of the product, for search, product enrichment or recommendations.
+- **Render,** credits: deployment on Render with Render Workflows.
+
+**Trial licences.** AG Studio and Bryntum both offer a 45-day trial. A trial started before 31 October 2026 ends before judging closes on 15 December, and judges must be able to run the hosted demo throughout. Start both on or after 31 October, or ask each team on the PayPal Discord for a licence that runs through judging. What an expired trial does to the page has not been checked. Bryntum's trial is installed as `@bryntum/scheduler@npm:@bryntum/scheduler-trial`.
 
 ---
 

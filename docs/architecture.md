@@ -453,6 +453,7 @@ Before any action on a hold, the approval rules decide who must confirm it.
 | Reduce or waive a claim | The owner, a manager, or the staff member who raised it |
 | Decide a contested claim | The owner or a manager, and not the person who raised it where the shop has more than one |
 | Refund part of a charge | The owner or a manager |
+| Move a booking that has not started to another item of the same type | Any staff member |
 
 **Rules that always hold**
 
@@ -1194,14 +1195,14 @@ Served by `web`. All routes require a Cognito token.
 | `/api/shops` | Shop settings, locations, staff and limits |
 | `/api/items` | Item types, items, photo plans, item passports |
 | `/api/prices` | Price lists and wear policies, draft and publish |
-| `/api/rentals` | Create, read, extend, cancel |
+| `/api/rentals` | Create, read, extend, move to another item of the same type, cancel |
 | `/api/holds` | Read state, request a hold, show the approval QR code |
 | `/api/sessions` | Start, add photographs, seal |
 | `/api/uploads` | Short-lived upload links |
 | `/api/comparisons` | Read results and findings |
 | `/api/claims` | Read, edit, approve, waive, decide |
 | `/api/disputes` | Read, confirm the response |
-| `/api/reports` | Holds ledger, damage and recovery, staff consistency |
+| `/api/reports` | The insights dashboard's rows: money held, captured and released, damage and recovery, staff consistency |
 | `/api/assistant` | Conversation with the owner's assistant, streamed |
 | `/api/paypal/connect` | Connect the shop's PayPal account |
 | `/api/proposals` | The morning queue: read, approve, reject, postpone |
@@ -1284,6 +1285,7 @@ Served by `web` under `/shop`. Each page asks `shopAccess` itself; the frame aro
 - **One frame.** `app/[locale]/shop/layout.tsx` puts every shop page in the shop's frame (`features/shell`): a dark sidebar with the shop switcher, the menu, PayPal's state and mode, the language and theme, and the account menu. It is a rail of icons from `md` to `lg` and a top bar with a menu sheet below `md`. The public pages keep the site's header and footer through the `(site)` route group, which is not part of their address.
 - **What the page reads.** `shopToday` in `packages/db` returns plain counts and rows. Where a hold stands (assured, valid, ending) and the order of the decisions come from `holdStanding` and `holdDay` in the domain. Times show on the shop's clock (`shopDay`), whoever reads them.
 - **Rentals, holds and claims** join the menu as their own pages are built with the spine.
+- **After the extensions,** `/shop/calendar`, the rental calendar on Bryntum Scheduler, and `/shop/insights`, the owner's dashboard on AG Studio, join the menu. `extensions.md` section 12.5.
 
 ---
 
@@ -1687,7 +1689,7 @@ The extensions' own risks and open questions are in `extensions.md` section 14.
 
 If time is short, these parts alone make a complete product: placing a hold at the counter, guided handover, guided return, the comparison with its second look, the claim screen with approval, capture and release, and the evidence pack. Everything else can follow.
 
-**After the spine,** the extensions are built in the order set out in `extensions.md` section 12: the accuracy scorecard, the operations agent, the Clean Record, renting through an assistant, the advocates, and the incident desk. None starts before the spine runs end to end.
+**After the spine,** the extensions are built in the order set out in `extensions.md` section 12: the accuracy scorecard, the operations agent, the Clean Record, renting through an assistant, the advocates, and the incident desk. Then the two sponsor surfaces in its section 12.5. None starts before the spine runs end to end.
 
 ---
 

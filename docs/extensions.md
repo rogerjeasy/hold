@@ -173,6 +173,7 @@ stateDiagram-v2
 | `refund_part` | Refunds part of a capture | Agent Toolkit function, called by code |
 | `respond_to_dispute` | Uploads the evidence pack and the drafted note | Direct REST |
 | `send_message` | Sends a drafted message to a renter | SES |
+| `move_booking` | Moves a booking that has not started to another free item of the same type, for the same period. Added with the rental calendar in section 12.5. | Hold's rentals path. No PayPal call. |
 | `note` | Nothing. It informs the owner. | |
 
 There is no proposal kind for a capture. A test enumerates the kinds and fails if any maps to one.
@@ -374,6 +375,8 @@ flowchart LR
 | Incident waiting | An incident from Extension 5 has waited for staff longer than the shop's set time | `note` |
 | Reconciliation difference | The nightly comparison with PayPal found a difference it could not apply | `note` |
 
+Section 12.5 adds one more detector, a booking blocked by an overdue or damaged item, with the rental calendar.
+
 **Step 2. The agent investigates each exception.** It has read tools only: Hold's records and PayPal's remote MCP server. For each exception it confirms the facts against PayPal, chooses among the proposal kinds that detector allows, writes the one-line reason with its references, and drafts any message or dispute note.
 
 **Step 3. The agent may add observations.** It can raise things no detector looks for, such as an item damaged in three rentals running. An observation can only become a `note`. It is labelled as raised by the agent.
@@ -456,7 +459,7 @@ PayPal's write tools, such as `create_invoice`, `create_refund` and `accept_disp
 | Code | `packages/ops`. Detectors, proposals and mandates in `packages/domain`. The gateway gains tiers. |
 | Queues | `ops-agent`, ordered per shop |
 | Schedules | One run per shop after reconciliation. Extra runs when a dispute opens, a hold becomes at risk or a capture fails. |
-| Screens | The morning queue, built on AG Grid, grouped by kind. The rules list in shop settings. |
+| Screens | The morning queue, a list grouped by kind. The rules list in shop settings. |
 | Assistant | The owner's assistant from the spine uses the same proposals. `propose_release` and `propose_extension` now write proposal records. |
 
 ### 6.10 Tests
@@ -589,7 +592,7 @@ Inside Hold, a shop reads the record directly. The credential is how the record 
 | Data | `rental_outcomes`, `trust_ladders`, `trust_rungs`, `renter_consents`. `holds` gains the ordinary amount, the ladder version and the rung. |
 | Code | `packages/trust`. The ladder and its invariants in `packages/domain`. |
 | State machines | None. The outcome row is written in the transaction that closes the rental. |
-| Screens | The ladder editor and simulation for the owner. The Clean Record and the reason for the hold amount for the renter. A trust ledger on AG Grid. |
+| Screens | The ladder editor and simulation for the owner. The Clean Record and the reason for the hold amount for the renter. A trust ledger as a list. |
 
 ### 7.12 Tests
 
@@ -1146,6 +1149,7 @@ About two days. First to be cut.
 | 19 Testing | The tests in each extension | All |
 | 20.3 Demo mode | Seeded history, the hosted assistant, a seeded contested claim | 2, 3, 4 |
 | 21 Decision record | Decisions 17 to 24 | All |
+| 7.3 Approval rules, 13.1 and 13.6 Interfaces | Moving a booking. The calendar and insights pages. | Section 12.5 |
 | 22 Risks | The risks in section 14 below | All |
 
 **The claim state machine after the extensions.**
@@ -1200,6 +1204,7 @@ No new state moves a claim backwards. A failed negotiation goes forward to `esca
 | 3 | Renting through your own assistant | B, and the gateway from 1 |
 | 4 | An advocate for each side | B, and mandates from 1. Step 3 for the outside assistant only. |
 | 5 | The incident desk | B |
+| 6 | The sponsor surfaces in section 12.5: the rental calendar, then the insights dashboard | B. The calendar's agent needs 1. |
 
 Extensions 2 and 5 share nothing with 1, 3 and 4 beyond the spine. A second person can build them alongside.
 
@@ -1227,21 +1232,69 @@ The deadline is Thursday 12 November 2026 at 12:00 pm Pacific Time. This assumes
 | 11 November | Video and submission form. Submit. |
 | 12 November, morning | Spare |
 
-Extension 5 fits only if earlier steps finish early or a second person builds it.
+Extension 5 fits only if earlier steps finish early or a second person builds it. The sponsor surfaces in 12.5 have no dates yet. They start only after the extensions before them are finished, and the stop line in 12.4 applies to them too.
 
 ### 12.4 The cut line
 
 If time runs short, cut in this order, and cut whole things.
 
-1. Extension 5.
-2. In Extension 3: the Cart API contract, then the mandated hold.
-3. In Extension 4: the outside assistant as the renter's advocate, then waiving the final tap.
-4. In Extension 2: the top rung with no hold.
-5. Extension 4 as a whole, leaving the renter's advocate that only drafts a reply.
+1. The sponsor surfaces in 12.5: the insights dashboard, then the calendar's agent, then the calendar.
+2. Extension 5.
+3. In Extension 3: the Cart API contract, then the mandated hold.
+4. In Extension 4: the outside assistant as the renter's advocate, then waiving the final tap.
+5. In Extension 2: the top rung with no hold.
+6. Extension 4 as a whole, leaving the renter's advocate that only drafts a reply.
 
 Never cut: the spine, the scorecard, the morning queue.
 
 **The stop line is the end of 9 November.** Anything not finished then is removed from the build, the README and the video. Nothing is shown half-working.
+
+### 12.5 After the six: the sponsor surfaces
+
+Two screens built for the sponsor prizes in `tech-stack.md` section 15. They follow every rule in section 3 and change no money rule. They come after the six extensions and are the first thing cut.
+
+**The rental calendar, on Bryntum Scheduler**
+
+Page `/shop/calendar`. Items down the side, grouped by item type, and time across the top. Each rental is a bar on each of its items.
+
+- **PayPal state flags each bar.** Plain code maps the rental's, hold's and claim's states to a flag: fee unpaid, with the time left before the booking lapses, then confirmed, hold placed, hold ending, hold at risk, capture failed, claim open, dispute open, overdue. A flag changes only when the state machine moves, which for PayPal means a verified event or a read back from PayPal. A booking turns from fee unpaid to confirmed only once PayPal confirms the fee. Each flag has an icon and a text label, never color alone.
+- **Collisions move bookings.** A booking is blocked when the item it needs will not be back in time: the rental before it on that item is overdue, or the item came back damaged and is out of service. The operations agent in section 6 gains one detector.
+
+| Detector | Condition | What may be proposed |
+|---|---|---|
+| Booking blocked | A booking that has not started needs an item that is overdue or out of service for any part of its period | `move_booking` when plain code finds a free item of the same type for the whole period, otherwise `send_message` and `note` |
+
+- **What the agent does.** It investigates as for any exception, chooses among the free items plain code lists, and writes the one-line reason. A proposed move shows on the calendar as an outline at its new place, and in the morning queue. A person approves it on either screen.
+- **Why a move never touches money.** `move_booking` keeps the period and the item type, so the fee and the hold amount stay as they are. A change of period goes through the existing `propose_extension`. A booking that is out, or a move to another item type, is refused by the server.
+- **Moving by hand.** Staff may drag a booking that has not started to another item of the same type. The same server rule applies. The drag sends a request through `/api/rentals`; the calendar is not the check.
+- **Small screens.** The scheduler scrolls inside its own container. Below `md` the page becomes a list of the day's bookings by item.
+
+**The insights dashboard, on AG Studio**
+
+Page `/shop/insights`, for the owner and managers. Its data comes from one server route under `/api/reports`, which returns rows for the caller's shop only, shaped for their role.
+
+- **Widgets.** Money on hold now, by where each hold stands. Reserved, captured and released by month, from the money log. Damage rate by item type. Claims by outcome. Recovery, captured against claimed. After Extension 2, hold amounts by trust rung. After Extension 0, the scorecard's figures.
+- **Custom widgets.** A hold's life: each authorization on its 29-day line, with assured, valid and ending marked. A settlement waterfall: reserved, then captured and released, showing that captured plus released never exceeds reserved. Both use Hold's design tokens in both themes.
+- **The insights agent.** A custom agent on the Studio Agent Framework that works with Studio's built-in agents to add and change widgets on request, such as "damage rate by item type this month". Its tier is `read`. It has no PayPal tool and no tool that writes. Every number on a widget is computed by Studio's data engine from the rows the server sent, never written by the model. The rows it sees carry no renter names or emails. If the model is down, the dashboard still shows every widget already saved.
+- **Model.** Claude Opus 5.5 on Bedrock, as for every agent in Hold, if Studio accepts a swapped-in harness. The prize page suggests it does. Confirm on the trial before building.
+
+**Done when**
+
+- **S1** A seeded shop's calendar shows every rental on its items, at every width in `AGENTS.md` section 9, with no sideways page scroll.
+- **S2** A booking shows as confirmed only after the verified fee event. A forged or unverified event changes nothing on the calendar.
+- **S3** A hold at risk, a failed capture and an open dispute each show their flag with a text label.
+- **S4** An overdue rental that collides with the next booking on its item produces exactly one `move_booking` proposal naming a free item of the same type. Approving it moves the booking and changes no amount. With no free item, the proposals are `send_message` and `note`.
+- **S5** Approving a move whose target item has since been booked is refused as superseded.
+- **S6** Moving a booking that is out, or to another item type, is refused by the server, by drag and by proposal.
+- **S7** The test in X1.3 still finds no proposal kind that leads to a capture.
+- **S8** Every figure on the dashboard equals a query over the shop's records. A second shop's manager, counter staff and read-only staff are refused.
+- **S9** A widget built by the insights agent shows the same numbers as the database. The agent's tool list contains no write tool and no PayPal tool.
+
+**Licences.** Both are 45-day trials. See `tech-stack.md` section 15 for when to start them.
+
+**In the video.** If built, the calendar joins the morning-queue beat: a flagged booking and its proposed move. The dashboard closes the owner's part.
+
+**Size.** About a day and a half for the calendar with its detector, and two days for the dashboard and its agent.
 
 ---
 
@@ -1310,6 +1363,10 @@ One story, as in `project-description.md`: one bike, one scratch, one photograph
 - Agent Ready is for Braintree merchants and names two protocols.
 - PayPal's own description of its WebMCP work says the buyer remains in charge of approving the payment.
 
+**Checked against the source on 15 October 2026**
+
+- What each sponsor prize asks for, the prize amounts and the 45-day trials of AG Studio and Bryntum, quoted in `tech-stack.md` section 15. From the hackathon's sponsor pages and rules.
+
 **Written from general knowledge and to be confirmed**
 
 - That a PayPal payer ID is the same across merchants.
@@ -1317,6 +1374,7 @@ One story, as in `project-description.md`: one bike, one scratch, one photograph
 - The `CHECKOUT.ORDER.APPROVED` event name and its timing.
 - That AWS KMS asymmetric keys suit signing the credential, and the choice of signing algorithm.
 - That MCP clients in common use can connect to a remote server with no sign-in step.
+- That AG Studio's agents accept Claude on Bedrock as a swapped-in harness, and what an expired AG Studio or Bryntum trial does to the page.
 
 **Estimates and proposals**
 
