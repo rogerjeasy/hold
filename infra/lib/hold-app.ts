@@ -10,11 +10,16 @@ import { createWorkStack } from './work-stack.ts'
 
 export type HoldAppOptions = {
   readonly senderEmail: string
-  readonly passkeyRelyingPartyId: string
   // The commit whose image the web app runs.
   readonly webImageTag: string
   // The web app's own address, once App Runner has given it one.
   readonly webPublicUrl: string | undefined
+}
+
+// A browser offers a passkey only on the domain it was made for, so passkeys are made for the web app's own host.
+// Before the app has an address, they are made for a developer's machine.
+function passkeyDomain(webPublicUrl: string | undefined): string {
+  return webPublicUrl === undefined ? 'localhost' : new URL(webPublicUrl).hostname
 }
 
 // Builds every Hold stack. Kept apart from bin/ so tests can build the same app without the command line.
@@ -26,7 +31,7 @@ export function createHoldApp(app: App, options: HoldAppOptions) {
   const synthesizer = () => new CliCredentialsStackSynthesizer({ qualifier: CDK_BOOTSTRAP_QUALIFIER, bucketPrefix: CDK_ASSETS_PREFIX })
 
   const data = createDataStack(app, { env, synthesizer: synthesizer() })
-  const identity = createIdentityStack(app, { env, synthesizer: synthesizer(), senderEmail: options.senderEmail, passkeyRelyingPartyId: options.passkeyRelyingPartyId })
+  const identity = createIdentityStack(app, { env, synthesizer: synthesizer(), senderEmail: options.senderEmail, passkeyRelyingPartyId: passkeyDomain(options.webPublicUrl) })
   const registry = createRegistryStack(app, { env, synthesizer: synthesizer() })
   const stacks = {
     data,

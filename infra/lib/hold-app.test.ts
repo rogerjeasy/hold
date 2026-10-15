@@ -13,7 +13,6 @@ const context = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'cdk.con
 const IMAGE_TAG = '0123456789abcdef0123456789abcdef01234567'
 const stacks = createHoldApp(new App({ context }), {
   senderEmail: 'codes@example.com',
-  passkeyRelyingPartyId: 'localhost',
   webImageTag: IMAGE_TAG,
   webPublicUrl: 'https://abc123.us-east-1.awsapprunner.com',
 })
@@ -149,9 +148,17 @@ describe('sign-in', () => {
     identity.hasResourceProperties('AWS::Cognito::UserPool', {
       MfaConfiguration: 'OFF',
       Policies: { SignInPolicy: { AllowedFirstAuthFactors: Match.arrayWith(['EMAIL_OTP', 'WEB_AUTHN']) } },
-      WebAuthnRelyingPartyID: 'localhost',
       WebAuthnUserVerification: 'required',
     })
+  })
+
+  it('makes passkeys for the address the web app is served from, so a browser offers them there', () => {
+    identity.hasResourceProperties('AWS::Cognito::UserPool', { WebAuthnRelyingPartyID: 'abc123.us-east-1.awsapprunner.com' })
+  })
+
+  it('makes passkeys for localhost until App Runner has given the web app an address', () => {
+    const first = createHoldApp(new App({ context }), { senderEmail: 'codes@example.com', webImageTag: IMAGE_TAG, webPublicUrl: undefined })
+    Template.fromStack(first.identity.stack).hasResourceProperties('AWS::Cognito::UserPool', { WebAuthnRelyingPartyID: 'localhost' })
   })
 
   it('keeps the cookie key in Secrets Manager, under Hold’s name', () => {

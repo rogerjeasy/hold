@@ -2,7 +2,6 @@
   "app": "node bin/hold.ts",
   "context": {
     "senderEmail": "rogerjeasybavibidila@gmail.com",
-    "passkeyRelyingPartyId": "localhost",
     "webPublicUrl": "https://p99faar3kp.us-east-1.awsapprunner.com",
     "@aws-cdk/core:defaultCrossStackReferences": "strong",
     "@aws-cdk/core:checkSecretUsage": true,
