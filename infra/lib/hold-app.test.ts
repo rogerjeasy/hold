@@ -567,6 +567,14 @@ describe('delivery', () => {
     expect(scheduling?.['Resource']).toBe('arn:aws:scheduler:us-east-1:707938860881:schedule/hold-*/*')
   })
 
+  it('lets CloudFormation tag a queue trigger only with Hold’s own tag, since tagging one names no function', () => {
+    const statements = [...Object.values(delivery.findResources('AWS::IAM::Policy')), ...Object.values(delivery.findResources('AWS::IAM::ManagedPolicy'))].flatMap(
+      (policy) => (policy as { Properties: { PolicyDocument: { Statement: Record<string, unknown>[] } } }).Properties.PolicyDocument.Statement,
+    )
+    const tagging = statements.find((statement) => statement['Resource'] === 'arn:aws:lambda:us-east-1:707938860881:event-source-mapping:*')
+    expect(tagging).toEqual({ Action: 'lambda:TagResource', Condition: { StringEquals: { 'aws:RequestTag/project': 'hold' } }, Effect: 'Allow', Resource: 'arn:aws:lambda:us-east-1:707938860881:event-source-mapping:*' })
+  })
+
   it('lets the boundary start only Hold’s functions, which is all the scheduler’s role needs for the relay', () => {
     const boundary = (boundaryPolicy() as { Properties: { PolicyDocument: { Statement: Record<string, unknown>[] } } }).Properties.PolicyDocument.Statement
     const invoking = boundary.find((statement) => statement['Action'] === 'lambda:InvokeFunction')

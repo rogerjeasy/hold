@@ -133,7 +133,10 @@ function computePolicy(stack: Stack): iam.ManagedPolicy {
       ArnLike: { 'lambda:FunctionArn': at.functions },
     }),
   )
-  add(statement(['lambda:GetEventSourceMapping', 'lambda:ListEventSourceMappings'], ['*']))
+  // CloudFormation tags each mapping it makes, and tagging one names no function, so the condition above never holds
+  // for it. A mapping may be tagged only with Hold's own project tag, so no other project's mappings can be relabelled.
+  add(statement(['lambda:TagResource'], [`arn:aws:lambda:${REGION}:${ACCOUNT}:event-source-mapping:*`], { StringEquals: { 'aws:RequestTag/project': PREFIX } }))
+  add(statement(['lambda:GetEventSourceMapping', 'lambda:ListEventSourceMappings', 'lambda:ListTags'], ['*']))
   add(statement(['scheduler:CreateSchedule', 'scheduler:UpdateSchedule', 'scheduler:DeleteSchedule', 'scheduler:GetSchedule'], [at.schedules]))
   return policy
 }
