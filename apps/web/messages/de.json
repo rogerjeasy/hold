@@ -1417,7 +1417,23 @@
         "no_email": "Diese Buchung hat keine E-Mail-Adresse, an die gesendet werden kann.",
         "email_failed": "Die E-Mail konnte nicht gesendet werden. Zeigen Sie stattdessen den Link.",
         "transition_not_allowed": "Nur eine Buchung, deren Mietpreis nicht bezahlt wurde, kann aufgegeben werden.",
-        "rows_mismatched": "Jede Zeile braucht einen Artikel und eine Zahl."
+        "rows_mismatched": "Jede Zeile braucht einen Artikel und eine Zahl.",
+        "not_booked": "Der Mietpreis muss bezahlt sein, bevor nach der Reservierung gefragt wird."
+      },
+      "hold": {
+        "title": "Reservierung bei der Abholung",
+        "body": "Fragen Sie bei der Abholung nach der Reservierung. Die mietende Person genehmigt {amount} in PayPal auf dem eigenen Telefon.",
+        "ask": "Nach der Reservierung fragen",
+        "asking": "Code wird erstellt…",
+        "again": "Code erneut zeigen",
+        "scan": "Mit dem Telefon der mietenden Person scannen, um die Reservierung zu genehmigen",
+        "waiting": "Warten auf die Genehmigung von {amount}.",
+        "declined": "PayPal hat die Zahlungsquelle abgelehnt. Es wurde nichts reserviert. Mit einer anderen Zahlungsart kann erneut genehmigt werden.",
+        "placed": "{amount} auf dem PayPal-Konto der mietenden Person reserviert.",
+        "ready": "Bereit zur Übergabe.",
+        "assuredUntil": "Am besten abbuchen bis",
+        "validUntil": "Endet",
+        "replacing": "Vor dem Ende dieser Reservierung wurde eine neue bei der mietenden Person angefragt. Warten auf die Genehmigung."
       }
     },
     "items": {
@@ -1952,7 +1968,11 @@
       "next": "Als Nächstes: Bei der Abholung genehmigen Sie die Reservierung auf Ihrem Telefon.",
       "lapsed": "Die Zahlungsfrist ist abgelaufen, und die Artikel wurden von jemand anderem gebucht. Wenden Sie sich an den Verleih, um neu zu buchen.",
       "abandoned": "Diese Buchung wurde aufgegeben. Wenden Sie sich an den Verleih, um neu zu buchen.",
-      "other": "Ihre Miete: {state}"
+      "other": "Ihre Miete: {state}",
+      "awaiting_hold": "Der Laden ist bereit für Ihre Reservierung.",
+      "holdNext": "Genehmigen Sie die Reservierung auf diesem Telefon, um Ihre Artikel abzuholen.",
+      "approveHold": "Reservierung genehmigen",
+      "ready": "Ihre Reservierung ist gesetzt. Sie können Ihre Artikel abholen."
     },
     "paid": {
       "title": "Ihre Zahlung wird bestätigt",
@@ -1978,9 +1998,33 @@
       "order_mismatch": "Diese Zahlung gehört nicht zu dieser Miete. Es wurde nichts abgebucht.",
       "amount_mismatch": "Der Betrag bei PayPal passte nicht zum Mietpreis. Der Verleih wurde informiert.",
       "not_completed": "PayPal hat die Zahlung noch nicht abgeschlossen.",
-      "not_found": "Diese Miete gibt es nicht mehr."
+      "not_found": "Diese Miete gibt es nicht mehr.",
+      "not_requested": "Der Laden hat noch nicht nach der Reservierung gefragt. Das geschieht, wenn Sie Ihre Artikel abholen.",
+      "already_placed": "Ihre Reservierung ist bereits gesetzt.",
+      "hold_refused": "PayPal konnte die Reservierung nicht setzen. Es wurde nichts reserviert. Fragen Sie im Laden nach."
     },
-    "orderDescription": "{shop}: {items}, {days, plural, one {# Tag} other {# Tage}}"
+    "orderDescription": "{shop}: {items}, {days, plural, one {# Tag} other {# Tage}}",
+    "holdPage": {
+      "title": "Reservierung genehmigen",
+      "lead": "{amount} werden während der Miete auf Ihrem PayPal-Konto reserviert. Das ist keine Abbuchung.",
+      "notYet": "Der Laden fragt nach der Reservierung, wenn Sie Ihre Artikel abholen.",
+      "approve": "{amount} mit PayPal genehmigen",
+      "approving": "PayPal wird geöffnet…",
+      "agree": "Mit der Genehmigung stimmen Sie der Reservierung und den Preisen des Ladens auf Ihrer Mietseite zu.",
+      "declined": "PayPal hat die Reservierung abgelehnt. Es wurde nichts reserviert. Sie können sie mit einer anderen Zahlungsart erneut genehmigen.",
+      "placed": "Ihre Reservierung über {amount} ist gesetzt. Es wurde nichts abgebucht.",
+      "validUntil": "Sie endet spätestens am {date} und wird freigegeben, sobald alles im gleichen Zustand zurückkommt.",
+      "back": "Zu Ihrer Miete",
+      "return": {
+        "title": "Ihre Reservierung wird bestätigt",
+        "checking": "Wir fragen bei PayPal nach…",
+        "done": "Reservierung gesetzt. Es wurde nichts abgebucht.",
+        "retry": "Erneut versuchen",
+        "again": "Erneut genehmigen"
+      },
+      "replaceTitle": "Neue Reservierung genehmigen",
+      "replaceLead": "Ihre Reservierung endet am {date}, und Ihre Miete ist noch offen. Genehmigen Sie eine neue Reservierung über {amount}, damit sie abgesichert bleibt. Das ist keine Abbuchung, und die alte Reservierung wird freigegeben, sobald Sie genehmigen."
+    }
   },
   "shopPage": {
     "label": "Online buchen",

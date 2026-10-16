@@ -1417,7 +1417,23 @@
         "no_email": "This booking has no email to send to.",
         "email_failed": "The email could not be sent. Show the link instead.",
         "transition_not_allowed": "Only a booking whose fee was not paid can be let go.",
-        "rows_mismatched": "Every line needs an item and a number."
+        "rows_mismatched": "Every line needs an item and a number.",
+        "not_booked": "The fee must be paid before the hold is asked for."
+      },
+      "hold": {
+        "title": "Hold at pickup",
+        "body": "When the renter collects, ask for the hold. They approve {amount} in PayPal on their own phone.",
+        "ask": "Ask for the hold",
+        "asking": "Making a code…",
+        "again": "Show the code again",
+        "scan": "Scan with the renter's phone to approve the hold",
+        "waiting": "Waiting for the renter to approve {amount}.",
+        "declined": "PayPal declined the renter's funding. Nothing was reserved. They can approve again with another way to pay.",
+        "placed": "{amount} reserved in the renter's PayPal account.",
+        "ready": "Ready for handover.",
+        "assuredUntil": "Best charged by",
+        "validUntil": "Ends",
+        "replacing": "A new hold was asked of the renter before this one ends. Waiting for their approval."
       }
     },
     "items": {
@@ -1952,7 +1968,11 @@
       "next": "Next: at pickup, you approve the hold on your phone.",
       "lapsed": "The time to pay ran out, and the items were booked by someone else. Contact the shop to book again.",
       "abandoned": "This booking was let go. Contact the shop to book again.",
-      "other": "Your rental: {state}"
+      "other": "Your rental: {state}",
+      "awaiting_hold": "The shop is ready for your hold.",
+      "holdNext": "Approve the hold on this phone to collect your items.",
+      "approveHold": "Approve the hold",
+      "ready": "Your hold is placed. You can collect your items."
     },
     "paid": {
       "title": "Confirming your payment",
@@ -1978,9 +1998,33 @@
       "order_mismatch": "This payment does not belong to this rental. Nothing was charged.",
       "amount_mismatch": "PayPal's amount did not match the fee. The shop has been told.",
       "not_completed": "PayPal has not completed the payment yet.",
-      "not_found": "This rental no longer exists."
+      "not_found": "This rental no longer exists.",
+      "not_requested": "The shop has not asked for the hold yet. They do when you collect your items.",
+      "already_placed": "Your hold is already placed.",
+      "hold_refused": "PayPal could not place the hold. Nothing was reserved. Ask the shop."
     },
-    "orderDescription": "{shop}: {items}, {days, plural, one {# day} other {# days}}"
+    "orderDescription": "{shop}: {items}, {days, plural, one {# day} other {# days}}",
+    "holdPage": {
+      "title": "Approve your hold",
+      "lead": "{amount} is reserved in your PayPal account while you rent. It is not a charge.",
+      "notYet": "The shop asks for the hold when you collect your items.",
+      "approve": "Approve {amount} with PayPal",
+      "approving": "Opening PayPal…",
+      "agree": "By approving, you agree to the hold and the shop's prices on your rental page.",
+      "declined": "PayPal declined the hold. Nothing was reserved. You can approve again with another way to pay.",
+      "placed": "Your hold of {amount} is placed. Nothing was charged.",
+      "validUntil": "It ends on {date} at the latest, and is released as soon as everything comes back as it left.",
+      "back": "See your rental",
+      "return": {
+        "title": "Confirming your hold",
+        "checking": "Checking with PayPal…",
+        "done": "Hold placed. Nothing was charged.",
+        "retry": "Try again",
+        "again": "Approve again"
+      },
+      "replaceTitle": "Approve a new hold",
+      "replaceLead": "Your hold ends on {date}, and your rental is still open. Approve a new hold of {amount} to keep it covered. It is not a charge, and the old hold is released as soon as you approve."
+    }
   },
   "shopPage": {
     "label": "Book online",

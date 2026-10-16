@@ -53,4 +53,17 @@ describe('loadWebConfig', () => {
     expect(loadWebConfig({ HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: KEY })).toMatchObject({ services: 'fake' })
     expect(() => loadWebConfig({ HOLD_ENVIRONMENT: 'production', HOLD_COOKIE_KEY: KEY })).toThrow(/HOLD_COGNITO_USER_POOL_ID/)
   })
+
+  it('signs renter links with a key of their own, read from its secret, which the worker reads too', () => {
+    const LINK_SECRET = 'arn:aws:secretsmanager:us-east-1:1:secret:hold/web/renter-link-key'
+    expect(loadWebConfig({ ...AWS, HOLD_RENTER_LINK_KEY_SECRET_ARN: LINK_SECRET }).renterLinkKey).toEqual({ kind: 'secret', secretArn: LINK_SECRET })
+    expect(loadWebConfig({ ...AWS, HOLD_RENTER_LINK_KEY: KEY }).renterLinkKey).toMatchObject({ kind: 'value' })
+  })
+
+  it('falls back to the cookie key for renter links only on a developer’s machine', () => {
+    expect(loadWebConfig(AWS).renterLinkKey).toEqual({ kind: 'secret', secretArn: SECRET })
+    expect(() => loadWebConfig({ ...AWS, HOLD_ENVIRONMENT: 'production', HOLD_EXECUTIONS_QUEUE_URL: 'https://sqs.test/e.fifo', HOLD_PAYPAL_EVENTS_QUEUE_URL: 'https://sqs.test/p.fifo' })).toThrow(/HOLD_RENTER_LINK_KEY_SECRET_ARN/)
+    expect(() => loadWebConfig({ ...AWS, HOLD_ENVIRONMENT: 'production', HOLD_RENTER_LINK_KEY: KEY })).toThrow(/HOLD_RENTER_LINK_KEY/)
+  })
 })
+

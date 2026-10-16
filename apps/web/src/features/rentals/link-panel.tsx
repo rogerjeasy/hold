@@ -1,12 +1,13 @@
 'use client'
 
-import { Copy, Mail, QrCode } from 'lucide-react'
+import { Mail, QrCode } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useActionState, useState } from 'react'
+import { useActionState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Panel } from '@/components/ui/panel'
 import { ActionMessage } from '@/features/shop/action-message'
 import { emailRenterLinkAgain, showRenterLink } from './actions'
+import { LinkCode } from './link-code'
 
 type LinkPanelProps = { rentalId: string; contactEmail: string | null; paid: boolean }
 
@@ -17,7 +18,6 @@ export function LinkPanel({ rentalId, contactEmail, paid }: LinkPanelProps) {
   const locale = useLocale()
   const [shown, show, showing] = useActionState(showRenterLink, null)
   const [emailed, email, emailing] = useActionState(emailRenterLinkAgain, null)
-  const [copied, setCopied] = useState(false)
 
   return (
     <Panel title={t('title')}>
@@ -45,26 +45,7 @@ export function LinkPanel({ rentalId, contactEmail, paid }: LinkPanelProps) {
           )}
         </div>
         {shown?.ok === true ? (
-          <figure className="grid justify-items-start gap-3">
-            {/* The SVG is drawn on the server from the link alone (server/qr.ts). */}
-            <div role="img" aria-label={t('scan')} className="size-56 border bg-white p-2" dangerouslySetInnerHTML={{ __html: shown.value.qr }} />
-            <figcaption className="text-sm text-muted-foreground">{t('scan')}</figcaption>
-            <p data-testid="renter-link" className="figures max-w-full text-sm break-all">
-              {shown.value.url}
-            </p>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => {
-                void navigator.clipboard.writeText(shown.value.url).then(() => {
-                  setCopied(true)
-                })
-              }}
-            >
-              <Copy aria-hidden="true" />
-              {copied ? t('copied') : t('copy')}
-            </Button>
-          </figure>
+          <LinkCode url={shown.value.url} qr={shown.value.qr} scan={t('scan')} />
         ) : (
           <ActionMessage result={shown} success="" results="shop.rentals.results" />
         )}

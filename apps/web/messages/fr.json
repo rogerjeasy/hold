@@ -1417,7 +1417,23 @@
         "no_email": "Cette réservation n'a pas d'e-mail auquel envoyer.",
         "email_failed": "L'e-mail n'a pas pu être envoyé. Montrez le lien à la place.",
         "transition_not_allowed": "Seule une réservation dont le prix n'a pas été réglé peut être abandonnée.",
-        "rows_mismatched": "Chaque ligne a besoin d'un article et d'un nombre."
+        "rows_mismatched": "Chaque ligne a besoin d'un article et d'un nombre.",
+        "not_booked": "Le prix doit être réglé avant de demander l'empreinte."
+      },
+      "hold": {
+        "title": "Empreinte au retrait",
+        "body": "Au retrait, demandez l'empreinte. La personne qui loue approuve {amount} dans PayPal sur son propre téléphone.",
+        "ask": "Demander l'empreinte",
+        "asking": "Création d'un code…",
+        "again": "Afficher le code à nouveau",
+        "scan": "À scanner avec le téléphone de la personne qui loue pour approuver l'empreinte",
+        "waiting": "En attente de l'approbation de {amount}.",
+        "declined": "PayPal a refusé le moyen de paiement. Rien n'a été réservé. Une nouvelle approbation est possible avec un autre moyen de paiement.",
+        "placed": "{amount} réservés sur le compte PayPal de la personne qui loue.",
+        "ready": "Prêt pour la remise.",
+        "assuredUntil": "À prélever de préférence avant le",
+        "validUntil": "Prend fin",
+        "replacing": "Une nouvelle empreinte a été demandée à la personne qui loue avant la fin de celle-ci. En attente de son approbation."
       }
     },
     "items": {
@@ -1952,7 +1968,11 @@
       "next": "Ensuite : au retrait, vous approuvez l'empreinte sur votre téléphone.",
       "lapsed": "Le délai de paiement est dépassé et les articles ont été réservés par quelqu'un d'autre. Contactez la boutique pour réserver à nouveau.",
       "abandoned": "Cette réservation a été abandonnée. Contactez la boutique pour réserver à nouveau.",
-      "other": "Votre location : {state}"
+      "other": "Votre location : {state}",
+      "awaiting_hold": "La boutique est prête pour votre empreinte.",
+      "holdNext": "Approuvez l'empreinte sur ce téléphone pour récupérer vos articles.",
+      "approveHold": "Approuver l'empreinte",
+      "ready": "Votre empreinte est posée. Vous pouvez récupérer vos articles."
     },
     "paid": {
       "title": "Confirmation de votre règlement",
@@ -1978,9 +1998,33 @@
       "order_mismatch": "Ce paiement n'appartient pas à cette location. Rien n'a été débité.",
       "amount_mismatch": "Le montant de PayPal ne correspondait pas au prix. La boutique a été prévenue.",
       "not_completed": "PayPal n'a pas encore terminé le paiement.",
-      "not_found": "Cette location n'existe plus."
+      "not_found": "Cette location n'existe plus.",
+      "not_requested": "La boutique n'a pas encore demandé l'empreinte. Elle le fait quand vous récupérez vos articles.",
+      "already_placed": "Votre empreinte est déjà posée.",
+      "hold_refused": "PayPal n'a pas pu poser l'empreinte. Rien n'a été réservé. Demandez à la boutique."
     },
-    "orderDescription": "{shop} : {items}, {days, plural, one {# jour} other {# jours}}"
+    "orderDescription": "{shop} : {items}, {days, plural, one {# jour} other {# jours}}",
+    "holdPage": {
+      "title": "Approuvez votre empreinte",
+      "lead": "{amount} sont réservés sur votre compte PayPal pendant la location. Ce n'est pas un prélèvement.",
+      "notYet": "La boutique demande l'empreinte quand vous récupérez vos articles.",
+      "approve": "Approuver {amount} avec PayPal",
+      "approving": "Ouverture de PayPal…",
+      "agree": "En approuvant, vous acceptez l'empreinte et les prix de la boutique affichés sur la page de votre location.",
+      "declined": "PayPal a refusé l'empreinte. Rien n'a été réservé. Vous pouvez l'approuver à nouveau avec un autre moyen de paiement.",
+      "placed": "Votre empreinte de {amount} est posée. Rien n'a été prélevé.",
+      "validUntil": "Elle prend fin au plus tard le {date}, et elle est libérée dès que tout revient dans le même état.",
+      "back": "Voir votre location",
+      "return": {
+        "title": "Confirmation de votre empreinte",
+        "checking": "Vérification auprès de PayPal…",
+        "done": "Empreinte posée. Rien n'a été prélevé.",
+        "retry": "Réessayer",
+        "again": "Approuver à nouveau"
+      },
+      "replaceTitle": "Approuvez une nouvelle empreinte",
+      "replaceLead": "Votre empreinte prend fin le {date}, et votre location est toujours en cours. Approuvez une nouvelle empreinte de {amount} pour qu'elle reste couverte. Ce n'est pas un prélèvement, et l'ancienne est libérée dès que vous approuvez."
+    }
   },
   "shopPage": {
     "label": "Réserver en ligne",

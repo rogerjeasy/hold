@@ -3,20 +3,35 @@ import { money } from '@hold/domain'
 import { CircleCheck, Hourglass, XCircle } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { TermsView } from '@/components/booking/terms-view'
+import { Button } from '@/components/ui/button'
 import { Panel } from '@/components/ui/panel'
 import { SampleTag } from '@/components/ui/sample-tag'
 import { useShopFormat } from '@/hooks/use-shop-format'
+import { Link } from '@/i18n/navigation'
 import { formatMoney } from '@/lib/money'
+import { linkRoutes } from '@/lib/routes'
 import { PayButton } from './pay-button'
 import { TwoAmounts } from './two-amounts'
 
-function Status({ view }: { view: RenterView }) {
+function Status({ token, view }: { token: string; view: RenterView }) {
   const t = useTranslations('renter.status')
   const states = useTranslations('rentalStates')
   // A booking past its time to pay may still be paid while nobody else has its items, so it still asks for payment.
   if (view.state === 'pending_payment') return <StatusLine icon={Hourglass} text={t('pending_payment')} />
   if (view.state === 'abandoned' || view.state === 'cancelled') return <StatusLine icon={XCircle} text={t('abandoned')} />
-  if (view.state === 'booked' || view.state === 'awaiting_hold') {
+  if (view.state === 'awaiting_hold') {
+    return (
+      <div className="grid justify-items-start gap-3">
+        <StatusLine icon={CircleCheck} text={t('awaiting_hold')} />
+        <p className="text-muted-foreground">{t('holdNext')}</p>
+        <Button asChild className="min-h-12">
+          <Link href={`${linkRoutes.renter}/${token}/pay`}>{t('approveHold')}</Link>
+        </Button>
+      </div>
+    )
+  }
+  if (view.state === 'ready') return <StatusLine icon={CircleCheck} text={t('ready')} />
+  if (view.state === 'booked') {
     return (
       <div className="grid gap-1">
         <StatusLine icon={CircleCheck} text={t('booked')} />
@@ -51,7 +66,7 @@ export function RenterScreen({ token, view }: { token: string; view: RenterView 
           {view.simulated ? <SampleTag /> : null}
         </p>
         <h1 className="text-page-title text-balance wrap-long-words">{t('title', { shop: view.shopName })}</h1>
-        <Status view={view} />
+        <Status token={token} view={view} />
       </header>
       <Panel title={t('what')}>
         <ul>

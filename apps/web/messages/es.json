@@ -1417,7 +1417,23 @@
         "no_email": "Esta reserva no tiene ningún correo al que enviar.",
         "email_failed": "No se pudo enviar el correo. Muestra el enlace en su lugar.",
         "transition_not_allowed": "Solo se puede abandonar una reserva cuyo precio no se pagó.",
-        "rows_mismatched": "Cada línea necesita un artículo y un número."
+        "rows_mismatched": "Cada línea necesita un artículo y un número.",
+        "not_booked": "El precio debe estar pagado antes de pedir la retención."
+      },
+      "hold": {
+        "title": "Retención en la recogida",
+        "body": "Al recoger, pide la retención. Quien alquila aprueba {amount} en PayPal en su propio teléfono.",
+        "ask": "Pedir la retención",
+        "asking": "Creando un código…",
+        "again": "Mostrar el código de nuevo",
+        "scan": "Escanéalo con el teléfono de quien alquila para aprobar la retención",
+        "waiting": "Esperando la aprobación de {amount}.",
+        "declined": "PayPal rechazó la forma de pago. No se reservó nada. Se puede aprobar de nuevo con otra forma de pago.",
+        "placed": "{amount} reservados en la cuenta de PayPal de quien alquila.",
+        "ready": "Listo para entregar.",
+        "assuredUntil": "Mejor cobrar antes del",
+        "validUntil": "Termina",
+        "replacing": "Se pidió una nueva retención a quien alquila antes de que termine esta. Esperando su aprobación."
       }
     },
     "items": {
@@ -1952,7 +1968,11 @@
       "next": "Siguiente: al recoger, apruebas la retención en tu teléfono.",
       "lapsed": "El plazo de pago se agotó y otra persona reservó los artículos. Contacta con la tienda para reservar de nuevo.",
       "abandoned": "Esta reserva se abandonó. Contacta con la tienda para reservar de nuevo.",
-      "other": "Tu alquiler: {state}"
+      "other": "Tu alquiler: {state}",
+      "awaiting_hold": "La tienda está lista para tu retención.",
+      "holdNext": "Aprueba la retención en este teléfono para recoger tus artículos.",
+      "approveHold": "Aprobar la retención",
+      "ready": "Tu retención está hecha. Puedes recoger tus artículos."
     },
     "paid": {
       "title": "Confirmando tu pago",
@@ -1978,9 +1998,33 @@
       "order_mismatch": "Este pago no pertenece a este alquiler. No se cobró nada.",
       "amount_mismatch": "El importe de PayPal no coincidía con el precio. Se ha avisado a la tienda.",
       "not_completed": "PayPal aún no ha completado el pago.",
-      "not_found": "Este alquiler ya no existe."
+      "not_found": "Este alquiler ya no existe.",
+      "not_requested": "La tienda aún no ha pedido la retención. Lo hace cuando recoges tus artículos.",
+      "already_placed": "Tu retención ya está hecha.",
+      "hold_refused": "PayPal no pudo hacer la retención. No se reservó nada. Pregunta en la tienda."
     },
-    "orderDescription": "{shop}: {items}, {days, plural, one {# día} other {# días}}"
+    "orderDescription": "{shop}: {items}, {days, plural, one {# día} other {# días}}",
+    "holdPage": {
+      "title": "Aprueba tu retención",
+      "lead": "Se reservan {amount} en tu cuenta de PayPal mientras alquilas. No es un cobro.",
+      "notYet": "La tienda pide la retención cuando recoges tus artículos.",
+      "approve": "Aprobar {amount} con PayPal",
+      "approving": "Abriendo PayPal…",
+      "agree": "Al aprobar, aceptas la retención y los precios de la tienda que ves en la página de tu alquiler.",
+      "declined": "PayPal rechazó la retención. No se reservó nada. Puedes aprobarla de nuevo con otra forma de pago.",
+      "placed": "Tu retención de {amount} está hecha. No se cobró nada.",
+      "validUntil": "Termina como muy tarde el {date} y se libera en cuanto todo vuelve igual que salió.",
+      "back": "Ver tu alquiler",
+      "return": {
+        "title": "Confirmando tu retención",
+        "checking": "Consultando con PayPal…",
+        "done": "Retención hecha. No se cobró nada.",
+        "retry": "Intentar de nuevo",
+        "again": "Aprobar de nuevo"
+      },
+      "replaceTitle": "Aprueba una nueva retención",
+      "replaceLead": "Tu retención termina el {date} y tu alquiler sigue abierto. Aprueba una nueva retención de {amount} para mantenerlo cubierto. No es un cobro, y la anterior se libera en cuanto apruebes."
+    }
   },
   "shopPage": {
     "label": "Reservar en línea",

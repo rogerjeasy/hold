@@ -41,7 +41,8 @@ export const itemRoutes = {
 // Pages reached by a link from an email, named by a token in their path. Not in the public list either.
 export const linkRoutes = {
   invite: '/invite',
-  // A renter's own rental, named by a signed token: /r/{token}.
+  // A renter's own rental, named by a signed token: /r/{token}. The same path as RENTER_LINK_PATH in @hold/auth, kept
+  // here too because screens import this file and must not load the server's crypto.
   renter: '/r',
   // A shop's own page for renters, named by its address: /s/{slug}.
   shopPage: '/s',

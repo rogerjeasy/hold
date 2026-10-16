@@ -1,6 +1,6 @@
 'use server'
 
-import { abandonBooking, BOOKING_LINK_SCOPES, findPayPalAccount, issueRenterLink, rentalDetail } from '@hold/db'
+import { abandonBooking, askForHold as askForRentalHold, BOOKING_LINK_SCOPES, findPayPalAccount, issueRenterLink, rentalDetail } from '@hold/db'
 import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
 import { bookingFields, emailRenterLink, placeBooking } from '@/server/booking'
@@ -64,6 +64,22 @@ export const emailRenterLinkAgain = shopAction(
     await issueRenterLink(transaction, context.shop.id, rental.id, link, BOOKING_LINK_SCOPES)
     const sent = await emailRenterLink(rental.contactEmail, link.token, readLocale(rental.language), context.shop.name)
     return sent ? { email: rental.contactEmail } : new Refusal('email_failed')
+  },
+)
+
+// At pickup: the hold the renter agreed to is requested, and a new link opens the page where they approve it in
+// PayPal on their own phone. Asked again, it shows a new code for the same hold. Requesting moves no money.
+export const askForHold = shopAction(
+  { name: 'rental.hold_asked', roles: STAFF, needsPasskey: false, input: withLocale({ rentalId: z.uuid() }) },
+  async (context, input, transaction) => {
+    const rental = await rentalDetail(transaction, input.rentalId, new Date())
+    if (rental === undefined) return new Refusal('not_found')
+    const asked = await askForRentalHold(transaction, rental.id, new Date())
+    if (!asked.ok) return new Refusal(asked.reason)
+    const link = await newRenterLink(rental.endsAt)
+    await issueRenterLink(transaction, context.shop.id, rental.id, link, BOOKING_LINK_SCOPES)
+    const url = `${await renterUrl(link.token, readLocale(rental.language))}/pay`
+    return { url, qr: await qrSvg(url) }
   },
 )
 

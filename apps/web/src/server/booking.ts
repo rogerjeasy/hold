@@ -1,4 +1,5 @@
 import 'server-only'
+import { renterLinkPath } from '@hold/auth'
 import { atShopTime } from '@hold/domain'
 import { createBooking } from '@hold/db'
 import type { Transaction } from '@hold/db'
@@ -6,7 +7,7 @@ import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import type { Locale } from '@/i18n/routing'
 import { list, Refusal } from './action'
-import { newRenterLink, renterPath, renterUrl } from './renter-links'
+import { newRenterLink, renterUrl } from './renter-links'
 import { getServices } from './services'
 
 // What a booking form sends, from the counter or from the shop's page: a period on the shop's clock and a count of
@@ -37,7 +38,7 @@ export async function placeBooking(
   const link = await newRenterLink(endsAt)
   const booked = await createBooking(transaction, shop.id, { startsAt, endsAt, lines, contact: who.contact, language: who.language, bookedThrough: who.bookedThrough, link }, new Date())
   if (!booked.ok) return new Refusal(booked.reason === 'not_available' && 'itemTypeId' in booked ? `not_available:${String(input.itemTypeId.indexOf(booked.itemTypeId))}` : booked.reason)
-  return { rentalId: booked.rentalId, token: link.token, path: renterPath(link.token, who.language) }
+  return { rentalId: booked.rentalId, token: link.token, path: renterLinkPath(link.token, who.language) }
 }
 
 // Sends the renter their link, in their language. Without the email the booking still stands: staff can show the link.

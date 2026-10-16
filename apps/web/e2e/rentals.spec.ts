@@ -125,3 +125,44 @@ test('a renter who approves the fee in PayPal and never comes back is still book
   await page.reload()
   await expect(page.getByRole('region', { name: 'Progress' }).getByText('Done')).toHaveCount(2)
 })
+
+test('at pickup, staff ask for the hold, the renter approves it on their own phone, and the rental is ready', async ({ page, browser }) => {
+  await shopReadyToBook(page, 'Lisbon Pickup Bikes')
+  await bookAtTheCounter(page)
+  await page.getByRole('button', { name: 'Show the link' }).click()
+  const link = (await page.getByTestId('renter-link').textContent()) ?? ''
+  const renter = await renterBrowser(browser)
+  await payFee(renter, link)
+
+  await page.reload()
+  const hold = page.getByRole('region', { name: 'Hold at pickup' })
+  await hold.getByRole('button', { name: 'Ask for the hold' }).click()
+  await expect(hold.getByRole('img', { name: "Scan with the renter's phone to approve the hold" })).toBeVisible()
+  await expect(hold.getByRole('status')).toContainText('Waiting for the renter to approve')
+  // On a phone at the counter, what staff act on comes before the terms.
+  await page.setViewportSize({ width: 390, height: 844 })
+  const holdTop = (await hold.boundingBox())?.y ?? Infinity
+  const termsTop = (await page.getByRole('region', { name: 'Terms' }).boundingBox())?.y ?? 0
+  expect(holdTop).toBeLessThan(termsTop)
+  await expectFitsEveryWidth(page)
+  const holdLink = (await hold.getByTestId('renter-link').textContent()) ?? ''
+  expect(holdLink).toMatch(/\/r\/[A-Za-z0-9_-]{65}\/pay$/)
+
+  await renter.goto(holdLink)
+  await expect(renter.getByRole('heading', { level: 1 })).toHaveText('Approve your hold')
+  await expect(renter.getByText('It is not a charge', { exact: false })).toBeVisible()
+  await expectFitsEveryWidth(renter)
+  await renter.getByRole('button', { name: /^Approve .* with PayPal$/ }).click()
+  await renter.getByRole('button', { name: 'Approve' }).click()
+  await expect(renter.getByText('Hold placed. Nothing was charged.')).toBeVisible()
+  await expectFitsEveryWidth(renter)
+  await renter.getByRole('link', { name: 'See your rental' }).click()
+  await expect(renter.getByText('Your hold is placed. You can collect your items.')).toBeVisible()
+  await renter.context().close()
+
+  // The staff page looks again by itself while it waits at the counter.
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await expect(hold.getByText('Ready for handover.')).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByRole('region', { name: 'Progress' }).getByText('Done')).toHaveCount(3)
+  await expectFitsEveryWidth(page)
+})

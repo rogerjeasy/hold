@@ -1,18 +1,17 @@
 import 'server-only'
-import { createHash } from 'node:crypto'
-import { GetSecretValueCommand, SecretsManagerClient } from '@aws-sdk/client-secrets-manager'
-import { createCognitoIdentity, createFakeIdentity } from '@hold/auth'
+import { createCognitoIdentity, createFakeIdentity, readKeySecret } from '@hold/auth'
 import type { Identity } from '@hold/auth'
 import { loadWebConfig } from '@hold/config'
-import type { CookieKeySource, WebConfig } from '@hold/config'
+import type { KeySource, WebConfig } from '@hold/config'
 import type { Database } from '@hold/db'
 import { createDataApiDatabase } from '@hold/db/data-api'
 import { createLazyMailer, createMemoryMailer, createSmtpMailer, loadSmtpSettings } from '@hold/notify'
 import type { Mailer } from '@hold/notify'
 import { createFakePayPal, createMemoryCredentialStore, createPayPalClient, createRestPayPalHolds, createSecretsManagerCredentialStore } from '@hold/paypal'
 import type { CredentialStore, FakePayPal, PayPalCredentials, PayPalHolds } from '@hold/paypal'
-import { applyPayPalEvent, createSqsSender, runExecution } from '@hold/settle'
-import type { QueueMessage, SettleDependencies } from '@hold/settle'
+import { applyPayPalEvent, createMemoryScheduler, createSqsSender, executionMessageSchema, paypalEventMessageSchema, runExecution, runUpkeep, upkeepMessageSchema } from '@hold/settle'
+import type { Notice, QueueMessage, RequestDependencies, SettleDependencies } from '@hold/settle'
+import { createRenterAsk } from './renter-ask'
 
 // What a PayPal credential check found: the credentials work, PayPal refused them, or PayPal could not be reached.
 export type CredentialCheck = 'accepted' | 'refused' | 'unavailable'
@@ -21,6 +20,8 @@ export type CredentialCheck = 'accepted' | 'refused' | 'unavailable'
 export type Services = {
   readonly config: WebConfig
   readonly cookieKey: Buffer
+  // Signs renter links. A key of its own, which the worker reads too; never the cookie key once deployed.
+  readonly renterLinkKey: Buffer
   readonly identity: Identity
   readonly database: Database
   readonly mailer: Mailer
@@ -33,15 +34,16 @@ export type Services = {
   // The webhook address of the shop whose account made an order, so the simulated PayPal can send its events there.
   readonly simulatedWebhookFor: (orderId: string) => string | undefined
   // Settling money with PayPal, acting as hold_app: work the app hands the worker goes through `send`.
-  readonly settle: SettleDependencies
+  // Records executions and hands them to the worker. Only the test environment also runs them, in this process.
+  readonly settle: RequestDependencies
 }
 
 // The test environment has no worker: each message is handled at once, in this process, by the same code.
 function runAtOnce(settle: () => SettleDependencies): (message: QueueMessage) => Promise<void> {
   return async (message) => {
-    const shopId = String(message.body['shopId'])
-    if (message.queue === 'executions') await runExecution(settle(), { shopId, executionId: String(message.body['executionId']) })
-    if (message.queue === 'paypal-events') await applyPayPalEvent(settle(), { shopId, eventId: String(message.body['eventId']) })
+    if (message.queue === 'executions') await runExecution(settle(), executionMessageSchema.parse(message.body))
+    if (message.queue === 'paypal-events') await applyPayPalEvent(settle(), paypalEventMessageSchema.parse(message.body))
+    if (message.queue === 'upkeep') await runUpkeep(settle(), upkeepMessageSchema.parse(message.body))
   }
 }
 
@@ -51,11 +53,9 @@ export const TEST_SIGN_IN_CODE = '24681357'
 export const TEST_REFUSED_PAYPAL_SECRET = 'refused-by-paypal'
 
 // The secret holds random text. The key is its SHA-256, which is always the 32 bytes AES-256 needs.
-async function loadCookieKey(source: CookieKeySource, region: string): Promise<Buffer> {
-  if (source.kind === 'value') return source.key
-  const secret = await new SecretsManagerClient({ region }).send(new GetSecretValueCommand({ SecretId: source.secretArn }))
-  if (secret.SecretString === undefined || secret.SecretString.length < 32) throw new Error('The cookie key secret is empty or too short.')
-  return createHash('sha256').update(secret.SecretString).digest()
+// A key named in the settings: given as is on a developer's machine, or read from its secret.
+function loadKey(source: KeySource, region: string): Promise<Buffer> {
+  return source.kind === 'value' ? Promise.resolve(source.key) : readKeySecret(source.secretArn, region)
 }
 
 async function checkWithPayPal(credentials: PayPalCredentials): Promise<CredentialCheck> {
@@ -81,18 +81,33 @@ async function build(): Promise<Services> {
         webhookOfAccount.set(credentialReference, input.url)
         return simulatedPayPal.createWebhook(input)
       },
-      createFeeOrder: async (input) => {
-        const created = await simulatedPayPal.createFeeOrder(input)
-        const url = webhookOfAccount.get(credentialReference)
-        if (created.ok && url !== undefined) webhookOfOrder.set(created.value.orderId, url)
-        return created
-      },
+      createFeeOrder: async (input) => remember(credentialReference, await simulatedPayPal.createFeeOrder(input)),
+      createHoldOrder: async (input) => remember(credentialReference, await simulatedPayPal.createHoldOrder(input)),
     })
+    function remember(credentialReference: string, created: Awaited<ReturnType<PayPalHolds['createHoldOrder']>>) {
+      const url = webhookOfAccount.get(credentialReference)
+      if (created.ok && url !== undefined) webhookOfOrder.set(created.value.orderId, url)
+      return created
+    }
     const database = await createTestDatabase()
-    const settle: SettleDependencies = { database, role: 'hold_app', paypalFor, paypalMode: config.paypalMode, send: runAtOnce(() => settle), now: () => new Date() }
+    // Schedules are kept, never fired: nothing in the test environment runs long enough to reach them.
+    // What the worker would tell people is kept, not sent.
+    const notices: Notice[] = []
+    const settle: SettleDependencies = {
+      database,
+      role: 'hold_app',
+      paypalFor,
+      paypalMode: config.paypalMode,
+      send: runAtOnce(() => settle),
+      scheduler: createMemoryScheduler(),
+      notifier: { tell: (notice) => Promise.resolve(void notices.push(notice)) },
+      renterAsk: createRenterAsk(database),
+      now: () => new Date(),
+    }
     return {
       config,
-      cookieKey: await loadCookieKey(config.cookieKey, 'us-east-1'),
+      cookieKey: await loadKey(config.cookieKey, 'us-east-1'),
+      renterLinkKey: await loadKey(config.renterLinkKey, 'us-east-1'),
       identity: createFakeIdentity({ fixedCode: TEST_SIGN_IN_CODE }),
       database,
       mailer: createMemoryMailer(),
@@ -121,7 +136,8 @@ async function build(): Promise<Services> {
   const send = config.queues === undefined ? () => Promise.reject(new Error('No worker queues are set.')) : createSqsSender({ queues: config.queues, region: config.region })
   return {
     config,
-    cookieKey: await loadCookieKey(config.cookieKey, config.region),
+    cookieKey: await loadKey(config.cookieKey, config.region),
+    renterLinkKey: await loadKey(config.renterLinkKey, config.region),
     identity: createCognitoIdentity({ region: config.region, ...config.cognito }),
     database,
     // Through the SMTP account in Secrets Manager, read when the first email is sent.
@@ -131,7 +147,7 @@ async function build(): Promise<Services> {
     paypalFor,
     simulatedPayPal: undefined,
     simulatedWebhookFor: () => undefined,
-    settle: { database, role: 'hold_app', paypalFor, paypalMode: config.paypalMode, send, now: () => new Date() },
+    settle: { database, role: 'hold_app', send, now: () => new Date() },
   }
 }
 

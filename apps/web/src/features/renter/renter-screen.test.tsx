@@ -62,4 +62,16 @@ describe('the renter’s page', () => {
     expect(screen.getByText(/This booking was let go/)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /^Pay/ })).not.toBeInTheDocument()
   })
+
+  it('sends the renter to approve the hold once the shop asks for it at pickup', () => {
+    renderWithIntl(<RenterScreen token="token" view={{ ...view, state: 'awaiting_hold' }} />)
+    expect(screen.getByText('The shop is ready for your hold.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Approve the hold' })).toHaveAttribute('href', '/r/token/pay')
+  })
+
+  it('says the items can be collected once the hold is placed', () => {
+    renderWithIntl(<RenterScreen token="token" view={{ ...view, state: 'ready' }} />)
+    expect(screen.getByText('Your hold is placed. You can collect your items.')).toBeInTheDocument()
+    expect(screen.queryByRole('link', { name: 'Approve the hold' })).not.toBeInTheDocument()
+  })
 })

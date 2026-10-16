@@ -1,4 +1,4 @@
-import { inShop, rentalDetail } from '@hold/db'
+import { inShop, rentalDetail, rentalHold } from '@hold/db'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
@@ -16,8 +16,11 @@ export default async function Page({ params }: { params: Promise<{ rentalId: str
   const context = await requireShop()
   const { database } = await getServices()
   const scope = { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId } as const
-  const rental = await inShop(database, scope, (transaction) => rentalDetail(transaction, rentalId, new Date()))
+  const { rental, hold } = await inShop(database, scope, async (transaction) => {
+    const found = await rentalDetail(transaction, rentalId, new Date())
+    return { rental: found, hold: found === undefined ? undefined : await rentalHold(transaction, found.id) }
+  })
   // Another shop's rental and a made-up address read the same.
   if (rental === undefined) notFound()
-  return <RentalScreen shopName={context.shop.name} clock={{ timeZone: context.shop.timeZone, currency: context.shop.currency }} rental={rental} canAct={context.role !== 'read_only'} />
+  return <RentalScreen shopName={context.shop.name} clock={{ timeZone: context.shop.timeZone, currency: context.shop.currency }} rental={rental} hold={hold} canAct={context.role !== 'read_only'} />
 }
