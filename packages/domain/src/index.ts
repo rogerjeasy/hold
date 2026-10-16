@@ -48,3 +48,5 @@ export { checkPhotoPlan, ITEM_CATEGORIES, PHOTO_PLAN_LIMITS, suggestedPhotoPlan,
 export type { ItemCategory, PhotoPlanProblem, PhotoPlanViewDraft, SuggestedView, ViewOutline } from './photo-plan.ts'
 export { blocksItem, BOOKING_LIMITS, bookingTerms, checkBooking, paymentLapsed, rentalDays } from './booking.ts'
 export type { BookingDraft, BookingLine, BookingProblem, BookingTerms, Period } from './booking.ts'
+export { CAPTURE_SESSION_KINDS, checkPhotoQuality, checkRegion, CONDITION_REPLIES, CONDITION_REPLY_HOURS, conditionReplyOpen, manifestText, MISSED_VIEWS, missingViews, PHOTO_QUALITY } from './capture-session.ts'
+export type { CaptureSessionKind, ConditionReply, PhotoMeasures, PhotoProblem, Region, SealedSession } from './capture-session.ts'
