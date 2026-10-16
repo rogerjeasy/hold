@@ -14,6 +14,8 @@ const ENVIRONMENT = {
   HOLD_SMTP_SECRET: 'hold/email/smtp',
   HOLD_PUBLIC_URL: 'https://abc.us-east-1.awsapprunner.com',
   HOLD_RENTER_LINK_KEY_SECRET_ARN: 'arn:aws:secretsmanager:us-east-1:1:secret:hold/web/renter-link-key',
+  HOLD_EVIDENCE_BUCKET: 'hold-evidence-1',
+  HOLD_DISPLAY_BUCKET: 'hold-display-1',
 }
 
 describe('the worker’s settings', () => {
@@ -27,6 +29,7 @@ describe('the worker’s settings', () => {
       smtpSecret: 'hold/email/smtp',
       publicUrl: 'https://abc.us-east-1.awsapprunner.com',
       renterLinkKeySecretArn: ENVIRONMENT.HOLD_RENTER_LINK_KEY_SECRET_ARN,
+      photoBuckets: { evidence: 'hold-evidence-1', display: 'hold-display-1' },
     })
   })
 

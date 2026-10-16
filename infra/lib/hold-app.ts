@@ -30,11 +30,21 @@ export function createHoldApp(app: App, options: HoldAppOptions) {
   // Deployed with the caller's own credentials, not the shared bootstrap's roles. Each stack gets its own.
   const synthesizer = () => new CliCredentialsStackSynthesizer({ qualifier: CDK_BOOTSTRAP_QUALIFIER, bucketPrefix: CDK_ASSETS_PREFIX })
 
-  const data = createDataStack(app, { env, synthesizer: synthesizer() })
+  // Before App Runner has given the web app an address, links and uploads point at a developer's machine.
+  const publicUrl = options.webPublicUrl ?? 'http://localhost:3000'
+  const data = createDataStack(app, { env, synthesizer: synthesizer(), publicUrl })
   const identity = createIdentityStack(app, { env, synthesizer: synthesizer(), senderEmail: options.senderEmail, passkeyRelyingPartyId: passkeyDomain(options.webPublicUrl) })
   const registry = createRegistryStack(app, { env, synthesizer: synthesizer() })
-  // Before App Runner has given the web app an address, email links point at a developer's machine.
-  const work = createWorkStack(app, { env, synthesizer: synthesizer(), cluster: data.cluster, workerUserSecret: data.workerUserSecret, renterLinkKey: identity.renterLinkKey, publicUrl: options.webPublicUrl ?? 'http://localhost:3000' })
+  const work = createWorkStack(app, {
+    env,
+    synthesizer: synthesizer(),
+    cluster: data.cluster,
+    workerUserSecret: data.workerUserSecret,
+    renterLinkKey: identity.renterLinkKey,
+    publicUrl,
+    evidenceBucket: data.evidenceBucket,
+    displayBucket: data.displayBucket,
+  })
   const stacks = {
     data,
     identity,
@@ -52,6 +62,8 @@ export function createHoldApp(app: App, options: HoldAppOptions) {
       webClient: identity.webClient,
       cookieKey: identity.cookieKey,
       renterLinkKey: identity.renterLinkKey,
+      evidenceBucket: data.evidenceBucket,
+      displayBucket: data.displayBucket,
       queues: work.queues,
     }),
     delivery: createDeliveryStack(app, { env, synthesizer: synthesizer() }),

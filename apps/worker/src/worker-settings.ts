@@ -20,6 +20,9 @@ const schema = z.object({
   HOLD_PUBLIC_URL: z.url(),
   // The key renter links are signed with, shared with the web app. Never the web app's cookie key.
   HOLD_RENTER_LINK_KEY_SECRET_ARN: z.string().startsWith('arn:aws:secretsmanager:'),
+  // The locked originals it reads, and the display copies it writes.
+  HOLD_EVIDENCE_BUCKET: z.string().min(3),
+  HOLD_DISPLAY_BUCKET: z.string().min(3),
 })
 
 export type WorkerSettings = {
@@ -32,6 +35,7 @@ export type WorkerSettings = {
   readonly smtpSecret: string
   readonly publicUrl: string
   readonly renterLinkKeySecretArn: string
+  readonly photoBuckets: { readonly evidence: string; readonly display: string }
 }
 
 export function loadWorkerSettings(environment: Readonly<Record<string, string | undefined>>): WorkerSettings {
@@ -47,5 +51,6 @@ export function loadWorkerSettings(environment: Readonly<Record<string, string |
     smtpSecret: value.HOLD_SMTP_SECRET,
     publicUrl: value.HOLD_PUBLIC_URL.replace(/\/$/, ''),
     renterLinkKeySecretArn: value.HOLD_RENTER_LINK_KEY_SECRET_ARN,
+    photoBuckets: { evidence: value.HOLD_EVIDENCE_BUCKET, display: value.HOLD_DISPLAY_BUCKET },
   }
 }

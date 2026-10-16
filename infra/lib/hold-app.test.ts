@@ -8,7 +8,8 @@ import { CODE_KEY_ARN, DATABASE_NAME, EVIDENCE_RETENTION_DAYS, PREFIX } from './
 import { QUEUES } from './work-stack.ts'
 
 // The default VPC lookup recorded by the first synth, so the tests build the same app with no AWS access.
-const context = JSON.parse(readFileSync(join(import.meta.dirname, '..', 'cdk.context.json'), 'utf8')) as Record<string, unknown>
+// Assets are not bundled: these tests read the templates, and bundling the worker installs sharp for the machine.
+const context = { ...(JSON.parse(readFileSync(join(import.meta.dirname, '..', 'cdk.context.json'), 'utf8')) as Record<string, unknown>), 'aws:cdk:bundling-stacks': [] }
 
 const IMAGE_TAG = '0123456789abcdef0123456789abcdef01234567'
 const stacks = createHoldApp(new App({ context }), {
@@ -161,6 +162,13 @@ describe('sign-in', () => {
     Template.fromStack(first.identity.stack).hasResourceProperties('AWS::Cognito::UserPool', { WebAuthnRelyingPartyID: 'localhost' })
   })
 
+  it('lets a phone put photographs into the evidence bucket only from the web app’s own address', () => {
+    data.hasResourceProperties('AWS::S3::Bucket', {
+      BucketName: 'hold-evidence-707938860881',
+      CorsConfiguration: { CorsRules: [{ AllowedMethods: ['PUT'], AllowedOrigins: ['https://abc123.us-east-1.awsapprunner.com'], AllowedHeaders: ['content-type', 'x-amz-checksum-sha256'], MaxAge: 300 }] },
+    })
+  })
+
   it('keeps the cookie key in Secrets Manager, under Hold’s name', () => {
     identity.hasResourceProperties('AWS::SecretsManager::Secret', { Name: 'hold/web/cookie-key' })
   })
@@ -273,14 +281,14 @@ describe('the worker', () => {
       .filter(([key]) => key.startsWith('WorkerRole'))
       .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: { Action: unknown }[] } } }).Properties.PolicyDocument.Statement)
 
-  it('runs four functions on Node 24: PayPal events, executions, hold upkeep and the outbox relay', () => {
-    for (const functionName of ['hold-worker-paypal-events', 'hold-worker-executions', 'hold-worker-upkeep', 'hold-worker-outbox-relay']) {
+  it('runs five functions on Node 24: PayPal events, executions, hold upkeep, display copies and the outbox relay', () => {
+    for (const functionName of ['hold-worker-paypal-events', 'hold-worker-executions', 'hold-worker-upkeep', 'hold-worker-media', 'hold-worker-outbox-relay']) {
       expect(functionNamed(functionName)?.Properties).toMatchObject({ Runtime: 'nodejs24.x' })
     }
   })
 
   it('takes PayPal events, executions and upkeep from their queues, and tries again only the messages that failed', () => {
-    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 3)
+    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 4)
     work.hasResourceProperties('AWS::Lambda::EventSourceMapping', { FunctionResponseTypes: ['ReportBatchItemFailures'] })
   })
 
@@ -316,6 +324,9 @@ describe('the worker', () => {
         'scheduler:UpdateSchedule',
         'scheduler:DeleteSchedule',
         'iam:PassRole',
+        's3:GetObject',
+        's3:PutObject',
+        'rekognition:DetectFaces',
         'logs:CreateLogGroup',
         'logs:CreateLogStream',
         'logs:PutLogEvents',
@@ -338,6 +349,17 @@ describe('the worker', () => {
     expect(settings).toContain('"HOLD_SMTP_SECRET":"hold/email/smtp"')
     expect(settings).toContain('"HOLD_PUBLIC_URL":"https://abc123.us-east-1.awsapprunner.com"')
     expect(JSON.stringify(workerPolicy())).toContain('secret:hold/email/smtp')
+  })
+
+  it('reads the locked originals and writes display copies, with room for the images, and deletes nothing', () => {
+    expect(functionNamed('hold-worker-media')?.Properties).toMatchObject({ MemorySize: 1536 })
+    const onEvidence = workerPolicy().find((statement) => JSON.stringify(statement).includes('EvidenceBucket'))
+    const onDisplay = workerPolicy().find((statement) => JSON.stringify(statement).includes('DisplayBucket'))
+    expect([onEvidence?.Action].flat()).toEqual(['s3:GetObject'])
+    expect([onDisplay?.Action].flat()).toEqual(['s3:PutObject'])
+    expect(JSON.stringify(workerPolicy())).not.toMatch(/s3:Delete/)
+    const settings = JSON.stringify(functionNamed('hold-worker-media')?.Properties?.['Environment'])
+    for (const setting of ['HOLD_EVIDENCE_BUCKET', 'HOLD_DISPLAY_BUCKET']) expect(settings).toContain(setting)
   })
 
   it('signs renter links with their own key, and can never read the web app’s cookie key', () => {
@@ -426,10 +448,25 @@ describe('the web app', () => {
         'sqs:SendMessage',
         'sqs:GetQueueAttributes',
         'sqs:GetQueueUrl',
+        's3:GetObject',
+        's3:PutObject',
       ]),
     )
     expect(instancePolicy()).toContain('secret:hold/paypal/shops/*')
     expect(instancePolicy()).toContain('secret:hold/email/smtp-??????')
+  })
+
+  it('signs uploads into the evidence bucket and reads back what arrived, reads display copies, and deletes nothing', () => {
+    const statements = Object.entries(web.findResources('AWS::IAM::Policy'))
+      .filter(([key]) => key.startsWith('InstanceRole'))
+      .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: { Action: unknown; Resource: unknown }[] } } }).Properties.PolicyDocument.Statement)
+    const onEvidence = statements.find((statement) => JSON.stringify(statement.Resource).includes('EvidenceBucket'))
+    const onDisplay = statements.find((statement) => JSON.stringify(statement.Resource).includes('DisplayBucket'))
+    expect(new Set([onEvidence?.Action].flat())).toEqual(new Set(['s3:GetObject', 's3:PutObject']))
+    expect([onDisplay?.Action].flat()).toEqual(['s3:GetObject'])
+    expect(JSON.stringify(statements)).not.toMatch(/s3:Delete|s3:\*/)
+    const names = variables().map((variable) => variable.Name)
+    for (const setting of ['HOLD_EVIDENCE_BUCKET', 'HOLD_DISPLAY_BUCKET', 'HOLD_MEDIA_QUEUE_URL']) expect(names).toContain(setting)
   })
 })
 
@@ -508,6 +545,10 @@ describe('delivery', () => {
     const statements = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
     expect(statements).toContain('iam:PermissionsBoundary')
     expect(statements).toMatch(/"Effect":"Deny"[^}]*iam:DeleteRolePermissionsBoundary|iam:DeleteRolePermissionsBoundary[^}]*"Effect":"Deny"/)
+  })
+
+  it('lets Hold’s roles find faces in a photograph, which the display copies need', () => {
+    expect(JSON.stringify(boundaryPolicy())).toContain('rekognition:DetectFaces')
   })
 
   it('keeps the boundary to what the app needs, and lets it hand on only the scheduler’s role', () => {

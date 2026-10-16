@@ -4,6 +4,7 @@ import * as apprunner from 'aws-cdk-lib/aws-apprunner'
 import type * as cognito from 'aws-cdk-lib/aws-cognito'
 import type * as ecr from 'aws-cdk-lib/aws-ecr'
 import * as iam from 'aws-cdk-lib/aws-iam'
+import type * as s3 from 'aws-cdk-lib/aws-s3'
 import type * as rds from 'aws-cdk-lib/aws-rds'
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 import { ACCOUNT, DATABASE_NAME, name, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
@@ -23,6 +24,8 @@ export type WebResources = {
 }
 
 export type WebStackProps = StackProps & {
+  readonly evidenceBucket: s3.IBucket
+  readonly displayBucket: s3.IBucket
   readonly repository: ecr.IRepository
   // The commit CI passed on. Its image is in the repository, tagged with it.
   readonly imageTag: string
@@ -40,7 +43,7 @@ export type WebStackProps = StackProps & {
 }
 
 // The queues the app hands work to: executions to capture, and the PayPal events it has stored.
-const HANDED_ON = ['executions', 'paypal-events'] as const
+const HANDED_ON = ['executions', 'paypal-events', 'media'] as const
 
 function queueOf(props: WebStackProps, queueName: string): sqs.IQueue {
   const queue = props.queues.get(queueName)
@@ -69,6 +72,10 @@ function instanceRole(stack: Stack, props: WebStackProps): iam.Role {
   role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:CreateSecret', 'secretsmanager:PutSecretValue', 'secretsmanager:TagResource'], resources: [paypalCredentials] }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['cognito-idp:AdminAddUserToGroup'], resources: [props.userPool.userPoolArn] }))
   for (const queueName of HANDED_ON) queueOf(props, queueName).grantSendMessages(role)
+  // Photographs: the phone puts each original through a link the app signs, and the app reads back what arrived. The
+  // app reads display copies to sign links to them. It deletes nothing; Object Lock would refuse it anyway.
+  role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:PutObject', 's3:GetObject'], resources: [props.evidenceBucket.arnForObjects('*')] }))
+  role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:GetObject'], resources: [props.displayBucket.arnForObjects('*')] }))
   return role
 }
 
@@ -86,6 +93,9 @@ function settings(props: WebStackProps): apprunner.CfnService.KeyValuePairProper
     HOLD_SMTP_SECRET: SMTP_SECRET_NAME,
     HOLD_EXECUTIONS_QUEUE_URL: queueOf(props, 'executions').queueUrl,
     HOLD_PAYPAL_EVENTS_QUEUE_URL: queueOf(props, 'paypal-events').queueUrl,
+    HOLD_MEDIA_QUEUE_URL: queueOf(props, 'media').queueUrl,
+    HOLD_EVIDENCE_BUCKET: props.evidenceBucket.bucketName,
+    HOLD_DISPLAY_BUCKET: props.displayBucket.bucketName,
     ...(props.publicUrl === undefined ? {} : { HOLD_PUBLIC_URL: props.publicUrl }),
   }
   return Object.entries(values).map(([key, value]) => ({ name: key, value }))

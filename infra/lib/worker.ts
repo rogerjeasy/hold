@@ -6,6 +6,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda'
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources'
 import * as nodejs from 'aws-cdk-lib/aws-lambda-nodejs'
 import type * as rds from 'aws-cdk-lib/aws-rds'
+import type * as s3 from 'aws-cdk-lib/aws-s3'
 import * as scheduler from 'aws-cdk-lib/aws-scheduler'
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 import type * as sqs from 'aws-cdk-lib/aws-sqs'
@@ -31,6 +32,8 @@ export type WorkerProps = {
   readonly publicUrl: string
   // Signs the renter links the worker emails. Never the web app's cookie key.
   readonly renterLinkKey: secretsmanager.ISecret
+  readonly evidenceBucket: s3.IBucket
+  readonly displayBucket: s3.IBucket
 }
 
 function workerRole(stack: Stack, props: WorkerProps): iam.Role {
@@ -74,6 +77,11 @@ function workerRole(stack: Stack, props: WorkerProps): iam.Role {
       conditions: { StringEquals: { 'iam:PassedToService': 'scheduler.amazonaws.com' } },
     }),
   )
+  // Display copies: it reads a locked original, finds its faces, and writes the blurred copy. It deletes nothing.
+  role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:GetObject'], resources: [props.evidenceBucket.arnForObjects('*')] }))
+  role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:PutObject'], resources: [props.displayBucket.arnForObjects('*')] }))
+  // DetectFaces names no resource.
+  role.addToPolicy(new iam.PolicyStatement({ actions: ['rekognition:DetectFaces'], resources: ['*'] }))
   for (const queueName of ['paypal-events', 'executions', 'upkeep']) {
     const queue = props.queues.get(queueName)
     if (queue === undefined) throw new Error(`No ${queueName} queue.`)
@@ -82,7 +90,11 @@ function workerRole(stack: Stack, props: WorkerProps): iam.Role {
   return role
 }
 
-function workerFunction(stack: Stack, id: string, functionName: string, entry: string, role: iam.Role, environment: Record<string, string>): nodejs.NodejsFunction {
+// sharp ships a native binary for the machine it is installed on, so it is installed, not bundled. The deploy runs on
+// Linux x86-64, as Lambda does.
+type FunctionOptions = { readonly memorySize?: number; readonly nativeModules?: readonly string[] }
+
+function workerFunction(stack: Stack, id: string, functionName: string, entry: string, role: iam.Role, environment: Record<string, string>, options: FunctionOptions = {}): nodejs.NodejsFunction {
   return new nodejs.NodejsFunction(stack, id, {
     functionName,
     description: `Hold worker: ${entry}`,
@@ -90,11 +102,11 @@ function workerFunction(stack: Stack, id: string, functionName: string, entry: s
     projectRoot: REPO_ROOT,
     depsLockFilePath: join(REPO_ROOT, 'pnpm-lock.yaml'),
     runtime: lambda.Runtime.NODEJS_24_X,
-    memorySize: 512,
+    memorySize: options.memorySize ?? 512,
     timeout: WORKER_TIMEOUT,
     role,
     environment,
-    bundling: { minify: true, sourceMap: false },
+    bundling: { minify: true, sourceMap: false, ...(options.nativeModules === undefined ? {} : { nodeModules: [...options.nativeModules] }) },
   })
 }
 
@@ -118,17 +130,22 @@ export function createWorker(stack: Stack, props: WorkerProps): void {
     HOLD_SMTP_SECRET: SMTP_SECRET_NAME,
     HOLD_PUBLIC_URL: props.publicUrl,
     HOLD_RENTER_LINK_KEY_SECRET_ARN: props.renterLinkKey.secretArn,
+    HOLD_EVIDENCE_BUCKET: props.evidenceBucket.bucketName,
+    HOLD_DISPLAY_BUCKET: props.displayBucket.bucketName,
   }
 
   const events = workerFunction(stack, 'PayPalEventsWorker', name('worker', 'paypal', 'events'), 'paypal-events-lambda.ts', role, environment)
   const executions = workerFunction(stack, 'ExecutionsWorker', name('worker', 'executions'), 'executions-lambda.ts', role, environment)
   const upkeep = workerFunction(stack, 'UpkeepWorker', name('worker', 'upkeep'), 'upkeep-lambda.ts', role, environment)
+  // Image work needs room: a 12-megapixel original is about 36 MB of pixels.
+  const media = workerFunction(stack, 'MediaWorker', name('worker', 'media'), 'media-lambda.ts', role, environment, { memorySize: 1536, nativeModules: ['sharp'] })
   const relay = workerFunction(stack, 'OutboxRelayWorker', name('worker', 'outbox', 'relay'), 'outbox-relay-lambda.ts', role, environment)
 
   // A message whose work failed is named back, so only it is tried again; the rest of the batch is done.
   events.addEventSource(new SqsEventSource(queue('paypal-events'), { batchSize: 5, reportBatchItemFailures: true }))
   executions.addEventSource(new SqsEventSource(queue('executions'), { batchSize: 5, reportBatchItemFailures: true }))
   upkeep.addEventSource(new SqsEventSource(queue('upkeep'), { batchSize: 5, reportBatchItemFailures: true }))
+  media.addEventSource(new SqsEventSource(queue('media'), { batchSize: 2, reportBatchItemFailures: true }))
 
   relay.grantInvoke(props.schedulerRole)
   new scheduler.CfnSchedule(stack, 'OutboxRelaySchedule', {

@@ -5,6 +5,7 @@ import * as iam from 'aws-cdk-lib/aws-iam'
 import * as scheduler from 'aws-cdk-lib/aws-scheduler'
 import * as sqs from 'aws-cdk-lib/aws-sqs'
 import type * as rds from 'aws-cdk-lib/aws-rds'
+import type * as s3 from 'aws-cdk-lib/aws-s3'
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 import { name } from './settings.ts'
 import { createWorker } from './worker.ts'
@@ -87,6 +88,8 @@ export type WorkStackProps = StackProps & {
   readonly workerUserSecret: secretsmanager.ISecret
   readonly renterLinkKey: secretsmanager.ISecret
   readonly publicUrl: string
+  readonly evidenceBucket: s3.IBucket
+  readonly displayBucket: s3.IBucket
 }
 
 export function createWorkStack(app: App, props: WorkStackProps): WorkResources {
@@ -105,7 +108,7 @@ export function createWorkStack(app: App, props: WorkStackProps): WorkResources 
   })
   for (const queue of queues.values()) queue.grantSendMessages(schedulerRole)
 
-  createWorker(stack, { cluster: props.cluster, workerUserSecret: props.workerUserSecret, queues, scheduleGroup, schedulerRole, publicUrl: props.publicUrl, renterLinkKey: props.renterLinkKey })
+  createWorker(stack, { cluster: props.cluster, workerUserSecret: props.workerUserSecret, queues, scheduleGroup, schedulerRole, publicUrl: props.publicUrl, renterLinkKey: props.renterLinkKey, evidenceBucket: props.evidenceBucket, displayBucket: props.displayBucket })
 
   for (const [queueName, queue] of queues) {
     new CfnOutput(stack, `QueueUrl-${queueName}`, { value: queue.queueUrl })

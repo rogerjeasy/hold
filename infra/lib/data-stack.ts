@@ -78,7 +78,7 @@ function createDatabase(stack: Stack) {
   return { cluster, appUserSecret, workerUserSecret }
 }
 
-function createEvidenceBucket(stack: Stack): s3.Bucket {
+function createEvidenceBucket(stack: Stack, publicUrl: string): s3.Bucket {
   // Object Lock can only be switched on when a bucket is created (tech-stack.md section 16, item 8).
   return new s3.Bucket(stack, 'EvidenceBucket', {
     bucketName: name('evidence', ACCOUNT),
@@ -90,6 +90,8 @@ function createEvidenceBucket(stack: Stack): s3.Bucket {
     blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
     enforceSSL: true,
     lifecycleRules: [{ id: 'abort-incomplete-uploads', abortIncompleteMultipartUploadAfter: Duration.days(7) }],
+    // The phone puts each photograph here itself, through a signed link, from the web app's own pages only.
+    cors: [{ allowedMethods: [s3.HttpMethods.PUT], allowedOrigins: [publicUrl], allowedHeaders: ['content-type', 'x-amz-checksum-sha256'], maxAge: 300 }],
     removalPolicy: RemovalPolicy.RETAIN,
   })
 }
@@ -107,10 +109,13 @@ function createDisplayBucket(stack: Stack): s3.Bucket {
   })
 }
 
-export function createDataStack(app: App, props: StackProps): DataResources {
+// The web app's own address, from which phones put photographs.
+export type DataStackProps = StackProps & { readonly publicUrl: string }
+
+export function createDataStack(app: App, props: DataStackProps): DataResources {
   const stack = new Stack(app, 'HoldData', { ...props, terminationProtection: true, description: 'Hold: database and photograph storage' })
   const { cluster, appUserSecret, workerUserSecret } = createDatabase(stack)
-  const evidenceBucket = createEvidenceBucket(stack)
+  const evidenceBucket = createEvidenceBucket(stack, props.publicUrl)
   const displayBucket = createDisplayBucket(stack)
 
   new CfnOutput(stack, 'DatabaseClusterArn', { value: cluster.clusterArn })

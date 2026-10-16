@@ -78,6 +78,8 @@ function permissionsBoundary(stack: Stack): iam.ManagedPolicy {
       statement(['sqs:SendMessage', 'sqs:ReceiveMessage', 'sqs:DeleteMessage', 'sqs:ChangeMessageVisibility', 'sqs:GetQueueAttributes', 'sqs:GetQueueUrl'], [at.sqs]),
       statement(['s3:GetObject', 's3:PutObject'], [at.objects]),
       statement(['s3:ListBucket'], [at.buckets]),
+      // Finding faces to blur in a display copy. The call names no resource.
+      statement(['rekognition:DetectFaces'], ['*']),
       statement(['secretsmanager:GetSecretValue', 'secretsmanager:DescribeSecret'], [at.secrets('*')]),
       statement(['secretsmanager:CreateSecret', 'secretsmanager:PutSecretValue', 'secretsmanager:TagResource'], [at.secrets('paypal/*')]),
       statement(['rds-data:ExecuteStatement', 'rds-data:BatchExecuteStatement', 'rds-data:BeginTransaction', 'rds-data:CommitTransaction', 'rds-data:RollbackTransaction'], [at.cluster]),
