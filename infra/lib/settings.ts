@@ -26,6 +26,7 @@ export const DATABASE_NAME = 'hold_db'
 // The role the application connects as. It does not own the tables, so row-level security applies to it.
 export const DATABASE_APP_USER = 'hold_app'
 export const DATABASE_ADMIN_USER = 'hold_admin'
+export const DATABASE_WORKER_USER = 'hold_worker'
 
 export function name(...parts: readonly string[]): string {
   return [PREFIX, ...parts].join('-')

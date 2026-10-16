@@ -4,7 +4,10 @@ import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
 import * as iam from 'aws-cdk-lib/aws-iam'
 import * as scheduler from 'aws-cdk-lib/aws-scheduler'
 import * as sqs from 'aws-cdk-lib/aws-sqs'
+import type * as rds from 'aws-cdk-lib/aws-rds'
+import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 import { name } from './settings.ts'
+import { createWorker } from './worker.ts'
 
 // Background work (architecture.md section 14.7): the spine's queues, each with a dead-letter queue and an alarm on
 // it, and the group the worker's schedules live in. The extensions add their queues when they arrive.
@@ -17,8 +20,9 @@ type QueueSpec = {
 }
 
 export const QUEUES: readonly QueueSpec[] = [
-  { name: 'paypal-events', orderedPerRental: true, visibilityTimeout: Duration.minutes(1) },
-  { name: 'executions', orderedPerRental: true, visibilityTimeout: Duration.minutes(2) },
+  // Longer than the worker may run on one message (worker.ts), so two functions never handle it at once.
+  { name: 'paypal-events', orderedPerRental: true, visibilityTimeout: Duration.minutes(6) },
+  { name: 'executions', orderedPerRental: true, visibilityTimeout: Duration.minutes(6) },
   { name: 'comparisons', orderedPerRental: false, visibilityTimeout: Duration.minutes(10) },
   { name: 'media', orderedPerRental: false, visibilityTimeout: Duration.minutes(5) },
   { name: 'evidence', orderedPerRental: true, visibilityTimeout: Duration.minutes(5) },
@@ -73,20 +77,24 @@ function createQueue(stack: Stack, spec: QueueSpec): sqs.Queue {
   })
 }
 
-export function createWorkStack(app: App, props: StackProps): WorkResources {
-  const stack = new Stack(app, 'HoldWork', { ...props, description: 'Hold: queues and schedules' })
+export type WorkStackProps = StackProps & { readonly cluster: rds.IDatabaseCluster; readonly workerUserSecret: secretsmanager.ISecret }
+
+export function createWorkStack(app: App, props: WorkStackProps): WorkResources {
+  const stack = new Stack(app, 'HoldWork', { ...props, description: 'Hold: queues, schedules and the worker' })
   const queues = new Map(QUEUES.map((spec) => [spec.name, createQueue(stack, spec)]))
 
   // Schedules for each hold are made and removed by the worker at run time (section 14.7), in this group only.
   const scheduleGroup = new scheduler.ScheduleGroup(stack, 'ScheduleGroup', { scheduleGroupName: name('schedules') })
   const schedulerRole = new iam.Role(stack, 'SchedulerRole', {
     roleName: name('scheduler'),
-    description: 'Assumed by EventBridge Scheduler to deliver Hold schedules to Hold queues, and nothing else.',
+    description: 'Assumed by EventBridge Scheduler to deliver Hold schedules to Hold queues and start the outbox relay.',
     assumedBy: new iam.ServicePrincipal('scheduler.amazonaws.com', {
       conditions: { StringEquals: { 'aws:SourceAccount': stack.account } },
     }),
   })
   for (const queue of queues.values()) queue.grantSendMessages(schedulerRole)
+
+  createWorker(stack, { cluster: props.cluster, workerUserSecret: props.workerUserSecret, queues, scheduleGroup, schedulerRole })
 
   for (const [queueName, queue] of queues) {
     new CfnOutput(stack, `QueueUrl-${queueName}`, { value: queue.queueUrl })

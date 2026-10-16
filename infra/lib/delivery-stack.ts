@@ -54,7 +54,7 @@ const at = {
 }
 // The only roles CloudFormation may hand on: the web app's two (infra/lib/web-stack.ts), which trust App Runner alone,
 // and the code sender's (infra/lib/code-sender.ts), which trusts Lambda alone.
-const PASSED_ROLES = [name('web'), name('web', 'access'), name('code', 'sender')]
+const PASSED_ROLES = [name('web'), name('web', 'access'), name('code', 'sender'), name('worker'), name('scheduler')]
 const HOLD_TAG = { 'aws:ResourceTag/project': PREFIX }
 const HOLD_REQUEST_TAG = { 'aws:RequestTag/project': PREFIX }
 
@@ -95,8 +95,47 @@ function permissionsBoundary(stack: Stack): iam.ManagedPolicy {
       statement(['kms:Decrypt', 'kms:GenerateDataKey'], ['*'], { StringEquals: { 'kms:ViaService': [`secretsmanager.${REGION}.amazonaws.com`, `s3.${REGION}.amazonaws.com`, `sqs.${REGION}.amazonaws.com`] } }),
       statement(['kms:Decrypt'], [at.keys], { StringEquals: HOLD_TAG }),
       statement(['iam:PassRole'], [at.role(name('scheduler'))], { StringEquals: { 'iam:PassedToService': 'scheduler.amazonaws.com' } }),
+      // The scheduler starts the outbox relay, one of Hold's functions.
+      statement(['lambda:InvokeFunction'], [at.functions]),
     ],
   })
+}
+
+// What CloudFormation needs to run Hold's code: the web app on App Runner, the functions on Lambda with what feeds
+// them, and the schedules that start them. Apart from the rest because one role's own policy holds at most 10,240
+// characters.
+function computePolicy(stack: Stack): iam.ManagedPolicy {
+  const policy = new iam.ManagedPolicy(stack, 'ComputePolicy', {
+    managedPolicyName: name('cloudformation', 'compute'),
+    description: "What CloudFormation needs to run Hold's code, and nothing of other projects",
+  })
+  const add = (statement: iam.PolicyStatement) => {
+    policy.addStatements(statement)
+  }
+  // The code sender: Hold's functions only, with their code read from Hold's prefix of the bootstrap bucket.
+  add(
+    statement(
+      ['lambda:CreateFunction', 'lambda:DeleteFunction', 'lambda:GetFunction', 'lambda:GetFunctionConfiguration', 'lambda:GetFunctionCodeSigningConfig', 'lambda:GetRuntimeManagementConfig', 'lambda:UpdateFunctionCode', 'lambda:UpdateFunctionConfiguration', 'lambda:AddPermission', 'lambda:RemovePermission', 'lambda:GetPolicy', 'lambda:TagResource', 'lambda:UntagResource', 'lambda:ListTags'],
+      [at.functions],
+    ),
+  )
+  add(statement(['s3:GetObject'], [`arn:aws:s3:::${CDK_ASSETS_BUCKET}/${CDK_ASSETS_PREFIX}*`]))
+  // App Runner: a service may be made only with the project tag, and only Hold's are described or changed after.
+  // Describing a service shows its settings, so another project's is never described.
+  add(statement(['apprunner:CreateService'], ['*'], { StringEquals: HOLD_REQUEST_TAG }))
+  add(statement(['apprunner:DescribeService', 'apprunner:ListOperations', 'apprunner:UpdateService', 'apprunner:DeleteService', 'apprunner:TagResource', 'apprunner:UntagResource', 'apprunner:ListTagsForResource'], [`${at.services}/*`]))
+  add(statement(['apprunner:CreateAutoScalingConfiguration', 'apprunner:DescribeAutoScalingConfiguration', 'apprunner:DeleteAutoScalingConfiguration', 'apprunner:TagResource', 'apprunner:UntagResource', 'apprunner:ListTagsForResource'], [`${at.scaling}/*`]))
+
+  // The worker: a queue may feed only one of Hold's functions. A mapping's own ARN is not known before it exists, so the
+  // function it feeds is what is checked. The outbox relay's schedule goes in Hold's own groups only.
+  add(
+    statement(['lambda:CreateEventSourceMapping', 'lambda:UpdateEventSourceMapping', 'lambda:DeleteEventSourceMapping', 'lambda:TagResource'], ['*'], {
+      ArnLike: { 'lambda:FunctionArn': at.functions },
+    }),
+  )
+  add(statement(['lambda:GetEventSourceMapping', 'lambda:ListEventSourceMappings'], ['*']))
+  add(statement(['scheduler:CreateSchedule', 'scheduler:UpdateSchedule', 'scheduler:DeleteSchedule', 'scheduler:GetSchedule'], [at.schedules]))
+  return policy
 }
 
 function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineRoles: readonly string[]): iam.Role {
@@ -132,14 +171,6 @@ function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineR
   // Encryption with AWS-managed keys, through the services that use them, for their own resources only.
   add(statement(['kms:DescribeKey', 'kms:CreateGrant'], ['*'], { StringEquals: { 'kms:ViaService': [`rds.${REGION}.amazonaws.com`, `secretsmanager.${REGION}.amazonaws.com`] }, Bool: { 'kms:GrantIsForAWSResource': true } }))
 
-  // The code sender: Hold's functions only, with their code read from Hold's prefix of the bootstrap bucket.
-  add(
-    statement(
-      ['lambda:CreateFunction', 'lambda:DeleteFunction', 'lambda:GetFunction', 'lambda:GetFunctionConfiguration', 'lambda:GetFunctionCodeSigningConfig', 'lambda:GetRuntimeManagementConfig', 'lambda:UpdateFunctionCode', 'lambda:UpdateFunctionConfiguration', 'lambda:AddPermission', 'lambda:RemovePermission', 'lambda:GetPolicy', 'lambda:TagResource', 'lambda:UntagResource', 'lambda:ListTags'],
-      [at.functions],
-    ),
-  )
-  add(statement(['s3:GetObject'], [`arn:aws:s3:::${CDK_ASSETS_BUCKET}/${CDK_ASSETS_PREFIX}*`]))
   // Keys: an administrator makes Hold's, because tagging a key as it is made needs kms:TagResource, which would let
   // this role tag another project's key as Hold's too. Setting one on the user pool makes Cognito's grant on it, so
   // that is all it may do with a key, and only with one tagged as Hold's. The grant can go only to Cognito and only
@@ -152,12 +183,6 @@ function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineR
     }),
   )
   add(deny(['kms:TagResource', 'kms:UntagResource'], ['*'], { 'ForAnyValue:StringEquals': { 'aws:TagKeys': ['project'] } }))
-
-  // App Runner: a service may be made only with the project tag, and only Hold's are described or changed after.
-  // Describing a service shows its settings, so another project's is never described.
-  add(statement(['apprunner:CreateService'], ['*'], { StringEquals: HOLD_REQUEST_TAG }))
-  add(statement(['apprunner:DescribeService', 'apprunner:ListOperations', 'apprunner:UpdateService', 'apprunner:DeleteService', 'apprunner:TagResource', 'apprunner:UntagResource', 'apprunner:ListTagsForResource'], [`${at.services}/*`]))
-  add(statement(['apprunner:CreateAutoScalingConfiguration', 'apprunner:DescribeAutoScalingConfiguration', 'apprunner:DeleteAutoScalingConfiguration', 'apprunner:TagResource', 'apprunner:UntagResource', 'apprunner:ListTagsForResource'], [`${at.scaling}/*`]))
 
   // Security groups: the project tag may be set only while one is created, and never changed after, so a group of
   // another project cannot be brought into reach by tagging it.
@@ -201,6 +226,7 @@ function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineR
   add(deny(['iam:DeleteRolePermissionsBoundary', 'iam:AttachRolePolicy', 'iam:CreatePolicy', 'iam:CreatePolicyVersion', 'iam:SetDefaultPolicyVersion', 'iam:CreateUser', 'iam:CreateAccessKey'], ['*']))
   // The pipeline's own roles, and the boundary, change only by an administrator's hand.
   add(deny(['iam:*'], [...pipelineRoles.map(at.role), boundary.managedPolicyArn]))
+  role.addManagedPolicy(computePolicy(stack))
   return role
 }
 
@@ -239,9 +265,9 @@ export function createDeliveryStack(app: App, props: StackProps): DeliveryResour
   add(statement(['ecr:GetAuthorizationToken'], ['*']))
   add(statement(['ecr:BatchCheckLayerAvailability', 'ecr:BatchGetImage', 'ecr:CompleteLayerUpload', 'ecr:InitiateLayerUpload', 'ecr:PutImage', 'ecr:UploadLayerPart'], [`arn:aws:ecr:${REGION}:${ACCOUNT}:repository/${name('app')}`]))
 
-  // Migrations: through the Data API, as the owner, with the two database logins' secrets.
+  // Migrations: through the Data API, as the owner, with the database logins' secrets.
   add(statement(['rds-data:ExecuteStatement', 'rds-data:BatchExecuteStatement', 'rds-data:BeginTransaction', 'rds-data:CommitTransaction', 'rds-data:RollbackTransaction'], [`arn:aws:rds:${REGION}:${ACCOUNT}:cluster:${name('database')}`]))
-  add(statement(['secretsmanager:GetSecretValue', 'secretsmanager:DescribeSecret'], ['admin', 'app'].map((login) => `${at.secrets(`database/${login}`)}-*`)))
+  add(statement(['secretsmanager:GetSecretValue', 'secretsmanager:DescribeSecret'], ['admin', 'app', 'worker'].map((login) => `${at.secrets(`database/${login}`)}-*`)))
 
   new CfnOutput(stack, 'DeployRoleArn', { value: deployRole.roleArn })
   new CfnOutput(stack, 'CloudFormationRoleArn', { value: cloudFormation.roleArn })

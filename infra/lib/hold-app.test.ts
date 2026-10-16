@@ -232,12 +232,80 @@ describe('queues', () => {
     work.resourceCountIs('AWS::CloudWatch::Alarm', QUEUES.length)
   })
 
-  it('lets the scheduler send to Hold queues and do nothing else', () => {
-    const policies = resourcesOfType(work, 'AWS::IAM::Policy')
-    const statements = policies.flatMap((policy) => (policy.Properties?.PolicyDocument as { Statement: { Action: unknown }[] }).Statement)
+  it('lets the scheduler send to Hold queues and start the outbox relay, and do nothing else', () => {
+    const statements = Object.entries(work.findResources('AWS::IAM::Policy'))
+      .filter(([key]) => key.startsWith('SchedulerRole'))
+      .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: { Action: unknown }[] } } }).Properties.PolicyDocument.Statement)
     const actions = statements.flatMap((statement) => [statement.Action].flat())
 
-    expect(new Set(actions)).toEqual(new Set(['sqs:SendMessage', 'sqs:GetQueueAttributes', 'sqs:GetQueueUrl']))
+    expect(new Set(actions)).toEqual(new Set(['sqs:SendMessage', 'sqs:GetQueueAttributes', 'sqs:GetQueueUrl', 'lambda:InvokeFunction']))
+  })
+
+  it('keeps a message hidden for longer than its worker may run, so two never handle it at once', () => {
+    for (const [queue, worker] of [
+      ['hold-paypal-events.fifo', 'hold-worker-paypal-events'],
+      ['hold-executions.fifo', 'hold-worker-executions'],
+    ]) {
+      const visibility = resourcesOfType(work, 'AWS::SQS::Queue').find((each) => each.Properties?.['QueueName'] === queue)?.Properties?.['VisibilityTimeout'] as number
+      const timeout = resourcesOfType(work, 'AWS::Lambda::Function').find((each) => each.Properties?.['FunctionName'] === worker)?.Properties?.['Timeout'] as number
+      expect(visibility).toBeGreaterThanOrEqual(timeout)
+    }
+  })
+})
+
+describe('the worker', () => {
+  const functionNamed = (functionName: string) => resourcesOfType(work, 'AWS::Lambda::Function').find((each) => each.Properties?.['FunctionName'] === functionName)
+  const workerPolicy = () =>
+    Object.entries(work.findResources('AWS::IAM::Policy'))
+      .filter(([key]) => key.startsWith('WorkerRole'))
+      .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: { Action: unknown }[] } } }).Properties.PolicyDocument.Statement)
+
+  it('runs three functions on Node 24: PayPal events, executions and the outbox relay', () => {
+    for (const functionName of ['hold-worker-paypal-events', 'hold-worker-executions', 'hold-worker-outbox-relay']) {
+      expect(functionNamed(functionName)?.Properties).toMatchObject({ Runtime: 'nodejs24.x' })
+    }
+  })
+
+  it('takes PayPal events and executions from their queues, and tries again only the messages that failed', () => {
+    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 2)
+    work.hasResourceProperties('AWS::Lambda::EventSourceMapping', { FunctionResponseTypes: ['ReportBatchItemFailures'] })
+  })
+
+  it('relays the outbox every minute, through the scheduler, in Hold’s schedule group', () => {
+    work.hasResourceProperties('AWS::Scheduler::Schedule', { Name: 'hold-outbox-relay', ScheduleExpression: 'rate(1 minute)', GroupName: Match.anyValue(), FlexibleTimeWindow: { Mode: 'OFF' } })
+  })
+
+  it('logs in to the database as hold_worker, never as the app or the owner of the tables', () => {
+    const settings = JSON.stringify(functionNamed('hold-worker-executions')?.Properties?.['Environment'])
+    expect(settings).toContain('WorkerUserSecret')
+    expect(settings).not.toMatch(/AppUserSecret|DatabaseSecret|database\/admin/)
+    data.hasResourceProperties('AWS::SecretsManager::Secret', { Name: 'hold/database/worker' })
+    expect(JSON.stringify(data.findResources('AWS::SecretsManager::Secret'))).toContain('\\"username\\":\\"hold_worker\\"')
+  })
+
+  it('may only query the database, read its login and the shops’ PayPal credentials, use its queues and write its logs', () => {
+    const actions = new Set(workerPolicy().flatMap((statement) => [statement.Action].flat()))
+    expect(actions).toEqual(
+      new Set([
+        'rds-data:ExecuteStatement',
+        'rds-data:BatchExecuteStatement',
+        'rds-data:BeginTransaction',
+        'rds-data:CommitTransaction',
+        'rds-data:RollbackTransaction',
+        'secretsmanager:GetSecretValue',
+        'sqs:ReceiveMessage',
+        'sqs:ChangeMessageVisibility',
+        'sqs:GetQueueUrl',
+        'sqs:DeleteMessage',
+        'sqs:GetQueueAttributes',
+        'sqs:SendMessage',
+        'logs:CreateLogGroup',
+        'logs:CreateLogStream',
+        'logs:PutLogEvents',
+      ]),
+    )
+    expect(JSON.stringify(workerPolicy())).toContain('secret:hold/paypal/shops/*')
+    expect(JSON.stringify(workerPolicy())).not.toContain('secretsmanager:PutSecretValue')
   })
 })
 
@@ -276,7 +344,7 @@ describe('the web app', () => {
 
   it('is told where its services are, and names its secrets without holding them', () => {
     const names = variables().map((variable) => variable.Name)
-    for (const setting of ['HOLD_ENVIRONMENT', 'HOLD_AWS_REGION', 'HOLD_COGNITO_USER_POOL_ID', 'HOLD_COGNITO_CLIENT_ID', 'HOLD_DATABASE_CLUSTER_ARN', 'HOLD_DATABASE_SECRET_ARN', 'HOLD_DATABASE_NAME', 'HOLD_COOKIE_KEY_SECRET_ARN', 'HOLD_SMTP_SECRET', 'HOLD_PUBLIC_URL']) {
+    for (const setting of ['HOLD_ENVIRONMENT', 'HOLD_AWS_REGION', 'HOLD_COGNITO_USER_POOL_ID', 'HOLD_COGNITO_CLIENT_ID', 'HOLD_DATABASE_CLUSTER_ARN', 'HOLD_DATABASE_SECRET_ARN', 'HOLD_DATABASE_NAME', 'HOLD_COOKIE_KEY_SECRET_ARN', 'HOLD_SMTP_SECRET', 'HOLD_PUBLIC_URL', 'HOLD_EXECUTIONS_QUEUE_URL', 'HOLD_PAYPAL_EVENTS_QUEUE_URL']) {
       expect(names).toContain(setting)
     }
     expect(names).not.toContain('HOLD_COOKIE_KEY')
@@ -292,7 +360,7 @@ describe('the web app', () => {
     expect(instancePolicy()).not.toMatch(/DatabaseSecret|database\/admin/)
   })
 
-  it('may do only what the web app does: query the database, read its secrets, keep PayPal credentials and put a person in a group', () => {
+  it('may do only what the web app does: query the database, read its secrets, keep PayPal credentials, hand work to the worker and put a person in a group', () => {
     const statements = Object.entries(web.findResources('AWS::IAM::Policy'))
       .filter(([key]) => key.startsWith('InstanceRole'))
       .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: { Action: unknown }[] } } }).Properties.PolicyDocument.Statement)
@@ -310,6 +378,9 @@ describe('the web app', () => {
         'secretsmanager:PutSecretValue',
         'secretsmanager:TagResource',
         'cognito-idp:AdminAddUserToGroup',
+        'sqs:SendMessage',
+        'sqs:GetQueueAttributes',
+        'sqs:GetQueueUrl',
       ]),
     )
     expect(instancePolicy()).toContain('secret:hold/paypal/shops/*')
@@ -318,6 +389,16 @@ describe('the web app', () => {
 })
 
 describe('delivery', () => {
+  // CloudFormation's role: its own policy and the policy for running Hold's code, which is apart only for size.
+  const cloudFormationPolicies = () => JSON.stringify({ ...delivery.findResources('AWS::IAM::Policy'), ...delivery.findResources('AWS::IAM::ManagedPolicy', { Properties: { ManagedPolicyName: 'hold-cloudformation-compute' } }) })
+  type Statement = Record<string, unknown> & { Effect: string }
+  const cloudFormationStatements = (): Statement[] =>
+    [
+      Object.entries(delivery.findResources('AWS::IAM::Policy')).find(([key]) => key.startsWith('CloudFormationRole'))?.[1],
+      ...Object.values(delivery.findResources('AWS::IAM::ManagedPolicy', { Properties: { ManagedPolicyName: 'hold-cloudformation-compute' } })),
+    ].flatMap((policy) => (policy as { Properties: { PolicyDocument: { Statement: Statement[] } } }).Properties.PolicyDocument.Statement)
+  const boundaryPolicy = () => Object.values(delivery.findResources('AWS::IAM::ManagedPolicy', { Properties: { ManagedPolicyName: 'hold-permissions-boundary' } }))[0]
+
   it('lets only the main branch of Hold’s repository take the deploy role, through GitHub’s OpenID Connect', () => {
     delivery.hasResourceProperties('AWS::IAM::Role', {
       RoleName: 'hold-github-deploy',
@@ -385,7 +466,7 @@ describe('delivery', () => {
   })
 
   it('keeps the boundary to what the app needs, and lets it hand on only the scheduler’s role', () => {
-    const boundary = JSON.stringify(Object.values(delivery.findResources('AWS::IAM::ManagedPolicy'))[0])
+    const boundary = JSON.stringify(boundaryPolicy())
     for (const broad of ['"sqs:*"', '"s3:*"', '"cognito-idp:*"', '"secretsmanager:*"', '"rds-data:*"', '"scheduler:*"', 'cloudformation:', 'iam:CreateRole', 'cognito-idp:AdminInitiateAuth', 'cognito-idp:AdminSetUserPassword']) {
       expect(boundary).not.toContain(broad)
     }
@@ -398,7 +479,7 @@ describe('delivery', () => {
     expect(boundary).not.toContain('role/hold-*')
   })
 
-  it('lets CloudFormation change only roles that carry Hold’s tag, and hand on only the web app’s two roles and the code sender’s', () => {
+  it('lets CloudFormation change only roles that carry Hold’s tag, and hand on only the web app’s two roles, the code sender’s, the worker’s and the scheduler’s', () => {
     const statements = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
     expect(statements).toMatch(/iam:UpdateAssumeRolePolicy[^}]*aws:ResourceTag\/project/)
 
@@ -407,7 +488,7 @@ describe('delivery', () => {
       .filter((statement) => [statement['Action']].flat().includes('iam:PassRole'))
     const allowed = passing.filter((statement) => statement['Effect'] === 'Allow' && JSON.stringify(statement).includes('role/hold-web'))
     expect(allowed).toHaveLength(1)
-    expect(new Set([allowed[0]?.['Resource']].flat())).toEqual(new Set(['role/hold-web', 'role/hold-web-access', 'role/hold-code-sender'].map((role) => `arn:aws:iam::707938860881:${role}`)))
+    expect(new Set([allowed[0]?.['Resource']].flat())).toEqual(new Set(['role/hold-web', 'role/hold-web-access', 'role/hold-code-sender', 'role/hold-worker', 'role/hold-scheduler'].map((role) => `arn:aws:iam::707938860881:${role}`)))
     // App Runner checks the pass with a service name of its own choosing, so none is named here. Both roles trust App
     // Runner alone, so no other service could use them.
     expect(allowed[0]?.['Condition']).toBeUndefined()
@@ -425,14 +506,34 @@ describe('delivery', () => {
   })
 
   it('lets CloudFormation make only App Runner services that carry Hold’s tag, and change only Hold’s', () => {
-    const statements = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
+    const statements = cloudFormationPolicies()
     expect(statements).toMatch(/apprunner:CreateService[^}]*aws:RequestTag\/project/)
     expect(statements).toContain('service/hold-*')
     expect(statements).not.toContain('"apprunner:*"')
   })
 
+  it('lets CloudFormation feed only Hold’s functions from queues, and schedule only in Hold’s groups', () => {
+    const statements = [...Object.values(delivery.findResources('AWS::IAM::Policy')), ...Object.values(delivery.findResources('AWS::IAM::ManagedPolicy'))].flatMap(
+      (policy) => (policy as { Properties: { PolicyDocument: { Statement: Record<string, unknown>[] } } }).Properties.PolicyDocument.Statement,
+    )
+    const mapping = statements.find((statement) => [statement['Action']].flat().includes('lambda:CreateEventSourceMapping'))
+    expect(JSON.stringify(mapping?.['Condition'])).toContain('function:hold-*')
+    const scheduling = statements.find((statement) => [statement['Action']].flat().includes('scheduler:CreateSchedule'))
+    expect(scheduling?.['Resource']).toBe('arn:aws:scheduler:us-east-1:707938860881:schedule/hold-*/*')
+  })
+
+  it('lets the boundary start only Hold’s functions, which is all the scheduler’s role needs for the relay', () => {
+    const boundary = (boundaryPolicy() as { Properties: { PolicyDocument: { Statement: Record<string, unknown>[] } } }).Properties.PolicyDocument.Statement
+    const invoking = boundary.find((statement) => statement['Action'] === 'lambda:InvokeFunction')
+    expect(invoking?.['Resource']).toBe('arn:aws:lambda:us-east-1:707938860881:function:hold-*')
+  })
+
+  it('lets the pipeline read the worker’s database login, to give hold_worker its password', () => {
+    expect(JSON.stringify(delivery.findResources('AWS::IAM::Policy'))).toContain('secret:hold/database/worker-*')
+  })
+
   it('lets CloudFormation manage only Hold’s Lambda functions and the keys that carry Hold’s tag, and never make or tag a key', () => {
-    const statements = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
+    const statements = cloudFormationPolicies()
     expect(statements).toContain('function:hold-*')
     // Tagging a key at creation needs kms:TagResource, which would let it tag another project's key too. An
     // administrator makes Hold's keys instead.
@@ -461,9 +562,7 @@ describe('delivery', () => {
   })
 
   it('never lets CloudFormation describe another project’s App Runner service, whose settings it would read', () => {
-    const statements = Object.values(delivery.findResources('AWS::IAM::Policy'))
-      .flatMap((policy) => (policy as { Properties: { PolicyDocument: { Statement: Record<string, unknown>[] } } }).Properties.PolicyDocument.Statement)
-      .filter((statement) => statement['Effect'] === 'Allow')
+    const statements = cloudFormationStatements().filter((statement) => statement['Effect'] === 'Allow')
     const describing = statements.filter((statement) => [statement['Action']].flat().some((action) => /^apprunner:(Describe|List|Get)/.test(String(action)) && !/^apprunner:List(Services|AutoScalingConfigurations)$/.test(String(action))))
 
     expect(describing.length).toBeGreaterThan(0)
@@ -479,8 +578,7 @@ describe('delivery', () => {
   })
 
   it('gives CloudFormation no way to read what Hold’s resources hold', () => {
-    const exec = Object.entries(delivery.findResources('AWS::IAM::Policy')).find(([key]) => key.startsWith('CloudFormationRole'))?.[1]
-    const allowed = JSON.stringify((exec as { Properties: { PolicyDocument: { Statement: { Effect: string }[] } } }).Properties.PolicyDocument.Statement.filter((entry) => entry.Effect === 'Allow'))
+    const allowed = JSON.stringify(cloudFormationStatements().filter((entry) => entry.Effect === 'Allow'))
     for (const action of ['s3:*', 'sqs:ReceiveMessage', 'sqs:*', 'secretsmanager:*', 'cognito-idp:*', 'cognito-idp:AdminInitiateAuth', 'rds:*', 'ecr:*', 'kms:Decrypt']) {
       expect(allowed).not.toContain(`"${action}"`)
     }

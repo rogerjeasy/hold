@@ -7,6 +7,7 @@ import {
   ACCOUNT,
   DATABASE_ADMIN_USER,
   DATABASE_APP_USER,
+  DATABASE_WORKER_USER,
   DATABASE_MAX_CAPACITY,
   DATABASE_MIN_CAPACITY,
   DATABASE_NAME,
@@ -22,6 +23,7 @@ export type DataResources = {
   readonly stack: Stack
   readonly cluster: rds.DatabaseCluster
   readonly appUserSecret: rds.DatabaseSecret
+  readonly workerUserSecret: rds.DatabaseSecret
   readonly evidenceBucket: s3.Bucket
   readonly displayBucket: s3.Bucket
 }
@@ -64,7 +66,16 @@ function createDatabase(stack: Stack) {
   })
   appUserSecret.applyRemovalPolicy(RemovalPolicy.RETAIN)
 
-  return { cluster, appUserSecret }
+  // The worker's own login (architecture.md section 12.2). Migrations give hold_worker this password.
+  const workerUserSecret = new rds.DatabaseSecret(stack, 'WorkerUserSecret', {
+    secretName: secretName('database', 'worker'),
+    username: DATABASE_WORKER_USER,
+    dbname: DATABASE_NAME,
+    masterSecret: cluster.secret,
+  })
+  workerUserSecret.applyRemovalPolicy(RemovalPolicy.RETAIN)
+
+  return { cluster, appUserSecret, workerUserSecret }
 }
 
 function createEvidenceBucket(stack: Stack): s3.Bucket {
@@ -98,7 +109,7 @@ function createDisplayBucket(stack: Stack): s3.Bucket {
 
 export function createDataStack(app: App, props: StackProps): DataResources {
   const stack = new Stack(app, 'HoldData', { ...props, terminationProtection: true, description: 'Hold: database and photograph storage' })
-  const { cluster, appUserSecret } = createDatabase(stack)
+  const { cluster, appUserSecret, workerUserSecret } = createDatabase(stack)
   const evidenceBucket = createEvidenceBucket(stack)
   const displayBucket = createDisplayBucket(stack)
 
@@ -107,5 +118,7 @@ export function createDataStack(app: App, props: StackProps): DataResources {
   new CfnOutput(stack, 'EvidenceBucketName', { value: evidenceBucket.bucketName })
   new CfnOutput(stack, 'DisplayBucketName', { value: displayBucket.bucketName })
 
-  return { stack, cluster, appUserSecret, evidenceBucket, displayBucket }
+  new CfnOutput(stack, 'DatabaseWorkerSecretArn', { value: workerUserSecret.secretArn })
+
+  return { stack, cluster, appUserSecret, workerUserSecret, evidenceBucket, displayBucket }
 }

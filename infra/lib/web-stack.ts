@@ -7,6 +7,7 @@ import * as iam from 'aws-cdk-lib/aws-iam'
 import type * as rds from 'aws-cdk-lib/aws-rds'
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 import { ACCOUNT, DATABASE_NAME, name, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
+import type * as sqs from 'aws-cdk-lib/aws-sqs'
 
 // The web app on App Runner (tech-stack.md section 8): one container service with its own HTTPS address, no load
 // balancer, NAT gateway or VPC. It runs the image CI built from a commit, named by the deploy, and changes only
@@ -33,6 +34,17 @@ export type WebStackProps = StackProps & {
   readonly userPool: cognito.IUserPool
   readonly webClient: cognito.IUserPoolClient
   readonly cookieKey: secretsmanager.ISecret
+  // The worker's queues the app hands work to at once.
+  readonly queues: ReadonlyMap<string, sqs.IQueue>
+}
+
+// The queues the app hands work to: executions to capture, and the PayPal events it has stored.
+const HANDED_ON = ['executions', 'paypal-events'] as const
+
+function queueOf(props: WebStackProps, queueName: string): sqs.IQueue {
+  const queue = props.queues.get(queueName)
+  if (queue === undefined) throw new Error(`No ${queueName} queue.`)
+  return queue
 }
 
 // What the running app may do, and no more: query the database as hold_app, read its secrets, keep each shop's PayPal
@@ -55,6 +67,7 @@ function instanceRole(stack: Stack, props: WebStackProps): iam.Role {
   role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:GetSecretValue'], resources: [props.appUserSecret.secretArn, props.cookieKey.secretArn, paypalCredentials, smtpLogin] }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:CreateSecret', 'secretsmanager:PutSecretValue', 'secretsmanager:TagResource'], resources: [paypalCredentials] }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['cognito-idp:AdminAddUserToGroup'], resources: [props.userPool.userPoolArn] }))
+  for (const queueName of HANDED_ON) queueOf(props, queueName).grantSendMessages(role)
   return role
 }
 
@@ -69,6 +82,8 @@ function settings(props: WebStackProps): apprunner.CfnService.KeyValuePairProper
     HOLD_DATABASE_NAME: DATABASE_NAME,
     HOLD_COOKIE_KEY_SECRET_ARN: props.cookieKey.secretArn,
     HOLD_SMTP_SECRET: SMTP_SECRET_NAME,
+    HOLD_EXECUTIONS_QUEUE_URL: queueOf(props, 'executions').queueUrl,
+    HOLD_PAYPAL_EVENTS_QUEUE_URL: queueOf(props, 'paypal-events').queueUrl,
     ...(props.publicUrl === undefined ? {} : { HOLD_PUBLIC_URL: props.publicUrl }),
   }
   return Object.entries(values).map(([key, value]) => ({ name: key, value }))

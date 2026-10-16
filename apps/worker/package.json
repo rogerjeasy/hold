@@ -5,7 +5,10 @@
   "type": "module",
   "dependencies": {
     "@aws-crypto/client-node": "^5.0.2",
+    "@hold/db": "workspace:*",
     "@hold/notify": "workspace:*",
+    "@hold/paypal": "workspace:*",
+    "@hold/settle": "workspace:*",
     "zod": "^4.6.7"
   }
 }

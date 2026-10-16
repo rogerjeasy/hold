@@ -33,10 +33,11 @@ export function createHoldApp(app: App, options: HoldAppOptions) {
   const data = createDataStack(app, { env, synthesizer: synthesizer() })
   const identity = createIdentityStack(app, { env, synthesizer: synthesizer(), senderEmail: options.senderEmail, passkeyRelyingPartyId: passkeyDomain(options.webPublicUrl) })
   const registry = createRegistryStack(app, { env, synthesizer: synthesizer() })
+  const work = createWorkStack(app, { env, synthesizer: synthesizer(), cluster: data.cluster, workerUserSecret: data.workerUserSecret })
   const stacks = {
     data,
     identity,
-    work: createWorkStack(app, { env, synthesizer: synthesizer() }),
+    work,
     registry,
     web: createWebStack(app, {
       env,
@@ -49,6 +50,7 @@ export function createHoldApp(app: App, options: HoldAppOptions) {
       userPool: identity.userPool,
       webClient: identity.webClient,
       cookieKey: identity.cookieKey,
+      queues: work.queues,
     }),
     delivery: createDeliveryStack(app, { env, synthesizer: synthesizer() }),
   }
