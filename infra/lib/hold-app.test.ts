@@ -165,6 +165,10 @@ describe('sign-in', () => {
     identity.hasResourceProperties('AWS::SecretsManager::Secret', { Name: 'hold/web/cookie-key' })
   })
 
+  it('keeps the key renter links are signed with apart from the cookie key, so the worker can sign links without it', () => {
+    identity.hasResourceProperties('AWS::SecretsManager::Secret', { Name: 'hold/web/renter-link-key' })
+  })
+
   it('gives a person ten minutes to type in the code, and hides whether an account exists', () => {
     identity.hasResourceProperties('AWS::Cognito::UserPoolClient', {
       ExplicitAuthFlows: ['ALLOW_USER_AUTH', 'ALLOW_REFRESH_TOKEN_AUTH'],
@@ -228,6 +232,10 @@ describe('queues', () => {
     })
   })
 
+  it('deduplicates the upkeep queue by content, since EventBridge Scheduler cannot name a deduplication id', () => {
+    work.hasResourceProperties('AWS::SQS::Queue', { QueueName: `${PREFIX}-upkeep.fifo`, FifoQueue: true, ContentBasedDeduplication: true })
+  })
+
   it('raises an alarm for each dead-letter queue', () => {
     work.resourceCountIs('AWS::CloudWatch::Alarm', QUEUES.length)
   })
@@ -245,6 +253,7 @@ describe('queues', () => {
     for (const [queue, worker] of [
       ['hold-paypal-events.fifo', 'hold-worker-paypal-events'],
       ['hold-executions.fifo', 'hold-worker-executions'],
+      ['hold-upkeep.fifo', 'hold-worker-upkeep'],
     ]) {
       const visibility = resourcesOfType(work, 'AWS::SQS::Queue').find((each) => each.Properties?.['QueueName'] === queue)?.Properties?.['VisibilityTimeout'] as number
       const timeout = resourcesOfType(work, 'AWS::Lambda::Function').find((each) => each.Properties?.['FunctionName'] === worker)?.Properties?.['Timeout'] as number
@@ -260,14 +269,14 @@ describe('the worker', () => {
       .filter(([key]) => key.startsWith('WorkerRole'))
       .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: { Action: unknown }[] } } }).Properties.PolicyDocument.Statement)
 
-  it('runs three functions on Node 24: PayPal events, executions and the outbox relay', () => {
-    for (const functionName of ['hold-worker-paypal-events', 'hold-worker-executions', 'hold-worker-outbox-relay']) {
+  it('runs four functions on Node 24: PayPal events, executions, hold upkeep and the outbox relay', () => {
+    for (const functionName of ['hold-worker-paypal-events', 'hold-worker-executions', 'hold-worker-upkeep', 'hold-worker-outbox-relay']) {
       expect(functionNamed(functionName)?.Properties).toMatchObject({ Runtime: 'nodejs24.x' })
     }
   })
 
-  it('takes PayPal events and executions from their queues, and tries again only the messages that failed', () => {
-    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 2)
+  it('takes PayPal events, executions and upkeep from their queues, and tries again only the messages that failed', () => {
+    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 3)
     work.hasResourceProperties('AWS::Lambda::EventSourceMapping', { FunctionResponseTypes: ['ReportBatchItemFailures'] })
   })
 
@@ -299,6 +308,10 @@ describe('the worker', () => {
         'sqs:DeleteMessage',
         'sqs:GetQueueAttributes',
         'sqs:SendMessage',
+        'scheduler:CreateSchedule',
+        'scheduler:UpdateSchedule',
+        'scheduler:DeleteSchedule',
+        'iam:PassRole',
         'logs:CreateLogGroup',
         'logs:CreateLogStream',
         'logs:PutLogEvents',
@@ -306,6 +319,33 @@ describe('the worker', () => {
     )
     expect(JSON.stringify(workerPolicy())).toContain('secret:hold/paypal/shops/*')
     expect(JSON.stringify(workerPolicy())).not.toContain('secretsmanager:PutSecretValue')
+  })
+
+  it('makes a hold’s schedules only in Hold’s group, and hands them only the scheduler’s role', () => {
+    const scheduling = workerPolicy().find((statement) => [statement.Action].flat().includes('scheduler:CreateSchedule'))
+    expect(JSON.stringify(scheduling)).toContain(':schedule/hold-schedules/*')
+    const passing = workerPolicy().find((statement) => [statement.Action].flat().includes('iam:PassRole')) as { Condition?: unknown } | undefined
+    expect(JSON.stringify(passing)).toContain('SchedulerRole')
+    expect(passing?.Condition).toEqual({ StringEquals: { 'iam:PassedToService': 'scheduler.amazonaws.com' } })
+  })
+
+  it('emails through Hold’s SMTP login, read by name, with links to the web app’s own address', () => {
+    const settings = JSON.stringify(functionNamed('hold-worker-upkeep')?.Properties?.['Environment'])
+    expect(settings).toContain('"HOLD_SMTP_SECRET":"hold/email/smtp"')
+    expect(settings).toContain('"HOLD_PUBLIC_URL":"https://abc123.us-east-1.awsapprunner.com"')
+    expect(JSON.stringify(workerPolicy())).toContain('secret:hold/email/smtp')
+  })
+
+  it('signs renter links with their own key, and can never read the web app’s cookie key', () => {
+    const settings = JSON.stringify(functionNamed('hold-worker-upkeep')?.Properties?.['Environment'])
+    expect(settings).toContain('HOLD_RENTER_LINK_KEY_SECRET_ARN')
+    expect(JSON.stringify(workerPolicy())).toContain('RenterLinkKey')
+    expect(JSON.stringify(workerPolicy())).not.toContain('CookieKey')
+  })
+
+  it('tells the worker where to schedule a hold’s upkeep and where it is sent', () => {
+    const settings = JSON.stringify(functionNamed('hold-worker-executions')?.Properties?.['Environment'])
+    for (const variable of ['HOLD_UPKEEP_QUEUE_URL', 'HOLD_UPKEEP_QUEUE_ARN', 'HOLD_SCHEDULE_GROUP', 'HOLD_SCHEDULER_ROLE_ARN']) expect(settings).toContain(variable)
   })
 })
 
@@ -344,10 +384,11 @@ describe('the web app', () => {
 
   it('is told where its services are, and names its secrets without holding them', () => {
     const names = variables().map((variable) => variable.Name)
-    for (const setting of ['HOLD_ENVIRONMENT', 'HOLD_AWS_REGION', 'HOLD_COGNITO_USER_POOL_ID', 'HOLD_COGNITO_CLIENT_ID', 'HOLD_DATABASE_CLUSTER_ARN', 'HOLD_DATABASE_SECRET_ARN', 'HOLD_DATABASE_NAME', 'HOLD_COOKIE_KEY_SECRET_ARN', 'HOLD_SMTP_SECRET', 'HOLD_PUBLIC_URL', 'HOLD_EXECUTIONS_QUEUE_URL', 'HOLD_PAYPAL_EVENTS_QUEUE_URL']) {
+    for (const setting of ['HOLD_ENVIRONMENT', 'HOLD_AWS_REGION', 'HOLD_COGNITO_USER_POOL_ID', 'HOLD_COGNITO_CLIENT_ID', 'HOLD_DATABASE_CLUSTER_ARN', 'HOLD_DATABASE_SECRET_ARN', 'HOLD_DATABASE_NAME', 'HOLD_COOKIE_KEY_SECRET_ARN', 'HOLD_RENTER_LINK_KEY_SECRET_ARN', 'HOLD_SMTP_SECRET', 'HOLD_PUBLIC_URL', 'HOLD_EXECUTIONS_QUEUE_URL', 'HOLD_PAYPAL_EVENTS_QUEUE_URL']) {
       expect(names).toContain(setting)
     }
     expect(names).not.toContain('HOLD_COOKIE_KEY')
+    expect(names).not.toContain('HOLD_RENTER_LINK_KEY')
     expect(variables()).toContainEqual({ Name: 'HOLD_ENVIRONMENT', Value: 'production' })
     expect(variables()).toContainEqual({ Name: 'HOLD_SMTP_SECRET', Value: 'hold/email/smtp' })
     expect(variables()).toContainEqual({ Name: 'HOLD_PUBLIC_URL', Value: 'https://abc123.us-east-1.awsapprunner.com' })

@@ -17,12 +17,16 @@ type QueueSpec = {
   // FIFO keeps work for one rental in order, using the rental as the message group.
   readonly orderedPerRental: boolean
   readonly visibilityTimeout: Duration
+  // For a queue EventBridge Scheduler sends to: it cannot name a deduplication ID, so the content is the ID.
+  readonly deduplicatedByContent?: boolean
 }
 
 export const QUEUES: readonly QueueSpec[] = [
   // Longer than the worker may run on one message (worker.ts), so two functions never handle it at once.
   { name: 'paypal-events', orderedPerRental: true, visibilityTimeout: Duration.minutes(6) },
   { name: 'executions', orderedPerRental: true, visibilityTimeout: Duration.minutes(6) },
+  // A hold's timed upkeep, sent by its schedules (architecture.md section 7.4), in order per hold.
+  { name: 'upkeep', orderedPerRental: true, visibilityTimeout: Duration.minutes(6), deduplicatedByContent: true },
   { name: 'comparisons', orderedPerRental: false, visibilityTimeout: Duration.minutes(10) },
   { name: 'media', orderedPerRental: false, visibilityTimeout: Duration.minutes(5) },
   { name: 'evidence', orderedPerRental: true, visibilityTimeout: Duration.minutes(5) },
@@ -63,8 +67,9 @@ function createQueue(stack: Stack, spec: QueueSpec): sqs.Queue {
     ...(spec.orderedPerRental
       ? {
           fifo: true,
-          // Each message carries its own deduplication ID: the execution's idempotency key, or PayPal's event ID.
-          contentBasedDeduplication: false,
+          // Each message Hold sends carries its own deduplication ID: the execution's, PayPal's event ID, or the
+          // schedule's name. A message a schedule sends has none, so the upkeep queue takes its content instead.
+          contentBasedDeduplication: spec.deduplicatedByContent === true,
           deduplicationScope: sqs.DeduplicationScope.MESSAGE_GROUP,
           fifoThroughputLimit: sqs.FifoThroughputLimit.PER_MESSAGE_GROUP_ID,
         }
@@ -77,7 +82,12 @@ function createQueue(stack: Stack, spec: QueueSpec): sqs.Queue {
   })
 }
 
-export type WorkStackProps = StackProps & { readonly cluster: rds.IDatabaseCluster; readonly workerUserSecret: secretsmanager.ISecret }
+export type WorkStackProps = StackProps & {
+  readonly cluster: rds.IDatabaseCluster
+  readonly workerUserSecret: secretsmanager.ISecret
+  readonly renterLinkKey: secretsmanager.ISecret
+  readonly publicUrl: string
+}
 
 export function createWorkStack(app: App, props: WorkStackProps): WorkResources {
   const stack = new Stack(app, 'HoldWork', { ...props, description: 'Hold: queues, schedules and the worker' })
@@ -94,7 +104,7 @@ export function createWorkStack(app: App, props: WorkStackProps): WorkResources 
   })
   for (const queue of queues.values()) queue.grantSendMessages(schedulerRole)
 
-  createWorker(stack, { cluster: props.cluster, workerUserSecret: props.workerUserSecret, queues, scheduleGroup, schedulerRole })
+  createWorker(stack, { cluster: props.cluster, workerUserSecret: props.workerUserSecret, queues, scheduleGroup, schedulerRole, publicUrl: props.publicUrl, renterLinkKey: props.renterLinkKey })
 
   for (const [queueName, queue] of queues) {
     new CfnOutput(stack, `QueueUrl-${queueName}`, { value: queue.queueUrl })

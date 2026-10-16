@@ -15,6 +15,7 @@ export type IdentityResources = {
   readonly userPool: cognito.UserPool
   readonly webClient: cognito.UserPoolClient
   readonly cookieKey: secretsmanager.Secret
+  readonly renterLinkKey: secretsmanager.Secret
 }
 
 export type IdentityStackProps = StackProps & {
@@ -93,9 +94,20 @@ export function createIdentityStack(app: App, props: IdentityStackProps): Identi
     removalPolicy: RemovalPolicy.RETAIN,
   })
 
+  // Signs renter links. Apart from the cookie key, so the worker can sign the links it emails, such as a request for a
+  // new hold, without being able to seal a sign-in. The web app and the worker read it.
+  const renterLinkKey = new secretsmanager.Secret(stack, 'RenterLinkKey', {
+    secretName: secretName('web', 'renter-link-key'),
+    description: 'Hold: signs renter links',
+    generateSecretString: { passwordLength: 64, excludePunctuation: true },
+    removalPolicy: RemovalPolicy.RETAIN,
+  })
+
   new CfnOutput(stack, 'UserPoolId', { value: userPool.userPoolId })
   new CfnOutput(stack, 'CookieKeySecretArn', { value: cookieKey.secretArn })
   new CfnOutput(stack, 'WebClientId', { value: webClient.userPoolClientId })
 
-  return { stack, userPool, webClient, cookieKey }
+  new CfnOutput(stack, 'RenterLinkKeySecretArn', { value: renterLinkKey.secretArn })
+
+  return { stack, userPool, webClient, cookieKey, renterLinkKey }
 }

@@ -34,6 +34,7 @@ export type WebStackProps = StackProps & {
   readonly userPool: cognito.IUserPool
   readonly webClient: cognito.IUserPoolClient
   readonly cookieKey: secretsmanager.ISecret
+  readonly renterLinkKey: secretsmanager.ISecret
   // The worker's queues the app hands work to at once.
   readonly queues: ReadonlyMap<string, sqs.IQueue>
 }
@@ -64,7 +65,7 @@ function instanceRole(stack: Stack, props: WebStackProps): iam.Role {
   )
   // Secrets Manager adds six random characters to a secret's name in its ARN.
   const smtpLogin = `arn:aws:secretsmanager:${REGION}:${ACCOUNT}:secret:${SMTP_SECRET_NAME}-??????`
-  role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:GetSecretValue'], resources: [props.appUserSecret.secretArn, props.cookieKey.secretArn, paypalCredentials, smtpLogin] }))
+  role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:GetSecretValue'], resources: [props.appUserSecret.secretArn, props.cookieKey.secretArn, props.renterLinkKey.secretArn, paypalCredentials, smtpLogin] }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:CreateSecret', 'secretsmanager:PutSecretValue', 'secretsmanager:TagResource'], resources: [paypalCredentials] }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['cognito-idp:AdminAddUserToGroup'], resources: [props.userPool.userPoolArn] }))
   for (const queueName of HANDED_ON) queueOf(props, queueName).grantSendMessages(role)
@@ -81,6 +82,7 @@ function settings(props: WebStackProps): apprunner.CfnService.KeyValuePairProper
     HOLD_DATABASE_SECRET_ARN: props.appUserSecret.secretArn,
     HOLD_DATABASE_NAME: DATABASE_NAME,
     HOLD_COOKIE_KEY_SECRET_ARN: props.cookieKey.secretArn,
+    HOLD_RENTER_LINK_KEY_SECRET_ARN: props.renterLinkKey.secretArn,
     HOLD_SMTP_SECRET: SMTP_SECRET_NAME,
     HOLD_EXECUTIONS_QUEUE_URL: queueOf(props, 'executions').queueUrl,
     HOLD_PAYPAL_EVENTS_QUEUE_URL: queueOf(props, 'paypal-events').queueUrl,

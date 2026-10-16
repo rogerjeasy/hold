@@ -9,10 +9,11 @@ import type * as rds from 'aws-cdk-lib/aws-rds'
 import * as scheduler from 'aws-cdk-lib/aws-scheduler'
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 import type * as sqs from 'aws-cdk-lib/aws-sqs'
-import { ACCOUNT, DATABASE_NAME, name, REGION, secretName } from './settings.ts'
+import { ACCOUNT, DATABASE_NAME, name, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
 
 // The worker (architecture.md section 14.4): Lambda functions fed by SQS, which App Runner cannot be, since it throttles
-// between requests. One applies PayPal's events, one carries out executions, and one relays the outbox every minute.
+// between requests. One applies PayPal's events, one carries out executions, one keeps placed holds watched, and one
+// relays the outbox every minute.
 
 const REPO_ROOT = join(import.meta.dirname, '..', '..')
 
@@ -26,6 +27,10 @@ export type WorkerProps = {
   readonly queues: ReadonlyMap<string, sqs.Queue>
   readonly scheduleGroup: scheduler.ScheduleGroup
   readonly schedulerRole: iam.Role
+  // The web app's own address, for links in the emails the worker sends.
+  readonly publicUrl: string
+  // Signs the renter links the worker emails. Never the web app's cookie key.
+  readonly renterLinkKey: secretsmanager.ISecret
 }
 
 function workerRole(stack: Stack, props: WorkerProps): iam.Role {
@@ -41,11 +46,12 @@ function workerRole(stack: Stack, props: WorkerProps): iam.Role {
       resources: [props.cluster.clusterArn],
     }),
   )
-  // Its own login, and each shop's PayPal credentials to read, never to write.
+  // Its own login, the renter-link key, each shop's PayPal credentials and Hold's SMTP login, to read, never to write.
+  const secrets = `arn:aws:secretsmanager:${REGION}:${ACCOUNT}:secret:`
   role.addToPolicy(
     new iam.PolicyStatement({
       actions: ['secretsmanager:GetSecretValue'],
-      resources: [props.workerUserSecret.secretArn, `arn:aws:secretsmanager:${REGION}:${ACCOUNT}:secret:${secretName('paypal', 'shops')}/*`],
+      resources: [props.workerUserSecret.secretArn, props.renterLinkKey.secretArn, `${secrets}${secretName('paypal', 'shops')}/*`, `${secrets}${SMTP_SECRET_NAME}-*`],
     }),
   )
   role.addToPolicy(
@@ -54,7 +60,21 @@ function workerRole(stack: Stack, props: WorkerProps): iam.Role {
       resources: [`arn:aws:logs:${REGION}:${ACCOUNT}:log-group:/aws/lambda/${name('worker')}-*:*`],
     }),
   )
-  for (const queueName of ['paypal-events', 'executions']) {
+  // A hold's upkeep: one-off schedules in Hold's group, which send with the scheduler's role and no other.
+  role.addToPolicy(
+    new iam.PolicyStatement({
+      actions: ['scheduler:CreateSchedule', 'scheduler:UpdateSchedule', 'scheduler:DeleteSchedule'],
+      resources: [`arn:aws:scheduler:${REGION}:${ACCOUNT}:schedule/${props.scheduleGroup.scheduleGroupName}/*`],
+    }),
+  )
+  role.addToPolicy(
+    new iam.PolicyStatement({
+      actions: ['iam:PassRole'],
+      resources: [props.schedulerRole.roleArn],
+      conditions: { StringEquals: { 'iam:PassedToService': 'scheduler.amazonaws.com' } },
+    }),
+  )
+  for (const queueName of ['paypal-events', 'executions', 'upkeep']) {
     const queue = props.queues.get(queueName)
     if (queue === undefined) throw new Error(`No ${queueName} queue.`)
     queue.grantSendMessages(role)
@@ -91,15 +111,24 @@ export function createWorker(stack: Stack, props: WorkerProps): void {
     HOLD_DATABASE_NAME: DATABASE_NAME,
     HOLD_EXECUTIONS_QUEUE_URL: queue('executions').queueUrl,
     HOLD_PAYPAL_EVENTS_QUEUE_URL: queue('paypal-events').queueUrl,
+    HOLD_UPKEEP_QUEUE_URL: queue('upkeep').queueUrl,
+    HOLD_UPKEEP_QUEUE_ARN: queue('upkeep').queueArn,
+    HOLD_SCHEDULE_GROUP: props.scheduleGroup.scheduleGroupName,
+    HOLD_SCHEDULER_ROLE_ARN: props.schedulerRole.roleArn,
+    HOLD_SMTP_SECRET: SMTP_SECRET_NAME,
+    HOLD_PUBLIC_URL: props.publicUrl,
+    HOLD_RENTER_LINK_KEY_SECRET_ARN: props.renterLinkKey.secretArn,
   }
 
   const events = workerFunction(stack, 'PayPalEventsWorker', name('worker', 'paypal', 'events'), 'paypal-events-lambda.ts', role, environment)
   const executions = workerFunction(stack, 'ExecutionsWorker', name('worker', 'executions'), 'executions-lambda.ts', role, environment)
+  const upkeep = workerFunction(stack, 'UpkeepWorker', name('worker', 'upkeep'), 'upkeep-lambda.ts', role, environment)
   const relay = workerFunction(stack, 'OutboxRelayWorker', name('worker', 'outbox', 'relay'), 'outbox-relay-lambda.ts', role, environment)
 
   // A message whose work failed is named back, so only it is tried again; the rest of the batch is done.
   events.addEventSource(new SqsEventSource(queue('paypal-events'), { batchSize: 5, reportBatchItemFailures: true }))
   executions.addEventSource(new SqsEventSource(queue('executions'), { batchSize: 5, reportBatchItemFailures: true }))
+  upkeep.addEventSource(new SqsEventSource(queue('upkeep'), { batchSize: 5, reportBatchItemFailures: true }))
 
   relay.grantInvoke(props.schedulerRole)
   new scheduler.CfnSchedule(stack, 'OutboxRelaySchedule', {

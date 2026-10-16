@@ -33,7 +33,8 @@ export function createHoldApp(app: App, options: HoldAppOptions) {
   const data = createDataStack(app, { env, synthesizer: synthesizer() })
   const identity = createIdentityStack(app, { env, synthesizer: synthesizer(), senderEmail: options.senderEmail, passkeyRelyingPartyId: passkeyDomain(options.webPublicUrl) })
   const registry = createRegistryStack(app, { env, synthesizer: synthesizer() })
-  const work = createWorkStack(app, { env, synthesizer: synthesizer(), cluster: data.cluster, workerUserSecret: data.workerUserSecret })
+  // Before App Runner has given the web app an address, email links point at a developer's machine.
+  const work = createWorkStack(app, { env, synthesizer: synthesizer(), cluster: data.cluster, workerUserSecret: data.workerUserSecret, renterLinkKey: identity.renterLinkKey, publicUrl: options.webPublicUrl ?? 'http://localhost:3000' })
   const stacks = {
     data,
     identity,
@@ -50,6 +51,7 @@ export function createHoldApp(app: App, options: HoldAppOptions) {
       userPool: identity.userPool,
       webClient: identity.webClient,
       cookieKey: identity.cookieKey,
+      renterLinkKey: identity.renterLinkKey,
       queues: work.queues,
     }),
     delivery: createDeliveryStack(app, { env, synthesizer: synthesizer() }),

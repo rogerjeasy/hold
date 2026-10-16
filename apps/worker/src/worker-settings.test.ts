@@ -7,6 +7,13 @@ const ENVIRONMENT = {
   HOLD_DATABASE_SECRET_ARN: 'arn:aws:secretsmanager:us-east-1:1:secret:hold/database/worker',
   HOLD_EXECUTIONS_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-executions.fifo',
   HOLD_PAYPAL_EVENTS_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-paypal-events.fifo',
+  HOLD_UPKEEP_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-upkeep.fifo',
+  HOLD_UPKEEP_QUEUE_ARN: 'arn:aws:sqs:us-east-1:1:hold-upkeep.fifo',
+  HOLD_SCHEDULE_GROUP: 'hold-schedules',
+  HOLD_SCHEDULER_ROLE_ARN: 'arn:aws:iam::1:role/hold-scheduler',
+  HOLD_SMTP_SECRET: 'hold/email/smtp',
+  HOLD_PUBLIC_URL: 'https://abc.us-east-1.awsapprunner.com',
+  HOLD_RENTER_LINK_KEY_SECRET_ARN: 'arn:aws:secretsmanager:us-east-1:1:secret:hold/web/renter-link-key',
 }
 
 describe('the worker’s settings', () => {
@@ -14,8 +21,12 @@ describe('the worker’s settings', () => {
     expect(loadWorkerSettings(ENVIRONMENT)).toEqual({
       region: 'us-east-1',
       database: { clusterArn: ENVIRONMENT.HOLD_DATABASE_CLUSTER_ARN, secretArn: ENVIRONMENT.HOLD_DATABASE_SECRET_ARN, name: 'hold_db' },
-      queues: { executions: ENVIRONMENT.HOLD_EXECUTIONS_QUEUE_URL, 'paypal-events': ENVIRONMENT.HOLD_PAYPAL_EVENTS_QUEUE_URL },
+      queues: { executions: ENVIRONMENT.HOLD_EXECUTIONS_QUEUE_URL, 'paypal-events': ENVIRONMENT.HOLD_PAYPAL_EVENTS_QUEUE_URL, upkeep: ENVIRONMENT.HOLD_UPKEEP_QUEUE_URL },
+      schedules: { groupName: 'hold-schedules', roleArn: ENVIRONMENT.HOLD_SCHEDULER_ROLE_ARN, queueArns: { upkeep: ENVIRONMENT.HOLD_UPKEEP_QUEUE_ARN } },
       paypalMode: 'sandbox',
+      smtpSecret: 'hold/email/smtp',
+      publicUrl: 'https://abc.us-east-1.awsapprunner.com',
+      renterLinkKeySecretArn: ENVIRONMENT.HOLD_RENTER_LINK_KEY_SECRET_ARN,
     })
   })
 
