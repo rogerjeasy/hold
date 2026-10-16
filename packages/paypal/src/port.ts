@@ -13,7 +13,7 @@ export type HoldOrder = {
   readonly payerId: string | undefined
 }
 
-export type AuthorizationStatus = 'pending' | 'created' | 'partially_captured' | 'captured' | 'voided' | 'denied'
+export type AuthorizationStatus = 'pending' | 'created' | 'partially_captured' | 'captured' | 'voided' | 'denied' | 'expired'
 
 // One PayPal authorization backing a hold. A renewal gives a new one with a new identifier.
 export type Authorization = {

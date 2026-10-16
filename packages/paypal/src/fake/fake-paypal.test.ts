@@ -99,6 +99,24 @@ describe('placing a hold', () => {
 
     expect(second.authorizationId).toBe(first.authorizationId)
   })
+
+  it('declines a hold the renter’s funding source refuses, and reserves nothing', async () => {
+    const order = valueOf(
+      await paypal.createHoldOrder({
+        amount: DEPOSIT,
+        rentalReference: 'rental-1',
+        description: 'Refundable hold',
+        returnUrl: 'https://hold.test/approved',
+        cancelUrl: 'https://hold.test/cancelled',
+        idempotencyKey: key(),
+      }),
+    )
+    paypal.approveOrder(order.orderId)
+    paypal.declineFunding(order.orderId)
+
+    expect(await kindOf(paypal.placeHold({ orderId: order.orderId, idempotencyKey: key() }))).toBe('declined')
+    expect(valueOf(await paypal.readHoldOrder(order.orderId)).status).toBe('approved')
+  })
 })
 
 describe('renewing a hold', () => {
@@ -234,6 +252,14 @@ describe('capturing from a hold', () => {
     onDay(29)
 
     expect(await kindOf(capture(hold.authorizationId, 40_00, true))).toBe('hold_expired')
+  })
+
+  it('reads as expired from the 29th day, as PayPal reports it', async () => {
+    const hold = await placeHold()
+    onDay(28)
+    expect(valueOf(await paypal.readAuthorization(hold.authorizationId)).status).toBe('created')
+    onDay(29)
+    expect(valueOf(await paypal.readAuthorization(hold.authorizationId)).status).toBe('expired')
   })
 })
 

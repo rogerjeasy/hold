@@ -22,6 +22,8 @@ export const FAKE_SIGNATURE = 'fake-signature'
 export type FakePayPal = PayPalHolds & {
   // Stands in for the renter approving the hold on PayPal's page.
   approveOrder(orderId: string): void
+  // Stands in for the renter's funding source refusing the hold when it is authorized.
+  declineFunding(orderId: string): void
   // Where an order sends the renter back, and what it is for: what a simulated approval page needs.
   orderLinks(orderId: string): { readonly returnUrl: string; readonly cancelUrl: string; readonly amount: Money; readonly description: string } | undefined
 }
@@ -69,6 +71,7 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
   const repliesByKey = new Map<string, unknown>()
   let lastNumber = 0
   const webhooks = new Map<string, string>()
+  const declined = new Set<string>()
 
   function nextId(prefix: string): string {
     lastNumber += 1
@@ -93,9 +96,11 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
   }
 
   function toAuthorization(authorization: FakeAuthorization): Authorization {
+    // PayPal reports a hold still open at the end of its validity as expired.
+    const lapsed = options.now() >= authorization.expiresAt && (authorization.status === 'created' || authorization.status === 'partially_captured')
     return {
       authorizationId: authorization.authorizationId,
-      status: authorization.status,
+      status: lapsed ? 'expired' : authorization.status,
       amount: authorization.amount,
       createdAt: authorization.createdAt,
       expiresAt: authorization.expiresAt,
@@ -124,6 +129,10 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
       const order = orders.get(orderId)
       if (order === undefined) throw new Error(`The fake PayPal has no order ${orderId}.`)
       if (order.status === 'awaiting_approval') order.status = 'approved'
+    },
+
+    declineFunding(orderId) {
+      declined.add(orderId)
     },
 
     createHoldOrder(input) {
@@ -190,6 +199,7 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
         const order = orders.get(input.orderId)
         if (order === undefined) return failure('not_found', 'No such order.')
         if (order.status !== 'approved') return failure('order_not_approved', 'The renter has not approved the order.')
+        if (declined.has(order.orderId)) return failure('declined', 'The funding source was declined.', 'INSTRUMENT_DECLINED')
         const createdAt = options.now()
         const authorization: FakeAuthorization = {
           authorizationId: nextId('FAKE-AUTH'),

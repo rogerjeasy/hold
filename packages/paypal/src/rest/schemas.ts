@@ -51,7 +51,7 @@ export const authorizationReferenceSchema = z.object({ id: z.string().min(1) })
 
 export const authorizationSchema = z.object({
   id: z.string().min(1),
-  status: z.enum(['CREATED', 'CAPTURED', 'DENIED', 'PARTIALLY_CAPTURED', 'VOIDED', 'PENDING']),
+  status: z.enum(['CREATED', 'CAPTURED', 'DENIED', 'EXPIRED', 'PARTIALLY_CAPTURED', 'VOIDED', 'PENDING']),
   amount: amountSchema,
   create_time: timeSchema,
   expiration_time: timeSchema,

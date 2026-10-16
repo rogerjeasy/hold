@@ -50,6 +50,7 @@ const AUTHORIZATION_STATUS: Record<PayPalAuthorization['status'], AuthorizationS
   CAPTURED: 'captured',
   VOIDED: 'voided',
   DENIED: 'denied',
+  EXPIRED: 'expired',
 }
 
 const CAPTURE_STATUS: Record<PayPalCapture['status'], CaptureStatus> = {

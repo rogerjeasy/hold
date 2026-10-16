@@ -152,6 +152,14 @@ describe('renewHold', () => {
   })
 })
 
+describe('readAuthorization', () => {
+  it('reads an authorization PayPal let expire as expired, not as an answer it cannot read', async () => {
+    const { holds } = holdsAgainst([{ status: 200, body: { ...AUTHORIZATION, status: 'EXPIRED' } }])
+
+    expect(await holds.readAuthorization('AUTH-1')).toMatchObject({ ok: true, value: { authorizationId: 'AUTH-1', status: 'expired' } })
+  })
+})
+
 describe('releaseHold', () => {
   it('voids the authorization, then reads it back', async () => {
     const { holds, server } = holdsAgainst([{ status: 204 }, { status: 200, body: { ...AUTHORIZATION, status: 'VOIDED' } }])
