@@ -1,17 +1,20 @@
 import { CircleCheck } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 import { ConnectPayPalForm } from './connect-paypal-form'
+import { TurnOnNotifications } from './turn-on-notifications'
 import { PasskeyGate } from './passkey-gate'
 import { ShopFrame } from './shop-frame'
 
 type PayPalScreenProps = {
   shopName: string
   connectedAt: Date | undefined
+  // Whether PayPal sends this shop's events to Hold.
+  notifications: boolean
   isOwner: boolean
   gate: { needed: boolean; hasPasskey: boolean; email: string }
 }
 
-export function PayPalScreen({ shopName, connectedAt, isOwner, gate }: PayPalScreenProps) {
+export function PayPalScreen({ shopName, connectedAt, notifications, isOwner, gate }: PayPalScreenProps) {
   const t = useTranslations('shop.paypal')
   const format = useFormatter()
 
@@ -26,6 +29,16 @@ export function PayPalScreen({ shopName, connectedAt, isOwner, gate }: PayPalScr
             <CircleCheck aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-primary" />
             {t('isConnected', { date: format.dateTime(connectedAt, { dateStyle: 'medium' }) })}
           </p>
+        )}
+        {connectedAt === undefined ? null : (
+          <div className="grid gap-3 border-l-2 border-border-strong pl-4">
+            <p>{notifications ? t('notificationsOn') : t('notificationsOff')}</p>
+            {isOwner && !notifications ? (
+              <PasskeyGate {...gate} returnTo="/shop/paypal">
+                <TurnOnNotifications />
+              </PasskeyGate>
+            ) : null}
+          </div>
         )}
         {isOwner ? (
           <section className="grid gap-4">

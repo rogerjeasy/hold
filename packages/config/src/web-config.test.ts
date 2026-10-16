@@ -27,6 +27,13 @@ describe('loadWebConfig', () => {
     })
   })
 
+  it('sends work to the worker’s queues when it knows them, and must know them when deployed', () => {
+    const queues = { HOLD_EXECUTIONS_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-executions.fifo', HOLD_PAYPAL_EVENTS_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-paypal-events.fifo' }
+    expect(loadWebConfig({ ...AWS, ...queues })).toMatchObject({ queues: { executions: queues.HOLD_EXECUTIONS_QUEUE_URL, 'paypal-events': queues.HOLD_PAYPAL_EVENTS_QUEUE_URL } })
+    expect(loadWebConfig(AWS)).toMatchObject({ queues: undefined })
+    expect(() => loadWebConfig({ ...AWS, HOLD_ENVIRONMENT: 'production' })).toThrow(/HOLD_EXECUTIONS_QUEUE_URL/)
+  })
+
   it('takes the cookie key itself on a developer’s machine, and never when deployed', () => {
     const local = { ...AWS, HOLD_COOKIE_KEY_SECRET_ARN: undefined, HOLD_COOKIE_KEY: KEY }
     expect(loadWebConfig(local).cookieKey).toMatchObject({ kind: 'value' })

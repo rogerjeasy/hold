@@ -19,6 +19,7 @@
     "@hold/domain": "workspace:*",
     "@hold/notify": "workspace:*",
     "@hold/paypal": "workspace:*",
+    "@hold/settle": "workspace:*",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.4.0",
     "lucide-react": "^1.55.0",

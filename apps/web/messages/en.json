@@ -1227,7 +1227,8 @@
       "paypal_refused": "PayPal did not accept these credentials. Check that you copied both from the same sandbox app.",
       "paypal_unavailable": "PayPal could not be reached. Nothing was kept. Try again in a moment.",
       "no_price_list": "Publish a price list first. The sample claims use its prices.",
-      "has_rentals": "This shop already has rentals, so no samples were added."
+      "has_rentals": "This shop already has rentals, so no samples were added.",
+      "notifications_failed": "PayPal did not accept the subscription. Check the app's credentials, then try again."
     },
     "security": {
       "title": "Security",
@@ -1715,7 +1716,12 @@
       "checking": "Checking with PayPal…",
       "connected": "Connected. PayPal accepted the credentials.",
       "sandboxOnly": "This build connects sandbox accounts only. The credentials are kept in AWS Secrets Manager and are never shown again.",
-      "ownerOnly": "Only the shop's owner can connect PayPal."
+      "ownerOnly": "Only the shop's owner can connect PayPal.",
+      "notificationsOn": "PayPal tells Hold what happens to each payment, so a renter who pays and closes the page is still booked.",
+      "notificationsOff": "PayPal does not tell Hold yet what happens to each payment. Renters who pay and come back are booked; one who closes the page is not.",
+      "turnOn": "Turn on notifications",
+      "turningOn": "Turning on…",
+      "turnedOn": "Notifications are on."
     }
   },
   "emails": {

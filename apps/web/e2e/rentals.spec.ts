@@ -105,3 +105,23 @@ test('the booking pages fit every width', async ({ page, browser }) => {
   await expectFitsEveryWidth(renter)
   await renter.context().close()
 })
+
+test('a renter who approves the fee in PayPal and never comes back is still booked, from PayPal’s event', async ({ page, browser }) => {
+  await shopReadyToBook(page, 'Porto Bike Hire')
+  await bookAtTheCounter(page)
+  await page.getByRole('button', { name: 'Show the link' }).click()
+  const link = (await page.getByTestId('renter-link').textContent()) ?? ''
+
+  const renter = await renterBrowser(browser)
+  await renter.goto(link)
+  await renter.getByRole('button', { name: /^Pay .* with PayPal$/ }).click()
+  await expect(renter.getByRole('button', { name: 'Approve' })).toBeVisible()
+  // The renter approves and closes the page: PayPal's redirect back to Hold is never followed.
+  const orderId = renter.url().split('/').at(-1) ?? ''
+  const approved = await renter.request.post(`/simulated-paypal/${orderId}/approve`, { maxRedirects: 0 })
+  expect(approved.status()).toBe(303)
+  await renter.context().close()
+
+  await page.reload()
+  await expect(page.getByRole('region', { name: 'Progress' }).getByText('Done')).toHaveCount(2)
+})

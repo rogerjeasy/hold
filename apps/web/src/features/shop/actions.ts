@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
 import { linkRoutes } from '@/lib/routes'
+import { subscribeToPayPal } from '@/server/paypal-subscription'
 import { getServices } from '@/server/services'
 import { list, Refusal, shopAction, withLocale } from '@/server/shop-access'
 
@@ -109,8 +110,14 @@ export const connectPayPal = shopAction(
     if (checked !== 'accepted') return new Refusal(checked === 'refused' ? 'paypal_refused' : 'paypal_unavailable')
     const reference = await paypalCredentials.save(context.shop.id, config.paypalMode, credentials)
     await savePayPalAccount(transaction, context.shop.id, config.paypalMode, reference)
-    return {}
+    return { notifications: await subscribeToPayPal(transaction, context.shop.id) }
   },
+)
+
+// Subscribes the shop's webhook address in its PayPal account, for shops that connected before Hold listened.
+export const turnOnPayPalNotifications = shopAction(
+  { name: 'paypal.notifications_on', roles: ['owner'], needsPasskey: true, input: withLocale({}) },
+  async (context, _input, transaction) => ((await subscribeToPayPal(transaction, context.shop.id)) ? {} : new Refusal('notifications_failed')),
 )
 
 // A day of sample rentals for a demonstration (architecture.md section 20.3). Every row is marked simulated and moves

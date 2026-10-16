@@ -1,6 +1,7 @@
 import 'server-only'
 import { money } from '@hold/domain'
-import { beginFeeCapture, confirmFeeCapture, itemsStillFree, renterView, saveFeeOrder } from '@hold/db'
+import { itemsStillFree, renterView, saveFeeOrder } from '@hold/db'
+import { requestFeeCapture } from '@hold/settle'
 import type { RenterLink } from '@hold/db'
 import { getTranslations } from 'next-intl/server'
 import type { Locale } from '@/i18n/routing'
@@ -8,13 +9,11 @@ import { Refusal } from './action'
 import { paypalForShop } from './paypal-for-shop'
 import type { InLinkShop } from './renter-access'
 import { renterUrl } from './renter-links'
+import { getServices } from './services'
 
 // The rental fee, from the renter's link to PayPal and back (architecture.md sections 7.6 and 11.1). The amount is the
 // one stored on the rental. Each step can be repeated: an order the renter is approving is reused, and a capture is
-// keyed by the rental and its order. Until the worker runs executions, this request finishes the one it began; its
-// outbox message lets the worker finish it instead if this request does not.
-
-const FAILURE_REASON: Readonly<Record<string, string>> = { order_not_approved: 'not_approved', declined: 'declined' }
+// keyed by the rental and its order. The worker calls PayPal to capture; this only records the execution and sends it.
 
 export async function startFeePayment(link: RenterLink, inLinkShop: InLinkShop, token: string, language: Locale): Promise<{ readonly approvalUrl: string } | Refusal> {
   const now = new Date()
@@ -47,7 +46,9 @@ export async function startFeePayment(link: RenterLink, inLinkShop: InLinkShop, 
   return { approvalUrl }
 }
 
-export async function confirmFeePayment(link: RenterLink, inLinkShop: InLinkShop, orderId: string): Promise<{ readonly state: 'booked' } | Refusal> {
+// The renter is back from PayPal. Once PayPal shows the order approved, the capture is recorded and handed to the
+// worker, which calls PayPal. The renter's page then shows the rental booked as soon as the worker has read it back.
+export async function confirmFeePayment(link: RenterLink, inLinkShop: InLinkShop, orderId: string): Promise<{ readonly state: 'booked' | 'capturing' } | Refusal> {
   const now = new Date()
   const view = await inLinkShop((transaction) => renterView(transaction, link.rentalId, now))
   if (view === undefined) return new Refusal('not_found')
@@ -61,10 +62,14 @@ export async function confirmFeePayment(link: RenterLink, inLinkShop: InLinkShop
   if (!order.ok) return new Refusal('paypal_unavailable')
   if (order.value.status === 'awaiting_approval') return new Refusal('not_approved')
 
-  const begun = await inLinkShop((transaction) => beginFeeCapture(transaction, link.rentalId, now))
-  if (!begun.ok) return new Refusal(begun.reason)
-  const captured = await paypal.captureFeeOrder({ orderId, idempotencyKey: begun.execution.idempotencyKey })
-  if (!captured.ok) return new Refusal(FAILURE_REASON[captured.error.kind] ?? 'paypal_unavailable')
-  const confirmed = await inLinkShop((transaction) => confirmFeeCapture(transaction, begun.execution.id, captured.value, now))
-  return confirmed.ok ? { state: 'booked' } : new Refusal(confirmed.reason)
+  if (view.state === 'booked') return { state: 'booked' }
+  const { settle } = await getServices()
+  try {
+    const requested = await requestFeeCapture(settle, link.shopId, link.rentalId)
+    if (!requested.ok) return new Refusal(requested.reason)
+  } catch {
+    // The execution and its outbox message are recorded; the relay hands it to the worker if sending failed.
+  }
+  const after = await inLinkShop((transaction) => renterView(transaction, link.rentalId, new Date()))
+  return { state: after?.state === 'booked' ? 'booked' : 'capturing' }
 }

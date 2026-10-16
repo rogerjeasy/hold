@@ -31,6 +31,17 @@ const awsServices = z
     HOLD_SMTP_SECRET: z.string().min(1),
     // Only sandbox accounts are connected in the hackathon build.
     HOLD_PAYPAL_MODE: z.literal('sandbox').default('sandbox'),
+    // The worker's queues, for work the app hands on at once. Without them, work waits in the outbox for the relay.
+    HOLD_EXECUTIONS_QUEUE_URL: z.url().optional(),
+    HOLD_PAYPAL_EVENTS_QUEUE_URL: z.url().optional(),
+  })
+  .refine((value) => value.HOLD_ENVIRONMENT !== 'production' || value.HOLD_EXECUTIONS_QUEUE_URL !== undefined, {
+    path: ['HOLD_EXECUTIONS_QUEUE_URL'],
+    message: 'Deployed, the app sends executions to the worker.',
+  })
+  .refine((value) => value.HOLD_ENVIRONMENT !== 'production' || value.HOLD_PAYPAL_EVENTS_QUEUE_URL !== undefined, {
+    path: ['HOLD_PAYPAL_EVENTS_QUEUE_URL'],
+    message: 'Deployed, the app sends PayPal events to the worker.',
   })
   .refine((value) => value.HOLD_COOKIE_KEY_SECRET_ARN !== undefined || value.HOLD_COOKIE_KEY !== undefined, {
     path: ['HOLD_COOKIE_KEY_SECRET_ARN'],
@@ -61,6 +72,8 @@ export type WebConfig =
       readonly publicUrl: string
       readonly smtpSecret: string
       readonly paypalMode: 'sandbox'
+      // By queue name, as the outbox names them.
+      readonly queues: Readonly<Record<'executions' | 'paypal-events', string>> | undefined
     }
   | {
       readonly environment: 'test'
@@ -95,5 +108,9 @@ export function loadWebConfig(environment: Readonly<Record<string, string | unde
     publicUrl: value.HOLD_PUBLIC_URL.replace(/\/$/, ''),
     smtpSecret: value.HOLD_SMTP_SECRET,
     paypalMode: value.HOLD_PAYPAL_MODE,
+    queues:
+      value.HOLD_EXECUTIONS_QUEUE_URL === undefined || value.HOLD_PAYPAL_EVENTS_QUEUE_URL === undefined
+        ? undefined
+        : { executions: value.HOLD_EXECUTIONS_QUEUE_URL, 'paypal-events': value.HOLD_PAYPAL_EVENTS_QUEUE_URL },
   }
 }

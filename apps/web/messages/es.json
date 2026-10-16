@@ -1227,7 +1227,8 @@
       "paypal_refused": "PayPal no ha aceptado estas credenciales. Comprueba que copiaste las dos de la misma app de sandbox.",
       "paypal_unavailable": "No se pudo conectar con PayPal. No se ha guardado nada. Inténtalo de nuevo en un momento.",
       "no_price_list": "Publica primero una lista de precios. Las reclamaciones de muestra usan sus precios.",
-      "has_rentals": "Esta tienda ya tiene alquileres, así que no se añadió ninguna muestra."
+      "has_rentals": "Esta tienda ya tiene alquileres, así que no se añadió ninguna muestra.",
+      "notifications_failed": "PayPal no aceptó la suscripción. Revisa las credenciales de la app y vuelve a intentarlo."
     },
     "security": {
       "title": "Seguridad",
@@ -1715,7 +1716,12 @@
       "checking": "Comprobando con PayPal…",
       "connected": "Conectada. PayPal aceptó las credenciales.",
       "sandboxOnly": "Esta versión solo conecta cuentas de sandbox. Las credenciales se guardan en AWS Secrets Manager y no se vuelven a mostrar.",
-      "ownerOnly": "Solo el propietario de la tienda puede conectar PayPal."
+      "ownerOnly": "Solo el propietario de la tienda puede conectar PayPal.",
+      "notificationsOn": "PayPal avisa a Hold de lo que pasa con cada pago, así que quien paga y cierra la página queda reservado igualmente.",
+      "notificationsOff": "PayPal aún no avisa a Hold de lo que pasa con cada pago. Quien paga y vuelve queda reservado; quien cierra la página, no.",
+      "turnOn": "Activar avisos",
+      "turningOn": "Activando…",
+      "turnedOn": "Los avisos están activados."
     }
   },
   "emails": {

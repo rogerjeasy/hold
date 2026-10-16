@@ -11,6 +11,8 @@ import { createLazyMailer, createMemoryMailer, createSmtpMailer, loadSmtpSetting
 import type { Mailer } from '@hold/notify'
 import { createFakePayPal, createMemoryCredentialStore, createPayPalClient, createRestPayPalHolds, createSecretsManagerCredentialStore } from '@hold/paypal'
 import type { CredentialStore, FakePayPal, PayPalCredentials, PayPalHolds } from '@hold/paypal'
+import { applyPayPalEvent, createSqsSender, runExecution } from '@hold/settle'
+import type { QueueMessage, SettleDependencies } from '@hold/settle'
 
 // What a PayPal credential check found: the credentials work, PayPal refused them, or PayPal could not be reached.
 export type CredentialCheck = 'accepted' | 'refused' | 'unavailable'
@@ -28,6 +30,19 @@ export type Services = {
   readonly paypalFor: (credentialReference: string) => PayPalHolds
   // The test environment's PayPal, whose orders a simulated approval page approves. Absent everywhere else.
   readonly simulatedPayPal: FakePayPal | undefined
+  // The webhook address of the shop whose account made an order, so the simulated PayPal can send its events there.
+  readonly simulatedWebhookFor: (orderId: string) => string | undefined
+  // Settling money with PayPal, acting as hold_app: work the app hands the worker goes through `send`.
+  readonly settle: SettleDependencies
+}
+
+// The test environment has no worker: each message is handled at once, in this process, by the same code.
+function runAtOnce(settle: () => SettleDependencies): (message: QueueMessage) => Promise<void> {
+  return async (message) => {
+    const shopId = String(message.body['shopId'])
+    if (message.queue === 'executions') await runExecution(settle(), { shopId, executionId: String(message.body['executionId']) })
+    if (message.queue === 'paypal-events') await applyPayPalEvent(settle(), { shopId, eventId: String(message.body['eventId']) })
+  }
 }
 
 // The code the test environment's fake identity sends every time. The end-to-end tests type it.
@@ -57,40 +72,66 @@ async function build(): Promise<Services> {
     const { createTestDatabase } = await import('@hold/db/testing')
     // One PayPal for every shop, which sends the renter to Hold's own simulated approval page.
     const simulatedPayPal = createFakePayPal({ now: () => new Date(), approvalUrl: (orderId) => `${config.publicUrl}/simulated-paypal/${orderId}` })
+    // One PayPal for every shop, which remembers each account's webhook address and the account each order was made in.
+    const webhookOfAccount = new Map<string, string>()
+    const webhookOfOrder = new Map<string, string>()
+    const paypalFor = (credentialReference: string): PayPalHolds => ({
+      ...simulatedPayPal,
+      createWebhook: (input) => {
+        webhookOfAccount.set(credentialReference, input.url)
+        return simulatedPayPal.createWebhook(input)
+      },
+      createFeeOrder: async (input) => {
+        const created = await simulatedPayPal.createFeeOrder(input)
+        const url = webhookOfAccount.get(credentialReference)
+        if (created.ok && url !== undefined) webhookOfOrder.set(created.value.orderId, url)
+        return created
+      },
+    })
+    const database = await createTestDatabase()
+    const settle: SettleDependencies = { database, role: 'hold_app', paypalFor, paypalMode: config.paypalMode, send: runAtOnce(() => settle), now: () => new Date() }
     return {
       config,
       cookieKey: await loadCookieKey(config.cookieKey, 'us-east-1'),
       identity: createFakeIdentity({ fixedCode: TEST_SIGN_IN_CODE }),
-      database: await createTestDatabase(),
+      database,
       mailer: createMemoryMailer(),
       paypalCredentials: createMemoryCredentialStore(),
       checkPayPalCredentials: (credentials) => Promise.resolve(credentials.clientSecret === TEST_REFUSED_PAYPAL_SECRET ? 'refused' : 'accepted'),
-      paypalFor: () => simulatedPayPal,
+      paypalFor,
       simulatedPayPal,
+      simulatedWebhookFor: (orderId) => webhookOfOrder.get(orderId),
+      settle,
     }
   }
   const paypalCredentials = createSecretsManagerCredentialStore(config.region)
+  const database = createDataApiDatabase({ region: config.region, clusterArn: config.database.clusterArn, secretArn: config.database.secretArn, database: config.database.name })
+  const paypalFor = (credentialReference: string) =>
+    createRestPayPalHolds(
+      createPayPalClient({
+        environment: config.paypalMode,
+        credentials: async () => {
+          const credentials = await paypalCredentials.read(credentialReference)
+          if (credentials === undefined) throw new Error('The shop’s PayPal credentials are missing.')
+          return credentials
+        },
+      }),
+    )
+  // Without the worker's queues, on a developer's machine, work waits in the outbox.
+  const send = config.queues === undefined ? () => Promise.reject(new Error('No worker queues are set.')) : createSqsSender({ queues: config.queues, region: config.region })
   return {
     config,
     cookieKey: await loadCookieKey(config.cookieKey, config.region),
     identity: createCognitoIdentity({ region: config.region, ...config.cognito }),
-    database: createDataApiDatabase({ region: config.region, clusterArn: config.database.clusterArn, secretArn: config.database.secretArn, database: config.database.name }),
+    database,
     // Through the SMTP account in Secrets Manager, read when the first email is sent.
     mailer: createLazyMailer(async () => createSmtpMailer(await loadSmtpSettings(config.smtpSecret, config.region))),
     paypalCredentials,
     checkPayPalCredentials: checkWithPayPal,
-    paypalFor: (credentialReference) =>
-      createRestPayPalHolds(
-        createPayPalClient({
-          environment: config.paypalMode,
-          credentials: async () => {
-            const credentials = await paypalCredentials.read(credentialReference)
-            if (credentials === undefined) throw new Error('The shop’s PayPal credentials are missing.')
-            return credentials
-          },
-        }),
-      ),
+    paypalFor,
     simulatedPayPal: undefined,
+    simulatedWebhookFor: () => undefined,
+    settle: { database, role: 'hold_app', paypalFor, paypalMode: config.paypalMode, send, now: () => new Date() },
   }
 }
 

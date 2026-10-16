@@ -1227,7 +1227,8 @@
       "paypal_refused": "PayPal hat diese Zugangsdaten nicht angenommen. Prüfen Sie, ob Sie beide aus derselben Sandbox-App kopiert haben.",
       "paypal_unavailable": "PayPal ist nicht erreichbar. Es wurde nichts gespeichert. Versuchen Sie es gleich noch einmal.",
       "no_price_list": "Veröffentlichen Sie zuerst eine Preisliste. Die Beispielforderungen verwenden ihre Preise.",
-      "has_rentals": "Dieser Laden hat schon Vermietungen, daher wurden keine Beispiele hinzugefügt."
+      "has_rentals": "Dieser Laden hat schon Vermietungen, daher wurden keine Beispiele hinzugefügt.",
+      "notifications_failed": "PayPal hat das Abonnement nicht angenommen. Prüfen Sie die Zugangsdaten der App und versuchen Sie es erneut."
     },
     "security": {
       "title": "Sicherheit",
@@ -1715,7 +1716,12 @@
       "checking": "Wird bei PayPal geprüft…",
       "connected": "Verbunden. PayPal hat die Zugangsdaten angenommen.",
       "sandboxOnly": "Diese Version verbindet nur Sandbox-Konten. Die Zugangsdaten liegen in AWS Secrets Manager und werden nie wieder angezeigt.",
-      "ownerOnly": "Nur der Inhaber des Verleihs kann PayPal verbinden."
+      "ownerOnly": "Nur der Inhaber des Verleihs kann PayPal verbinden.",
+      "notificationsOn": "PayPal meldet Hold, was mit jeder Zahlung geschieht. So ist auch gebucht, wer bezahlt und die Seite schließt.",
+      "notificationsOff": "PayPal meldet Hold noch nicht, was mit jeder Zahlung geschieht. Wer bezahlt und zurückkommt, ist gebucht; wer die Seite schließt, nicht.",
+      "turnOn": "Benachrichtigungen einschalten",
+      "turningOn": "Wird eingeschaltet…",
+      "turnedOn": "Benachrichtigungen sind eingeschaltet."
     }
   },
   "emails": {

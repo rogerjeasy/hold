@@ -1227,7 +1227,8 @@
       "paypal_refused": "PayPal n'a pas accepté ces identifiants. Vérifiez que vous avez copié les deux depuis la même app sandbox.",
       "paypal_unavailable": "PayPal est injoignable. Rien n'a été conservé. Réessayez dans un instant.",
       "no_price_list": "Publiez d’abord une grille tarifaire. Les réclamations d’exemple utilisent ses prix.",
-      "has_rentals": "Cette boutique a déjà des locations, aucun exemple n’a donc été ajouté."
+      "has_rentals": "Cette boutique a déjà des locations, aucun exemple n’a donc été ajouté.",
+      "notifications_failed": "PayPal n'a pas accepté l'abonnement. Vérifiez les identifiants de l'app, puis réessayez."
     },
     "security": {
       "title": "Sécurité",
@@ -1715,7 +1716,12 @@
       "checking": "Vérification auprès de PayPal…",
       "connected": "Relié. PayPal a accepté les identifiants.",
       "sandboxOnly": "Cette version ne relie que des comptes sandbox. Les identifiants sont conservés dans AWS Secrets Manager et ne sont plus jamais affichés.",
-      "ownerOnly": "Seul le propriétaire de la boutique peut relier PayPal."
+      "ownerOnly": "Seul le propriétaire de la boutique peut relier PayPal.",
+      "notificationsOn": "PayPal informe Hold de ce qui arrive à chaque paiement : un client qui paie puis ferme la page est tout de même réservé.",
+      "notificationsOff": "PayPal n'informe pas encore Hold de ce qui arrive à chaque paiement. Un client qui paie et revient est réservé ; un client qui ferme la page ne l'est pas.",
+      "turnOn": "Activer les notifications",
+      "turningOn": "Activation…",
+      "turnedOn": "Les notifications sont activées."
     }
   },
   "emails": {

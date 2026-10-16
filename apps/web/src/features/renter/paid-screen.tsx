@@ -4,20 +4,27 @@ import { CircleCheck, LoaderCircle } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { startTransition, useActionState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
-import { Link } from '@/i18n/navigation'
+import { Link, useRouter } from '@/i18n/navigation'
 import { linkRoutes } from '@/lib/routes'
 import { confirmFee } from './actions'
 import { RenterMessage } from './renter-message'
 
-type PaidScreenProps = { token: string; orderId: string; shopName: string }
+// `booked` is what the server last read: the page is drawn again while the worker captures, until it says booked.
+type PaidScreenProps = { token: string; orderId: string; shopName: string; booked: boolean }
+
+// How often, and for how long, the page looks again while the worker captures the fee.
+const LOOK_EVERY_MS = 2000
+const LOOK_FOR_MS = 60_000
 
 // Where PayPal sends the renter back. Arriving changes nothing: the page then asks, once, by a POST, for the payment
-// to be confirmed with PayPal, which is what books the rental.
-export function PaidScreen({ token, orderId, shopName }: PaidScreenProps) {
+// to be captured. The worker captures it with PayPal, which is what books the rental.
+export function PaidScreen({ token, orderId, shopName, booked }: PaidScreenProps) {
   const t = useTranslations('renter.paid')
   const locale = useLocale()
   const [result, confirm, pending] = useActionState(confirmFee, null)
-  const asked = useRef(false)
+  const router = useRouter()
+  const asked = useRef(booked)
+  const capturing = result?.ok === true && result.value.state === 'capturing' && !booked
   const send = () => {
     const data = new FormData()
     data.set('token', token)
@@ -32,12 +39,26 @@ export function PaidScreen({ token, orderId, shopName }: PaidScreenProps) {
     asked.current = true
     send()
   })
+  useEffect(() => {
+    if (!capturing) return
+    const looking = setInterval(() => {
+      router.refresh()
+    }, LOOK_EVERY_MS)
+    const giveUp = setTimeout(() => {
+      clearInterval(looking)
+    }, LOOK_FOR_MS)
+    return () => {
+      clearInterval(looking)
+      clearTimeout(giveUp)
+    }
+  }, [capturing, router])
+  const done = booked || (result?.ok === true && result.value.state === 'booked')
 
   return (
     <div className="mx-auto grid w-full max-w-xl gap-6 px-4 py-12 md:px-8">
       <p className="label text-xs text-muted-foreground">{shopName}</p>
       <h1 className="text-page-title text-balance">{t('title')}</h1>
-      {result?.ok === true ? (
+      {done ? (
         <div className="grid gap-4">
           <p role="status" className="flex items-center gap-2 text-lg font-semibold">
             <CircleCheck aria-hidden="true" className="size-5 text-primary" />
@@ -47,7 +68,7 @@ export function PaidScreen({ token, orderId, shopName }: PaidScreenProps) {
             {t('back')}
           </Link>
         </div>
-      ) : result === null || pending ? (
+      ) : result === null || pending || capturing ? (
         <p role="status" className="flex items-center gap-2 text-muted-foreground">
           <LoaderCircle aria-hidden="true" className="size-5 animate-spin" />
           {t('checking')}

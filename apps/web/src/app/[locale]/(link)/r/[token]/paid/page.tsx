@@ -16,5 +16,5 @@ export default async function Page({ params, searchParams }: { params: Promise<{
   const page = await renterPage(token)
   if (!page.ok) return <LinkRefused failure={page.failure} />
   if (typeof orderId !== 'string') return <LinkRefused failure="link_invalid" />
-  return <PaidScreen token={token} orderId={orderId} shopName={page.view.shopName} />
+  return <PaidScreen token={token} orderId={orderId} shopName={page.view.shopName} booked={page.view.state !== 'pending_payment'} />
 }
