@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@aws-sdk/client-scheduler": "3.1151.0",
     "@aws-sdk/client-sqs": "3.1151.0",
     "@hold/db": "workspace:*",
     "@hold/domain": "workspace:*",

@@ -1,10 +1,11 @@
-import { beginFeeCapture, confirmFeeCapture, feeRentalByOrder, inShop, markPayPalEvent, payPalEvent, paypalAccounts } from '@hold/db'
+import { feeRentalByOrder, holdRentalByOrder, inShop, markPayPalEvent, payPalEvent, paypalAccounts } from '@hold/db'
 import type { Transaction } from '@hold/db'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { PayPalUnavailable, TRANSIENT } from './dependencies.ts'
+import { PayPalUnavailable } from './dependencies.ts'
 import type { SettleDependencies } from './dependencies.ts'
-import { runExecution } from './fee-capture.ts'
+import { applyFeeEvent } from './fee-capture.ts'
+import { applyHoldEvent } from './hold-placement.ts'
 
 // Applying an event PayPal delivered (architecture.md section 8.5). It is verified with PayPal first, and then only
 // the resource it names is read back from PayPal: nothing in the event's body is believed. Applying it again changes
@@ -64,39 +65,26 @@ export async function applyPayPalEvent(dependencies: SettleDependencies, message
 
   const parsed = eventSchema.safeParse(JSON.parse(event.rawBody))
   const body = parsed.success ? parsed.data : undefined
-  const orderId = body?.event_type === 'CHECKOUT.ORDER.APPROVED' ? body.resource?.id : body?.event_type === 'PAYMENT.CAPTURE.COMPLETED' ? body.resource?.supplementary_data?.related_ids?.order_id : undefined
-  const rentalId = orderId === undefined ? undefined : await inScope((transaction) => feeRentalByOrder(transaction, orderId))
-  if (body === undefined || orderId === undefined || rentalId === undefined) {
+  // An order's own event names it; a capture or an authorization names the order it was made on.
+  const orderId = body?.event_type === 'CHECKOUT.ORDER.APPROVED' ? body.resource?.id : body?.resource?.supplementary_data?.related_ids?.order_id
+  if (body === undefined || orderId === undefined) {
     await mark('verified', 'ignored')
     return 'ignored'
   }
-  const now = dependencies.now()
-
-  if (body.event_type === 'CHECKOUT.ORDER.APPROVED') {
-    // The renter approved the fee but may never have come back to Hold. Read back: PayPal's record decides.
-    const order = await paypal.readHoldOrder(orderId)
-    if (!order.ok) throw new PayPalUnavailable(order.error.kind)
-    const begun = order.value.status === 'approved' ? await inScope((transaction) => beginFeeCapture(transaction, rentalId, now)) : undefined
-    if (begun === undefined || !begun.ok) {
-      await mark('verified', 'ignored', rentalId)
-      return 'ignored'
-    }
-    const outcome = await runExecution(dependencies, { shopId, executionId: begun.execution.id })
-    await mark('verified', outcome === 'failed' ? 'failed' : 'applied', rentalId)
-    return 'applied'
-  }
-
-  // PAYMENT.CAPTURE.COMPLETED: PayPal captured the fee. The order is read back for who paid and how much.
-  const payment = await paypal.readFeePayment(orderId)
-  if (!payment.ok) {
-    if (TRANSIENT.has(payment.error.kind)) throw new PayPalUnavailable(payment.error.kind)
-    await mark('verified', 'ignored', rentalId)
+  const target = await inScope(async (transaction) => {
+    const feeRental = await feeRentalByOrder(transaction, orderId)
+    if (feeRental !== undefined) return { kind: 'fee', rentalId: feeRental } as const
+    const holdRental = await holdRentalByOrder(transaction, orderId)
+    return holdRental === undefined ? undefined : ({ kind: 'hold', rentalId: holdRental } as const)
+  })
+  if (target === undefined) {
+    await mark('verified', 'ignored')
     return 'ignored'
   }
-  const confirmed = await inScope(async (transaction) => {
-    const begun = await beginFeeCapture(transaction, rentalId, now, { confirming: true })
-    return begun.ok ? confirmFeeCapture(transaction, begun.execution.id, payment.value, now) : begun
-  })
-  await mark('verified', confirmed.ok ? 'applied' : 'failed', rentalId)
-  return 'applied'
+  const processing =
+    target.kind === 'fee'
+      ? await applyFeeEvent(dependencies, shopId, paypal, { type: body.event_type, orderId }, target.rentalId)
+      : await applyHoldEvent(dependencies, shopId, paypal, { type: body.event_type, orderId, resourceId: body.resource?.id }, target.rentalId)
+  await mark('verified', processing, target.rentalId)
+  return processing === 'ignored' ? 'ignored' : 'applied'
 }

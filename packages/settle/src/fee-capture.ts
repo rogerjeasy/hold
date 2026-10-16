@@ -1,59 +1,63 @@
-import { and, eq } from 'drizzle-orm'
-import { beginFeeCapture, confirmFeeCapture, EXECUTIONS_QUEUE, failExecution, feeExecution, inShop, outbox } from '@hold/db'
+import { beginFeeCapture, confirmFeeCapture, failExecution } from '@hold/db'
+import type { StoredExecution } from '@hold/db'
+import type { PayPalHolds } from '@hold/paypal'
 import { PayPalUnavailable, TRANSIENT } from './dependencies.ts'
-import type { SettleDependencies } from './dependencies.ts'
-import { shopPayPal } from './shop-paypal.ts'
+import type { RequestDependencies, SettleDependencies } from './dependencies.ts'
+import { inWorkerShop, sendExecution } from './execution-queue.ts'
+import type { ExecutionOutcome, RequestResult } from './execution-queue.ts'
 
 // Capturing the rental fee (architecture.md section 7.6). Whoever asks only records the execution and queues it; the
 // worker calls PayPal with the execution's key and records what PayPal reads back.
 
-const scope = (dependencies: SettleDependencies, shopId: string) => ({ role: dependencies.role ?? 'hold_worker', shopId }) as const
-
-export const executionMessage = (shopId: string, rentalId: string, executionId: string) => ({
-  queue: EXECUTIONS_QUEUE,
-  group: rentalId,
-  deduplicationId: `execution-${executionId}`,
-  body: { shopId, executionId },
-})
-
-export type RequestResult = { readonly ok: true; readonly executionId: string } | { readonly ok: false; readonly reason: string }
-
-// Records the capture of an approved fee and sends it to the worker at once. Its outbox message is the fallback if
-// the send fails. Asked again, it sends the same execution, which the queue takes once.
-export async function requestFeeCapture(dependencies: SettleDependencies, shopId: string, rentalId: string): Promise<RequestResult> {
-  const now = dependencies.now()
-  const begun = await inShop(dependencies.database, scope(dependencies, shopId), (transaction) => beginFeeCapture(transaction, rentalId, now))
+// Records the capture of an approved fee and sends it to the worker at once. Asked again, it sends the same execution.
+export async function requestFeeCapture(dependencies: RequestDependencies, shopId: string, rentalId: string): Promise<RequestResult> {
+  const begun = await inWorkerShop(dependencies, shopId, (transaction) => beginFeeCapture(transaction, rentalId, dependencies.now()))
   if (!begun.ok) return begun
-  await dependencies.send(executionMessage(shopId, rentalId, begun.execution.id))
-  await inShop(dependencies.database, scope(dependencies, shopId), (transaction) =>
-    transaction.update(outbox).set({ state: 'sent', sentAt: now }).where(and(eq(outbox.messageGroup, rentalId), eq(outbox.queue, EXECUTIONS_QUEUE), eq(outbox.state, 'pending'))),
-  )
+  await sendExecution(dependencies, shopId, rentalId, begun.execution.id)
   return { ok: true, executionId: begun.execution.id }
 }
 
-export type ExecutionOutcome = 'confirmed' | 'failed' | 'nothing_to_do'
-
-// Carries out one execution. Throws while PayPal cannot be reached, so the queue tries again; records PayPal's refusal
-// otherwise. A confirmed or failed execution is left alone.
-export async function runExecution(dependencies: SettleDependencies, message: { readonly shopId: string; readonly executionId: string }): Promise<ExecutionOutcome> {
-  const { shopId, executionId } = message
-  const loaded = await inShop(dependencies.database, scope(dependencies, shopId), async (transaction) => ({
-    execution: await feeExecution(transaction, executionId),
-    account: await shopPayPal(dependencies, transaction, shopId),
-  }))
-  const { execution, account } = loaded
-  if (execution === undefined || execution.action !== 'fee_capture' || execution.state === 'confirmed' || execution.state === 'failed') return 'nothing_to_do'
+// Throws while PayPal cannot be reached, so the queue tries again; records PayPal's refusal otherwise.
+export async function captureFee(dependencies: SettleDependencies, shopId: string, execution: Pick<StoredExecution, 'id' | 'orderId' | 'idempotencyKey'>, paypal: PayPalHolds): Promise<ExecutionOutcome> {
   const now = dependencies.now()
-  if (account === undefined || execution.orderId === undefined) {
-    await inShop(dependencies.database, scope(dependencies, shopId), (transaction) => failExecution(transaction, executionId, 'No PayPal account or order.', now))
+  if (execution.orderId === undefined) {
+    await inWorkerShop(dependencies, shopId, (transaction) => failExecution(transaction, execution.id, 'No order.', now))
     return 'failed'
   }
-  const captured = await account.paypal.captureFeeOrder({ orderId: execution.orderId, idempotencyKey: execution.idempotencyKey })
+  const captured = await paypal.captureFeeOrder({ orderId: execution.orderId, idempotencyKey: execution.idempotencyKey })
   if (!captured.ok) {
     if (TRANSIENT.has(captured.error.kind)) throw new PayPalUnavailable(captured.error.kind)
-    await inShop(dependencies.database, scope(dependencies, shopId), (transaction) => failExecution(transaction, executionId, captured.error.kind, now))
+    await inWorkerShop(dependencies, shopId, (transaction) => failExecution(transaction, execution.id, captured.error.kind, now))
     return 'failed'
   }
-  const confirmed = await inShop(dependencies.database, scope(dependencies, shopId), (transaction) => confirmFeeCapture(transaction, executionId, captured.value, now))
+  const confirmed = await inWorkerShop(dependencies, shopId, (transaction) => confirmFeeCapture(transaction, execution.id, captured.value, now))
   return confirmed.ok ? 'confirmed' : 'failed'
+}
+
+export type EventProcessing = 'applied' | 'ignored' | 'failed'
+
+// An event about a fee order. Nothing in the event is believed: the order is read back from PayPal.
+export async function applyFeeEvent(dependencies: SettleDependencies, shopId: string, paypal: PayPalHolds, event: { readonly type: string; readonly orderId: string }, rentalId: string): Promise<EventProcessing> {
+  const now = dependencies.now()
+  if (event.type === 'CHECKOUT.ORDER.APPROVED') {
+    // The renter approved the fee but may never have come back to Hold. PayPal's record decides.
+    const order = await paypal.readHoldOrder(event.orderId)
+    if (!order.ok) throw new PayPalUnavailable(order.error.kind)
+    if (order.value.status !== 'approved') return 'ignored'
+    const begun = await inWorkerShop(dependencies, shopId, (transaction) => beginFeeCapture(transaction, rentalId, now))
+    if (!begun.ok) return 'ignored'
+    return (await captureFee(dependencies, shopId, begun.execution, paypal)) === 'failed' ? 'failed' : 'applied'
+  }
+  if (event.type !== 'PAYMENT.CAPTURE.COMPLETED') return 'ignored'
+  // PayPal captured the fee. The order is read back for who paid and how much.
+  const payment = await paypal.readFeePayment(event.orderId)
+  if (!payment.ok) {
+    if (TRANSIENT.has(payment.error.kind)) throw new PayPalUnavailable(payment.error.kind)
+    return 'ignored'
+  }
+  const confirmed = await inWorkerShop(dependencies, shopId, async (transaction) => {
+    const begun = await beginFeeCapture(transaction, rentalId, now, { confirming: true })
+    return begun.ok ? confirmFeeCapture(transaction, begun.execution.id, payment.value, now) : begun
+  })
+  return confirmed.ok ? 'applied' : 'failed'
 }

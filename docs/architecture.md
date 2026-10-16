@@ -343,6 +343,16 @@ The rules are plain code in `packages/domain/src/booking.ts`. The tables are wri
 - **Paying the fee.** The renter's link page shows what they rent, the fee and the hold apart, the price list and wear policy they agree to, and the reply period. Paying creates an order with intent to capture in the shop's own PayPal account, for the stored fee, and sends the renter to PayPal. An order already awaiting approval is reused. PayPal sends the renter back to `/r/{token}/paid`, which changes nothing on arrival and confirms by a POST: the order is read back and must be approved and must be the one this rental started; then the execution is recorded and handed to the worker, which captures the order with its key and reads it back. Only that read-back books the rental (section 7.6). A renter who approves and never comes back is booked from PayPal's `CHECKOUT.ORDER.APPROVED` event (section 8.5).
 - **After the time to pay.** A booking past its 15 minutes no longer keeps its items, but its renter may still pay while nobody else has taken them. Staff can let an unpaid booking go (`abandoned`). A paid booking is not cancelled here, since that would need its fee refunded.
 - **Who the renter is.** The payer PayPal names on the capture, through `hold_renter_for_payer`. Until then a rental shows the contact staff typed, or "not paid yet".
+
+### 6.6 The hold at pickup
+
+The rules are plain code in `packages/domain/src/hold-placement.ts`. The tables are written by `hold-repository.ts` and `hold-upkeep-repository.ts` in `packages/db`; the PayPal calls are made by `packages/settle`.
+
+- **Staff ask for it.** On the rental's page, the "Hold at pickup" panel asks for the hold once the fee is paid (`askForHold`, any staff member). This writes the hold, `requested` and `at_counter`, for the hold agreed at booking, moves the rental to `awaiting_hold`, and shows a new renter link to `/r/{token}/pay` as a QR code. Asking again shows a new code for the same hold. Requesting moves no money.
+- **The renter approves it on their own phone.** `/r/{token}/pay` says what the hold is, that it is not a charge, and sends the renter to PayPal for an order with intent to authorize, for the stored amount, worded by `holdOrderDescription` in their language. An order still waiting for approval is reused. PayPal sends them back to the same page, which changes nothing on arrival and confirms by a POST: the order is read back, must be approved and must be the one the hold waits on; then the authorization is recorded as an execution and handed to the worker (section 7.6).
+- **Placed only on PayPal's word.** The worker authorizes the order with the execution's key and reads the authorization back. The hold is placed only for a `created` authorization for exactly the agreed amount and currency; a pending one waits for the event, and any other amount fails the execution. Placing records both clocks from PayPal (section 7.4), logs `hold_placed` once, moves the rental to `ready`, and schedules the hold's upkeep. A renter who approves and never comes back is placed from PayPal's `CHECKOUT.ORDER.APPROVED` event, and a reply lost on the way from `PAYMENT.AUTHORIZATION.CREATED` (section 8.5).
+- **A declined funding source** fails the execution with `declined`. The hold stays `requested`, the rental `awaiting_hold`, and both the renter's page and the staff panel say plainly that nothing was reserved. The renter approves again, which makes a new order with a new key.
+- **The staff panel looks again by itself** every three seconds while it waits, and shows the placed hold with the day to charge by and the day it ends.
 ---
 
 ## 7. The hold core
@@ -532,6 +542,14 @@ The plan is computed by plain code in `packages/domain/src/upkeep.ts` from the a
 
 **Hold tracks expiry itself.** PayPal's event list has no event for a hold expiring, so Hold does not wait to be told. It acts on its own clock and confirms by reading the authorization from PayPal.
 
+**As built** (`packages/settle/src/upkeep.ts`, `upkeep-schedules.ts`):
+
+- **Two one-off schedules per authorization,** `hold-replace-{authorization}` three days before the end and `hold-expire-{authorization}` at the end, in the `hold-schedules` group of EventBridge Scheduler. Each sends a message to the `upkeep` queue, grouped by the hold, and is deleted after it fires. A step whose time has already passed is sent to the queue at once, since a schedule in the past never fires. If making them fails after PayPal placed the hold, the execution is tried again and `ensureUpkeep` makes them then.
+- **A step acts only on the authorization the hold rests on.** One made for an authorization a replacement took over from does nothing.
+- **Expiry** reads the authorization back. If PayPal still holds the money until a later time, the step moves to that time. Otherwise the hold and its authorization are marked `expired`, the audit trail says so, and every owner is emailed in their language with a link to the rental. A failed email is tried again without expiring twice.
+- **Replacement,** while the rental still needs its hold (`needsReplacement`: from `ready` until `settling`): the worker makes a new hold order for the same amount, keyed by the authorization it replaces, keeps it on the hold, signs a new renter link to `/r/{token}/pay` and emails it to the renter, in the rental's language, with the day the old hold ends. Once the renter approves, the hold moves onto the new authorization (`replaces_id` names the old one), its own clocks and schedules replace the old ones, and the old authorization is voided through a `release` execution, confirmed by reading it back, with `hold_released` in the money log. A renter who never approves is left to expiry. Placing a replacement through a saved payment method waits for PayPal to allow it (tech-stack.md section 16).
+- **The rental ends:** a step for a hold no longer `placed` or `at_risk` does nothing, so no schedule outlives its use. Removing them when the rental closes comes with closing.
+
 ### 7.5 The reply period and the hold's life
 
 A shop may give the renter time to reply to a claim. That period cannot outlast the hold.
@@ -686,7 +704,7 @@ sequenceDiagram
 - **The subscription.** Connecting PayPal subscribes the shop's own address, `/api/webhooks/paypal/{accountId}`, to the events in `PAYPAL_EVENT_TYPES`, and keeps the subscription's id beside the account. A shop connected earlier turns it on from its PayPal page. PayPal takes only an HTTPS address, so on a developer's machine there are no events and Hold works without them.
 - **The intake** reads the shop from the account in the address through `hold_paypal_account`, before any shop is chosen. It stores the exact body and PayPal's signing headers, once per PayPal event ID, with an outbox message in the same transaction, sends that message to the `paypal-events` queue at once, and answers 200. Events about one order share a group: a capture is grouped by the order it was made on. Deliveries are limited per network and to 64 KB.
 - **Verification** asks PayPal's `verify-webhook-signature` about the exact stored body, against the account's subscription. A rejected event is kept, marked `rejected`, and never applied.
-- **What is applied.** `CHECKOUT.ORDER.APPROVED` on a fee order: the order is read back, and only if PayPal shows it approved is the fee captured. This books a renter who approved in PayPal and never came back to Hold. `PAYMENT.CAPTURE.COMPLETED` on a fee order: the order is read back for who paid and how much, and confirmed as in section 6.5. Every other event is kept and marked `ignored` until the feature that acts on it is built.
+- **What is applied.** `CHECKOUT.ORDER.APPROVED` on a fee order: the order is read back, and only if PayPal shows it approved is the fee captured. This books a renter who approved in PayPal and never came back to Hold. `PAYMENT.CAPTURE.COMPLETED` on a fee order: the order is read back for who paid and how much, and confirmed as in section 6.5. `CHECKOUT.ORDER.APPROVED` on a hold order: read back, and only if approved is the authorization recorded and carried out. `PAYMENT.AUTHORIZATION.CREATED` on a hold order: the authorization is read back and confirmed as in section 6.6. Every other event is kept and marked `ignored` until the feature that acts on it is built.
 
 ### 8.6 Reconciliation
 
@@ -1204,7 +1222,7 @@ Renters have no account. They act through links.
 | Property | How |
 |---|---|
 | **Bound to one rental** | The link's token names one rental and nothing else |
-| **Signed** | The token is 32 random bytes and a 16-byte HMAC-SHA-256 of them, with a key derived from the app's secret for links alone (`packages/auth/src/renter/renter-link.ts`). A changed token is rejected before the database is asked. |
+| **Signed** | The token is 32 random bytes and a 16-byte HMAC-SHA-256 of them, with a key derived from the secret `hold/web/renter-link-key`, which is not the cookie key (`packages/auth/src/renter/renter-link.ts`). The web app and the worker read it, so the worker can sign the links it emails without being able to seal a sign-in. On a developer's machine it falls back to the cookie key. A changed token is rejected before the database is asked. |
 | **Expiring** | Each link has an end date tied to the rental's life |
 | **Scoped** | View, pay, confirm condition, extend, accept, contest. Each link carries only the scopes it needs. A booking's link carries view and pay. |
 | **Revocable** | Only the token's fingerprint is stored. Removing it ends the link. |
@@ -1260,7 +1278,7 @@ Served by `web`. Each requires a valid signed link.
 | Route | Purpose |
 |---|---|
 | `/r/{token}` | The rental: status, hold, price list |
-| `/r/{token}/pay` | Approve the hold at pickup. The fee is paid from `/r/{token}` itself. |
+| `/r/{token}/pay` | Approve the hold at pickup, or its replacement before it ends. PayPal returns the renter here, and the hold is confirmed by a POST, never on arrival. The fee is paid from `/r/{token}` itself. |
 | `/r/{token}/paid` | Where PayPal returns the renter. Confirms the fee by a POST, never on arrival. |
 | `/r/{token}/condition` | Review and confirm the handover report |
 | `/r/{token}/session` | Guided photographs for shipped rentals |
@@ -1409,7 +1427,7 @@ The worker's compute is added with its code. The web app's address is known only
 | Service | Runs on | Notes |
 |---|---|---|
 | web | App Runner, 1 vCPU and 2 GB, one to two instances | Checked by TCP on port 3000. Runs the image named by the deploy, never the newest pushed |
-| worker | Lambda, Node 24, 512 MB, four minutes per message | App Runner throttles CPU between requests, so it cannot poll queues. Three functions: `hold-worker-paypal-events` and `hold-worker-executions` fed by their FIFO queues, naming only the messages that failed so only those are tried again, and `hold-worker-outbox-relay` started every minute by EventBridge Scheduler. The four minutes allow a paused Aurora cluster to wake. Each queue hides a message for six minutes, longer than a function may run on it. Code in `apps/worker`, deployed by `infra/lib/worker.ts` |
+| worker | Lambda, Node 24, 512 MB, four minutes per message | App Runner throttles CPU between requests, so it cannot poll queues. Four functions: `hold-worker-paypal-events`, `hold-worker-executions` and `hold-worker-upkeep` fed by their FIFO queues, each message read with its queue's schema and naming only the messages that failed so only those are tried again, and `hold-worker-outbox-relay` started every minute by EventBridge Scheduler. The worker makes schedules only in `hold-schedules`, hands them only the scheduler's role, and emails through Hold's SMTP login. The four minutes allow a paused Aurora cluster to wake. Each queue hides a message for six minutes, longer than a function may run on it. Code in `apps/worker`, deployed by `infra/lib/worker.ts` |
 
 ### 14.5 Data
 
@@ -1433,6 +1451,7 @@ The worker's compute is added with its code. The web app's address is known only
 |---|---|---|
 | `paypal-events` | Stored event IDs to verify and apply | Per rental |
 | `executions` | Approved actions on holds | Per rental |
+| `upkeep` | A hold's timed steps, sent by its schedules. Deduplicated by content, since EventBridge Scheduler cannot name a deduplication ID | Per hold |
 | `comparisons` | Sealed return sessions to compare | None needed |
 | `media` | Display copies and face blurring | None needed |
 | `evidence` | Evidence packs to build | Per rental |
@@ -1447,7 +1466,7 @@ Every queue has a dead-letter queue and an alarm on it.
 ### 14.8 Configuration
 
 - Non-secret configuration is typed and validated at startup, in `packages/config`. A service with invalid configuration does not start, and the error names the settings that are wrong, never their values. The web app's settings are listed in `apps/web/.env.example`.
-- Secrets come from Secrets Manager at startup and are never written to logs or images. The key that seals the sign-in cookie is `hold/web/cookie-key`, made by the HoldIdentity stack: the web app reads it by its ARN (`HOLD_COOKIE_KEY_SECRET_ARN`) and uses its SHA-256 as the key. Deployed, the app refuses a key given any other way.
+- Secrets come from Secrets Manager at startup and are never written to logs or images. The key that seals the sign-in cookie is `hold/web/cookie-key`, made by the HoldIdentity stack: the web app reads it by its ARN (`HOLD_COOKIE_KEY_SECRET_ARN`) and uses its SHA-256 as the key. Deployed, the app refuses a key given any other way. Renter links are signed with their own key, `hold/web/renter-link-key` (`HOLD_RENTER_LINK_KEY_SECRET_ARN`), which the worker reads too. The worker is told the web app's address (`HOLD_PUBLIC_URL`) for links in its emails.
 
 ---
 
@@ -1479,6 +1498,7 @@ Every queue has a dead-letter queue and an alarm on it.
 | **The web app reads another shop's queued work** | Reading the outbox across shops is a function only `hold_worker` may call; the web app's role is refused. Tested in `paypal-event-repository.test.ts`. |
 | **A replayed request** | Idempotency keys at every layer. |
 | **One shop reads another's data** | Shop checks in the service and row-level security in the database. |
+| **The worker is compromised and forges a sign-in** | The worker reads the renter-link key, never the cookie key, so it can sign links but not seal a sign-in. Tested in `hold-app.test.ts`. |
 | **A renter link leaks through the address bar** | Renter pages send no referrer and are not indexed. Each link is bound to one rental and its scopes, expires 60 days after the rental, and cannot move money without the renter approving in PayPal. |
 | **Bookings are made to tie up a shop's items** | Bookings on a shop's page are limited to ten per network in fifteen minutes, and an unpaid booking keeps its items for fifteen minutes only. Tested in `booking-flow.test.ts`. |
 | **A renter pays one rental with another's order, or a changed amount** | The fee is read from the rental, never from the renter. A capture is made only for the order this rental started, after PayPal shows it approved, and PayPal's captured amount must equal the stored fee or nothing is booked. Tested in `booking-flow.test.ts` and `booking-repository.test.ts`. |
