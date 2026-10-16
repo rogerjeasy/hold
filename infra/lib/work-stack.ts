@@ -97,7 +97,8 @@ export function createWorkStack(app: App, props: WorkStackProps): WorkResources 
   const scheduleGroup = new scheduler.ScheduleGroup(stack, 'ScheduleGroup', { scheduleGroupName: name('schedules') })
   const schedulerRole = new iam.Role(stack, 'SchedulerRole', {
     roleName: name('scheduler'),
-    description: 'Assumed by EventBridge Scheduler to deliver Hold schedules to Hold queues and start the outbox relay.',
+    // Kept as first deployed: the pipeline may not change a role's description. The role also starts the outbox relay.
+    description: 'Assumed by EventBridge Scheduler to deliver Hold schedules to Hold queues, and nothing else.',
     assumedBy: new iam.ServicePrincipal('scheduler.amazonaws.com', {
       conditions: { StringEquals: { 'aws:SourceAccount': stack.account } },
     }),

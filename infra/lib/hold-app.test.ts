@@ -240,6 +240,10 @@ describe('queues', () => {
     work.resourceCountIs('AWS::CloudWatch::Alarm', QUEUES.length)
   })
 
+  it('keeps the scheduler role’s description as deployed, since the pipeline may not change a role’s description', () => {
+    work.hasResourceProperties('AWS::IAM::Role', { RoleName: 'hold-scheduler', Description: 'Assumed by EventBridge Scheduler to deliver Hold schedules to Hold queues, and nothing else.' })
+  })
+
   it('lets the scheduler send to Hold queues and start the outbox relay, and do nothing else', () => {
     const statements = Object.entries(work.findResources('AWS::IAM::Policy'))
       .filter(([key]) => key.startsWith('SchedulerRole'))
