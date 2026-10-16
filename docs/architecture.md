@@ -353,6 +353,18 @@ The rules are plain code in `packages/domain/src/hold-placement.ts`. The tables 
 - **Placed only on PayPal's word.** The worker authorizes the order with the execution's key and reads the authorization back. The hold is placed only for a `created` authorization for exactly the agreed amount and currency; a pending one waits for the event, and any other amount fails the execution. Placing records both clocks from PayPal (section 7.4), logs `hold_placed` once, moves the rental to `ready`, and schedules the hold's upkeep. A renter who approves and never comes back is placed from PayPal's `CHECKOUT.ORDER.APPROVED` event, and a reply lost on the way from `PAYMENT.AUTHORIZATION.CREATED` (section 8.5).
 - **A declined funding source** fails the execution with `declined`. The hold stays `requested`, the rental `awaiting_hold`, and both the renter's page and the staff panel say plainly that nothing was reserved. The renter approves again, which makes a new order with a new key.
 - **The staff panel looks again by itself** every three seconds while it waits, and shows the placed hold with the day to charge by and the day it ends.
+
+### 6.7 The guided handover
+
+The rules are plain code in `packages/domain/src/capture-session.ts`. The tables are written by `capture-repository.ts` in `packages/db`; photographs are stored by `packages/evidence`, and display copies made by `packages/vision`.
+
+- **Staff photograph each item.** Once the hold is placed, the rental's "Handover" panel starts a session per item (`/shop/rentals/{id}/handover/{session}`), on the plan its type has now. The screen walks the plan's views; each shows the rear camera with the view's framing outline, a file to choose when there is no camera, and, for a demonstration, a sample photograph said to be one.
+- **The phone checks each photograph before it uploads.** OpenCV.js, in a Web Worker, measures sharpness (the variance of the Laplacian), shadows and highlights (the grey levels the darkest and brightest 5% lie beyond, so an item lit against a black or white backdrop passes) and how much of the frame the item's edges fill. `checkPhotoQuality` decides: a blurred, too dark, washed-out or nearly empty photograph is retaken, with the reason, before anything uploads.
+- **Straight to the locked bucket, fingerprinted twice.** The phone computes the SHA-256 and asks for a five-minute signed PUT under `{shop}/{session}/{view}/{random}.jpg`; the checksum is signed, so S3 refuses any other file. The server then reads back the SHA-256 S3 computed and records that, at the server's time. A retake takes the view's place and marks the earlier photograph superseded; the earlier one stays locked and on record. The service roles may change only a photograph's display copy, perceptual fingerprint and retake mark, never its fingerprint or original.
+- **Marks.** Each view shows the item's known open marks from sealed sessions; staff confirm those still there, and box new ones on the photograph (dragged, or moved and sized with the arrow keys) with a description. A new mark is on the item from then on (section 9.4).
+- **Sealing** needs every required view. The manifest (`manifestText`) lists each photograph's view, fingerprint and time and names the item's previous manifest; its SHA-256 becomes the item's chain head. When every item of the rental is sealed, the rental is `out`.
+- **The condition report.** Sealing the last item issues a link with the scopes `view` and `confirm_condition` to `/r/{token}/condition`, emailed to the contact and shown to staff as a code. For 24 hours (`CONDITION_REPLY_HOURS`) the renter confirms it, or adds photographs of anything missed into a `condition` session of their own, sealed and chained like any other, and the rental records the answer. Any link to the rental may look; only that one may answer.
+- **Display copies.** Each recorded photograph is sent to the `media` queue as soon as it is committed (the outbox is the fallback). The worker reads the original, shrinks it to 1,600 pixels, finds faces with Rekognition on the small copy, blurs them, strips all metadata, writes the copy to the display bucket and records it with a 64-bit perceptual fingerprint. Screens show display copies through five-minute signed links.
 ---
 
 ## 7. The hold core
@@ -757,6 +769,7 @@ A capture session is one guided set of photographs of one item.
 | Packing | Staff | Before a shipped item is sealed |
 | Unboxing | Renter | When a shipped item arrives |
 | Send-back | Renter | Before a shipped item is returned |
+| Condition | Renter | Within a day of a handover, photographs of anything staff missed (section 6.7) |
 
 **How a session runs**
 
@@ -1280,7 +1293,7 @@ Served by `web`. Each requires a valid signed link.
 | `/r/{token}` | The rental: status, hold, price list |
 | `/r/{token}/pay` | Approve the hold at pickup, or its replacement before it ends. PayPal returns the renter here, and the hold is confirmed by a POST, never on arrival. The fee is paid from `/r/{token}` itself. |
 | `/r/{token}/paid` | Where PayPal returns the renter. Confirms the fee by a POST, never on arrival. |
-| `/r/{token}/condition` | Review and confirm the handover report |
+| `/r/{token}/condition` | How each item left: its photographs and marks. Within 24 hours of the handover, the link sent then may confirm it or add photographs of anything missed. |
 | `/r/{token}/session` | Guided photographs for shipped rentals |
 | `/r/{token}/claim` | See a claim, accept or contest it |
 | `/r/{token}/record` | The evidence pack |
@@ -1345,7 +1358,8 @@ Served by `web` under `/shop`. Each page asks `shopAccess` itself; the frame aro
 | `/shop` | Today: the day's figures (items out, due back, held on PayPal, claims to decide), what needs a decision, the handovers and returns at the counter with a line for now, the holds by where they stand, the month so far from the money log, and the latest audit lines. Until the shop is set up, its setup steps. |
 | `/shop/rentals` | Every rental, newest first: who, items, period, fee, hold and where it stands, filtered by part of its life (`?show=`). The address of the shop's own page. |
 | `/shop/rentals/new` | Booking at the counter or on the phone: dates on the shop's clock in the address, then a counter per item type up to what is free, the fee and hold as they add up, and an optional contact who is emailed the link. Needs PayPal connected and items. |
-| `/shop/rentals/{id}` | One rental: its progress from booking to settlement, its terms, the renter's link as a QR code or by email, and letting go of an unpaid booking. |
+| `/shop/rentals/{id}` | One rental: its progress from booking to settlement, its terms, the hold at pickup, the handover of each item, the renter's link as a QR code or by email, and letting go of an unpaid booking. On a phone, what staff act on comes before the terms. |
+| `/shop/rentals/{id}/handover/{session}` | One item's guided handover: each view photographed and checked on the phone, its marks confirmed or boxed, then sealed; the condition report's code once the rental is out. |
 | `/shop/items` | The item types, each with its terms, kit, photo plan and items, and where each item stands. Four figures on top: items, available, out now, in repair. Filters by standing, each its own address (`?show=`). |
 | `/shop/items/new`, `/shop/items/types/{id}` | Creating and editing an item type, with its kit and its photo plan. The plan starts from the suggestion for the kind. |
 | `/shop/items/{id}` | The item passport (section 9.4): where it is, its rentals, its known marks, its chain of photo sessions, its photo plan, its details and its status. Another shop's item answers 404. |
@@ -1427,7 +1441,7 @@ The worker's compute is added with its code. The web app's address is known only
 | Service | Runs on | Notes |
 |---|---|---|
 | web | App Runner, 1 vCPU and 2 GB, one to two instances | Checked by TCP on port 3000. Runs the image named by the deploy, never the newest pushed |
-| worker | Lambda, Node 24, 512 MB, four minutes per message | App Runner throttles CPU between requests, so it cannot poll queues. Four functions: `hold-worker-paypal-events`, `hold-worker-executions` and `hold-worker-upkeep` fed by their FIFO queues, each message read with its queue's schema and naming only the messages that failed so only those are tried again, and `hold-worker-outbox-relay` started every minute by EventBridge Scheduler. The worker makes schedules only in `hold-schedules`, hands them only the scheduler's role, and emails through Hold's SMTP login. The four minutes allow a paused Aurora cluster to wake. Each queue hides a message for six minutes, longer than a function may run on it. Code in `apps/worker`, deployed by `infra/lib/worker.ts` |
+| worker | Lambda, Node 24, 512 MB, four minutes per message | App Runner throttles CPU between requests, so it cannot poll queues. Five functions: `hold-worker-paypal-events`, `hold-worker-executions` and `hold-worker-upkeep` fed by their FIFO queues, `hold-worker-media` (1.5 GB, with sharp) fed by the standard `media` queue, each message read with its queue's schema and naming only the messages that failed so only those are tried again, and `hold-worker-outbox-relay` started every minute by EventBridge Scheduler. The worker makes schedules only in `hold-schedules`, hands them only the scheduler's role, and emails through Hold's SMTP login. The four minutes allow a paused Aurora cluster to wake. Each queue hides a message for six minutes, longer than a function may run on it. Code in `apps/worker`, deployed by `infra/lib/worker.ts` |
 
 ### 14.5 Data
 
@@ -1453,7 +1467,7 @@ The worker's compute is added with its code. The web app's address is known only
 | `executions` | Approved actions on holds | Per rental |
 | `upkeep` | A hold's timed steps, sent by its schedules. Deduplicated by content, since EventBridge Scheduler cannot name a deduplication ID | Per hold |
 | `comparisons` | Sealed return sessions to compare | None needed |
-| `media` | Display copies and face blurring | None needed |
+| `media` | Display copies and face blurring. A standard queue, so messages carry no group or deduplication ID; a copy is made once whatever | None needed |
 | `evidence` | Evidence packs to build | Per rental |
 | `messages` | Emails and in-app messages | None needed |
 | `ops-agent` | Operations agent runs | Per shop |
@@ -1466,7 +1480,7 @@ Every queue has a dead-letter queue and an alarm on it.
 ### 14.8 Configuration
 
 - Non-secret configuration is typed and validated at startup, in `packages/config`. A service with invalid configuration does not start, and the error names the settings that are wrong, never their values. The web app's settings are listed in `apps/web/.env.example`.
-- Secrets come from Secrets Manager at startup and are never written to logs or images. The key that seals the sign-in cookie is `hold/web/cookie-key`, made by the HoldIdentity stack: the web app reads it by its ARN (`HOLD_COOKIE_KEY_SECRET_ARN`) and uses its SHA-256 as the key. Deployed, the app refuses a key given any other way. Renter links are signed with their own key, `hold/web/renter-link-key` (`HOLD_RENTER_LINK_KEY_SECRET_ARN`), which the worker reads too. The worker is told the web app's address (`HOLD_PUBLIC_URL`) for links in its emails.
+- Secrets come from Secrets Manager at startup and are never written to logs or images. The key that seals the sign-in cookie is `hold/web/cookie-key`, made by the HoldIdentity stack: the web app reads it by its ARN (`HOLD_COOKIE_KEY_SECRET_ARN`) and uses its SHA-256 as the key. Deployed, the app refuses a key given any other way. Renter links are signed with their own key, `hold/web/renter-link-key` (`HOLD_RENTER_LINK_KEY_SECRET_ARN`), which the worker reads too. The worker is told the web app's address (`HOLD_PUBLIC_URL`) for links in its emails. Both are told the photograph buckets (`HOLD_EVIDENCE_BUCKET`, `HOLD_DISPLAY_BUCKET`), and the web app the `media` queue. The evidence bucket takes a PUT only from the web app's own address (CORS).
 
 ---
 
@@ -1498,6 +1512,7 @@ Every queue has a dead-letter queue and an alarm on it.
 | **The web app reads another shop's queued work** | Reading the outbox across shops is a function only `hold_worker` may call; the web app's role is refused. Tested in `paypal-event-repository.test.ts`. |
 | **A replayed request** | Idempotency keys at every layer. |
 | **One shop reads another's data** | Shop checks in the service and row-level security in the database. |
+| **A photograph is swapped, corrupted or forged at upload** | The upload link signs the photograph's SHA-256, so S3 refuses any other file; the server records the SHA-256 S3 computed, not one the phone states; the key must be under the session and view; Object Lock keeps the original; column grants stop any service changing a fingerprint or key. Tested in `capture-repository.test.ts` and `handover-flow.test.ts`. |
 | **The worker is compromised and forges a sign-in** | The worker reads the renter-link key, never the cookie key, so it can sign links but not seal a sign-in. Tested in `hold-app.test.ts`. |
 | **A renter link leaks through the address bar** | Renter pages send no referrer and are not indexed. Each link is bound to one rental and its scopes, expires 60 days after the rental, and cannot move money without the renter approving in PayPal. |
 | **Bookings are made to tie up a shop's items** | Bookings on a shop's page are limited to ten per network in fifteen minutes, and an unpaid booking keeps its items for fifteen minutes only. Tested in `booking-flow.test.ts`. |

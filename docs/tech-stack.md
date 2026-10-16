@@ -107,7 +107,7 @@ This is the screen staff use most, so it gets the most care.
 - **Browser camera** through the standard media API, using the rear camera at the highest resolution the phone allows.
 - **A framing outline** for each required view, so every photograph of a given item type is taken from the same angle.
 - **A ghost of the handover photograph** shown faintly during the return session. Staff line the item up with it. Matching angles is the single biggest help to an accurate comparison.
-- **Instant quality checks on the phone,** before upload, using OpenCV.js: sharpness, brightness and whether the item fills the frame. A poor photograph is caught while retaking it takes two seconds.
+- **Instant quality checks on the phone,** before upload, using OpenCV.js (`@techstark/opencv-js` 4.12, loaded in a Web Worker on the handover screen only): sharpness, shadows and highlights, and whether the item fills the frame. A poor photograph is caught while retaking it takes two seconds. The thresholds in `PHOTO_QUALITY` are starting values, to tune on the evaluation set.
 - **Direct upload to S3** through short-lived signed links, with a progress indicator and retry for weak shop wifi.
 
 ### 4.2 Owner screens

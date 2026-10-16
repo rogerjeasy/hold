@@ -1738,6 +1738,81 @@
       "turnOn": "Activar avisos",
       "turningOn": "Activando…",
       "turnedOn": "Los avisos están activados."
+    },
+    "handover": {
+      "title": "Entrega",
+      "body": "Fotografía cada artículo antes de que salga. Cuando todos estén sellados, el alquiler sale y quien alquila recibe las fotos.",
+      "sealed": "Fotografiado y sellado",
+      "start": "Fotografiar",
+      "startItem": "Fotografiar {item}",
+      "continue": "Continuar",
+      "continueItem": "Continuar {item}",
+      "results": {
+        "not_ready": "La retención debe estar hecha antes de la entrega.",
+        "not_found": "Ese artículo no está en este alquiler.",
+        "storage_unavailable": "Aquí aún no se pueden guardar fotos. Pregunta a quien lleva la tienda.",
+        "sealed": "Estas fotos están selladas y no pueden cambiar.",
+        "unknown_view": "Esa vista no está en el plan de fotos del artículo.",
+        "key_mismatch": "Esa foto es de otra vista. Hazla de nuevo.",
+        "not_uploaded": "La foto no llegó. Hazla de nuevo.",
+        "too_large": "La foto es demasiado grande. Hazla de nuevo.",
+        "views_missing": "Aún faltan fotos de algunas vistas.",
+        "region_invalid": "Dibuja el recuadro dentro de la foto.",
+        "description_invalid": "Describe la marca en hasta 200 caracteres."
+      },
+      "marks": {
+        "photo": "La foto de esta vista",
+        "box": "El recuadro de la nueva marca",
+        "boxAt": "{x} % desde la izquierda, {y} % desde arriba, {width} % de ancho, {height} % de alto",
+        "added": "Añadida ahora",
+        "confirmed": "Sigue ahí",
+        "stillThere": "Sigue ahí",
+        "stillThereItem": "Sigue ahí: {mark}",
+        "add": "Añadir una marca",
+        "howTo": "Arrastra el recuadro sobre la marca, o muévelo con las flechas y cambia su tamaño con Mayús y las flechas.",
+        "description": "¿Qué marca es?",
+        "save": "Guardar la marca",
+        "cancel": "Cancelar"
+      },
+      "taker": {
+        "camera": "Cámara para {view}",
+        "noCamera": "La cámara no está disponible. Elige una foto.",
+        "take": "Hacer la foto",
+        "file": "Elegir una foto",
+        "sample": "Usar la foto de ejemplo",
+        "checking": "Comprobando la foto…",
+        "uploading": "Subiendo… {percent} %",
+        "retake": "Hazla de nuevo: {problems}.",
+        "failed": "La foto no se subió. Revisa la conexión y vuelve a intentarlo.",
+        "problems": {
+          "blurred": "está desenfocada",
+          "too_dark": "está demasiado oscura",
+          "too_bright": "está demasiado clara",
+          "badly_framed": "el artículo no llena el contorno"
+        }
+      },
+      "back": "Volver al alquiler",
+      "preparing": "Preparando la foto…",
+      "retake": "Hacerla de nuevo",
+      "label": "Fotos de la entrega",
+      "views": {
+        "label": "Vistas",
+        "done": "Fotografiada",
+        "needed": "Necesaria",
+        "optional": "Opcional"
+      },
+      "seal": {
+        "seal": "Sellar las fotos",
+        "ready": "Todas las vistas necesarias están fotografiadas. Sellar las fija y las encadena a la historia del artículo.",
+        "missing": "{count, plural, one {A una vista le falta} other {A # vistas les falta}} una foto.",
+        "out": "El alquiler ha salido.",
+        "next": "Sellado. Fotografía el siguiente artículo del alquiler.",
+        "emailed": "Quien alquila ha recibido por correo el informe de estado. También puede escanear este código.",
+        "show": "Muestra este código a quien alquila. Abre el informe de estado, que confirma o completa en 24 horas.",
+        "scan": "Escanéalo con el teléfono de quien alquila para ver el informe de estado",
+        "back": "Volver al alquiler",
+        "sealedNote": "Sellado. Estas fotos ya no pueden cambiar."
+      }
     }
   },
   "emails": {
@@ -1748,6 +1823,10 @@
     "renterLink": {
       "subject": "Tu alquiler en {shop}: paga el precio",
       "body": "Tu alquiler en {shop} está reservado y espera el pago.\n\nAbre este enlace para ver lo que alquilas, el precio, la retención que se hace al recogerlo y los precios de daños de la tienda. Luego paga el precio con PayPal:\n\n{link}\n\nEl enlace es solo tuyo. Guárdalo hasta que se cierre el alquiler."
+    },
+    "conditionReport": {
+      "subject": "Tu alquiler en {shop}: cómo salió",
+      "body": "Tu alquiler en {shop} ya va contigo. Estas son las fotos que se hicieron al entregarlo y las marcas que se anotaron.\n\nAbre este enlace para verlas. Si todo está bien, confírmalo. Si se pasó algo por alto, añade ahora una foto, en un plazo de 24 horas, para que nunca te lo cobren:\n\n{link}"
     }
   },
   "shell": {
@@ -1972,7 +2051,9 @@
       "awaiting_hold": "La tienda está lista para tu retención.",
       "holdNext": "Aprueba la retención en este teléfono para recoger tus artículos.",
       "approveHold": "Aprobar la retención",
-      "ready": "Tu retención está hecha. Puedes recoger tus artículos."
+      "ready": "Tu retención está hecha. Puedes recoger tus artículos.",
+      "out": "Tu alquiler está contigo.",
+      "condition": "Ver cómo salió"
     },
     "paid": {
       "title": "Confirmando tu pago",
@@ -2001,7 +2082,12 @@
       "not_found": "Este alquiler ya no existe.",
       "not_requested": "La tienda aún no ha pedido la retención. Lo hace cuando recoges tus artículos.",
       "already_placed": "Tu retención ya está hecha.",
-      "hold_refused": "PayPal no pudo hacer la retención. No se reservó nada. Pregunta en la tienda."
+      "hold_refused": "PayPal no pudo hacer la retención. No se reservó nada. Pregunta en la tienda.",
+      "nothing_added": "Añade primero una foto.",
+      "already_replied": "Ya has respondido.",
+      "closed": "El plazo para responder ha terminado.",
+      "not_handed_over": "El alquiler aún no se ha entregado.",
+      "upload_failed": "La foto no se subió. Inténtalo de nuevo."
     },
     "orderDescription": "{shop}: {items}, {days, plural, one {# día} other {# días}}",
     "holdPage": {
@@ -2024,6 +2110,25 @@
       },
       "replaceTitle": "Aprueba una nueva retención",
       "replaceLead": "Tu retención termina el {date} y tu alquiler sigue abierto. Aprueba una nueva retención de {amount} para mantenerlo cubierto. No es un cobro, y la anterior se libera en cuanto apruebes."
+    },
+    "condition": {
+      "title": "Cómo salió tu alquiler",
+      "lead": "Estas son las fotos de la entrega, con cada marca anotada. Nunca se te cobrará nada de lo que se ve aquí.",
+      "preparing": "Preparando la foto…",
+      "photoOf": "{item}: {view}",
+      "noMarks": "No se anotó ninguna marca.",
+      "addedCount": "Has añadido {count, plural, one {una foto} other {# fotos}}.",
+      "openUntil": "Puedes confirmarlo o añadir lo que se pasó por alto hasta {when}.",
+      "closed": "El plazo para responder ha terminado.",
+      "repliedConfirmed": "Has confirmado las fotos.",
+      "repliedAdded": "Has añadido fotos de lo que se pasó por alto. La tienda las ve con la entrega.",
+      "otherLink": "Responde desde el enlace que la tienda te envió en la entrega.",
+      "confirm": "Todo está como se ve",
+      "add": "Añadir una foto de algo que se pasó por alto",
+      "which": "¿Qué artículo?",
+      "missedView": "Algo que se pasó por alto",
+      "send": "Enviar lo que añadí",
+      "back": "Ver tu alquiler"
     }
   },
   "shopPage": {

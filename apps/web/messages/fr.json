@@ -1738,6 +1738,81 @@
       "turnOn": "Activer les notifications",
       "turningOn": "Activation…",
       "turnedOn": "Les notifications sont activées."
+    },
+    "handover": {
+      "title": "Remise",
+      "body": "Photographiez chaque article avant son départ. Une fois tous les articles scellés, la location est partie et la personne qui loue reçoit les photos.",
+      "sealed": "Photographié et scellé",
+      "start": "Photographier",
+      "startItem": "Photographier {item}",
+      "continue": "Continuer",
+      "continueItem": "Continuer {item}",
+      "results": {
+        "not_ready": "L'empreinte doit être posée avant la remise.",
+        "not_found": "Cet article ne fait pas partie de cette location.",
+        "storage_unavailable": "Les photos ne peuvent pas encore être enregistrées ici. Demandez au responsable de la boutique.",
+        "sealed": "Ces photos sont scellées et ne peuvent plus changer.",
+        "unknown_view": "Cette vue n'est pas dans le plan photo de l'article.",
+        "key_mismatch": "Cette photo appartient à une autre vue. Reprenez-la.",
+        "not_uploaded": "La photo n'est pas arrivée. Reprenez-la.",
+        "too_large": "La photo est trop lourde. Reprenez-la.",
+        "views_missing": "Certaines vues attendent encore une photo.",
+        "region_invalid": "Tracez le cadre à l'intérieur de la photo.",
+        "description_invalid": "Décrivez la marque en 200 caractères au plus."
+      },
+      "marks": {
+        "photo": "La photo de cette vue",
+        "box": "Le cadre de la nouvelle marque",
+        "boxAt": "{x} % depuis la gauche, {y} % depuis le haut, {width} % de large, {height} % de haut",
+        "added": "Ajoutée à l'instant",
+        "confirmed": "Toujours là",
+        "stillThere": "Toujours là",
+        "stillThereItem": "Toujours là : {mark}",
+        "add": "Ajouter une marque",
+        "howTo": "Faites glisser le cadre sur la marque, ou déplacez-le avec les flèches et redimensionnez-le avec Maj et les flèches.",
+        "description": "Quelle est cette marque ?",
+        "save": "Enregistrer la marque",
+        "cancel": "Annuler"
+      },
+      "taker": {
+        "camera": "Appareil photo pour {view}",
+        "noCamera": "L'appareil photo n'est pas disponible. Choisissez une photo.",
+        "take": "Prendre la photo",
+        "file": "Choisir une photo",
+        "sample": "Utiliser la photo d'exemple",
+        "checking": "Vérification de la photo…",
+        "uploading": "Envoi… {percent} %",
+        "retake": "Reprenez-la : {problems}.",
+        "failed": "La photo n'a pas été envoyée. Vérifiez la connexion et réessayez.",
+        "problems": {
+          "blurred": "elle est floue",
+          "too_dark": "elle est trop sombre",
+          "too_bright": "elle est trop claire",
+          "badly_framed": "l'article ne remplit pas le cadre"
+        }
+      },
+      "back": "Retour à la location",
+      "preparing": "Préparation de la photo…",
+      "retake": "La reprendre",
+      "label": "Photos de la remise",
+      "views": {
+        "label": "Vues",
+        "done": "Photographiée",
+        "needed": "Requise",
+        "optional": "Facultative"
+      },
+      "seal": {
+        "seal": "Sceller les photos",
+        "ready": "Toutes les vues requises sont photographiées. Sceller les fige et les enchaîne à l'historique de l'article.",
+        "missing": "{count, plural, one {Une vue attend} other {# vues attendent}} encore une photo.",
+        "out": "La location est partie.",
+        "next": "Scellé. Photographiez l'article suivant de la location.",
+        "emailed": "La personne qui loue a reçu le rapport d'état par e-mail. Elle peut aussi scanner ce code.",
+        "show": "Montrez ce code à la personne qui loue. Il ouvre le rapport d'état, qu'elle confirme ou complète sous 24 heures.",
+        "scan": "À scanner avec le téléphone de la personne qui loue pour voir le rapport d'état",
+        "back": "Retour à la location",
+        "sealedNote": "Scellé. Ces photos ne peuvent plus changer."
+      }
     }
   },
   "emails": {
@@ -1748,6 +1823,10 @@
     "renterLink": {
       "subject": "Votre location chez {shop} : réglez le prix",
       "body": "Votre location chez {shop} est réservée et attend son règlement.\n\nOuvrez ce lien pour voir ce que vous louez, le prix, l'empreinte posée au retrait et les prix des dommages de la boutique. Réglez ensuite le prix avec PayPal :\n\n{link}\n\nCe lien est à vous seul. Gardez-le jusqu'à la clôture de la location."
+    },
+    "conditionReport": {
+      "subject": "Votre location chez {shop} : son état au départ",
+      "body": "Votre location chez {shop} est maintenant avec vous. Voici les photos prises à la remise, et les marques notées.\n\nOuvrez ce lien pour les voir. Si tout y est, confirmez-le. Si quelque chose a été oublié, ajoutez-en une photo maintenant, sous 24 heures, pour qu'on ne vous le facture jamais :\n\n{link}"
     }
   },
   "shell": {
@@ -1972,7 +2051,9 @@
       "awaiting_hold": "La boutique est prête pour votre empreinte.",
       "holdNext": "Approuvez l'empreinte sur ce téléphone pour récupérer vos articles.",
       "approveHold": "Approuver l'empreinte",
-      "ready": "Votre empreinte est posée. Vous pouvez récupérer vos articles."
+      "ready": "Votre empreinte est posée. Vous pouvez récupérer vos articles.",
+      "out": "Votre location est avec vous.",
+      "condition": "Voir son état au départ"
     },
     "paid": {
       "title": "Confirmation de votre règlement",
@@ -2001,7 +2082,12 @@
       "not_found": "Cette location n'existe plus.",
       "not_requested": "La boutique n'a pas encore demandé l'empreinte. Elle le fait quand vous récupérez vos articles.",
       "already_placed": "Votre empreinte est déjà posée.",
-      "hold_refused": "PayPal n'a pas pu poser l'empreinte. Rien n'a été réservé. Demandez à la boutique."
+      "hold_refused": "PayPal n'a pas pu poser l'empreinte. Rien n'a été réservé. Demandez à la boutique.",
+      "nothing_added": "Ajoutez d'abord une photo.",
+      "already_replied": "Vous avez déjà répondu.",
+      "closed": "Le délai pour répondre est passé.",
+      "not_handed_over": "La location n'a pas encore été remise.",
+      "upload_failed": "La photo n'a pas été envoyée. Réessayez."
     },
     "orderDescription": "{shop} : {items}, {days, plural, one {# jour} other {# jours}}",
     "holdPage": {
@@ -2024,6 +2110,25 @@
       },
       "replaceTitle": "Approuvez une nouvelle empreinte",
       "replaceLead": "Votre empreinte prend fin le {date}, et votre location est toujours en cours. Approuvez une nouvelle empreinte de {amount} pour qu'elle reste couverte. Ce n'est pas un prélèvement, et l'ancienne est libérée dès que vous approuvez."
+    },
+    "condition": {
+      "title": "L'état de votre location au départ",
+      "lead": "Voici les photos prises à la remise, avec chaque marque notée. Rien de ce qui figure ici ne vous sera jamais facturé.",
+      "preparing": "Préparation de la photo…",
+      "photoOf": "{item} : {view}",
+      "noMarks": "Aucune marque n'a été notée.",
+      "addedCount": "Vous avez ajouté {count, plural, one {une photo} other {# photos}}.",
+      "openUntil": "Vous pouvez confirmer ou ajouter ce qui a été oublié jusqu'au {when}.",
+      "closed": "Le délai pour répondre est passé.",
+      "repliedConfirmed": "Vous avez confirmé les photos.",
+      "repliedAdded": "Vous avez ajouté des photos de ce qui avait été oublié. La boutique les voit avec la remise.",
+      "otherLink": "Répondez depuis le lien que la boutique vous a envoyé à la remise.",
+      "confirm": "Tout est comme montré",
+      "add": "Ajouter une photo de quelque chose d'oublié",
+      "which": "Quel article ?",
+      "missedView": "Quelque chose d'oublié",
+      "send": "Envoyer ce que j'ai ajouté",
+      "back": "Voir votre location"
     }
   },
   "shopPage": {

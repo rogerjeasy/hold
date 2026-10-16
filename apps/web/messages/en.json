@@ -1738,6 +1738,81 @@
       "turnOn": "Turn on notifications",
       "turningOn": "Turning on…",
       "turnedOn": "Notifications are on."
+    },
+    "handover": {
+      "title": "Handover",
+      "body": "Photograph each item before it leaves. Once every item is sealed, the rental is out and the renter is sent the photographs.",
+      "sealed": "Photographed and sealed",
+      "start": "Photograph",
+      "startItem": "Photograph {item}",
+      "continue": "Continue",
+      "continueItem": "Continue {item}",
+      "results": {
+        "not_ready": "The hold must be placed before the handover.",
+        "not_found": "That item is not in this rental.",
+        "storage_unavailable": "Photographs cannot be stored here yet. Ask the shop's owner.",
+        "sealed": "These photographs are sealed and cannot change.",
+        "unknown_view": "That view is not in this item's photo plan.",
+        "key_mismatch": "That photograph belongs to another view. Take it again.",
+        "not_uploaded": "The photograph did not arrive. Take it again.",
+        "too_large": "The photograph is too large. Take it again.",
+        "views_missing": "Some views still need a photograph.",
+        "region_invalid": "Draw the box inside the photograph.",
+        "description_invalid": "Describe the mark in up to 200 characters."
+      },
+      "marks": {
+        "photo": "The photograph of this view",
+        "box": "The new mark's box",
+        "boxAt": "{x}% from the left, {y}% from the top, {width}% wide, {height}% high",
+        "added": "Added now",
+        "confirmed": "Still there",
+        "stillThere": "Still there",
+        "stillThereItem": "Still there: {mark}",
+        "add": "Add a mark",
+        "howTo": "Drag the box onto the mark, or move it with the arrow keys and size it with Shift and the arrow keys.",
+        "description": "What is the mark?",
+        "save": "Save the mark",
+        "cancel": "Cancel"
+      },
+      "taker": {
+        "camera": "Camera for {view}",
+        "noCamera": "The camera is not available. Choose a photograph instead.",
+        "take": "Take the photograph",
+        "file": "Choose a photograph",
+        "sample": "Use the sample photograph",
+        "checking": "Checking the photograph…",
+        "uploading": "Uploading… {percent}%",
+        "retake": "Take it again: {problems}.",
+        "failed": "The photograph did not upload. Check the connection and try again.",
+        "problems": {
+          "blurred": "it is blurred",
+          "too_dark": "it is too dark",
+          "too_bright": "it is too bright",
+          "badly_framed": "the item does not fill the outline"
+        }
+      },
+      "back": "Back to the rental",
+      "preparing": "Preparing the photograph…",
+      "retake": "Take it again",
+      "label": "Handover photographs",
+      "views": {
+        "label": "Views",
+        "done": "Photographed",
+        "needed": "Needed",
+        "optional": "Optional"
+      },
+      "seal": {
+        "seal": "Seal the photographs",
+        "ready": "Every needed view is photographed. Sealing fixes them and chains them to the item's history.",
+        "missing": "{count, plural, one {One view still needs} other {# views still need}} a photograph.",
+        "out": "The rental is out.",
+        "next": "Sealed. Photograph the rental's next item.",
+        "emailed": "The renter has been emailed the condition report. They can also scan this code.",
+        "show": "Show the renter this code. It opens the condition report, which they confirm or add to within 24 hours.",
+        "scan": "Scan with the renter's phone to see the condition report",
+        "back": "Back to the rental",
+        "sealedNote": "Sealed. These photographs can no longer change."
+      }
     }
   },
   "emails": {
@@ -1748,6 +1823,10 @@
     "renterLink": {
       "subject": "Your rental at {shop}: pay the fee",
       "body": "Your rental at {shop} is booked and waits for its fee.\n\nOpen this link to see what you rent, the fee, the hold placed when you collect it, and the shop's damage prices. Then pay the fee with PayPal:\n\n{link}\n\nThe link is yours alone. Keep it until the rental is settled."
+    },
+    "conditionReport": {
+      "subject": "Your rental at {shop}: the condition it left in",
+      "body": "Your rental at {shop} is on its way with you. These are the photographs staff took as it left, and any marks they noted.\n\nOpen this link to look. If everything is there, confirm it. If staff missed something, add a photograph of it now, within 24 hours, so you are never charged for it:\n\n{link}"
     }
   },
   "shell": {
@@ -1972,7 +2051,9 @@
       "awaiting_hold": "The shop is ready for your hold.",
       "holdNext": "Approve the hold on this phone to collect your items.",
       "approveHold": "Approve the hold",
-      "ready": "Your hold is placed. You can collect your items."
+      "ready": "Your hold is placed. You can collect your items.",
+      "out": "Your rental is with you.",
+      "condition": "See how it left"
     },
     "paid": {
       "title": "Confirming your payment",
@@ -2001,7 +2082,12 @@
       "not_found": "This rental no longer exists.",
       "not_requested": "The shop has not asked for the hold yet. They do when you collect your items.",
       "already_placed": "Your hold is already placed.",
-      "hold_refused": "PayPal could not place the hold. Nothing was reserved. Ask the shop."
+      "hold_refused": "PayPal could not place the hold. Nothing was reserved. Ask the shop.",
+      "nothing_added": "Add a photograph first.",
+      "already_replied": "You have already answered.",
+      "closed": "The time to answer has passed.",
+      "not_handed_over": "The rental has not been handed over yet.",
+      "upload_failed": "The photograph did not upload. Try again."
     },
     "orderDescription": "{shop}: {items}, {days, plural, one {# day} other {# days}}",
     "holdPage": {
@@ -2024,6 +2110,25 @@
       },
       "replaceTitle": "Approve a new hold",
       "replaceLead": "Your hold ends on {date}, and your rental is still open. Approve a new hold of {amount} to keep it covered. It is not a charge, and the old hold is released as soon as you approve."
+    },
+    "condition": {
+      "title": "How your rental left",
+      "lead": "These are the photographs staff took at handover, with every mark they noted. You are never charged for anything shown here.",
+      "preparing": "Preparing the photograph…",
+      "photoOf": "{item}: {view}",
+      "noMarks": "No marks were noted.",
+      "addedCount": "You added {count, plural, one {one photograph} other {# photographs}}.",
+      "openUntil": "You can confirm it or add what was missed until {when}.",
+      "closed": "The time to answer has passed.",
+      "repliedConfirmed": "You confirmed the photographs.",
+      "repliedAdded": "You added photographs of what was missed. The shop sees them with the handover.",
+      "otherLink": "Answer from the link the shop sent you at handover.",
+      "confirm": "Everything is as shown",
+      "add": "Add a photograph of something missed",
+      "which": "Which item?",
+      "missedView": "Something missed",
+      "send": "Send what I added",
+      "back": "See your rental"
     }
   },
   "shopPage": {

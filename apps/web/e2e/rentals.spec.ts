@@ -1,36 +1,7 @@
-import type { Browser, Page } from '@playwright/test'
 import { expectFitsEveryWidth } from './support/responsive'
+import { bookAtTheCounter, payFee, renterBrowser } from './support/rental'
 import { shopReadyToBook } from './support/shop'
 import { expect, test } from './support/test'
-
-// The renter opens their link in a browser of their own: no shop session, as on their phone.
-async function renterBrowser(browser: Browser): Promise<Page> {
-  return (await browser.newContext()).newPage()
-}
-
-async function bookAtTheCounter(page: Page): Promise<void> {
-  await page.getByRole('navigation', { name: 'Shop pages' }).getByRole('link', { name: 'Rentals' }).click()
-  await page.getByRole('link', { name: 'New rental' }).first().click()
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('New rental')
-  await page.getByRole('button', { name: 'One more City e-bike' }).click()
-  await page.getByLabel('Name').fill('Priya Natarajan')
-  await page.getByLabel('Email').fill('priya@renter.example')
-  await page.getByRole('button', { name: 'Book', exact: true }).click()
-  await expect(page).toHaveURL(/\/shop\/rentals\/[0-9a-f-]{36}$/)
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Priya Natarajan')
-}
-
-// From the renter's link through the simulated PayPal and back, to a booked rental.
-async function payFee(renter: Page, link: string): Promise<void> {
-  await renter.goto(link)
-  await expect(renter.getByRole('region', { name: 'Two amounts, kept apart' })).toContainText('This is not a charge')
-  await renter.getByRole('button', { name: /^Pay .* with PayPal$/ }).click()
-  await expect(renter.getByText('Test environment. No money moves.', { exact: false })).toBeVisible()
-  await renter.getByRole('button', { name: 'Approve' }).click()
-  await expect(renter.getByText('Payment confirmed. Your rental is booked.')).toBeVisible()
-  await renter.getByRole('link', { name: 'See your rental' }).click()
-  await expect(renter.getByText('Booked. Your fee is paid.')).toBeVisible()
-}
 
 test('staff book at the counter, the renter pays the fee from the link, and the rental is booked', async ({ page, browser }) => {
   await shopReadyToBook(page)

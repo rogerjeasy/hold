@@ -1738,6 +1738,81 @@
       "turnOn": "Benachrichtigungen einschalten",
       "turningOn": "Wird eingeschaltet…",
       "turnedOn": "Benachrichtigungen sind eingeschaltet."
+    },
+    "handover": {
+      "title": "Übergabe",
+      "body": "Fotografieren Sie jeden Artikel, bevor er geht. Sobald jeder Artikel versiegelt ist, ist die Miete unterwegs und die mietende Person erhält die Fotos.",
+      "sealed": "Fotografiert und versiegelt",
+      "start": "Fotografieren",
+      "startItem": "{item} fotografieren",
+      "continue": "Weiter",
+      "continueItem": "{item} weiter",
+      "results": {
+        "not_ready": "Die Reservierung muss vor der Übergabe gesetzt sein.",
+        "not_found": "Dieser Artikel gehört nicht zu dieser Miete.",
+        "storage_unavailable": "Fotos können hier noch nicht gespeichert werden. Fragen Sie die Inhaberin oder den Inhaber.",
+        "sealed": "Diese Fotos sind versiegelt und können sich nicht mehr ändern.",
+        "unknown_view": "Diese Ansicht steht nicht im Fotoplan des Artikels.",
+        "key_mismatch": "Dieses Foto gehört zu einer anderen Ansicht. Machen Sie es erneut.",
+        "not_uploaded": "Das Foto ist nicht angekommen. Machen Sie es erneut.",
+        "too_large": "Das Foto ist zu groß. Machen Sie es erneut.",
+        "views_missing": "Einige Ansichten brauchen noch ein Foto.",
+        "region_invalid": "Zeichnen Sie das Feld innerhalb des Fotos.",
+        "description_invalid": "Beschreiben Sie die Spur in bis zu 200 Zeichen."
+      },
+      "marks": {
+        "photo": "Das Foto dieser Ansicht",
+        "box": "Das Feld der neuen Spur",
+        "boxAt": "{x} % von links, {y} % von oben, {width} % breit, {height} % hoch",
+        "added": "Gerade hinzugefügt",
+        "confirmed": "Noch vorhanden",
+        "stillThere": "Noch vorhanden",
+        "stillThereItem": "Noch vorhanden: {mark}",
+        "add": "Spur hinzufügen",
+        "howTo": "Ziehen Sie das Feld auf die Spur, oder verschieben Sie es mit den Pfeiltasten und ändern Sie die Größe mit Umschalt und den Pfeiltasten.",
+        "description": "Was ist die Spur?",
+        "save": "Spur speichern",
+        "cancel": "Abbrechen"
+      },
+      "taker": {
+        "camera": "Kamera für {view}",
+        "noCamera": "Die Kamera ist nicht verfügbar. Wählen Sie stattdessen ein Foto.",
+        "take": "Foto aufnehmen",
+        "file": "Foto auswählen",
+        "sample": "Beispielfoto verwenden",
+        "checking": "Foto wird geprüft…",
+        "uploading": "Wird hochgeladen… {percent} %",
+        "retake": "Bitte erneut aufnehmen: {problems}.",
+        "failed": "Das Foto wurde nicht hochgeladen. Prüfen Sie die Verbindung und versuchen Sie es erneut.",
+        "problems": {
+          "blurred": "es ist unscharf",
+          "too_dark": "es ist zu dunkel",
+          "too_bright": "es ist zu hell",
+          "badly_framed": "der Artikel füllt den Rahmen nicht"
+        }
+      },
+      "back": "Zurück zur Miete",
+      "preparing": "Foto wird vorbereitet…",
+      "retake": "Erneut aufnehmen",
+      "label": "Übergabefotos",
+      "views": {
+        "label": "Ansichten",
+        "done": "Fotografiert",
+        "needed": "Erforderlich",
+        "optional": "Optional"
+      },
+      "seal": {
+        "seal": "Fotos versiegeln",
+        "ready": "Jede erforderliche Ansicht ist fotografiert. Das Versiegeln legt sie fest und verkettet sie mit der Geschichte des Artikels.",
+        "missing": "{count, plural, one {Eine Ansicht braucht} other {# Ansichten brauchen}} noch ein Foto.",
+        "out": "Die Miete ist unterwegs.",
+        "next": "Versiegelt. Fotografieren Sie den nächsten Artikel der Miete.",
+        "emailed": "Die mietende Person hat den Zustandsbericht per E-Mail erhalten. Sie kann auch diesen Code scannen.",
+        "show": "Zeigen Sie der mietenden Person diesen Code. Er öffnet den Zustandsbericht, den sie innerhalb von 24 Stunden bestätigt oder ergänzt.",
+        "scan": "Mit dem Telefon der mietenden Person scannen, um den Zustandsbericht zu sehen",
+        "back": "Zurück zur Miete",
+        "sealedNote": "Versiegelt. Diese Fotos können sich nicht mehr ändern."
+      }
     }
   },
   "emails": {
@@ -1748,6 +1823,10 @@
     "renterLink": {
       "subject": "Ihre Miete bei {shop}: Mietpreis bezahlen",
       "body": "Ihre Miete bei {shop} ist gebucht und wartet auf die Bezahlung.\n\nÖffnen Sie diesen Link, um zu sehen, was Sie mieten, den Mietpreis, die Reservierung bei der Abholung und die Schadenspreise des Verleihs. Dann bezahlen Sie den Mietpreis mit PayPal:\n\n{link}\n\nDer Link gehört nur Ihnen. Bewahren Sie ihn auf, bis die Miete abgeschlossen ist."
+    },
+    "conditionReport": {
+      "subject": "Ihre Miete bei {shop}: der Zustand bei der Übergabe",
+      "body": "Ihre Miete bei {shop} ist jetzt bei Ihnen. Hier sind die Fotos, die bei der Übergabe gemacht wurden, und alle Spuren, die notiert wurden.\n\nÖffnen Sie diesen Link. Wenn alles stimmt, bestätigen Sie es. Wenn etwas übersehen wurde, fügen Sie jetzt, innerhalb von 24 Stunden, ein Foto davon hinzu, damit Ihnen dafür nie etwas berechnet wird:\n\n{link}"
     }
   },
   "shell": {
@@ -1972,7 +2051,9 @@
       "awaiting_hold": "Der Laden ist bereit für Ihre Reservierung.",
       "holdNext": "Genehmigen Sie die Reservierung auf diesem Telefon, um Ihre Artikel abzuholen.",
       "approveHold": "Reservierung genehmigen",
-      "ready": "Ihre Reservierung ist gesetzt. Sie können Ihre Artikel abholen."
+      "ready": "Ihre Reservierung ist gesetzt. Sie können Ihre Artikel abholen.",
+      "out": "Ihre Miete ist bei Ihnen.",
+      "condition": "Ansehen, wie sie übergeben wurde"
     },
     "paid": {
       "title": "Ihre Zahlung wird bestätigt",
@@ -2001,7 +2082,12 @@
       "not_found": "Diese Miete gibt es nicht mehr.",
       "not_requested": "Der Laden hat noch nicht nach der Reservierung gefragt. Das geschieht, wenn Sie Ihre Artikel abholen.",
       "already_placed": "Ihre Reservierung ist bereits gesetzt.",
-      "hold_refused": "PayPal konnte die Reservierung nicht setzen. Es wurde nichts reserviert. Fragen Sie im Laden nach."
+      "hold_refused": "PayPal konnte die Reservierung nicht setzen. Es wurde nichts reserviert. Fragen Sie im Laden nach.",
+      "nothing_added": "Fügen Sie zuerst ein Foto hinzu.",
+      "already_replied": "Sie haben bereits geantwortet.",
+      "closed": "Die Zeit zum Antworten ist abgelaufen.",
+      "not_handed_over": "Die Miete wurde noch nicht übergeben.",
+      "upload_failed": "Das Foto wurde nicht hochgeladen. Versuchen Sie es erneut."
     },
     "orderDescription": "{shop}: {items}, {days, plural, one {# Tag} other {# Tage}}",
     "holdPage": {
@@ -2024,6 +2110,25 @@
       },
       "replaceTitle": "Neue Reservierung genehmigen",
       "replaceLead": "Ihre Reservierung endet am {date}, und Ihre Miete ist noch offen. Genehmigen Sie eine neue Reservierung über {amount}, damit sie abgesichert bleibt. Das ist keine Abbuchung, und die alte Reservierung wird freigegeben, sobald Sie genehmigen."
+    },
+    "condition": {
+      "title": "Wie Ihre Miete übergeben wurde",
+      "lead": "Das sind die Fotos von der Übergabe, mit allen notierten Spuren. Für nichts, was hier zu sehen ist, wird Ihnen je etwas berechnet.",
+      "preparing": "Foto wird vorbereitet…",
+      "photoOf": "{item}: {view}",
+      "noMarks": "Es wurden keine Spuren notiert.",
+      "addedCount": "Sie haben {count, plural, one {ein Foto} other {# Fotos}} hinzugefügt.",
+      "openUntil": "Sie können bis {when} bestätigen oder Übersehenes ergänzen.",
+      "closed": "Die Zeit zum Antworten ist abgelaufen.",
+      "repliedConfirmed": "Sie haben die Fotos bestätigt.",
+      "repliedAdded": "Sie haben Fotos von Übersehenem hinzugefügt. Der Laden sieht sie mit der Übergabe.",
+      "otherLink": "Antworten Sie über den Link, den der Laden Ihnen bei der Übergabe geschickt hat.",
+      "confirm": "Alles ist wie gezeigt",
+      "add": "Foto von etwas Übersehenem hinzufügen",
+      "which": "Welcher Artikel?",
+      "missedView": "Etwas Übersehenes",
+      "send": "Hinzugefügtes senden",
+      "back": "Zu Ihrer Miete"
     }
   },
   "shopPage": {

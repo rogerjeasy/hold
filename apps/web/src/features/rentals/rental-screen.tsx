@@ -1,4 +1,4 @@
-import type { RentalDetail, RentalHold } from '@hold/db'
+import type { RentalDetail, RentalHandover, RentalHold } from '@hold/db'
 import { ArrowLeft } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { SampleTag } from '@/components/ui/sample-tag'
@@ -6,6 +6,7 @@ import { ShopFrame } from '@/features/shop/shop-frame'
 import type { ShopClock } from '@/hooks/use-shop-format'
 import { Link } from '@/i18n/navigation'
 import { shopRoutes } from '@/lib/routes'
+import { HandoverPanel } from '@/features/handover/handover-panel'
 import { HoldPanel } from './hold-panel'
 import { LetGo } from './let-go'
 import { LinkPanel } from './link-panel'
@@ -13,15 +14,17 @@ import { RentalProgress } from './rental-progress'
 import { RentalStateBadge } from './rental-state-badge'
 import { RentalTerms } from './rental-terms'
 
-type RentalScreenProps = { shopName: string; clock: ShopClock; rental: RentalDetail; hold: RentalHold | undefined; canAct: boolean }
+type RentalScreenProps = { shopName: string; clock: ShopClock; rental: RentalDetail; hold: RentalHold | undefined; handovers: readonly RentalHandover[]; canAct: boolean }
 
 // One rental: where it stands, what was agreed, the renter's link and the hold at pickup.
-export function RentalScreen({ shopName, clock, rental, hold, canAct }: RentalScreenProps) {
+export function RentalScreen({ shopName, clock, rental, hold, handovers, canAct }: RentalScreenProps) {
   const t = useTranslations('shop.rentals')
   const waiting = rental.state === 'pending_payment'
   const live = !['closed', 'cancelled', 'abandoned'].includes(rental.state) && !rental.simulated
   // Staff ask for the hold once the fee is paid. A placed hold is shown to everyone who can see the rental.
   const asking = canAct && live && (rental.state === 'booked' || rental.state === 'awaiting_hold')
+  // Once the hold is placed, staff photograph each item; the panel stays to show what was sealed.
+  const handingOver = canAct && live && (rental.state === 'ready' || rental.state === 'out')
   return (
     <ShopFrame shopName={shopName} title={rental.who ?? t('notKnown')}>
       <div className="grid gap-8">
@@ -39,6 +42,7 @@ export function RentalScreen({ shopName, clock, rental, hold, canAct }: RentalSc
           <RentalTerms rental={rental} clock={clock} />
           {/* At the counter on a phone, what staff act on comes before the terms. */}
           <div className="grid min-w-0 gap-6 max-lg:order-first">
+            {handingOver ? <HandoverPanel rentalId={rental.id} handovers={handovers} /> : null}
             {asking || hold?.state === 'placed' ? <HoldPanel rentalId={rental.id} state={rental.state} holdCents={rental.holdCents} hold={hold} clock={clock} /> : null}
             {canAct && live ? <LinkPanel rentalId={rental.id} contactEmail={rental.contactEmail} paid={!waiting} /> : null}
             {canAct && waiting ? <LetGo rentalId={rental.id} /> : null}

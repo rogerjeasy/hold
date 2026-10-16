@@ -74,4 +74,11 @@ describe('the renter’s page', () => {
     expect(screen.getByText('Your hold is placed. You can collect your items.')).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: 'Approve the hold' })).not.toBeInTheDocument()
   })
+
+  it('links to the condition report once the rental is out', () => {
+    renderWithIntl(<RenterScreen token="token" view={{ ...view, state: 'out' }} />)
+    expect(screen.getByText('Your rental is with you.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'See how it left' })).toHaveAttribute('href', '/r/token/condition')
+  })
 })
+

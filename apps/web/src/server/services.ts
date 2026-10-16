@@ -5,6 +5,9 @@ import { loadWebConfig } from '@hold/config'
 import type { KeySource, WebConfig } from '@hold/config'
 import type { Database } from '@hold/db'
 import { createDataApiDatabase } from '@hold/db/data-api'
+import { createMemoryEvidenceStore, createS3EvidenceStore, makeDisplayCopy, mediaMessageSchema } from '@hold/evidence'
+import type { DisplayJobDependencies, EvidenceStore, MemoryEvidenceStore } from '@hold/evidence'
+import { noFaces } from '@hold/vision'
 import { createLazyMailer, createMemoryMailer, createSmtpMailer, loadSmtpSettings } from '@hold/notify'
 import type { Mailer } from '@hold/notify'
 import { createFakePayPal, createMemoryCredentialStore, createPayPalClient, createRestPayPalHolds, createSecretsManagerCredentialStore } from '@hold/paypal'
@@ -36,11 +39,16 @@ export type Services = {
   // Settling money with PayPal, acting as hold_app: work the app hands the worker goes through `send`.
   // Records executions and hands them to the worker. Only the test environment also runs them, in this process.
   readonly settle: RequestDependencies
+  // Where photographs go. Absent on a developer's machine without buckets, where no photograph can be taken.
+  readonly evidence: EvidenceStore | undefined
+  // The test environment's store, which its simulated storage route fills and serves. Absent everywhere else.
+  readonly simulatedEvidence: MemoryEvidenceStore | undefined
 }
 
 // The test environment has no worker: each message is handled at once, in this process, by the same code.
-function runAtOnce(settle: () => SettleDependencies): (message: QueueMessage) => Promise<void> {
+function runAtOnce(settle: () => SettleDependencies, media: DisplayJobDependencies): (message: QueueMessage) => Promise<void> {
   return async (message) => {
+    if (message.queue === 'media') await makeDisplayCopy(media, mediaMessageSchema.parse(message.body))
     if (message.queue === 'executions') await runExecution(settle(), executionMessageSchema.parse(message.body))
     if (message.queue === 'paypal-events') await applyPayPalEvent(settle(), paypalEventMessageSchema.parse(message.body))
     if (message.queue === 'upkeep') await runUpkeep(settle(), upkeepMessageSchema.parse(message.body))
@@ -90,6 +98,8 @@ async function build(): Promise<Services> {
       return created
     }
     const database = await createTestDatabase()
+    // Photographs go to a store in memory, through the app's own simulated storage route.
+    const simulatedEvidence = createMemoryEvidenceStore({ baseUrl: `${config.publicUrl}/api/simulated-storage` })
     // Schedules are kept, never fired: nothing in the test environment runs long enough to reach them.
     // What the worker would tell people is kept, not sent.
     const notices: Notice[] = []
@@ -98,7 +108,7 @@ async function build(): Promise<Services> {
       role: 'hold_app',
       paypalFor,
       paypalMode: config.paypalMode,
-      send: runAtOnce(() => settle),
+      send: runAtOnce(() => settle, { database, role: 'hold_app', evidence: simulatedEvidence, faces: noFaces }),
       scheduler: createMemoryScheduler(),
       notifier: { tell: (notice) => Promise.resolve(void notices.push(notice)) },
       renterAsk: createRenterAsk(database),
@@ -117,6 +127,8 @@ async function build(): Promise<Services> {
       simulatedPayPal,
       simulatedWebhookFor: (orderId) => webhookOfOrder.get(orderId),
       settle,
+      evidence: simulatedEvidence,
+      simulatedEvidence,
     }
   }
   const paypalCredentials = createSecretsManagerCredentialStore(config.region)
@@ -148,6 +160,8 @@ async function build(): Promise<Services> {
     simulatedPayPal: undefined,
     simulatedWebhookFor: () => undefined,
     settle: { database, role: 'hold_app', send, now: () => new Date() },
+    evidence: config.photoBuckets === undefined ? undefined : createS3EvidenceStore({ evidenceBucket: config.photoBuckets.evidence, displayBucket: config.photoBuckets.display, region: config.region }),
+    simulatedEvidence: undefined,
   }
 }
 

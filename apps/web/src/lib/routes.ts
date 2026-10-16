@@ -29,6 +29,8 @@ export const shopRoutes = {
 export const rentalRoutes = {
   new: '/shop/rentals/new',
   rental: (rentalId: string) => `/shop/rentals/${rentalId}`,
+  // One item's guided handover photographs.
+  handover: (rentalId: string, sessionId: string) => `/shop/rentals/${rentalId}/handover/${sessionId}`,
 } as const
 
 // Pages reached from the items page rather than from the menu, some named by the row they show.

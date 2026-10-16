@@ -83,6 +83,10 @@ export type ShopActionSpec<Input> = {
   readonly input: z.ZodType<Input>
 }
 
+// Work handed on once the change is committed, such as a message to the worker. Its outbox row is written with the
+// change, so a failure here only waits for the relay; it is never the caller's failure.
+export type AfterCommit<Output> = (context: ShopContext, output: Output) => Promise<void>
+
 // Every server function built here. A test checks that each shop action file exports nothing else.
 const SHOP_ACTIONS = new WeakSet<object>()
 
@@ -93,6 +97,7 @@ export function isShopAction(value: unknown): boolean {
 export function shopAction<Input, Output>(
   spec: ShopActionSpec<Input>,
   act: (context: ShopContext, input: Input, transaction: Transaction) => Promise<Output | Refusal>,
+  afterCommit?: AfterCommit<Output>,
 ): (previous: unknown, data: FormData) => Promise<ShopActionResult<Output>> {
   const action = async (_previous: unknown, data: FormData): Promise<ShopActionResult<Output>> => {
     const access = await shopAccess()
@@ -104,11 +109,19 @@ export function shopAction<Input, Output>(
     const parsed = spec.input.safeParse(formObject(data))
     if (!parsed.success) return { ok: false, failure: 'invalid', fields: failedFields(parsed.error) }
     const scope = { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId } as const
-    return actInScope(
+    const result = await actInScope(
       scope,
       (transaction) => act(context, parsed.data, transaction),
       () => ({ actorKind: 'person', actorId: context.person.userId, action: spec.name, detail: { factor: context.factor } }),
     )
+    if (result.ok && afterCommit !== undefined) {
+      try {
+        await afterCommit(context, result.value)
+      } catch {
+        // The outbox row written with the change hands the work on later.
+      }
+    }
+    return result
   }
   SHOP_ACTIONS.add(action)
   return action

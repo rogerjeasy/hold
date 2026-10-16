@@ -31,6 +31,16 @@ function Status({ token, view }: { token: string; view: RenterView }) {
     )
   }
   if (view.state === 'ready') return <StatusLine icon={CircleCheck} text={t('ready')} />
+  if (view.state === 'out') {
+    return (
+      <div className="grid justify-items-start gap-3">
+        <StatusLine icon={CircleCheck} text={t('out')} />
+        <Link href={`${linkRoutes.renter}/${token}/condition`} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
+          {t('condition')}
+        </Link>
+      </div>
+    )
+  }
   if (view.state === 'booked') {
     return (
       <div className="grid gap-1">
