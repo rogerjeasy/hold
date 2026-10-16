@@ -27,7 +27,10 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Type-aware linting reads every package at once and passes Node's default heap of about 2 GB on the runner.
       - run: pnpm check
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
 
   e2e:
     name: End to end
