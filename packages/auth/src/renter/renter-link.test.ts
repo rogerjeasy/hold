@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { issueRenterToken, readRenterToken, RENTER_LINK_SCOPES, renterLinkKey } from './renter-link.ts'
+import { issueRenterToken, readRenterToken, RENTER_LINK_SCOPES, renterLinkExpiry, renterLinkKey, renterLinkPath } from './renter-link.ts'
 
 const key = renterLinkKey(Buffer.alloc(32, 3))
 const bytes = (fill: number) => () => Buffer.alloc(32, fill)
@@ -29,5 +29,16 @@ describe('a renter link token', () => {
 
   it('has a fixed list of scopes, none of which moves money on its own', () => {
     expect(RENTER_LINK_SCOPES).toEqual(['view', 'pay', 'confirm_condition', 'extend', 'accept', 'contest'])
+  })
+})
+
+describe('where a renter link points, and for how long', () => {
+  it('names the rental by its token, in the renter’s language, English at the bare path', () => {
+    expect(renterLinkPath('TOKEN', 'en')).toBe('/r/TOKEN')
+    expect(renterLinkPath('TOKEN', 'de')).toBe('/de/r/TOKEN')
+  })
+
+  it('lasts as long as the rental might still need it: through the return, a claim and its reply', () => {
+    expect(renterLinkExpiry(new Date('2026-10-20T09:00:00Z'))).toEqual(new Date('2026-12-19T09:00:00Z'))
   })
 })

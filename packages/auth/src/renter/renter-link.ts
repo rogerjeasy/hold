@@ -1,4 +1,5 @@
 import { createHash, createHmac, hkdfSync, timingSafeEqual } from 'node:crypto'
+import { addDays } from '@hold/domain'
 
 // A renter has no account and acts through a link (architecture.md section 12.3). The token is random and signed, so a
 // changed token is refused before the database is asked. Only its fingerprint is stored, so removing that row ends
@@ -37,4 +38,18 @@ export function readRenterToken(key: Buffer, token: string): { readonly fingerpr
   const expected = sign(key, random)
   if (given.length !== expected.length || !timingSafeEqual(given, expected)) return undefined
   return { fingerprint: fingerprintOf(token) }
+}
+
+// Where a link opens: the rental, named by its token, in the renter's language, English at the bare path.
+export const RENTER_LINK_PATH = '/r'
+
+export function renterLinkPath(token: string, language: string): string {
+  return `${language === 'en' ? '' : `/${language}`}${RENTER_LINK_PATH}/${token}`
+}
+
+// A link lasts as long as its rental might still need it: through the return, a claim and its reply.
+const LINK_DAYS_AFTER_RENTAL = 60
+
+export function renterLinkExpiry(rentalEndsAt: Date): Date {
+  return addDays(rentalEndsAt, LINK_DAYS_AFTER_RENTAL)
 }

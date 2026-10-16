@@ -5,6 +5,7 @@
   "type": "module",
   "dependencies": {
     "@aws-sdk/client-cognito-identity-provider": "3.1151.0",
+    "@aws-sdk/client-secrets-manager": "3.1151.0",
     "@hold/domain": "workspace:*",
     "aws-jwt-verify": "5.2.1"
   },
