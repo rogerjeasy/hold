@@ -90,27 +90,36 @@ export async function confirmFeeCapture(transaction: Transaction, executionId: s
     .update(executions)
     .set({ state: 'confirmed', attempts: execution.attempts + 1, paypalResourceIds: { order: payment.orderId, capture: payment.captureId }, updatedAt: now })
     .where(eq(executions.id, executionId))
-  await transaction.update(outbox).set({ state: 'sent', sentAt: now }).where(and(eq(outbox.messageGroup, execution.rentalId), eq(outbox.queue, EXECUTIONS_QUEUE), eq(outbox.state, 'pending')))
+  await markExecutionSent(transaction, executionId, now)
   return { ok: true }
 }
 
 export type StoredExecution = {
   readonly id: string
   readonly rentalId: string
+  // Absent for the rental fee, which comes before any hold.
+  readonly holdId: string | null
   readonly action: string
   readonly state: 'pending' | 'submitted' | 'confirmed' | 'failed'
   readonly idempotencyKey: string
   readonly orderId: string | undefined
+  // The PayPal authorization a release voids.
+  readonly authorizationId: string | undefined
 }
 
-export async function feeExecution(transaction: Transaction, executionId: string): Promise<StoredExecution | undefined> {
+export async function findExecution(transaction: Transaction, executionId: string): Promise<StoredExecution | undefined> {
   const [row] = await transaction
-    .select({ id: executions.id, rentalId: executions.rentalId, action: executions.action, state: executions.state, idempotencyKey: executions.idempotencyKey, resources: executions.paypalResourceIds })
+    .select({ id: executions.id, rentalId: executions.rentalId, holdId: executions.holdId, action: executions.action, state: executions.state, idempotencyKey: executions.idempotencyKey, resources: executions.paypalResourceIds })
     .from(executions)
     .where(eq(executions.id, executionId))
   if (row === undefined) return undefined
   const { resources, ...execution } = row
-  return { ...execution, orderId: resources['order'] }
+  return { ...execution, orderId: resources['order'], authorizationId: resources['authorization'] }
+}
+
+// The execution's outbox message reached its queue, or is no longer needed. Other messages of the rental wait on.
+export async function markExecutionSent(transaction: Transaction, executionId: string, now: Date): Promise<void> {
+  await transaction.update(outbox).set({ state: 'sent', sentAt: now }).where(and(eq(outbox.state, 'pending'), sql`${outbox.payload} ->> 'executionId' = ${executionId}`))
 }
 
 // An execution PayPal refused for good, such as an order the renter never approved. Nothing is retried.

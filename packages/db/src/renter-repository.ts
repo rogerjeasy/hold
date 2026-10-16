@@ -117,3 +117,15 @@ export async function renterView(transaction: Transaction, rentalId: string, now
     paymentLapsed: rental.state === 'pending_payment' && paymentLapsed(rental.createdAt, now),
   }
 }
+
+// Where to reach a rental's renter: the email PayPal gave when they paid, or the one staff typed, in the rental's
+// language. Nothing when neither is known.
+export async function renterContact(transaction: Transaction, rentalId: string): Promise<{ readonly email: string; readonly language: string } | undefined> {
+  const [row] = await transaction
+    .select({ paid: renters.email, typed: rentals.contactEmail, language: rentals.language })
+    .from(rentals)
+    .leftJoin(renters, eq(renters.id, rentals.renterId))
+    .where(eq(rentals.id, rentalId))
+  const email = row?.paid ?? row?.typed ?? null
+  return row === undefined || email === null ? undefined : { email, language: row.language }
+}

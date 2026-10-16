@@ -92,6 +92,20 @@
       "when": 1792089816463,
       "tag": "0012_worker_functions",
       "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1792137013948,
+      "tag": "0013_hold_at_pickup",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792139264411,
+      "tag": "0014_hold_replacement",
+      "breakpoints": true
     }
   ]
 }

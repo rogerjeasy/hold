@@ -100,12 +100,15 @@ export const holds = pgTable(
     state: holdState().notNull().default('requested'),
     paypalOrderId: text().unique(),
     currentAuthorizationId: reference().references((): AnyPgColumn => authorizations.id),
+    // The order of a replacement hold the renter is asked to approve before this one ends (architecture.md 7.4).
+    replacementOrderId: text().unique(),
     createdAt: createdAt(),
   },
   (table) => [allowed(table.strategy, PLACEMENT_STRATEGIES), allowed(table.state, HOLD_STATES), shopIsolation(table.shopId)],
 )
 
-// One PayPal authorization behind a hold. A renewal adds a new one, which names the one it replaced.
+// One PayPal authorization behind a hold. A renewal adds a new one, which names the one it renewed; a replacement, a new
+// hold the renter approved before the old one ended, names the one it replaced.
 export const authorizations = pgTable(
   'authorizations',
   {
@@ -123,6 +126,7 @@ export const authorizations = pgTable(
     validUntil: at().notNull(),
     state: authorizationState().notNull().default('created'),
     renewedFromId: reference().references((): AnyPgColumn => authorizations.id),
+    replacesId: reference().references((): AnyPgColumn => authorizations.id),
   },
   (table) => [allowed(table.state, AUTHORIZATION_STATES), shopIsolation(table.shopId)],
 )
