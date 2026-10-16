@@ -16,7 +16,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./testing": "./src/testing/test-database.ts",
-    "./data-api": "./src/data-api.ts"
+    "./data-api": "./src/data-api.ts",
+    "./testing/ready-rental": "./src/testing/ready-rental.ts"
   },
   "scripts": {
     "migrations:generate": "drizzle-kit generate",

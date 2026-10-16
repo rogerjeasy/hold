@@ -29,3 +29,5 @@ export { askForHold, beginHoldPlacement, confirmHoldPlaced, holdRentalByAuthoriz
 export type { AskResult, BeginPlacementResult, ConfirmPlacementResult, HoldExecution, HoldUpkeep, PlacedAuthorization, RentalHold } from './hold-repository.ts'
 export { confirmAuthorizationReleased, expireHold, holdUpkeep, saveReplacementOrder, shopOwners, upkeepTarget } from './hold-upkeep-repository.ts'
 export type { ExpireResult, ReleasedResult, ReplacementResult, ShopOwner, UpkeepTarget } from './hold-upkeep-repository.ts'
+export { addMark, captureSession, conditionReport, confirmMarks, markPhotoMessageSent, MEDIA_QUEUE, openConditionSessions, photoForDisplay, recordDisplayCopy, recordPhoto, rentalHandovers, rentalItemFor, replyToCondition, sealSession, startCaptureSession } from './capture-repository.ts'
+export type { AddMarkResult, CaptureSession, ConditionReport, RentalHandover, NewPhoto, RecordPhotoResult, ReplyResult, SealResult, SessionMark, SessionPhoto, StartResult } from './capture-repository.ts'

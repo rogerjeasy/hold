@@ -6,7 +6,7 @@ import type { Accessory } from '@hold/domain'
 import { appRole, shopIsolation, workerRole } from './access.ts'
 import { items, priceLists, wearPolicies } from './catalog.ts'
 import { at, cents, createdAt, currency, id, reference } from './columns.ts'
-import { allowed, AUTHORIZATION_STATES, authorizationState, BOOKING_CHANNELS, bookingChannel, holdState, PLACEMENT_STRATEGIES, placementStrategy, rentalState } from './enums.ts'
+import { allowed, AUTHORIZATION_STATES, authorizationState, BOOKING_CHANNELS, bookingChannel, CONDITION_REPLIES, conditionReply, holdState, PLACEMENT_STRATEGIES, placementStrategy, rentalState } from './enums.ts'
 import { shopReference } from './shops.ts'
 
 // A renter is the PayPal payer who approved an order. Not tied to one shop, so it has no shop_id.
@@ -58,11 +58,14 @@ export const rentals = pgTable(
       .references(() => wearPolicies.id),
     state: rentalState().notNull().default('pending_payment'),
     paypalFeeOrderId: text().unique(),
+    // The renter's answer to the condition report sent at handover, and when they gave it (architecture.md 11.2).
+    conditionReply: conditionReply(),
+    conditionRepliedAt: at(),
     // Sample data added for a demonstration. Its hold, claim and money rows are simulated too, and every screen says so.
     simulated: boolean().notNull().default(false),
     createdAt: createdAt(),
   },
-  (table) => [allowed(table.state, RENTAL_STATES), allowed(table.bookedThrough, BOOKING_CHANNELS), shopIsolation(table.shopId)],
+  (table) => [allowed(table.state, RENTAL_STATES), allowed(table.bookedThrough, BOOKING_CHANNELS), allowed(table.conditionReply, CONDITION_REPLIES), shopIsolation(table.shopId)],
 )
 
 export const rentalItems = pgTable(

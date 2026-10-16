@@ -1,4 +1,4 @@
-import { CLAIM_STATES, HOLD_STATES, ITEM_CATEGORIES, ITEM_STATUSES, PRICE_CATEGORIES, RENTAL_STATES, STAFF_ROLES } from '@hold/domain'
+import { CAPTURE_SESSION_KINDS, CLAIM_STATES, CONDITION_REPLIES, HOLD_STATES, ITEM_CATEGORIES, ITEM_STATUSES, PRICE_CATEGORIES, RENTAL_STATES, STAFF_ROLES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
 import { check, text } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
@@ -26,7 +26,6 @@ export function allowed(column: AnyPgColumn, values: Values) {
 export const PAYPAL_MODES = ['sandbox', 'live'] as const
 export const PLACEMENT_STRATEGIES = ['at_counter', 'combined', 'saved_method'] as const
 export const AUTHORIZATION_STATES = ['created', 'renewed', 'voided', 'captured', 'expired'] as const
-export const CAPTURE_SESSION_KINDS = ['handover', 'return', 'packing', 'unboxing', 'send_back'] as const
 export const MARK_STATUSES = ['open', 'repaired'] as const
 export const COMPARISON_STATES = ['pending', 'running', 'clean', 'findings', 'deferred', 'failed'] as const
 export const FINDING_CLASSES = ['new_damage', 'known_mark', 'wear', 'missing_part', 'uncertain'] as const
@@ -56,7 +55,9 @@ export const itemStatus = oneOf(ITEM_STATUSES)
 export const paypalMode = oneOf(PAYPAL_MODES)
 export const placementStrategy = oneOf(PLACEMENT_STRATEGIES)
 export const authorizationState = oneOf(AUTHORIZATION_STATES)
+export { CAPTURE_SESSION_KINDS, CONDITION_REPLIES }
 export const captureSessionKind = oneOf(CAPTURE_SESSION_KINDS)
+export const conditionReply = oneOf(CONDITION_REPLIES)
 export const markStatus = oneOf(MARK_STATUSES)
 export const comparisonState = oneOf(COMPARISON_STATES)
 export const findingClass = oneOf(FINDING_CLASSES)

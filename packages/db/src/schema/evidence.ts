@@ -1,4 +1,6 @@
-import { boolean, integer, jsonb, pgTable, real, text, unique } from 'drizzle-orm/pg-core'
+import type { Region } from '@hold/domain'
+import { sql } from 'drizzle-orm'
+import { boolean, integer, jsonb, pgTable, real, text, unique, uniqueIndex } from 'drizzle-orm/pg-core'
 import { shopIsolation } from './access.ts'
 import { items, photoPlans, priceEntries } from './catalog.ts'
 import { at, createdAt, id, reference } from './columns.ts'
@@ -6,8 +8,8 @@ import { allowed, CAPTURE_SESSION_KINDS, captureSessionKind, COMPARISON_STATES, 
 import { rentalItems, rentals } from './rentals.ts'
 import { shopReference, users } from './shops.ts'
 
-// A rectangle on a photograph, as fractions of its width and height, so it survives resizing.
-export type Region = { readonly x: number; readonly y: number; readonly width: number; readonly height: number }
+export type { Region }
+
 
 export const captureSessions = pgTable(
   'capture_sessions',
@@ -26,8 +28,12 @@ export const captureSessions = pgTable(
     actorUserId: reference().references(() => users.id),
     startedAt: createdAt(),
     sealedAt: at(),
+    // The sealed manifest's exact text (domain manifestText). Its SHA-256 is the fingerprint the item's next session names.
+    manifest: text(),
     manifestFingerprint: text(),
     previousManifestFingerprint: text(),
+    // The item's known marks staff confirmed were still there at this session.
+    confirmedMarkIds: jsonb().$type<readonly string[]>().notNull().default([]),
   },
   (table) => [allowed(table.kind, CAPTURE_SESSION_KINDS), shopIsolation(table.shopId)],
 )
@@ -50,8 +56,10 @@ export const photos = pgTable(
     // When the server received it, not the phone's clock.
     receivedAt: at().notNull(),
     quality: jsonb().$type<Readonly<Record<string, number>>>(),
+    // Set when a retake before sealing took this photograph's place. The photograph itself stays locked and on record.
+    supersededAt: at(),
   },
-  (table) => [unique().on(table.sessionId, table.view), shopIsolation(table.shopId)],
+  (table) => [uniqueIndex('photos_current_view_unique').on(table.sessionId, table.view).where(sql`${table.supersededAt} is null`), shopIsolation(table.shopId)],
 )
 
 export const marks = pgTable(
