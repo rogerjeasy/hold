@@ -285,3 +285,19 @@ describe('a rental fee in the fake', () => {
     expect(created.approvalUrl).toBe(`https://hold.test/simulated-paypal/${created.orderId}`)
   })
 })
+
+describe('webhooks in the fake', () => {
+  const headers = { transmissionId: 'T-1', transmissionTime: '2026-10-15T09:00:00Z', transmissionSig: 'fake-signature', certUrl: 'fake', authAlgo: 'fake' }
+
+  it('subscribes once per address', async () => {
+    const first = valueOf(await paypal.createWebhook({ url: 'https://hold.test/a', eventTypes: [] }))
+    expect(valueOf(await paypal.createWebhook({ url: 'https://hold.test/a', eventTypes: [] }))).toEqual(first)
+  })
+
+  it('verifies only what it signed itself, for its own webhook', async () => {
+    const { webhookId } = valueOf(await paypal.createWebhook({ url: 'https://hold.test/b', eventTypes: [] }))
+    expect(valueOf(await paypal.verifyWebhook({ webhookId, headers, body: '{}' }))).toBe('verified')
+    expect(valueOf(await paypal.verifyWebhook({ webhookId, headers: { ...headers, transmissionSig: 'forged' }, body: '{}' }))).toBe('rejected')
+    expect(valueOf(await paypal.verifyWebhook({ webhookId: 'unknown', headers, body: '{}' }))).toBe('rejected')
+  })
+})

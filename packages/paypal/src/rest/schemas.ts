@@ -79,6 +79,10 @@ export const feeOrderSchema = z.object({
   purchase_units: z.array(z.object({ payments: z.object({ captures: z.array(captureSchema.omit({ final_capture: true }).extend({ final_capture: z.boolean().default(true) })).optional() }).optional() })).optional(),
 })
 
+export const webhookSchema = z.object({ id: z.string().min(1) })
+export const webhookListSchema = z.object({ webhooks: z.array(z.object({ id: z.string().min(1), url: z.string() })) })
+export const verificationSchema = z.object({ verification_status: z.enum(['SUCCESS', 'FAILURE']) })
+
 export type PayPalOrder = z.infer<typeof orderSchema>
 export type PayPalFeeOrder = z.infer<typeof feeOrderSchema>
 export type PayPalAuthorization = z.infer<typeof authorizationSchema>

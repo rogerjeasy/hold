@@ -45,6 +45,8 @@ export type PayPalFailureKind =
   | 'hold_already_captured'
   // A fee order captured already, perhaps by an earlier attempt.
   | 'already_captured'
+  // A webhook subscription for the address exists already.
+  | 'webhook_exists'
   | 'amount_exceeds_hold'
   // A renewal was asked for inside the assured period.
   | 'renewal_too_soon'
@@ -117,7 +119,34 @@ export type FeePayment = {
 
 export type CaptureFeeInput = { readonly orderId: string; readonly idempotencyKey: string }
 
+// The events Hold subscribes each shop's account to (architecture.md section 8.3). Those it does not act on yet are
+// kept and marked ignored.
+export const PAYPAL_EVENT_TYPES = [
+  'CHECKOUT.ORDER.APPROVED',
+  'PAYMENT.CAPTURE.COMPLETED',
+  'PAYMENT.CAPTURE.DENIED',
+  'PAYMENT.CAPTURE.REFUNDED',
+  'PAYMENT.AUTHORIZATION.CREATED',
+  'PAYMENT.AUTHORIZATION.VOIDED',
+  'CUSTOMER.DISPUTE.CREATED',
+] as const
+
+// The headers PayPal signs an event delivery with.
+export type WebhookHeaders = {
+  readonly transmissionId: string
+  readonly transmissionTime: string
+  readonly transmissionSig: string
+  readonly certUrl: string
+  readonly authAlgo: string
+}
+
+export type VerifyWebhookInput = { readonly webhookId: string; readonly headers: WebhookHeaders; readonly body: string }
+
 export type PayPalHolds = {
+  // Subscribes Hold's address to events from the shop's account. An address already subscribed keeps its subscription.
+  createWebhook(input: { readonly url: string; readonly eventTypes: readonly string[] }): Promise<PayPalResult<{ readonly webhookId: string }>>
+  // Asks PayPal whether it signed this exact delivery. Nothing in an event is used before this says verified.
+  verifyWebhook(input: VerifyWebhookInput): Promise<PayPalResult<'verified' | 'rejected'>>
   // The rental fee: an ordinary order, captured once the renter approves it.
   createFeeOrder(input: CreateFeeOrderInput): Promise<PayPalResult<HoldOrder>>
   // Captures an approved fee order, then reads it back: PayPal's record is the truth.

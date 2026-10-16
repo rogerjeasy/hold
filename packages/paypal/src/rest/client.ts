@@ -81,6 +81,7 @@ const KIND_BY_ISSUE: ReadonlyMap<string, PayPalFailureKind> = new Map([
   ['INVALID_RESOURCE_ID', 'not_found'],
   // Asking again for a capture already made: Hold reads the order instead.
   ['ORDER_ALREADY_CAPTURED', 'already_captured'],
+  ['WEBHOOK_URL_ALREADY_EXISTS', 'webhook_exists'],
 ])
 
 function parseJson(text: string): unknown {

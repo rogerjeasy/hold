@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { fail, ok } from '@hold/domain'
 import type * as z from 'zod'
 import { toPayPalAmount } from '../amount.ts'
@@ -21,11 +22,15 @@ import {
   captureSchema,
   feeOrderSchema,
   orderSchema,
+  verificationSchema,
+  webhookListSchema,
+  webhookSchema,
 } from './schemas.ts'
 import type { PayPalAuthorization, PayPalCapture, PayPalFeeOrder, PayPalOrder } from './schemas.ts'
 
 const ORDERS_PATH = '/v2/checkout/orders'
 const AUTHORIZATIONS_PATH = '/v2/payments/authorizations'
+const WEBHOOKS_PATH = '/v1/notifications/webhooks'
 // The link PayPal names differently depending on how the order was created. Both lead the renter to approve.
 const APPROVAL_LINKS: ReadonlySet<string> = new Set(['payer-action', 'approve'])
 
@@ -173,6 +178,47 @@ export function createRestPayPalHolds(client: PayPalClient): PayPalHolds {
     },
 
     readFeePayment,
+
+    async createWebhook(input) {
+      const reply = await client.send({
+        method: 'POST',
+        path: WEBHOOKS_PATH,
+        // One subscription per address, however often it is asked for.
+        idempotencyKey: `webhook-${createHash('sha256').update(input.url).digest('hex').slice(0, 40)}`,
+        body: { url: input.url, event_types: input.eventTypes.map((name) => ({ name })) },
+      })
+      if (reply.ok || reply.error.kind !== 'webhook_exists') return mapped(read(webhookSchema, reply), (webhook) => ({ webhookId: webhook.id }))
+      // Connecting again subscribes the same address, so the earlier subscription is found and kept.
+      const listed = read(webhookListSchema, await client.send({ method: 'GET', path: WEBHOOKS_PATH }))
+      if (!listed.ok) return listed
+      const existing = listed.value.webhooks.find((webhook) => webhook.url === input.url)
+      return existing === undefined ? fail(reply.error) : ok({ webhookId: existing.id })
+    },
+
+    async verifyWebhook(input) {
+      let event: unknown
+      try {
+        event = JSON.parse(input.body)
+      } catch {
+        return ok('rejected')
+      }
+      const { headers } = input
+      const reply = await client.send({
+        method: 'POST',
+        path: '/v1/notifications/verify-webhook-signature',
+        idempotencyKey: `verify-${headers.transmissionId.slice(0, 80)}`,
+        body: {
+          auth_algo: headers.authAlgo,
+          cert_url: headers.certUrl,
+          transmission_id: headers.transmissionId,
+          transmission_sig: headers.transmissionSig,
+          transmission_time: headers.transmissionTime,
+          webhook_id: input.webhookId,
+          webhook_event: event,
+        },
+      })
+      return mapped(read(verificationSchema, reply), (answer) => (answer.verification_status === 'SUCCESS' ? 'verified' : 'rejected'))
+    },
 
     async readHoldOrder(orderId) {
       const reply = await client.send({ method: 'GET', path: orderPath(orderId) })

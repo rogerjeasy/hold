@@ -16,6 +16,9 @@ import type {
 // PayPal's hold rules in memory, with a clock the caller controls. The sandbox cannot move time forward, so
 // renewal and expiry are exercised here. Rules the sandbox trials have not yet confirmed are marked.
 
+// The signature the fake puts on the events it sends, and the only one it verifies.
+export const FAKE_SIGNATURE = 'fake-signature'
+
 export type FakePayPal = PayPalHolds & {
   // Stands in for the renter approving the hold on PayPal's page.
   approveOrder(orderId: string): void
@@ -65,6 +68,7 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
   const authorizations = new Map<string, FakeAuthorization>()
   const repliesByKey = new Map<string, unknown>()
   let lastNumber = 0
+  const webhooks = new Map<string, string>()
 
   function nextId(prefix: string): string {
     lastNumber += 1
@@ -129,6 +133,17 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
         return created
       })
       return Promise.resolve(ok(toHoldOrder(order)))
+    },
+
+    createWebhook(input) {
+      const webhookId = webhooks.get(input.url) ?? nextId('FAKE-WEBHOOK')
+      webhooks.set(input.url, webhookId)
+      return Promise.resolve(ok({ webhookId }))
+    },
+
+    verifyWebhook(input) {
+      const known = [...webhooks.values()].includes(input.webhookId)
+      return Promise.resolve(ok(known && input.headers.transmissionSig === FAKE_SIGNATURE ? 'verified' : 'rejected'))
     },
 
     orderLinks(orderId) {
