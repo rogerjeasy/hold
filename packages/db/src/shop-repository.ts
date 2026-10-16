@@ -31,9 +31,14 @@ export async function savePayPalAccount(transaction: Transaction, shopId: string
     .onConflictDoUpdate({ target: [paypalAccounts.shopId, paypalAccounts.mode], set: { credentialReference } })
 }
 
+// The subscription that sends the account's events to Hold. Its id is what PayPal verifies each delivery against.
+export async function saveWebhookId(transaction: Transaction, shopId: string, mode: PayPalMode, webhookId: string): Promise<void> {
+  await transaction.update(paypalAccounts).set({ webhookId }).where(and(eq(paypalAccounts.shopId, shopId), eq(paypalAccounts.mode, mode)))
+}
+
 export async function findPayPalAccount(transaction: Transaction, shopId: string, mode: PayPalMode) {
   const [account] = await transaction
-    .select({ id: paypalAccounts.id, credentialReference: paypalAccounts.credentialReference, createdAt: paypalAccounts.createdAt })
+    .select({ id: paypalAccounts.id, credentialReference: paypalAccounts.credentialReference, webhookId: paypalAccounts.webhookId, createdAt: paypalAccounts.createdAt })
     .from(paypalAccounts)
     .where(and(eq(paypalAccounts.shopId, shopId), eq(paypalAccounts.mode, mode)))
   return account

@@ -1,12 +1,13 @@
-import { GetSecretValueCommand, SecretsManagerClient } from '@aws-sdk/client-secrets-manager'
+import { GetSecretValueCommand, ResourceNotFoundException, SecretsManagerClient } from '@aws-sdk/client-secrets-manager'
 import { sql } from 'drizzle-orm'
 import { migrate } from 'drizzle-orm/aws-data-api/pg/migrator'
 import { createDataApiDatabase } from '../src/data-api.ts'
 import { scramVerifier } from '../src/scram.ts'
 
 // Applies every migration to Hold's Aurora cluster as the owner, hold_admin, then gives hold_app its login with the
-// password Secrets Manager holds for it. Safe to run again: applied migrations are skipped and the password is reset
-// to the same one. Run with AWS credentials for the account, for example AWS_PROFILE=wick-dev.
+// password Secrets Manager holds for it, and hold_worker the same once its secret exists. Safe to run again: applied
+// migrations are skipped and each password is reset to the same one. Run with AWS credentials for the account, for
+// example AWS_PROFILE=wick-dev.
 
 function setting(name: 'HOLD_DATABASE_CLUSTER_ARN' | 'HOLD_DATABASE_ADMIN_SECRET_ARN' | 'HOLD_DATABASE_APP_SECRET_ARN'): string {
   const value = process.env[name]
@@ -25,12 +26,29 @@ console.log(`Migrating ${database}...`)
 await migrate(admin, { migrationsFolder: MIGRATIONS })
 
 const secrets = new SecretsManagerClient({ region })
-const secret = await secrets.send(new GetSecretValueCommand({ SecretId: setting('HOLD_DATABASE_APP_SECRET_ARN') }))
-const { username, password } = JSON.parse(secret.SecretString ?? '{}') as { username?: unknown; password?: unknown }
-if (username !== 'hold_app' || typeof password !== 'string') throw new Error('The app secret does not hold the hold_app login.')
-const verifier = scramVerifier(password)
-if (!VERIFIER_SHAPE.test(verifier)) throw new Error('The password verifier has an unexpected shape.')
-await admin.execute(sql.raw(`ALTER ROLE hold_app WITH LOGIN PASSWORD '${verifier}'`))
+
+// Gives a service role its login, sending PostgreSQL only the password's SCRAM verifier. Nothing for a secret that
+// does not exist yet: the worker's is made by the deploy that follows the first migration, and the next run uses it.
+async function giveLogin(secretId: string, role: 'hold_app' | 'hold_worker'): Promise<boolean> {
+  let secret
+  try {
+    secret = await secrets.send(new GetSecretValueCommand({ SecretId: secretId }))
+  } catch (error) {
+    if (error instanceof ResourceNotFoundException) return false
+    throw error
+  }
+  const { username, password } = JSON.parse(secret.SecretString ?? '{}') as { username?: unknown; password?: unknown }
+  if (username !== role || typeof password !== 'string') throw new Error(`The secret does not hold the ${role} login.`)
+  const verifier = scramVerifier(password)
+  if (!VERIFIER_SHAPE.test(verifier)) throw new Error('The password verifier has an unexpected shape.')
+  await admin.execute(sql.raw(`ALTER ROLE ${role} WITH LOGIN PASSWORD '${verifier}'`))
+  return true
+}
+
+if (!(await giveLogin(setting('HOLD_DATABASE_APP_SECRET_ARN'), 'hold_app'))) throw new Error('The app secret does not exist.')
+const workerSecret = process.env['HOLD_DATABASE_WORKER_SECRET'] ?? 'hold/database/worker'
+const worker = await giveLogin(workerSecret, 'hold_worker')
+console.log(worker ? 'hold_worker can log in.' : `No ${workerSecret} secret yet: hold_worker gets its login on the next run.`)
 
 const [applied] = await admin.select({ count: sql<number>`count(*)::int` }).from(sql`drizzle.__drizzle_migrations`)
 console.log(`Done. ${String(applied?.count)} migrations applied. hold_app can log in.`)

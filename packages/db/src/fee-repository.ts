@@ -20,7 +20,9 @@ export type BeginResult = { readonly ok: true; readonly execution: FeeExecution 
 
 // Records that the fee is to be captured: one execution with its idempotency key, and the outbox message that lets
 // the worker finish it if this request does not. Asked again, it returns the same execution.
-export async function beginFeeCapture(transaction: Transaction, rentalId: string, now: Date): Promise<BeginResult> {
+// `confirming` is for a capture PayPal already made, which is recorded whatever the rental's state: PayPal's record is
+// the truth, and confirmFeeCapture asks a person to refund a booking let go in the meantime.
+export async function beginFeeCapture(transaction: Transaction, rentalId: string, now: Date, options: { readonly confirming?: boolean } = {}): Promise<BeginResult> {
   const [rental] = await transaction
     .select({ shopId: rentals.shopId, state: rentals.state, orderId: rentals.paypalFeeOrderId, feeCents: rentals.feeCents, currency: rentals.currency, createdAt: rentals.createdAt })
     .from(rentals)
@@ -31,9 +33,9 @@ export async function beginFeeCapture(transaction: Transaction, rentalId: string
   const idempotencyKey = `fee-capture-${rentalId}-${rental.orderId}`
   const [existing] = await transaction.select().from(executions).where(eq(executions.idempotencyKey, idempotencyKey))
   if (existing !== undefined) return { ok: true, execution: { id: existing.id, rentalId, orderId: rental.orderId, idempotencyKey, amountCents: rental.feeCents, currency: rental.currency } }
-  if (rental.state !== 'pending_payment') return { ok: false, reason: 'not_pending' }
+  if (options.confirming !== true && rental.state !== 'pending_payment') return { ok: false, reason: 'not_pending' }
   // A booking past its time to pay no longer keeps its items. It may still be paid while nobody else has taken them.
-  if (paymentLapsed(rental.createdAt, now) && !(await itemsStillFree(transaction, rentalId, now))) return { ok: false, reason: 'payment_lapsed' }
+  if (options.confirming !== true && paymentLapsed(rental.createdAt, now) && !(await itemsStillFree(transaction, rentalId, now))) return { ok: false, reason: 'payment_lapsed' }
   const [created] = await transaction
     .insert(executions)
     .values({ shopId: rental.shopId, rentalId, action: 'fee_capture', idempotencyKey, currency: rental.currency, amountCents: rental.feeCents, paypalResourceIds: { order: rental.orderId }, createdAt: now, updatedAt: now })
@@ -90,4 +92,31 @@ export async function confirmFeeCapture(transaction: Transaction, executionId: s
     .where(eq(executions.id, executionId))
   await transaction.update(outbox).set({ state: 'sent', sentAt: now }).where(and(eq(outbox.messageGroup, execution.rentalId), eq(outbox.queue, EXECUTIONS_QUEUE), eq(outbox.state, 'pending')))
   return { ok: true }
+}
+
+export type StoredExecution = {
+  readonly id: string
+  readonly rentalId: string
+  readonly action: string
+  readonly state: 'pending' | 'submitted' | 'confirmed' | 'failed'
+  readonly idempotencyKey: string
+  readonly orderId: string | undefined
+}
+
+export async function feeExecution(transaction: Transaction, executionId: string): Promise<StoredExecution | undefined> {
+  const [row] = await transaction
+    .select({ id: executions.id, rentalId: executions.rentalId, action: executions.action, state: executions.state, idempotencyKey: executions.idempotencyKey, resources: executions.paypalResourceIds })
+    .from(executions)
+    .where(eq(executions.id, executionId))
+  if (row === undefined) return undefined
+  const { resources, ...execution } = row
+  return { ...execution, orderId: resources['order'] }
+}
+
+// An execution PayPal refused for good, such as an order the renter never approved. Nothing is retried.
+export async function failExecution(transaction: Transaction, executionId: string, reason: string, now: Date): Promise<void> {
+  await transaction
+    .update(executions)
+    .set({ state: 'failed', lastError: reason, attempts: sql`${executions.attempts} + 1`, updatedAt: now })
+    .where(and(eq(executions.id, executionId), sql`${executions.state} <> 'confirmed'`))
 }

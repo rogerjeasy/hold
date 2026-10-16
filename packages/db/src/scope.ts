@@ -36,9 +36,10 @@ export function inShop<Result>(database: Database, scope: Scope, work: (transact
 
 // A transaction that names no shop, so row-level security shows it nothing. It can only call the functions that
 // answer before a shop is chosen, such as finding which shops a signed-in person belongs to.
-export function outsideShop<Result>(database: Database, work: (transaction: Transaction) => Promise<Result>): Promise<Result> {
+export function outsideShop<Result>(database: Database, work: (transaction: Transaction) => Promise<Result>, role: DatabaseRole = 'hold_app'): Promise<Result> {
+  if (!DATABASE_ROLES.includes(role)) throw new RangeError(`Unknown database role ${role}.`)
   return database.transaction(async (transaction) => {
-    await transaction.execute(sql`select set_config('role', 'hold_app', true)`)
+    await transaction.execute(sql`select set_config('role', ${role}, true)`)
     return work(transaction)
   })
 }
