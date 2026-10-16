@@ -12,6 +12,7 @@ import {
   PIPELINE_STACKS,
   PREFIX,
   REGION,
+  TAGS,
 } from './settings.ts'
 
 // How GitHub Actions reaches the account (tech-stack.md section 12): through OpenID Connect, with no AWS key stored
@@ -133,9 +134,16 @@ function computePolicy(stack: Stack): iam.ManagedPolicy {
       ArnLike: { 'lambda:FunctionArn': at.functions },
     }),
   )
-  // CloudFormation tags each mapping it makes, and tagging one names no function, so the condition above never holds
-  // for it. A mapping may be tagged only with Hold's own project tag, so no other project's mappings can be relabelled.
-  add(statement(['lambda:TagResource'], [`arn:aws:lambda:${REGION}:${ACCOUNT}:event-source-mapping:*`], { StringEquals: { 'aws:RequestTag/project': PREFIX } }))
+  // CloudFormation tags each mapping it makes with the stack's tags, and tagging one names no function, so the condition
+  // above never holds for it. A mapping's ID is unknown until it exists, so the grant names every mapping, and allows
+  // only Hold's own two tags with their own values, beside CloudFormation's: nothing else can be written on any mapping.
+  add(
+    statement(['lambda:TagResource'], [`arn:aws:lambda:${REGION}:${ACCOUNT}:event-source-mapping:*`], {
+      StringEquals: Object.fromEntries(Object.entries(TAGS).map(([key, value]) => [`aws:RequestTag/${key}`, value])),
+      // CloudFormation adds its own aws:cloudformation tags, which only AWS can write.
+      'ForAllValues:StringLike': { 'aws:TagKeys': [...Object.keys(TAGS), 'aws:cloudformation:*'] },
+    }),
+  )
   add(statement(['lambda:GetEventSourceMapping', 'lambda:ListEventSourceMappings', 'lambda:ListTags'], ['*']))
   add(statement(['scheduler:CreateSchedule', 'scheduler:UpdateSchedule', 'scheduler:DeleteSchedule', 'scheduler:GetSchedule'], [at.schedules]))
   return policy

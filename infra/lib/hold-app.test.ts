@@ -572,7 +572,17 @@ describe('delivery', () => {
       (policy) => (policy as { Properties: { PolicyDocument: { Statement: Record<string, unknown>[] } } }).Properties.PolicyDocument.Statement,
     )
     const tagging = statements.find((statement) => statement['Resource'] === 'arn:aws:lambda:us-east-1:707938860881:event-source-mapping:*')
-    expect(tagging).toEqual({ Action: 'lambda:TagResource', Condition: { StringEquals: { 'aws:RequestTag/project': 'hold' } }, Effect: 'Allow', Resource: 'arn:aws:lambda:us-east-1:707938860881:event-source-mapping:*' })
+    // Only Hold's own two tags, and project set to hold: no other tag can be put on any mapping in the account.
+    expect(tagging).toEqual({
+      Action: 'lambda:TagResource',
+      Condition: {
+        StringEquals: { 'aws:RequestTag/project': 'hold', 'aws:RequestTag/managed_by': 'cdk' },
+        // CloudFormation adds its own aws: tags, which only AWS can write.
+        'ForAllValues:StringLike': { 'aws:TagKeys': ['project', 'managed_by', 'aws:cloudformation:*'] },
+      },
+      Effect: 'Allow',
+      Resource: 'arn:aws:lambda:us-east-1:707938860881:event-source-mapping:*',
+    })
   })
 
   it('lets the boundary start only Hold’s functions, which is all the scheduler’s role needs for the relay', () => {
