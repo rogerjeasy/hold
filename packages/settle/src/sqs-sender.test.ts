@@ -13,4 +13,12 @@ describe('sending to SQS', () => {
     const send = createSqsSender({ queues: {}, client: { send: () => Promise.resolve(undefined) } })
     await expect(send({ queue: 'media', group: 'g', deduplicationId: 'd', body: {} })).rejects.toThrow(/media/)
   })
+
+  it('sends to a standard queue without a group or deduplication id, which SQS refuses there', async () => {
+    const sent: unknown[] = []
+    const send = createSqsSender({ queues: { media: 'https://sqs.test/hold-media' }, client: { send: (command) => Promise.resolve(void sent.push(command.input)) } })
+    await send({ queue: 'media', group: 'session-1', deduplicationId: 'photo-1', body: { shopId: 'shop-1', photoId: '1' } })
+    expect(sent).toEqual([{ QueueUrl: 'https://sqs.test/hold-media', MessageBody: '{"shopId":"shop-1","photoId":"1"}' }])
+  })
 })
+
