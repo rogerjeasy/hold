@@ -20,4 +20,16 @@ describe('a queue handler', () => {
     expect(handle).not.toHaveBeenCalled()
     expect(answer).toEqual({ batchItemFailures: [] })
   })
+
+  it('logs which message failed and the kind of error, never the error’s text, which can carry a query’s values', async () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    const failing = new Error('Failed query: select hold_renter_for_payer($1, $2) params: PAYER1,renter@example.com')
+    failing.name = 'DrizzleQueryError'
+    const answer = await createQueueHandler({ field: 'eventId', handle: () => Promise.reject(failing) })({ Records: [record('7', { shopId: 's', eventId: 'e' })] })
+    expect(answer).toEqual({ batchItemFailures: [{ itemIdentifier: '7' }] })
+    const lines = logged.mock.calls.flat().join(' ')
+    expect(lines).toContain('7')
+    expect(lines).toContain('DrizzleQueryError')
+    expect(lines).not.toContain('renter@example.com')
+  })
 })

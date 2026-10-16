@@ -24,7 +24,8 @@ export function createQueueHandler<Field extends string>(options: { readonly fie
       try {
         await options.handle(message)
       } catch (error) {
-        console.error(`Message ${record.messageId} failed and will be tried again: ${error instanceof Error ? error.message : 'unknown error'}`)
+        // Only the kind of error: a failed query's text carries its values, which can be a renter's details.
+        console.error(`Message ${record.messageId} failed and will be tried again: ${error instanceof Error ? error.name : 'unknown error'}`)
         failures.push({ itemIdentifier: record.messageId })
       }
     }
