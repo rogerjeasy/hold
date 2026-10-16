@@ -8,7 +8,7 @@ import { getServices } from './services'
 // stored first, with an outbox message, and PayPal is answered at once: PayPal retries anything else for three days.
 // Nothing in the event is believed here. The worker verifies it with PayPal and reads back what it names.
 
-const MAX_BODY = 64 * 1024
+export const PAYPAL_EVENT_MAX_BYTES = 64 * 1024
 // PayPal's own delivery rate is far below this. It only stops a flood of made-up events filling the table.
 const DELIVERIES = { name: 'paypal-webhook', max: 600, windowSeconds: 60 } as const
 
@@ -23,7 +23,7 @@ const answer = (status: number) => new Response(null, { status })
 export async function receivePayPalEvent(accountId: string, rawBody: string, headers: Headers): Promise<Response> {
   const { database, settle } = await getServices()
   if (!(await takeRateToken(database, DELIVERIES, (await callerNetwork()) ?? 'local'))) return answer(429)
-  if (rawBody.length > MAX_BODY) return answer(413)
+  if (rawBody.length > PAYPAL_EVENT_MAX_BYTES) return answer(413)
   let parsed: z.infer<typeof eventSchema>
   try {
     parsed = eventSchema.parse(JSON.parse(rawBody))
