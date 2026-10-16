@@ -319,12 +319,14 @@ In the hackathon build, the owner pastes their sandbox app's client ID and secre
 ## 11. Queues and schedules
 
 - **Amazon SQS** carries work that should not block the counter: comparing a photo session, applying a PayPal webhook, building an evidence pack, sending a message. Each queue has a dead-letter queue.
+- **AWS Lambda runs the worker.** Functions fed by the queues apply PayPal's events and capture fees, and one started every minute relays the outbox. App Runner cannot do this, since it throttles CPU between requests. The web app and the worker send to SQS with `@aws-sdk/client-sqs`, at the version of the other AWS clients.
 - **Amazon EventBridge Scheduler** drives everything time-based:
   - charging an unanswered claim before the hold lapses
   - warning the owner when a hold nears its 29-day limit
   - reminding a renter that a return is due
   - closing a claim when the renter's reply period ends
   - nightly reconciliation against PayPal
+  - the outbox relay, every minute
 - **Hold's SMTP account** sends email to renters and owners.
 
 **Hold upkeep is the scheduler's most important job.** A hold that lapses unnoticed leaves the shop unprotected. Every hold has a schedule created with it and removed when it ends.

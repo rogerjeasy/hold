@@ -178,6 +178,7 @@ hold/
                       detectors, trust ladder, negotiation referee. Pure code.
     db/               schema, migrations, repositories, row-level security
     paypal/           PayPal adapter, webhook verification, event mapping
+    settle/           running executions, applying verified PayPal events, the outbox relay
     evidence/         capture sessions, fingerprints, chain, evidence packs
     vision/           quality checks, alignment, candidate regions
     compare/          the comparison pipeline and its second look
@@ -339,7 +340,7 @@ The rules are plain code in `packages/domain/src/booking.ts`. The tables are wri
 - **Limits.** A rental lasts at most 28 days, so the hold placed at pickup outlives it, its return and a claim's reply. It may start up to 15 minutes in the past, for a renter at the counter, and up to a year ahead. Up to ten kinds of item, ten of each.
 - **Which items.** The booking takes specific items, the first free ones of each type by label. An item is free for a period unless it is in repair or retired, or a rental that still needs it overlaps the period. An unpaid booking keeps its items for 15 minutes (`PENDING_PAYMENT_MINUTES`). An item out, or back and being checked, is kept until now at least; an overdue one until it comes back. The candidate items are locked while the booking is written, so two bookings made at once cannot take the same item.
 - **The renter's link.** Each booking issues a link with the scopes `view` and `pay` (section 12.3). Staff can show a new link as a QR code at any time, or email it to the contact. Each showing makes a new link, since only fingerprints are kept.
-- **Paying the fee.** The renter's link page shows what they rent, the fee and the hold apart, the price list and wear policy they agree to, and the reply period. Paying creates an order with intent to capture in the shop's own PayPal account, for the stored fee, and sends the renter to PayPal. An order already awaiting approval is reused. PayPal sends the renter back to `/r/{token}/paid`, which changes nothing on arrival and confirms by a POST: the order is read back and must be approved and must be the one this rental started; then the execution is recorded, the order captured with its key, and the order read back again. Only that read-back books the rental (section 7.6).
+- **Paying the fee.** The renter's link page shows what they rent, the fee and the hold apart, the price list and wear policy they agree to, and the reply period. Paying creates an order with intent to capture in the shop's own PayPal account, for the stored fee, and sends the renter to PayPal. An order already awaiting approval is reused. PayPal sends the renter back to `/r/{token}/paid`, which changes nothing on arrival and confirms by a POST: the order is read back and must be approved and must be the one this rental started; then the execution is recorded and handed to the worker, which captures the order with its key and reads it back. Only that read-back books the rental (section 7.6). A renter who approves and never comes back is booked from PayPal's `CHECKOUT.ORDER.APPROVED` event (section 8.5).
 - **After the time to pay.** A booking past its 15 minutes no longer keeps its items, but its renter may still pay while nobody else has taken them. Staff can let an unpaid booking go (`abandoned`). A paid booking is not cancelled here, since that would need its fee refunded.
 - **Who the renter is.** The payer PayPal names on the capture, through `hold_renter_for_payer`. Until then a rental shows the contact staff typed, or "not paid yet".
 ---
@@ -550,7 +551,9 @@ Acting on a hold involves a database and an outside API, which cannot share a tr
 4. The worker records PayPal's reply and marks the execution submitted.
 5. The execution is confirmed only when the matching PayPal event is verified, or the resource is read back from PayPal.
 
-**The rental fee** follows the same steps with the action `fee_capture`, which names the rental and no hold. Until the worker runs executions, the renter's request that wrote the execution and its outbox message goes on to call PayPal and record the read-back itself (`apps/web/src/server/fee-payment.ts`); the outbox message is there for the worker to finish it if that request does not. The capture's key is fixed by the rental and its order, so repeating it captures nothing twice, and the money log takes the capture's identifier once. PayPal's amount must equal the stored fee to the cent, or the execution fails and nothing is booked.
+**The rental fee** follows the same steps with the action `fee_capture`, which names the rental and no hold. The renter's request records the execution with its outbox message and sends it to the `executions` queue at once (`requestFeeCapture` in `packages/settle`); the worker calls PayPal with the execution's key and records the read-back (`runExecution`). If the send fails, the outbox relay sends it within a minute. The renter's page looks again every two seconds until the rental shows as booked.
+
+**The outbox relay** runs every minute (`relayOutbox`, scheduled by EventBridge Scheduler). It reads the oldest waiting messages in every shop through `hold_pending_outbox`, which only `hold_worker` may call, sends each to its queue with its rental as the group and what it names as the deduplication ID, and marks it sent only once the queue took it. Most messages are sent by the request that wrote them, so the relay mostly finds nothing. The capture's key is fixed by the rental and its order, so repeating it captures nothing twice, and the money log takes the capture's identifier once. PayPal's amount must equal the stored fee to the cent, or the execution fails and nothing is booked.
 
 **Idempotency at each layer**
 
@@ -676,7 +679,14 @@ sequenceDiagram
 - **Read the resource back.** Hold does not trust the event body for amounts or status.
 - **Tolerate disorder.** State machines only move forward, so a late or repeated event changes nothing.
 
-**Simulator events.** PayPal's webhook simulator sends events that PayPal's own verification call rejects. Hold accepts them only in the test environment, behind an explicit setting, and marks them as simulated.
+**Simulator events.** PayPal's webhook simulator sends events that PayPal's own verification call rejects, so Hold never applies them. In the test environment, the simulated PayPal signs its own events and verifies only those.
+
+**As built** (`apps/web/src/server/paypal-webhook.ts`, `packages/settle/src/paypal-events.ts`):
+
+- **The subscription.** Connecting PayPal subscribes the shop's own address, `/api/webhooks/paypal/{accountId}`, to the events in `PAYPAL_EVENT_TYPES`, and keeps the subscription's id beside the account. A shop connected earlier turns it on from its PayPal page. PayPal takes only an HTTPS address, so on a developer's machine there are no events and Hold works without them.
+- **The intake** reads the shop from the account in the address through `hold_paypal_account`, before any shop is chosen. It stores the exact body and PayPal's signing headers, once per PayPal event ID, with an outbox message in the same transaction, sends that message to the `paypal-events` queue at once, and answers 200. Events about one order share a group: a capture is grouped by the order it was made on. Deliveries are limited per network and to 64 KB.
+- **Verification** asks PayPal's `verify-webhook-signature` about the exact stored body, against the account's subscription. A rejected event is kept, marked `rejected`, and never applied.
+- **What is applied.** `CHECKOUT.ORDER.APPROVED` on a fee order: the order is read back, and only if PayPal shows it approved is the fee captured. This books a renter who approved in PayPal and never came back to Hold. `PAYMENT.CAPTURE.COMPLETED` on a fee order: the order is read back for who paid and how much, and confirmed as in section 6.5. Every other event is kept and marked `ignored` until the feature that acts on it is built.
 
 ### 8.6 Reconciliation
 
@@ -1185,7 +1195,7 @@ Three layers, each independent of the others.
 - `users` and `renters` carry no shop. A person sees themselves and their colleagues in the current shop. A shop sees only the renters who rented from it. Renters are created only through `hold_renter_for_payer`, from the identity PayPal returned.
 - No service role may delete a row. The money log, approvals and the audit trail also refuse updates. Both rules are grants, so they hold even for a query that passes every policy.
 
-**Service access.** The worker uses a separate database role, `hold_worker`, and each job names the single shop it is working on.
+**Service access.** The worker uses a separate database role, `hold_worker`, with its own login in the secret `hold/database/worker`, and each job names the single shop it is working on. The migration gives `hold_worker` its password once that secret exists, so the first deploy of the worker needs a second migration run. Only `hold_worker` may read the outbox across shops, through `hold_pending_outbox`.
 
 ### 12.3 Renters
 
@@ -1265,7 +1275,7 @@ Served by `web`. Each requires a valid signed link.
 
 | Route | From | Protection |
 |---|---|---|
-| `/webhooks/paypal/{accountId}` | PayPal | Signature verification |
+| `/api/webhooks/paypal/{accountId}` | PayPal | Stored first, then verified with PayPal before anything in it is used. Limited per network and to 64 KB. Under `/api` because the language proxy leaves it alone. |
 
 ### 13.4 The MCP server for assistants
 
@@ -1399,7 +1409,7 @@ The worker's compute is added with its code. The web app's address is known only
 | Service | Runs on | Notes |
 |---|---|---|
 | web | App Runner, 1 vCPU and 2 GB, one to two instances | Checked by TCP on port 3000. Runs the image named by the deploy, never the newest pushed |
-| worker | To be chosen with its code | App Runner throttles CPU between requests, so it cannot poll queues. Lambda functions fed by SQS are the likely choice |
+| worker | Lambda, Node 24, 512 MB, four minutes per message | App Runner throttles CPU between requests, so it cannot poll queues. Three functions: `hold-worker-paypal-events` and `hold-worker-executions` fed by their FIFO queues, naming only the messages that failed so only those are tried again, and `hold-worker-outbox-relay` started every minute by EventBridge Scheduler. The four minutes allow a paused Aurora cluster to wake. Each queue hides a message for six minutes, longer than a function may run on it. Code in `apps/worker`, deployed by `infra/lib/worker.ts` |
 
 ### 14.5 Data
 
@@ -1464,7 +1474,9 @@ Every queue has a dead-letter queue and an alarm on it.
 | **A passkey-proven record is carried to another account's session** | The record names the person and the session it belongs to, and is checked against the verified access token. Tested in `shop-access.test.ts`. |
 | **Someone who reached an owner's inbox adds their own passkey** | Only the first passkey can be added from an emailed-code session. Every later one needs a session a passkey proved, checked on both halves of the registration. Tested in `passkey-registration.test.ts`. |
 | **A sign-in attempt is altered or guessed** | The attempt travels in a cookie sealed with AES-256-GCM, so a changed one is refused. It lasts ten minutes and ends after three wrong codes. Tested in `sealed.test.ts`. |
-| **A forged webhook** | Signature verification and reading the resource back from PayPal. |
+| **A forged webhook** | Stored, then verified with PayPal against the shop's own subscription before anything in it is used; a rejected one is never applied. What it names is then read back from PayPal, and the event's body is never believed. Tested in `settle.test.ts` and `paypal-webhook.test.ts`. |
+| **Made-up events fill the database** | Deliveries are limited per network and to 64 KB, and one PayPal event ID is stored once. |
+| **The web app reads another shop's queued work** | Reading the outbox across shops is a function only `hold_worker` may call; the web app's role is refused. Tested in `paypal-event-repository.test.ts`. |
 | **A replayed request** | Idempotency keys at every layer. |
 | **One shop reads another's data** | Shop checks in the service and row-level security in the database. |
 | **A renter link leaks through the address bar** | Renter pages send no referrer and are not indexed. Each link is bound to one rental and its scopes, expires 60 days after the rental, and cannot move money without the renter approving in PayPal. |
@@ -1707,7 +1719,7 @@ The first two are confirmed by short trials on day one. The third is confirmed o
 | Question | Why it matters | Affects the hackathon |
 |---|---|---|
 | **Does the "combined" strategy work?** | Partly answered: the sandbox confirmed on 14 October 2026 that the remainder survives a partial capture and can be captured or released. Renewal after a partial capture is tried after day 4. | Yes. If renewal fails, combined holds are limited to short rentals. |
-| **What runs the worker?** | App Runner throttles CPU between requests, so it cannot poll queues or run scheduled work. Lambda functions fed by SQS are the likely answer, and suit the worker's short jobs. Comparisons that run for minutes fit Lambda's 15-minute limit. | Yes, before the first queue consumer is built |
+| **What runs the worker?** | Settled on 15 October 2026: Lambda functions fed by SQS (section 14.4). App Runner throttles CPU between requests, so it cannot poll queues or run scheduled work. Comparisons that run for minutes fit Lambda's 15-minute limit. | No |
 | **Is SES out of its sandbox?** | Settled another way: email goes through Hold's SMTP account, so SES's sandbox no longer limits who receives a code (`tech-stack.md` section 9.1). | No |
 | **How accurate is the comparison in a real shop?** | Outdoor light, wet or dirty items and hurried photographs will all test it. | Yes. It decides how much is automatic and how much goes to a person. |
 | **How does Hold act on a real shop's PayPal account?** | Holding a shop's API credentials is not acceptable in production. PayPal's partner model is the likely answer. | No |
