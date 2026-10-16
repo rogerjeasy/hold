@@ -28,8 +28,8 @@ describe('loadWebConfig', () => {
   })
 
   it('sends work to the worker’s queues when it knows them, and must know them when deployed', () => {
-    const queues = { HOLD_EXECUTIONS_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-executions.fifo', HOLD_PAYPAL_EVENTS_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-paypal-events.fifo' }
-    expect(loadWebConfig({ ...AWS, ...queues })).toMatchObject({ queues: { executions: queues.HOLD_EXECUTIONS_QUEUE_URL, 'paypal-events': queues.HOLD_PAYPAL_EVENTS_QUEUE_URL } })
+    const queues = { HOLD_EXECUTIONS_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-executions.fifo', HOLD_PAYPAL_EVENTS_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-paypal-events.fifo', HOLD_MEDIA_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-media' }
+    expect(loadWebConfig({ ...AWS, ...queues })).toMatchObject({ queues: { executions: queues.HOLD_EXECUTIONS_QUEUE_URL, 'paypal-events': queues.HOLD_PAYPAL_EVENTS_QUEUE_URL, media: queues.HOLD_MEDIA_QUEUE_URL } })
     expect(loadWebConfig(AWS)).toMatchObject({ queues: undefined })
     expect(() => loadWebConfig({ ...AWS, HOLD_ENVIRONMENT: 'production' })).toThrow(/HOLD_EXECUTIONS_QUEUE_URL/)
   })
@@ -64,6 +64,13 @@ describe('loadWebConfig', () => {
     expect(loadWebConfig(AWS).renterLinkKey).toEqual({ kind: 'secret', secretArn: SECRET })
     expect(() => loadWebConfig({ ...AWS, HOLD_ENVIRONMENT: 'production', HOLD_EXECUTIONS_QUEUE_URL: 'https://sqs.test/e.fifo', HOLD_PAYPAL_EVENTS_QUEUE_URL: 'https://sqs.test/p.fifo' })).toThrow(/HOLD_RENTER_LINK_KEY_SECRET_ARN/)
     expect(() => loadWebConfig({ ...AWS, HOLD_ENVIRONMENT: 'production', HOLD_RENTER_LINK_KEY: KEY })).toThrow(/HOLD_RENTER_LINK_KEY/)
+  })
+
+  it('names the two photograph buckets, which a deployed app must know', () => {
+    const buckets = { HOLD_EVIDENCE_BUCKET: 'hold-evidence-1', HOLD_DISPLAY_BUCKET: 'hold-display-1' }
+    expect(loadWebConfig({ ...AWS, ...buckets })).toMatchObject({ photoBuckets: { evidence: 'hold-evidence-1', display: 'hold-display-1' } })
+    expect(loadWebConfig(AWS)).toMatchObject({ photoBuckets: undefined })
+    expect(() => loadWebConfig({ ...AWS, HOLD_ENVIRONMENT: 'production' })).toThrow(/HOLD_EVIDENCE_BUCKET/)
   })
 })
 

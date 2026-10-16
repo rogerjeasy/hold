@@ -38,6 +38,12 @@ const awsServices = z
     // The worker's queues, for work the app hands on at once. Without them, work waits in the outbox for the relay.
     HOLD_EXECUTIONS_QUEUE_URL: z.url().optional(),
     HOLD_PAYPAL_EVENTS_QUEUE_URL: z.url().optional(),
+    // Photographs whose display copies the worker makes. Without it, they wait in the outbox for the relay.
+    HOLD_MEDIA_QUEUE_URL: z.url().optional(),
+    // Where photographs go: the locked originals, and the face-blurred copies people see. Without them, on a
+    // developer's machine, no photograph can be taken.
+    HOLD_EVIDENCE_BUCKET: z.string().min(3).optional(),
+    HOLD_DISPLAY_BUCKET: z.string().min(3).optional(),
   })
   .refine((value) => value.HOLD_ENVIRONMENT !== 'production' || value.HOLD_EXECUTIONS_QUEUE_URL !== undefined, {
     path: ['HOLD_EXECUTIONS_QUEUE_URL'],
@@ -46,6 +52,10 @@ const awsServices = z
   .refine((value) => value.HOLD_ENVIRONMENT !== 'production' || value.HOLD_PAYPAL_EVENTS_QUEUE_URL !== undefined, {
     path: ['HOLD_PAYPAL_EVENTS_QUEUE_URL'],
     message: 'Deployed, the app sends PayPal events to the worker.',
+  })
+  .refine((value) => value.HOLD_ENVIRONMENT !== 'production' || (value.HOLD_EVIDENCE_BUCKET !== undefined && value.HOLD_DISPLAY_BUCKET !== undefined), {
+    path: ['HOLD_EVIDENCE_BUCKET'],
+    message: 'Deployed, the app stores photographs.',
   })
   .refine((value) => value.HOLD_COOKIE_KEY_SECRET_ARN !== undefined || value.HOLD_COOKIE_KEY !== undefined, {
     path: ['HOLD_COOKIE_KEY_SECRET_ARN'],
@@ -86,7 +96,8 @@ export type WebConfig =
       readonly smtpSecret: string
       readonly paypalMode: 'sandbox'
       // By queue name, as the outbox names them.
-      readonly queues: Readonly<Record<'executions' | 'paypal-events', string>> | undefined
+      readonly queues: Readonly<Record<'executions' | 'paypal-events', string> & Partial<Record<'media', string>>> | undefined
+      readonly photoBuckets: { readonly evidence: string; readonly display: string } | undefined
     }
   | {
       readonly environment: 'test'
@@ -131,6 +142,11 @@ export function loadWebConfig(environment: Readonly<Record<string, string | unde
     queues:
       value.HOLD_EXECUTIONS_QUEUE_URL === undefined || value.HOLD_PAYPAL_EVENTS_QUEUE_URL === undefined
         ? undefined
-        : { executions: value.HOLD_EXECUTIONS_QUEUE_URL, 'paypal-events': value.HOLD_PAYPAL_EVENTS_QUEUE_URL },
+        : {
+            executions: value.HOLD_EXECUTIONS_QUEUE_URL,
+            'paypal-events': value.HOLD_PAYPAL_EVENTS_QUEUE_URL,
+            ...(value.HOLD_MEDIA_QUEUE_URL === undefined ? {} : { media: value.HOLD_MEDIA_QUEUE_URL }),
+          },
+    photoBuckets: value.HOLD_EVIDENCE_BUCKET === undefined || value.HOLD_DISPLAY_BUCKET === undefined ? undefined : { evidence: value.HOLD_EVIDENCE_BUCKET, display: value.HOLD_DISPLAY_BUCKET },
   }
 }
