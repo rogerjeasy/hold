@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatMoney } from './money'
+import { formatMoney } from './money-format.ts'
 
 const hold = { cents: 30000, currency: 'EUR' }
 
