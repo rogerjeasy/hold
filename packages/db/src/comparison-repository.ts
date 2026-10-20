@@ -1,3 +1,4 @@
+import { reserveEvidencePack } from './evidence-repository.ts'
 import { INSPECTION_LIMITS, RENTAL_TRANSITIONS, transition } from '@hold/domain'
 import { and, asc, eq, inArray, isNotNull, isNull, lte, ne, sql } from 'drizzle-orm'
 import { auditLog, captureSessions, comparisons, findings, itemTypes, items, marks, photoPlans, photos, priceEntries, rentalItems, rentals, users, wearPolicies } from './schema/index.ts'
@@ -46,6 +47,8 @@ export async function completeComparison(transaction: Transaction, comparisonId:
   if (updated === undefined) return false
   for (const finding of result.findings) await transaction.insert(findings).values({ ...finding, shopId: updated.shopId, comparisonId })
   await transaction.insert(auditLog).values({ shopId: updated.shopId, actorKind: 'worker', action: 'comparison.completed', subjectKind: 'comparison', subjectId: comparisonId, detail: { state: result.state, reason: result.reason, model: result.model, promptVersion: result.promptVersion, simulated: result.simulated }, at: now })
+  const [rental] = await transaction.select({ id: rentalItems.rentalId }).from(comparisons).innerJoin(captureSessions, eq(captureSessions.id, comparisons.returnSessionId)).innerJoin(rentalItems, eq(rentalItems.id, captureSessions.rentalItemId)).where(eq(comparisons.id, comparisonId))
+  if (rental !== undefined) await reserveEvidencePack(transaction, rental.id, now)
   return true
 }
 

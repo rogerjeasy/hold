@@ -308,12 +308,15 @@ Every table except `users` and `renters` carries a `shop_id`.
 | `invoices` | Rental, PayPal invoice ID, amount, state |
 | `shipments` | Rental, direction, carrier, tracking number, status |
 | `disputes` | Rental, PayPal dispute ID, reason, state, evidence sent |
-| `evidence_packs` | Rental, version, evidence key, manifest fingerprint |
+| `evidence_packs` | Rental, immutable version and validated frozen snapshot, source fingerprint, renderer version, build state, PDF/manifest hashes and exact S3 object-version references |
+| `receipt_deliveries` | Rental, verified event, receipt kind, exact pack version, recipient identity and language, amounts, delivery state, lease, attempts and sent time |
 | `renter_links` | Rental, token fingerprint, scope, expiry, last used |
 | `outbox` | Pending messages written in the same transaction as state changes |
 | `audit_log` | Who did what, when, from where |
 
 **What the migrations hold so far.** Every table above, with `rentals.simulated` added in `0009`, the item columns in `0010` and the booking columns in `0011`, except `locations`, `shipments` and `disputes`, which arrive with the features that use them. The schema is in `packages/db/src/schema`, the migrations in `packages/db/migrations`.
+
+Migrations `0018`–`0020` add evidence publication metadata and `receipt_deliveries`, shop RLS and publication/delivery guards. A pack must be inserted as `building` without publication metadata; a receipt starts `queued` without a lease or sent time. The web role reserves work; only the worker role may publish artifacts or update delivery metadata. Frozen snapshot/version identity and published metadata cannot be rewritten, and neither service role may delete these records.
 
 **Tables added by the extensions.** `mandates`, `proposals`, `exceptions`, `ops_runs`, `eval_runs`, `finding_outcomes`, `rental_outcomes`, `trust_ladders`, `trust_rungs`, `renter_consents`, `quotes`, `agent_sessions`, `negotiations`, `negotiation_moves` and `incidents`. Their contents are listed in `extensions.md` section 4.6.
 
@@ -830,7 +833,7 @@ The passport is the page `/shop/items/{id}` (section 13.6). It shows the item's 
 
 ### 9.5 The evidence pack
 
-One document per rental, built by the worker.
+Versioned documents per rental, built by the worker from a frozen, validated database snapshot.
 
 1. The rental's details and the versions of the price list and wear policy the renter agreed to.
 2. The handover session and the condition report the renter confirmed.
@@ -839,10 +842,18 @@ One document per rental, built by the worker.
 5. The claim, each line with its price list entry.
 6. The approvals, including anything a person changed.
 7. The renter's reply, if any.
-8. The PayPal record: hold placed, amount captured, amount released.
-9. A manifest of every photograph's fingerprint.
+8. The PayPal record: authorizations and verified fee capture, deposit capture, release, refund and invoice events. Invoice sent and invoice paid are distinct; expiry is not represented as release. Sandbox and simulated records are visibly labelled.
+9. A manifest of original and embedded display-copy SHA-256 fingerprints, server receipt times, supersession and sealed-session chain links. Storage keys and renter tokens never enter the downloadable manifest or PDF.
 
-The pack is stored locked, shown to the renter, and is what Hold uploads if a dispute is opened. A new version is written if anything changes. Earlier versions remain.
+Sealing evidence, condition replies, comparison completion or deferral, claim changes, approvals, renter replies, resolution and verified settlement reserve the relevant snapshot in the same shop transaction as the lifecycle change and its outbox work. A rental-row lock serializes version allocation. Identical canonical source fingerprints reuse a version; changed source values reserve a new one. The worker renders only that frozen snapshot, including incomplete stages, agreed historical prices/policy text, named manual reasons, uncertainty, model/prompt identity and quoted renter comments. Ordinary packs embed face-blurred display photographs, paired by item/view with finding outlines. A missing display copy blocks publication and retries; there is no original-photo fallback.
+
+The snapshot, photograph manifest and PDF are written under version-specific keys in the locked evidence bucket using conditional S3 creation and SHA-256 checksums. Exact object-version references are retained and used for verification and downloads. Identical bytes after a lost response can be reused; conflicting bytes fail closed. `building → ready` requires complete hashes/version references, while `failed → building` retries the same reserved snapshot. `ready` has no outgoing transition. Earlier published versions remain. The record supplies the evidence for a later dispute submission; generation itself does not submit a dispute.
+
+PDFKit `0.20.2` renders four Western-language document label sets with standard Helvetica, measured wrapping, section headings and page numbers. Arbitrary non-Latin names or comments need a future embedded Unicode font. Python PDF tooling is used only for local visual inspection.
+
+Staff and renters can list versions and download the shared PDF/manifest after access checks (sections 12.3 and 13). Snapshots whose claim is `draft` or `awaiting_approval` remain staff-only. Authenticated POST server actions request a build or a download link; rendering and signed-link issuance never happen merely because a page is visited. Read-only staff can download but cannot request builds. Signed links last at most 300 seconds and name the published S3 version. Page/action responses are private/no-store; no original-photo URL is included.
+
+**Settlement receipts.** Verified capture with its confirmed remainder produces one receipt; clean release, refund, invoice sent and invoice paid have separate receipt kinds. Fee payment and renewal do not send settlement receipts. Each intent is committed with its verified money event and bound to the snapshot's exact pack. Publication queues its delivery; later evidence cannot retarget it. A protective capture receipt leaves the contest visibly open, and a sent invoice never claims payment. The shared `@hold/settle` receipt state machine leases work, waits for that pack to be ready and marks `sent` only after the transport accepts it. The worker uses SMTP; simulated execution uses the same state machine with the memory mailer. Missing verified payer contact is a recorded failure. No receipt attaches a PDF or grants payment authority.
 
 ---
 
@@ -1272,6 +1283,8 @@ Renters have no account. They act through links.
 
 **How a link is checked.** Every renter request and page goes through `renterAction` or `renterAccess` in `apps/web/src/server/renter-access.ts`: the network is rate limited, the token's signature is checked, its link is read by fingerprint through `hold_renter_link` before any shop is chosen, the link must be live and carry the scope, and the work runs in transactions bound to the link's shop with no person named. A changed, unknown, expired and revoked link get the same answer. Renter pages are not indexed and send no referrer, so the token in their address never reaches another site.
 
+Receipt links carry only `view`, are bound to one rental and select the immutable pack UUID through `/record?version={pack UUID}`. They expire 60 days after the later of the rental end or receipt issuance. This extends the read-only window for a late refund: a newly issued refund receipt must not arrive with an already expired record link. Retries may issue multiple valid, expiring read-only links; only fingerprints are stored, and no plaintext token enters the outbox, PDF, manifest or logs. Expired, revoked, malformed, wrong-scope and cross-rental/version requests fail closed. A record link cannot accept, contest or pay a claim.
+
 ### 12.4 Connecting the shop's PayPal account
 
 **In the hackathon build,** the owner pastes the client ID and secret of their shop's PayPal sandbox app on the shop's PayPal page. Hold checks them by asking PayPal for a token, then keeps them in Secrets Manager under `hold/paypal/shops/{shop}/sandbox`, and stores only that name in `paypal_accounts`. They are never shown again. Only the owner can connect, and only after confirming with a passkey.
@@ -1311,6 +1324,8 @@ Served by `web`. All routes require a Cognito token.
 | `/api/incidents` | Incidents reported by renters |
 | `/api/accuracy` | The scorecard |
 
+The rental record uses POST server actions through the same access wrapper: `buildRecord` for owner/manager/counter staff, and `downloadRecord` for all four staff roles. The strict input selects a stored rental/pack and `pdf` or `manifest`; it accepts no amounts or storage keys. The record page itself only reads.
+
 ### 13.2 Renter routes
 
 Served by `web`. Each requires a valid signed link.
@@ -1323,11 +1338,13 @@ Served by `web`. Each requires a valid signed link.
 | `/r/{token}/condition` | How each item left: its photographs and marks. Within 24 hours of the handover, the link sent then may confirm it or add photographs of anything missed. |
 | `/r/{token}/session` | Guided photographs for shipped rentals |
 | `/r/{token}/claim` | See a claim, accept or contest it |
-| `/r/{token}/record` | The evidence pack |
+| `/r/{token}/record` | Shared evidence versions and PDF/manifest downloads; `?version={pack UUID}` selects the exact receipt version. Draft and awaiting-approval claims remain staff-only. |
 | `/r/{token}/incident` | Report something that happened during the rental |
 | `/r/{token}/negotiation` | Set an advocate's limit, read the transcript, confirm the result |
 | `/r/{token}/trust` | The Clean Record, consent and the credential |
 | `/r/{token}/assistant` | What a connected assistant did, and a button to disconnect it |
+
+Record build/download POST actions require the signed link's `view` scope and exact rental binding. Visits only read; download actions issue a private, exact-version S3 URL lasting at most 300 seconds. Unknown or malformed selected versions are refused without revealing another rental's metadata.
 
 ### 13.3 Inbound webhooks
 
@@ -1389,6 +1406,7 @@ Served by `web` under `/shop`. Each page asks `shopAccess` itself; the frame aro
 | `/shop/rentals/{id}/handover/{session}` | One item's guided handover: each view photographed and checked on the phone, its marks confirmed or boxed, then sealed; the condition report's code once the rental is out. |
 | `/shop/rentals/{id}/return/{session}` | One item's guided return, using the handover's saved plan and faint display-photo overlay. Required views must be present before sealing. Read-only members see evidence without capture controls. |
 | `/shop/rentals/{id}/comparison/{comparison}` | Comparison progress, paired display photographs, findings and model/prompt identity. Staff can append a named manual inspection; read-only members cannot. A different shop's record or a different rental binding answers 404. |
+| `/shop/rentals/{id}/record` | Evidence versions, creation times, fingerprints, pending/failure/retry states and receipt delivery status. `?version={pack UUID}` selects a stored version. All roles can download; read-only staff have no build controls. |
 | `/shop/items` | The item types, each with its terms, kit, photo plan and items, and where each item stands. Four figures on top: items, available, out now, in repair. Filters by standing, each its own address (`?show=`). |
 | `/shop/items/new`, `/shop/items/types/{id}` | Creating and editing an item type, with its kit and its photo plan. The plan starts from the suggestion for the kind. |
 | `/shop/items/{id}` | The item passport (section 9.4): where it is, its rentals, its known marks, its chain of photo sessions, its photo plan, its details and its status. Another shop's item answers 404. |
@@ -1497,12 +1515,14 @@ The worker's compute is added with its code. The web app's address is known only
 | `upkeep` | A hold's timed steps, sent by its schedules. Deduplicated by content, since EventBridge Scheduler cannot name a deduplication ID | Per hold |
 | `comparisons` | Sealed return sessions to compare | None needed |
 | `media` | Display copies and face blurring. A standard queue, so messages carry no group or deduplication ID; a copy is made once whatever | None needed |
-| `evidence` | Evidence packs to build | Per rental |
-| `messages` | Emails and in-app messages | None needed |
+| `evidence` | Reserved pack IDs to render and publish from frozen snapshots | Per rental |
+| `messages` | Settlement receipt delivery IDs; six-minute visibility exceeds the five-minute delivery lease | None needed |
 | `ops-agent` | Operations agent runs | Per shop |
 | `negotiations` | The advocates' turns on a contested claim | Per rental |
 
 Every queue has a dead-letter queue and an alarm on it.
+
+The outbox relay carries evidence and receipt identities without tokens or contact details. Separate evidence and receipt Lambda roles have only their required database, logs, queue and artifact/secret access: the renderer reads face-blurred display copies and writes/reads `packs/*`, without PayPal credentials; the receipt worker reads its link-signing and SMTP secrets. PDFKit and sharp are external pinned worker modules so PDFKit font data and sharp's native loader ship with the bundle. Deploy the updated `HoldDelivery` permissions boundary before the compute stack. AWS deployment and Linux Lambda runtime execution remain unverified in this change.
 
 **Schedules:** hold replacement before validity ends, the charge of an unanswered claim before the hold lapses, hold expiry, return-due reminders, overdue alerts, reply-period end, the nightly reconciliation, the operations agent's run after it, and the expiry of unpaid bookings. Schedules for a hold are created when it is placed and removed when it ends.
 
@@ -1521,7 +1541,10 @@ Every queue has a dead-letter queue and an alarm on it.
 |---|---|
 | **A shop overcharges a renter** | Charges only from findings with photographs. Prices only from the list the renter agreed to. Never more than the hold. A person's approval on record. The renter sees everything and can reply. |
 | **Staff invent damage** | Every line needs a finding or a written reason. Claims above the limit need a second person. Approvals record what was changed. |
-| **Evidence is altered afterwards** | Object Lock, fingerprints and the chain per item. |
+| **Evidence is altered afterwards** | Object Lock, original/display fingerprints and the chain per item; frozen version identities and worker-only publication guards; conditional artifact writes with checksums and exact-version reads. Published metadata cannot be updated or deleted. |
+| **An evidence export exposes an original or an unpresented claim** | PDF/manifest downloads contain only face-blurred display photographs and shared fields, with no storage keys or renter tokens. Missing display copies block publication. Renter queries and downloads exclude draft/awaiting-approval snapshots and enforce the link's rental/version binding. |
+| **A receipt repeats a charge or announces an unverified success** | Delivery is separate from money execution, created only from verified event records and bound to a published frozen pack. Capture and remainder share one receipt; protective captures and unpaid invoices retain their distinct labels. Leases and terminal sent-state guards reject ordinary duplicates. |
+| **A forwarded receipt link grants money authority** | Receipt links have only the view scope, exact rental binding, signature, expiry and revocation checks. Accept/contest/payment scopes and one-time codes remain separate. Only fingerprints are stored; short-lived artifact URLs name an exact published version. |
 | **A return is uploaded or sealed as a handover baseline** | Staff capture actions bind the session kind as well as shop scope. Returns keep the sealed handover plan; handover mark actions refuse return sessions. Negative cases are in `return-flow.test.ts`. |
 | **A model response invents money or turns uncertainty into a charge** | Strict schemas contain price codes but no amounts, code resolves only agreed entries, a fresh second look checks damage, and uncertainty defers. The comparison has no PayPal dependency or action tool. Tested in `pipeline.test.ts`, `inspection.test.ts` and `job.test.ts`. |
 | **A queue retry duplicates or replaces findings** | Atomic comparison creation with the return outbox, a bounded worker lease, terminal-state checks and stale-completion rejection. Tested in `return-repository.test.ts` and `job.test.ts`. |
@@ -1534,7 +1557,7 @@ Every queue has a dead-letter queue and an alarm on it.
 | **Sample rentals pass for real ones** | Only the owner, only in a shop with no rentals, and once. Every sample rental is marked `simulated` in the record, its PayPal references start with `SIMULATED-`, its audit lines say so, and every screen marks it. No PayPal call is made. Tested in `shop-access.test.ts` and `shop-today.test.ts`. |
 | **Codes are requested to pester someone or run up cost** | Five code emails per address and forty requests per network in fifteen minutes, on top of Cognito's own limits. Tested in `sign-in-flow.test.ts`. |
 | **A sign-in code is read on its way to the person** | Cognito encrypts each code with Hold's own KMS key before handing it over. Only `hold-code-sender` may decrypt with it and only Hold's user pool may call it. The code and the address are never logged. Tested in `code-sender.test.ts` and `hold-app.test.ts`. |
-| **The SMTP password leaks** | Kept only in the secret `hold/email/smtp`, readable by the code sender and the web app alone. No template, image, setting or log holds it. |
+| **The SMTP password leaks** | Kept only in the secret `hold/email/smtp`, readable by the code sender, web app and narrowly scoped receipt worker. No template, image, setting or log holds it. |
 | **A shop's PayPal credentials leak** | Kept only in Secrets Manager, checked with PayPal before being kept, never shown again, never logged. |
 | **Someone finds out who has an account** | Every address gets the same "check your email" step, and a code for an address with no account is simply wrong. Passkey sign-in gives every address options of the same shape, with no list of credentials. Tested in `sign-in-flow.test.ts` and `fake-identity.test.ts`. |
 | **A passkey-proven record is carried to another account's session** | The record names the person and the session it belongs to, and is checked against the verified access token. Tested in `shop-access.test.ts`. |
@@ -1586,6 +1609,9 @@ Every queue has a dead-letter queue and an alarm on it.
 | **Claude is unavailable** | The return session is still sealed and stored. Staff are told the comparison is delayed and can inspect by eye. The hold stays in place. |
 | **The comparison cannot decide** | The result is "needs a person". Nothing is charged on an uncertain finding. |
 | **Rekognition is unavailable** | Display copies are held back until faces can be blurred. Originals are unaffected. |
+| **A pack lacks a display copy or artifact write fails** | Publication fails closed and retries the same frozen version. Existing identical conditional writes can be reused; conflicting bytes are refused. Payment operations are neither rolled back nor repeated. |
+| **A receipt has no verified contact or SMTP fails** | Delivery is recorded as failed and retries independently of payment and pack generation. A five-minute lease fences concurrent attempts; messages remain invisible for six minutes. |
+| **SMTP accepts a receipt and the worker crashes before recording success** | A retry may send a duplicate email. Ordinary redelivery after recorded success is a no-op; SMTP cannot provide exactly-once delivery across that crash boundary. Retries may create additional valid read-only expiring links. |
 | **A worker crashes mid-job** | The message returns to the queue. Idempotency makes the retry safe. |
 | **A message keeps failing** | It moves to the dead-letter queue and raises an alarm. |
 | **A deployment goes wrong** | Rolling deployment with health checks rolls back automatically. |
@@ -1673,13 +1699,16 @@ These are targets, not measured results.
 | **Renewal** | Reauthorization and expiry | A fake PayPal with a controllable clock, because the sandbox cannot simulate these |
 | **End to end** | Handover, return, claim, reply | Playwright, with a recorded image as the camera |
 | **Comparison** | Accuracy of findings | The evaluation set in section 10.8 |
-| **Evidence** | Lock, fingerprints, chain | Tests that try to alter stored evidence and must fail |
+| **Evidence** | Frozen historical snapshots, immutable publication, SHA-256 manifests, chain, conditional writes and exact versions | PostgreSQL grant/guard and cross-shop tests, storage/worker recovery tests, deterministic PDF tests, and page rasterization/text inspection with generated fixtures |
+| **Receipts** | Verified-event creation, capture/remainder grouping, exact pack binding, leases, retry and contact failures | Shared worker/fake state-machine tests and memory mailer; no real email or payment needed |
 | **Security** | Isolation between shops, renter link scope | Tests that try to cross those boundaries and must fail |
 | **Agents** | That no tool, proposal kind or mandate leads to a charge a claim does not justify | Tests that list every one and must find none |
 | **Detectors** | Each exception is found once, and only when its condition is true | Seeded states and property tests |
 | **Referee** | No settlement outside either side's limits, and every negotiation ends | Property tests over any sequence of moves |
 | **Ladder** | A hold is never raised, and never rises with more clean returns | Property tests |
 | **Manipulation** | Text from renters, assistants and PayPal memos cannot steer an agent into an action | Seeded hostile text |
+
+Evidence/receipt coverage includes staff and renter PDF/manifest actions, staff-only draft snapshots, malformed/expired/revoked/cross-rental links and exact version selection. Representative English, French, German and Spanish PDFs, a clean return and long multi-item content are rendered and visually inspected locally; generated fixture photographs are separate from the evaluation set. Record pages join the shared responsive Playwright checks. These local checks do not verify deployed AWS Object Lock/IAM, the Linux native/font bundle, new live PayPal sandbox paths or live AI accuracy; those remain deferred.
 
 **Properties the domain tests assert for any input**
 

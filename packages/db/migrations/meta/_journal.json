@@ -127,6 +127,27 @@
       "when": 1792513234272,
       "tag": "0017_gigantic_unicorn",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1792523877970,
+      "tag": "0018_evidence_versions",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1792524130500,
+      "tag": "0019_settlement_receipts",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1792525181401,
+      "tag": "0020_document_publication_guards",
+      "breakpoints": true
     }
   ]
 }

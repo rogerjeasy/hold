@@ -233,13 +233,15 @@ The extensions add four agents to the owner's assistant. All that run inside Hol
 
 Photographs are Hold's evidence, so how they are stored matters as much as how they are compared.
 
-- **Amazon S3 with Object Lock.** Once written, a photograph cannot be overwritten or deleted until its retention period ends. This is what makes the evidence credible to a renter or to PayPal.
+- **Amazon S3 with Object Lock.** A retained object version cannot be overwritten or deleted until its retention period ends. Versioning can still create a new object under the same key, so document publication additionally uses conditional creation, SHA-256 checksums and exact object-version references.
 - **A fingerprint for every photograph.** A SHA-256 hash is recorded in the database at upload. Any later copy can be proved identical.
 - **Server time, not phone time.** The capture time recorded is the moment the server received the upload.
 - **Private by default.** Renters and staff see photographs only through short-lived signed links.
 - **Faces blurred.** Amazon Rekognition finds faces and sharp blurs them before the display copy is saved. The original stays locked for evidence.
 - **Display copies.** Smaller versions are generated for fast loading on a phone.
-- **Evidence packs.** A PDF with the photographs, the comparison, the price list, the approval and the payment record, generated on the worker and stored in S3. It is what the renter sees and what is uploaded to PayPal if a dispute is opened.
+- **Evidence packs.** Frozen, validated snapshots are reserved with lifecycle transactions and rendered on the worker into immutable versioned PDFs and photograph manifests. The PDF contains paired face-blurred display photographs and outlines, historical agreed prices/policy, human decisions, replies and verified payment records; sandbox/simulation and incomplete stages are explicit. The manifest distinguishes original and embedded display SHA-256 hashes and preserves sealed-session chain links without storage keys. Missing display copies block publication and retry; no original fallback is permitted. The stored snapshot is internal; downloads expose only the PDF and shared manifest. A later dispute submission can use these artifacts.
+- **PDFKit `0.20.2`.** The evidence package uses PDFKit with its TypeScript definitions. Standard Helvetica covers the four Western-language label sets without external font assets; arbitrary non-Latin names/comments require a future embedded Unicode font. The worker ships PDFKit and sharp as pinned external modules for font data and native-library bundling. Python/PyMuPDF is local inspection tooling, never a production dependency.
+- **Private downloads.** Authenticated staff or signed renter actions resolve the rental and published pack before issuing exact-version S3 URLs lasting at most 300 seconds. Draft/awaiting-approval snapshots stay staff-only; record pages read without causing builds. Earlier published versions remain immutable.
 
 ---
 
@@ -335,6 +337,12 @@ In the hackathon build, the owner pastes their sandbox app's client ID and secre
   The worker makes each hold's one-off schedules at run time with `@aws-sdk/client-scheduler`, at the version of the other AWS clients, in the `hold-schedules` group.
 - **Hold's SMTP account** sends email to renters and owners.
 
+**Evidence and settlement delivery.** The outbox relay sends reserved pack IDs to `evidence` and receipt IDs to `messages`. Dedicated evidence and receipt Lambda roles use only their artifact/database or SMTP/link-signing permissions; the renderer has no PayPal credentials. Publication queues receipts bound to that exact pack. Verified capture plus its remainder is one receipt; verified release, refund, invoice sent and invoice paid are distinct. A protective capture leaves the contest open, and invoice sent never means paid. Fee payments and renewals do not issue settlement receipts.
+
+`receipt_deliveries` records the verified event, kind, pack, lease, attempts and `queued`/`sending`/`sent`/`failed` status. Both the worker and simulated web environment run the shared `@hold/settle` delivery state machine through transport ports; demo emails remain in memory. A five-minute lease prevents concurrent sends, and the messages queue has six-minute visibility. Recorded sends make ordinary duplicates no-ops; SMTP acceptance followed by a worker crash can still duplicate an email. Missing verified payer contact is a visible delivery failure.
+
+Receipts contain a view-only link selecting the exact pack UUID, not a PDF attachment. It expires 60 days after the later of rental end or receipt issuance, so a late refund still gives the renter time to read its record. Retries may create multiple valid expiring read-only links; only token fingerprints are stored. Deploy the updated `HoldDelivery` permissions boundary before compute. Deployment and Linux Lambda bundle execution remain unverified.
+
 **Hold upkeep is the scheduler's most important job.** A hold that lapses unnoticed leaves the shop unprotected. Every hold has a schedule created with it and removed when it ends.
 
 ---
@@ -364,6 +372,8 @@ In the hackathon build, the owner pastes their sandbox app's client ID and secre
 
 ## 14. Testing
 
+**Evidence and receipt validation, 20 October 2026.** The final local check passed 159 test files and 1,233 tests. The production build, record-download browser flow and four handover/return/claim regression flows passed. Staff and renter PDF/manifest bytes matched, historical versions stayed fixed, and both record pages passed every required viewport. A recorded RDS Data API regression verifies that JSONB SQL expressions are decoded before snapshot validation, while PostgreSQL tests cover the underlying snapshot query. These are local and recorded-response checks; deployed AWS permissions/Object Lock, Linux Lambda execution, actual SMTP delivery and fresh PayPal sandbox trials remain outstanding.
+
 - **Vitest** for unit tests. The hold state machine and the claim arithmetic get the heaviest coverage.
 - **PGlite** for repository and row-level security tests: PostgreSQL compiled to WebAssembly, running inside the test process with every migration applied. `pnpm test` then needs no Docker daemon. It is PostgreSQL 18 where Aurora is 17.9, and Hold uses nothing that differs between them. The database package exports it as `@hold/db/testing`.
 - **Playwright** for end-to-end tests. Chromium can be given a recorded image as its camera, so the guided photo sessions are tested automatically.
@@ -373,6 +383,7 @@ In the hackathon build, the owner pastes their sandbox app's client ID and secre
 - **The photo evaluation set,** run before every release, reporting how often damage is caught and how often clean returns are wrongly flagged.
 - **Property tests with fast-check** for the negotiation referee, the trust ladder and the detectors.
 - **MCP Inspector** to check Hold's MCP server by hand, and a scripted MCP client in the end-to-end tests.
+- **Evidence and receipt tests** cover frozen version reuse/change, initial-state and worker-only publication guards (migrations `0018`–`0020`), cross-shop/rental denial, conditional artifact recovery, missing display copies, verified-event receipt creation, leases, duplicate delivery and failure recovery. PDF text extraction and page rasterization inspect generated fixtures in all four document languages, a clean return and long multi-item content. Browser checks cover exact selected versions, PDF/manifest downloads and responsive record pages. Integrated verification status is recorded with the feature; deployed AWS/Linux behavior and fresh live PayPal/AI trials require separate verification.
 
 ---
 
@@ -424,6 +435,8 @@ Each of these should be tried against the real services before the build depends
 11. **The payer ID across shops.** Pay two different sandbox business accounts from one sandbox personal account and compare the payer IDs. The Clean Record's key depends on them matching.
 12. **The approval event.** Approve an order from a bare link with no Hold page open, and confirm that `CHECKOUT.ORDER.APPROVED` arrives so the fee can be captured.
 **Claim-settlement adapter validation, 20 October 2026.** Capture read-back, refunds and invoice creation/search/send are implemented through the existing PayPal port with strict recorded-response tests and the controllable fake. The implementation follows the official [Payments v2](https://developer.paypal.com/api/payments/v2/) and [Invoicing v2](https://developer.paypal.com/docs/api/invoicing/v2/) contracts. It does not assume Invoicing supports payment-style request deduplication: it searches a stable invoice number and validates claim reference, amount and currency before reuse. These new adapter paths have not been exercised against a live sandbox in this change; that validation remains outstanding alongside deployment, rather than being represented as a confirmed trial. The participant also explicitly deferred deployment and live AI accuracy evaluation until later. No gate-half evaluation images were used.
+
+**Evidence and receipt implementation, 20 October 2026.** Immutable pack publication and receipt delivery are implemented against local storage/mailer fakes, database guards and the existing verified PayPal-event paths. This adds no confirmed live PayPal trial. Deployment of the new Lambda roles/queues and the updated `HoldDelivery` policy, exact-version S3/Object Lock behavior on AWS, and the Linux PDFKit/sharp runtime bundle still need deployed verification. Local PDF rendering does not establish live comparison accuracy; the live AI evaluation remains deferred and no gate-half images were used.
 
 13. **An outside MCP client.** Connect one common MCP client to a stub of Hold's server with no sign-in step.
 

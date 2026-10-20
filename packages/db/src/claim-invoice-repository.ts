@@ -1,5 +1,6 @@
 import { CLAIM_TRANSITIONS, HOLD_TRANSITIONS, money, settle, transition } from '@hold/domain'
 import { and, eq } from 'drizzle-orm'
+import { queueSettlementReceipts } from './receipt-repository.ts'
 import { EXECUTIONS_QUEUE, markExecutionSent } from './fee-repository.ts'
 import { claimCollectionReady } from './claim-resolution.ts'
 import { closeSettledRental, settlementWork } from './settlement-repository.ts'
@@ -67,5 +68,6 @@ export async function confirmClaimInvoiced(transaction: Transaction, executionId
   }
   await transaction.update(executions).set({ state: 'confirmed', lastError: null, updatedAt: now }).where(eq(executions.id, executionId))
   await markExecutionSent(transaction, executionId, now)
+  await queueSettlementReceipts(transaction, work.bill.rentalId, now, [`${read.invoiceId}:sent`, ...(read.status === 'paid' ? [`${read.invoiceId}:paid`] : []), ...(fallback && released?.status === 'voided' ? [`${released.authorizationId}:voided`] : [])])
   return true
 }

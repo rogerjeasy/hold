@@ -61,3 +61,9 @@ export { settlementExecutionForResource } from './settlement-event-repository.ts
 export { mayExecuteSettlement } from './settlement-repository.ts'
 
 export { resolveClaimSettlement } from './claim-resolution.ts'
+export { evidenceSnapshotSchema } from './evidence-snapshot-schema.ts'
+export type { EvidenceSnapshot } from './evidence-snapshot-schema.ts'
+export { reserveEvidencePack, evidencePackFor, evidenceVersions, publishEvidencePack, evidenceBuildState, loadEvidenceBuild, pendingEvidenceWork } from './evidence-repository.ts'
+export type { EvidenceVersion } from './evidence-repository.ts'
+export { queueSettlementReceipts, receiptDeliveriesFor, leaseReceipt, finishReceipt } from './receipt-repository.ts'
+export type { ReceiptDeliverySummary } from './receipt-repository.ts'

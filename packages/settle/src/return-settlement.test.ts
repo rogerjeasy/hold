@@ -1,5 +1,5 @@
 import { approveClaim, confirmCleanReturn, draftClaim, inShop, presentClaim, replyToClaim, rentalDetail } from '@hold/db'
-import { executions, holds, moneyEvents, claimWorkspace, publishPriceList, rentals, staffRoles } from '@hold/db'
+import { executions, holds, moneyEvents, claimWorkspace, publishPriceList, receiptDeliveriesFor, rentals, staffRoles } from '@hold/db'
 import { eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { createMemoryScheduler, requestHoldPlacement, runExecution } from './index.ts'
@@ -35,11 +35,13 @@ describe('settling a returned rental', () => {
     const requested = await act((transaction) => confirmCleanReturn(transaction, rentalId, userId, 'Inspected in person: no new damage.', NOW))
     if (!requested.ok) throw new Error(requested.reason)
     expect((await act((transaction) => rentalDetail(transaction, rentalId, NOW)))?.state).toBe('settling')
+    expect(await act((transaction) => receiptDeliveriesFor(transaction, rentalId))).toEqual([])
     expect(await runExecution(dependencies(), { shopId: fixture.shopId, executionId: requested.executionId })).toBe('confirmed')
     expect((await act((transaction) => rentalDetail(transaction, rentalId, NOW)))?.state).toBe('closed')
     expect((await act((transaction) => transaction.select().from(holds).where(eq(holds.rentalId, rentalId))))[0]?.state).toBe('released')
     expect(await runExecution(dependencies(), { shopId: fixture.shopId, executionId: requested.executionId })).toBe('nothing_to_do')
     expect((await act((transaction) => transaction.select().from(moneyEvents).where(eq(moneyEvents.rentalId, rentalId)))).filter((row) => row.kind === 'hold_released').map((row) => row.amountCents)).toEqual([30000])
+    expect(await act((transaction) => receiptDeliveriesFor(transaction, rentalId))).toMatchObject([{ kind: 'release', status: 'queued', amountCents: 30000, releasedCents: 30000 }])
   })
   it('takes only the accepted approved claim, releases the remainder and ignores duplicate work', async () => {
     const rentalId = await returned()
@@ -56,6 +58,7 @@ describe('settling a returned rental', () => {
     const events = await act((transaction) => transaction.select().from(moneyEvents).where(eq(moneyEvents.rentalId, rentalId)))
     expect(events.filter((row) => row.kind === 'hold_captured').map((row) => row.amountCents)).toEqual([3500])
     expect(events.filter((row) => row.kind === 'hold_released').map((row) => row.amountCents)).toEqual([26500])
+    expect(await act((transaction) => receiptDeliveriesFor(transaction, rentalId))).toMatchObject([{ kind: 'capture', status: 'queued', amountCents: 3500, releasedCents: 26500 }])
     expect((await act((transaction) => rentalDetail(transaction, rentalId, NOW)))?.state).toBe('closed')
     expect((await act((transaction) => transaction.select().from(executions).where(eq(executions.id, accepted.executionId ?? ''))))[0]?.state).toBe('confirmed')
   })
@@ -93,6 +96,7 @@ it('falls back to a verified invoice on a refused capture and releases the autho
   expect((await act((transaction) => transaction.select().from(invoices).where(eq(invoices.rentalId, rentalId)))).map((row) => ({ state: row.state, amount: row.amountCents }))).toEqual([{ state: 'sent', amount: 3500 }])
   expect((await act((transaction) => transaction.select().from(holds).where(eq(holds.rentalId, rentalId))))[0]?.state).toBe('invoiced')
   expect((await act((transaction) => transaction.select().from(moneyEvents).where(eq(moneyEvents.rentalId, rentalId)))).filter((row) => row.kind === 'hold_captured')).toHaveLength(0)
+  expect((await act((transaction) => receiptDeliveriesFor(transaction, rentalId))).map((receipt) => receipt.kind).sort()).toEqual(['invoice_sent', 'release'])
 })
 
 it('schedules the reply deadline and charges an unanswered approved claim once it ends', async () => {
@@ -138,12 +142,14 @@ it('protects an approved claim before expiry while preserving a later contest an
   const pendingRefund: SettleDependencies = { ...dependencies(), paypalFor: () => ({ ...fixture.fake, refundCapture: async (input) => { const result = await fixture.fake.refundCapture(input); return result.ok ? { ...result, value: { ...result.value, status: 'pending' as const } } : result } }) }
   expect(await runExecution(pendingRefund, { shopId: fixture.shopId, executionId: decision.executionId })).toBe('waiting')
   expect((await act((transaction) => transaction.select().from(moneyEvents).where(eq(moneyEvents.rentalId, rentalId)))).filter((row) => row.kind === 'refunded')).toHaveLength(0)
+  expect((await act((transaction) => receiptDeliveriesFor(transaction, rentalId))).some((receipt) => receipt.kind === 'refund')).toBe(false)
   const refund = (await act((transaction) => transaction.select().from(executions).where(eq(executions.id, decision.executionId))))[0]
   const delivered = await fixture.delivered('PAYMENT.CAPTURE.REFUNDED', { id: refund?.paypalResourceIds['refund'] ?? '' })
   const { applyPayPalEvent } = await import('./paypal-events.ts')
   const recoverRefund: SettleDependencies = { ...dependencies(), paypalFor: () => ({ ...fixture.fake, refundCapture: () => Promise.reject(new Error('A known refund must be read, never posted again')) }) }
   expect(await applyPayPalEvent(recoverRefund, { shopId: fixture.shopId, eventId: delivered })).toBe('applied')
   expect((await act((transaction) => transaction.select().from(moneyEvents).where(eq(moneyEvents.rentalId, rentalId)))).filter((row) => row.kind === 'refunded').map((row) => row.amountCents)).toEqual([3500])
+  expect((await act((transaction) => receiptDeliveriesFor(transaction, rentalId))).filter((receipt) => receipt.kind === 'refund')).toMatchObject([{ amountCents: 3500, status: 'queued' }])
   expect((await act((transaction) => rentalDetail(transaction, rentalId, now)))?.state).toBe('closed')
 })
 
@@ -159,11 +165,13 @@ it('recovers a pending capture only after a verified event and a fresh resource 
   if (!accepted.ok || accepted.executionId === null) throw new Error('No capture')
   const pending = { ...dependencies(), paypalFor: () => ({ ...fixture.fake, readCapture: async (id: string) => { const result = await fixture.fake.readCapture(id); return result.ok ? { ...result, value: { ...result.value, status: 'pending' as const } } : result } }) }
   expect(await runExecution(pending, { shopId: fixture.shopId, executionId: accepted.executionId })).toBe('waiting')
+  expect(await act((transaction) => receiptDeliveriesFor(transaction, rentalId))).toEqual([])
   expect((await act((transaction) => rentalDetail(transaction, rentalId, now)))?.state).toBe('settling')
   const execution = (await act((transaction) => transaction.select().from(executions).where(eq(executions.id, accepted.executionId ?? ''))))[0]
   const resource = { id: execution?.paypalResourceIds['capture'] ?? '' }
   const forged = await fixture.delivered('PAYMENT.CAPTURE.COMPLETED', resource, 'forged')
   expect(await applyPayPalEvent(dependencies(), { shopId: fixture.shopId, eventId: forged })).toBe('rejected')
+  expect(await act((transaction) => receiptDeliveriesFor(transaction, rentalId))).toEqual([])
   const delivered = await fixture.delivered('PAYMENT.CAPTURE.COMPLETED', resource)
   expect(await applyPayPalEvent(dependencies(), { shopId: fixture.shopId, eventId: delivered })).toBe('applied')
   expect((await act((transaction) => rentalDetail(transaction, rentalId, now)))?.state).toBe('closed')
@@ -187,6 +195,7 @@ it('records an invoice as paid only after the verified PayPal invoice event is r
   const paid: SettleDependencies = { ...dependencies(), paypalFor: () => ({ ...fixture.fake, invoiceClaim: async (input) => { const result = await fixture.fake.invoiceClaim(input); return result.ok ? { ...result, value: { ...result.value, status: 'paid' as const } } : result } }) }
   await applyPayPalEvent(paid, { shopId: fixture.shopId, eventId: delivered })
   expect((await act((transaction) => transaction.select().from(moneyEvents).where(eq(moneyEvents.rentalId, rentalId)))).filter((event) => event.kind === 'invoice_paid').map((event) => event.amountCents)).toEqual([3500])
+  expect((await act((transaction) => receiptDeliveriesFor(transaction, rentalId))).filter((receipt) => receipt.kind === 'invoice_paid')).toMatchObject([{ amountCents: 3500, status: 'queued' }])
   expect((await act((transaction) => rentalDetail(transaction, rentalId, now)))?.state).toBe('closed')
 })
 

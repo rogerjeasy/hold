@@ -33,7 +33,7 @@ async function inspected() {
     const session = await scoped((transaction) => startCaptureSession(transaction, { rentalId: rental.rentalId, rentalItemId: rentalItemId ?? '', kind, actorUserId: null }, new Date()))
     if (!session.ok) throw new Error(session.reason)
     const capture = await scoped((transaction) => captureSession(transaction, session.sessionId))
-    for (const view of capture?.plan.filter((view) => view.required) ?? []) await scoped((transaction) => recordPhoto(transaction, session.sessionId, { view: view.key, evidenceKey: randomUUID(), sha256: randomUUID(), quality: { sharpness: 120, shadows: 20, highlights: 220, filled: .6 } }, new Date()))
+    for (const view of capture?.plan.filter((view) => view.required) ?? []) await scoped((transaction) => recordPhoto(transaction, session.sessionId, { view: view.key, evidenceKey: randomUUID(), sha256: 'a'.repeat(64), quality: { sharpness: 120, shadows: 20, highlights: 220, filled: .6 } }, new Date()))
     await scoped((transaction) => sealSession(transaction, session.sessionId, new Date()))
   }
   await signIn(jar, OWNER, 'passkey')

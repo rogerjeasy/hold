@@ -49,6 +49,16 @@ export function createS3EvidenceStore(options: S3EvidenceStoreOptions): Evidence
     async putDisplay(key, body) {
       await client.send(new PutObjectCommand({ Bucket: options.displayBucket, Key: key, Body: body, ContentType: 'image/jpeg' }))
     },
+    async readDisplay(key) {
+      try {
+        const object = await client.send(new GetObjectCommand({ Bucket: options.displayBucket, Key: key }))
+        const body = object['Body'] as { transformToByteArray: () => Promise<Uint8Array> } | undefined
+        return body === undefined ? undefined : Buffer.from(await body.transformToByteArray())
+      } catch (error) {
+        if (error instanceof Error && (error.name === 'NotFound' || error.name === 'NoSuchKey')) return undefined
+        throw error
+      }
+    },
     displayLink(key) {
       return getSignedUrl(signer, new GetObjectCommand({ Bucket: options.displayBucket, Key: key }), { expiresIn: LINK_SECONDS })
     },

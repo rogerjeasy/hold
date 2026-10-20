@@ -1,4 +1,4 @@
-import { resolveClaimSettlement, mayExecuteSettlement, beginClaimInvoice, beginSettlementRenewal, findExecution, confirmClaimCaptured, confirmReturnReleased, failExecution, saveSettlementResource, settlementWork } from '@hold/db'
+import { queueSettlementReceipts, resolveClaimSettlement, mayExecuteSettlement, beginClaimInvoice, beginSettlementRenewal, findExecution, confirmClaimCaptured, confirmReturnReleased, failExecution, saveSettlementResource, settlementWork } from '@hold/db'
 import type { StoredExecution } from '@hold/db'
 import { money, planCharge } from '@hold/domain'
 import type { PayPalHolds } from '@hold/paypal'
@@ -65,6 +65,7 @@ export async function settleReturn(dependencies: SettleDependencies, shopId: str
   const result = await inWorkerShop(dependencies, shopId, async (transaction) => {
     const confirmed = await confirmClaimCaptured(transaction, execution.id, capture.value, authorization.value, dependencies.now())
     const nextId = confirmed && work.claim !== undefined ? await resolveClaimSettlement(transaction, work.claim.id, dependencies.now()) : undefined
+    if (confirmed) await queueSettlementReceipts(transaction, work.execution.rentalId, dependencies.now(), [capture.value.captureId, `${authorization.value.authorizationId}:remainder`])
     return { confirmed, nextId }
   })
   if (!result.confirmed) return 'waiting'

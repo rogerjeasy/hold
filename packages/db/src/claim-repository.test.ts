@@ -21,7 +21,7 @@ async function returned() {
     const started = await shop.act((transaction) => startCaptureSession(transaction, { rentalId: rental.rentalId, rentalItemId: rental.rentalItemIds[0] ?? '', kind, actorUserId: shop.scope.userId ?? null }, NOW))
     if (!started.ok) throw new Error(started.reason)
     const session = await shop.act((transaction) => captureSession(transaction, started.sessionId))
-    for (const view of session?.plan.filter((view) => view.required) ?? []) await shop.act((transaction) => recordPhoto(transaction, started.sessionId, { view: view.key, evidenceKey: randomUUID(), sha256: randomUUID(), quality: { sharpness: 120, shadows: 20, highlights: 220, filled: .6 } }, NOW))
+    for (const view of session?.plan.filter((view) => view.required) ?? []) await shop.act((transaction) => recordPhoto(transaction, started.sessionId, { view: view.key, evidenceKey: randomUUID(), sha256: 'a'.repeat(64), quality: { sharpness: 120, shadows: 20, highlights: 220, filled: .6 } }, NOW))
     await shop.act((transaction) => sealSession(transaction, started.sessionId, NOW))
   }
   return rental.rentalId

@@ -1,4 +1,5 @@
 import type { Region } from '@hold/domain'
+import type { EvidenceSnapshot } from '../evidence-snapshot-schema.ts'
 import { sql } from 'drizzle-orm'
 import { boolean, integer, jsonb, pgTable, real, text, unique, uniqueIndex } from 'drizzle-orm/pg-core'
 import { shopIsolation } from './access.ts'
@@ -140,7 +141,16 @@ export const evidencePacks = pgTable(
     version: integer().notNull(),
     evidenceKey: text().notNull().unique(),
     manifestFingerprint: text().notNull(),
+    snapshot: jsonb().$type<EvidenceSnapshot>().notNull(),
+    sourceFingerprint: text().notNull(),
+    state: text().notNull().default('building'),
+    rendererVersion: text().notNull().default('evidence-v1'),
+    pdfSha256: text(),
+    pdfVersionId: text(),
+    manifestVersionId: text(),
+    snapshotVersionId: text(),
+    lastError: text(),
     createdAt: createdAt(),
   },
-  (table) => [unique().on(table.rentalId, table.version), shopIsolation(table.shopId)],
+  (table) => [unique().on(table.rentalId, table.version), unique().on(table.rentalId, table.sourceFingerprint), shopIsolation(table.shopId)],
 )

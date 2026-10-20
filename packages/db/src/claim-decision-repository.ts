@@ -1,3 +1,4 @@
+import { reserveEvidencePack } from './evidence-repository.ts'
 import { CLAIM_TRANSITIONS, transition } from '@hold/domain'
 import { and, count, eq } from 'drizzle-orm'
 import { resolveClaimSettlement } from './claim-resolution.ts'
@@ -25,6 +26,7 @@ export async function decideClaim(transaction: Transaction, claimId: string, use
     await transaction.update(executions).set({ paypalResourceIds: { ...earlyCapture.paypalResourceIds, decision, decisionApproval: approval.id }, updatedAt: now }).where(eq(executions.id, earlyCapture.id))
     await transaction.insert(auditLog).values({ shopId: claim.shopId, actorKind: 'person', actorId: userId, action: `claim.${decision}`, subjectKind: 'claim', subjectId: claim.id, detail: { reason: reason.trim() }, at: now })
     const executionId = await resolveClaimSettlement(transaction, claim.id, now)
+    await reserveEvidencePack(transaction, claim.rentalId, now)
     return { ok: true, rentalId: claim.rentalId, executionId: executionId ?? earlyCapture.id } as const
   }
   let state = claim.state

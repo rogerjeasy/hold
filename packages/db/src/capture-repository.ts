@@ -1,3 +1,4 @@
+import { reserveEvidencePack } from './evidence-repository.ts'
 import { createHash } from 'node:crypto'
 import { checkRegion, conditionReplyOpen, CONDITION_REPLY_HOURS, manifestText, mayHandOver, MISSED_VIEWS, missingViews, RENTAL_TRANSITIONS, transition } from '@hold/domain'
 import type { CaptureSessionKind, ConditionReply, PhotoMeasures, Region } from '@hold/domain'
@@ -264,6 +265,7 @@ export async function sealSession(transaction: Transaction, sessionId: string, n
     }
   }
   if (session.kind === 'return') await queueReturnComparisons(transaction, session.rentalId, now)
+  await reserveEvidencePack(transaction, session.rentalId, now)
   return { ok: true, manifestFingerprint: fingerprint, rentalOut: (await rentalState()) === 'out' }
 }
 
@@ -321,6 +323,7 @@ export async function replyToCondition(transaction: Transaction, rentalId: strin
   if (!report.open) return { ok: false, reason: 'closed' }
   if (reply.kind === 'added' && !report.items.some((item) => item.added.length > 0)) return { ok: false, reason: 'nothing_added' }
   await transaction.update(rentals).set({ conditionReply: reply.kind, conditionRepliedAt: now }).where(eq(rentals.id, rentalId))
+  await reserveEvidencePack(transaction, rentalId, now)
   return { ok: true }
 }
 

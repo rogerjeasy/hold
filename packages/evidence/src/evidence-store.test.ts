@@ -27,6 +27,14 @@ describe('the evidence store in memory', () => {
   it('knows nothing of a key that never arrived', async () => {
     expect(await createMemoryEvidenceStore({ baseUrl: 'https://hold.test' }).stored('missing.jpg')).toBeUndefined()
   })
+
+  it('reads only the display copy and never falls back to the uploaded original', async () => {
+    const store = createMemoryEvidenceStore({ baseUrl: 'https://hold.test' })
+    store.receive('photo.jpg', body, Buffer.from(sha256, 'hex').toString('base64'))
+    expect(await store.readDisplay('photo.jpg')).toBeUndefined()
+    await store.putDisplay('photo.jpg', Buffer.from('blurred display'))
+    expect(await store.readDisplay('photo.jpg')).toEqual(Buffer.from('blurred display'))
+  })
 })
 
 describe('the evidence store on S3', () => {
@@ -59,5 +67,15 @@ describe('the evidence store on S3', () => {
   it('knows nothing of a key S3 does not have', async () => {
     const missing = Object.assign(new Error('Not Found'), { name: 'NotFound' })
     expect(await createS3EvidenceStore(options(missing)).stored('nothing.jpg')).toBeUndefined()
+  })
+
+  it('reads display bytes from the display bucket and treats a missing copy as pending', async () => {
+    sent.length = 0
+    const store = createS3EvidenceStore(options({ Body: { transformToByteArray: () => Promise.resolve(Buffer.from('blurred display')) } }))
+    expect(await store.readDisplay('photo.jpg')).toEqual(Buffer.from('blurred display'))
+    expect(sent).toEqual([{ name: 'GetObjectCommand', input: { Bucket: 'hold-display-1', Key: 'photo.jpg' } }])
+    const missing = Object.assign(new Error('Not Found'), { name: 'NoSuchKey' })
+    expect(await createS3EvidenceStore(options(missing)).readDisplay('photo.jpg')).toBeUndefined()
+    await expect(createS3EvidenceStore(options(new Error('transport failed'))).readDisplay('photo.jpg')).rejects.toThrow('transport failed')
   })
 })

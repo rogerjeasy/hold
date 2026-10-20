@@ -1,3 +1,4 @@
+import { reserveEvidencePack } from './evidence-repository.ts'
 import { checkClaimLines, claimTotal, CLAIM_TRANSITIONS, HOLD_TRANSITIONS, money, transition } from '@hold/domain'
 import type { ClaimLine } from '@hold/domain'
 import { and, eq, isNotNull, isNull } from 'drizzle-orm'
@@ -50,6 +51,7 @@ export async function draftClaim(transaction: Transaction, rentalId: string, use
   await transaction.insert(claimLines).values(stored.map((line) => ({ ...line, claimId: created.id })))
   if (!transition(CLAIM_TRANSITIONS, created.state, 'awaiting_approval').ok) throw new Error('The new claim cannot await approval.')
   await transaction.update(claims).set({ state: 'awaiting_approval' }).where(eq(claims.id, created.id))
+  await reserveEvidencePack(transaction, rentalId, now)
   return { ok: true, claimId: created.id, totalCents: total.cents } as const
 }
 
@@ -66,6 +68,7 @@ export async function approveClaim(transaction: Transaction, claimId: string, us
   await transaction.insert(approvals).values({ shopId: claim.shopId, subject: 'claim', subjectId: claim.id, decidedByUserId: userId, decision: 'approved', method: 'on_screen', changes: [{ lineIds: lines.map((line) => line.id), totalCents: total }], createdAt: now })
   await transaction.update(claims).set({ state: 'approved' }).where(eq(claims.id, claimId))
   await startSettling(transaction, claim.rentalId)
+  await reserveEvidencePack(transaction, claim.rentalId, now)
   return { ok: true, rentalId: claim.rentalId } as const
 }
 
@@ -91,6 +94,7 @@ async function openClaimReply(transaction: Transaction, claim: typeof claims.$in
   const replyDueAt = new Date(now.getTime() + shop.replyPeriodHours * 3_600_000)
   await transaction.update(claims).set({ state: 'presented', presentedAt: now, replyDueAt }).where(eq(claims.id, claim.id))
   await transaction.insert(outbox).values({ shopId: claim.shopId, queue: 'upkeep', messageGroup: claim.rentalId, payload: { kind: 'claim_plan', claimId: claim.id }, createdAt: now })
+  await reserveEvidencePack(transaction, claim.rentalId, now)
   return { ok: true, rentalId: claim.rentalId, replyDueAt } as const
 }
 
@@ -119,5 +123,6 @@ export async function confirmCleanReturn(transaction: Transaction, rentalId: str
   if (hold.state !== 'expired') await transaction.update(holds).set({ state: 'releasing' }).where(eq(holds.id, hold.id))
   await startSettling(transaction, rentalId)
   await transaction.insert(auditLog).values({ shopId: rental.shopId, actorKind: 'person', actorId: userId, action: 'return.clean_confirmed', subjectKind: 'rental', subjectId: rentalId, detail: { reason: reason.trim() }, at: now })
+  await reserveEvidencePack(transaction, rentalId, now)
   return { ok: true, executionId: execution.id, rentalId } as const
 }

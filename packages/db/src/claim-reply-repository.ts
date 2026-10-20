@@ -1,3 +1,4 @@
+import { reserveEvidencePack } from './evidence-repository.ts'
 import { claimDeadlineAction, CLAIM_TRANSITIONS, HOLD_TRANSITIONS, money, planCharge, settle, transition } from '@hold/domain'
 import { and, eq } from 'drizzle-orm'
 import { resolveClaimSettlement } from './claim-resolution.ts'
@@ -29,6 +30,7 @@ export async function queueClaimCapture(transaction: Transaction, claimId: strin
     if (!transition(HOLD_TRANSITIONS, hold.state, next).ok) throw new Error('The queued capture cannot reserve this hold.')
     await transaction.update(holds).set({ state: next }).where(eq(holds.id, hold.id))
   }
+  await reserveEvidencePack(transaction, claim.rentalId, now)
   return { ok: true, executionId: execution.id, rentalId: claim.rentalId } as const
 }
 
@@ -45,12 +47,14 @@ export async function replyToClaim(transaction: Transaction, rentalId: string, d
   if (early) {
     await transaction.insert(claimReplies).values({ shopId: claim.shopId, claimId: claim.id, decision, comment: comment.trim(), createdAt: now })
     const executionId = await resolveClaimSettlement(transaction, claim.id, now)
+    await reserveEvidencePack(transaction, rentalId, now)
     return { ok: true, executionId: executionId ?? null, rentalId } as const
   }
   const target = decision === 'accept' ? 'accepted' : 'contested'
   if (!transition(CLAIM_TRANSITIONS, claim.state, target).ok) return { ok: false, reason: 'already_replied' } as const
   await transaction.insert(claimReplies).values({ shopId: claim.shopId, claimId: claim.id, decision, comment: comment.trim(), createdAt: now })
   await transaction.update(claims).set({ state: target }).where(eq(claims.id, claim.id))
+  await reserveEvidencePack(transaction, rentalId, now)
   if (decision === 'contest') return { ok: true, executionId: null, rentalId } as const
   return queueClaimCapture(transaction, claim.id, now)
 }

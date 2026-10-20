@@ -1,5 +1,6 @@
 import { CLAIM_TRANSITIONS, transition } from '@hold/domain'
 import { and, eq } from 'drizzle-orm'
+import { queueSettlementReceipts } from './receipt-repository.ts'
 import { EXECUTIONS_QUEUE, markExecutionSent } from './fee-repository.ts'
 import { closeSettledRental, settlementWork } from './settlement-repository.ts'
 import { approvals, claims, executions, moneyEvents, outbox } from './schema/index.ts'
@@ -38,5 +39,6 @@ export async function confirmClaimRefund(transaction: Transaction, executionId: 
   await transaction.update(executions).set({ state: 'confirmed', lastError: null, paypalResourceIds: { ...work.execution.paypalResourceIds, refund: read.refundId }, updatedAt: now }).where(eq(executions.id, executionId))
   await markExecutionSent(transaction, executionId, now)
   await closeSettledRental(transaction, work.claim.rentalId, work.hold.state, now)
+  await queueSettlementReceipts(transaction, work.claim.rentalId, now, [read.refundId])
   return true
 }

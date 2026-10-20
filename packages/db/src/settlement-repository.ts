@@ -1,5 +1,7 @@
 import { CLAIM_TRANSITIONS, HOLD_TRANSITIONS, mayCapture, mayCloseRental, money, RENTAL_TRANSITIONS, settle, transition } from '@hold/domain'
 import { and, eq } from 'drizzle-orm'
+import { reserveEvidencePack } from './evidence-repository.ts'
+import { queueSettlementReceipts } from './receipt-repository.ts'
 import { markExecutionSent } from './fee-repository.ts'
 import { approvals, auditLog, authorizations, claims, executions, holds, moneyEvents, rentals } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
@@ -29,6 +31,7 @@ export async function closeSettledRental(transaction: Transaction, rentalId: str
   if (rental !== undefined && mayCloseRental(holdState) && transition(RENTAL_TRANSITIONS, rental.state, 'closed').ok) {
     await transaction.update(rentals).set({ state: 'closed' }).where(eq(rentals.id, rentalId))
     await transaction.insert(auditLog).values({ shopId: rental.shopId, actorKind: 'worker', action: 'rental.settled', subjectKind: 'rental', subjectId: rentalId, at: now })
+    await reserveEvidencePack(transaction, rentalId, now)
   }
 }
 
@@ -47,6 +50,8 @@ export async function confirmReturnReleased(transaction: Transaction, executionI
   const claim = work.claim
   if (claim !== undefined && transition(CLAIM_TRANSITIONS, claim.state, 'closed').ok) await transaction.update(claims).set({ state: 'closed' }).where(eq(claims.id, claim.id))
   await closeSettledRental(transaction, work.hold.rentalId, target, now)
+  await reserveEvidencePack(transaction, work.hold.rentalId, now)
+  if (!expired) await queueSettlementReceipts(transaction, work.hold.rentalId, now, [`${read.authorizationId}:voided`])
   return true
 }
 

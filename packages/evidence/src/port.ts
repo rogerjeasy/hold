@@ -14,6 +14,8 @@ export type EvidenceStore = {
   stored(key: string): Promise<{ readonly sha256: string; readonly bytes: number } | undefined>
   // The original, for the worker that makes its display copy.
   read(key: string): Promise<Buffer>
+  // Face-blurred display bytes only. A missing copy must never fall back to the original.
+  readDisplay(key: string): Promise<Buffer | undefined>
   putDisplay(key: string, body: Buffer): Promise<void>
   // A short-lived link to a display copy.
   displayLink(key: string): Promise<string>

@@ -36,6 +36,9 @@ export function createMemoryEvidenceStore(options: { readonly baseUrl: string })
       displays.set(key, body)
       return Promise.resolve()
     },
+    readDisplay(key) {
+      return Promise.resolve(displays.get(key))
+    },
     displayLink(key) {
       return Promise.resolve(`${options.baseUrl}/display/${key}`)
     },
