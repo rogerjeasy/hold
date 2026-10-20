@@ -283,7 +283,7 @@ describe('the worker', () => {
 
   it('runs comparisons from their queue with a separate role that cannot send money work or read PayPal credentials', () => {
     expect(functionNamed('hold-worker-comparisons')?.Properties).toMatchObject({ Runtime: 'nodejs24.x', MemorySize: 1536 })
-    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 5)
+    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 7)
     const policies = Object.entries(work.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('ComparisonRole')).map(([, value]) => value)
     expect(policies.length).toBeGreaterThan(0)
     const policy = JSON.stringify(policies)
@@ -303,7 +303,7 @@ describe('the worker', () => {
   })
 
   it('takes PayPal events, executions and upkeep from their queues, and tries again only the messages that failed', () => {
-    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 5)
+    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 7)
     work.hasResourceProperties('AWS::Lambda::EventSourceMapping', { FunctionResponseTypes: ['ReportBatchItemFailures'] })
   })
 
@@ -464,6 +464,7 @@ describe('the web app', () => {
         'sqs:GetQueueAttributes',
         'sqs:GetQueueUrl',
         's3:GetObject',
+        's3:GetObjectVersion',
         's3:PutObject',
       ]),
     )
@@ -572,7 +573,7 @@ describe('delivery', () => {
       expect(boundary).not.toContain(broad)
     }
     const decrypting = (JSON.parse(boundary) as { Properties: { PolicyDocument: { Statement: Record<string, unknown>[] } } }).Properties.PolicyDocument.Statement.find(
-      (statement) => statement['Resource'] === 'arn:aws:kms:us-east-1:707938860881:key/*',
+      (statement) => statement['Resource'] === 'arn:aws:kms:us-east-1:707938860881:key/*' && statement['Action'] === 'kms:Decrypt',
     )
     expect(decrypting).toEqual({ Action: 'kms:Decrypt', Condition: { StringEquals: { 'aws:ResourceTag/project': 'hold' } }, Effect: 'Allow', Resource: 'arn:aws:kms:us-east-1:707938860881:key/*' })
     expect(boundary).toContain('role/hold-scheduler')
@@ -589,7 +590,7 @@ describe('delivery', () => {
       .filter((statement) => [statement['Action']].flat().includes('iam:PassRole'))
     const allowed = passing.filter((statement) => statement['Effect'] === 'Allow' && JSON.stringify(statement).includes('role/hold-web'))
     expect(allowed).toHaveLength(1)
-    expect(new Set([allowed[0]?.['Resource']].flat())).toEqual(new Set(['role/hold-web', 'role/hold-web-access', 'role/hold-code-sender', 'role/hold-worker', 'role/hold-scheduler'].map((role) => `arn:aws:iam::707938860881:${role}`)))
+    expect(new Set([allowed[0]?.['Resource']].flat())).toEqual(new Set(['role/hold-web', 'role/hold-web-access', 'role/hold-code-sender', 'role/hold-worker', 'role/hold-comparison', 'role/hold-evidence', 'role/hold-receipts', 'role/hold-scheduler'].map((role) => `arn:aws:iam::707938860881:${role}`)))
     // App Runner checks the pass with a service name of its own choosing, so none is named here. Both roles trust App
     // Runner alone, so no other service could use them.
     expect(allowed[0]?.['Condition']).toBeUndefined()

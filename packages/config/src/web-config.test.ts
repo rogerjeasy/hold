@@ -13,6 +13,9 @@ const AWS = {
 }
 
 describe('loadWebConfig', () => {
+  it('hands frozen record builds directly to the evidence queue when configured', () => {
+    expect(loadWebConfig({ ...AWS, HOLD_EXECUTIONS_QUEUE_URL: 'https://sqs.test/e.fifo', HOLD_PAYPAL_EVENTS_QUEUE_URL: 'https://sqs.test/p.fifo', HOLD_EVIDENCE_QUEUE_URL: 'https://sqs.test/evidence.fifo' })).toMatchObject({ queues: { evidence: 'https://sqs.test/evidence.fifo' } })
+  })
   it('hands return comparisons directly to their queue when configured', () => {
     expect(loadWebConfig({ ...AWS, HOLD_EXECUTIONS_QUEUE_URL: 'https://sqs.test/e.fifo', HOLD_PAYPAL_EVENTS_QUEUE_URL: 'https://sqs.test/p.fifo', HOLD_COMPARISONS_QUEUE_URL: 'https://sqs.test/comparisons' })).toMatchObject({ queues: { comparisons: 'https://sqs.test/comparisons' } })
   })

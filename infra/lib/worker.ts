@@ -82,7 +82,7 @@ function workerRole(stack: Stack, props: WorkerProps): iam.Role {
   role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:PutObject'], resources: [props.displayBucket.arnForObjects('*')] }))
   // DetectFaces names no resource.
   role.addToPolicy(new iam.PolicyStatement({ actions: ['rekognition:DetectFaces'], resources: ['*'] }))
-  for (const queueName of ['paypal-events', 'executions', 'upkeep', 'comparisons', 'media']) {
+  for (const queueName of ['paypal-events', 'executions', 'upkeep', 'comparisons', 'media', 'evidence', 'messages']) {
     const queue = props.queues.get(queueName)
     if (queue === undefined) throw new Error(`No ${queueName} queue.`)
     queue.grantSendMessages(role)
@@ -126,6 +126,8 @@ export function createWorker(stack: Stack, props: WorkerProps): void {
     HOLD_UPKEEP_QUEUE_URL: queue('upkeep').queueUrl,
     HOLD_COMPARISONS_QUEUE_URL: queue('comparisons').queueUrl,
     HOLD_MEDIA_QUEUE_URL: queue('media').queueUrl,
+    HOLD_EVIDENCE_QUEUE_URL: queue('evidence').queueUrl,
+    HOLD_MESSAGES_QUEUE_URL: queue('messages').queueUrl,
     HOLD_UPKEEP_QUEUE_ARN: queue('upkeep').queueArn,
     HOLD_SCHEDULE_GROUP: props.scheduleGroup.scheduleGroupName,
     HOLD_SCHEDULER_ROLE_ARN: props.schedulerRole.roleArn,

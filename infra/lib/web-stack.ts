@@ -43,7 +43,7 @@ export type WebStackProps = StackProps & {
 }
 
 // The queues the app hands work to: executions to capture, and the PayPal events it has stored.
-const HANDED_ON = ['executions', 'paypal-events', 'media', 'comparisons'] as const
+const HANDED_ON = ['executions', 'paypal-events', 'media', 'comparisons', 'evidence'] as const
 
 function queueOf(props: WebStackProps, queueName: string): sqs.IQueue {
   const queue = props.queues.get(queueName)
@@ -75,6 +75,7 @@ function instanceRole(stack: Stack, props: WebStackProps): iam.Role {
   // Photographs: the phone puts each original through a link the app signs, and the app reads back what arrived. The
   // app reads display copies to sign links to them. It deletes nothing; Object Lock would refuse it anyway.
   role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:PutObject', 's3:GetObject'], resources: [props.evidenceBucket.arnForObjects('*')] }))
+  role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:GetObjectVersion'], resources: [props.evidenceBucket.arnForObjects('packs/*')] }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:GetObject'], resources: [props.displayBucket.arnForObjects('*')] }))
   return role
 }
@@ -95,6 +96,7 @@ function settings(props: WebStackProps): apprunner.CfnService.KeyValuePairProper
     HOLD_PAYPAL_EVENTS_QUEUE_URL: queueOf(props, 'paypal-events').queueUrl,
     HOLD_MEDIA_QUEUE_URL: queueOf(props, 'media').queueUrl,
     HOLD_COMPARISONS_QUEUE_URL: queueOf(props, 'comparisons').queueUrl,
+    HOLD_EVIDENCE_QUEUE_URL: queueOf(props, 'evidence').queueUrl,
     HOLD_EVIDENCE_BUCKET: props.evidenceBucket.bucketName,
     HOLD_DISPLAY_BUCKET: props.displayBucket.bucketName,
     ...(props.publicUrl === undefined ? {} : { HOLD_PUBLIC_URL: props.publicUrl }),

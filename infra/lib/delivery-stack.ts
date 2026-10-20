@@ -55,7 +55,7 @@ const at = {
 }
 // The only roles CloudFormation may hand on: the web app's two (infra/lib/web-stack.ts), which trust App Runner alone,
 // and the code sender's (infra/lib/code-sender.ts), which trusts Lambda alone.
-const PASSED_ROLES = [name('web'), name('web', 'access'), name('code', 'sender'), name('worker'), name('scheduler')]
+const PASSED_ROLES = [name('web'), name('web', 'access'), name('code', 'sender'), name('worker'), name('comparison'), name('evidence'), name('receipts'), name('scheduler')]
 const HOLD_TAG = { 'aws:ResourceTag/project': PREFIX }
 const HOLD_REQUEST_TAG = { 'aws:RequestTag/project': PREFIX }
 
@@ -76,7 +76,7 @@ function permissionsBoundary(stack: Stack): iam.ManagedPolicy {
     description: "The most any of Hold's roles may do: Hold's own resources, and nothing of other projects",
     statements: [
       statement(['sqs:SendMessage', 'sqs:ReceiveMessage', 'sqs:DeleteMessage', 'sqs:ChangeMessageVisibility', 'sqs:GetQueueAttributes', 'sqs:GetQueueUrl'], [at.sqs]),
-      statement(['s3:GetObject', 's3:PutObject'], [at.objects]),
+      statement(['s3:GetObject', 's3:GetObjectVersion', 's3:PutObject'], [at.objects]),
       statement(['s3:ListBucket'], [at.buckets]),
       // Finding faces to blur in a display copy. The call names no resource.
       statement(['rekognition:DetectFaces'], ['*']),
@@ -96,7 +96,8 @@ function permissionsBoundary(stack: Stack): iam.ManagedPolicy {
       ]),
       statement(['cloudwatch:PutMetricData'], ['*'], { StringEquals: { 'cloudwatch:namespace': 'Hold' } }),
       statement(['cognito-idp:AdminAddUserToGroup'], [at.userPools], { StringEquals: HOLD_TAG }),
-      statement(['kms:Decrypt', 'kms:GenerateDataKey'], ['*'], { StringEquals: { 'kms:ViaService': [`secretsmanager.${REGION}.amazonaws.com`, `s3.${REGION}.amazonaws.com`, `sqs.${REGION}.amazonaws.com`] } }),
+      statement(['kms:Decrypt', 'kms:GenerateDataKey'], ['*'], { StringEquals: { 'kms:ViaService': [`secretsmanager.${REGION}.amazonaws.com`, `sqs.${REGION}.amazonaws.com`] } }),
+      statement(['kms:Decrypt', 'kms:GenerateDataKey'], [at.keys], { StringEquals: { 'kms:ViaService': `s3.${REGION}.amazonaws.com`, 'kms:CallerAccount': ACCOUNT, 'kms:EncryptionContext:aws:s3:arn': [`arn:aws:s3:::${name('evidence', ACCOUNT)}`, `arn:aws:s3:::${name('display', ACCOUNT)}`] }, 'ForAnyValue:StringEquals': { 'kms:ResourceAliases': 'alias/aws/s3' } }),
       statement(['kms:Decrypt'], [at.keys], { StringEquals: HOLD_TAG }),
       statement(['iam:PassRole'], [at.role(name('scheduler'))], { StringEquals: { 'iam:PassedToService': 'scheduler.amazonaws.com' } }),
       // The scheduler starts the outbox relay, one of Hold's functions.

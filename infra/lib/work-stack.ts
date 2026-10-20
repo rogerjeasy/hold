@@ -10,6 +10,7 @@ import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 import { name } from './settings.ts'
 import { createWorker } from './worker.ts'
 import { createComparisonWorker } from './comparison-worker.ts'
+import { createEvidenceWorkers } from './evidence-worker.ts'
 
 // Background work (architecture.md section 14.7): the spine's queues, each with a dead-letter queue and an alarm on
 // it, and the group the worker's schedules live in. The extensions add their queues when they arrive.
@@ -32,7 +33,7 @@ export const QUEUES: readonly QueueSpec[] = [
   { name: 'comparisons', orderedPerRental: false, visibilityTimeout: Duration.minutes(10) },
   { name: 'media', orderedPerRental: false, visibilityTimeout: Duration.minutes(5) },
   { name: 'evidence', orderedPerRental: true, visibilityTimeout: Duration.minutes(5) },
-  { name: 'messages', orderedPerRental: false, visibilityTimeout: Duration.minutes(1) },
+  { name: 'messages', orderedPerRental: false, visibilityTimeout: Duration.minutes(6) },
 ]
 
 // After this many failed attempts a message moves to its dead-letter queue, where the alarm sees it.
@@ -112,6 +113,7 @@ export function createWorkStack(app: App, props: WorkStackProps): WorkResources 
   const workerProps = { cluster: props.cluster, workerUserSecret: props.workerUserSecret, queues, scheduleGroup, schedulerRole, publicUrl: props.publicUrl, renterLinkKey: props.renterLinkKey, evidenceBucket: props.evidenceBucket, displayBucket: props.displayBucket }
   createWorker(stack, workerProps)
   createComparisonWorker(stack, workerProps)
+  createEvidenceWorkers(stack, workerProps)
 
   for (const [queueName, queue] of queues) {
     new CfnOutput(stack, `QueueUrl-${queueName}`, { value: queue.queueUrl })
