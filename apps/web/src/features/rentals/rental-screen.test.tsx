@@ -11,6 +11,10 @@ vi.mock('@/i18n/navigation', async (original) => ({ ...(await original<object>()
 const clock = { timeZone: 'Europe/Lisbon', currency: 'EUR' }
 
 describe('a rental', () => {
+  it('links even read-only staff to the rental record', () => {
+    renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail()} hold={undefined} handovers={[]} canAct={false} />)
+    expect(screen.getByRole('link', { name: 'Your rental record' })).toHaveAttribute('href', `/shop/rentals/${detail().id}/record`)
+  })
   it('links a returned rental to claim review and settlement', () => {
     renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ state: 'returned' })} hold={undefined} handovers={[]} canAct />)
     expect(screen.getByRole('link', { name: 'Claim and settlement' })).toHaveAttribute('href', `/shop/rentals/${detail().id}/claim`)

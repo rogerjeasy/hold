@@ -7,6 +7,10 @@ vi.mock('./actions', () => ({ prepareClaim: vi.fn(), approveAndPresent: vi.fn(),
 vi.mock('@/hooks/use-look-again', () => ({ useLookAgain: () => undefined }))
 const workspace: ClaimWorkspace = { protectedReply: false, rentalId: 'rental', rentalState: 'inspecting', currency: 'EUR', simulated: false, reservedCents: 30000, holdState: 'placed', claim: null, prices: [{ id: 'price', description: 'Scratch', amountCents: 3500 }], possibleFindings: [], lines: [], payments: [], invoices: [], execution: null, replies: [], decisions: [], amounts: { capture: { cents: 0, currency: 'EUR' }, release: { cents: 30000, currency: 'EUR' }, invoice: { cents: 0, currency: 'EUR' } } }
 describe('claim preparation and settlement screen', () => {
+  it('links the shared claim record from staff review', () => {
+    renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={workspace} canAct={false} />)
+    expect(screen.getByRole('link', { name: 'Your rental record' })).toHaveAttribute('href', '/shop/rentals/rental/record')
+  })
   it('offers separate staff confirmation for a clean return and evidence-backed claim preparation', () => {
     renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={workspace} canAct />)
     expect(screen.getByLabelText('Inspection reason')).toBeInTheDocument()

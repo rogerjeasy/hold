@@ -1,4 +1,46 @@
 {
+  "records": {
+    "title": "Ihre Mietunterlagen",
+    "back": "Zurück zur Miete",
+    "lead": "Bewahren Sie eine versionierte Kopie der Fotos, Feststellungen, Entscheidungen und Abrechnung Ihrer Miete auf. Jede erstellte Version bleibt unverändert.",
+    "prepare": "Aktuelle Unterlagen erstellen",
+    "update": "Aktuelle Unterlagen aktualisieren",
+    "retry": "Erstellung erneut versuchen",
+    "preparing": "Wird erstellt…",
+    "requested": "Ihre Unterlagen werden erstellt. Diese Seite aktualisiert sich automatisch.",
+    "requestFailed": "Diese Anfrage konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+    "opening": "Wird geöffnet…",
+    "downloadPdf": "PDF herunterladen",
+    "downloadManifest": "Manifest herunterladen",
+    "savePdf": "PDF speichern",
+    "saveManifest": "Manifest speichern",
+    "empty": "Es wurden noch keine Unterlagen erstellt.",
+    "version": "Version {number}",
+    "created": "Erstellt am",
+    "utc": "UTC",
+    "building": "Ihre Unterlagen werden erstellt. Diese Seite aktualisiert sich automatisch.",
+    "buildFailed": "Die Unterlagen konnten nicht erstellt werden. Bitte versuchen Sie es erneut.",
+    "ready": "Zum Herunterladen bereit",
+    "pdfHash": "PDF-Fingerabdruck (SHA-256)",
+    "manifestHash": "Manifest-Fingerabdruck (SHA-256)",
+    "unavailable": "Nicht verfügbar",
+    "unavailableVersion": "Version der Unterlagen nicht verfügbar",
+    "receiptsTitle": "Belege per E-Mail",
+    "receiptsEmpty": "Noch keine Belege per E-Mail.",
+    "receiptKinds": {
+      "capture": "Zahlung erhalten",
+      "release": "Reservierung freigegeben",
+      "refund": "Erstattung bestätigt",
+      "invoice_sent": "Zahlung angefordert",
+      "invoice_paid": "Rechnung bezahlt"
+    },
+    "receiptStates": {
+      "queued": "Wartet auf Versand",
+      "sending": "Wird gesendet",
+      "sent": "Gesendet",
+      "failed": "Versand fehlgeschlagen; ein neuer Versuch folgt."
+    }
+  },
   "meta": {
     "siteName": "Hold",
     "tagline": "Die Kaution, die Ihr Konto nie verlässt.",

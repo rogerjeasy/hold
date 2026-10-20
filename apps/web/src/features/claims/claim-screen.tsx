@@ -14,11 +14,13 @@ import { ClaimDraftForm } from './claim-draft-form'
 
 export function ClaimScreen({ shopName, data, canAct, photoUrls = {} }: { shopName: string; data: ClaimWorkspace; canAct: boolean; photoUrls?: Readonly<Record<string, string>> }) {
   const t = useTranslations('claim'); const locale = useLocale()
+  const records = useTranslations('records')
   const amount = (cents: number) => formatMoney(money(cents, data.currency), locale)
   const pending = ['releasing', 'renewing', 'capturing'].includes(data.holdState) || data.claim?.state === 'charging' || (data.execution !== null && ['pending', 'submitted'].includes(data.execution.state))
   useLookAgain(pending, { forMs: 180000 })
   return <ShopFrame shopName={shopName} title={t('title')}><div className="grid gap-6">
     <Link href={rentalRoutes.rental(data.rentalId)} className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{t('back')}</Link>
+    <Link href={rentalRoutes.record(data.rentalId)} className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{records('title')}</Link>
     <Notice title={t('humanDecision')} body={t('boundary')} />
     {data.rentalState === 'closed' ? <Notice title={t('settled')} body={t('settledBody')} /> : null}
     {pending ? <p role="status">{t('pending')}</p> : null}

@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
   transpilePackages: ['@hold/auth', '@hold/compare', '@hold/config', '@hold/db', '@hold/domain', '@hold/evidence', '@hold/notify', '@hold/paypal', '@hold/vision'],
   // Loaded from node_modules when the server runs. PGlite finds its WebAssembly beside it, and only the test
   // environment loads it at all.
-  serverExternalPackages: ['@electric-sql/pglite'],
+  serverExternalPackages: ['@electric-sql/pglite', 'pdfkit'],
   // OpenCV.js, measured in a worker on the phone, names Node's file system for when it runs in Node. In the browser it
   // never calls it.
   turbopack: { resolveAlias: { fs: { browser: './src/lib/empty-module.ts' } } },

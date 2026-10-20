@@ -1,4 +1,46 @@
 {
+  "records": {
+    "title": "Tu expediente de alquiler",
+    "back": "Volver al alquiler",
+    "lead": "Guarda una copia con versiones de las fotografías, hallazgos, decisiones y liquidación del alquiler. Cada versión preparada permanece sin cambios.",
+    "prepare": "Preparar el expediente actual",
+    "update": "Actualizar el expediente",
+    "retry": "Volver a intentar la preparación",
+    "preparing": "Preparando…",
+    "requested": "Tu expediente se está preparando. Esta página se actualiza automáticamente.",
+    "requestFailed": "No se pudo completar esta solicitud. Vuelve a intentarlo.",
+    "opening": "Abriendo…",
+    "downloadPdf": "Descargar PDF",
+    "downloadManifest": "Descargar manifiesto",
+    "savePdf": "Guardar PDF",
+    "saveManifest": "Guardar manifiesto",
+    "empty": "Aún no se ha preparado ningún expediente.",
+    "version": "Versión {number}",
+    "created": "Preparado el",
+    "utc": "UTC",
+    "building": "Tu expediente se está preparando. Esta página se actualiza automáticamente.",
+    "buildFailed": "No se pudo preparar el expediente. Vuelve a intentarlo.",
+    "ready": "Listo para descargar",
+    "pdfHash": "Huella del PDF (SHA-256)",
+    "manifestHash": "Huella del manifiesto (SHA-256)",
+    "unavailable": "No disponible",
+    "unavailableVersion": "Versión del expediente no disponible",
+    "receiptsTitle": "Recibos por correo",
+    "receiptsEmpty": "Aún no hay recibos por correo.",
+    "receiptKinds": {
+      "capture": "Pago recibido",
+      "release": "Retención liberada",
+      "refund": "Reembolso confirmado",
+      "invoice_sent": "Pago solicitado",
+      "invoice_paid": "Factura pagada"
+    },
+    "receiptStates": {
+      "queued": "Pendiente de envío",
+      "sending": "Enviando",
+      "sent": "Enviado",
+      "failed": "El envío falló; se volverá a intentar."
+    }
+  },
   "meta": {
     "siteName": "Hold",
     "tagline": "La fianza que nunca sale de tu cuenta.",

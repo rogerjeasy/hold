@@ -1,4 +1,46 @@
 {
+  "records": {
+    "title": "Votre dossier de location",
+    "back": "Revenir à la location",
+    "lead": "Conservez une copie versionnée des photographies, constats, décisions et du règlement de la location. Chaque version préparée reste inchangée.",
+    "prepare": "Préparer le dossier actuel",
+    "update": "Actualiser le dossier",
+    "retry": "Réessayer la préparation",
+    "preparing": "Préparation…",
+    "requested": "Votre dossier est en préparation. Cette page s’actualise automatiquement.",
+    "requestFailed": "Cette demande n’a pas pu aboutir. Veuillez réessayer.",
+    "opening": "Ouverture…",
+    "downloadPdf": "Télécharger le PDF",
+    "downloadManifest": "Télécharger le manifeste",
+    "savePdf": "Enregistrer le PDF",
+    "saveManifest": "Enregistrer le manifeste",
+    "empty": "Aucun dossier n’a encore été préparé.",
+    "version": "Version {number}",
+    "created": "Préparé le",
+    "utc": "UTC",
+    "building": "Votre dossier est en préparation. Cette page s’actualise automatiquement.",
+    "buildFailed": "Le dossier n’a pas pu être préparé. Veuillez réessayer.",
+    "ready": "Prêt à télécharger",
+    "pdfHash": "Empreinte du PDF (SHA-256)",
+    "manifestHash": "Empreinte du manifeste (SHA-256)",
+    "unavailable": "Indisponible",
+    "unavailableVersion": "Version du dossier indisponible",
+    "receiptsTitle": "Reçus par e-mail",
+    "receiptsEmpty": "Aucun reçu envoyé par e-mail pour le moment.",
+    "receiptKinds": {
+      "capture": "Paiement reçu",
+      "release": "Empreinte libérée",
+      "refund": "Remboursement confirmé",
+      "invoice_sent": "Paiement demandé",
+      "invoice_paid": "Facture payée"
+    },
+    "receiptStates": {
+      "queued": "En attente d’envoi",
+      "sending": "Envoi en cours",
+      "sent": "Envoyé",
+      "failed": "Échec de l’envoi ; une nouvelle tentative sera effectuée."
+    }
+  },
   "meta": {
     "siteName": "Hold",
     "tagline": "La caution qui ne quitte jamais votre compte.",

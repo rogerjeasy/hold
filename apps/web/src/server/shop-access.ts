@@ -121,6 +121,9 @@ export function shopAction<Input, Output>(
         // The outbox row written with the change hands the work on later.
       }
     }
+    if (result.ok) {
+      try { await (await getServices()).flushRecords(context.shop.id) } catch { /* The committed outbox retains failed document work. */ }
+    }
     return result
   }
   SHOP_ACTIONS.add(action)

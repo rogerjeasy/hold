@@ -71,6 +71,7 @@ export function renterAction<Input extends { readonly token: string }, Output>(
     await inLinkShop((transaction) =>
       transaction.insert(auditLog).values({ shopId: link.shopId, actorKind: 'renter', actorId: link.id, action: spec.name, subjectKind: 'rental', subjectId: link.rentalId }),
     )
+    try { await (await getServices()).flushRecords(link.shopId) } catch { /* The committed outbox retains failed document work. */ }
     revalidatePath('/', 'layout')
     return { ok: true, value: result }
   }

@@ -31,6 +31,10 @@ const view: RenterView = {
 }
 
 describe('the renter’s page', () => {
+  it('links to the rental record through the renter’s own signed token', () => {
+    renderWithIntl(<RenterScreen token="signed-token" view={view} />)
+    expect(screen.getByRole('link', { name: 'Your rental record' })).toHaveAttribute('href', '/r/signed-token/record')
+  })
   it('keeps the fee and the hold apart, and says the hold is not a charge', () => {
     renderWithIntl(<RenterScreen token="token" view={view} />)
     const amounts = screen.getByRole('region', { name: 'Two amounts, kept apart' })

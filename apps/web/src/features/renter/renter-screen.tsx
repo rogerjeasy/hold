@@ -65,6 +65,7 @@ function StatusLine({ icon: Icon, text }: { icon: typeof Hourglass; text: string
 // the payment while it is due.
 export function RenterScreen({ token, view }: { token: string; view: RenterView }) {
   const t = useTranslations('renter')
+  const records = useTranslations('records')
   const format = useShopFormat({ timeZone: view.timeZone, currency: view.currency })
   const locale = useLocale()
   const due = view.state === 'pending_payment'
@@ -77,6 +78,7 @@ export function RenterScreen({ token, view }: { token: string; view: RenterView 
         </p>
         <h1 className="text-page-title text-balance wrap-long-words">{t('title', { shop: view.shopName })}</h1>
         <Status token={token} view={view} />
+        <Link href={linkRoutes.record(token)} referrerPolicy="no-referrer" className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{records('title')}</Link>
       </header>
       <Panel title={t('what')}>
         <ul>

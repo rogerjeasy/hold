@@ -1,4 +1,46 @@
 {
+  "records": {
+    "title": "Your rental record",
+    "back": "Back to rental",
+    "lead": "Keep a versioned copy of the rental’s photographs, findings, decisions and settlement. Each prepared version stays unchanged.",
+    "prepare": "Prepare current record",
+    "update": "Update current record",
+    "retry": "Try preparing again",
+    "preparing": "Preparing…",
+    "requested": "Your record is being prepared. This page updates automatically.",
+    "requestFailed": "This request could not be completed. Please try again.",
+    "opening": "Opening…",
+    "downloadPdf": "Download PDF",
+    "downloadManifest": "Download manifest",
+    "savePdf": "Save PDF",
+    "saveManifest": "Save manifest",
+    "empty": "No record has been prepared yet.",
+    "version": "Version {number}",
+    "created": "Prepared on",
+    "utc": "UTC",
+    "building": "Preparing your record. This page updates automatically.",
+    "buildFailed": "The record could not be prepared. Please try again.",
+    "ready": "Ready to download",
+    "pdfHash": "PDF fingerprint (SHA-256)",
+    "manifestHash": "Manifest fingerprint (SHA-256)",
+    "unavailable": "Unavailable",
+    "unavailableVersion": "Record version unavailable",
+    "receiptsTitle": "Receipt emails",
+    "receiptsEmpty": "No receipt emails yet.",
+    "receiptKinds": {
+      "capture": "Payment received",
+      "release": "Hold released",
+      "refund": "Refund confirmed",
+      "invoice_sent": "Payment requested",
+      "invoice_paid": "Invoice paid"
+    },
+    "receiptStates": {
+      "queued": "Waiting to send",
+      "sending": "Sending",
+      "sent": "Sent",
+      "failed": "Delivery failed; it will be retried."
+    }
+  },
   "meta": {
     "siteName": "Hold",
     "tagline": "The deposit that never leaves your account.",

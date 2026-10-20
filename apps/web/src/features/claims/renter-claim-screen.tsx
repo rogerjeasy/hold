@@ -12,12 +12,15 @@ import { Panel } from '@/components/ui/panel'
 import { Textarea } from '@/components/ui/textarea'
 import { RenterMessage } from '@/features/renter/renter-message'
 import { useLookAgain } from '@/hooks/use-look-again'
+import { Link } from '@/i18n/navigation'
+import { linkRoutes } from '@/lib/routes'
 import { acknowledgeClaim, acceptClaim, contestClaim, sendClaimCode } from './renter-actions'
 
 export type RenterClaimData = { readonly shopName: string; readonly currency: string; readonly state: ClaimState; readonly totalCents: number; readonly captureCents: number; readonly releaseCents: number; readonly invoiceCents: number; readonly replyDueAt: Date | null; readonly holdState: HoldState; readonly canReply: boolean; readonly canAcknowledge?: boolean; readonly pendingSettlement?: boolean; readonly lines: readonly { readonly id: string; readonly description: string; readonly reason: string; readonly amountCents: number; readonly actorName: string | null; readonly beforeUrl: string | null; readonly afterUrl: string | null }[] }
 
 export function RenterClaimScreen({ token, data }: { token: string; data: RenterClaimData }) {
   const t = useTranslations('claim'); const locale = useLocale(); const format = useFormatter()
+  const records = useTranslations('records')
   const amount = (cents: number) => formatMoney(money(cents, data.currency), locale)
   const [acknowledged, acknowledge, acknowledging] = useActionState(acknowledgeClaim, null)
   const [sent, send, sending] = useActionState(sendClaimCode, null)
@@ -28,6 +31,7 @@ export function RenterClaimScreen({ token, data }: { token: string; data: Renter
   const wording = Object.fromEntries(['code_expired', 'wrong_code', 'code_recently_sent', 'reply_expired', 'already_replied', 'reason_required', 'email_unavailable'].map((key) => [key, t(`results.${key}` as Parameters<typeof t>[0])]))
   return <div className="mx-auto grid w-full max-w-3xl gap-6 px-4 py-8 md:px-8 md:py-12">
     <header><p className="label text-xs text-muted-foreground wrap-long-words">{data.shopName}</p><h1 className="mt-3 text-page-title text-balance">{t('renterTitle')}</h1></header>
+    <Link href={linkRoutes.record(token)} referrerPolicy="no-referrer" className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{records('title')}</Link>
     <Notice title={t(`states.${data.state}`)} body={data.state === 'closed' ? t('settledBody') : t('renterBoundary')} />
     {pending ? <p role="status">{t('pending')}</p> : null}
     {data.replyDueAt === null ? null : <p>{t('replyDue', { when: format.dateTime(data.replyDueAt, { dateStyle: 'medium', timeStyle: 'short' }) })}</p>}

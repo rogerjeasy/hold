@@ -14,6 +14,7 @@ it('shows the evidence and stored charge, asks for an email code and provides a 
 it('keeps the reply controls available after a protective charge when the reply period is still open', () => {
   renderWithIntl(<RenterClaimScreen token="token" data={{ shopName: 'Ribeira Bikes', currency: 'EUR', state: 'charged', totalCents: 3500, captureCents: 3500, releaseCents: 26500, invoiceCents: 0, replyDueAt: new Date('2026-10-22'), holdState: 'captured', lines: [], canReply: true }} />)
   expect(screen.getByRole('button', { name: 'Contest this claim' })).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'Your rental record' })).toHaveAttribute('href', '/r/token/record')
 })
 
 it('shows pending confirmation while a protected capture is being refunded', () => {

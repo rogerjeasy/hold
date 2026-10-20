@@ -21,6 +21,7 @@ type RentalScreenProps = { shopName: string; clock: ShopClock; rental: RentalDet
 export function RentalScreen({ shopName, clock, rental, hold, handovers, returns = [], canAct }: RentalScreenProps) {
   const t = useTranslations('shop.rentals')
   const claim = useTranslations('claim')
+  const records = useTranslations('records')
   const waiting = rental.state === 'pending_payment'
   const live = !['closed', 'cancelled', 'abandoned'].includes(rental.state) && !rental.simulated
   // Staff ask for the hold once the fee is paid. A placed hold is shown to everyone who can see the rental.
@@ -40,6 +41,7 @@ export function RentalScreen({ shopName, clock, rental, hold, handovers, returns
         </div>
         {rental.paymentLapsed ? <p className="max-w-prose border-l-2 border-primary pl-3">{t('detail.lapsedNote')}</p> : null}
         <RentalProgress state={rental.state} />
+        <Link href={rentalRoutes.record(rental.id)} className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{records('title')}</Link>
         {['returned', 'inspecting', 'settling', 'closed'].includes(rental.state) ? <Link href={rentalRoutes.claim(rental.id)} className="inline-flex min-h-12 items-center justify-self-start font-semibold underline underline-offset-4">{claim('title')}</Link> : null}
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
           <RentalTerms rental={rental} clock={clock} />

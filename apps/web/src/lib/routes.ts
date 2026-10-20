@@ -29,6 +29,7 @@ export const shopRoutes = {
 export const rentalRoutes = {
   new: '/shop/rentals/new',
   claim: (rentalId: string) => `/shop/rentals/${rentalId}/claim`,
+  record: (rentalId: string) => `/shop/rentals/${rentalId}/record`,
   rental: (rentalId: string) => `/shop/rentals/${rentalId}`,
   // One item's guided handover photographs.
   handover: (rentalId: string, sessionId: string) => `/shop/rentals/${rentalId}/handover/${sessionId}`,
@@ -49,6 +50,7 @@ export const linkRoutes = {
   // A renter's own rental, named by a signed token: /r/{token}. The same path as RENTER_LINK_PATH in @hold/auth, kept
   // here too because screens import this file and must not load the server's crypto.
   renter: '/r',
+  record: (token: string) => `/r/${token}/record`,
   // A shop's own page for renters, named by its address: /s/{slug}.
   shopPage: '/s',
 } as const
