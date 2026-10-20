@@ -1,4 +1,5 @@
 import 'server-only'
+import { comparisonMessageSchema, runComparison } from '@hold/compare'
 import { createCognitoIdentity, createFakeIdentity, readKeySecret } from '@hold/auth'
 import type { Identity } from '@hold/auth'
 import { loadWebConfig } from '@hold/config'
@@ -49,6 +50,9 @@ export type Services = {
 function runAtOnce(settle: () => SettleDependencies, media: DisplayJobDependencies): (message: QueueMessage) => Promise<void> {
   return async (message) => {
     if (message.queue === 'media') await makeDisplayCopy(media, mediaMessageSchema.parse(message.body))
+    // This environment's model is explicitly simulated and never calls Bedrock. The same pipeline still rejects
+    // reused, unreadable or poorly aligned photographs before any model result is considered.
+    if (message.queue === 'comparisons') await runComparison({ database: media.database, role: media.role ?? 'hold_worker', evidence: media.evidence, model: { look: () => Promise.resolve({ kind: 'unavailable', model: 'simulated' }) }, simulated: true, now: () => new Date() }, comparisonMessageSchema.parse(message.body))
     if (message.queue === 'executions') await runExecution(settle(), executionMessageSchema.parse(message.body))
     if (message.queue === 'paypal-events') await applyPayPalEvent(settle(), paypalEventMessageSchema.parse(message.body))
     if (message.queue === 'upkeep') await runUpkeep(settle(), upkeepMessageSchema.parse(message.body))

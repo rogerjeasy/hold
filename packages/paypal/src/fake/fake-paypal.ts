@@ -11,6 +11,7 @@ import type {
   PayPalFailureKind,
   PayPalHolds,
   PayPalResult,
+  Refund,
 } from '../port.ts'
 
 // PayPal's hold rules in memory, with a clock the caller controls. The sandbox cannot move time forward, so
@@ -72,6 +73,9 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
   let lastNumber = 0
   const webhooks = new Map<string, string>()
   const declined = new Set<string>()
+
+  const refunds = new Map<string, Refund>()
+  const captures = new Map<string, Capture & { readonly authorizationId: string }>()
 
   function nextId(prefix: string): string {
     lastNumber += 1
@@ -265,6 +269,30 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
       return Promise.resolve(result.ok ? ok(toAuthorization(result.value)) : result)
     },
 
+    refundCapture(input) {
+      return Promise.resolve(once('refund', input.idempotencyKey, () => {
+        const capture = captures.get(input.captureId)
+        if (capture === undefined || input.amount.currency !== capture.amount.currency || input.amount.cents > capture.amount.cents) return failure('rejected', 'Invalid refund.')
+        const refund: Refund = { refundId: nextId('FAKE-REFUND'), captureId: input.captureId, status: 'completed', amount: input.amount, createdAt: options.now() }
+        refunds.set(refund.refundId, refund)
+        return ok(refund)
+      }))
+    },
+
+    readRefund(refundId, captureId) {
+      const refund = refunds.get(refundId)
+      return Promise.resolve(refund === undefined || refund.captureId !== captureId ? failure('not_found', 'No such refund.') : ok(refund))
+    },
+
+    invoiceClaim(input) {
+      return Promise.resolve(once('invoice', input.idempotencyKey, () => ok({ invoiceId: nextId('FAKE-INVOICE'), status: 'sent' as const, amount: input.amount, claimReference: input.claimReference })))
+    },
+
+    readCapture(captureId) {
+      const capture = captures.get(captureId)
+      return Promise.resolve(capture === undefined ? failure('not_found', 'No such capture.') : ok(capture))
+    },
+
     captureFromHold(input) {
       const result = once('capture', input.idempotencyKey, (): PayPalResult<Capture> => {
         const current = usable(input.authorizationId)
@@ -280,13 +308,15 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
         authorization.capturedCents += input.amount.cents
         const finalCapture = input.finalCapture || authorization.capturedCents === authorization.amount.cents
         authorization.status = finalCapture ? 'captured' : 'partially_captured'
-        return ok({
+        const capture: Capture = {
           captureId: nextId('FAKE-CAPTURE'),
           status: 'completed',
           amount: input.amount,
           finalCapture,
           createdAt: options.now(),
-        })
+        }
+        captures.set(capture.captureId, { ...capture, authorizationId: input.authorizationId })
+        return ok(capture)
       })
       return Promise.resolve(result)
     },

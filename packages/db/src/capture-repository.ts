@@ -5,6 +5,7 @@ import { and, asc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
 import type { PhotoPlanView } from './schema/catalog.ts'
 import { captureSessions, holds, items, itemTypes, marks, outbox, photoPlans, photos, rentalItems, rentals } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
+import { queueReturnComparisons } from './return-repository.ts'
 
 // Capture sessions (architecture.md section 9): the guided photographs of one item, its marks, the sealed manifest
 // that chains the item's sessions, and the renter's answer to the condition report. Built for the handover (section
@@ -32,7 +33,8 @@ export async function startCaptureSession(transaction: Transaction, request: Sta
     .for('update', { of: rentals })
   if (rental === undefined) return { ok: false, reason: 'not_found' }
   const sessionsOf = (kind: CaptureSessionKind) =>
-    transaction.select({ id: captureSessions.id, sealedAt: captureSessions.sealedAt }).from(captureSessions).where(and(eq(captureSessions.rentalItemId, request.rentalItemId), eq(captureSessions.kind, kind))).orderBy(asc(captureSessions.startedAt))
+    transaction.select({ id: captureSessions.id, sealedAt: captureSessions.sealedAt, planId: captureSessions.photoPlanId }).from(captureSessions).where(and(eq(captureSessions.rentalItemId, request.rentalItemId), eq(captureSessions.kind, kind))).orderBy(asc(captureSessions.startedAt))
+  let planId = rental.planId
   if (request.kind === 'handover') {
     const [existing] = await sessionsOf('handover')
     if (existing !== undefined) return { ok: true, sessionId: existing.id }
@@ -42,12 +44,18 @@ export async function startCaptureSession(transaction: Transaction, request: Sta
     if (handover?.sealedAt === null || handover === undefined || rental.reply !== null || !conditionReplyOpen(handover.sealedAt, now)) return { ok: false, reason: 'not_ready' }
     const open = (await sessionsOf('condition')).find((session) => session.sealedAt === null)
     if (open !== undefined) return { ok: true, sessionId: open.id }
+  } else if (request.kind === 'return') {
+    const [existing] = await sessionsOf('return')
+    if (existing !== undefined) return { ok: true, sessionId: existing.id }
+    const [handover] = await sessionsOf('handover')
+    if (!['out', 'overdue'].includes(rental.state) || handover?.sealedAt == null) return { ok: false, reason: 'not_ready' }
+    planId = handover.planId
   } else {
     return { ok: false, reason: 'not_ready' }
   }
   const [created] = await transaction
     .insert(captureSessions)
-    .values({ shopId: rental.shopId, rentalItemId: request.rentalItemId, kind: request.kind, photoPlanId: rental.planId, actorUserId: request.actorUserId, startedAt: now })
+    .values({ shopId: rental.shopId, rentalItemId: request.rentalItemId, kind: request.kind, photoPlanId: planId, actorUserId: request.actorUserId, startedAt: now })
     .returning({ id: captureSessions.id })
   if (created === undefined) throw new Error('The session was not created.')
   return { ok: true, sessionId: created.id }
@@ -115,11 +123,11 @@ async function marksFor(transaction: Transaction, session: Pick<SessionRow, 'id'
     .map((row) => ({ id: row.id, view: row.view, region: row.region, description: row.description, new: row.seenIn === session.id, confirmed: row.seenIn === session.id || session.confirmedMarkIds.includes(row.id) }))
 }
 
-export type SessionPhoto = { readonly id: string; readonly view: string; readonly displayKey: string | null; readonly receivedAt: Date }
+export type SessionPhoto = { readonly id: string; readonly view: string; readonly displayKey: string | null; readonly receivedAt: Date; readonly simulated?: boolean }
 
 async function currentPhotos(transaction: Transaction, sessionId: string): Promise<readonly SessionPhoto[]> {
   return transaction
-    .select({ id: photos.id, view: photos.view, displayKey: photos.displayKey, receivedAt: photos.receivedAt })
+    .select({ id: photos.id, view: photos.view, displayKey: photos.displayKey, receivedAt: photos.receivedAt, simulated: sql<boolean>`coalesce((${photos.quality} ->> 'simulated')::int = 1, false)` })
     .from(photos)
     .where(and(eq(photos.sessionId, sessionId), isNull(photos.supersededAt)))
     .orderBy(asc(photos.view))
@@ -171,7 +179,7 @@ async function openSession(transaction: Transaction, sessionId: string): Promise
   return row
 }
 
-export type NewPhoto = { readonly view: string; readonly evidenceKey: string; readonly sha256: string; readonly quality: PhotoMeasures }
+export type NewPhoto = { readonly view: string; readonly evidenceKey: string; readonly sha256: string; readonly quality: PhotoMeasures; readonly simulated?: boolean }
 
 export type RecordPhotoResult = { readonly ok: true; readonly photoId: string } | Refused<'not_found' | 'sealed' | 'unknown_view'>
 
@@ -184,7 +192,7 @@ export async function recordPhoto(transaction: Transaction, sessionId: string, p
   await transaction.update(photos).set({ supersededAt: now }).where(and(eq(photos.sessionId, sessionId), eq(photos.view, photo.view), isNull(photos.supersededAt)))
   const [created] = await transaction
     .insert(photos)
-    .values({ shopId: session.shopId, sessionId, view: photo.view, evidenceKey: photo.evidenceKey, sha256: photo.sha256, receivedAt: now, quality: photo.quality })
+    .values({ shopId: session.shopId, sessionId, view: photo.view, evidenceKey: photo.evidenceKey, sha256: photo.sha256, receivedAt: now, quality: { ...photo.quality, ...(photo.simulated === true ? { simulated: 1 } : {}) } })
     .returning({ id: photos.id })
   if (created === undefined) throw new Error('The photograph was not recorded.')
   await transaction.insert(outbox).values({ shopId: session.shopId, queue: MEDIA_QUEUE, messageGroup: sessionId, payload: { photoId: created.id }, createdAt: now })
@@ -255,6 +263,7 @@ export async function sealSession(transaction: Transaction, sessionId: string, n
       await transaction.update(rentals).set({ state: 'out' }).where(eq(rentals.id, session.rentalId))
     }
   }
+  if (session.kind === 'return') await queueReturnComparisons(transaction, session.rentalId, now)
   return { ok: true, manifestFingerprint: fingerprint, rentalOut: (await rentalState()) === 'out' }
 }
 

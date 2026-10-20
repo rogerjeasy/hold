@@ -8,7 +8,7 @@ import type { UpkeepMessage } from './queue-messages.ts'
 
 export const UPKEEP_QUEUE = 'upkeep'
 
-export type UpkeepKind = UpkeepMessage['kind']
+export type UpkeepKind = Extract<UpkeepMessage, { holdId: string }>['kind']
 
 export function upkeepScheduleName(kind: UpkeepKind, authorizationId: string): string {
   return `hold-${kind}-${authorizationId}`

@@ -196,6 +196,9 @@ importers:
       '@hold/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hold/compare':
+        specifier: workspace:*
+        version: link:../../packages/compare
       '@hold/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -320,6 +323,9 @@ importers:
       '@hold/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@hold/compare':
+        specifier: workspace:*
+        version: link:../../packages/compare
       '@hold/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -397,7 +403,32 @@ importers:
         specifier: 5.2.1
         version: 5.2.1
 
-  packages/compare: {}
+  packages/compare:
+    dependencies:
+      '@anthropic-ai/bedrock-sdk':
+        specifier: ^0.34.4
+        version: 0.34.4(zod@4.6.7)
+      '@anthropic-ai/sdk':
+        specifier: ^0.133.0
+        version: 0.133.0(zod@4.6.7)
+      '@hold/db':
+        specifier: workspace:*
+        version: link:../db
+      '@hold/domain':
+        specifier: workspace:*
+        version: link:../domain
+      '@hold/evidence':
+        specifier: workspace:*
+        version: link:../evidence
+      '@hold/vision':
+        specifier: workspace:*
+        version: link:../vision
+      sharp:
+        specifier: 0.35.5
+        version: 0.35.5(@types/node@24.19.2)
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
 
   packages/config:
     dependencies:
@@ -539,13 +570,12 @@ importers:
       '@hold/domain':
         specifier: workspace:*
         version: link:../domain
-      sharp:
-        specifier: 0.35.5
-        version: 0.35.5(@types/node@24.19.2)
-    devDependencies:
       '@techstark/opencv-js':
         specifier: 4.12.0-release.1
         version: 4.12.0-release.1
+      sharp:
+        specifier: 0.35.5
+        version: 0.35.5(@types/node@24.19.2)
 
 packages:
 

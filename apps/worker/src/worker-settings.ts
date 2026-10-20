@@ -10,6 +10,8 @@ const schema = z.object({
   HOLD_EXECUTIONS_QUEUE_URL: z.url(),
   HOLD_PAYPAL_EVENTS_QUEUE_URL: z.url(),
   HOLD_UPKEEP_QUEUE_URL: z.url(),
+  HOLD_COMPARISONS_QUEUE_URL: z.url().optional(),
+  HOLD_MEDIA_QUEUE_URL: z.url().optional(),
   HOLD_UPKEEP_QUEUE_ARN: z.string().startsWith('arn:aws:sqs:'),
   HOLD_SCHEDULE_GROUP: z.string().min(1),
   HOLD_SCHEDULER_ROLE_ARN: z.string().startsWith('arn:aws:iam:'),
@@ -28,7 +30,7 @@ const schema = z.object({
 export type WorkerSettings = {
   readonly region: string
   readonly database: { readonly clusterArn: string; readonly secretArn: string; readonly name: string }
-  readonly queues: Readonly<Record<'executions' | 'paypal-events' | 'upkeep', string>>
+  readonly queues: Readonly<Record<'executions' | 'paypal-events' | 'upkeep', string> & Partial<Record<'comparisons' | 'media', string>>>
   // Where a hold's schedules are made, the role they send with, and the queues they may send to.
   readonly schedules: { readonly groupName: string; readonly roleArn: string; readonly queueArns: Readonly<Record<'upkeep', string>> }
   readonly paypalMode: 'sandbox'
@@ -45,7 +47,7 @@ export function loadWorkerSettings(environment: Readonly<Record<string, string |
   return {
     region: value.AWS_REGION,
     database: { clusterArn: value.HOLD_DATABASE_CLUSTER_ARN, secretArn: value.HOLD_DATABASE_SECRET_ARN, name: value.HOLD_DATABASE_NAME },
-    queues: { executions: value.HOLD_EXECUTIONS_QUEUE_URL, 'paypal-events': value.HOLD_PAYPAL_EVENTS_QUEUE_URL, upkeep: value.HOLD_UPKEEP_QUEUE_URL },
+    queues: { executions: value.HOLD_EXECUTIONS_QUEUE_URL, 'paypal-events': value.HOLD_PAYPAL_EVENTS_QUEUE_URL, upkeep: value.HOLD_UPKEEP_QUEUE_URL, ...(value.HOLD_COMPARISONS_QUEUE_URL === undefined ? {} : { comparisons: value.HOLD_COMPARISONS_QUEUE_URL }), ...(value.HOLD_MEDIA_QUEUE_URL === undefined ? {} : { media: value.HOLD_MEDIA_QUEUE_URL }) },
     schedules: { groupName: value.HOLD_SCHEDULE_GROUP, roleArn: value.HOLD_SCHEDULER_ROLE_ARN, queueArns: { upkeep: value.HOLD_UPKEEP_QUEUE_ARN } },
     paypalMode: value.HOLD_PAYPAL_MODE,
     smtpSecret: value.HOLD_SMTP_SECRET,

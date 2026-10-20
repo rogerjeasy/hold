@@ -58,9 +58,9 @@ describe('the claim machine', () => {
     expect(reachableFrom(CLAIM_TRANSITIONS, 'escalated').has('contested')).toBe(false)
   })
 
-  it('reaches charging only through a renter reply, a lapse, an agreement or a decision', () => {
+  it('lists the approved pre-expiry exception alongside reply, lapse, agreement and decision paths', () => {
     const intoCharging = CLAIM_STATES.filter((state) => CLAIM_TRANSITIONS[state].includes('charging'))
-    expect(intoCharging.sort()).toEqual(['accepted', 'agreed', 'charge_failed', 'decided', 'lapsed'])
+    expect(intoCharging.sort()).toEqual(['accepted', 'agreed', 'charge_failed', 'decided', 'lapsed', 'presented'])
   })
 })
 
@@ -76,4 +76,10 @@ describe('how the machines connect', () => {
   it('closes a rental only once its hold is released, captured, invoiced or expired', () => {
     expect(HOLD_STATES.filter(mayCloseRental).sort()).toEqual(['captured', 'expired', 'invoiced', 'released'])
   })
+})
+
+it('can waive a failed protective charge and release its unused authorization', () => {
+  expect(CLAIM_TRANSITIONS.charge_failed).toContain('waived')
+  expect(HOLD_TRANSITIONS.capture_failed).toContain('releasing')
+  expect(HOLD_TRANSITIONS.releasing).toContain('expired')
 })

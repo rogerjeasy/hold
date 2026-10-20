@@ -1,3 +1,4 @@
+import { runClaimDeadline } from './claim-deadline.ts'
 import { expireHold, saveReplacementOrder, upkeepTarget } from '@hold/db'
 import type { UpkeepTarget } from '@hold/db'
 import { money, needsReplacement } from '@hold/domain'
@@ -12,12 +13,13 @@ import type { UpkeepMessage } from './queue-messages.ts'
 // The timed steps that keep a placed hold watched (architecture.md section 7.4), each sent by its schedule. Hold acts on
 // its own clock and confirms with PayPal: PayPal sends no event when a hold expires.
 
-export type UpkeepOutcome = 'expired' | 'still_valid' | 'replacement_asked' | 'nothing_to_do'
+export type UpkeepOutcome = 'expired' | 'still_valid' | 'replacement_asked' | 'nothing_to_do' | 'claim_scheduled' | 'claim_charging'
 
 // PayPal still holds the money on an authorization in these states until its end.
 const STILL_HELD: ReadonlySet<string> = new Set(['created', 'partially_captured', 'pending'])
 
 export async function runUpkeep(dependencies: SettleDependencies, message: UpkeepMessage): Promise<UpkeepOutcome> {
+  if ('claimId' in message) return runClaimDeadline(dependencies, message)
   const { shopId, holdId, authorizationId } = message
   const { target, account } = await inWorkerShop(dependencies, shopId, async (transaction) => ({
     target: await upkeepTarget(transaction, holdId, authorizationId),
@@ -52,7 +54,7 @@ export async function runUpkeep(dependencies: SettleDependencies, message: Upkee
 // Three days before the hold's end, while the rental still needs it: a new hold for the same amount, which the renter
 // approves from a link, as at pickup. Once approved, the hold moves onto it and the old one is released. A saved
 // payment method would need no approval, but PayPal must first allow the shop to keep one (tech-stack.md section 16).
-async function askForReplacement(dependencies: SettleDependencies, message: UpkeepMessage, target: UpkeepTarget, paypal: PayPalHolds): Promise<UpkeepOutcome> {
+async function askForReplacement(dependencies: SettleDependencies, message: Extract<UpkeepMessage, { holdId: string }>, target: UpkeepTarget, paypal: PayPalHolds): Promise<UpkeepOutcome> {
   const { shopId, holdId, authorizationId } = message
   if (!needsReplacement(target.rentalState)) return 'nothing_to_do'
   const approval = await dependencies.renterAsk.approval(shopId, target.rentalId)

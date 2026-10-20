@@ -9,6 +9,7 @@ import type * as s3 from 'aws-cdk-lib/aws-s3'
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 import { name } from './settings.ts'
 import { createWorker } from './worker.ts'
+import { createComparisonWorker } from './comparison-worker.ts'
 
 // Background work (architecture.md section 14.7): the spine's queues, each with a dead-letter queue and an alarm on
 // it, and the group the worker's schedules live in. The extensions add their queues when they arrive.
@@ -108,7 +109,9 @@ export function createWorkStack(app: App, props: WorkStackProps): WorkResources 
   })
   for (const queue of queues.values()) queue.grantSendMessages(schedulerRole)
 
-  createWorker(stack, { cluster: props.cluster, workerUserSecret: props.workerUserSecret, queues, scheduleGroup, schedulerRole, publicUrl: props.publicUrl, renterLinkKey: props.renterLinkKey, evidenceBucket: props.evidenceBucket, displayBucket: props.displayBucket })
+  const workerProps = { cluster: props.cluster, workerUserSecret: props.workerUserSecret, queues, scheduleGroup, schedulerRole, publicUrl: props.publicUrl, renterLinkKey: props.renterLinkKey, evidenceBucket: props.evidenceBucket, displayBucket: props.displayBucket }
+  createWorker(stack, workerProps)
+  createComparisonWorker(stack, workerProps)
 
   for (const [queueName, queue] of queues) {
     new CfnOutput(stack, `QueueUrl-${queueName}`, { value: queue.queueUrl })

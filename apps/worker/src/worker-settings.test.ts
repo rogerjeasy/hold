@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { loadWorkerSettings } from './worker-settings.ts'
+import { createSqsSender } from '@hold/settle'
 
 const ENVIRONMENT = {
   AWS_REGION: 'us-east-1',
@@ -19,6 +20,13 @@ const ENVIRONMENT = {
 }
 
 describe('the worker’s settings', () => {
+  it.each(['comparisons', 'media'])('lets the outbox relay deliver %s work when the immediate send failed', async (queue) => {
+    const settings = loadWorkerSettings({ ...ENVIRONMENT, HOLD_COMPARISONS_QUEUE_URL: 'https://sqs.test/comparisons', HOLD_MEDIA_QUEUE_URL: 'https://sqs.test/media' })
+    let queuedUrl: string | undefined
+    const send = createSqsSender({ queues: settings.queues, client: { send: (command) => { queuedUrl = command.input.QueueUrl; return Promise.resolve({}) } } })
+    await send({ queue, group: 'rental', deduplicationId: 'job', body: { shopId: 'shop', comparisonId: 'comparison' } })
+    expect(queuedUrl).toBe(`https://sqs.test/${queue}`)
+  })
   it('are read from its environment, with the database name and PayPal mode defaulted', () => {
     expect(loadWorkerSettings(ENVIRONMENT)).toEqual({
       region: 'us-east-1',

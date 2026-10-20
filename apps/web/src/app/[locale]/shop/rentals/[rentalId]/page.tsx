@@ -1,4 +1,4 @@
-import { inShop, rentalDetail, rentalHandovers, rentalHold } from '@hold/db'
+import { inShop, rentalDetail, rentalHandovers, rentalHold, rentalReturns } from '@hold/db'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
@@ -16,12 +16,12 @@ export default async function Page({ params }: { params: Promise<{ rentalId: str
   const context = await requireShop()
   const { database } = await getServices()
   const scope = { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId } as const
-  const { rental, hold, handovers } = await inShop(database, scope, async (transaction) => {
+  const { rental, hold, handovers, returns } = await inShop(database, scope, async (transaction) => {
     const found = await rentalDetail(transaction, rentalId, new Date())
-    if (found === undefined) return { rental: undefined, hold: undefined, handovers: [] }
-    return { rental: found, hold: await rentalHold(transaction, found.id), handovers: await rentalHandovers(transaction, found.id) }
+    if (found === undefined) return { rental: undefined, hold: undefined, handovers: [], returns: [] }
+    return { rental: found, hold: await rentalHold(transaction, found.id), handovers: await rentalHandovers(transaction, found.id), returns: await rentalReturns(transaction, found.id) }
   })
   // Another shop's rental and a made-up address read the same.
   if (rental === undefined) notFound()
-  return <RentalScreen shopName={context.shop.name} clock={{ timeZone: context.shop.timeZone, currency: context.shop.currency }} rental={rental} hold={hold} handovers={handovers} canAct={context.role !== 'read_only'} />
+  return <RentalScreen shopName={context.shop.name} clock={{ timeZone: context.shop.timeZone, currency: context.shop.currency }} rental={rental} hold={hold} handovers={handovers} returns={returns} canAct={context.role !== 'read_only'} />
 }

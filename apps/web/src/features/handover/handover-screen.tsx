@@ -23,7 +23,7 @@ export type HandoverView = {
   readonly sealed: boolean
   readonly plan: readonly { readonly key: string; readonly label: string; readonly outline: ViewOutline; readonly required: boolean }[]
   // A photograph's display copy, or null while the worker makes it.
-  readonly photos: readonly { readonly view: string; readonly url: string | null }[]
+  readonly photos: readonly { readonly view: string; readonly url: string | null; readonly simulated?: boolean }[]
   readonly marks: readonly SessionMark[]
   readonly missing: readonly string[]
 }

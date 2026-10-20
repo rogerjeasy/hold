@@ -13,6 +13,9 @@ const AWS = {
 }
 
 describe('loadWebConfig', () => {
+  it('hands return comparisons directly to their queue when configured', () => {
+    expect(loadWebConfig({ ...AWS, HOLD_EXECUTIONS_QUEUE_URL: 'https://sqs.test/e.fifo', HOLD_PAYPAL_EVENTS_QUEUE_URL: 'https://sqs.test/p.fifo', HOLD_COMPARISONS_QUEUE_URL: 'https://sqs.test/comparisons' })).toMatchObject({ queues: { comparisons: 'https://sqs.test/comparisons' } })
+  })
   it('reads the AWS services, with defaults for the region, database name and public address', () => {
     expect(loadWebConfig(AWS)).toMatchObject({
       environment: 'development',

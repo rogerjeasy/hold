@@ -5,14 +5,13 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./measure": "./src/measure.ts"
+    "./measure": "./src/measure.ts",
+    "./inspect-pair": "./src/inspect-pair.ts"
   },
   "dependencies": {
     "@aws-sdk/client-rekognition": "3.1151.0",
     "@hold/domain": "workspace:*",
-    "sharp": "0.35.5"
-  },
-  "devDependencies": {
+    "sharp": "0.35.5",
     "@techstark/opencv-js": "4.12.0-release.1"
   }
 }

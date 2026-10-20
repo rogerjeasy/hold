@@ -98,6 +98,10 @@ export const comparisons = pgTable(
     alignment: jsonb().$type<Readonly<Record<string, number>>>(),
     model: text(),
     promptVersion: text(),
+    // A bounded lease lets a queue retry recover a worker that stopped mid-comparison.
+    startedAt: at(),
+    deferredReason: text(),
+    simulated: boolean().notNull().default(false),
     createdAt: createdAt(),
     completedAt: at(),
   },

@@ -1,4 +1,4 @@
-import { jsonb, pgTable, text } from 'drizzle-orm/pg-core'
+import { integer, jsonb, pgTable, text } from 'drizzle-orm/pg-core'
 import { shopIsolation } from './access.ts'
 import { at, createdAt, id, reference } from './columns.ts'
 import { allowed, OUTBOX_STATES, outboxState } from './enums.ts'
@@ -20,6 +20,9 @@ export const renterLinks = pgTable(
     expiresAt: at().notNull(),
     lastUsedAt: at(),
     revokedAt: at(),
+    claimCodeHash: text(),
+    claimCodeExpiresAt: at(),
+    claimCodeAttempts: integer().notNull().default(0),
     createdAt: createdAt(),
   },
   (table) => [shopIsolation(table.shopId)],

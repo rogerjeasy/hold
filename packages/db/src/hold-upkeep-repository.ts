@@ -1,6 +1,7 @@
 import { HOLD_TRANSITIONS, planUpkeep, transition } from '@hold/domain'
 import type { HoldState, RentalState } from '@hold/domain'
 import { and, eq, inArray } from 'drizzle-orm'
+import { closeSettledRental } from './settlement-repository.ts'
 import { markExecutionSent } from './fee-repository.ts'
 import type { HoldUpkeep } from './hold-repository.ts'
 import { auditLog, authorizations, executions, holds, moneyEvents, rentals, staffRoles, users } from './schema/index.ts'
@@ -119,5 +120,9 @@ export async function confirmAuthorizationReleased(transaction: Transaction, exe
     .onConflictDoNothing()
   await transaction.update(executions).set({ state: 'confirmed', attempts: execution.attempts + 1, lastError: null, updatedAt: now }).where(eq(executions.id, executionId))
   await markExecutionSent(transaction, executionId, now)
+  if (execution.holdId !== null) {
+    const [hold] = await transaction.select().from(holds).where(eq(holds.id, execution.holdId))
+    if (hold !== undefined) await closeSettledRental(transaction, execution.rentalId, hold.state, now)
+  }
   return { ok: true }
 }

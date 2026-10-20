@@ -5,10 +5,20 @@ import { detail } from './fixtures'
 import { RentalScreen } from './rental-screen'
 
 vi.mock('./actions', () => ({ showRenterLink: () => Promise.resolve(null), emailRenterLinkAgain: () => Promise.resolve(null), letGoOfBooking: () => Promise.resolve(null), askForHold: () => Promise.resolve(null) }))
+vi.mock('@/features/returns/actions', () => ({ startReturn: vi.fn() }))
+vi.mock('@/i18n/navigation', async (original) => ({ ...(await original<object>()), useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }) }))
 
 const clock = { timeZone: 'Europe/Lisbon', currency: 'EUR' }
 
 describe('a rental', () => {
+  it('links a returned rental to claim review and settlement', () => {
+    renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ state: 'returned' })} hold={undefined} handovers={[]} canAct />)
+    expect(screen.getByRole('link', { name: 'Claim and settlement' })).toHaveAttribute('href', `/shop/rentals/${detail().id}/claim`)
+  })
+  it('offers a return inspection when an item is out', () => {
+    renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ state: 'out' })} hold={undefined} handovers={[]} returns={[{ itemId: 'bike', label: 'City e-bike', sessionId: null, sealed: false, comparisonId: null }]} canAct />)
+    expect(screen.getByRole('button', { name: 'Start return for City e-bike' })).toBeInTheDocument()
+  })
   it('shows its terms: when, what, the fee and the hold, and the price list agreed to', () => {
     renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail()} hold={undefined} handovers={[]} canAct />)
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Priya Natarajan')

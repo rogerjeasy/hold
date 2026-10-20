@@ -281,6 +281,21 @@ describe('the worker', () => {
       .filter(([key]) => key.startsWith('WorkerRole'))
       .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: { Action: unknown }[] } } }).Properties.PolicyDocument.Statement)
 
+  it('runs comparisons from their queue with a separate role that cannot send money work or read PayPal credentials', () => {
+    expect(functionNamed('hold-worker-comparisons')?.Properties).toMatchObject({ Runtime: 'nodejs24.x', MemorySize: 1536 })
+    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 5)
+    const policies = Object.entries(work.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('ComparisonRole')).map(([, value]) => value)
+    expect(policies.length).toBeGreaterThan(0)
+    const policy = JSON.stringify(policies)
+    expect(policy).toContain('bedrock-mantle:CreateInference')
+    expect(policy).not.toContain('sqs:SendMessage')
+    expect(policy).not.toContain('paypal/shops')
+    expect(policy).not.toContain('s3:PutObject')
+    const boundary = JSON.stringify(delivery.findResources('AWS::IAM::ManagedPolicy'))
+    expect(boundary).toContain('bedrock-mantle:CreateInference')
+    expect(boundary).toContain('bedrock-mantle:Model')
+  })
+
   it('runs five functions on Node 24: PayPal events, executions, hold upkeep, display copies and the outbox relay', () => {
     for (const functionName of ['hold-worker-paypal-events', 'hold-worker-executions', 'hold-worker-upkeep', 'hold-worker-media', 'hold-worker-outbox-relay']) {
       expect(functionNamed(functionName)?.Properties).toMatchObject({ Runtime: 'nodejs24.x' })
@@ -288,7 +303,7 @@ describe('the worker', () => {
   })
 
   it('takes PayPal events, executions and upkeep from their queues, and tries again only the messages that failed', () => {
-    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 4)
+    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 5)
     work.hasResourceProperties('AWS::Lambda::EventSourceMapping', { FunctionResponseTypes: ['ReportBatchItemFailures'] })
   })
 

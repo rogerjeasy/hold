@@ -31,3 +31,33 @@ export { confirmAuthorizationReleased, expireHold, holdUpkeep, saveReplacementOr
 export type { ExpireResult, ReleasedResult, ReplacementResult, ShopOwner, UpkeepTarget } from './hold-upkeep-repository.ts'
 export { addMark, captureSession, conditionReport, confirmMarks, markPhotoMessageSent, MEDIA_QUEUE, openConditionSessions, photoForDisplay, recordDisplayCopy, recordPhoto, rentalHandovers, rentalItemFor, replyToCondition, sealSession, startCaptureSession } from './capture-repository.ts'
 export type { AddMarkResult, CaptureSession, ConditionReport, RentalHandover, NewPhoto, RecordPhotoResult, ReplyResult, SealResult, SessionMark, SessionPhoto, StartResult } from './capture-repository.ts'
+export { COMPARISONS_QUEUE, rentalReturns, returnBaseline } from './return-repository.ts'
+export type { RentalReturn } from './return-repository.ts'
+export { beginComparison, comparisonReport, completeComparison } from './comparison-repository.ts'
+export type { ComparisonPhoto, ComparisonReport, StoredInspection } from './comparison-repository.ts'
+
+export { acknowledgeClaimReview, approveClaim, confirmCleanReturn, draftClaim, presentClaim } from './claim-repository.ts'
+
+export { replyToClaim, queueClaimCapture } from './claim-reply-repository.ts'
+export { settlementWork, saveSettlementResource, confirmClaimCaptured, confirmReturnReleased } from './settlement-repository.ts'
+
+export { issueClaimCode, useClaimCode } from './claim-code-repository.ts'
+export { decideClaim } from './claim-decision-repository.ts'
+
+export { beginSettlementRenewal, confirmSettlementRenewal, failSettlementRenewal } from './settlement-renewal.ts'
+
+export { claimWorkspace } from './claim-query.ts'
+export type { ClaimWorkspace } from './claim-query.ts'
+
+export { beginClaimInvoice, claimInvoiceWork, confirmClaimInvoiced } from './claim-invoice-repository.ts'
+
+export { claimDeadlineWork, claimDue } from './claim-deadline-repository.ts'
+
+export { closeSettledRental } from './settlement-repository.ts'
+export { queueClaimRefund, confirmClaimRefund } from './claim-refund-repository.ts'
+
+export { settlementExecutionForResource } from './settlement-event-repository.ts'
+
+export { mayExecuteSettlement } from './settlement-repository.ts'
+
+export { resolveClaimSettlement } from './claim-resolution.ts'

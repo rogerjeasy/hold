@@ -23,6 +23,7 @@ export type UploadRequest = {
   readonly measures: PhotoMeasures
   readonly locale: string
   readonly onProgress?: (share: number) => void
+  readonly simulated?: boolean
 }
 
 const TRIES = 3
@@ -49,7 +50,7 @@ export async function uploadPhoto(request: UploadRequest, steps: UploadSteps): P
   if (!stored) return { ok: false, reason: 'upload_failed' }
   const { sharpness, shadows, highlights, filled } = request.measures
   const measured = { sharpness: String(sharpness), shadows: String(shadows), highlights: String(highlights), filled: String(filled) }
-  const confirmed = await steps.confirm(null, fields({ ...request.target, view: request.view, key: link.value.key, ...measured, locale: request.locale }))
+  const confirmed = await steps.confirm(null, fields({ ...request.target, view: request.view, key: link.value.key, ...measured, locale: request.locale, ...(request.simulated === true ? { simulated: 'true' } : {}) }))
   return confirmed.ok ? { ok: true, photoId: confirmed.value.photoId } : { ok: false, reason: reasonOf(confirmed) }
 }
 

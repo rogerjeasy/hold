@@ -66,11 +66,8 @@ describe('starting a handover', () => {
     expect(session).toMatchObject({ kind: 'handover', rentalId, itemLabel: 'City e-bike 1', missing: ['left-side', 'right-side'], sealedAt: null })
   })
 
-  it('is refused for a rental whose hold is not placed', async () => {
-    const { rentalId, rentalItemIds, sessionId } = await handover()
-    await photographed(sessionId)
-    await shop.act((transaction) => sealSession(transaction, sessionId, NOW))
-    // The rental is out now, so a second handover cannot begin.
+  it('refuses a return before the item has been handed over', async () => {
+    const { rentalId, rentalItemIds } = await handover()
     expect(await shop.act((transaction) => startCaptureSession(transaction, { rentalId, rentalItemId: rentalItemIds[0] ?? '', kind: 'return', actorUserId: null }, NOW))).toEqual({ ok: false, reason: 'not_ready' })
   })
 
