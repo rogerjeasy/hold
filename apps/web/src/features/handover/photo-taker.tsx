@@ -21,17 +21,17 @@ const UNMEASURED: PhotoMeasures = { sharpness: 0, shadows: 0, highlights: 0, fil
 const SAMPLE = '/images/sample-handover.jpg'
 
 // Puts a checked photograph where it belongs: staff's handover, or what a renter adds to the condition report.
-export type UploadTaken = (blob: Blob, measures: PhotoMeasures, onProgress: (share: number) => void) => Promise<{ readonly ok: true } | { readonly ok: false; readonly reason: string }>
+export type UploadTaken = (blob: Blob, measures: PhotoMeasures, onProgress: (share: number) => void, simulated?: boolean) => Promise<{ readonly ok: true } | { readonly ok: false; readonly reason: string }>
 
 // Takes one view's photograph (architecture.md section 9.1): the camera with the view's outline, a file when there is no
 // camera, or the sample. The phone checks it at once and asks for a retake before anything uploads.
-export function PhotoTaker({ view, upload, onTaken }: { view: View; upload: UploadTaken; onTaken: () => void }) {
+export function PhotoTaker({ view, upload, onTaken, guide }: { view: View; upload: UploadTaken; onTaken: () => void; guide?: string }) {
   const t = useTranslations('shop.handover.taker')
   const check = useQualityCheck()
   const camera = useCamera(true)
   const [step, setStep] = useState<Step>({ kind: 'ready' })
 
-  const take = async (read: () => Promise<ReadImage>) => {
+  const take = async (read: () => Promise<ReadImage>, simulated = false) => {
     setStep({ kind: 'checking' })
     const image = await read()
     const measures = await check(image.pixels)
@@ -43,7 +43,7 @@ export function PhotoTaker({ view, upload, onTaken }: { view: View; upload: Uplo
     setStep({ kind: 'uploading', share: 0 })
     const uploaded = await upload(image.blob, measures ?? UNMEASURED, (share) => {
       setStep({ kind: 'uploading', share })
-    })
+    }, simulated)
     if (uploaded.ok) {
       setStep({ kind: 'ready' })
       onTaken()
@@ -54,7 +54,8 @@ export function PhotoTaker({ view, upload, onTaken }: { view: View; upload: Uplo
   return (
     <div className="grid gap-3">
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
-        <video ref={camera.video} playsInline muted aria-label={t('camera', { view: view.label })} className="size-full object-cover" />
+        <video ref={camera.video} playsInline muted aria-label={t('camera', { view: view.label })} className="size-full object-contain" />
+        {guide === undefined ? null : <img src={guide} alt={t('guide', { view: view.label })} className="pointer-events-none absolute inset-0 size-full object-contain opacity-40" />}
         <OutlineOverlay outline={view.outline} />
         {camera.state === 'unavailable' ? <p className="absolute inset-x-0 bottom-0 bg-black/70 p-3 text-sm text-white">{t('noCamera')}</p> : null}
       </div>
@@ -70,7 +71,7 @@ export function PhotoTaker({ view, upload, onTaken }: { view: View; upload: Uplo
             <input type="file" accept="image/jpeg" capture="environment" className="sr-only" disabled={busy} onChange={(event) => { const file = event.target.files?.[0]; if (file !== undefined) void take(() => readImage(file)) }} />
           </label>
         </Button>
-        <Button type="button" variant="ghost" className="min-h-12" disabled={busy} onClick={() => { void take(async () => readImage(await (await fetch(SAMPLE)).blob())) }}>
+        <Button type="button" variant="ghost" className="min-h-12" disabled={busy} onClick={() => { void take(async () => readImage(await (await fetch(SAMPLE)).blob()), true) }}>
           <FlaskConical aria-hidden="true" />
           {t('sample')}
         </Button>

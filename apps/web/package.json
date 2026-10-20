@@ -14,6 +14,7 @@
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "3.1151.0",
     "@hold/auth": "workspace:*",
+    "@hold/compare": "workspace:*",
     "@hold/config": "workspace:*",
     "@hold/db": "workspace:*",
     "@hold/domain": "workspace:*",

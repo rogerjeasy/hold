@@ -32,6 +32,7 @@ describe('taking a view’s photograph', () => {
       expect(taken).toHaveBeenCalled()
     })
     expect(upload.mock.calls[0]?.[1]).toMatchObject({ sharpness: 150 })
+    expect(upload.mock.calls[0]?.[3]).toBe(true)
   })
 
   it('asks for a retake of a blurred or dark photograph, says why, and uploads nothing', async () => {

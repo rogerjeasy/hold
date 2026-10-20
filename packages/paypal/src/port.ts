@@ -35,6 +35,8 @@ export type Capture = {
   readonly createdAt: Date
 }
 
+export type Refund = { readonly refundId: string; readonly captureId: string; readonly status: 'completed' | 'pending' | 'cancelled' | 'failed'; readonly amount: Money; readonly createdAt: Date }
+
 export type PayPalFailureKind =
   // The order was not approved by the renter, so there is nothing to authorize yet.
   | 'order_not_approved'
@@ -128,6 +130,7 @@ export const PAYPAL_EVENT_TYPES = [
   'PAYMENT.CAPTURE.REFUNDED',
   'PAYMENT.AUTHORIZATION.CREATED',
   'PAYMENT.AUTHORIZATION.VOIDED',
+  'INVOICING.INVOICE.PAID',
   'CUSTOMER.DISPUTE.CREATED',
 ] as const
 
@@ -161,4 +164,8 @@ export type PayPalHolds = {
   renewHold(input: RenewHoldInput): Promise<PayPalResult<Authorization>>
   releaseHold(input: ReleaseHoldInput): Promise<PayPalResult<Authorization>>
   captureFromHold(input: CaptureFromHoldInput): Promise<PayPalResult<Capture>>
+  refundCapture(input: { readonly captureId: string; readonly amount: Money; readonly idempotencyKey: string }): Promise<PayPalResult<Refund>>
+  readRefund(refundId: string, captureId: string): Promise<PayPalResult<Refund>>
+  invoiceClaim(input: { readonly invoiceNumber: string; readonly claimReference: string; readonly email: string; readonly amount: Money; readonly description: string; readonly idempotencyKey: string }): Promise<PayPalResult<{ readonly invoiceId: string; readonly status: 'sent' | 'paid'; readonly claimReference: string; readonly amount: Money }>>
+  readCapture(captureId: string): Promise<PayPalResult<Capture & { readonly authorizationId: string }>>
 }

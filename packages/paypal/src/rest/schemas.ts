@@ -3,7 +3,7 @@ import { fromPayPalAmount } from '../amount.ts'
 
 // What Hold reads from PayPal's replies. PayPal sends much more, and the rest is left alone.
 
-const amountSchema = z.object({ currency_code: z.string().length(3), value: z.string() }).transform((amount, context) => {
+export const amountSchema = z.object({ currency_code: z.string().length(3), value: z.string() }).transform((amount, context) => {
   const money = fromPayPalAmount(amount)
   if (money === undefined) {
     context.addIssue({ code: 'custom', message: 'Not a PayPal amount.' })
@@ -87,3 +87,5 @@ export type PayPalOrder = z.infer<typeof orderSchema>
 export type PayPalFeeOrder = z.infer<typeof feeOrderSchema>
 export type PayPalAuthorization = z.infer<typeof authorizationSchema>
 export type PayPalCapture = z.infer<typeof captureSchema>
+
+export const captureReadSchema = captureSchema.extend({ supplementary_data: z.object({ related_ids: z.object({ authorization_id: z.string().min(1) }) }) })

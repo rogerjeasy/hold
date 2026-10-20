@@ -28,9 +28,12 @@ export const shopRoutes = {
 // Pages reached from the rentals page rather than from the menu.
 export const rentalRoutes = {
   new: '/shop/rentals/new',
+  claim: (rentalId: string) => `/shop/rentals/${rentalId}/claim`,
   rental: (rentalId: string) => `/shop/rentals/${rentalId}`,
   // One item's guided handover photographs.
   handover: (rentalId: string, sessionId: string) => `/shop/rentals/${rentalId}/handover/${sessionId}`,
+  return: (rentalId: string, sessionId: string) => `/shop/rentals/${rentalId}/return/${sessionId}`,
+  comparison: (rentalId: string, comparisonId: string) => `/shop/rentals/${rentalId}/comparison/${comparisonId}`,
 } as const
 
 // Pages reached from the items page rather than from the menu, some named by the row they show.

@@ -2,5 +2,16 @@
   "name": "@hold/compare",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": {
+    "@anthropic-ai/bedrock-sdk": "^0.34.4",
+    "@anthropic-ai/sdk": "^0.133.0",
+    "@hold/db": "workspace:*",
+    "@hold/domain": "workspace:*",
+    "@hold/evidence": "workspace:*",
+    "@hold/vision": "workspace:*",
+    "sharp": "0.35.5",
+    "zod": "^4.6.7"
+  }
 }

@@ -1,9 +1,11 @@
-import { feeRentalByOrder, holdRentalByOrder, inShop, markPayPalEvent, payPalEvent, paypalAccounts } from '@hold/db'
+import { settlementExecutionForResource, feeRentalByOrder, holdRentalByOrder, inShop, markPayPalEvent, payPalEvent, paypalAccounts } from '@hold/db'
 import type { Transaction } from '@hold/db'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { PayPalUnavailable } from './dependencies.ts'
 import type { SettleDependencies } from './dependencies.ts'
+import { runExecution } from './executions.ts'
+import { invoiceApprovedClaim } from './claim-invoice.ts'
 import { applyFeeEvent } from './fee-capture.ts'
 import { applyHoldEvent } from './hold-placement.ts'
 
@@ -65,6 +67,14 @@ export async function applyPayPalEvent(dependencies: SettleDependencies, message
 
   const parsed = eventSchema.safeParse(JSON.parse(event.rawBody))
   const body = parsed.success ? parsed.data : undefined
+  if (body?.resource?.id !== undefined && ['PAYMENT.CAPTURE.COMPLETED', 'PAYMENT.CAPTURE.DENIED', 'PAYMENT.AUTHORIZATION.VOIDED', 'PAYMENT.CAPTURE.REFUNDED', 'INVOICING.INVOICE.PAID'].includes(body.event_type)) {
+    const settlement = await inScope((transaction) => settlementExecutionForResource(transaction, body.resource?.id ?? '', body.event_type))
+    if (settlement !== undefined) {
+      const result = settlement.action === 'invoice' ? await invoiceApprovedClaim(dependencies, shopId, settlement.id, paypal) : await runExecution(dependencies, { shopId, executionId: settlement.id })
+      await mark('verified', result === 'failed' ? 'failed' : 'applied', settlement.rentalId)
+      return 'applied'
+    }
+  }
   // An order's own event names it; a capture or an authorization names the order it was made on.
   const orderId = body?.event_type === 'CHECKOUT.ORDER.APPROVED' ? body.resource?.id : body?.resource?.supplementary_data?.related_ids?.order_id
   if (body === undefined || orderId === undefined) {

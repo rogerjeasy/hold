@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto'
 import { fail, ok } from '@hold/domain'
 import type * as z from 'zod'
+import { readRefund, refundCapture } from './refunds.ts'
+import { invoiceClaim } from './invoices.ts'
 import { toPayPalAmount } from '../amount.ts'
 import type {
   Authorization,
@@ -20,6 +22,7 @@ import {
   authorizationSchema,
   authorizedOrderSchema,
   captureSchema,
+  captureReadSchema,
   feeOrderSchema,
   orderSchema,
   verificationSchema,
@@ -256,6 +259,15 @@ export function createRestPayPalHolds(client: PayPalClient): PayPalHolds {
         idempotencyKey: input.idempotencyKey,
       })
       return reply.ok ? readAuthorization(input.authorizationId) : reply
+    },
+
+    invoiceClaim: invoiceClaim(client),
+    refundCapture: refundCapture(client),
+    readRefund: readRefund(client),
+
+    async readCapture(captureId) {
+      const reply = read(captureReadSchema, await client.send({ method: 'GET', path: `/v2/payments/captures/${encodeURIComponent(captureId)}` }))
+      return mapped(reply, (capture) => ({ ...toCapture(capture), authorizationId: capture.supplementary_data.related_ids.authorization_id }))
     },
 
     async captureFromHold(input) {

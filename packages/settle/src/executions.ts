@@ -4,6 +4,10 @@ import { inWorkerShop } from './execution-queue.ts'
 import type { ExecutionOutcome } from './execution-queue.ts'
 import { captureFee } from './fee-capture.ts'
 import { authorizeHold, ensureUpkeep, releaseReplaced } from './hold-placement.ts'
+import { refundApprovedClaim } from './claim-refund.ts'
+import { invoiceApprovedClaim } from './claim-invoice.ts'
+import { renewForSettlement } from './settlement-renewal.ts'
+import { settleReturn } from './return-settlement.ts'
 import { shopPayPal } from './shop-paypal.ts'
 
 // Carries out one execution from the queue. A confirmed or failed execution is left alone, except that a placed
@@ -25,6 +29,10 @@ export async function runExecution(dependencies: SettleDependencies, message: { 
   }
   if (execution.action === 'fee_capture') return captureFee(dependencies, shopId, execution, account.paypal)
   if (execution.action === 'authorize') return authorizeHold(dependencies, shopId, execution, account.paypal)
+  if (execution.action === 'refund') return refundApprovedClaim(dependencies, shopId, execution.id, account.paypal)
+  if (execution.action === 'invoice') return invoiceApprovedClaim(dependencies, shopId, execution.id, account.paypal)
+  if (execution.action === 'renew') return renewForSettlement(dependencies, shopId, execution, account.paypal)
+  if (execution.action === 'capture' || (execution.action === 'release' && execution.idempotencyKey.startsWith('return-release-'))) return settleReturn(dependencies, shopId, execution, account.paypal)
   if (execution.action === 'release') return releaseReplaced(dependencies, shopId, execution, account.paypal)
   return 'nothing_to_do'
 }

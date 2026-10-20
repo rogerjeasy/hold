@@ -6,6 +6,7 @@
   "dependencies": {
     "@aws-crypto/client-node": "^5.0.2",
     "@hold/auth": "workspace:*",
+    "@hold/compare": "workspace:*",
     "@hold/db": "workspace:*",
     "@hold/domain": "workspace:*",
     "@hold/evidence": "workspace:*",

@@ -186,6 +186,10 @@ This is the screen staff use most, so it gets the most care.
 
 ### 6.1 The comparison pipeline
 
+**Implementation status, 20 October 2026.** Guided staff returns and the comparison worker are implemented through staff review, including a separate named manual inspection record. The current deterministic aligner supports small translations and defers when it cannot align reliably. Accuracy has not yet been measured on the project's tuning/gate photographs; the bare trial and the evaluation/scorecard release work remain open. See architecture sections 9.1 and 10.3 for implemented boundaries and budgets.
+
+The worker uses the Bedrock SDK's Mantle client. Its role needs `bedrock-mantle:CreateInference`, constrained by `bedrock-mantle:Model` to the configured primary and fallback models and by `aws:RequestedRegion`. AWS documents this model condition in [Security and IAM roles](https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-managed-agents-openai-security.html). The permission is also added to Hold's permissions boundary. Applying that boundary requires an administrator to deploy `HoldDelivery`; the ordinary pipeline cannot change its own boundary. No infrastructure is deployed by implementing this feature.
+
 Comparing two photographs for a small scratch is the hardest technical problem in Hold. No single tool should be trusted with it alone. The recommended approach uses the cheapest reliable method first and the model for judgment.
 
 | Step | Where | Tool | Purpose |
@@ -419,6 +423,8 @@ Each of these should be tried against the real services before the build depends
 10. **PayPal's MCP server from a server.** Connect an MCP client to the sandbox server with a shop's access token and no browser. List the tools and record their exact names.
 11. **The payer ID across shops.** Pay two different sandbox business accounts from one sandbox personal account and compare the payer IDs. The Clean Record's key depends on them matching.
 12. **The approval event.** Approve an order from a bare link with no Hold page open, and confirm that `CHECKOUT.ORDER.APPROVED` arrives so the fee can be captured.
+**Claim-settlement adapter validation, 20 October 2026.** Capture read-back, refunds and invoice creation/search/send are implemented through the existing PayPal port with strict recorded-response tests and the controllable fake. The implementation follows the official [Payments v2](https://developer.paypal.com/api/payments/v2/) and [Invoicing v2](https://developer.paypal.com/docs/api/invoicing/v2/) contracts. It does not assume Invoicing supports payment-style request deduplication: it searches a stable invoice number and validates claim reference, amount and currency before reuse. These new adapter paths have not been exercised against a live sandbox in this change; that validation remains outstanding alongside deployment, rather than being represented as a confirmed trial. The participant also explicitly deferred deployment and live AI accuracy evaluation until later. No gate-half evaluation images were used.
+
 13. **An outside MCP client.** Connect one common MCP client to a stub of Hold's server with no sign-in step.
 
 ---

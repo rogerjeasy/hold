@@ -189,6 +189,7 @@ export async function confirmHoldPlaced(transaction: Transaction, executionId: s
   const [known] = await transaction.select({ id: authorizations.id }).from(authorizations).where(eq(authorizations.paypalAuthorizationId, placed.authorizationId))
   const replacing = known === undefined && hold.current !== null && (hold.state === 'placed' || hold.state === 'at_risk') ? hold.current : null
 
+  const surplus = known === undefined && hold.current !== null && replacing === null
   const clocks = authorizationClocks(placed, false)
   await transaction
     .insert(authorizations)
@@ -199,7 +200,7 @@ export async function confirmHoldPlaced(transaction: Transaction, executionId: s
 
   if (replacing !== null) {
     await transaction.update(holds).set({ state: 'placed', currentAuthorizationId: stored.id, replacementOrderId: null }).where(eq(holds.id, holdId))
-  } else if (transition(HOLD_TRANSITIONS, hold.state, 'placed').ok) {
+  } else if (!surplus && transition(HOLD_TRANSITIONS, hold.state, 'placed').ok) {
     await transaction.update(holds).set({ state: 'placed', currentAuthorizationId: stored.id }).where(eq(holds.id, holdId))
   }
   const [rental] = await transaction.select({ state: rentals.state }).from(rentals).where(eq(rentals.id, execution.rentalId))
@@ -214,6 +215,11 @@ export async function confirmHoldPlaced(transaction: Transaction, executionId: s
     .where(eq(executions.id, executionId))
   await markExecutionSent(transaction, executionId, now)
   const upkeep = { holdId, authorizationId: stored.id, ...planUpkeep(clocks) }
+  if (surplus) {
+    await transaction.update(holds).set({ replacementOrderId: null }).where(eq(holds.id, holdId))
+    const releaseExecutionId = await beginRelease(transaction, { shopId: execution.shopId, rentalId: execution.rentalId, holdId, authorizationId: stored.id }, now)
+    return { ok: true, upkeep, replaced: { authorizationId: stored.id, releaseExecutionId, rentalId: execution.rentalId } }
+  }
   if (replacing === null) return { ok: true, upkeep, replaced: undefined }
   const releaseExecutionId = await beginRelease(transaction, { shopId: execution.shopId, rentalId: execution.rentalId, holdId, authorizationId: replacing }, now)
   return { ok: true, upkeep, replaced: { authorizationId: replacing, releaseExecutionId, rentalId: execution.rentalId } }

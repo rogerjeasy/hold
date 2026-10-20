@@ -49,9 +49,9 @@ describe('every server function', () => {
     const { isShopPageAction } = await import('./shop-page-access')
     // A renter acts through a link, someone on a shop's page through its address, everyone else as staff of a shop.
     // Signing in and signing up come before any shop, so the auth feature's actions are the one exception.
-    const wrapperFor = (file: string) => (file.includes('/renter/') ? isRenterAction : file.includes('/shop-page/') ? isShopPageAction : isShopAction)
-    const files = import.meta.glob<Record<string, unknown>>(['/src/features/*/actions.ts', '!/src/features/auth/actions.ts'])
-    expect(Object.keys(files)).toEqual(expect.arrayContaining(['/src/features/shop/actions.ts', '/src/features/items/actions.ts', '/src/features/rentals/actions.ts', '/src/features/renter/actions.ts', '/src/features/shop-page/actions.ts']))
+    const wrapperFor = (file: string) => ((file.includes('/renter/') || file.endsWith('/renter-actions.ts')) ? isRenterAction : file.includes('/shop-page/') ? isShopPageAction : isShopAction)
+    const files = import.meta.glob<Record<string, unknown>>(['/src/features/*/actions.ts', '/src/features/*/renter-actions.ts', '!/src/features/auth/actions.ts'])
+    expect(Object.keys(files)).toEqual(expect.arrayContaining(['/src/features/shop/actions.ts', '/src/features/items/actions.ts', '/src/features/rentals/actions.ts', '/src/features/renter/actions.ts', '/src/features/shop-page/actions.ts', '/src/features/claims/renter-actions.ts']))
     for (const [file, load] of Object.entries(files)) {
       const exported = Object.entries(await load())
       expect(exported.length, file).toBeGreaterThan(0)

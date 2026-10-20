@@ -416,6 +416,8 @@ stateDiagram-v2
     placed --> releasing
     at_risk --> releasing
     releasing --> released
+    releasing --> expired: PayPal confirms expiry
+    capture_failed --> releasing: claim waived
     placed --> capturing
     at_risk --> capturing
     capturing --> captured
@@ -450,6 +452,7 @@ stateDiagram-v2
     presented --> accepted
     presented --> contested
     presented --> lapsed
+    presented --> charging: approved, hold near expiry
     contested --> negotiating
     contested --> decided
     negotiating --> agreed
@@ -464,6 +467,7 @@ stateDiagram-v2
     charging --> charged
     charging --> charge_failed
     charge_failed --> charging
+    charge_failed --> waived: protected claim waived
     charged --> adjusted
     charged --> closed
     adjusted --> closed
@@ -569,7 +573,18 @@ A shop may give the renter time to reply to a claim. That period cannot outlast 
 - If the reply period ends inside the hold's validity, Hold waits.
 - If the hold would lapse first, Hold captures the approved amount before it lapses and tells the renter that the claim is still open. If the claim is then reduced or waived, the difference is refunded.
 
-This rule is shown to the renter at booking.
+This rule is shown to the renter at booking. The explicit `presented` → `charging` exception is allowed only by the deterministic deadline guard for an approved claim whose hold would otherwise outlast the reply period by less than one day. It preserves the original reply period: a protective capture is not a final decision on a later contest, and a human-approved waiver refunds the verified capture through its own execution.
+
+**As built on 20 October 2026 — claim approval and settlement**
+
+- `/shop/rentals/{rentalId}/claim` composes a claim from the rental's agreed price-list version. A selected finding must be non-simulated, second-look-confirmed new damage or a missing part with photographs from both sealed sessions. A manual line requires a named staff member and a written inspection reason. Neither input accepts an amount. The screen shows stored prices, paired signed display photographs and the capture/release/invoice split.
+- Approval checks the person's role and approval limit, records the immutable line IDs and total, and creates a private, scoped renter link and QR. Approval alone neither starts the reply period nor permits capture. The renter sees `/r/{token}/claim` and explicitly posts “I have reviewed this claim”; that transaction records presentation and the original reply deadline. Reopening or reissuing a link does not reset it. A claim never reviewed stays approved for staff follow-up rather than silently charging.
+- Accept/contest requires a fresh eight-digit code sent to the email returned by PayPal for the payer. Migration `0017` adds only challenge metadata to `renter_links`: a keyed digest, expiry and attempt count. The code is bound to the link, expires after ten minutes, has three attempts, is single-use, and cannot be resent inside sixty seconds. A booking/pay link cannot reply. The signed shared renter wrapper and shop RLS apply to every write; staff money decisions use the existing passkey step-up.
+- A normal acceptance, elapsed reply period or eligible independent owner/manager decision queues one capture; a contest queues none. A staff-confirmed clean return or waiver queues one release. Approval, state changes, execution and outbox row commit together. Prices, approval bounds and final-capture amounts are rechecked before PayPal is called. No agent or model can approve or charge.
+- The capture reserves the hold as `renewing` or `capturing` before any outside call. A renewal has its own execution; its new authorization ID replaces the capture's binding before capture starts. A late replacement authorization cannot replace one being settled: it gets a durable release job, and the rental cannot close while an extra created authorization remains or its claim is not closed (including an unpaid excess invoice). Confirmation checks the exact execution, authorization, final-capture flag, amount and currency. Pending capture/refund resource IDs are retained for verified webhook recovery and direct read-back.
+- `claim_plan` and `claim_due` use the existing upkeep queue. The due time is the earlier of the reply deadline and one day before authorization expiry. A protective capture leaves the original reply period open. Excess/fallback invoices wait for acceptance, an eligible uphold decision, or the original deadline with no contest. A contested protected claim remains open. The human decision is fenced under the claim lock; a later conflicting decision cannot race a refund. Waiver refunds the verified captured amount, or releases the unused authorization after a failed capture. These recovery edges are `charge_failed → waived`, `capture_failed → releasing`, and `releasing → expired` only when a fresh PayPal read proves expiry; an already expired hold stays terminal.
+- A refused capture, including a pending capture later read as declined/failed, uses the approved claim's full amount for an invoice; an expired authorization is never captured. An excess above the hold becomes a separate invoice. Capture confirmation and any next invoice/refund outbox obligation share one transaction. Invoices are searched by a stable invoice number before creation, then read/validated before and after sending. A verified `INVOICING.INVOICE.PAID` event triggers another direct read before recording payment and closing. A sent invoice keeps the claim/rental open; it is never counted as paid. Money events and approvals remain append-only.
+- Staff and renter screens show settlement status in English, French, German and Spanish. The private link is handed to the renter at the counter; claim presentation is explicitly acknowledged there. A downloadable evidence pack and automatic settlement receipt emails are still subsequent spine work; the current claim pages contain the shared record and evidence. Deployment and live AI accuracy evaluation are deferred as recorded in section 20.2.
 
 ### 7.6 Execution, the outbox and idempotency
 
@@ -779,6 +794,8 @@ A capture session is one guided set of photographs of one item.
 4. The photograph uploads straight to the evidence bucket through a short-lived signed link, with its fingerprint attached so S3 rejects a corrupted upload.
 5. When every required view is present, the session is sealed.
 
+**Return capture implemented, 20 October 2026.** Staff start a return only for an `out` or `overdue` rental with a sealed handover. The return keeps that handover's photo plan, even if the item type is edited later. Starting again resumes the same session. Retakes preserve earlier originals. Only when all items have sealed returns does the rental move to `returned`, and the same transaction writes one comparison and outbox message per item. Handovers and returns share upload validation but their actions refuse each other's session IDs. A return cannot add permanent known marks through a handover action. Sample photographs carry `quality.simulated = 1`; the return capture screen labels saved samples and sample handover guides, and any comparison using them is marked simulated in its record and on screen.
+
 ### 9.2 What makes a photograph evidence
 
 | Property | How Hold provides it |
@@ -897,6 +914,16 @@ The model is also asked to report anything the candidate regions missed.
 | **Needs a person** | Anything uncertain, a poor alignment, a possible item mismatch | Staff are asked to look at the item itself |
 
 ### 10.3 When the system defers
+
+**Current implementation, 20 October 2026.** `packages/compare` runs the pipeline after all items' return sessions are sealed. The worker remeasures originals with OpenCV, corrects orientation and size with sharp, corrects exposure as a pair, aligns small translations, and groups changed pixels into candidate regions. This initial aligner does not estimate rotation, scale or perspective; a pair outside its supported alignment must go to a person. Its starting thresholds are in `PAIR_LIMITS`; confidence and known-mark overlap rules are in `INSPECTION_LIMITS`. They have synthetic-image and recorded-response tests, not a measured accuracy claim. The tuning evaluation and the public scorecard remain required before release.
+
+The first look sees full photographs and candidate crops with the agreed wear policy and price codes as quoted data. The second look gets only neutral paired crops in a fresh request, without the first look's description or proposed price. Code translates handover marks into the aligned return coordinates before excluding overlaps, clears unknown price codes, and gives uncertainty precedence over confirmed findings. Every observation in a second look must agree on the damage class at the required confidence; a mixed or uncertain response defers. Prices are resolved only against the rental's saved price-list version. Exact original or perceptual-fingerprint matches with earlier evidence defer without calling the model; renter condition photographs never become the baseline.
+
+One comparison permits at most ten logical model calls, each with at most 4,096 output tokens, explicit high effort and a shared 120-second model-phase deadline. Each call has a 30-second timeout and no transport retries. The documented refusal fallback can make one additional physical request per logical call, so the physical ceiling is twenty requests and 81,920 output tokens. No tools are offered. Model identity, prompt version, call/token totals and per-view alignment scores are persisted; refusals, invalid output and ordinary service failures defer. An unexpected processing error records a deferred result before being surfaced to the queue handler.
+
+Comparison records have a `started_at` lease, `deferred_reason` and `simulated` marker (migration 0016). A running lease can be reclaimed after three minutes; completion must match the current lease. Duplicate deliveries cannot duplicate findings or replace a completed result. The comparison Lambda has its own IAM role with evidence read access and model-scoped Mantle inference, but no PayPal credentials, execution queue access or photograph write access. The existing outbox relay is the fallback if immediate delivery fails; its configured queue addresses and send grants include both comparisons and media.
+
+The staff review shows **Clean**, **Findings**, or **Needs a person**, paired display photographs and observations. A person can append their own outcome and written reason to the audit trail even while AI is unavailable. This preserves the model's original result and records the named reviewer. Neither inspection nor a manual note creates an approval, changes the hold, prepares a charge, or closes the rental. The claim and settlement parts of the spine follow this inspection feature.
 
 Hold is designed to say "I cannot tell" readily. It defers to a person when:
 
@@ -1360,6 +1387,8 @@ Served by `web` under `/shop`. Each page asks `shopAccess` itself; the frame aro
 | `/shop/rentals/new` | Booking at the counter or on the phone: dates on the shop's clock in the address, then a counter per item type up to what is free, the fee and hold as they add up, and an optional contact who is emailed the link. Needs PayPal connected and items. |
 | `/shop/rentals/{id}` | One rental: its progress from booking to settlement, its terms, the hold at pickup, the handover of each item, the renter's link as a QR code or by email, and letting go of an unpaid booking. On a phone, what staff act on comes before the terms. |
 | `/shop/rentals/{id}/handover/{session}` | One item's guided handover: each view photographed and checked on the phone, its marks confirmed or boxed, then sealed; the condition report's code once the rental is out. |
+| `/shop/rentals/{id}/return/{session}` | One item's guided return, using the handover's saved plan and faint display-photo overlay. Required views must be present before sealing. Read-only members see evidence without capture controls. |
+| `/shop/rentals/{id}/comparison/{comparison}` | Comparison progress, paired display photographs, findings and model/prompt identity. Staff can append a named manual inspection; read-only members cannot. A different shop's record or a different rental binding answers 404. |
 | `/shop/items` | The item types, each with its terms, kit, photo plan and items, and where each item stands. Four figures on top: items, available, out now, in repair. Filters by standing, each its own address (`?show=`). |
 | `/shop/items/new`, `/shop/items/types/{id}` | Creating and editing an item type, with its kit and its photo plan. The plan starts from the suggestion for the kind. |
 | `/shop/items/{id}` | The item passport (section 9.4): where it is, its rentals, its known marks, its chain of photo sessions, its photo plan, its details and its status. Another shop's item answers 404. |
@@ -1493,6 +1522,10 @@ Every queue has a dead-letter queue and an alarm on it.
 | **A shop overcharges a renter** | Charges only from findings with photographs. Prices only from the list the renter agreed to. Never more than the hold. A person's approval on record. The renter sees everything and can reply. |
 | **Staff invent damage** | Every line needs a finding or a written reason. Claims above the limit need a second person. Approvals record what was changed. |
 | **Evidence is altered afterwards** | Object Lock, fingerprints and the chain per item. |
+| **A return is uploaded or sealed as a handover baseline** | Staff capture actions bind the session kind as well as shop scope. Returns keep the sealed handover plan; handover mark actions refuse return sessions. Negative cases are in `return-flow.test.ts`. |
+| **A model response invents money or turns uncertainty into a charge** | Strict schemas contain price codes but no amounts, code resolves only agreed entries, a fresh second look checks damage, and uncertainty defers. The comparison has no PayPal dependency or action tool. Tested in `pipeline.test.ts`, `inspection.test.ts` and `job.test.ts`. |
+| **A queue retry duplicates or replaces findings** | Atomic comparison creation with the return outbox, a bounded worker lease, terminal-state checks and stale-completion rejection. Tested in `return-repository.test.ts` and `job.test.ts`. |
+| **Demonstration photographs pass as measured results** | Sample uploads retain a simulation marker; it propagates to the comparison and its audit line, and the staff screen discloses it. Reused photographs defer before model inference. Tested in `photo-taker.test.tsx`, `return-flow.test.ts`, `job.test.ts` and `returns.spec.ts`. |
 | **A renter denies damage they caused** | The handover report they confirmed, and the dated photographs. |
 | **A renter is blamed for old damage** | The item passport and the known-marks check. |
 | **Someone guesses a renter's link** | Long signed tokens, expiry, scopes, and a one-time code for money decisions. |
@@ -1507,6 +1540,10 @@ Every queue has a dead-letter queue and an alarm on it.
 | **A passkey-proven record is carried to another account's session** | The record names the person and the session it belongs to, and is checked against the verified access token. Tested in `shop-access.test.ts`. |
 | **Someone who reached an owner's inbox adds their own passkey** | Only the first passkey can be added from an emailed-code session. Every later one needs a session a passkey proved, checked on both halves of the registration. Tested in `passkey-registration.test.ts`. |
 | **A sign-in attempt is altered or guessed** | The attempt travels in a cookie sealed with AES-256-GCM, so a changed one is refused. It lasts ten minutes and ends after three wrong codes. Tested in `sealed.test.ts`. |
+| **A claim link is forwarded or a reply is replayed** | Signed, expiring rental-scoped links plus a link-bound, three-attempt, single-use payer-email code. Unknown fields and client amounts are rejected. Negative cases are covered in `claim-code-repository.test.ts` and `claim-flow.test.ts`. |
+| **A deadline charges before the renter sees a claim** | Staff approval only creates the private link. A renter POST acknowledges review and starts the reply period; opening/reissuing a link never resets it. Tested in `claim-flow.test.ts`. |
+| **A late replacement or conflicting waiver races settlement** | Reserve the hold before network calls, bind confirmation to the exact authorization, void unused late replacements, fence the human decision and retain pending resource IDs. Regression cases are in `return-settlement.test.ts`. |
+| **An invoice is collected while a protected claim is still contested** | Defer invoice creation until acceptance, eligible uphold or an unanswered original deadline; preserve the contest/refund path after a protective capture. Tested in `return-settlement.test.ts`. |
 | **A forged webhook** | Stored, then verified with PayPal against the shop's own subscription before anything in it is used; a rejected one is never applied. What it names is then read back from PayPal, and the event's body is never believed. Tested in `settle.test.ts` and `paypal-webhook.test.ts`. |
 | **Made-up events fill the database** | Deliveries are limited per network and to 64 KB, and one PayPal event ID is stored once. |
 | **The web app reads another shop's queued work** | Reading the outbox across shops is a function only `hold_worker` may call; the web app's role is refused. Tested in `paypal-event-repository.test.ts`. |
@@ -1666,6 +1703,8 @@ These are targets, not measured results.
 | **Demo** | The hosted environment judges use | Sandbox |
 
 ### 20.2 Deployment
+
+**Participant deferral, 20 October 2026:** Deployment and live AI accuracy evaluation remain outstanding and will be done later. Continue local implementation and verification of the essential spine. This records a deliberate deferral, not a successful deployment or an accuracy result.
 
 1. Every pull request and every push to main runs **CI** (`.github/workflows/ci.yml`): lint, type-check and the unit tests (`pnpm check`), the end-to-end suite against the in-process fakes, and a build of the container image. CI needs no AWS access and no secret.
 2. Once CI passes on main, **Deploy** (`.github/workflows/deploy.yml`) runs. It can also be started by hand.
