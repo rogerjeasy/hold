@@ -851,6 +851,8 @@ The snapshot, photograph manifest and PDF are written under version-specific key
 
 PDFKit `0.20.2` renders four Western-language document label sets with standard Helvetica, measured wrapping, section headings and page numbers. Arbitrary non-Latin names or comments need a future embedded Unicode font. Python PDF tooling is used only for local visual inspection.
 
+Photo and comparison Lambda entry points use `@hold/evidence/photos`, which exposes photo storage and display processing without loading the PDF renderer. The evidence worker alone loads PDFKit as an installed external module; its file-based assets must not be bundled into the photo workers' CommonJS code. A startup regression builds and executes both photo handlers in that deployment format.
+
 Staff and renters can list versions and download the shared PDF/manifest after access checks (sections 12.3 and 13). Snapshots whose claim is `draft` or `awaiting_approval` remain staff-only. Authenticated POST server actions request a build or a download link; rendering and signed-link issuance never happen merely because a page is visited. Read-only staff can download but cannot request builds. Signed links last at most 300 seconds and name the published S3 version. Page/action responses are private/no-store; no original-photo URL is included.
 
 **Settlement receipts.** Verified capture with its confirmed remainder produces one receipt; clean release, refund, invoice sent and invoice paid have separate receipt kinds. Fee payment and renewal do not send settlement receipts. Each intent is committed with its verified money event and bound to the snapshot's exact pack. Publication queues its delivery; later evidence cannot retarget it. A protective capture receipt leaves the contest visibly open, and a sent invoice never claims payment. The shared `@hold/settle` receipt state machine leases work, waits for that pack to be ready and marks `sent` only after the transport accepts it. The worker uses SMTP; simulated execution uses the same state machine with the memory mailer. Missing verified payer contact is a recorded failure. No receipt attaches a PDF or grants payment authority.
@@ -1734,6 +1736,8 @@ Evidence/receipt coverage includes staff and renter PDF/manifest actions, staff-
 ### 20.2 Deployment
 
 **Participant deferral, 20 October 2026:** Deployment and live AI accuracy evaluation remain outstanding and will be done later. Continue local implementation and verification of the essential spine. This records a deliberate deferral, not a successful deployment or an accuracy result.
+
+**Verification resumed, 22 October 2026:** The participant requested the clean-return, accepted-damage and contested-claim paths against real services. Deployment repair and observed results are tracked in [the real-service verification record](verification/2026-10-22-core-real-services.md). The earlier deferral no longer blocks this scope. This is not the accuracy evaluation; the extension gate remains unmet until the recorded end-to-end checks pass.
 
 1. Every pull request and every push to main runs **CI** (`.github/workflows/ci.yml`): lint, type-check and the unit tests (`pnpm check`), the end-to-end suite against the in-process fakes, and a build of the container image. CI needs no AWS access and no secret.
 2. Once CI passes on main, **Deploy** (`.github/workflows/deploy.yml`) runs. It can also be started by hand.

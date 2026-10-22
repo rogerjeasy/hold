@@ -438,6 +438,10 @@ Each of these should be tried against the real services before the build depends
 
 **Evidence and receipt implementation, 20 October 2026.** Immutable pack publication and receipt delivery are implemented against local storage/mailer fakes, database guards and the existing verified PayPal-event paths. This adds no confirmed live PayPal trial. Deployment of the new Lambda roles/queues and the updated `HoldDelivery` policy, exact-version S3/Object Lock behavior on AWS, and the Linux PDFKit/sharp runtime bundle still need deployed verification. Local PDF rendering does not establish live comparison accuracy; the live AI evaluation remains deferred and no gate-half images were used.
 
+**Real-service verification resumed, 22 October 2026.** [The verification record](verification/2026-10-22-core-real-services.md) distinguishes live provider observations from simulated inputs and unfinished scenarios. Initial checks confirmed PayPal sandbox credential acceptance, the live `hold_app` login with zero rows visible without scope, and the evidence bucket's 180-day GOVERNANCE Object Lock configuration. The stale administrative deployment policy was updated after review; worker/web rollout and the three rental scenarios are tracked separately. These preflight observations do not establish completed settlement, delivered receipts or comparison accuracy.
+
+**Live worker startup, 22 October 2026.** Deployed empty-batch invocations exposed eager PDFKit initialization in the CommonJS media/comparison bundles. Failing startup tests preceded a photo-only evidence import fix. The corrected JavaScript was deployed with the CI-produced Linux native dependencies; both live handlers then returned an empty failure list without a Lambda function error. Evidence and receipt handlers also started successfully. The post-fix full check passed 160 files / 1,235 tests. These startup checks do not exercise image processing, model inference, PDF rendering, SMTP delivery or settlement.
+
 13. **An outside MCP client.** Connect one common MCP client to a stub of Hold's server with no sign-in step.
 
 ---
