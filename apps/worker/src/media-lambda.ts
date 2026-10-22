@@ -1,4 +1,4 @@
-import { makeDisplayCopy, mediaMessageSchema } from '@hold/evidence'
+import { makeDisplayCopy, mediaMessageSchema } from '@hold/evidence/photos'
 import { createQueueHandler } from './queue-batch.ts'
 import { workerMedia } from './worker-media.ts'
 

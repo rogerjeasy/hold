@@ -1,6 +1,6 @@
 import { createDataApiDatabase } from '@hold/db/data-api'
-import { createS3EvidenceStore } from '@hold/evidence'
-import type { DisplayJobDependencies } from '@hold/evidence'
+import { createS3EvidenceStore } from '@hold/evidence/photos'
+import type { DisplayJobDependencies } from '@hold/evidence/photos'
 import { createRekognitionFaces } from '@hold/vision'
 import { loadWorkerSettings } from './worker-settings.ts'
 

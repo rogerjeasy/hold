@@ -1,6 +1,6 @@
 import { comparisonMessageSchema, createBedrockComparisonModel, runComparison } from '@hold/compare'
 import { createDataApiDatabase } from '@hold/db/data-api'
-import { createS3EvidenceStore } from '@hold/evidence'
+import { createS3EvidenceStore } from '@hold/evidence/photos'
 import { z } from 'zod'
 import { createQueueHandler } from './queue-batch.ts'
 
