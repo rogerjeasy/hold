@@ -10,6 +10,8 @@ export type StubReply = {
 export type SentCall = {
   readonly method: string
   readonly path: string
+  // The query string, with its question mark, or empty.
+  readonly query: string
   readonly headers: Headers
   readonly body: unknown
 }
@@ -40,7 +42,7 @@ export function stubServer(replies: readonly (StubReply | typeof NO_ANSWER)[]): 
 
   const stubFetch: typeof fetch = (input, init) => {
     const url = new URL(input instanceof Request ? input.url : input)
-    calls.push({ method: init?.method ?? 'GET', path: url.pathname, headers: new Headers(init?.headers), body: readBody(init?.body) })
+    calls.push({ method: init?.method ?? 'GET', path: url.pathname, query: url.search, headers: new Headers(init?.headers), body: readBody(init?.body) })
     const reply = waiting.shift()
     if (reply === undefined) return Promise.reject(new Error(`No reply was scripted for ${url.pathname}.`))
     if (reply === NO_ANSWER) return Promise.reject(new TypeError('fetch failed'))

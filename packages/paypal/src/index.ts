@@ -14,6 +14,7 @@ export type {
   FeePayment,
   HoldOrder,
   HoldOrderStatus,
+  OpenDispute,
   PayPalFailure,
   PayPalFailureKind,
   PayPalHolds,

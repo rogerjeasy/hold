@@ -7,6 +7,7 @@ import type {
   FeePayment,
   HoldOrder,
   HoldOrderStatus,
+  OpenDispute,
   PayPalFailure,
   PayPalFailureKind,
   PayPalHolds,
@@ -27,6 +28,8 @@ export type FakePayPal = PayPalHolds & {
   declineFunding(orderId: string): void
   // Where an order sends the renter back, and what it is for: what a simulated approval page needs.
   orderLinks(orderId: string): { readonly returnUrl: string; readonly cancelUrl: string; readonly amount: Money; readonly description: string } | undefined
+  // Stands in for a renter opening a dispute with PayPal.
+  openDispute(dispute: OpenDispute): void
 }
 
 export type FakePayPalOptions = {
@@ -68,6 +71,7 @@ function failure(kind: PayPalFailureKind, description: string, issue?: string): 
 
 export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
   const orders = new Map<string, FakeOrder>()
+  const disputes: OpenDispute[] = []
   const authorizations = new Map<string, FakeAuthorization>()
   const repliesByKey = new Map<string, unknown>()
   let lastNumber = 0
@@ -137,6 +141,14 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
 
     declineFunding(orderId) {
       declined.add(orderId)
+    },
+
+    openDispute(dispute) {
+      disputes.push(dispute)
+    },
+
+    listOpenDisputes() {
+      return Promise.resolve(ok(disputes.filter((dispute) => dispute.open)))
     },
 
     createHoldOrder(input) {

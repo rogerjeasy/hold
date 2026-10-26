@@ -168,4 +168,8 @@ export type PayPalHolds = {
   readRefund(refundId: string, captureId: string): Promise<PayPalResult<Refund>>
   invoiceClaim(input: { readonly invoiceNumber: string; readonly claimReference: string; readonly email: string; readonly amount: Money; readonly description: string; readonly idempotencyKey: string }): Promise<PayPalResult<{ readonly invoiceId: string; readonly status: 'sent' | 'paid'; readonly claimReference: string; readonly amount: Money }>>
   readCapture(captureId: string): Promise<PayPalResult<Capture & { readonly authorizationId: string }>>
+  // The disputes waiting on the shop, with their due dates and the captures they name.
+  listOpenDisputes(): Promise<PayPalResult<readonly OpenDispute[]>>
 }
+
+export type OpenDispute = { readonly id: string; readonly open: boolean; readonly amount: Money | null; readonly responseDueAt: Date | null; readonly captureIds: readonly string[] }

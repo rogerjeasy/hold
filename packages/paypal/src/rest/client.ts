@@ -44,6 +44,8 @@ export type PayPalClient = {
   send(request: PayPalRequest): Promise<PayPalResult<PayPalReply>>
   // Asks PayPal for a token and nothing else: proof that the credentials work, before Hold stores them.
   checkCredentials(): Promise<PayPalResult<void>>
+  // The shop's access token, for PayPal's own MCP server only. It never reaches a model or a log.
+  accessToken(): Promise<PayPalResult<string>>
 }
 
 type Attempt<Value> =
@@ -237,5 +239,6 @@ export function createPayPalClient(options: PayPalClientOptions): PayPalClient {
       const token = await accessToken()
       return token.ok ? ok(undefined) : token
     },
+    accessToken,
   }
 }
