@@ -35,5 +35,5 @@ export default async function proxy(request: NextRequest): Promise<NextResponse>
 
 export const config = {
   // Every path except Next.js internals and files with an extension, such as images.
-  matcher: '/((?!api|_next|_vercel|.*\\..*).*)',
+  matcher: '/((?!api|mcp|_next|_vercel|.*\\..*).*)',
 }

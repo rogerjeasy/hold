@@ -31,6 +31,11 @@ describe('the rentals page', () => {
     expect(lapsed).toHaveTextContent("Booked on the shop's page")
   })
 
+  it('says when a renter’s own assistant made the booking', () => {
+    show()
+    expect(screen.getByRole('listitem', { name: 'Mei Tanaka' })).toHaveTextContent("Booked by the renter's assistant")
+  })
+
   it('marks a sample as a sample', () => {
     show()
     expect(screen.getByRole('listitem', { name: 'Julia Novak' })).toHaveTextContent('Sample')

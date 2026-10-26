@@ -1431,7 +1431,8 @@
         },
         "done": "Erledigt",
         "toDo": "Noch nicht",
-        "lapsedNote": "Die Zahlungsfrist ist abgelaufen, deshalb werden die Artikel nicht mehr freigehalten. Die mietende Person kann noch bezahlen, solange niemand sonst sie gebucht hat."
+        "lapsedNote": "Die Zahlungsfrist ist abgelaufen, deshalb werden die Artikel nicht mehr freigehalten. Die mietende Person kann noch bezahlen, solange niemand sonst sie gebucht hat.",
+        "assistant": "Durch den eigenen Assistenten des Mieters"
       },
       "link": {
         "title": "Der Link der mietenden Person",
@@ -1488,7 +1489,8 @@
         "assuredUntil": "Am besten abbuchen bis",
         "validUntil": "Endet",
         "replacing": "Vor dem Ende dieser Reservierung wurde eine neue bei der mietenden Person angefragt. Warten auf die Genehmigung."
-      }
+      },
+      "fromAssistant": "Vom Assistenten des Mieters gebucht"
     },
     "items": {
       "title": "Artikel",

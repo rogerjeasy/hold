@@ -1431,7 +1431,8 @@
         },
         "done": "Done",
         "toDo": "Not yet",
-        "lapsedNote": "The time to pay ran out, so the items are no longer kept. The renter can still pay while nobody else has booked them."
+        "lapsedNote": "The time to pay ran out, so the items are no longer kept. The renter can still pay while nobody else has booked them.",
+        "assistant": "By the renter's own assistant"
       },
       "link": {
         "title": "The renter's link",
@@ -1488,7 +1489,8 @@
         "assuredUntil": "Best charged by",
         "validUntil": "Ends",
         "replacing": "A new hold was asked of the renter before this one ends. Waiting for their approval."
-      }
+      },
+      "fromAssistant": "Booked by the renter's assistant"
     },
     "items": {
       "title": "Items",

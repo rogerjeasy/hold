@@ -1431,7 +1431,8 @@
         },
         "done": "Hecho",
         "toDo": "Aún no",
-        "lapsedNote": "El plazo de pago se agotó, así que los artículos ya no se guardan. El cliente aún puede pagar mientras nadie más los haya reservado."
+        "lapsedNote": "El plazo de pago se agotó, así que los artículos ya no se guardan. El cliente aún puede pagar mientras nadie más los haya reservado.",
+        "assistant": "Por el asistente del propio cliente"
       },
       "link": {
         "title": "El enlace del cliente",
@@ -1488,7 +1489,8 @@
         "assuredUntil": "Mejor cobrar antes del",
         "validUntil": "Termina",
         "replacing": "Se pidió una nueva retención a quien alquila antes de que termine esta. Esperando su aprobación."
-      }
+      },
+      "fromAssistant": "Reservado por el asistente del cliente"
     },
     "items": {
       "title": "Artículos",

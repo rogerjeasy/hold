@@ -1431,7 +1431,8 @@
         },
         "done": "Fait",
         "toDo": "Pas encore",
-        "lapsedNote": "Le délai de paiement est dépassé, donc les articles ne sont plus gardés. Le client peut encore régler tant que personne d'autre ne les a réservés."
+        "lapsedNote": "Le délai de paiement est dépassé, donc les articles ne sont plus gardés. Le client peut encore régler tant que personne d'autre ne les a réservés.",
+        "assistant": "Par l'assistant du locataire"
       },
       "link": {
         "title": "Le lien du client",
@@ -1488,7 +1489,8 @@
         "assuredUntil": "À prélever de préférence avant le",
         "validUntil": "Prend fin",
         "replacing": "Une nouvelle empreinte a été demandée à la personne qui loue avant la fin de celle-ci. En attente de son approbation."
-      }
+      },
+      "fromAssistant": "Réservé par l'assistant du locataire"
     },
     "items": {
       "title": "Articles",

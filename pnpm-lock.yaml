@@ -211,6 +211,9 @@ importers:
       '@hold/evidence':
         specifier: workspace:*
         version: link:../../packages/evidence
+      '@hold/mcp':
+        specifier: workspace:*
+        version: link:../../packages/mcp
       '@hold/notify':
         specifier: workspace:*
         version: link:../../packages/notify
@@ -226,6 +229,9 @@ importers:
       '@hold/vision':
         specifier: workspace:*
         version: link:../../packages/vision
+      '@modelcontextprotocol/sdk':
+        specifier: 1.32.1
+        version: 1.32.1(zod@4.6.7)
       '@techstark/opencv-js':
         specifier: 4.12.0-release.1
         version: 4.12.0-release.1

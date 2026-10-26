@@ -52,7 +52,7 @@ function ports(): McpPorts {
 
 async function connect(network = '203.0.113.10', name = 'Trip planner'): Promise<Client> {
   const client = new Client({ name, version: '1.0.0' })
-  await client.connect(new StreamableHTTPClientTransport(new URL('https://hold.example/mcp'), { fetch: (url, init) => handleMcpRequest(new Request(url, init), ports(), network) }))
+  await client.connect(new StreamableHTTPClientTransport(new URL('https://hold.example/mcp'), { fetch: async (url, init) => { const request = new Request(url, init); return handleMcpRequest(request, request.method === 'POST' ? await request.text() : '', ports(), network) } }))
   await client.listTools()
   return client
 }

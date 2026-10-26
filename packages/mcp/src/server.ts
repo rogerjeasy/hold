@@ -16,8 +16,8 @@ import type { Caller } from './public-tools.ts'
 
 export const SERVER_INFO = { name: 'hold', title: 'Hold: rent from small shops through your assistant', version: '1.0.0' } as const
 
-// An MCP request is a small JSON document. Anything larger is refused before it is parsed.
-const MAX_BODY_BYTES = 64 * 1024
+// An MCP request is a small JSON document. The app refuses anything larger before it reaches this server.
+export const MAX_MCP_REQUEST_BYTES = 64 * 1024
 
 const jsonSchema = (schema: z.ZodType, io: 'input' | 'output') => {
   const document = z.toJSONSchema(schema, { io }) as { type: 'object'; [key: string]: unknown }
@@ -63,35 +63,14 @@ export function clientNameOf(sessionId: string | null): string {
   return Buffer.from(encoded, 'base64url').toString('utf8').replace(/[\p{Cc}\p{Cf}]/gu, '').trim().slice(0, ASSISTANT_LIMITS.clientNameLength)
 }
 
-async function readCapped(request: Request): Promise<string | undefined> {
-  if (Number(request.headers.get('content-length') ?? 0) > MAX_BODY_BYTES) return undefined
-  if (request.body === null) return ''
-  const reader: ReadableStreamDefaultReader<Uint8Array> = request.body.getReader()
-  const chunks: Uint8Array[] = []
-  let size = 0
-  for (;;) {
-    const { done, value } = await reader.read()
-    if (done) break
-    size += value.byteLength
-    if (size > MAX_BODY_BYTES) {
-      await reader.cancel()
-      return undefined
-    }
-    chunks.push(value)
-  }
-  return Buffer.concat(chunks).toString('utf8')
-}
-
 const jsonError = (status: number, message: string) => new Response(JSON.stringify({ jsonrpc: '2.0', error: { code: -32000, message }, id: null }), { status, headers: { 'content-type': 'application/json' } })
 
 const initializeSchema = z.object({ method: z.literal('initialize'), params: z.object({ clientInfo: z.object({ name: z.string() }) }) })
 
-// One HTTP request to /mcp. Only POST carries calls: this server offers no stream of its own messages and keeps no
-// session to end, so GET and DELETE are answered 405, as the transport's specification allows.
-export async function handleMcpRequest(request: Request, ports: McpPorts, network: string | undefined): Promise<Response> {
+// One HTTP request to /mcp, its body already read. Only POST carries calls: this server offers no stream of its own
+// messages and keeps no session to end, so GET and DELETE are answered 405, as the transport's specification allows.
+export async function handleMcpRequest(request: Request, body: string, ports: McpPorts, network: string | undefined): Promise<Response> {
   if (request.method !== 'POST') return new Response(null, { status: 405, headers: { allow: 'POST' } })
-  const body = await readCapped(request)
-  if (body === undefined) return jsonError(413, 'The request is too large.')
   let parsed: unknown
   try {
     parsed = JSON.parse(body)
