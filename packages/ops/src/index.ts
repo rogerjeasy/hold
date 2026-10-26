@@ -5,3 +5,4 @@ export { openPayPalReader, PAYPAL_MCP_SANDBOX_URL, paypalTransport } from './pay
 export type { OpenedReader, PayPalReader, PayPalTool } from './paypal-reader.ts'
 export { runOperations } from './run-operations.ts'
 export type { OpsDependencies, Reminder, ShopPayPalReads } from './run-operations.ts'
+export { createBedrockInvestigator } from './bedrock-investigator.ts'
