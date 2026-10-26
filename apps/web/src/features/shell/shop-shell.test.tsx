@@ -37,6 +37,7 @@ describe('the shop shell', () => {
     expect(within(menu).getByRole('link', { name: 'Prices' })).toHaveAttribute('aria-current', 'page')
     expect(within(menu).getByRole('link', { name: 'Today' })).not.toHaveAttribute('aria-current')
     expect(within(menu).getByText('Settings')).toBeInTheDocument()
+    expect(within(menu).getByRole('link', { name: 'Trust ladder' })).toHaveAttribute('href', '/shop/trust')
   })
 
   it('names the shop, the person’s role in it, and offers the person’s other shops', async () => {
