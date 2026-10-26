@@ -1,4 +1,4 @@
-import { CAPTURE_SESSION_KINDS, CLAIM_STATES, FINDING_VERDICTS, CONDITION_REPLIES, HOLD_STATES, ITEM_CATEGORIES, ITEM_STATUSES, PRICE_CATEGORIES, RENTAL_STATES, STAFF_ROLES } from '@hold/domain'
+import { CAPTURE_SESSION_KINDS, CLAIM_STATES, DETECTOR_KINDS, FINDING_VERDICTS, MANDATE_KINDS, PROPOSAL_KINDS, PROPOSAL_STATES, REMINDER_KINDS, CONDITION_REPLIES, HOLD_STATES, ITEM_CATEGORIES, ITEM_STATUSES, PRICE_CATEGORIES, RENTAL_STATES, STAFF_ROLES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
 import { check, text } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
@@ -31,7 +31,7 @@ export const COMPARISON_STATES = ['pending', 'running', 'clean', 'findings', 'de
 export const FINDING_CLASSES = ['new_damage', 'known_mark', 'wear', 'missing_part', 'uncertain'] as const
 export const CLAIM_LINE_SOURCES = ['finding', 'person'] as const
 export const CLAIM_REPLY_DECISIONS = ['accept', 'contest'] as const
-export const APPROVAL_SUBJECTS = ['claim', 'release', 'refund'] as const
+export const APPROVAL_SUBJECTS = ['claim', 'release', 'refund', 'proposal'] as const
 export const APPROVAL_DECISIONS = ['approved', 'rejected', 'waived'] as const
 export const APPROVAL_METHODS = ['on_screen', 'mandate'] as const
 // authorize places a hold the renter approved; fee_capture takes the rental fee, before any hold.
@@ -79,3 +79,19 @@ export const bookingChannel = oneOf(BOOKING_CHANNELS)
 export const EVALUATION_HALVES = ['tuning', 'gate'] as const
 export const evaluationHalf = oneOf(EVALUATION_HALVES)
 export const findingVerdict = oneOf(FINDING_VERDICTS)
+
+// The operations agent and the mandates behind it (extensions.md sections 4 and 6).
+export const OPS_RUN_STATES = ['running', 'completed', 'failed'] as const
+export const OPS_TRIGGERS = ['nightly', 'dispute_opened', 'hold_at_risk', 'capture_failed', 'manual'] as const
+export const RULE_STATES = ['drafted', 'confirmed', 'discarded'] as const
+// A staff member's own screen, or a renter's one-time code.
+export const GRANT_METHODS = ['on_screen', 'one_time_code'] as const
+export const opsRunState = oneOf(OPS_RUN_STATES)
+export const opsTrigger = oneOf(OPS_TRIGGERS)
+export const ruleState = oneOf(RULE_STATES)
+export const grantMethod = oneOf(GRANT_METHODS)
+export const mandateKind = oneOf(MANDATE_KINDS)
+export const proposalKind = oneOf(PROPOSAL_KINDS)
+export const proposalState = oneOf(PROPOSAL_STATES)
+export const detectorKind = oneOf(DETECTOR_KINDS)
+export const reminderKind = oneOf(REMINDER_KINDS)

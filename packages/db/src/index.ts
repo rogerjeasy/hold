@@ -69,3 +69,6 @@ export { queueSettlementReceipts, receiptDeliveriesFor, leaseReceipt, finishRece
 export type { ReceiptDeliverySummary } from './receipt-repository.ts'
 export { acceptedEvalRun, acceptedEvalRunAsOwner, fieldRecord, recordEvalRun, recordFindingOutcomes } from './scorecard-repository.ts'
 export type { EvalRunRecord, FieldRecordMonth } from './scorecard-repository.ts'
+export { beginOpsRun, completeOpsRun, decideProposal, morningQueue, OPS_EXECUTE_QUEUE, pendingProposals, recordExceptions, shopSnapshot, writeProposal } from './ops-repository.ts'
+export type { DecisionInput, DecisionResult, ProposalInput, QueueEntry, RecordedException, RunUsage, WriteResult } from './ops-repository.ts'
+export { confirmedRules, decideRule, draftRule, grantStandingRule, liveStandingRule, recordReminder, remindersSentOn, revokeMandate, rulesForOwner } from './ops-settings-repository.ts'

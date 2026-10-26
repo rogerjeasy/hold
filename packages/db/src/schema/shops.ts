@@ -1,6 +1,6 @@
 import { STAFF_ROLES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
-import { integer, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
+import { integer, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
 import { appRole, shopIsolation, workerRole } from './access.ts'
 import { cents, createdAt, currency, id, reference } from './columns.ts'
 import { allowed, PAYPAL_MODES, paypalMode, staffRole } from './enums.ts'
@@ -41,6 +41,9 @@ export const shops = pgTable(
     // A claim above this goes to the owner or a manager, whatever a staff member's own limit. Unset, staff limits alone apply.
     ownerApprovalThresholdCents: cents(),
     replyPeriodHours: integer().notNull().default(72),
+    // How long the operations agent waits before it asks about a clean return, an unpaid invoice or a waiting
+    // incident, and which automatic reminders the shop has switched off (extensions.md section 6.4).
+    opsSettings: jsonb().$type<{ readonly confirmCleanWithinHours?: number; readonly invoiceUnpaidDays?: number; readonly incidentWaitHours?: number; readonly remindersOff?: readonly string[] }>().notNull().default({}),
     createdAt: createdAt(),
   },
   (table) => [shopIsolation(table.id)],

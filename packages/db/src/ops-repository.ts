@@ -1,0 +1,203 @@
+import { createHash } from 'node:crypto'
+import { DETECTOR_PROPOSALS, orderQueue, PROPOSAL_TRANSITIONS, proposalFingerprintInput, transition } from '@hold/domain'
+import type { ProposalKind, ShopException, ShopSnapshot } from '@hold/domain'
+import { and, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm'
+import { approvals, authorizations, captureSessions, claims, comparisons, holds, invoices, moneyEvents, opsRuns, outbox, proposals, rentalItems, rentals, shopExceptions, shops } from './schema/index.ts'
+import type { Transaction } from './scope.ts'
+
+export const OPS_EXECUTE_QUEUE = 'ops-execute'
+
+const DEFAULT_SETTINGS = { confirmCleanWithinHours: 4, invoiceUnpaidDays: 7, incidentWaitHours: 2 } as const
+
+// What the detectors read: the shop's own records, with what code read from PayPal beside them.
+export async function shopSnapshot(transaction: Transaction, now: Date, fromPayPal: Pick<ShopSnapshot, 'disputes' | 'differences'>): Promise<ShopSnapshot> {
+  const [shop] = await transaction.select({ opsSettings: shops.opsSettings }).from(shops).limit(1)
+  const rentalRows = await transaction.select({ id: rentals.id, state: rentals.state, endsAt: rentals.endsAt, renterId: rentals.renterId }).from(rentals).where(eq(rentals.simulated, false))
+  const holdRows = await transaction.select({ id: holds.id, rentalId: holds.rentalId, state: holds.state, reservedCents: holds.reservedCents, currency: holds.currency, validUntil: authorizations.validUntil, stateChangedAt: holds.stateChangedAt, replacementOrderId: holds.replacementOrderId })
+    .from(holds).leftJoin(authorizations, eq(authorizations.id, holds.currentAuthorizationId))
+  const comparisonRows = await transaction.select({ rentalId: rentalItems.rentalId, state: comparisons.state, completedAt: comparisons.completedAt, simulated: comparisons.simulated })
+    .from(comparisons).innerJoin(captureSessions, eq(captureSessions.id, comparisons.returnSessionId)).innerJoin(rentalItems, eq(rentalItems.id, captureSessions.rentalItemId))
+  const claimRows = await transaction.select({ id: claims.id, rentalId: claims.rentalId, state: claims.state, totalCents: claims.totalCents, currency: claims.currency, replyDueAt: claims.replyDueAt }).from(claims)
+  const invoiceRows = await transaction.select({ id: invoices.id, claimId: invoices.claimId, rentalId: invoices.rentalId, state: invoices.state, amountCents: invoices.amountCents, sentAt: invoices.sentAt }).from(invoices)
+  return {
+    now,
+    settings: { ...DEFAULT_SETTINGS, ...shop?.opsSettings },
+    rentals: rentalRows,
+    holds: holdRows.map(({ replacementOrderId, ...hold }) => ({ ...hold, replacementStarted: replacementOrderId !== null })),
+    comparisons: comparisonRows,
+    claims: claimRows,
+    invoices: invoiceRows,
+    incidents: [],
+    ...fromPayPal,
+  }
+}
+
+export async function beginOpsRun(transaction: Transaction, trigger: typeof opsRuns.$inferInsert['trigger'], now: Date): Promise<string> {
+  const [shop] = await transaction.select({ id: shops.id }).from(shops).limit(1)
+  if (shop === undefined) throw new Error('No shop in scope.')
+  const [run] = await transaction.insert(opsRuns).values({ shopId: shop.id, trigger, startedAt: now }).returning({ id: opsRuns.id })
+  if (run === undefined) throw new Error('The run was not recorded.')
+  return run.id
+}
+
+export type RunUsage = { readonly toolCalls: number; readonly inputTokens: number; readonly outputTokens: number; readonly model: string | null; readonly promptVersion: string | null; readonly paypalChecked: boolean; readonly counts: Readonly<Record<string, number>> }
+
+export async function completeOpsRun(transaction: Transaction, runId: string, usage: RunUsage, now: Date): Promise<void> {
+  await transaction.update(opsRuns).set({ ...usage, state: 'completed', completedAt: now }).where(eq(opsRuns.id, runId))
+}
+
+export type RecordedException = ShopException & { readonly id: string }
+
+// Writes each exception once, keyed by its fingerprint, and marks resolved those the detectors no longer see.
+export async function recordExceptions(transaction: Transaction, runId: string, found: readonly ShopException[], now: Date): Promise<RecordedException[]> {
+  const [shop] = await transaction.select({ id: shops.id }).from(shops).limit(1)
+  if (shop === undefined) throw new Error('No shop in scope.')
+  const recorded: RecordedException[] = []
+  for (const exception of found) {
+    await transaction.insert(shopExceptions).values({ shopId: shop.id, kind: exception.kind, subjectKind: exception.subjectKind, subjectId: exception.subjectId, rentalId: exception.rentalId, fingerprint: exception.fingerprint, deadline: exception.deadline, moneyCents: exception.moneyCents, detectedAt: now, lastRunId: runId }).onConflictDoNothing()
+    const [row] = await transaction.select({ id: shopExceptions.id }).from(shopExceptions).where(eq(shopExceptions.fingerprint, exception.fingerprint))
+    if (row !== undefined) recorded.push({ ...exception, id: row.id })
+  }
+  const seen = found.map((exception) => exception.fingerprint)
+  await transaction.update(shopExceptions).set({ resolvedAt: now }).where(and(isNull(shopExceptions.resolvedAt), seen.length === 0 ? sql`true` : sql`${shopExceptions.fingerprint} not in (${sql.join(seen.map((each) => sql`${each}`), sql`, `)})`))
+  return recorded
+}
+
+// The state a proposal is written against, read from the records it names. At approval it is read again.
+async function subjectFingerprint(transaction: Transaction, subjectKind: string, subjectId: string): Promise<string> {
+  let state: Record<string, string | number | null> = { subjectKind, subjectId }
+  if (subjectKind === 'hold') {
+    const [hold] = await transaction.select({ state: holds.state, authorization: holds.currentAuthorizationId, reserved: holds.reservedCents }).from(holds).where(eq(holds.id, subjectId))
+    state = { ...state, ...hold }
+  } else if (subjectKind === 'claim') {
+    const [claim] = await transaction.select({ state: claims.state, total: claims.totalCents }).from(claims).where(eq(claims.id, subjectId))
+    state = { ...state, ...claim }
+  } else if (subjectKind === 'rental') {
+    const [rental] = await transaction.select({ state: rentals.state }).from(rentals).where(eq(rentals.id, subjectId))
+    state = { ...state, ...rental }
+  } else if (subjectKind === 'invoice') {
+    const [bill] = await transaction.select({ state: invoices.state }).from(invoices).where(eq(invoices.id, subjectId))
+    state = { ...state, ...bill }
+  }
+  return createHash('sha256').update(proposalFingerprintInput(state)).digest('hex')
+}
+
+export type ProposalInput = {
+  readonly exceptionId: string | null
+  readonly kind: ProposalKind
+  readonly reason: string
+  readonly references: readonly string[]
+  readonly draft: string | null
+  // An observation no detector raised. It may only be a note.
+  readonly raisedByAgent: boolean
+  readonly runId: string | null
+  readonly model: string | null
+  readonly promptVersion: string | null
+  readonly subject?: { readonly kind: string; readonly id: string; readonly rentalId: string | null }
+}
+
+export type WriteResult = { readonly written: true; readonly id: string } | { readonly written: false; readonly reason?: 'kind_not_allowed' | 'no_exception' }
+
+// Writes a proposal of a kind its exception allows, against the state its subject is in now. A repeated run with the
+// same subject in the same state writes nothing.
+export async function writeProposal(transaction: Transaction, input: ProposalInput, now: Date): Promise<WriteResult> {
+  let subject = input.subject
+  if (input.exceptionId !== null) {
+    const [exception] = await transaction.select().from(shopExceptions).where(eq(shopExceptions.id, input.exceptionId))
+    if (exception === undefined) return { written: false, reason: 'no_exception' }
+    if (!DETECTOR_PROPOSALS[exception.kind].includes(input.kind)) return { written: false, reason: 'kind_not_allowed' }
+    subject = { kind: exception.subjectKind, id: exception.subjectId, rentalId: exception.rentalId }
+  } else if (!input.raisedByAgent || input.kind !== 'note') {
+    return { written: false, reason: 'kind_not_allowed' }
+  }
+  if (subject === undefined) return { written: false, reason: 'no_exception' }
+  const [shop] = await transaction.select({ id: shops.id }).from(shops).limit(1)
+  if (shop === undefined) throw new Error('No shop in scope.')
+  const [row] = await transaction.insert(proposals).values({
+    shopId: shop.id, kind: input.kind, subjectKind: subject.kind, subjectId: subject.id, rentalId: subject.rentalId, exceptionId: input.exceptionId,
+    reason: input.reason, references: [...input.references], draft: input.draft, preconditionFingerprint: await subjectFingerprint(transaction, subject.kind, subject.id),
+    raisedByAgent: input.raisedByAgent, runId: input.runId, model: input.model, promptVersion: input.promptVersion, createdAt: now, updatedAt: now,
+  }).onConflictDoNothing().returning({ id: proposals.id })
+  return row === undefined ? { written: false } : { written: true, id: row.id }
+}
+
+export type QueueEntry = {
+  readonly id: string
+  readonly kind: ProposalKind
+  readonly subjectKind: string
+  readonly subjectId: string
+  readonly rentalId: string | null
+  readonly reason: string
+  readonly references: readonly string[]
+  readonly draft: string | null
+  readonly raisedByAgent: boolean
+  readonly deadline: Date | null
+  readonly exceptionKind: string | null
+  // Read from the records the proposal names, now; never from the proposal or the model.
+  readonly amountCents: number | null
+  readonly currency: string | null
+  readonly moneyCents: number
+}
+
+// The amount approving a proposal would act on, read from the database at this moment (X1.10).
+async function amountFor(transaction: Transaction, kind: ProposalKind, subjectKind: string, subjectId: string, rentalId: string | null): Promise<{ amountCents: number | null; currency: string | null }> {
+  if (kind === 'note' || kind === 'send_message' || rentalId === null) return { amountCents: null, currency: null }
+  const [hold] = await transaction.select({ reservedCents: holds.reservedCents, currency: holds.currency, state: holds.state }).from(holds).where(eq(holds.rentalId, rentalId))
+  if (kind === 'release_hold' || kind === 'request_replacement_hold') return hold === undefined ? { amountCents: null, currency: null } : { amountCents: hold.reservedCents, currency: hold.currency }
+  const [claim] = await transaction.select({ totalCents: claims.totalCents, currency: claims.currency }).from(claims).where(subjectKind === 'claim' ? eq(claims.id, subjectId) : eq(claims.rentalId, rentalId))
+  if (claim === undefined) return { amountCents: null, currency: null }
+  const captured = (await transaction.select({ amountCents: moneyEvents.amountCents }).from(moneyEvents).where(and(eq(moneyEvents.rentalId, rentalId), eq(moneyEvents.kind, 'hold_captured')))).reduce((sum, event) => sum + event.amountCents, 0)
+  return { amountCents: Math.max(0, claim.totalCents - captured), currency: claim.currency }
+}
+
+// The morning queue: every pending proposal, including those postponed until now, nearest deadline first.
+export async function morningQueue(transaction: Transaction, now: Date): Promise<QueueEntry[]> {
+  const rows = await transaction.select({ proposal: proposals, deadline: shopExceptions.deadline, exceptionKind: shopExceptions.kind, moneyCents: shopExceptions.moneyCents })
+    .from(proposals).leftJoin(shopExceptions, eq(shopExceptions.id, proposals.exceptionId))
+    .where(and(eq(proposals.state, 'pending'), or(isNull(proposals.postponedUntil), lt(proposals.postponedUntil, now))))
+  const entries: QueueEntry[] = []
+  for (const { proposal, deadline, exceptionKind, moneyCents } of rows) {
+    const amount = await amountFor(transaction, proposal.kind, proposal.subjectKind, proposal.subjectId, proposal.rentalId)
+    entries.push({ id: proposal.id, kind: proposal.kind, subjectKind: proposal.subjectKind, subjectId: proposal.subjectId, rentalId: proposal.rentalId, reason: proposal.reason, references: proposal.references, draft: proposal.draft, raisedByAgent: proposal.raisedByAgent, deadline, exceptionKind, ...amount, moneyCents: amount.amountCents ?? moneyCents ?? 0 })
+  }
+  return orderQueue(entries)
+}
+
+export type DecisionInput = { readonly decision: 'approve' | 'reject' | 'postpone'; readonly reason: string; readonly mandateId?: string }
+export type DecisionResult = { readonly ok: true; readonly state: 'approved' | 'rejected' | 'pending' | 'executed'; readonly proposalId: string } | { readonly ok: false; readonly reason: 'not_found' | 'not_pending' | 'reason_required' | 'superseded' }
+
+// A person's decision on one proposal. Approval re-reads the state it was written against: if it changed, the
+// proposal is superseded and nothing is executed (X1.5). An approved proposal hands its execution to the outbox.
+export async function decideProposal(transaction: Transaction, proposalId: string, userId: string | null, input: DecisionInput, now: Date): Promise<DecisionResult> {
+  const [proposal] = await transaction.select().from(proposals).where(eq(proposals.id, proposalId)).for('update')
+  if (proposal === undefined) return { ok: false, reason: 'not_found' }
+  if (proposal.state !== 'pending') return { ok: false, reason: 'not_pending' }
+  if (input.decision === 'postpone') {
+    await transaction.update(proposals).set({ postponedUntil: new Date(now.getTime() + 24 * 3_600_000), updatedAt: now }).where(eq(proposals.id, proposalId))
+    return { ok: true, state: 'pending', proposalId }
+  }
+  if (input.decision === 'reject') {
+    if (input.reason.trim() === '') return { ok: false, reason: 'reason_required' }
+    await transaction.update(proposals).set({ state: 'rejected', decidedByUserId: userId, decisionReason: input.reason.trim(), decidedAt: now, updatedAt: now }).where(eq(proposals.id, proposalId))
+    return { ok: true, state: 'rejected', proposalId }
+  }
+  if (await subjectFingerprint(transaction, proposal.subjectKind, proposal.subjectId) !== proposal.preconditionFingerprint) {
+    await transaction.update(proposals).set({ state: 'superseded', decidedAt: now, updatedAt: now }).where(eq(proposals.id, proposalId))
+    return { ok: false, reason: 'superseded' }
+  }
+  const method = input.mandateId === undefined ? 'on_screen' as const : 'mandate' as const
+  await transaction.insert(approvals).values({ shopId: proposal.shopId, subject: 'proposal', subjectId: proposal.id, decidedByUserId: userId, decision: 'approved', method, changes: [{ kind: proposal.kind, reason: input.reason.trim(), ...(input.mandateId === undefined ? {} : { mandateId: input.mandateId }) }], createdAt: now })
+  if (proposal.kind === 'note') {
+    await transaction.update(proposals).set({ state: 'executed', decidedByUserId: userId, mandateId: input.mandateId ?? null, decidedAt: now, updatedAt: now }).where(eq(proposals.id, proposalId))
+    return { ok: true, state: 'executed', proposalId }
+  }
+  if (!transition(PROPOSAL_TRANSITIONS, 'pending', 'approved').ok) return { ok: false, reason: 'not_pending' }
+  await transaction.update(proposals).set({ state: 'approved', decidedByUserId: userId, mandateId: input.mandateId ?? null, decisionReason: input.reason.trim() || null, decidedAt: now, updatedAt: now }).where(eq(proposals.id, proposalId))
+  await transaction.insert(outbox).values({ shopId: proposal.shopId, queue: OPS_EXECUTE_QUEUE, messageGroup: proposal.rentalId ?? proposal.id, payload: { proposalId: proposal.id }, createdAt: now })
+  return { ok: true, state: 'approved', proposalId }
+}
+
+// Every live proposal that names one of these holds, for releasing several in one approval.
+export async function pendingProposals(transaction: Transaction, ids: readonly string[]) {
+  return ids.length === 0 ? [] : transaction.select().from(proposals).where(and(inArray(proposals.id, [...ids]), eq(proposals.state, 'pending')))
+}

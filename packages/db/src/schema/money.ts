@@ -91,6 +91,8 @@ export const invoices = pgTable(
     currency: currency().notNull(),
     amountCents: cents().notNull(),
     state: invoiceState().notNull().default('draft'),
+    // Set by a trigger when PayPal reports the invoice sent: how long it has waited unpaid.
+    sentAt: at(),
     createdAt: createdAt(),
   },
   (table) => [allowed(table.state, INVOICE_STATES), shopIsolation(table.shopId)],

@@ -105,6 +105,8 @@ export const holds = pgTable(
     currentAuthorizationId: reference().references((): AnyPgColumn => authorizations.id),
     // The order of a replacement hold the renter is asked to approve before this one ends (architecture.md 7.4).
     replacementOrderId: text().unique(),
+    // Kept by a trigger whenever the state changes, so a detector can tell how long a hold has been at risk.
+    stateChangedAt: createdAt(),
     createdAt: createdAt(),
   },
   (table) => [allowed(table.strategy, PLACEMENT_STRATEGIES), allowed(table.state, HOLD_STATES), shopIsolation(table.shopId)],
