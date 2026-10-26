@@ -3,6 +3,7 @@ import { CLAIM_STATES, CLAIM_TRANSITIONS } from './claim.ts'
 import { HOLD_STATES, HOLD_TRANSITIONS } from './hold.ts'
 import { INCIDENT_STATES, INCIDENT_TRANSITIONS } from './incident.ts'
 import { mayCapture, mayCloseRental, mayHandOver } from './lifecycle-links.ts'
+import { NEGOTIATION_STATES, NEGOTIATION_TRANSITIONS } from './negotiation.ts'
 import { RENTAL_STATES, RENTAL_TRANSITIONS } from './rental.ts'
 import { isFinal, transition } from './state-machine.ts'
 import type { Transitions } from './state-machine.ts'
@@ -12,6 +13,7 @@ const MACHINES = [
   { name: 'hold', states: HOLD_STATES, transitions: HOLD_TRANSITIONS as Transitions<string>, start: 'requested', finals: ['released', 'captured', 'invoiced', 'expired', 'declined'] },
   { name: 'claim', states: CLAIM_STATES, transitions: CLAIM_TRANSITIONS as Transitions<string>, start: 'draft', finals: ['closed'] },
   { name: 'incident', states: INCIDENT_STATES, transitions: INCIDENT_TRANSITIONS as Transitions<string>, start: 'reported', finals: ['resolved', 'withdrawn'] },
+  { name: 'negotiation', states: NEGOTIATION_STATES, transitions: NEGOTIATION_TRANSITIONS as Transitions<string>, start: 'open', finals: ['settled', 'escalated', 'replied'] },
 ] as const
 
 function reachableFrom(transitions: Transitions<string>, start: string): Set<string> {
@@ -56,6 +58,20 @@ describe.each(MACHINES)('the $name machine', ({ states, transitions, start, fina
 })
 
 describe('the claim machine', () => {
+  it('negotiates only from contested, and only forward: agreed or escalated, then charging or the owner’s decision', () => {
+    expect(CLAIM_STATES.filter((state) => CLAIM_TRANSITIONS[state].includes('negotiating'))).toEqual(['contested'])
+    expect(CLAIM_TRANSITIONS.negotiating).toEqual(['agreed', 'escalated'])
+    expect(CLAIM_TRANSITIONS.agreed).toEqual(['charging', 'escalated'])
+    expect(CLAIM_TRANSITIONS.escalated).toEqual(['decided'])
+  })
+
+  it('never lets a claim that negotiated, agreed or escalated negotiate again (X4.7)', () => {
+    for (const state of ['negotiating', 'agreed', 'escalated', 'decided'] as const) {
+      expect(reachableFrom(CLAIM_TRANSITIONS, state).has('contested')).toBe(false)
+      expect([...reachableFrom(CLAIM_TRANSITIONS, state)].filter((reached) => reached !== state).includes('negotiating')).toBe(false)
+    }
+  })
+
   it('never lets an escalated claim return to contested', () => {
     expect(reachableFrom(CLAIM_TRANSITIONS, 'escalated').has('contested')).toBe(false)
   })
