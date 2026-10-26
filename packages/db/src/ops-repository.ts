@@ -4,7 +4,7 @@ import type { ProposalKind, ShopException, ShopSnapshot } from '@hold/domain'
 import { and, eq, gte, inArray, isNull, lt, or, sql } from 'drizzle-orm'
 import { approvals, auditLog, authorizations, captureSessions, claims, comparisons, holds, invoices, moneyEvents, opsRuns, outbox, proposals, rentalItems, rentals, shopExceptions, shops } from './schema/index.ts'
 import { releaseCleanReturn } from './claim-repository.ts'
-import { mandateById } from './ops-settings-repository.ts'
+import { mandateForUse } from './ops-settings-repository.ts'
 import type { Transaction } from './scope.ts'
 
 export const OPS_EXECUTE_QUEUE = 'ops-execute'
@@ -204,7 +204,7 @@ type Proposal = typeof proposals.$inferSelect
 async function approvalAuthority(transaction: Transaction, proposal: Proposal, userId: string | null, mandateId: string | undefined, now: Date): Promise<{ readonly ok: true } | { readonly ok: false; readonly reason: string }> {
   if (mandateId === undefined) return userId === null ? { ok: false, reason: 'mandate' } : { ok: true }
   if (userId !== null) return { ok: false, reason: 'mandate' }
-  const mandate = await mandateById(transaction, mandateId)
+  const mandate = await mandateForUse(transaction, mandateId)
   if (mandate === undefined) return { ok: false, reason: 'mandate' }
   const [exception] = proposal.exceptionId === null ? [] : await transaction.select({ kind: shopExceptions.kind }).from(shopExceptions).where(eq(shopExceptions.id, proposal.exceptionId))
   const dayStart = new Date(`${now.toISOString().slice(0, 10)}T00:00:00Z`)

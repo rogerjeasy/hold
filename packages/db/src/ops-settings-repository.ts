@@ -54,9 +54,10 @@ export async function liveStandingRule(transaction: Transaction, now: Date): Pro
   return row === undefined ? undefined : asMandate(row)
 }
 
-// Any of the shop's mandates, live or not: the caller checks it with withinMandate.
-export async function mandateById(transaction: Transaction, mandateId: string): Promise<Mandate | undefined> {
-  const [row] = await transaction.select().from(mandates).where(eq(mandates.id, mandateId))
+// Any of the shop's mandates, live or not, locked until the transaction ends: two approvals under one mandate count
+// its daily uses one after the other. The caller checks it with withinMandate.
+export async function mandateForUse(transaction: Transaction, mandateId: string): Promise<Mandate | undefined> {
+  const [row] = await transaction.select().from(mandates).where(eq(mandates.id, mandateId)).for('update')
   return row === undefined ? undefined : asMandate(row)
 }
 
