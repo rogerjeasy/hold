@@ -16,6 +16,12 @@ const fromPerson = (cents: number, reason: string, staffId = 'staff-1'): ClaimLi
   source: { kind: 'person', staffId, reason },
 })
 
+const agreedInRental = (cents: number, photoCount = 1): ClaimLine => ({
+  priceEntryId: 'scratch-deep',
+  amount: chf(cents),
+  source: { kind: 'agreed_in_rental', incidentId: 'incident-1', photoCount },
+})
+
 describe('claim total', () => {
   it('is the sum of the lines', () => {
     expect(claimTotal([fromFinding(80_00), fromPerson(25_50, 'Mud inside the frame')], 'CHF')).toEqual(chf(105_50))
@@ -31,10 +37,15 @@ describe('claim lines', () => {
     expect(checkClaimLines([fromFinding(80_00), fromPerson(25_50, 'Mud inside the frame')])).toEqual({ ok: true, value: undefined })
   })
 
+  it('accepts a line the renter agreed during the rental, backed by the photographs they took', () => {
+    expect(checkClaimLines([agreedInRental(35_00)])).toEqual({ ok: true, value: undefined })
+  })
+
   it.each([
     ['a finding with no photographs', fromFinding(80_00, 0)],
     ['a person with no reason', fromPerson(25_50, '   ')],
     ['a reason with no person', fromPerson(25_50, 'Mud', '')],
+    ['an agreed line with no photographs', agreedInRental(35_00, 0)],
   ])('refuses %s', (_, line) => {
     expect(checkClaimLines([fromFinding(10_00), line])).toEqual({ ok: false, error: { kind: 'line_without_evidence', lineIndex: 1 } })
   })

@@ -26,3 +26,23 @@ describe('inspection outcomes', () => {
     expect(inspectFindings([], [])).toEqual({ state: 'clean', findings: [] })
   })
 })
+
+describe('marks reported during this rental (comparison step 7)', () => {
+  const reported = { id: 'reported', view: 'left-side', region: { x: 0.15, y: 0.15, width: 0.3, height: 0.3 }, covered: true }
+  it('labels damage inside a mark the renter agreed to as reported, linked to that mark', () => {
+    expect(inspectFindings([damage], [], [reported])).toEqual({ state: 'clean', findings: [{ ...damage, class: 'reported', matchedMarkId: 'reported' }] })
+  })
+  it('sends damage that has grown beyond the reported mark to a person, still linked', () => {
+    const grown = { ...damage, region: { x: 0.1, y: 0.1, width: 0.6, height: 0.6 } }
+    expect(inspectFindings([grown], [], [reported])).toEqual({ state: 'deferred', findings: [{ ...grown, class: 'uncertain', matchedMarkId: 'reported' }] })
+  })
+  it('keeps a reported mark that nobody agreed to as ordinary damage, linked for the person who decides', () => {
+    expect(inspectFindings([damage], [], [{ ...reported, covered: false }])).toEqual({ state: 'findings', findings: [{ ...damage, matchedMarkId: 'reported' }] })
+  })
+  it('never makes a reported mark old: it is not a known mark, and other views are untouched', () => {
+    expect(inspectFindings([damage], [], [{ ...reported, view: 'right-side' }])).toMatchObject({ state: 'findings', findings: [{ class: 'new_damage', matchedMarkId: null }] })
+  })
+  it('lets a mark from before the rental win, as it always did', () => {
+    expect(inspectFindings([damage], [{ id: 'known', view: 'left-side', region }], [reported])).toMatchObject({ findings: [{ class: 'known_mark', matchedMarkId: 'known' }] })
+  })
+})

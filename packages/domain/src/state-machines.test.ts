@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { CLAIM_STATES, CLAIM_TRANSITIONS } from './claim.ts'
 import { HOLD_STATES, HOLD_TRANSITIONS } from './hold.ts'
+import { INCIDENT_STATES, INCIDENT_TRANSITIONS } from './incident.ts'
 import { mayCapture, mayCloseRental, mayHandOver } from './lifecycle-links.ts'
 import { RENTAL_STATES, RENTAL_TRANSITIONS } from './rental.ts'
 import { isFinal, transition } from './state-machine.ts'
@@ -10,6 +11,7 @@ const MACHINES = [
   { name: 'rental', states: RENTAL_STATES, transitions: RENTAL_TRANSITIONS as Transitions<string>, start: 'pending_payment', finals: ['closed', 'cancelled', 'abandoned'] },
   { name: 'hold', states: HOLD_STATES, transitions: HOLD_TRANSITIONS as Transitions<string>, start: 'requested', finals: ['released', 'captured', 'invoiced', 'expired', 'declined'] },
   { name: 'claim', states: CLAIM_STATES, transitions: CLAIM_TRANSITIONS as Transitions<string>, start: 'draft', finals: ['closed'] },
+  { name: 'incident', states: INCIDENT_STATES, transitions: INCIDENT_TRANSITIONS as Transitions<string>, start: 'reported', finals: ['resolved', 'withdrawn'] },
 ] as const
 
 function reachableFrom(transitions: Transitions<string>, start: string): Set<string> {
@@ -61,6 +63,15 @@ describe('the claim machine', () => {
   it('lists the approved pre-expiry exception alongside reply, lapse, agreement and decision paths', () => {
     const intoCharging = CLAIM_STATES.filter((state) => CLAIM_TRANSITIONS[state].includes('charging'))
     expect(intoCharging.sort()).toEqual(['accepted', 'agreed', 'charge_failed', 'decided', 'lapsed', 'presented'])
+  })
+})
+
+describe('the incident machine', () => {
+  it('never returns to reported or triaged once a person or the renter decided', () => {
+    for (const state of ['agreed', 'shop_matter', 'claim_opened', 'awaiting_staff'] as const) {
+      expect(reachableFrom(INCIDENT_TRANSITIONS, state).has('triaged')).toBe(false)
+      expect(reachableFrom(INCIDENT_TRANSITIONS, state).has('reported')).toBe(false)
+    }
   })
 })
 
