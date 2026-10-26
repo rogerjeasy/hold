@@ -1,3 +1,4 @@
+export * from './assistants.ts'
 export * from './catalog.ts'
 export * from './claims.ts'
 export * from './enums.ts'

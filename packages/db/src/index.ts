@@ -79,3 +79,7 @@ export { answerTrustConsent, currentTrustLadder, deleteTrustRecord, markOutcomeO
 export type { LadderPublishResult, LedgerLine, PublishedTrustLadder, TrustConsent, TrustOutcome } from './trust-repository.ts'
 export { issueTrustCode, useTrustCode } from './trust-code-repository.ts'
 export type { IssuedTrustCode, UsedTrustCode } from './trust-code-repository.ts'
+export { priceBooking } from './booking-repository.ts'
+export type { PricedBooking, PriceResult } from './booking-repository.ts'
+export { bookFromQuote, bookingProgress, expireUnpaidAssistantBookings, issueAgentToken, publicShops, quoteShop, rentalAssistant, revokeAssistant, saveDraftReply, saveQuote, sessionByBookingSecret, sessionByToken, touchAgentSession } from './assistant-repository.ts'
+export type { AgentSessionRow, AssistantBookingInput, AssistantBookingResult, BookingProgress, IssueResult, PublicShopRow, QuotedLine, QuoteResult, RentalAssistant, SavedQuote } from './assistant-repository.ts'

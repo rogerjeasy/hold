@@ -1,7 +1,8 @@
 import { blocksItem, bookingTerms, checkBooking, money, paymentLapsed, RENTAL_TRANSITIONS, rentalDays, transition } from '@hold/domain'
-import type { ItemCategory, Period, RentalState } from '@hold/domain'
+import type { BookingTerms, ItemCategory, Period, RentalState } from '@hold/domain'
 import { and, asc, desc, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm'
 import { items, itemTypes, priceLists, rentalItems, rentals, renterLinks, renters, shops, wearPolicies } from './schema/index.ts'
+import type { BookingChannel } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
 // Bookings, made by staff or by a renter on the shop's page (architecture.md section 6.5). A booking waits for its
@@ -57,7 +58,7 @@ export type NewBooking = Period & {
   readonly lines: readonly { readonly itemTypeId: string; readonly count: number }[]
   readonly contact: { readonly name: string; readonly email: string } | undefined
   readonly language: string
-  readonly bookedThrough: 'staff' | 'shop_page'
+  readonly bookedThrough: BookingChannel
   // The renter link sent or shown with the booking. Only its fingerprint is kept.
   readonly link: { readonly fingerprint: string; readonly expiresAt: Date }
 }
@@ -70,7 +71,20 @@ export type BookingResult =
 // A booking's link pays the fee and approves the hold, and during the rental reports what happened (extensions.md 10).
 export const BOOKING_LINK_SCOPES = ['view', 'pay', 'report_incident']
 
-export async function createBooking(transaction: Transaction, shopId: string, booking: NewBooking, now: Date): Promise<BookingResult> {
+export type PricedBooking = {
+  readonly currency: string
+  readonly terms: BookingTerms
+  // Each line with its type's name, as the shop wrote it.
+  readonly names: ReadonlyMap<string, string>
+  readonly priceList: { readonly id: string; readonly version: number }
+  readonly wearPolicyId: string
+}
+
+export type PriceResult = { readonly ok: true; readonly priced: PricedBooking } | { readonly ok: false; readonly reason: string }
+
+// What a booking of these lines for this period would cost and hold, from the shop's item types and its current price
+// list. The one place a booking is priced, whether it is then made at once or quoted to an assistant first.
+export async function priceBooking(transaction: Transaction, shopId: string, booking: Period & Pick<NewBooking, 'lines'>, now: Date): Promise<PriceResult> {
   const typeIds = booking.lines.map((line) => line.itemTypeId)
   if (!typeIds.every((id) => UUID.test(id)) || new Set(typeIds).size !== typeIds.length) return { ok: false, reason: 'not_found' }
   // Read inside the caller's shop: an id from another shop is simply not there.
@@ -95,18 +109,23 @@ export async function createBooking(transaction: Transaction, shopId: string, bo
     .limit(1)
   const [wear] = list === undefined ? [] : await transaction.select({ id: wearPolicies.id }).from(wearPolicies).where(and(eq(wearPolicies.version, list.version), isNotNull(wearPolicies.publishedAt)))
   if (list === undefined || wear === undefined) return { ok: false, reason: 'no_price_list' }
+  const terms = bookingTerms(lines, rentalDays(booking.startsAt, booking.endsAt), currency)
+  return { ok: true, priced: { currency, terms, names: new Map(types.map((type) => [type.id, type.name])), priceList: list, wearPolicyId: wear.id } }
+}
 
-  const candidates = await itemsWithRentals(transaction, typeIds, true)
+export async function createBooking(transaction: Transaction, shopId: string, booking: NewBooking, now: Date): Promise<BookingResult> {
+  const priced = await priceBooking(transaction, shopId, booking, now)
+  if (!priced.ok) return priced
+  const { currency, terms, priceList: list, wearPolicyId } = priced.priced
+
+  const candidates = await itemsWithRentals(transaction, booking.lines.map((line) => line.itemTypeId), true)
   const chosen: { readonly itemId: string; readonly dayRateCents: number; readonly holdCents: number }[] = []
-  for (const line of booking.lines) {
+  for (const line of terms.lines) {
     const freeItems = candidates.filter((item) => item.itemTypeId === line.itemTypeId && free(item, booking, now)).slice(0, line.count)
     if (freeItems.length < line.count) return { ok: false, reason: 'not_available', itemTypeId: line.itemTypeId }
-    const type = types.find((candidate) => candidate.id === line.itemTypeId)
-    if (type === undefined) throw new Error('A booked type was not read.')
-    chosen.push(...freeItems.map((item) => ({ itemId: item.id, dayRateCents: type.dayRateCents, holdCents: type.holdCents })))
+    chosen.push(...freeItems.map((item) => ({ itemId: item.id, dayRateCents: line.dayRate.cents, holdCents: line.hold.cents })))
   }
 
-  const terms = bookingTerms(lines, rentalDays(booking.startsAt, booking.endsAt), currency)
   const [rental] = await transaction
     .insert(rentals)
     .values({
@@ -117,7 +136,7 @@ export async function createBooking(transaction: Transaction, shopId: string, bo
       feeCents: terms.fee.cents,
       holdCents: terms.hold.cents,
       priceListId: list.id,
-      wearPolicyId: wear.id,
+      wearPolicyId,
       contactName: booking.contact?.name.trim() ?? null,
       contactEmail: booking.contact?.email.trim().toLowerCase() ?? null,
       language: booking.language,
@@ -153,7 +172,7 @@ export type RentalSummary = {
   readonly feeCents: number
   readonly holdCents: number
   readonly currency: string
-  readonly bookedThrough: 'staff' | 'shop_page'
+  readonly bookedThrough: BookingChannel
   readonly simulated: boolean
   // An unpaid booking past its fifteen minutes. It no longer keeps its items.
   readonly paymentLapsed: boolean
@@ -187,7 +206,7 @@ type SummaryRow = {
   readonly feeCents: number
   readonly holdCents: number
   readonly currency: string
-  readonly bookedThrough: 'staff' | 'shop_page'
+  readonly bookedThrough: BookingChannel
   readonly simulated: boolean
   readonly createdAt: Date
   readonly items: string
