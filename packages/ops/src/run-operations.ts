@@ -92,7 +92,7 @@ export async function runOperations(dependencies: OpsDependencies, input: { read
       const choice = dependencies.investigator !== undefined && withinCeilings
         ? await investigate(dependencies, { shopId, exception, candidates, rules, reader, runId, budget, limits, stopAt, usage })
         : fixedChoice(first, false)
-      proposals += await asWorker((transaction) => writeChoice(transaction, { exception, choice, runId, paypalChecked: reader !== undefined && choice.paypalConfirmed }, now))
+      proposals += await asWorker((transaction) => writeChoice(transaction, { exception, choice, runId, paypalChecked: choice.paypalConfirmed }, now))
     }
   } finally {
     await reader?.close().catch(() => undefined)
@@ -123,7 +123,8 @@ async function investigate(dependencies: OpsDependencies, work: Investigation): 
   if (investigator === undefined) return fallback
   const facts = await inShop(dependencies.database, { role: 'hold_worker', shopId: work.shopId }, (transaction) =>
     exception.rentalId === null ? Promise.resolve({ subjectKind: exception.subjectKind, subjectId: exception.subjectId }) : exceptionFacts(transaction, 'rental', exception.rentalId))
-  const tools = gatedTools({ database: dependencies.database, shopId: work.shopId, runId: work.runId, subject: { kind: exception.subjectKind, id: exception.subjectId }, reader: work.reader, budget: work.budget, maxToolCalls: work.limits.maxToolCalls, now: dependencies.now })
+  const answered = { count: 0 }
+  const tools = gatedTools({ database: dependencies.database, shopId: work.shopId, runId: work.runId, subject: { kind: exception.subjectKind, id: exception.subjectId }, reader: work.reader, budget: work.budget, answered, maxToolCalls: work.limits.maxToolCalls, now: dependencies.now })
   const signal = AbortSignal.timeout(Math.max(1, work.stopAt - Date.now()))
   const result = await investigator.investigate(
     { exceptionKind: exception.kind, allowed: candidates, deadline: exception.deadline, facts: JSON.stringify({ exception: { kind: exception.kind, subjectKind: exception.subjectKind, subjectId: exception.subjectId, moneyCents: exception.moneyCents }, records: facts }), rules: work.rules, paypalAvailable: work.reader !== undefined },
@@ -142,7 +143,8 @@ async function investigate(dependencies: OpsDependencies, work: Investigation): 
   // A kind the detector does not allow is the mark of a steered answer: only its observations, which can be notes
   // and nothing else, are kept.
   if (!candidates.includes(proposalKind)) return { ...fallback, model: result.model, observations }
-  return { kind: proposalKind, reason, references, draft, model: result.model, investigated: true, paypalConfirmed, observations }
+  // The model's word that it checked PayPal counts only if a PayPal read for this exception actually answered.
+  return { kind: proposalKind, reason, references, draft, model: result.model, investigated: true, paypalConfirmed: paypalConfirmed && answered.count > 0, observations }
 }
 
 // Writes the queue entry, the agent's observations as notes, and, for a clean return nobody confirmed, applies the

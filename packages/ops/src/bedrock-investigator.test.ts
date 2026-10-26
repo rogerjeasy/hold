@@ -34,7 +34,7 @@ describe('the operations investigator adapter', () => {
   it('stops calling tools at the exception\'s limit and tells the model so', async () => {
     const replies = [toolUse('toolu_1', 'get_order', {}), toolUse('toolu_2', 'get_order', {}), message({ content: [{ type: 'text', text: JSON.stringify(ANSWER) }], stop_reason: 'end_turn' })]
     const bodies: string[] = []
-    const investigator = createBedrockInvestigator({ awsRegion: 'us-east-1', skipAuth: true, fetch: (_url, options) => { bodies.push(String(options?.body)); return Promise.resolve(replies.shift() ?? message({ content: [], stop_reason: 'end_turn' })) } })
+    const investigator = createBedrockInvestigator({ awsRegion: 'us-east-1', skipAuth: true, fetch: (_url, options) => { bodies.push(typeof options?.body === 'string' ? options.body : ''); return Promise.resolve(replies.shift() ?? message({ content: [], stop_reason: 'end_turn' })) } })
     const calls: string[] = []
     await investigator.investigate(request, tools(calls), { toolCalls: 1, signal: new AbortController().signal })
     expect(calls).toHaveLength(1)

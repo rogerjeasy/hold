@@ -130,6 +130,15 @@ describe('a nightly run', () => {
     expect(written).toMatchObject({ kind: 'request_replacement_hold', model: 'scripted', payload: { paypalChecked: 'no' } })
   })
 
+  it('marks PayPal checked only when a PayPal read for the exception succeeded, whatever the model says', async () => {
+    await holdEnding()
+    await holdEnding()
+    let turn = 0
+    const investigator = scripted(() => { turn += 1; return turn === 1 ? { answer: answer({ proposalKind: 'request_replacement_hold', paypalConfirmed: true }) } : { calls: [{ name: 'get_order', args: {} }], answer: answer({ proposalKind: 'request_replacement_hold', paypalConfirmed: true }) } })
+    await run({ investigator })
+    expect((await inShopProposals()).map((each) => each.payload['paypalChecked'] ?? 'yes').sort()).toEqual(['no', 'yes'])
+  })
+
   it('writes every PayPal tool call to the audit log with its run and tool, refused ones too (X1.7)', async () => {
     await holdEnding()
     const investigator = scripted(() => ({ calls: [{ name: 'get_order', args: { id: 'HOLD-1' } }, { name: 'create_refund', args: { capture_id: 'C-1' } }], answer: answer({ proposalKind: 'request_replacement_hold' }) }))

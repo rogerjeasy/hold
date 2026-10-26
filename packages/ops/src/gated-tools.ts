@@ -14,6 +14,8 @@ export type GateContext = {
   readonly subject: { readonly kind: string; readonly id: string }
   readonly reader: PayPalReader | undefined
   readonly budget: RunBudget
+  // PayPal reads that answered for this exception: what decides whether the entry says PayPal was checked.
+  readonly answered: { count: number }
   readonly maxToolCalls: number
   readonly now: () => Date
 }
@@ -52,6 +54,7 @@ export function gatedTools(context: GateContext): GatedTools {
       }
       context.budget.toolCalls += 1
       const read = await reader.call(name, args)
+      if (read.ok) context.answered.count += 1
       await audit(name, read.ok ? 'ok' : read.reason, Date.now() - started)
       return read.ok ? read.text : 'PayPal could not answer this call.'
     },
