@@ -28,6 +28,8 @@ const words = {
   comparison: ['Comparison', 'Comparaison', 'Vergleich', 'Comparación'],
   model: ['Model', 'Modèle', 'Modell', 'Modelo'],
   prompt: ['Prompt version', 'Version du prompt', 'Prompt-Version', 'Versión del prompt'],
+  measured: ['Last measured', 'Dernière mesure', 'Zuletzt gemessen', 'Última medición'],
+  notMeasured: ['Not measured on the evaluation set yet', 'Pas encore mesuré sur le jeu d’évaluation', 'Noch nicht am Bewertungssatz gemessen', 'Aún sin medir en el conjunto de evaluación'],
   deferred: ['Deferred reason', 'Motif du report', 'Grund der Zurückstellung', 'Motivo del aplazamiento'],
   finding: ['Finding', 'Constat', 'Feststellung', 'Hallazgo'],
   classification: ['Classification', 'Classification', 'Klassifizierung', 'Clasificación'],

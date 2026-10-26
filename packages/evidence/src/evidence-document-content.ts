@@ -46,6 +46,9 @@ export function renderComparisons(context: EvidenceDocument, snapshot: EvidenceS
       context.line('secondLook', finding.secondLookConfirmed === null ? null : context.label(finding.secondLookConfirmed ? 'yes' : 'no'))
     }
   }
+  // Counts only, as everywhere a measured figure appears. The figures themselves stay in English: they are data.
+  const measured = snapshot.measurement
+  context.line('measured', measured === null ? context.label('notMeasured') : `${measured.completedAt.slice(0, 10)} · ${measured.pipelineVersion} · damage found ${String(measured.damageFound.count)} of ${String(measured.damageFound.total)} · clean returns wrongly flagged ${String(measured.cleanWronglyFlagged.count)} of ${String(measured.cleanWronglyFlagged.total)}`)
 }
 
 export function renderDecisions(context: EvidenceDocument, snapshot: EvidenceSnapshot) {

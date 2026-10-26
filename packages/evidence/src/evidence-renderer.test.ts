@@ -90,3 +90,19 @@ describe('immutable evidence documents', () => {
     expect(pairedPage).toContain('Touring bicycle')
   })
 })
+
+describe('how the comparison was measured', () => {
+  it('names the run the comparison was last measured in, with its counts', async () => {
+    const fixture = await input()
+    const measured = { ...fixture.snapshot, measurement: { pipelineVersion: 'inspection-1+abc123def456', dataSetVersion: 'f'.repeat(64), completedAt: evidenceFixtureTime, damageFound: { count: 34, total: 40 }, cleanWronglyFlagged: { count: 0, total: 60 } } }
+    const text = textOf(await renderEvidencePdf({ ...fixture, snapshot: measured }))
+    expect(text).toContain('inspection-1+abc123def456')
+    expect(text).toContain('damage found 34 of 40')
+    expect(text).toContain('clean returns wrongly flagged 0 of 60')
+  })
+
+  it('says when the comparison has not been measured', async () => {
+    const fixture = await input()
+    expect(textOf(await renderEvidencePdf({ ...fixture, snapshot: { ...fixture.snapshot, measurement: null } }))).toContain('Not measured on the evaluation set yet')
+  })
+})

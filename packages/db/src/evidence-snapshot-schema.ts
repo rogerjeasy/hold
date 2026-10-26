@@ -3,6 +3,7 @@ import { z } from 'zod'
 const cents = z.number().int().nonnegative()
 const timestamp = z.iso.datetime({ offset: true })
 const region = z.strictObject({ x: z.number().min(0).max(1), y: z.number().min(0).max(1), width: z.number().min(0).max(1), height: z.number().min(0).max(1) })
+const share = z.strictObject({ count: z.number().int().nonnegative(), total: z.number().int().nonnegative() })
 const accessory = z.strictObject({ name: z.string(), count: z.number().int().nonnegative() })
 export const evidencePhotoSchema = z.strictObject({
   id: z.uuid(), view: z.string(), sha256: z.string().regex(/^[a-f0-9]{64}$/), receivedAt: timestamp,
@@ -22,5 +23,8 @@ export const evidenceSnapshotSchema = z.strictObject({
   invoices: z.array(z.strictObject({ id: z.uuid(), paypalInvoiceId: z.string().nullable(), state: z.string(), amountCents: cents, currency: z.string().length(3) })),
   authorizations: z.array(z.strictObject({ reference: z.string(), state: z.string(), amountCents: cents, currency: z.string().length(3), createdAt: timestamp, validUntil: timestamp })),
   paypalMode: z.enum(['sandbox', 'live']).nullable(),
+  // The accepted evaluation run the comparison was last measured in (extensions.md section 5.5). Older versions
+  // of the record were written before it existed.
+  measurement: z.strictObject({ pipelineVersion: z.string(), dataSetVersion: z.string(), completedAt: timestamp, damageFound: share, cleanWronglyFlagged: share }).nullable().default(null),
 })
 export type EvidenceSnapshot = z.infer<typeof evidenceSnapshotSchema>

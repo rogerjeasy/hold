@@ -21,6 +21,6 @@ export function evidenceRenderFixture(): EvidenceSnapshot {
     replies: [{ id: evidenceFixtureId(25), decision: 'accepted', comment: '<script>quoted renter text</script>', addedPhotoIds: [evidenceFixtureId(14)], createdAt: evidenceFixtureTime }],
     payments: [{ id: evidenceFixtureId(26), kind: 'deposit_capture', amountCents: 1250, currency: 'CHF', paypalReference: 'VERIFIED-CAPTURE', occurredAt: evidenceFixtureTime }],
     invoices: [{ id: evidenceFixtureId(27), paypalInvoiceId: 'INVOICE-UNPAID', state: 'sent', amountCents: 1250, currency: 'CHF' }],
-    authorizations: [{ reference: 'AUTH-EXPIRED', state: 'expired', amountCents: 10000, currency: 'CHF', createdAt: evidenceFixtureTime, validUntil: evidenceFixtureTime }], paypalMode: 'sandbox',
+    authorizations: [{ reference: 'AUTH-EXPIRED', state: 'expired', amountCents: 10000, currency: 'CHF', createdAt: evidenceFixtureTime, validUntil: evidenceFixtureTime }], paypalMode: 'sandbox', measurement: null,
   }
 }
