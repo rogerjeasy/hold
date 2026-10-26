@@ -5,8 +5,9 @@ import { addDays } from './hold-clocks.ts'
 // says, so an item's sessions form a chain that cannot be rewritten.
 
 // Who takes each kind and when (architecture.md section 9.1). `condition` holds what a renter photographed after a
-// handover that staff missed.
-export const CAPTURE_SESSION_KINDS = ['handover', 'return', 'packing', 'unboxing', 'send_back', 'condition'] as const
+// handover that staff missed; `incident`, what a renter photographed of something that happened during the rental
+// (extensions.md section 10.6). Both are renter-supplied and never a comparison's baseline.
+export const CAPTURE_SESSION_KINDS = ['handover', 'return', 'packing', 'unboxing', 'send_back', 'condition', 'incident'] as const
 export type CaptureSessionKind = (typeof CAPTURE_SESSION_KINDS)[number]
 
 // The renter's answer to the condition report.

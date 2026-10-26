@@ -1,6 +1,6 @@
 import type { RenterView } from '@hold/db'
 import { money } from '@hold/domain'
-import { CircleCheck, Hourglass, XCircle } from 'lucide-react'
+import { CircleCheck, Hourglass, TriangleAlert, XCircle } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { TermsView } from '@/components/booking/terms-view'
 import { Button } from '@/components/ui/button'
@@ -63,7 +63,7 @@ function StatusLine({ icon: Icon, text }: { icon: typeof Hourglass; text: string
 
 // The renter's own rental, opened from their link: where it stands, what they rent, the two amounts, the terms, and
 // the payment while it is due.
-export function RenterScreen({ token, view }: { token: string; view: RenterView }) {
+export function RenterScreen({ token, view, canReport = false }: { token: string; view: RenterView; canReport?: boolean }) {
   const t = useTranslations('renter')
   const records = useTranslations('records')
   const format = useShopFormat({ timeZone: view.timeZone, currency: view.currency })
@@ -78,6 +78,11 @@ export function RenterScreen({ token, view }: { token: string; view: RenterView 
         </p>
         <h1 className="text-page-title text-balance wrap-long-words">{t('title', { shop: view.shopName })}</h1>
         <Status token={token} view={view} />
+        {canReport && ['out', 'overdue'].includes(view.state) ? (
+          <Button asChild variant="outline" className="min-h-12 justify-self-start">
+            <Link href={linkRoutes.incidents(token)} referrerPolicy="no-referrer"><TriangleAlert aria-hidden="true" />{t('somethingHappened')}</Link>
+          </Button>
+        ) : null}
         <Link href={linkRoutes.record(token)} referrerPolicy="no-referrer" className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{records('title')}</Link>
       </header>
       <Panel title={t('what')}>

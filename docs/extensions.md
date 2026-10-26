@@ -1024,7 +1024,7 @@ During a rental, the renter's link has one more button: "Something happened". Th
 | Kind | Example | What the renter is offered | Who decides |
 |---|---|---|---|
 | **Small damage** | A scratch that matches a price list entry | Agree it now at the published price, or leave it for the return | The renter agrees. Staff confirm at return. |
-| **Mechanical fault** | A battery that will not charge | Logged as the shop's matter. Staff are told at once. | Staff: swap, collect or compensate |
+| **Mechanical fault** | A battery that will not charge | Logged for the shop, which makes it its matter once staff confirm it. Staff are told at once. | Staff: swap, collect or compensate |
 | **Theft or loss** | The bike is gone | Fixed steps: where, when, the lock and keys, a police report number later. Staff are told at once. | The owner, through the ordinary claim |
 | **Anything unsafe or unclear** | A cracked frame. Someone was hurt. | A fixed message: stop using the item, the shop will contact you. Emergency numbers where relevant. | A person |
 
@@ -1033,7 +1033,7 @@ During a rental, the renter's link has one more button: "Something happened". Th
 ### 10.4 Agreeing small damage before the return
 
 1. The renter photographs the damage. The camera shows the handover photograph of that view faintly, as in a return session.
-2. Hold matches it to a price list entry and shows the published price.
+2. Hold suggests a price list entry. A staff member confirms which published price applies, and Hold shows it. (Decided after the security review: a price chosen by the model alone never becomes binding.)
 3. The renter agrees, with the one-time code used for any money decision.
 4. The agreed line is stored on the incident. Nothing is charged.
 5. At the return, the comparison recognises the mark as reported during the rental and links it to the agreed line.
@@ -1117,6 +1117,21 @@ The sorting step has no tools. The renter's description is passed as quoted data
 - **X5.6** A report of a fault adds a mark that no claim line can be drafted from.
 - **X5.7** The incident's photographs are locked and extend the item's chain.
 - **X5.8** With Claude unavailable, the report is still stored and staff are alerted.
+
+**Progress, 27 October 2026.** Built on its own branch; `architecture.md` section 6.8 describes it.
+
+| Check | State | Proven by |
+|---|---|---|
+| X5.1 | Met | `incident-repository.test.ts` (agreement stores the entry's amount, writes no execution or outbox work), `incidents.spec.ts` (report, staff confirm, one-time code, agreed). Live: the email code in the sandbox. |
+| X5.2 | Met | `inspection.test.ts`, `pipeline.test.ts`, `incident-claim.test.ts` (reported marks read, finding linked to the report and its agreed line), `comparison-screen.test.tsx`. The end-to-end run uses the test environment's unavailable comparison model, so the label itself needs Bedrock to be seen live. |
+| X5.3 | Met | `incident.test.ts` (`checkKeptLine`), `incident-claim.test.ts`, `claim-screen.test.tsx`, `incidents.spec.ts` (raising refused, lowered to 20). |
+| X5.4 | Met | `incident-claim.test.ts` (capture execution of the kept lines only), `incidents.spec.ts` (settled: 20 captured, 280 released, against the simulated PayPal). Live: the sandbox capture. |
+| X5.5 | Met | `incident-safety.test.ts`, `incident.test.ts`, `incident-outcome.test.ts`, `incidents.spec.ts` (fixed message only, no price, staff list). |
+| X5.6 | Met | A fault's mark is covered, so a finding over it is `reported` and never billable; no fault report can be agreed, so no `agreed_in_rental` line comes from it (`incident-claim.test.ts`, `incident-repository.test.ts`). |
+| X5.7 | Met | `incident-repository.test.ts` (sealed into the chain, chain head moves, session closed once sent). |
+| X5.8 | Met | `incident-repository.test.ts` and `incident-triage.test.ts` (unavailable, refused, invalid and timed out all store and go to a person), the sent-but-unsorted report still listed, alert email in `incident-email.test.ts`. Live: Bedrock itself. |
+
+Deferred: the operations agent's detector and the `refund_part` and `send_invoice` proposals (Extension 1, which reads `incidentsWaitingForStaff`); withdrawing a report (in the state machine, with no screen yet); the honesty reduction (off by default, so nothing changes until a shop can set it).
 
 ### 10.11 In the video
 

@@ -12,5 +12,5 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Page({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params
   const page = await renterPage(token)
-  return page.ok ? <RenterScreen token={token} view={page.view} /> : <LinkRefused failure={page.failure} />
+  return page.ok ? <RenterScreen token={token} view={page.view} canReport={page.canReport} /> : <LinkRefused failure={page.failure} />
 }

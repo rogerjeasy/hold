@@ -1,5 +1,6 @@
 import 'server-only'
-import { comparisonMessageSchema, runComparison } from '@hold/compare'
+import { comparisonMessageSchema, createBedrockIncidentModel, createSimulatedIncidentModel, runComparison } from '@hold/compare'
+import type { IncidentModel } from '@hold/compare'
 import { createCognitoIdentity, createFakeIdentity, readKeySecret } from '@hold/auth'
 import type { Identity } from '@hold/auth'
 import { loadWebConfig } from '@hold/config'
@@ -46,6 +47,8 @@ export type Services = {
   // The test environment's store, which its simulated storage route fills and serves. Absent everywhere else.
   readonly simulatedEvidence: MemoryEvidenceStore | undefined
   readonly documents: DocumentStore | undefined
+  // Sorts a renter's incident report: Claude on Bedrock, or in the test environment a stand-in that says it is simulated.
+  readonly incidentModel: IncidentModel
   readonly flushRecords: (shopId: string) => Promise<void>
 }
 
@@ -141,6 +144,7 @@ async function build(): Promise<Services> {
       evidence: simulatedEvidence,
       simulatedEvidence,
       documents,
+      incidentModel: createSimulatedIncidentModel(),
       flushRecords: (shopId) => records.flush(shopId),
     }
   }
@@ -176,6 +180,7 @@ async function build(): Promise<Services> {
     evidence: config.photoBuckets === undefined ? undefined : createS3EvidenceStore({ evidenceBucket: config.photoBuckets.evidence, displayBucket: config.photoBuckets.display, region: config.region }),
     simulatedEvidence: undefined,
     documents: config.photoBuckets === undefined ? undefined : createS3DocumentStore({ evidenceBucket: config.photoBuckets.evidence, region: config.region }),
+    incidentModel: createBedrockIncidentModel({ awsRegion: config.region }),
     flushRecords: () => Promise.resolve(),
   }
 }

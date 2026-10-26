@@ -23,7 +23,7 @@ describe('the comparison review screen', () => {
 })
 
 describe('a finding\'s confidence', () => {
-  const finding = { id: 'f1', view: 'left-side', region: { x: 0.4, y: 0.4, width: 0.1, height: 0.1 }, class: 'new_damage' as const, confidence: 0.95, description: 'A new scratch.', secondLookConfirmed: true, priceDescription: null, amountCents: null, currency: null }
+  const finding = { id: 'f1', view: 'left-side', region: { x: 0.4, y: 0.4, width: 0.1, height: 0.1 }, class: 'new_damage' as const, confidence: 0.95, description: 'A new scratch.', secondLookConfirmed: true, priceDescription: null, amountCents: null, currency: null, reported: null }
   const calibration = { high: { count: 34, total: 36 }, medium: { count: 0, total: 0 }, low: { count: 1, total: 4 } }
 
   it('says how often findings at its level were correct in testing', () => {
@@ -35,4 +35,12 @@ describe('a finding\'s confidence', () => {
     renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={{ ...report, state: 'deferred', findings: [{ ...finding, class: 'uncertain', confidence: 0.8 }] }} canAct calibration={calibration} />)
     expect(screen.getByText('Confidence medium. Not measured at this level yet.')).toBeInTheDocument()
   })
+})
+
+it('labels damage the renter reported and agreed during the rental, and links it to the agreed line (X5.2)', () => {
+  const finding = { id: 'finding', view: 'left-side', region: { x: 0.2, y: 0.2, width: 0.2, height: 0.2 }, class: 'reported' as const, confidence: 0.95, description: 'Scratch on the left side', secondLookConfirmed: true, priceDescription: 'Scratch', amountCents: 3500, currency: 'EUR', reported: { incidentId: 'incident', state: 'agreed' as const, agreedCents: 3500, currency: 'EUR' } }
+  renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={{ ...report, findings: [finding] }} canAct />)
+  expect(screen.getByText('Reported during this rental')).toBeInTheDocument()
+  expect(screen.getByText(/The renter reported it during the rental and agreed €35.00\./)).toBeInTheDocument()
+  expect(screen.getByRole('link', { name: 'See the agreed line' })).toHaveAttribute('href', '/shop/rentals/rental/claim')
 })

@@ -5,7 +5,9 @@ import { pairedCrops } from './crops.ts'
 import { lookSchema, PROMPT_VERSION } from './model.ts'
 import type { ComparisonModel, ModelFinding } from './model.ts'
 
-type Input = { readonly views: readonly { readonly view: string; readonly pair: PairResult }[]; readonly marks: readonly { readonly id: string; readonly view: string; readonly region: Region }[]; readonly wearPolicy: string; readonly itemType: string; readonly priceCodes: readonly string[] }
+type Mark = { readonly id: string; readonly view: string; readonly region: Region }
+// reported: marks the renter reported during this rental (step 7), covered when agreed or made the shop's matter.
+type Input = { readonly views: readonly { readonly view: string; readonly pair: PairResult }[]; readonly marks: readonly Mark[]; readonly reported?: readonly (Mark & { readonly covered: boolean })[]; readonly wearPolicy: string; readonly itemType: string; readonly priceCodes: readonly string[] }
 type Observed = ModelFinding & { readonly view: string; readonly secondLookConfirmed: boolean | null }
 
 // There are no action tools. Every call is independent, bounded, structured and revalidated here.
@@ -14,10 +16,11 @@ export async function compareInspection(input: Input, model: ComparisonModel) {
   let calls = 0; let inputTokens = 0; let outputTokens = 0
   const models = new Set<string>()
   const findings: Observed[] = []
-  const alignedMarks: { id: string; view: string; region: Region }[] = []
+  const alignedMarks: Mark[] = []
+  const alignedReported: (Mark & { covered: boolean })[] = []
   const alignment: Record<string, number> = {}
   const finish = (deferred: boolean) => {
-    const inspected = inspectFindings(findings, alignedMarks)
+    const inspected = inspectFindings(findings, alignedMarks, alignedReported)
     return { ...inspected, state: deferred ? 'deferred' as const : inspected.state, model: [...models].join(', ') || 'not_called', promptVersion: PROMPT_VERSION, alignment: { ...alignment, calls, inputTokens, outputTokens } }
   }
   const look: ComparisonModel['look'] = async (request) => {
@@ -34,6 +37,8 @@ export async function compareInspection(input: Input, model: ComparisonModel) {
     alignment[view] = pair.alignment
     const knownMarks = input.marks.filter((mark) => mark.view === view).map((mark) => ({ ...mark, region: { ...mark.region, x: mark.region.x + pair.offset.x, y: mark.region.y + pair.offset.y } }))
     alignedMarks.push(...knownMarks)
+    // Reported marks are matched by code alone and never shown to the model, which compares only the two photographs.
+    alignedReported.push(...(input.reported ?? []).filter((mark) => mark.view === view).map((mark) => ({ ...mark, region: { ...mark.region, x: mark.region.x + pair.offset.x, y: mark.region.y + pair.offset.y } })))
     const crops = (await Promise.all(pair.candidates.map((region) => pairedCrops(pair, region)))).flat()
     const first = await look({ kind: 'first', context: JSON.stringify({ itemType: input.itemType, wearPolicy: input.wearPolicy, priceCodes: input.priceCodes, knownMarks, candidateRegions: pair.candidates }), images: [{ label: 'Full handover photograph', body: pair.before }, { label: 'Full return photograph', body: pair.after }, ...crops] }, signal)
     if (first.kind !== 'result') return finish(true)

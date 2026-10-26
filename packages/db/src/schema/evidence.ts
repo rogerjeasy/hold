@@ -5,6 +5,7 @@ import { boolean, integer, jsonb, pgTable, real, text, unique, uniqueIndex } fro
 import { shopIsolation } from './access.ts'
 import { items, photoPlans, priceEntries } from './catalog.ts'
 import { at, createdAt, id, reference } from './columns.ts'
+import { incidents } from './incidents.ts'
 import { allowed, CAPTURE_SESSION_KINDS, captureSessionKind, COMPARISON_STATES, comparisonState, FINDING_CLASSES, findingClass, MARK_STATUSES, markStatus } from './enums.ts'
 import { rentalItems, rentals } from './rentals.ts'
 import { shopReference, users } from './shops.ts'
@@ -78,6 +79,8 @@ export const marks = pgTable(
       .notNull()
       .references(() => captureSessions.id),
     status: markStatus().notNull().default('open'),
+    // The report it was first seen in, when a renter reported it during the rental.
+    incidentId: reference().references(() => incidents.id),
     closedAt: at(),
   },
   (table) => [allowed(table.status, MARK_STATUSES), shopIsolation(table.shopId)],

@@ -1,7 +1,11 @@
+import { checkRegion } from './capture-session.ts'
 import type { Region } from './capture-session.ts'
 
-export const INSPECTION_LIMITS = { minConfidence: 0.9, knownMarkOverlap: 0.5, maxFindings: 8, maxCalls: 10, maxTokensPerCall: 4096, maxMilliseconds: 120_000 } as const
-export type InspectionClass = 'new_damage' | 'missing_part' | 'wear' | 'uncertain' | 'known_mark'
+// reportedOverlap: how far a finding and a mark reported during the rental must cover each other (intersection over
+// union) to be the same damage. maxReportedArea: the largest share of a view a renter's box may cover, so a report can
+// never be drawn around more than the damage it shows.
+export const INSPECTION_LIMITS = { minConfidence: 0.9, knownMarkOverlap: 0.5, reportedOverlap: 0.5, maxReportedArea: 0.1, maxFindings: 8, maxCalls: 10, maxTokensPerCall: 4096, maxMilliseconds: 120_000 } as const
+export type InspectionClass = 'new_damage' | 'missing_part' | 'wear' | 'uncertain' | 'known_mark' | 'reported'
 export type InspectionFinding = { readonly view: string; readonly region: Region; readonly class: InspectionClass; readonly confidence: number; readonly secondLookConfirmed: boolean | null }
 
 export function regionOverlap(first: Region, second: Region): number {
@@ -11,14 +15,32 @@ export function regionOverlap(first: Region, second: Region): number {
   return area / (first.width * first.height + second.width * second.height - area)
 }
 
-// The model suggests observations. Plain code decides uncertainty and excludes marks already on the item.
-export function inspectFindings<Finding extends InspectionFinding>(findings: readonly Finding[], marks: readonly { readonly id: string; readonly view: string; readonly region: Region }[]) {
+// A box a renter draws on their incident photograph: on the photograph, and no larger than the cap.
+export function checkReportedRegion(region: Region): boolean {
+  return checkRegion(region) && region.width * region.height <= INSPECTION_LIMITS.maxReportedArea
+}
+
+type Mark = { readonly id: string; readonly view: string; readonly region: Region }
+// A mark the renter reported during this rental (extensions.md section 10.6). Covered when its incident was agreed as
+// small damage or made the shop's matter: then a line already speaks for it, or none may.
+type ReportedMark = Mark & { readonly covered: boolean }
+
+// The model suggests observations. Plain code decides uncertainty, excludes marks already on the item, and links
+// findings to marks reported during this rental. Reporting does not make a mark old: it is never a known mark here.
+export function inspectFindings<Finding extends InspectionFinding>(findings: readonly Finding[], marks: readonly Mark[], reported: readonly ReportedMark[] = []) {
   const checked = findings.map((finding) => {
     const known = marks.find((mark) => mark.view === finding.view && regionOverlap(finding.region, mark.region) >= INSPECTION_LIMITS.knownMarkOverlap)
     if (known !== undefined) return { ...finding, class: 'known_mark' as const, matchedMarkId: known.id }
+    const report = reported.find((mark) => mark.view === finding.view && regionOverlap(finding.region, mark.region) > 0)
+    if (report?.covered === true) {
+      // Only the same damage, matched both ways in a box within the cap, is the reported one. Damage that grew, moved or
+      // sits inside a larger box goes to a person: the agreed line covers only what was photographed.
+      const same = checkReportedRegion(report.region) && regionOverlap(finding.region, report.region) >= INSPECTION_LIMITS.reportedOverlap
+      return { ...finding, class: same ? 'reported' as const : 'uncertain' as const, matchedMarkId: report.id }
+    }
     const damage = finding.class === 'new_damage' || finding.class === 'missing_part'
     const uncertain = finding.class === 'uncertain' || finding.confidence < INSPECTION_LIMITS.minConfidence || (damage && finding.secondLookConfirmed !== true)
-    return { ...finding, class: uncertain ? 'uncertain' as const : finding.class, matchedMarkId: null }
+    return { ...finding, class: uncertain ? 'uncertain' as const : finding.class, matchedMarkId: report?.id ?? null }
   })
   const state = checked.some((finding) => finding.class === 'uncertain') ? 'deferred' as const
     : checked.some((finding) => finding.class === 'new_damage' || finding.class === 'missing_part') ? 'findings' as const : 'clean' as const

@@ -3,10 +3,12 @@ import type { Money } from './money.ts'
 import { fail, ok } from './result.ts'
 import type { Result } from './result.ts'
 
-// Where a claim line came from. A line without photographs needs a named person and their written reason.
+// Where a claim line came from. A line without photographs needs a named person and their written reason. A line the
+// renter agreed during the rental rests on the photographs they took of it (extensions.md section 10.4).
 export type ClaimLineSource =
   | { readonly kind: 'finding'; readonly findingId: string; readonly photoCount: number }
   | { readonly kind: 'person'; readonly staffId: string; readonly reason: string }
+  | { readonly kind: 'agreed_in_rental'; readonly incidentId: string; readonly photoCount: number }
 
 // The amount is always read from the agreed price list entry, never supplied by a model or a client.
 export type ClaimLine = {
@@ -30,7 +32,7 @@ export function checkClaimLines(lines: readonly ClaimLine[]): Result<void, Claim
 }
 
 function hasEvidence(source: ClaimLineSource): boolean {
-  return source.kind === 'finding' ? source.photoCount > 0 : source.staffId !== '' && source.reason.trim() !== ''
+  return source.kind === 'person' ? source.staffId !== '' && source.reason.trim() !== '' : source.photoCount > 0
 }
 
 // How an approved claim meets the hold. Hold never takes more than the reserved amount, even where PayPal would allow it.

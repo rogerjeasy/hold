@@ -4,7 +4,7 @@ import { checkRegion, conditionReplyOpen, CONDITION_REPLY_HOURS, manifestText, m
 import type { CaptureSessionKind, ConditionReply, PhotoMeasures, Region } from '@hold/domain'
 import { and, asc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
 import type { PhotoPlanView } from './schema/catalog.ts'
-import { captureSessions, holds, items, itemTypes, marks, outbox, photoPlans, photos, rentalItems, rentals } from './schema/index.ts'
+import { captureSessions, holds, incidents, items, itemTypes, marks, outbox, photoPlans, photos, rentalItems, rentals } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 import { queueReturnComparisons } from './return-repository.ts'
 
@@ -102,8 +102,10 @@ async function sessionRow(transaction: Transaction, sessionId: string, lock = fa
   return row
 }
 
-// The views a session photographs: its plan's for staff, a few free ones for what a renter adds.
+// The views a session photographs: its plan's for staff, a few free ones for what a renter adds, and for an incident
+// the plan's views, each optional, since a renter photographs only what happened.
 function viewsOf(session: Pick<SessionRow, 'kind' | 'planViews'>): readonly PhotoPlanView[] {
+  if (session.kind === 'incident') return session.planViews.map((view) => ({ ...view, required: false }))
   if (session.kind !== 'condition') return session.planViews
   return MISSED_VIEWS.map((key) => ({ key, label: key, outline: 'detail', required: false }))
 }
@@ -177,6 +179,11 @@ async function openSession(transaction: Transaction, sessionId: string): Promise
   const row = await sessionRow(transaction, sessionId, true)
   if (row === undefined) return { ok: false, reason: 'not_found' }
   if (row.sealedAt !== null) return { ok: false, reason: 'sealed' }
+  // A renter's incident session closes when the report is sent, photographed or not.
+  if (row.kind === 'incident') {
+    const [incident] = await transaction.select({ sentAt: incidents.sentAt }).from(incidents).where(eq(incidents.sessionId, sessionId))
+    if (incident === undefined || incident.sentAt !== null) return { ok: false, reason: 'sealed' }
+  }
   return row
 }
 

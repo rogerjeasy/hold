@@ -5,6 +5,7 @@ import { priceEntries } from './catalog.ts'
 import { at, cents, createdAt, currency, id, reference } from './columns.ts'
 import { allowed, APPROVAL_DECISIONS, APPROVAL_METHODS, APPROVAL_SUBJECTS, approvalDecision, approvalMethod, approvalSubject, CLAIM_LINE_SOURCES, CLAIM_REPLY_DECISIONS, claimLineSource, claimReplyDecision, claimState } from './enums.ts'
 import { findings } from './evidence.ts'
+import { incidents } from './incidents.ts'
 import { rentals } from './rentals.ts'
 import { shopReference, users } from './shops.ts'
 
@@ -28,7 +29,8 @@ export const claims = pgTable(
   (table) => [allowed(table.state, CLAIM_STATES), shopIsolation(table.shopId)],
 )
 
-// Each line has a finding with photographs, or a named person and their written reason.
+// Each line has a finding with photographs, a named person and their written reason, or the renter's agreement during
+// the rental with the photographs they took.
 export const claimLines = pgTable(
   'claim_lines',
   {
@@ -44,6 +46,8 @@ export const claimLines = pgTable(
     amountCents: cents().notNull(),
     source: claimLineSource().notNull(),
     findingId: reference().references(() => findings.id),
+    // The incident whose agreed line this is, for a line the renter agreed during the rental.
+    incidentId: reference().references(() => incidents.id),
     addedByUserId: reference().references(() => users.id),
     reason: text(),
     createdAt: createdAt(),

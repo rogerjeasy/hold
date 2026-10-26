@@ -10,7 +10,7 @@ import { getServices } from './services'
 // token never reaches another site.
 export const renterPageMetadata = (title: string): Metadata => ({ title, robots: { index: false, follow: false }, referrer: 'no-referrer' })
 
-export type RenterPage = { readonly ok: true; readonly view: RenterView } | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' }
+export type RenterPage = { readonly ok: true; readonly view: RenterView; readonly canReport: boolean } | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' }
 
 export async function renterPage(token: string): Promise<RenterPage> {
   const now = new Date()
@@ -18,7 +18,7 @@ export async function renterPage(token: string): Promise<RenterPage> {
   if (!access.ok) return access
   const { database } = await getServices()
   const view = await inShop(database, { role: 'hold_app', shopId: access.link.shopId }, (transaction) => renterView(transaction, access.link.rentalId, now))
-  return view === undefined ? { ok: false, failure: 'link_invalid' } : { ok: true, view }
+  return view === undefined ? { ok: false, failure: 'link_invalid' } : { ok: true, view, canReport: access.link.scopes.includes('report_incident') }
 }
 
 export type RenterHoldPage = { readonly ok: true; readonly view: RenterView; readonly hold: RentalHold | undefined } | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' }

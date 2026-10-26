@@ -293,15 +293,15 @@ Every table except `users`, `renters` and `eval_runs` carries a `shop_id`.
 | `rental_items` | Rental, item, the day rate and hold agreed for it at booking, accessories out, accessories back |
 | `holds` | Rental, reserved amount, placement strategy, state, current authorization |
 | `authorizations` | Hold, PayPal authorization ID, amount, created, assured until, valid until, state |
-| `capture_sessions` | Rental item, kind, the photo plan used, actor, started, completed, manifest fingerprint |
+| `capture_sessions` | Rental item, kind (handover, return, packing, unboxing, send-back, condition, incident), the photo plan used, actor, started, completed, manifest fingerprint |
 | `photos` | Session, view, evidence key, display key, fingerprint, received time, quality scores |
-| `marks` | Item, view, region, description, first seen session, status |
+| `marks` | Item, view, region, description, first seen session, status (`open`, `repaired`, or `reported` during its rental), the incident it was reported in |
 | `comparisons` | Handover session, return session, alignment scores, state, model and version used |
-| `findings` | Comparison, view, region, class, confidence, description, matched mark, suggested price entry |
+| `findings` | Comparison, view, region, class (including `reported`, a mark the renter reported during this rental), confidence, description, matched mark, suggested price entry |
 | `finding_outcomes` | Finding, rental, claim, verdict (upheld, reduced, removed by staff, removed after contest), who decided, when. Append-only. |
 | `eval_runs` | Half, data set version, pipeline version, model, prompt version, thresholds, pair counts, measures for all pairs and for real ones, gate limits and result, accepted, results file. No `shop_id`. |
 | `claims` | Rental, total, state, presented at, reply due |
-| `claim_lines` | Claim, finding, price entry, amount, source |
+| `claim_lines` | Claim, finding, price entry, amount, source (`finding`, `person`, or `agreed_in_rental` with its incident) |
 | `claim_replies` | Claim, renter decision, comment, added photos |
 | `approvals` | Subject, staff member, decision, changes made, method |
 | `executions` | Rental, hold (absent for the fee), action, idempotency key, amount, PayPal resource IDs, state, attempts |
@@ -319,6 +319,8 @@ Every table except `users`, `renters` and `eval_runs` carries a `shop_id`.
 **What the migrations hold so far.** Every table above, with `rentals.simulated` added in `0009`, the item columns in `0010` and the booking columns in `0011`, except `locations`, `shipments` and `disputes`, which arrive with the features that use them. The schema is in `packages/db/src/schema`, the migrations in `packages/db/migrations`.
 
 Migrations `0018`–`0020` add evidence publication metadata and `receipt_deliveries`, shop RLS and publication/delivery guards. A pack must be inserted as `building` without publication metadata; a receipt starts `queued` without a lease or sent time. The web role reserves work; only the worker role may publish artifacts or update delivery metadata. Frozen snapshot/version identity and published metadata cannot be rewritten, and neither service role may delete these records.
+
+Migration `0021` (Extension 5, renumbered at merge) adds `incidents`, the capture session kind `incident`, the mark status `reported` with `marks.incident_id`, the finding class `reported`, and the claim line source `agreed_in_rental` with `claim_lines.incident_id`. Its hand-written block grants the services `SELECT, INSERT` and column-limited `UPDATE` on `incidents` (never the renter's words, the rental, the item, the session or the report time), requires a confirmed price to name its staff member and time, requires an agreed line to equal the confirmed entry with a positive amount, ties every `agreed_in_rental` line to an incident and no other line to one, and adds the trigger `hold_incident_guard`, which refuses any state move the incident machine does not list and any change to a sent time, a confirmed price, an agreed line or a theft account already given (only a missing police report number may be added, once).
 
 **Tables added by the extensions.** `mandates`, `proposals`, `exceptions`, `ops_runs`, `eval_runs`, `finding_outcomes`, `rental_outcomes`, `trust_ladders`, `trust_rungs`, `renter_consents`, `quotes`, `agent_sessions`, `negotiations`, `negotiation_moves` and `incidents`. Their contents are listed in `extensions.md` section 4.6.
 
@@ -370,6 +372,19 @@ The rules are plain code in `packages/domain/src/capture-session.ts`. The tables
 - **Sealing** needs every required view. The manifest (`manifestText`) lists each photograph's view, fingerprint and time and names the item's previous manifest; its SHA-256 becomes the item's chain head. When every item of the rental is sealed, the rental is `out`.
 - **The condition report.** Sealing the last item issues a link with the scopes `view` and `confirm_condition` to `/r/{token}/condition`, emailed to the contact and shown to staff as a code. For 24 hours (`CONDITION_REPLY_HOURS`) the renter confirms it, or adds photographs of anything missed into a `condition` session of their own, sealed and chained like any other, and the rental records the answer. Any link to the rental may look; only that one may answer.
 - **Display copies.** Each recorded photograph is sent to the `media` queue as soon as it is committed (the outbox is the fallback). The worker reads the original, shrinks it to 1,600 pixels, finds faces with Rekognition on the small copy, blurs them, strips all metadata, writes the copy to the display bucket and records it with a 64-bit perceptual fingerprint. Screens show display copies through five-minute signed links.
+### 6.8 The incident desk
+
+Extension 5 (`extensions.md` section 10). The rules are plain code in `packages/domain` (`incident.ts`, `incident-safety.ts`, `number-guard.ts`, and step 7 in `inspection.ts`). The table is written by `incident-repository.ts` and `incident-closing.ts` in `packages/db`; the sorting call is `triageIncident` in `packages/compare`; the pages are in section 13.
+
+- **Reporting.** "Something happened" shows on `/r/{token}` while the rental is `out` or `overdue`, to a link with the scope `report_incident` (booking, hold and condition links carry it). The renter chooses the item, what happened (damage, a fault, gone, someone hurt or unsafe, not sure) and describes it. The words are stored at once as an incident in `reported`, with a capture session of kind `incident` on the plan of the item's sealed handover, every view optional.
+- **Photographs.** The renter photographs a view with the handover photograph of that view shown faintly behind the camera, through the same signed-checksum upload as staff. They may box the damage on one photograph; the box is at most a tenth of the view (`INSPECTION_LIMITS.maxReportedArea`). Sending records `sent_at`, seals the photographs into the item's chain (renter-supplied, never a comparison baseline), adds the box as a mark with status `reported` linked to the incident, and closes the session: no photograph or mark can be added after.
+- **Sorting.** Code decides first: words that could bear on safety in English, French, Spanish or German (`mentionsSafety`), or the renter's choice of unsafe or not sure, make it `unsafe_or_unclear`. Then one Claude call with no tools, a strict schema, effort `medium`, 1,024 output tokens and a 20-second ceiling, with the renter's words, choice and the agreed price list (codes and descriptions, no amounts) as quoted data. The model can only agree with code's kind or make it unclear; any disagreement, low confidence, refusal, invalid answer or outage goes to `awaiting_staff`. Small damage with a photograph and a listed code is `triaged` with a *suggested* entry; every other report waits for a person. The model's confirmation is kept only for small damage and only if it names no number at all (`guardNumbers` with no amount, since no price is confirmed yet). Model, prompt version (`incident-1`), outcome and the simulated marker are stored on the incident.
+- **Price.** A staff member confirms which entry of the agreed list applies (`confirmIncidentPrice`, owner, manager or counter staff). Only then may the renter agree it, with the one-time code of section 12.3, bound in its digest to that incident. The agreed amount is the entry's, read from the database. Nothing is charged and PayPal is not called. The renter may instead leave it for the return.
+- **Faults and thefts.** A fault becomes the shop's matter only when staff say so (`makeShopMatter`); no claim line can come from it. A theft or loss shows fixed steps: where, when, lock and keys, written once, and a police report number added once, later if need be.
+- **Alerts.** After sorting, or if sorting fails, the shop's owners and managers are emailed in their language (`incidentAlertEmail` in `packages/notify`), and the time is recorded. `/shop/incidents` lists every sent report; its waiting view (`incidentsWaitingForStaff`) is complete whether or not the model or the email worked, and is the seam for Extension 1's detector.
+- **At the return.** A price the renter did not agree lapses to `awaiting_staff`. Step 7 of the comparison reads the item's `reported` marks of this rental (section 10.2). The claim draft carries each agreed line; staff keep it, lower it or leave it out, never raise it (`checkKeptLine`), and drafting moves waiting reports to `claim_opened`. The line is charged with any others in the one final capture, and the rest of the hold is released, through the ordinary settlement.
+- **At the close.** Agreed, shop-matter and claim-opened reports are `resolved`, and every `reported` mark of the rental becomes an ordinary `open` mark, so no later renter is charged for it.
+
 ---
 
 ## 7. The hold core
@@ -790,6 +805,7 @@ A capture session is one guided set of photographs of one item.
 | Unboxing | Renter | When a shipped item arrives |
 | Send-back | Renter | Before a shipped item is returned |
 | Condition | Renter | Within a day of a handover, photographs of anything staff missed (section 6.7) |
+| Incident | Renter | During the rental, photographs of something that happened (section 6.8). Never a comparison baseline. |
 
 **How a session runs**
 
@@ -916,7 +932,7 @@ The model is also asked to report anything the candidate regions missed.
 
 **Step 6. Second look.** Each finding classed as damage or missing is checked again by a separate call with a fresh context. That call sees only the two close crops and a neutral question. It does not see the first call's reasoning. If the two disagree, the finding becomes "cannot tell".
 
-**Step 7. Known marks.** Plain code compares each finding's region with the item's marks. A match is relabelled as already present and removed from consideration. Marks reported during this rental through the incident desk are checked too. A match there is labelled as reported during the rental and linked to any line the renter already agreed.
+**Step 7. Known marks.** Plain code compares each finding's region with the item's marks. A match is relabelled as already present and removed from consideration. Marks reported during this rental through the incident desk are checked too. A finding and a reported mark match only both ways (intersection over union at least `INSPECTION_LIMITS.reportedOverlap`) and only for a box within the size cap. A match with a report that was agreed or made the shop's matter is labelled as reported during the rental and linked to the report and its agreed line; it is never billable as a finding. Damage that grew, moved or sits inside a larger box is "cannot tell" and goes to a person. A report nobody agreed only links the finding, which stays ordinary. These marks are never known marks: reporting does not make a mark old.
 
 **Step 8. Price.** Plain code looks up the suggested entry in the price list version the renter agreed to. If the code does not exist in that list, the finding is left for a person to price.
 
@@ -1008,7 +1024,7 @@ The owner can ask questions and give instructions in plain language.
 ### 10.7 Model configuration
 
 - Model Claude Opus 5.5 on Amazon Bedrock, `anthropic.claude-opus-5-5`, with a client-side refusal fallback to `anthropic.claude-opus-4-8`.
-- Effort is set explicitly on every call: high for both looks, medium for summaries, low for short messages.
+- Effort is set explicitly on every call: high for both looks, medium for summaries and for sorting an incident report, low for short messages.
 - Structured output for all findings.
 - The stop reason is checked on every response. A refusal is handled as a normal outcome, and server-side fallbacks are enabled.
 - The model and prompt version used are stored with each comparison, so a result can be explained later.
@@ -1288,9 +1304,9 @@ Renters have no account. They act through links.
 | **Bound to one rental** | The link's token names one rental and nothing else |
 | **Signed** | The token is 32 random bytes and a 16-byte HMAC-SHA-256 of them, with a key derived from the secret `hold/web/renter-link-key`, which is not the cookie key (`packages/auth/src/renter/renter-link.ts`). The web app and the worker read it, so the worker can sign the links it emails without being able to seal a sign-in. On a developer's machine it falls back to the cookie key. A changed token is rejected before the database is asked. |
 | **Expiring** | Each link has an end date tied to the rental's life |
-| **Scoped** | View, pay, confirm condition, extend, accept, contest. Each link carries only the scopes it needs. A booking's link carries view and pay. |
+| **Scoped** | View, pay, confirm condition, extend, accept, contest, report incident. Each link carries only the scopes it needs. A booking's link carries view, pay and report incident; the condition report's link view, confirm condition and report incident. |
 | **Revocable** | Only the token's fingerprint is stored. Removing it ends the link. |
-| **Stepped up for money decisions** | Accepting or contesting a claim requires a one-time code sent to the email PayPal provided |
+| **Stepped up for money decisions** | Accepting or contesting a claim, or agreeing an incident's confirmed price, requires a one-time code sent to the email PayPal provided. The code's digest names its purpose and, for an incident, the incident, so one code never serves another decision. |
 
 **Who the renter is.** The renter's identity is the PayPal payer who approved the order. Their payer ID, name and email come from PayPal and are not typed in.
 
@@ -1352,7 +1368,8 @@ Served by `web`. Each requires a valid signed link.
 | `/r/{token}/session` | Guided photographs for shipped rentals |
 | `/r/{token}/claim` | See a claim, accept or contest it |
 | `/r/{token}/record` | Shared evidence versions and PDF/manifest downloads; `?version={pack UUID}` selects the exact receipt version. Draft and awaiting-approval claims remain staff-only. |
-| `/r/{token}/incident` | Report something that happened during the rental |
+| `/r/{token}/incident` | Report something that happened during the rental, and list earlier reports. Needs the scope `report_incident`. |
+| `/r/{token}/incident/{incident}` | One report: photographs while it is written, then the fixed message for its kind, the confirmed price and the one-time code to agree it, or the theft steps. Another rental's report answers as an unusable link. |
 | `/r/{token}/negotiation` | Set an advocate's limit, read the transcript, confirm the result |
 | `/r/{token}/trust` | The Clean Record, consent and the credential |
 | `/r/{token}/assistant` | What a connected assistant did, and a button to disconnect it |
@@ -1423,11 +1440,12 @@ Served by `web` under `/shop`. Each page asks `shopAccess` itself; the frame aro
 | `/shop/items` | The item types, each with its terms, kit, photo plan and items, and where each item stands. Four figures on top: items, available, out now, in repair. Filters by standing, each its own address (`?show=`). |
 | `/shop/items/new`, `/shop/items/types/{id}` | Creating and editing an item type, with its kit and its photo plan. The plan starts from the suggestion for the kind. |
 | `/shop/items/{id}` | The item passport (section 9.4): where it is, its rentals, its known marks, its chain of photo sessions, its photo plan, its details and its status. Another shop's item answers 404. |
+| `/shop/incidents` | What renters reported during their rentals: waiting for a person by default, all with `?show=all`. Each quotes the renter, says how it was sorted and whether an alert email went out, and offers staff the price to confirm or the shop's matter to take on. Read-only members see it without controls. |
 | `/shop/prices`, `/shop/paypal`, `/shop/staff`, `/shop/security` | The shop's settings |
 
 - **One frame.** `app/[locale]/shop/layout.tsx` puts every shop page in the shop's frame (`features/shell`): a dark sidebar with the shop switcher, the menu, PayPal's state and mode, the language and theme, and the account menu. It is a rail of icons from `md` to `lg` and a top bar with a menu sheet below `md`. The public pages keep the site's header and footer through the `(site)` route group, which is not part of their address.
 - **What the page reads.** `shopToday` in `packages/db` returns plain counts and rows. Where a hold stands (assured, valid, ending) and the order of the decisions come from `holdStanding` and `holdDay` in the domain. Times show on the shop's clock (`shopDay`), whoever reads them.
-- **Rentals** and **Items** follow Today in the menu. **Holds and claims** join the menu after Rentals as their own pages are built with the spine.
+- **Rentals**, **Items** and **Incidents** follow Today in the menu. **Holds and claims** join the menu after Rentals as their own pages are built with the spine.
 - **After the extensions,** `/shop/calendar`, the rental calendar on Bryntum Scheduler, and `/shop/insights`, the owner's dashboard on AG Studio, join the menu. `extensions.md` section 12.5.
 
 ---
@@ -1594,6 +1612,14 @@ The outbox relay carries evidence and receipt identities without tokens or conta
 | **A row is tied to another shop's row by its id** | PostgreSQL checks a foreign key without row-level security, so a guessed id would pass it. Every repository function reads the row it refers to inside the caller's shop first, and answers "not found" when it is not there. Tested in `item-repository.test.ts` and `items.spec.ts`. |
 | **A credential leaks** | Secrets only in Secrets Manager. Each service has its own minimal IAM role. |
 | **A hold lapses unnoticed** | Hold upkeep, the at-risk state, alarms and reconciliation. |
+| **A renter's report talks the model into calling an item safe or cheap** | The words are quoted data in a call with no tools; code routes safety words in four languages to a person first, and the model can only agree with code's kind or make it unclear. Tested in `incident.test.ts`, `incident-safety.test.ts` and `incident-triage.test.ts`. |
+| **A model's confirmation slips an amount past the guard** (security review 1) | Each number is parsed by the currency's rules: a decimal part has exactly the currency's digits, thousands groups exactly three, and a bare number counts whole units, so "3500" is never 35.00. An incident's confirmation may hold no number at all. Tested in `number-guard.test.ts`. |
+| **A large reported box absorbs unrelated damage at the return** (security review 2 and 5) | A renter's box is at most a tenth of the view, refused when sent and ignored at the comparison; a finding matches a reported mark only both ways (intersection over union), otherwise it goes to a person. Tested in `inspection.test.ts`, `pipeline.test.ts` and `incident-repository.test.ts`. |
+| **The model turns a renter's damage into the shop's matter, or the reverse** (security review 3) | Code's kind and the model's must agree, or the report is unclear and goes to a person; a fault becomes the shop's matter only when staff confirm it. Tested in `incident.test.ts` and `incident-repository.test.ts`. |
+| **A model-chosen price becomes binding** (security review 4) | The model only suggests an entry. A named staff member confirms the entry before the renter can agree; the database requires the confirmation's author and time, and the agreed entry to equal it. Tested in `incident.test.ts` and `incident-repository.test.ts`. |
+| **A theft account is rewritten after the fact** (security review 6) | Written once while the report waits for a person; afterwards only a missing police report number may be added, once. The `hold_incident_guard` trigger refuses any other change. Tested in `incident-repository.test.ts`. |
+| **Photographs are added to a report after it was sent** (security review 7) | Sending records `sent_at` and closes the incident session whether or not it holds photographs; `recordPhoto`, `addMark` and `confirmMarks` refuse it, and the trigger keeps `sent_at` fixed. Tested in `incident-repository.test.ts`. |
+| **An agreed line is raised, or charged from an unagreed report** | Staff may keep or lower an agreed line and never raise it; only an `agreed` incident yields an `agreed_in_rental` line; a check constraint ties those lines to incidents. Agreeing calls no PayPal and writes no execution. Tested in `incident-claim.test.ts`, `incident-repository.test.ts` and `claim-screen.test.tsx`. |
 
 ### 15.2 Data protection
 

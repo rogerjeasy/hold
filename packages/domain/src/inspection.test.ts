@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { inspectFindings } from './inspection.ts'
+import { checkReportedRegion, INSPECTION_LIMITS, inspectFindings } from './inspection.ts'
 import fc from 'fast-check'
 
 const region = { x: 0.2, y: 0.2, width: 0.2, height: 0.2 }
@@ -24,5 +24,42 @@ describe('inspection outcomes', () => {
   it('treats ordinary wear and an empty set as clean', () => {
     expect(inspectFindings([{ ...damage, class: 'wear', secondLookConfirmed: null }], [])).toMatchObject({ state: 'clean' })
     expect(inspectFindings([], [])).toEqual({ state: 'clean', findings: [] })
+  })
+})
+
+describe('marks reported during this rental (comparison step 7)', () => {
+  const reported = { id: 'reported', view: 'left-side', region: { x: 0.18, y: 0.18, width: 0.24, height: 0.24 }, covered: true }
+  it('labels damage inside a mark the renter agreed to as reported, linked to that mark', () => {
+    expect(inspectFindings([damage], [], [reported])).toEqual({ state: 'clean', findings: [{ ...damage, class: 'reported', matchedMarkId: 'reported' }] })
+  })
+  it('sends damage that has grown beyond the reported mark to a person, still linked', () => {
+    const grown = { ...damage, region: { x: 0.1, y: 0.1, width: 0.6, height: 0.6 } }
+    expect(inspectFindings([grown], [], [reported])).toEqual({ state: 'deferred', findings: [{ ...grown, class: 'uncertain', matchedMarkId: 'reported' }] })
+  })
+  it('keeps a reported mark that nobody agreed to as ordinary damage, linked for the person who decides', () => {
+    expect(inspectFindings([damage], [], [{ ...reported, covered: false }])).toEqual({ state: 'findings', findings: [{ ...damage, matchedMarkId: 'reported' }] })
+  })
+  it('never makes a reported mark old: it is not a known mark, and other views are untouched', () => {
+    expect(inspectFindings([damage], [], [{ ...reported, view: 'right-side' }])).toMatchObject({ state: 'findings', findings: [{ class: 'new_damage', matchedMarkId: null }] })
+  })
+  it('never lets a large reported region absorb other damage inside it: the match must hold both ways', () => {
+    const wide = { ...reported, region: { x: 0.1, y: 0.1, width: 0.45, height: 0.45 } }
+    expect(inspectFindings([damage], [], [wide])).toEqual({ state: 'deferred', findings: [{ ...damage, class: 'uncertain', matchedMarkId: 'reported' }] })
+  })
+  it('never covers anything with a region larger than the cap, whatever overlaps it', () => {
+    const huge = { ...reported, region: { x: 0, y: 0, width: 1, height: 1 } }
+    expect(checkReportedRegion(huge.region)).toBe(false)
+    fc.assert(fc.property(fc.double({ min: 0, max: 0.79, noNaN: true }), fc.double({ min: 0, max: 0.79, noNaN: true }), fc.double({ min: 0.01, max: 0.2, noNaN: true }), (x, y, side) => {
+      const finding = { ...damage, region: { x, y, width: side, height: side } }
+      expect(inspectFindings([finding], [], [huge]).findings[0]?.class).not.toBe('reported')
+    }))
+  })
+  it('accepts reported regions up to the cap only', () => {
+    expect(checkReportedRegion({ x: 0, y: 0, width: 0.5, height: INSPECTION_LIMITS.maxReportedArea / 0.5 })).toBe(true)
+    expect(checkReportedRegion({ x: 0, y: 0, width: 0.5, height: INSPECTION_LIMITS.maxReportedArea / 0.5 + 0.02 })).toBe(false)
+    expect(checkReportedRegion({ x: 0.9, y: 0.9, width: 0.2, height: 0.05 })).toBe(false)
+  })
+  it('lets a mark from before the rental win, as it always did', () => {
+    expect(inspectFindings([damage], [{ id: 'known', view: 'left-side', region }], [reported])).toMatchObject({ findings: [{ class: 'known_mark', matchedMarkId: 'known' }] })
   })
 })

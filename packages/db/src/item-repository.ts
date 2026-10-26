@@ -2,7 +2,7 @@ import { bindingRental, changeItemStatus, checkItem, ITEM_LIMITS, itemStanding, 
 import type { Accessory, ClaimState, ItemCategory, ItemDraft, ItemStanding, ItemStatus, ItemTypeDraft, RentalState } from '@hold/domain'
 import { and, asc, count, desc, eq, inArray, ne, notInArray, sql } from 'drizzle-orm'
 import type { PhotoPlanView } from './schema/index.ts'
-import { captureSessions, claims, items, itemTypes, marks, photoPlans, photos, rentalItems, rentals, renters, shops } from './schema/index.ts'
+import { captureSessions, claims, items, itemTypes, MARK_STATUSES, marks, photoPlans, photos, rentalItems, rentals, renters, shops } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
 // The shop's item types and items (architecture.md section 6.3). Every function runs inside inShop, so row-level
@@ -244,7 +244,7 @@ export type PassportRental = {
   readonly claim: { readonly state: ClaimState; readonly totalCents: number; readonly currency: string } | undefined
 }
 
-export type PassportMark = { readonly id: string; readonly view: string; readonly description: string; readonly status: 'open' | 'repaired'; readonly firstSeenAt: Date }
+export type PassportMark = { readonly id: string; readonly view: string; readonly description: string; readonly status: (typeof MARK_STATUSES)[number]; readonly firstSeenAt: Date }
 
 export type PassportSession = {
   readonly id: string

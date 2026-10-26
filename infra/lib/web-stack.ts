@@ -77,6 +77,9 @@ function instanceRole(stack: Stack, props: WebStackProps): iam.Role {
   role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:PutObject', 's3:GetObject'], resources: [props.evidenceBucket.arnForObjects('*')] }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:GetObjectVersion'], resources: [props.evidenceBucket.arnForObjects('packs/*')] }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:GetObject'], resources: [props.displayBucket.arnForObjects('*')] }))
+  // Sorting a renter's incident report: one Claude call with no tools, while the renter waits (extensions.md section 10).
+  // Mantle authorizes by model condition rather than model ARN, as for the comparison worker.
+  role.addToPolicy(new iam.PolicyStatement({ actions: ['bedrock-mantle:CreateInference'], resources: ['*'], conditions: { StringEquals: { 'aws:RequestedRegion': REGION, 'bedrock-mantle:Model': ['anthropic.claude-opus-5-5', 'anthropic.claude-opus-4-8'] } } }))
   return role
 }
 

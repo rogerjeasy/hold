@@ -1207,7 +1207,8 @@
       "prices": "Prices",
       "paypal": "PayPal",
       "settings": "Settings",
-      "scorecard": "Reliability"
+      "scorecard": "Reliability",
+      "incidents": "Incidents"
     },
     "setup": {
       "title": "Set up your shop",
@@ -1673,7 +1674,8 @@
           "empty": "No marks recorded. A mark seen at a handover is added here, so no later renter is charged for it.",
           "firstSeen": "First seen {date}",
           "open": "Still there",
-          "repaired": "Repaired"
+          "repaired": "Repaired",
+          "reported": "Reported during a rental"
         },
         "rentals": {
           "title": "Rentals",
@@ -1927,7 +1929,8 @@
         "missing_part": "Possible missing part",
         "wear": "Ordinary wear",
         "known_mark": "Already present at handover",
-        "uncertain": "Uncertain observation"
+        "uncertain": "Uncertain observation",
+        "reported": "Reported during this rental"
       },
       "secondLook": "Confirmed by an independent second look.",
       "price": "Agreed price list: {description} — {amount}. This is a suggestion for review, not a charge.",
@@ -1940,7 +1943,60 @@
       "record": "Record inspection",
       "recorded": "Your inspection has been recorded.",
       "reviewHistory": "Staff inspection record",
-      "staff": "Staff member"
+      "staff": "Staff member",
+      "reportedAgreed": "The renter reported it during the rental and agreed {amount}.",
+      "reportedNotAgreed": "The renter reported it during the rental. Nothing was agreed, so a person decides.",
+      "reportedLink": "See the agreed line",
+      "claimLink": "Open the claim"
+    },
+    "incidents": {
+      "title": "Incidents",
+      "lead": "What renters reported during their rentals. Staff were emailed at once; this list is complete whether or not the model answered.",
+      "filter": "Which reports",
+      "waiting": "Waiting for a person",
+      "all": "All reports",
+      "noneWaiting": "Nothing waits for a person.",
+      "none": "No reports yet.",
+      "reported": "Reported {when} by {renter}",
+      "renter": "the renter",
+      "safety": "Could bear on safety",
+      "theft": "Where: {where}. When: {when}. Lock and keys: {lockAndKeys}. Police report: {police}.",
+      "notYet": "not yet",
+      "offer": "Price confirmed: {description}, {amount}",
+      "agreed": "The renter agreed {amount}. Nothing is charged until the return.",
+      "sortedBy": "Sorted by {model}, checked by code.",
+      "sortedByCode": "Sorted by code alone: the model did not answer.",
+      "notAlerted": "No email reached staff. This page is the alert.",
+      "priceThatApplies": "Published price that applies",
+      "confirmPrice": "Confirm this price for the renter",
+      "priceConfirmed": "Price confirmed. The renter can now agree to it.",
+      "shopMatter": "Make it the shop’s matter",
+      "shopMatterDone": "It is the shop’s matter now. No claim line can come from it.",
+      "openRental": "Open the rental",
+      "results": {
+        "not_to_price": "This report has no price to confirm now.",
+        "price_not_agreed": "That price is not in the list the renter agreed to.",
+        "not_waiting": "This report no longer waits for a person.",
+        "role_may_not_confirm": "Your role cannot confirm prices."
+      },
+      "kinds": {
+        "small_damage": "Small damage",
+        "mechanical_fault": "Mechanical fault",
+        "theft_or_loss": "Theft or loss",
+        "unsafe_or_unclear": "Unsafe or unclear",
+        "unsorted": "Not sorted yet"
+      },
+      "states": {
+        "reported": "Reported",
+        "triaged": "Sorted",
+        "agreed": "Agreed by the renter",
+        "shop_matter": "The shop’s matter",
+        "awaiting_staff": "Waiting for a person",
+        "claim_opened": "In the claim",
+        "resolved": "Settled",
+        "withdrawn": "Withdrawn"
+      },
+      "sortedBySimulated": "Sorted by a stand-in for the test environment, checked by code."
     }
   },
   "emails": {
@@ -1959,6 +2015,10 @@
     "claimCode": {
       "subject": "Your Hold claim verification code",
       "body": "Your verification code is {code}. It expires in ten minutes. Only enter it on your private Hold claim page."
+    },
+    "incidentCode": {
+      "subject": "Your Hold verification code",
+      "body": "Your verification code is {code}. It expires in ten minutes. Only enter it on your private Hold page for the report you made."
     }
   },
   "shell": {
@@ -2219,7 +2279,21 @@
       "already_replied": "You have already answered.",
       "closed": "The time to answer has passed.",
       "not_handed_over": "The rental has not been handed over yet.",
-      "upload_failed": "The photograph did not upload. Try again."
+      "upload_failed": "The photograph did not upload. Try again.",
+      "not_out": "Reports are open while you have the items.",
+      "description_invalid": "Describe what happened, in up to 1,000 characters.",
+      "already_sent": "This report was already sent.",
+      "region_invalid": "Keep the box on the photograph, close around the damage.",
+      "not_agreeable": "This price cannot be agreed now. The page shows where the report stands.",
+      "not_theft": "These details are for a theft or loss waiting for the shop.",
+      "already_given": "These details were already given.",
+      "no_details": "Give the details first.",
+      "police_report_invalid": "Enter the police report number.",
+      "storage_unavailable": "Photographs cannot be taken here right now.",
+      "key_mismatch": "That photograph does not belong to this report.",
+      "not_uploaded": "The photograph did not arrive. Take it again.",
+      "sealed": "This report was sent, so no photograph can be added.",
+      "unknown_view": "That view is not one of this item’s."
     },
     "orderDescription": "{shop}: {items}, {days, plural, one {# day} other {# days}}",
     "holdPage": {
@@ -2261,6 +2335,132 @@
       "missedView": "Something missed",
       "send": "Send what I added",
       "back": "See your rental"
+    },
+    "somethingHappened": "Something happened",
+    "incident": {
+      "title": "Something happened",
+      "lead": "Tell the shop what happened to what you rented. Your report is dated, locked and kept with the item’s history.",
+      "toRental": "Back to your rental",
+      "emergencyFirst": "If anyone is hurt or in danger, call the emergency number first: 112 in Europe, 911 in North America.",
+      "newReport": "A new report",
+      "closed": "Reports are open while you have the items. Contact the shop about anything else.",
+      "earlier": "Your reports",
+      "reportTitle": "What happened to {item}",
+      "back": "All your reports",
+      "yourWords": "What you told the shop",
+      "start": {
+        "which": "Which item",
+        "what": "What happened",
+        "hints": {
+          "damage": "A mark or damage, such as a scratch or a dent",
+          "fault": "Something stopped working",
+          "gone": "It is gone: stolen or lost",
+          "unsafe": "Someone was hurt, or it might not be safe",
+          "not_sure": "I am not sure"
+        },
+        "describe": "Describe what happened",
+        "describeHelp": "In your own words. The shop reads exactly what you write.",
+        "continue": "Continue"
+      },
+      "capture": {
+        "guidance": "Photograph what happened, from the side that shows it. The photograph taken when the item left is shown faintly behind the camera, so you can match the angle. Every view is optional.",
+        "sampleTitle": "Sample photographs",
+        "sampleBody": "Some photographs here are samples for the demonstration, not of a real item."
+      },
+      "send": {
+        "noPhotos": "No photographs yet. You can still send the report, for example if the item is gone.",
+        "whichPhoto": "Photograph to mark",
+        "photo": "Your photograph",
+        "box": "Where it is",
+        "boxAt": "Box at {x}% across and {y}% down",
+        "markIt": "Mark where it is",
+        "howTo": "Drag the box onto the damage, or move it with the arrow keys and size it with Shift and the arrow keys. Keep it close around the damage.",
+        "tooLarge": "The box is too large. Keep it close around the damage alone.",
+        "removeBox": "Remove the box",
+        "send": "Send the report",
+        "sending": "Sending…"
+      },
+      "outcome": {
+        "simulated": "Sorted by a stand-in for the test environment, not by Claude.",
+        "unsafe": {
+          "title": "Stop using the item",
+          "stop": "Please stop using it now, and keep it somewhere safe.",
+          "contact": "The shop has been told and will contact you.",
+          "emergency": "If anyone is hurt or in danger, call the emergency number: 112 in Europe, 911 in North America."
+        },
+        "photographs": {
+          "title": "Not sent yet",
+          "body": "Add photographs if you can, then send the report."
+        },
+        "stored": {
+          "title": "Your report is stored",
+          "body": "The shop has been told and will contact you."
+        },
+        "theft": {
+          "title": "A theft or loss",
+          "body": "The shop has been told and will contact you. Please give these details now. A police report number can be added later."
+        },
+        "fault": {
+          "title": "A fault",
+          "body": "A fault is not charged to you. The shop has been told and will contact you about a swap or a collection."
+        },
+        "pricing": {
+          "title": "Small damage",
+          "body": "The shop will confirm which of its published prices applies, and this page will show it. Nothing is charged now."
+        },
+        "offer": {
+          "title": "Small damage at a published price",
+          "body": "The shop’s published price for {description} is {price}. You can agree to it now, or leave it for the return. Nothing is charged now."
+        },
+        "agreed": {
+          "title": "Agreed",
+          "body": "You agreed the published price for {description}.",
+          "amount": "Agreed: {price}",
+          "notCharged": "Nothing has been charged. At the return a staff member confirms it after seeing the item, and can only lower it. It is charged once with any other line, and the rest of your hold is released."
+        },
+        "return": {
+          "title": "Left for the return",
+          "body": "A person at the shop will look at it when you bring the item back."
+        },
+        "resolved": {
+          "title": "Settled",
+          "body": "The shop has settled this report."
+        }
+      },
+      "agree": {
+        "codeGuidance": "To agree {price}, ask for a one-time code. It goes to the email PayPal gave for you.",
+        "sendCode": "Email me a code",
+        "codeSent": "Code sent. It expires in ten minutes.",
+        "codeSentSandbox": "Code sent to the booking’s contact address, since this is PayPal’s sandbox. It expires in ten minutes.",
+        "code": "One-time code",
+        "agree": "Agree {price}",
+        "leaveGuidance": "Or leave it for the return, when a person at the shop will look at it.",
+        "leave": "Leave it for the return",
+        "codeExpired": "This code has expired. Ask for a new one.",
+        "wrongCode": "That code is not right. Check it and try again.",
+        "codeRecentlySent": "A code was sent a moment ago. Check your email.",
+        "emailUnavailable": "The code could not be sent. Try again in a moment."
+      },
+      "theft": {
+        "where": "Where it happened",
+        "when": "When it happened",
+        "lockAndKeys": "The lock and the keys: was it locked, and where are the keys?",
+        "policeReport": "Police report number",
+        "policeLater": "If you do not have one yet, you can add it later.",
+        "send": "Send these details",
+        "notGiven": "Not given yet",
+        "addPolice": "Add the police report number"
+      },
+      "states": {
+        "reported": "Reported",
+        "triaged": "Sorted",
+        "agreed": "Agreed by the renter",
+        "shop_matter": "The shop’s matter",
+        "awaiting_staff": "Waiting for a person",
+        "claim_opened": "In the claim",
+        "resolved": "Settled",
+        "withdrawn": "Withdrawn"
+      }
     }
   },
   "shopPage": {
@@ -2375,10 +2575,19 @@
       "already_replied": "This claim already has a reply.",
       "reason_required": "Write your reason before continuing.",
       "email_unavailable": "The code could not be sent. Please try again later.",
-      "decision_recorded": "A decision is already recorded. Refresh this page to see its settlement status."
+      "decision_recorded": "A decision is already recorded. Refresh this page to see its settlement status.",
+      "incident_not_agreed": "That report was not agreed by the renter.",
+      "raises_agreed_line": "A line the renter agreed can be lowered, never raised.",
+      "empty_line": "Leave the line out rather than keep it at nothing."
     },
     "acknowledge": "I have reviewed this claim",
-    "reviewFirst": "Review the evidence and prices. Your reply period starts when you confirm you have reviewed this claim."
+    "reviewFirst": "Review the evidence and prices. Your reply period starts when you confirm you have reviewed this claim.",
+    "agreed": {
+      "keep": "Keep the line the renter agreed: {price}, {amount}",
+      "amount": "Amount to keep, at most {amount}",
+      "neverRaised": "A line the renter agreed can be lowered, never raised.",
+      "drafted": "Agreed by the renter during the rental, confirmed by staff at the return."
+    }
   },
   "scorecard": {
     "title": "How reliable is the comparison",

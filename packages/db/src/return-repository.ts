@@ -2,6 +2,7 @@ import { RENTAL_TRANSITIONS, transition } from '@hold/domain'
 import { and, asc, eq, isNotNull, isNull, sql } from 'drizzle-orm'
 import { captureSessions, comparisons, items, outbox, photos, rentalItems, rentals } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
+import { lapseUnagreedOffers } from './incident-closing.ts'
 
 export const COMPARISONS_QUEUE = 'comparisons'
 
@@ -26,6 +27,7 @@ export async function queueReturnComparisons(transaction: Transaction, rentalId:
     if (created !== undefined) await transaction.insert(outbox).values({ shopId: rental.shopId, queue: COMPARISONS_QUEUE, messageGroup: rentalId, payload: { comparisonId: created.id }, createdAt: now })
   }
   await transaction.update(rentals).set({ state: 'returned' }).where(eq(rentals.id, rentalId))
+  await lapseUnagreedOffers(transaction, rentalId)
 }
 
 export type RentalReturn = { readonly itemId: string; readonly label: string; readonly sessionId: string | null; readonly sealed: boolean; readonly comparisonId: string | null }
@@ -40,10 +42,11 @@ export async function rentalReturns(transaction: Transaction, rentalId: string):
   return rows.map((row) => ({ ...row, sealed: row.sealedAt !== null }))
 }
 
-// Only the sealed staff handover is a baseline; renter additions never replace it.
+// Only the sealed staff handover is a baseline; renter additions never replace it. A return and a renter's incident
+// report both show it faintly behind the camera.
 export async function returnBaseline(transaction: Transaction, sessionId: string) {
   const [session] = await transaction.select({ rentalItemId: captureSessions.rentalItemId, kind: captureSessions.kind }).from(captureSessions).where(eq(captureSessions.id, sessionId))
-  if (session?.kind !== 'return') return []
+  if (session?.kind !== 'return' && session?.kind !== 'incident') return []
   return transaction.select({ view: photos.view, displayKey: photos.displayKey, simulated: sql<boolean>`coalesce((${photos.quality} ->> 'simulated')::int = 1, false)` })
     .from(photos).innerJoin(captureSessions, eq(captureSessions.id, photos.sessionId))
     .where(and(eq(captureSessions.rentalItemId, session.rentalItemId), eq(captureSessions.kind, 'handover'), isNotNull(captureSessions.sealedAt), isNull(photos.supersededAt))).orderBy(asc(photos.view))
