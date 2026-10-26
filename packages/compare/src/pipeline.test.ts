@@ -47,6 +47,14 @@ describe('the return comparison pipeline', () => {
     const previous = { x: 0.2, y: 0.2, width: 0.1, height: 0.1 }
     expect(await compareInspection({ ...given, views: [{ view: 'left-side', pair: { ...pair, offset: { x: 0.05, y: 0 } } }], marks: [{ id: 'known', view: 'left-side', region: previous }] }, { look: () => Promise.resolve(reply(result([{ ...damage, region: { ...previous, x: 0.25 } }]))) })).toMatchObject({ state: 'clean', findings: [{ class: 'known_mark', matchedMarkId: 'known' }] })
   })
+  it('labels damage the renter reported and agreed during the rental as reported, in return coordinates (X5.2)', async () => {
+    const given = await input()
+    const pair = given.views[0]?.pair
+    if (pair === undefined) throw new Error('No prepared pair')
+    const reported = [{ id: 'reported', view: 'left-side', region: { x: 0.2, y: 0.2, width: 0.2, height: 0.2 }, covered: true }]
+    expect(await compareInspection({ ...given, views: [{ view: 'left-side', pair: { ...pair, offset: { x: 0.05, y: 0 } } }], reported }, { look: () => Promise.resolve(reply(result([{ ...damage, region: { ...region, x: 0.25 } }]))) })).toMatchObject({ state: 'clean', findings: [{ class: 'reported', matchedMarkId: 'reported' }] })
+    expect(await compareInspection({ ...given, reported }, { look: () => Promise.resolve(reply(result([{ ...damage, region: { x: 0.1, y: 0.1, width: 0.3, height: 0.3 } }]))) })).toMatchObject({ state: 'deferred', findings: [{ class: 'uncertain', matchedMarkId: 'reported' }] })
+  })
   it('excludes known marks with code and discards an unknown price code', async () => {
     const given = await input()
     expect(await compareInspection({ ...given, marks: [{ id: 'known', view: 'left-side', region }] }, { look: () => Promise.resolve(reply(result([damage]))) })).toMatchObject({ state: 'clean', findings: [{ class: 'known_mark', matchedMarkId: 'known' }] })
