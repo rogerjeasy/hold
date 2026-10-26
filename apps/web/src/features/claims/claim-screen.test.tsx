@@ -36,3 +36,12 @@ it('lets an eligible person uphold a contested protected claim after its capture
   renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={{ ...workspace, protectedReply: true, claim: { id: 'claim', state: 'charge_failed', totalCents: 3500, raisedByUserId: 'staff', replyDueAt: new Date('2026-10-22') }, replies: [{ decision: 'contest', comment: 'Already marked.' }] }} canAct />)
   expect(screen.getByRole('button', { name: 'Uphold claim and settle' })).toBeInTheDocument()
 })
+
+// Found on 26 October 2026: an owner signed in with an emailed code pressed release and read only "Confirm with your
+// passkey first", with nothing on the page to confirm with.
+it('asks a person whose session an emailed code proved to confirm with a passkey before any money decision', () => {
+  renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={workspace} canAct passkey={{ needed: true, hasPasskey: true, email: 'tomas@ribeirabikes.example' }} />)
+  expect(screen.getByRole('button', { name: 'Confirm with my passkey' })).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: 'Confirm clean return and release hold' })).not.toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Prepare claim for review' })).toBeInTheDocument()
+})

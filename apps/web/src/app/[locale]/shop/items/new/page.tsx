@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { ItemTypeScreen } from '@/features/items/item-type-screen'
-import { passkeyGate } from '@/features/items/type-page'
+import { passkeyGate } from '@/server/passkey-gate'
 import { redirect } from '@/i18n/navigation'
 import { itemRoutes, shopRoutes } from '@/lib/routes'
 import { requireShop } from '@/server/shop-page'
