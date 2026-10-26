@@ -40,10 +40,11 @@ export async function rentalReturns(transaction: Transaction, rentalId: string):
   return rows.map((row) => ({ ...row, sealed: row.sealedAt !== null }))
 }
 
-// Only the sealed staff handover is a baseline; renter additions never replace it.
+// Only the sealed staff handover is a baseline; renter additions never replace it. A return and a renter's incident
+// report both show it faintly behind the camera.
 export async function returnBaseline(transaction: Transaction, sessionId: string) {
   const [session] = await transaction.select({ rentalItemId: captureSessions.rentalItemId, kind: captureSessions.kind }).from(captureSessions).where(eq(captureSessions.id, sessionId))
-  if (session?.kind !== 'return') return []
+  if (session?.kind !== 'return' && session?.kind !== 'incident') return []
   return transaction.select({ view: photos.view, displayKey: photos.displayKey, simulated: sql<boolean>`coalesce((${photos.quality} ->> 'simulated')::int = 1, false)` })
     .from(photos).innerJoin(captureSessions, eq(captureSessions.id, photos.sessionId))
     .where(and(eq(captureSessions.rentalItemId, session.rentalItemId), eq(captureSessions.kind, 'handover'), isNotNull(captureSessions.sealedAt), isNull(photos.supersededAt))).orderBy(asc(photos.view))

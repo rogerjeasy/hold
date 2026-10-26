@@ -102,8 +102,10 @@ async function sessionRow(transaction: Transaction, sessionId: string, lock = fa
   return row
 }
 
-// The views a session photographs: its plan's for staff, a few free ones for what a renter adds.
+// The views a session photographs: its plan's for staff, a few free ones for what a renter adds, and for an incident
+// the plan's views, each optional, since a renter photographs only what happened.
 function viewsOf(session: Pick<SessionRow, 'kind' | 'planViews'>): readonly PhotoPlanView[] {
+  if (session.kind === 'incident') return session.planViews.map((view) => ({ ...view, required: false }))
   if (session.kind !== 'condition') return session.planViews
   return MISSED_VIEWS.map((key) => ({ key, label: key, outline: 'detail', required: false }))
 }

@@ -1,4 +1,4 @@
-import { CAPTURE_SESSION_KINDS, CLAIM_STATES, CONDITION_REPLIES, HOLD_STATES, ITEM_CATEGORIES, ITEM_STATUSES, PRICE_CATEGORIES, RENTAL_STATES, STAFF_ROLES } from '@hold/domain'
+import { CAPTURE_SESSION_KINDS, CLAIM_STATES, CONDITION_REPLIES, HOLD_STATES, INCIDENT_HINTS, INCIDENT_KINDS, INCIDENT_STATES, ITEM_CATEGORIES, ITEM_STATUSES, PRICE_CATEGORIES, RENTAL_STATES, STAFF_ROLES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
 import { check, text } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
@@ -26,10 +26,12 @@ export function allowed(column: AnyPgColumn, values: Values) {
 export const PAYPAL_MODES = ['sandbox', 'live'] as const
 export const PLACEMENT_STRATEGIES = ['at_counter', 'combined', 'saved_method'] as const
 export const AUTHORIZATION_STATES = ['created', 'renewed', 'voided', 'captured', 'expired'] as const
-export const MARK_STATUSES = ['open', 'repaired'] as const
+// reported: first seen in a renter's incident report during the rental it belongs to (extensions.md section 10.6).
+export const MARK_STATUSES = ['open', 'repaired', 'reported'] as const
 export const COMPARISON_STATES = ['pending', 'running', 'clean', 'findings', 'deferred', 'failed'] as const
-export const FINDING_CLASSES = ['new_damage', 'known_mark', 'wear', 'missing_part', 'uncertain'] as const
-export const CLAIM_LINE_SOURCES = ['finding', 'person'] as const
+// reported: matches a mark the renter reported during this rental that a line already speaks for, or none may.
+export const FINDING_CLASSES = ['new_damage', 'known_mark', 'wear', 'missing_part', 'uncertain', 'reported'] as const
+export const CLAIM_LINE_SOURCES = ['finding', 'person', 'agreed_in_rental'] as const
 export const CLAIM_REPLY_DECISIONS = ['accept', 'contest'] as const
 export const APPROVAL_SUBJECTS = ['claim', 'release', 'refund'] as const
 export const APPROVAL_DECISIONS = ['approved', 'rejected', 'waived'] as const
@@ -44,6 +46,8 @@ export const PROCESSING_STATES = ['pending', 'applied', 'ignored', 'failed'] as 
 export const MONEY_EVENT_KINDS = ['fee_captured', 'hold_placed', 'hold_renewed', 'hold_released', 'hold_captured', 'refunded', 'invoice_sent', 'invoice_paid'] as const
 export const INVOICE_STATES = ['draft', 'sent', 'paid', 'cancelled'] as const
 export const OUTBOX_STATES = ['pending', 'sent'] as const
+// What came of asking the model to sort an incident. Anything but answered leaves the sorting to code and a person.
+export const TRIAGE_OUTCOMES = ['answered', 'refused', 'unavailable', 'invalid'] as const
 
 export const rentalState = oneOf(RENTAL_STATES)
 export const holdState = oneOf(HOLD_STATES)
@@ -74,3 +78,8 @@ export const moneyEventKind = oneOf(MONEY_EVENT_KINDS)
 export const invoiceState = oneOf(INVOICE_STATES)
 export const outboxState = oneOf(OUTBOX_STATES)
 export const bookingChannel = oneOf(BOOKING_CHANNELS)
+export { INCIDENT_HINTS, INCIDENT_KINDS, INCIDENT_STATES }
+export const incidentHint = oneOf(INCIDENT_HINTS)
+export const incidentKind = oneOf(INCIDENT_KINDS)
+export const incidentState = oneOf(INCIDENT_STATES)
+export const triageOutcome = oneOf(TRIAGE_OUTCOMES)

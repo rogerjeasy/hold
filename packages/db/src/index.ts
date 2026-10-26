@@ -67,3 +67,5 @@ export { reserveEvidencePack, evidencePackFor, evidenceVersions, publishEvidence
 export type { EvidenceVersion } from './evidence-repository.ts'
 export { queueSettlementReceipts, receiptDeliveriesFor, leaseReceipt, finishReceipt } from './receipt-repository.ts'
 export type { ReceiptDeliverySummary } from './receipt-repository.ts'
+export { agreeIncident, confirmIncidentPrice, incidentAlert, incidentForRenter, incidentsWaitingForStaff, issueIncidentCode, leaveIncidentForReturn, makeShopMatter, markIncidentAlerted, rentalIncidents, saveTheftDetails, sendIncident, shopIncidents, sortIncidentReport, startIncident } from './incident-repository.ts'
+export type { MarkedBox, NewIncident, RenterIncident, ShopIncident, TriageAnswer } from './incident-repository.ts'

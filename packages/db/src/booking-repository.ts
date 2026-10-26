@@ -67,7 +67,8 @@ export type BookingResult =
   | { readonly ok: false; readonly reason: 'not_available'; readonly itemTypeId: string }
   | { readonly ok: false; readonly reason: string }
 
-export const BOOKING_LINK_SCOPES = ['view', 'pay']
+// A booking's link pays the fee and approves the hold, and during the rental reports what happened (extensions.md 10).
+export const BOOKING_LINK_SCOPES = ['view', 'pay', 'report_incident']
 
 export async function createBooking(transaction: Transaction, shopId: string, booking: NewBooking, now: Date): Promise<BookingResult> {
   const typeIds = booking.lines.map((line) => line.itemTypeId)
