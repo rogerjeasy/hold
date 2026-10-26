@@ -6,6 +6,7 @@ import { claimCollectionReady } from './claim-resolution.ts'
 import { closeSettledRental, settlementWork } from './settlement-repository.ts'
 import { authorizations, claimLines, claims, executions, holds, invoices, moneyEvents, outbox, priceEntries, rentals, renters } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
+import { markOutcomeOpen } from './trust-repository.ts'
 
 export async function beginClaimInvoice(transaction: Transaction, captureExecutionId: string, failed: boolean, reason: string, now: Date) {
   const work = await settlementWork(transaction, captureExecutionId)
@@ -57,6 +58,8 @@ export async function confirmClaimInvoiced(transaction: Transaction, executionId
     await transaction.update(authorizations).set({ state: released.status === 'voided' ? 'voided' : 'expired' }).where(eq(authorizations.id, work.authorization.id))
     if (released.status === 'voided') await transaction.insert(moneyEvents).values({ shopId: work.hold.shopId, rentalId: work.hold.rentalId, holdId: work.hold.id, kind: 'hold_released', currency: work.hold.currency, amountCents: work.hold.reservedCents, paypalReference: `${released.authorizationId}:voided`, occurredAt: now }).onConflictDoNothing()
   }
+  // A decided claim now waits on the invoice: the renter's record shows it open, and unpaid once it is past due.
+  if (read.status === 'sent') await markOutcomeOpen(transaction, work.bill.rentalId, now)
   await transaction.insert(moneyEvents).values({ shopId: work.bill.shopId, rentalId: work.bill.rentalId, holdId: work.hold.id, kind: 'invoice_sent', currency: read.amount.currency, amountCents: read.amount.cents, paypalReference: `${read.invoiceId}:sent`, occurredAt: now }).onConflictDoNothing()
   if (read.status === 'paid' && work.claim !== undefined) {
     await transaction.insert(moneyEvents).values({ shopId: work.bill.shopId, rentalId: work.bill.rentalId, holdId: work.hold.id, kind: 'invoice_paid', currency: read.amount.currency, amountCents: read.amount.cents, paypalReference: `${read.invoiceId}:paid`, occurredAt: now }).onConflictDoNothing()

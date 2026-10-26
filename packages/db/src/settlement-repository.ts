@@ -5,6 +5,7 @@ import { queueSettlementReceipts } from './receipt-repository.ts'
 import { markExecutionSent } from './fee-repository.ts'
 import { approvals, auditLog, authorizations, claims, executions, holds, moneyEvents, rentals } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
+import { writeRentalOutcome } from './trust-repository.ts'
 
 export async function settlementWork(transaction: Transaction, executionId: string) {
   const [execution] = await transaction.select().from(executions).where(eq(executions.id, executionId)).for('update')
@@ -30,6 +31,8 @@ export async function closeSettledRental(transaction: Transaction, rentalId: str
   if (outstanding.length > 0) return
   if (rental !== undefined && mayCloseRental(holdState) && transition(RENTAL_TRANSITIONS, rental.state, 'closed').ok) {
     await transaction.update(rentals).set({ state: 'closed' }).where(eq(rentals.id, rentalId))
+    // The renter's Clean Record gains this rental's outcome in the same transaction (extensions.md section 7.4).
+    await writeRentalOutcome(transaction, rentalId, now)
     await transaction.insert(auditLog).values({ shopId: rental.shopId, actorKind: 'worker', action: 'rental.settled', subjectKind: 'rental', subjectId: rentalId, at: now })
     await reserveEvidencePack(transaction, rentalId, now)
   }

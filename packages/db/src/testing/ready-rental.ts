@@ -23,6 +23,8 @@ export type ReadyRentalShop = {
   act<Result>(work: (transaction: Transaction) => Promise<Result>): Promise<Result>
   // A rental of the given items, or the next free one, ready for handover, on days of its own.
   readyRental(itemCount?: number): Promise<{ readonly rentalId: string; readonly rentalItemIds: readonly string[]; readonly itemIds: readonly string[] }>
+  // A rental of one item whose fee the given PayPal payer paid: booked, and waiting for its hold.
+  paidRental(payerId: string): Promise<string>
 }
 
 export async function readyRentalShop(database: TestDatabase, subject: string, now: Date): Promise<ReadyRentalShop> {
@@ -41,31 +43,39 @@ export async function readyRentalShop(database: TestDatabase, subject: string, n
     saveItemType(transaction, scope.shopId, { draft: { name: 'City e-bike', category: 'e_bike', currency: 'EUR', value: eur(2400_00), hold: eur(300_00), dayRate: eur(40_00), accessories: [], views: [...views] } }, now),
   )
   if (!saved.ok) throw new Error(saved.reason)
-  await act((transaction) => addItems(transaction, { itemTypeId: saved.id, count: 2, size: '', serial: '' }, now))
+  const typeId = saved.id
+  await act((transaction) => addItems(transaction, { itemTypeId: typeId, count: 2, size: '', serial: '' }, now))
   let slot = 0
+
+  // Booked on days of its own, so the shop's items never run out, and its fee paid by the payer.
+  async function paid(itemCount: number, payerId: (rentalId: string) => string): Promise<string> {
+    slot += 1
+    const startsAt = new Date(now.getTime() + slot * 72 * 3_600_000)
+    const created = await act((transaction) =>
+      createBooking(
+        transaction,
+        scope.shopId,
+        { lines: [{ itemTypeId: typeId, count: itemCount }], startsAt, endsAt: new Date(startsAt.getTime() + 24 * 3_600_000), contact: { name: 'Priya', email: 'priya@example.com' }, language: 'en', bookedThrough: 'staff', link: { fingerprint: `${subject}-link-${String(slot)}`, expiresAt: addDays(now, 300) } },
+        now,
+      ),
+    )
+    if (!created.ok) throw new Error(created.reason)
+    const { rentalId } = created
+    await act((transaction) => saveFeeOrder(transaction, rentalId, `FEE-${rentalId}`))
+    const fee = await act((transaction) => beginFeeCapture(transaction, rentalId, now))
+    if (!fee.ok) throw new Error(fee.reason)
+    const payer = { payerId: payerId(rentalId), email: 'priya@example.com', name: 'Priya Natarajan' }
+    await act((transaction) => confirmFeeCapture(transaction, fee.execution.id, { orderId: `FEE-${rentalId}`, captureId: `CAPTURE-${rentalId}`, status: 'completed', amount: eur(itemCount * 40_00), payer }, now))
+    return rentalId
+  }
 
   return {
     scope,
-    typeId: saved.id,
+    typeId,
     act,
+    paidRental: (payerId) => paid(1, () => payerId),
     async readyRental(itemCount = 1) {
-      slot += 1
-      const startsAt = new Date(now.getTime() + slot * 72 * 3_600_000)
-      const created = await act((transaction) =>
-        createBooking(
-          transaction,
-          scope.shopId,
-          { lines: [{ itemTypeId: saved.id, count: itemCount }], startsAt, endsAt: new Date(startsAt.getTime() + 24 * 3_600_000), contact: { name: 'Priya', email: 'priya@example.com' }, language: 'en', bookedThrough: 'staff', link: { fingerprint: `${subject}-link-${String(slot)}`, expiresAt: addDays(now, 300) } },
-          now,
-        ),
-      )
-      if (!created.ok) throw new Error(created.reason)
-      const { rentalId } = created
-      await act((transaction) => saveFeeOrder(transaction, rentalId, `FEE-${rentalId}`))
-      const fee = await act((transaction) => beginFeeCapture(transaction, rentalId, now))
-      if (!fee.ok) throw new Error(fee.reason)
-      const payer = { payerId: `PAYER-${rentalId}`, email: 'priya@example.com', name: 'Priya Natarajan' }
-      await act((transaction) => confirmFeeCapture(transaction, fee.execution.id, { orderId: `FEE-${rentalId}`, captureId: `CAPTURE-${rentalId}`, status: 'completed', amount: eur(itemCount * 40_00), payer }, now))
+      const rentalId = await paid(itemCount, (id) => `PAYER-${id}`)
       await act((transaction) => askForHold(transaction, rentalId, now))
       await act((transaction) => saveHoldOrder(transaction, rentalId, `HOLD-${rentalId}`))
       const hold = await act((transaction) => beginHoldPlacement(transaction, rentalId, now))

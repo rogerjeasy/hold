@@ -22,7 +22,7 @@ const ladder: TrustLadder = {
     { cleanReturns: 2, sharePercent: 50, largestValue: undefined, needsSavedMethod: false },
   ],
 }
-const rental = (renter: string, index: number, overrides: Partial<PastRental> = {}): PastRental => ({ renter, startsAt: day(index), closedAt: day(index + 1), outcome: 'clean', counts: true, items: [ebike], claimCents: 0, ...overrides })
+const rental = (renter: string, index: number, overrides: Partial<PastRental> = {}): PastRental => ({ renter, startsAt: day(index), closedAt: day(index + 1), outcome: 'clean', feeCaptured: true, fee: chf(40_00), hours: 24, items: [ebike], claimCents: 0, ...overrides })
 
 describe('replaying a ladder over a shop’s past rentals', () => {
   it('lowers a hold only from returns closed before the rental began', () => {
@@ -42,13 +42,21 @@ describe('replaying a ladder over a shop’s past rentals', () => {
     expect(simulateLadder(ladder, past)).toMatchObject({ claimsAboveLoweredHold: 1, uncovered: chf(150_00) })
   })
 
+  it('applies the candidate ladder’s own minimum fee and length to the returns that count', () => {
+    const past = [rental('priya', 0, { fee: chf(5_00) }), rental('priya', 3, { hours: 2 }), rental('priya', 6)]
+    expect(simulateLadder({ ...ladder, minimumFee: chf(10_00), minimumHours: 4 }, past).lowered).toBe(0)
+    expect(simulateLadder(ladder, past).lowered).toBe(1)
+  })
+
   it('has totals equal to a direct recomputation, rental by rental', () => {
     const arbitraryRental = fc.record({
       renter: fc.constantFrom('a', 'b', 'c'),
       startsAt: fc.integer({ min: 0, max: 900 }).map(day),
       length: fc.integer({ min: 1, max: 10 }),
       outcome: fc.constantFrom('clean', 'settled', 'open'),
-      counts: fc.boolean(),
+      feeCaptured: fc.boolean(),
+      feeCents: fc.integer({ min: 0, max: 100_00 }),
+      hours: fc.integer({ min: 1, max: 72 }),
       holds: fc.array(fc.integer({ min: 0, max: 1000_00 }), { minLength: 1, maxLength: 3 }),
       claimCents: fc.integer({ min: 0, max: 2000_00 }),
     })
@@ -59,11 +67,13 @@ describe('replaying a ladder over a shop’s past rentals', () => {
           startsAt: each.startsAt,
           closedAt: new Date(each.startsAt.getTime() + each.length * DAY),
           outcome: each.outcome,
-          counts: each.counts,
+          feeCaptured: each.feeCaptured,
+          fee: chf(each.feeCents),
+          hours: each.hours,
           items: each.holds.map((cents) => ({ hold: chf(cents), value: chf(1000_00) })),
           claimCents: each.claimCents,
         }))
-        const candidate: TrustLadder = { ...ladder, rungs: [{ cleanReturns: needed, sharePercent: 40, largestValue: undefined, needsSavedMethod: false }] }
+        const candidate: TrustLadder = { ...ladder, minimumFee: chf(20_00), minimumHours: 3, rungs: [{ cleanReturns: needed, sharePercent: 40, largestValue: undefined, needsSavedMethod: false }] }
         const simulation = simulateLadder(candidate, past)
         let loweredBy = 0
         let lowered = 0
@@ -71,7 +81,8 @@ describe('replaying a ladder over a shop’s past rentals', () => {
         let uncovered = 0
         for (const each of past) {
           const earlier = past.filter((other) => other.renter === each.renter && other.closedAt.getTime() < each.startsAt.getTime())
-          const record = cleanRecord(earlier.map((other) => ({ outcome: other.outcome, closedAt: other.closedAt, counts: other.counts, unpaidAfter: null, shop: 'here' })), candidate.windowMonths, each.startsAt)
+          const counts = (other: PastRental) => other.feeCaptured && other.fee.cents >= 20_00 && other.hours >= 3
+          const record = cleanRecord(earlier.map((other) => ({ outcome: other.outcome, closedAt: other.closedAt, counts: counts(other), unpaidAfter: null, shop: 'here' })), candidate.windowMonths, each.startsAt)
           const hold = rentalHoldFor(each.items, candidate, record)
           if (hold.amount.cents < hold.ordinary.cents) {
             lowered += 1

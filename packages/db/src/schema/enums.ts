@@ -1,4 +1,4 @@
-import { CAPTURE_SESSION_KINDS, CLAIM_STATES, CONDITION_REPLIES, HOLD_STATES, ITEM_CATEGORIES, ITEM_STATUSES, PRICE_CATEGORIES, RENTAL_STATES, STAFF_ROLES } from '@hold/domain'
+import { CAPTURE_SESSION_KINDS, CLAIM_STATES, CONDITION_REPLIES, HOLD_STATES, ITEM_CATEGORIES, ITEM_STATUSES, PRICE_CATEGORIES, RENTAL_STATES, STAFF_ROLES, STORED_OUTCOMES, TRUST_HISTORIES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
 import { check, text } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
@@ -44,6 +44,8 @@ export const PROCESSING_STATES = ['pending', 'applied', 'ignored', 'failed'] as 
 export const MONEY_EVENT_KINDS = ['fee_captured', 'hold_placed', 'hold_renewed', 'hold_released', 'hold_captured', 'refunded', 'invoice_sent', 'invoice_paid'] as const
 export const INVOICE_STATES = ['draft', 'sent', 'paid', 'cancelled'] as const
 export const OUTBOX_STATES = ['pending', 'sent'] as const
+// What a renter consents to: their record of clean returns used to lower holds at other Hold shops.
+export const CONSENT_PURPOSES = ['network_history'] as const
 
 export const rentalState = oneOf(RENTAL_STATES)
 export const holdState = oneOf(HOLD_STATES)
@@ -74,3 +76,6 @@ export const moneyEventKind = oneOf(MONEY_EVENT_KINDS)
 export const invoiceState = oneOf(INVOICE_STATES)
 export const outboxState = oneOf(OUTBOX_STATES)
 export const bookingChannel = oneOf(BOOKING_CHANNELS)
+export const trustHistory = oneOf(TRUST_HISTORIES)
+export const storedOutcome = oneOf(STORED_OUTCOMES)
+export const consentPurpose = oneOf(CONSENT_PURPOSES)

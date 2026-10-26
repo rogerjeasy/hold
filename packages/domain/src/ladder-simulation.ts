@@ -1,4 +1,4 @@
-import { cleanRecord } from './clean-record.ts'
+import { cleanRecord, countsTowardRecord } from './clean-record.ts'
 import type { StoredOutcome } from './clean-record.ts'
 import { money } from './money.ts'
 import type { Money } from './money.ts'
@@ -15,9 +15,12 @@ export type PastRental = {
   // When its outcome was known. A rental still open has none.
   readonly closedAt: Date
   readonly outcome: StoredOutcome
-  readonly counts: boolean
+  // What decides whether it builds a record under the candidate ladder's own minimums.
+  readonly feeCaptured: boolean
+  readonly fee: Money
+  readonly hours: number
   readonly items: readonly ItemHold[]
-  // What its claim asked for, or zero.
+  // What was taken for its claim in the end, from the money log, or zero.
   readonly claimCents: number
 }
 
@@ -33,10 +36,11 @@ export type LadderSimulation = {
 }
 
 export function simulateLadder(ladder: TrustLadder, past: readonly PastRental[]): LadderSimulation {
+  const minimums = { fee: ladder.minimumFee, hours: ladder.minimumHours }
   const rows = past.map((rental) => {
     const earlier = past
       .filter((other) => other.renter === rental.renter && other.closedAt.getTime() < rental.startsAt.getTime())
-      .map((other) => ({ outcome: other.outcome, closedAt: other.closedAt, counts: other.counts, unpaidAfter: null, shop: 'here' }))
+      .map((other) => ({ outcome: other.outcome, closedAt: other.closedAt, counts: countsTowardRecord({ ...other, simulated: false }, minimums), unpaidAfter: null, shop: 'here' }))
     return { rental, hold: rentalHoldFor(rental.items, ladder, cleanRecord(earlier, ladder.windowMonths, rental.startsAt)) }
   })
   let lowered = 0

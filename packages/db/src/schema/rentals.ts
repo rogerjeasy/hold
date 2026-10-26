@@ -1,6 +1,6 @@
 import { HOLD_STATES, RENTAL_STATES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
-import { boolean, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
+import { boolean, integer, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 import type { Accessory } from '@hold/domain'
 import { appRole, shopIsolation, workerRole } from './access.ts'
@@ -8,6 +8,7 @@ import { items, priceLists, wearPolicies } from './catalog.ts'
 import { at, cents, createdAt, currency, id, reference } from './columns.ts'
 import { allowed, AUTHORIZATION_STATES, authorizationState, BOOKING_CHANNELS, bookingChannel, CONDITION_REPLIES, conditionReply, holdState, PLACEMENT_STRATEGIES, placementStrategy, rentalState } from './enums.ts'
 import { shopReference } from './shops.ts'
+import { trustLadders } from './trust.ts'
 
 // A renter is the PayPal payer who approved an order. Not tied to one shop, so it has no shop_id.
 // Renters are created and found through hold_renter_for_payer, defined in the first migration.
@@ -19,6 +20,9 @@ export const renters = pgTable(
     email: text().notNull(),
     name: text(),
     language: text().notNull().default('en'),
+    // The renter key (extensions.md section 7.4), kept so the rental's outcome can be written when it closes without
+    // Hold's secret. Set through hold_set_renter_trust_key, once.
+    trustKey: text().unique(),
     createdAt: createdAt(),
   },
   (table) => [
@@ -63,6 +67,10 @@ export const rentals = pgTable(
     conditionRepliedAt: at(),
     // Sample data added for a demonstration. Its hold, claim and money rows are simulated too, and every screen says so.
     simulated: boolean().notNull().default(false),
+    // The trust ladder version and rung its hold was placed under, as it keeps the price list version. Null when the
+    // ordinary hold applied with no ladder published.
+    trustLadderId: reference().references((): AnyPgColumn => trustLadders.id),
+    trustRung: integer(),
     createdAt: createdAt(),
   },
   (table) => [allowed(table.state, RENTAL_STATES), allowed(table.bookedThrough, BOOKING_CHANNELS), allowed(table.conditionReply, CONDITION_REPLIES), shopIsolation(table.shopId)],
@@ -105,6 +113,13 @@ export const holds = pgTable(
     currentAuthorizationId: reference().references((): AnyPgColumn => authorizations.id),
     // The order of a replacement hold the renter is asked to approve before this one ends (architecture.md 7.4).
     replacementOrderId: text().unique(),
+    // The hold the renter agreed to at booking. reservedCents is lower when the shop's trust ladder lowered it, and
+    // never higher. Null for holds asked for before the ladder existed, whose reserved amount was the ordinary one.
+    ordinaryCents: cents(),
+    trustLadderId: reference().references((): AnyPgColumn => trustLadders.id),
+    trustRung: integer(),
+    // The clean returns the reduction rested on, for the sentence the renter reads.
+    cleanReturns: integer(),
     createdAt: createdAt(),
   },
   (table) => [allowed(table.strategy, PLACEMENT_STRATEGIES), allowed(table.state, HOLD_STATES), shopIsolation(table.shopId)],

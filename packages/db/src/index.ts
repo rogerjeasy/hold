@@ -25,6 +25,7 @@ export { findRenterLink, renterContact, renterView } from './renter-repository.t
 export type { RenterLink, RenterView } from './renter-repository.ts'
 export { feeRentalByOrder, markOutboxSent, markPayPalEvent, PAYPAL_EVENTS_QUEUE, payPalEvent, pendingOutbox, recordPayPalEvent } from './paypal-event-repository.ts'
 export type { Delivery, OutboxMessage, RecordResult, StoredEvent } from './paypal-event-repository.ts'
+export type { TrustedHold } from './hold-repository.ts'
 export { askForHold, beginHoldPlacement, confirmHoldPlaced, holdRentalByAuthorization, holdRentalByOrder, rentalHold, saveHoldOrder } from './hold-repository.ts'
 export type { AskResult, BeginPlacementResult, ConfirmPlacementResult, HoldExecution, HoldUpkeep, PlacedAuthorization, RentalHold } from './hold-repository.ts'
 export { confirmAuthorizationReleased, expireHold, holdUpkeep, saveReplacementOrder, shopOwners, upkeepTarget } from './hold-upkeep-repository.ts'
@@ -67,3 +68,5 @@ export { reserveEvidencePack, evidencePackFor, evidenceVersions, publishEvidence
 export type { EvidenceVersion } from './evidence-repository.ts'
 export { queueSettlementReceipts, receiptDeliveriesFor, leaseReceipt, finishReceipt } from './receipt-repository.ts'
 export type { ReceiptDeliverySummary } from './receipt-repository.ts'
+export { answerTrustConsent, currentTrustLadder, deleteTrustRecord, markOutcomeOpen, pastRentalsForSimulation, publishTrustLadder, rentalItemHolds, renterTrustKey, shopOutcomes, trustConsent, trustLadderById, trustMoneyLog, trustOutcomes, writeRentalOutcome } from './trust-repository.ts'
+export type { LadderPublishResult, LedgerLine, PublishedTrustLadder, TrustConsent, TrustOutcome } from './trust-repository.ts'
