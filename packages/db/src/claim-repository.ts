@@ -1,13 +1,16 @@
 import { reserveEvidencePack } from './evidence-repository.ts'
-import { checkClaimLines, claimTotal, CLAIM_TRANSITIONS, HOLD_TRANSITIONS, money, transition } from '@hold/domain'
+import { checkClaimLines, checkKeptLine, claimTotal, CLAIM_TRANSITIONS, HOLD_TRANSITIONS, money, transition } from '@hold/domain'
 import type { ClaimLine } from '@hold/domain'
 import { and, eq, isNotNull, isNull } from 'drizzle-orm'
 import { claimStaff, startSettling } from './claim-access.ts'
 import { EXECUTIONS_QUEUE } from './fee-repository.ts'
-import { approvals, auditLog, authorizations, captureSessions, claimLines, claims, comparisons, executions, findings, holds, outbox, photos, priceEntries, rentalItems, rentals, shops } from './schema/index.ts'
+import { approvals, auditLog, authorizations, captureSessions, claimLines, claims, comparisons, executions, findings, holds, incidents, outbox, photos, priceEntries, rentalItems, rentals, shops } from './schema/index.ts'
+import { openClaimIncidents } from './incident-closing.ts'
 import type { Transaction } from './scope.ts'
 
-export type DraftClaimLine = { readonly priceEntryId: string; readonly findingId?: string; readonly reason?: string }
+// A line from a finding or a named person's reason, priced from the agreed list; or the line the renter agreed during
+// the rental, which staff keep at its amount or lower (extensions.md section 10.4).
+export type DraftClaimLine = { readonly priceEntryId: string; readonly findingId?: string; readonly reason?: string } | { readonly incidentId: string; readonly amountCents: number }
 const refused = <Reason extends string>(reason: Reason) => ({ ok: false, reason }) as const
 
 export async function draftClaim(transaction: Transaction, rentalId: string, userId: string, lines: readonly DraftClaimLine[], now: Date) {
@@ -25,6 +28,15 @@ export async function draftClaim(transaction: Transaction, rentalId: string, use
   const stored: Omit<typeof claimLines.$inferInsert, 'claimId'>[] = []
   const seen = new Set<string>()
   for (const line of lines) {
+    if ('incidentId' in line) {
+      const kept = await agreedLine(transaction, rentalId, line)
+      if (!kept.ok) return kept
+      if (seen.has(`incident-${line.incidentId}`)) return refused('duplicate_line')
+      seen.add(`incident-${line.incidentId}`)
+      priced.push(kept.line)
+      stored.push({ shopId: rental.shopId, priceEntryId: kept.line.priceEntryId, currency: rental.currency, amountCents: kept.line.amount.cents, source: 'agreed_in_rental', incidentId: line.incidentId, addedByUserId: userId, createdAt: now })
+      continue
+    }
     const entry = agreed.find((entry) => entry.id === line.priceEntryId && entry.currency === rental.currency)
     if (entry === undefined) return refused('price_not_agreed')
     const identity = line.findingId ?? line.priceEntryId
@@ -51,8 +63,23 @@ export async function draftClaim(transaction: Transaction, rentalId: string, use
   await transaction.insert(claimLines).values(stored.map((line) => ({ ...line, claimId: created.id })))
   if (!transition(CLAIM_TRANSITIONS, created.state, 'awaiting_approval').ok) throw new Error('The new claim cannot await approval.')
   await transaction.update(claims).set({ state: 'awaiting_approval' }).where(eq(claims.id, created.id))
+  await openClaimIncidents(transaction, rentalId)
   await reserveEvidencePack(transaction, rentalId, now)
   return { ok: true, claimId: created.id, totalCents: total.cents } as const
+}
+
+// The line the renter agreed during this rental, as staff confirm it: its agreed entry, at the agreed amount or lower,
+// resting on the photographs the renter took. Only an agreed report gives one: a fault, a theft or an unclear report
+// never does.
+async function agreedLine(transaction: Transaction, rentalId: string, line: { readonly incidentId: string; readonly amountCents: number }) {
+  const [incident] = await transaction.select().from(incidents).where(and(eq(incidents.id, line.incidentId), eq(incidents.rentalId, rentalId)))
+  if (incident === undefined || incident.state !== 'agreed' || incident.agreedCents === null || incident.agreedPriceEntryId === null) return refused('incident_not_agreed')
+  if (!Number.isSafeInteger(line.amountCents) || line.amountCents < 0) return refused('raises_agreed_line')
+  const kept = checkKeptLine(money(incident.agreedCents, incident.currency), money(line.amountCents, incident.currency))
+  if (!kept.ok) return refused(kept.error)
+  const taken = await transaction.select({ id: photos.id }).from(photos).where(and(eq(photos.sessionId, incident.sessionId), isNull(photos.supersededAt)))
+  const claimLine: ClaimLine = { priceEntryId: incident.agreedPriceEntryId, amount: kept.value, source: { kind: 'agreed_in_rental', incidentId: incident.id, photoCount: taken.length } }
+  return { ok: true, line: claimLine } as const
 }
 
 export async function approveClaim(transaction: Transaction, claimId: string, userId: string, now: Date) {

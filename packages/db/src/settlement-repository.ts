@@ -1,4 +1,5 @@
 import { CLAIM_TRANSITIONS, HOLD_TRANSITIONS, mayCapture, mayCloseRental, money, RENTAL_TRANSITIONS, settle, transition } from '@hold/domain'
+import { closeRentalIncidents } from './incident-closing.ts'
 import { and, eq } from 'drizzle-orm'
 import { reserveEvidencePack } from './evidence-repository.ts'
 import { queueSettlementReceipts } from './receipt-repository.ts'
@@ -30,6 +31,7 @@ export async function closeSettledRental(transaction: Transaction, rentalId: str
   if (outstanding.length > 0) return
   if (rental !== undefined && mayCloseRental(holdState) && transition(RENTAL_TRANSITIONS, rental.state, 'closed').ok) {
     await transaction.update(rentals).set({ state: 'closed' }).where(eq(rentals.id, rentalId))
+    await closeRentalIncidents(transaction, rentalId, now)
     await transaction.insert(auditLog).values({ shopId: rental.shopId, actorKind: 'worker', action: 'rental.settled', subjectKind: 'rental', subjectId: rentalId, at: now })
     await reserveEvidencePack(transaction, rentalId, now)
   }

@@ -2,6 +2,7 @@ import { RENTAL_TRANSITIONS, transition } from '@hold/domain'
 import { and, asc, eq, isNotNull, isNull, sql } from 'drizzle-orm'
 import { captureSessions, comparisons, items, outbox, photos, rentalItems, rentals } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
+import { lapseUnagreedOffers } from './incident-closing.ts'
 
 export const COMPARISONS_QUEUE = 'comparisons'
 
@@ -26,6 +27,7 @@ export async function queueReturnComparisons(transaction: Transaction, rentalId:
     if (created !== undefined) await transaction.insert(outbox).values({ shopId: rental.shopId, queue: COMPARISONS_QUEUE, messageGroup: rentalId, payload: { comparisonId: created.id }, createdAt: now })
   }
   await transaction.update(rentals).set({ state: 'returned' }).where(eq(rentals.id, rentalId))
+  await lapseUnagreedOffers(transaction, rentalId)
 }
 
 export type RentalReturn = { readonly itemId: string; readonly label: string; readonly sessionId: string | null; readonly sealed: boolean; readonly comparisonId: string | null }

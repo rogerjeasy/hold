@@ -1,7 +1,7 @@
 import { reserveEvidencePack } from './evidence-repository.ts'
 import { INSPECTION_LIMITS, RENTAL_TRANSITIONS, transition } from '@hold/domain'
 import { and, asc, eq, inArray, isNotNull, isNull, lte, ne, sql } from 'drizzle-orm'
-import { auditLog, captureSessions, comparisons, findings, itemTypes, items, marks, photoPlans, photos, priceEntries, rentalItems, rentals, users, wearPolicies } from './schema/index.ts'
+import { auditLog, captureSessions, comparisons, findings, incidents, itemTypes, items, marks, photoPlans, photos, priceEntries, rentalItems, rentals, users, wearPolicies } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
 export type ComparisonPhoto = Pick<typeof photos.$inferSelect, 'view' | 'evidenceKey' | 'sha256' | 'perceptualHash' | 'displayKey' | 'quality'>
@@ -29,14 +29,20 @@ export async function beginComparison(transaction: Transaction, comparisonId: st
   const known = await transaction.select({ id: marks.id, view: marks.view, region: marks.region }).from(marks)
     .innerJoin(captureSessions, eq(captureSessions.id, marks.firstSeenSessionId))
     .where(and(eq(marks.itemId, rental.itemId), eq(marks.status, 'open'), lte(captureSessions.sealedAt, handover.sealedAt)))
+  // Marks the renter reported during this rental (step 7): covered when the report was agreed or made the shop's matter.
+  // Reporting does not make a mark old, so they are never among the known marks above.
+  const reported = (await transaction.select({ id: marks.id, view: marks.view, region: marks.region, state: incidents.state }).from(marks)
+    .innerJoin(incidents, eq(incidents.id, marks.incidentId))
+    .where(and(eq(marks.itemId, rental.itemId), eq(marks.status, 'reported'), eq(incidents.rentalItemId, returned.rentalItemId))))
+    .map(({ state, ...mark }) => ({ ...mark, covered: state === 'agreed' || state === 'shop_matter' }))
   const prices = await transaction.select({ id: priceEntries.id, code: priceEntries.code }).from(priceEntries).where(eq(priceEntries.priceListId, rental.priceListId))
   const previous = await transaction.select({ sha256: photos.sha256, perceptualHash: photos.perceptualHash }).from(photos)
     .innerJoin(captureSessions, eq(captureSessions.id, photos.sessionId))
     .innerJoin(rentalItems, eq(rentalItems.id, captureSessions.rentalItemId))
-    .where(and(eq(rentalItems.itemId, rental.itemId), ne(captureSessions.id, returned.id), isNotNull(captureSessions.sealedAt), lte(captureSessions.sealedAt, returned.startedAt), inArray(captureSessions.kind, ['handover', 'condition', 'return'])))
+    .where(and(eq(rentalItems.itemId, rental.itemId), ne(captureSessions.id, returned.id), isNotNull(captureSessions.sealedAt), lte(captureSessions.sealedAt, returned.startedAt), inArray(captureSessions.kind, ['handover', 'condition', 'return', 'incident'])))
   // The current return is excluded even when test clocks give it the same timestamp as handover.
   const baseline = await sessionPhotos(transaction, handover.id)
-  return { id: comparison.id, shopId: comparison.shopId, rentalId: rental.id, startedAt: now, plan: plan?.views ?? [], before: baseline, after: await sessionPhotos(transaction, returned.id), known, prices, wearPolicy: rental.wearPolicy, itemType: rental.itemType, previous }
+  return { id: comparison.id, shopId: comparison.shopId, rentalId: rental.id, startedAt: now, plan: plan?.views ?? [], before: baseline, after: await sessionPhotos(transaction, returned.id), known, reported, prices, wearPolicy: rental.wearPolicy, itemType: rental.itemType, previous }
 }
 
 export type StoredInspection = { readonly state: 'clean' | 'findings' | 'deferred'; readonly model: string; readonly promptVersion: string; readonly alignment: Readonly<Record<string, number>>; readonly reason: string | null; readonly simulated: boolean; readonly findings: readonly Pick<typeof findings.$inferInsert, 'view' | 'region' | 'class' | 'confidence' | 'description' | 'secondLookConfirmed' | 'matchedMarkId' | 'suggestedPriceEntryId'>[] }
