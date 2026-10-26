@@ -1,6 +1,7 @@
 'use server'
 
-import { abandonBooking, askForHold as askForRentalHold, BOOKING_LINK_SCOPES, findPayPalAccount, issueRenterLink, rentalDetail } from '@hold/db'
+import { abandonBooking, askForHold as askForRentalHold, BOOKING_LINK_SCOPES, findPayPalAccount, issueRenterLink, rentalDetail, renterTrustKey } from '@hold/db'
+import { trustedHold } from '@hold/trust'
 import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
 import { bookingFields, emailRenterLink, placeBooking } from '@/server/booking'
@@ -67,14 +68,17 @@ export const emailRenterLinkAgain = shopAction(
   },
 )
 
-// At pickup: the hold the renter agreed to is requested, and a new link opens the page where they approve it in
-// PayPal on their own phone. Asked again, it shows a new code for the same hold. Requesting moves no money.
+// At pickup: the hold the renter agreed to is requested, lowered by the shop's trust ladder when the renter's record
+// earns it, and a new link opens the page where they approve it in PayPal on their own phone. The payer is known from
+// the fee they paid. Asked again, it shows a new code for the same hold. Requesting moves no money.
 export const askForHold = shopAction(
   { name: 'rental.hold_asked', roles: STAFF, needsPasskey: false, input: withLocale({ rentalId: z.uuid() }) },
   async (context, input, transaction) => {
     const rental = await rentalDetail(transaction, input.rentalId, new Date())
     if (rental === undefined) return new Refusal('not_found')
-    const asked = await askForRentalHold(transaction, rental.id, new Date())
+    const { trust } = await getServices()
+    const renterKey = await renterTrustKey(transaction, rental.id, trust.renterKey)
+    const asked = await askForRentalHold(transaction, rental.id, new Date(), await trustedHold(transaction, rental.id, renterKey, new Date()))
     if (!asked.ok) return new Refusal(asked.reason)
     const link = await newRenterLink(rental.endsAt)
     await issueRenterLink(transaction, context.shop.id, rental.id, link, BOOKING_LINK_SCOPES)

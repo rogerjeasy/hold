@@ -18,6 +18,8 @@ const hold = (overrides: Partial<RentalHold> = {}): RentalHold => ({
   assuredUntil: null,
   validUntil: null,
   placementFailure: null,
+  ordinaryCents: 300_00,
+  trust: null,
   ...overrides,
 })
 

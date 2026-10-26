@@ -3,7 +3,7 @@ import { comparisonMessageSchema, runComparison } from '@hold/compare'
 import { createCognitoIdentity, createFakeIdentity, readKeySecret } from '@hold/auth'
 import type { Identity } from '@hold/auth'
 import { loadWebConfig } from '@hold/config'
-import type { KeySource, WebConfig } from '@hold/config'
+import type { CredentialKeySource, KeySource, WebConfig } from '@hold/config'
 import type { Database } from '@hold/db'
 import { createDataApiDatabase } from '@hold/db/data-api'
 import { createMemoryDocumentStore, createS3DocumentStore, createMemoryEvidenceStore, createS3EvidenceStore, makeDisplayCopy, mediaMessageSchema } from '@hold/evidence'
@@ -15,6 +15,8 @@ import { createFakePayPal, createMemoryCredentialStore, createPayPalClient, crea
 import type { CredentialStore, FakePayPal, PayPalCredentials, PayPalHolds } from '@hold/paypal'
 import { applyPayPalEvent, createMemoryScheduler, createSqsSender, executionMessageSchema, paypalEventMessageSchema, runExecution, runUpkeep, upkeepMessageSchema } from '@hold/settle'
 import type { Notice, QueueMessage, RequestDependencies, SettleDependencies } from '@hold/settle'
+import { createKmsSigner, createLocalSigner, kmsCalls, renterKeyFor } from '@hold/trust'
+import type { CredentialSigner, RenterKey } from '@hold/trust'
 import { createRenterAsk } from './renter-ask'
 import { simulatedRecords } from './simulated-records'
 
@@ -47,6 +49,21 @@ export type Services = {
   readonly simulatedEvidence: MemoryEvidenceStore | undefined
   readonly documents: DocumentStore | undefined
   readonly flushRecords: (shopId: string) => Promise<void>
+  // The Clean Record (extensions.md section 7): the renter key, made with a secret only Hold has, and the key that
+  // signs credentials, read from KMS on first use so the app starts without it.
+  readonly trust: { readonly renterKey: RenterKey; readonly signer: () => Promise<CredentialSigner> }
+}
+
+// The credential signer, made once. A KMS key is read on first use: a failure then fails that credential, not the app.
+function credentialSigner(source: CredentialKeySource, region: string): () => Promise<CredentialSigner> {
+  let signer: Promise<CredentialSigner> | undefined
+  return () => {
+    signer ??= source.kind === 'kms' ? createKmsSigner({ keyId: source.keyId, kms: kmsCalls(region) }) : Promise.resolve(createLocalSigner())
+    signer.catch(() => {
+      signer = undefined
+    })
+    return signer
+  }
 }
 
 // The test environment has no worker: each message is handled at once, in this process, by the same code.
@@ -142,6 +159,7 @@ async function build(): Promise<Services> {
       simulatedEvidence,
       documents,
       flushRecords: (shopId) => records.flush(shopId),
+      trust: { renterKey: renterKeyFor(await loadKey(config.trustKey, 'us-east-1')), signer: credentialSigner(config.credentialKey, 'us-east-1') },
     }
   }
   const paypalCredentials = createSecretsManagerCredentialStore(config.region)
@@ -177,6 +195,7 @@ async function build(): Promise<Services> {
     simulatedEvidence: undefined,
     documents: config.photoBuckets === undefined ? undefined : createS3DocumentStore({ evidenceBucket: config.photoBuckets.evidence, region: config.region }),
     flushRecords: () => Promise.resolve(),
+    trust: { renterKey: renterKeyFor(await loadKey(config.trustKey, config.region)), signer: credentialSigner(config.credentialKey, config.region) },
   }
 }
 

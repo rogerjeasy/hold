@@ -8,6 +8,8 @@ export const routes = {
   demo: '/demo',
   signIn: '/sign-in',
   signUp: '/sign-up',
+  // Anyone shown a renter's Clean Record checks it here (extensions.md section 7.7).
+  verify: '/verify',
 } as const
 
 export type RouteKey = keyof typeof routes
@@ -23,6 +25,7 @@ export const shopRoutes = {
   staff: '/shop/staff',
   prices: '/shop/prices',
   paypal: '/shop/paypal',
+  trust: '/shop/trust',
 } as const
 
 // Pages reached from the rentals page rather than from the menu.
@@ -51,6 +54,12 @@ export const linkRoutes = {
   // here too because screens import this file and must not load the server's crypto.
   renter: '/r',
   record: (token: string) => `/r/${token}/record`,
+  // The renter's Clean Record, its credential and their consent.
+  cleanRecord: (token: string) => `/r/${token}/clean-record`,
   // A shop's own page for renters, named by its address: /s/{slug}.
   shopPage: '/s',
 } as const
+
+// Where the public key that signs Clean Record credentials is published, as a JSON Web Key Set, so anyone can check a
+// credential without asking Hold.
+export const CREDENTIAL_KEYS_PATH = '/.well-known/hold-credential-keys.json'

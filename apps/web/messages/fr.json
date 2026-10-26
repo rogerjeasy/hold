@@ -85,6 +85,10 @@
     },
     "invite": {
       "title": "Une invitation"
+    },
+    "verify": {
+      "title": "Vérifier un historique de retours",
+      "description": "Vérifiez l'historique des locations rendues en bon état d'un client, avec la clé publiée par Hold."
     }
   },
   "nav": {
@@ -1201,7 +1205,8 @@
       "staff": "Équipe",
       "prices": "Prix",
       "paypal": "PayPal",
-      "settings": "Réglages"
+      "settings": "Réglages",
+      "trust": "Échelle de confiance"
     },
     "setup": {
       "title": "Préparez votre boutique",
@@ -2373,5 +2378,144 @@
     },
     "acknowledge": "J’ai examiné cette réclamation",
     "reviewFirst": "Vérifiez les preuves et les prix. Votre délai commence quand vous confirmez avoir examiné cette réclamation."
+  },
+  "trust": {
+    "reason": "Votre empreinte est de {amount}, et non de {ordinary}, car vous avez rendu {count, plural, one {# location} other {# locations}} en bon état au cours des {months} derniers mois.",
+    "staffReason": "Abaissée de {ordinary} par l'échelle de confiance version {version}, échelon {rung} : {count, plural, one {# retour sans réclamation} other {# retours sans réclamation}} au cours des {months} derniers mois.",
+    "ladder": {
+      "title": "Échelle de confiance",
+      "lead": "Les clients qui rendent leurs locations en bon état obtiennent une empreinte plus basse. La confiance ne fait que baisser l'empreinte : sans historique, ou avec une réclamation impayée, l'empreinte habituelle s'applique.",
+      "none": "Aucune échelle de confiance n'est publiée. Chaque client a l'empreinte habituelle.",
+      "current": "La version {version} est publiée depuis le {date}. Une location garde la version sous laquelle son empreinte a été placée.",
+      "readOnly": "Seul le propriétaire peut publier une échelle de confiance.",
+      "rungZero": "Moins de retours sans réclamation : toute l'empreinte",
+      "rungLine": "{count, plural, one {# retour sans réclamation} other {# retours sans réclamation}} : {share} % de l'empreinte, pour {cover}",
+      "anyValue": "les articles de toute valeur",
+      "upTo": "les articles valant jusqu'à {amount}",
+      "neverReached": "Demande un moyen PayPal enregistré, donc n'est pas encore atteint.",
+      "historyLine": "Compte {history}, sur les {months} derniers mois. Une location compte à partir de {fee} et de {hours} heures.",
+      "historyNames": {
+        "own": "les retours de cette boutique seulement",
+        "network": "les retours de cette boutique, et ceux d'autres boutiques Hold si le client y consent"
+      },
+      "history": "L'historique qui compte",
+      "historyOwn": "Les retours de cette boutique seulement",
+      "historyNetwork": "Ceux de cette boutique et d'autres boutiques Hold, si le client y consent",
+      "historyHelp": "Une boutique ne voit jamais où un client a loué ailleurs. Elle voit l'échelon et les nombres.",
+      "window": "Mois d'historique qui comptent",
+      "minimumFee": "Plus petit tarif qui compte, en {currency}",
+      "minimumHours": "Plus courte location qui compte, en heures",
+      "minimumsHelp": "Pour qu'un historique ne se construise pas à bas prix. Seul un tarif encaissé par PayPal compte.",
+      "rungs": "Échelons",
+      "rung": "Échelon {number}",
+      "cleanReturns": "Retours sans réclamation requis",
+      "share": "Part de l'empreinte gardée, en %",
+      "largestValue": "Valeur maximale de l'article, en {currency}",
+      "largestValueHelp": "Laissez vide pour les articles de toute valeur.",
+      "savedMethod": "Demande un moyen PayPal enregistré",
+      "savedMethodNo": "Non",
+      "savedMethodYes": "Oui",
+      "savedMethodNote": "Hold ne garde pas encore de moyens PayPal enregistrés : un échelon qui en demande un n'est jamais atteint. Sans lui, la plus petite part reste au-dessus de zéro.",
+      "remove": "Retirer l'échelon {number}",
+      "add": "Ajouter un échelon",
+      "simulate": "Rejouer sur les locations passées",
+      "simulating": "Rejeu…",
+      "publish": "Publier cette échelle de confiance",
+      "publishing": "Publication…",
+      "published": "Échelle de confiance publiée.",
+      "publishHelp": "Publier crée une nouvelle version. Les empreintes déjà placées gardent la leur.",
+      "simulation": {
+        "title": "Rejouée sur {count, plural, one {# location passée} other {# locations passées}}",
+        "lowered": "Empreintes abaissées",
+        "loweredBy": "Abaissées de, en tout",
+        "claimsAbove": "Réclamations passées au-dessus de l'empreinte abaissée",
+        "uncovered": "Reste à facturer",
+        "note": "Calculé par du code simple à partir des locations clôturées de cette boutique et de son journal d'argent."
+      },
+      "ledger": {
+        "title": "Registre de confiance",
+        "empty": "Aucune location n'a été clôturée depuis le début de l'échelle de confiance.",
+        "outcomes": {
+          "clean": "Sans réclamation",
+          "settled": "Réglée",
+          "unpaid": "Impayée",
+          "open": "En cours"
+        },
+        "notCounted": "Ne compte pas",
+        "line": "{category} · clôturée le {date}",
+        "see": "Voir la location"
+      },
+      "results": {
+        "currency_unset": "Publiez d'abord votre liste de prix, pour que l'échelle ait une devise.",
+        "currency_mismatch": "L'échelle doit être dans la devise de la boutique.",
+        "rows_mismatched": "Chaque échelon demande ses retours, sa part et sa valeur.",
+        "minimum_fee_invalid": "Le plus petit tarif n'est pas un montant. Utilisez des chiffres, comme 20 ou 20,00.",
+        "minimum_hours_invalid": "La plus courte location est un nombre entier d'heures, jusqu'à 672.",
+        "minimum_fee_wrong_currency": "Le plus petit tarif doit être dans la devise de la boutique.",
+        "window_invalid": "L'historique qui compte va de 1 à 36 mois.",
+        "too_many_rungs": "Une échelle a au plus cinq échelons.",
+        "clean_returns_invalid": "L'échelon {row} demande un nombre entier de retours, de 1 à 100.",
+        "clean_returns_not_rising": "L'échelon {row} doit demander plus de retours que le précédent.",
+        "share_invalid": "La part de l'échelon {row} est un pourcentage entier inférieur à 100.",
+        "share_not_falling": "L'échelon {row} doit garder moins de l'empreinte que le précédent.",
+        "share_zero_needs_saved_method": "L'échelon {row} ne garde aucune empreinte, ce qui demande un moyen PayPal enregistré.",
+        "cover_invalid": "La valeur maximale de l'échelon {row} doit être supérieure à zéro.",
+        "cover_amount_invalid": "La valeur maximale de l'échelon {row} n'est pas un montant."
+      }
+    },
+    "record": {
+      "title": "Votre historique de retours",
+      "lead": "Chaque location rendue en bon état est comptée ici. L'historique ne contient ni nom, ni e-mail, ni montant, et vous décidez si d'autres boutiques Hold l'utilisent.",
+      "notYet": "Votre historique commence dès que PayPal a confirmé votre paiement.",
+      "counts": "Vos locations des {months} derniers mois",
+      "clean": "Rendues en bon état",
+      "settled": "Réclamation réglée",
+      "unpaid": "Réclamation impayée",
+      "open": "Réclamation en cours",
+      "shops": "Boutiques Hold",
+      "neverTaken": "Cautions jamais prélevées : {amount} sur {count, plural, one {# location} other {# locations}}.",
+      "neverTakenNone": "Aucune empreinte ne vous a encore été libérée.",
+      "credential": "Montrer votre historique",
+      "credentialLead": "Chacun peut scanner ce code pour vérifier votre historique avec la clé publiée par Hold. Il ne montre que les nombres ci-dessus et cesse de fonctionner à {time}. Rouvrez cette page pour en obtenir un nouveau.",
+      "credentialScan": "Scannez pour vérifier cet historique",
+      "credentialText": "Ou partagez cette attestation",
+      "credentialUnavailable": "Votre historique ne peut pas être signé pour le moment. Réessayez dans un instant.",
+      "consentTitle": "Autres boutiques Hold",
+      "consentQuestion": "Utiliser mon historique de retours sans réclamation pour baisser mes futures empreintes dans les boutiques Hold.",
+      "consentYes": "Oui, l'utiliser",
+      "consentNo": "Non, merci",
+      "consentIsOn": "D'autres boutiques Hold peuvent utiliser votre historique pour baisser votre empreinte.",
+      "consentIsOff": "Chaque boutique utilise seulement son propre historique de vos retours.",
+      "turnOn": "Utiliser mon historique dans les autres boutiques Hold",
+      "turnOff": "Ne plus utiliser mon historique dans les autres boutiques Hold",
+      "saving": "Enregistrement…",
+      "delete": "Supprimer mon historique",
+      "deleteLead": "Vos retours sont supprimés dans toutes les boutiques Hold, et votre prochaine empreinte est l'habituelle. Une réclamation encore en cours reste jusqu'à son règlement.",
+      "deleteConfirm": "Je comprends que mon historique est supprimé dans toutes les boutiques Hold",
+      "deleting": "Suppression…",
+      "deleted": "Votre historique est supprimé.",
+      "back": "Voir votre location",
+      "link": "Votre historique de retours",
+      "results": {
+        "renter_unknown": "Votre historique commence dès que PayPal a confirmé votre paiement."
+      }
+    },
+    "verify": {
+      "title": "Vérifier un historique de retours",
+      "lead": "Un client peut vous montrer son historique de locations rendues en bon état. Hold le signe, et cette page vérifie la signature avec la clé publiée par Hold, ici dans votre navigateur.",
+      "paste": "Attestation",
+      "pasteHelp": "Scannez le code sur le téléphone du client, ou collez l'attestation qu'il a partagée.",
+      "check": "Vérifier",
+      "valid": "Signée par Hold. Valable jusqu'à {time}.",
+      "counts": "Locations des {months} derniers mois",
+      "key": "Clé publique de Hold",
+      "problems": {
+        "malformed": "Ce n'est pas une attestation d'historique de retours.",
+        "unknown_key": "Cette attestation n'a pas été signée avec la clé de Hold.",
+        "bad_signature": "Cette attestation a été modifiée après sa signature par Hold.",
+        "expired": "Cette attestation a expiré. Demandez au client de rouvrir son historique.",
+        "not_yet_valid": "Cette attestation n'est pas encore valable. Vérifiez l'horloge de cet appareil."
+      }
+    }
   }
 }

@@ -85,6 +85,10 @@
     },
     "invite": {
       "title": "An invitation"
+    },
+    "verify": {
+      "title": "Check a Clean Record",
+      "description": "Check a renter's record of rentals returned in good condition, with Hold's published key."
     }
   },
   "nav": {
@@ -1201,7 +1205,8 @@
       "staff": "Staff",
       "prices": "Prices",
       "paypal": "PayPal",
-      "settings": "Settings"
+      "settings": "Settings",
+      "trust": "Trust ladder"
     },
     "setup": {
       "title": "Set up your shop",
@@ -2373,5 +2378,144 @@
     },
     "acknowledge": "I have reviewed this claim",
     "reviewFirst": "Review the evidence and prices. Your reply period starts when you confirm you have reviewed this claim."
+  },
+  "trust": {
+    "reason": "Your hold is {amount}, not {ordinary}, because you have returned {count, plural, one {# rental} other {# rentals}} in good condition in the last {months} months.",
+    "staffReason": "Lowered from {ordinary} by trust ladder version {version}, rung {rung}: {count, plural, one {# clean return} other {# clean returns}} in the last {months} months.",
+    "ladder": {
+      "title": "Trust ladder",
+      "lead": "Renters who return rentals in good condition earn a lower hold. Trust only ever lowers a hold: no history, or an unpaid claim, means the ordinary hold.",
+      "none": "No trust ladder is published. Every renter is held for the ordinary amount.",
+      "current": "Version {version} is published, since {date}. A rental keeps the version its hold was placed under.",
+      "readOnly": "Only the owner can publish a trust ladder.",
+      "rungZero": "Fewer clean returns: the whole hold",
+      "rungLine": "{count, plural, one {# clean return} other {# clean returns}}: {share}% of the hold, for {cover}",
+      "anyValue": "items of any value",
+      "upTo": "items worth up to {amount}",
+      "neverReached": "Needs a saved PayPal method, so it is not reached yet.",
+      "historyLine": "Counts {history}, over the last {months} months. A rental counts from a fee of {fee} and {hours} hours.",
+      "historyNames": {
+        "own": "this shop's returns only",
+        "network": "this shop's returns, and other Hold shops' when the renter consents"
+      },
+      "history": "Whose history counts",
+      "historyOwn": "This shop's returns only",
+      "historyNetwork": "This shop's and other Hold shops', when the renter consents",
+      "historyHelp": "A shop never sees where else a renter rented. It sees the rung and the counts.",
+      "window": "Months of history that count",
+      "minimumFee": "Smallest fee that counts, in {currency}",
+      "minimumHours": "Shortest rental that counts, in hours",
+      "minimumsHelp": "So a record cannot be built cheaply. Only a fee captured through PayPal counts.",
+      "rungs": "Rungs",
+      "rung": "Rung {number}",
+      "cleanReturns": "Clean returns needed",
+      "share": "Share of the hold kept, in %",
+      "largestValue": "Largest item value, in {currency}",
+      "largestValueHelp": "Leave empty for items of any value.",
+      "savedMethod": "Needs a saved PayPal method",
+      "savedMethodNo": "No",
+      "savedMethodYes": "Yes",
+      "savedMethodNote": "Hold does not keep saved PayPal methods yet, so a rung that needs one is never reached. Without one, the lowest share is above zero.",
+      "remove": "Remove rung {number}",
+      "add": "Add a rung",
+      "simulate": "Replay over past rentals",
+      "simulating": "Replaying…",
+      "publish": "Publish this trust ladder",
+      "publishing": "Publishing…",
+      "published": "Trust ladder published.",
+      "publishHelp": "Publishing makes a new version. Holds already placed keep theirs.",
+      "simulation": {
+        "title": "Replayed over {count, plural, one {# past rental} other {# past rentals}}",
+        "lowered": "Holds lowered",
+        "loweredBy": "Lowered by, in all",
+        "claimsAbove": "Past claims above the lowered hold",
+        "uncovered": "Left to invoice",
+        "note": "Worked out by plain code from this shop's closed rentals and its money log."
+      },
+      "ledger": {
+        "title": "Trust ledger",
+        "empty": "No rental has closed since the trust ladder began.",
+        "outcomes": {
+          "clean": "Clean",
+          "settled": "Settled",
+          "unpaid": "Unpaid",
+          "open": "Open"
+        },
+        "notCounted": "Does not count",
+        "line": "{category} · closed {date}",
+        "see": "See the rental"
+      },
+      "results": {
+        "currency_unset": "Publish your price list first, so the ladder has a currency.",
+        "currency_mismatch": "The ladder must be in the shop's currency.",
+        "rows_mismatched": "Every rung needs its clean returns, its share and its value.",
+        "minimum_fee_invalid": "The smallest fee is not an amount. Use digits, such as 20 or 20.00.",
+        "minimum_hours_invalid": "The shortest rental is a whole number of hours, up to 672.",
+        "minimum_fee_wrong_currency": "The smallest fee must be in the shop's currency.",
+        "window_invalid": "The history that counts is 1 to 36 months.",
+        "too_many_rungs": "A ladder has at most five rungs.",
+        "clean_returns_invalid": "Rung {row} needs a whole number of clean returns, from 1 to 100.",
+        "clean_returns_not_rising": "Rung {row} must need more clean returns than the rung before it.",
+        "share_invalid": "The share of rung {row} is a whole percentage below 100.",
+        "share_not_falling": "Rung {row} must keep less of the hold than the rung before it.",
+        "share_zero_needs_saved_method": "Rung {row} keeps no hold, which needs a saved PayPal method.",
+        "cover_invalid": "The largest item value of rung {row} must be above zero.",
+        "cover_amount_invalid": "The largest item value of rung {row} is not an amount."
+      }
+    },
+    "record": {
+      "title": "Your Clean Record",
+      "lead": "Every rental you return in good condition is counted here. It carries no name, email or amount, and you decide whether other Hold shops use it.",
+      "notYet": "Your Clean Record starts once PayPal has confirmed your payment.",
+      "counts": "Your rentals in the last {months} months",
+      "clean": "Returned in good condition",
+      "settled": "Claim settled",
+      "unpaid": "Claim unpaid",
+      "open": "Claim in progress",
+      "shops": "Hold shops",
+      "neverTaken": "Deposits never taken from you: {amount} across {count, plural, one {# rental} other {# rentals}}.",
+      "neverTakenNone": "No hold has been released to you yet.",
+      "credential": "Show your record",
+      "credentialLead": "Anyone can scan this code to check your record with Hold's published key. It shows only the counts above, and stops working at {time}. Open this page again for a new one.",
+      "credentialScan": "Scan to check this Clean Record",
+      "credentialText": "Or share this credential",
+      "credentialUnavailable": "Your record cannot be signed right now. Try again in a moment.",
+      "consentTitle": "Other Hold shops",
+      "consentQuestion": "Use my record of clean returns to lower future holds at Hold shops.",
+      "consentYes": "Yes, use it",
+      "consentNo": "No, thank you",
+      "consentIsOn": "Other Hold shops may use your record to lower your hold.",
+      "consentIsOff": "Only each shop’s own record of your returns is used there.",
+      "turnOn": "Use my record at other Hold shops",
+      "turnOff": "Stop using my record at other Hold shops",
+      "saving": "Saving…",
+      "delete": "Delete my record",
+      "deleteLead": "Your returns are removed at every Hold shop, and your next hold is the ordinary one. A claim still being settled stays until it is.",
+      "deleteConfirm": "I understand my record is deleted at every Hold shop",
+      "deleting": "Deleting…",
+      "deleted": "Your record is deleted.",
+      "back": "See your rental",
+      "link": "Your Clean Record",
+      "results": {
+        "renter_unknown": "Your record starts once PayPal has confirmed your payment."
+      }
+    },
+    "verify": {
+      "title": "Check a Clean Record",
+      "lead": "A renter can show you their record of rentals returned in good condition. Hold signs it, and this page checks the signature with Hold's published key, here in your browser.",
+      "paste": "Credential",
+      "pasteHelp": "Scan the code on the renter’s phone, or paste the credential they shared.",
+      "check": "Check",
+      "valid": "Signed by Hold. Valid until {time}.",
+      "counts": "Rentals in the last {months} months",
+      "key": "Hold's public key",
+      "problems": {
+        "malformed": "This is not a Clean Record credential.",
+        "unknown_key": "This credential was not signed with Hold's key.",
+        "bad_signature": "This credential was changed after Hold signed it.",
+        "expired": "This credential has expired. Ask the renter to open their record again.",
+        "not_yet_valid": "This credential is not valid yet. Check the clock on this device."
+      }
+    }
   }
 }

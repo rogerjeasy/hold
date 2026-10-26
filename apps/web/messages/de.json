@@ -85,6 +85,10 @@
     },
     "invite": {
       "title": "Eine Einladung"
+    },
+    "verify": {
+      "title": "Rückgabebilanz prüfen",
+      "description": "Prüfen Sie die Bilanz einwandfrei zurückgegebener Mieten mit dem von Hold veröffentlichten Schlüssel."
     }
   },
   "nav": {
@@ -1201,7 +1205,8 @@
       "staff": "Team",
       "prices": "Preise",
       "paypal": "PayPal",
-      "settings": "Einstellungen"
+      "settings": "Einstellungen",
+      "trust": "Vertrauensstufen"
     },
     "setup": {
       "title": "Richten Sie Ihren Verleih ein",
@@ -2373,5 +2378,144 @@
     },
     "acknowledge": "Ich habe diese Forderung geprüft",
     "reviewFirst": "Prüfen Sie die Belege und Preise. Ihre Antwortfrist beginnt mit Ihrer Prüfbestätigung."
+  },
+  "trust": {
+    "reason": "Ihre Reservierung beträgt {amount} statt {ordinary}, weil Sie in den letzten {months} Monaten {count, plural, one {# Miete} other {# Mieten}} einwandfrei zurückgegeben haben.",
+    "staffReason": "Von {ordinary} gesenkt durch Vertrauensstufen Version {version}, Stufe {rung}: {count, plural, one {# einwandfreie Rückgabe} other {# einwandfreie Rückgaben}} in den letzten {months} Monaten.",
+    "ladder": {
+      "title": "Vertrauensstufen",
+      "lead": "Wer Mieten einwandfrei zurückgibt, bekommt eine niedrigere Reservierung. Vertrauen senkt eine Reservierung nur: ohne Bilanz oder mit einer unbezahlten Forderung gilt die übliche Reservierung.",
+      "none": "Es sind keine Vertrauensstufen veröffentlicht. Für alle gilt die übliche Reservierung.",
+      "current": "Version {version} ist seit dem {date} veröffentlicht. Eine Miete behält die Version, unter der ihre Reservierung gesetzt wurde.",
+      "readOnly": "Nur die Inhaberin oder der Inhaber kann Vertrauensstufen veröffentlichen.",
+      "rungZero": "Weniger einwandfreie Rückgaben: die ganze Reservierung",
+      "rungLine": "{count, plural, one {# einwandfreie Rückgabe} other {# einwandfreie Rückgaben}}: {share} % der Reservierung, für {cover}",
+      "anyValue": "Artikel jeden Werts",
+      "upTo": "Artikel bis zu einem Wert von {amount}",
+      "neverReached": "Braucht eine gespeicherte PayPal-Zahlungsart und wird deshalb noch nicht erreicht.",
+      "historyLine": "Zählt {history}, über die letzten {months} Monate. Eine Miete zählt ab einer Gebühr von {fee} und {hours} Stunden.",
+      "historyNames": {
+        "own": "nur die Rückgaben dieses Ladens",
+        "network": "die Rückgaben dieses Ladens und, mit Zustimmung der Mietenden, anderer Hold-Läden"
+      },
+      "history": "Welche Bilanz zählt",
+      "historyOwn": "Nur die Rückgaben dieses Ladens",
+      "historyNetwork": "Die dieses Ladens und anderer Hold-Läden, wenn die Mietenden zustimmen",
+      "historyHelp": "Ein Laden sieht nie, wo jemand sonst gemietet hat. Er sieht die Stufe und die Zahlen.",
+      "window": "Monate, die zählen",
+      "minimumFee": "Kleinste Gebühr, die zählt, in {currency}",
+      "minimumHours": "Kürzeste Miete, die zählt, in Stunden",
+      "minimumsHelp": "Damit sich keine Bilanz billig aufbauen lässt. Nur eine über PayPal eingezogene Gebühr zählt.",
+      "rungs": "Stufen",
+      "rung": "Stufe {number}",
+      "cleanReturns": "Nötige einwandfreie Rückgaben",
+      "share": "Behaltener Anteil der Reservierung, in %",
+      "largestValue": "Höchster Artikelwert, in {currency}",
+      "largestValueHelp": "Leer lassen für Artikel jeden Werts.",
+      "savedMethod": "Braucht eine gespeicherte PayPal-Zahlungsart",
+      "savedMethodNo": "Nein",
+      "savedMethodYes": "Ja",
+      "savedMethodNote": "Hold speichert noch keine PayPal-Zahlungsarten, deshalb wird eine Stufe, die eine braucht, nie erreicht. Ohne sie bleibt der kleinste Anteil über null.",
+      "remove": "Stufe {number} entfernen",
+      "add": "Stufe hinzufügen",
+      "simulate": "Auf frühere Mieten anwenden",
+      "simulating": "Wird angewendet…",
+      "publish": "Diese Vertrauensstufen veröffentlichen",
+      "publishing": "Wird veröffentlicht…",
+      "published": "Vertrauensstufen veröffentlicht.",
+      "publishHelp": "Veröffentlichen erstellt eine neue Version. Bereits gesetzte Reservierungen behalten ihre.",
+      "simulation": {
+        "title": "Angewendet auf {count, plural, one {# frühere Miete} other {# frühere Mieten}}",
+        "lowered": "Gesenkte Reservierungen",
+        "loweredBy": "Insgesamt gesenkt um",
+        "claimsAbove": "Frühere Forderungen über der gesenkten Reservierung",
+        "uncovered": "Noch in Rechnung zu stellen",
+        "note": "Mit einfachem Code aus den abgeschlossenen Mieten dieses Ladens und seinem Geldprotokoll berechnet."
+      },
+      "ledger": {
+        "title": "Vertrauensprotokoll",
+        "empty": "Seit Beginn der Vertrauensstufen wurde keine Miete abgeschlossen.",
+        "outcomes": {
+          "clean": "Einwandfrei",
+          "settled": "Beglichen",
+          "unpaid": "Unbezahlt",
+          "open": "Offen"
+        },
+        "notCounted": "Zählt nicht",
+        "line": "{category} · abgeschlossen am {date}",
+        "see": "Miete ansehen"
+      },
+      "results": {
+        "currency_unset": "Veröffentlichen Sie zuerst Ihre Preisliste, damit die Stufen eine Währung haben.",
+        "currency_mismatch": "Die Stufen müssen in der Währung des Ladens sein.",
+        "rows_mismatched": "Jede Stufe braucht ihre Rückgaben, ihren Anteil und ihren Wert.",
+        "minimum_fee_invalid": "Die kleinste Gebühr ist kein Betrag. Verwenden Sie Ziffern, etwa 20 oder 20,00.",
+        "minimum_hours_invalid": "Die kürzeste Miete ist eine ganze Zahl von Stunden, bis 672.",
+        "minimum_fee_wrong_currency": "Die kleinste Gebühr muss in der Währung des Ladens sein.",
+        "window_invalid": "Es zählen 1 bis 36 Monate.",
+        "too_many_rungs": "Es gibt höchstens fünf Stufen.",
+        "clean_returns_invalid": "Stufe {row} braucht eine ganze Zahl von Rückgaben, von 1 bis 100.",
+        "clean_returns_not_rising": "Stufe {row} muss mehr Rückgaben verlangen als die Stufe davor.",
+        "share_invalid": "Der Anteil von Stufe {row} ist ein ganzer Prozentsatz unter 100.",
+        "share_not_falling": "Stufe {row} muss weniger von der Reservierung behalten als die Stufe davor.",
+        "share_zero_needs_saved_method": "Stufe {row} behält keine Reservierung, dafür braucht es eine gespeicherte PayPal-Zahlungsart.",
+        "cover_invalid": "Der höchste Artikelwert von Stufe {row} muss über null liegen.",
+        "cover_amount_invalid": "Der höchste Artikelwert von Stufe {row} ist kein Betrag."
+      }
+    },
+    "record": {
+      "title": "Ihre Rückgabebilanz",
+      "lead": "Jede einwandfrei zurückgegebene Miete wird hier gezählt. Die Bilanz enthält keinen Namen, keine E-Mail und keinen Betrag, und Sie entscheiden, ob andere Hold-Läden sie nutzen.",
+      "notYet": "Ihre Bilanz beginnt, sobald PayPal Ihre Zahlung bestätigt hat.",
+      "counts": "Ihre Mieten der letzten {months} Monate",
+      "clean": "Einwandfrei zurückgegeben",
+      "settled": "Forderung beglichen",
+      "unpaid": "Forderung unbezahlt",
+      "open": "Forderung offen",
+      "shops": "Hold-Läden",
+      "neverTaken": "Nie einbehaltene Kautionen: {amount} über {count, plural, one {# Miete} other {# Mieten}}.",
+      "neverTakenNone": "Bisher wurde keine Reservierung für Sie freigegeben.",
+      "credential": "Ihre Bilanz zeigen",
+      "credentialLead": "Alle können diesen Code scannen, um Ihre Bilanz mit dem von Hold veröffentlichten Schlüssel zu prüfen. Er zeigt nur die Zahlen oben und gilt bis {time}. Öffnen Sie diese Seite erneut für einen neuen.",
+      "credentialScan": "Scannen, um diese Bilanz zu prüfen",
+      "credentialText": "Oder teilen Sie diesen Nachweis",
+      "credentialUnavailable": "Ihre Bilanz kann gerade nicht signiert werden. Versuchen Sie es gleich noch einmal.",
+      "consentTitle": "Andere Hold-Läden",
+      "consentQuestion": "Meine Bilanz einwandfreier Rückgaben nutzen, um künftige Reservierungen in Hold-Läden zu senken.",
+      "consentYes": "Ja, nutzen",
+      "consentNo": "Nein, danke",
+      "consentIsOn": "Andere Hold-Läden dürfen Ihre Bilanz nutzen, um Ihre Reservierung zu senken.",
+      "consentIsOff": "Jeder Laden nutzt nur seine eigene Bilanz Ihrer Rückgaben.",
+      "turnOn": "Meine Bilanz in anderen Hold-Läden nutzen",
+      "turnOff": "Meine Bilanz in anderen Hold-Läden nicht mehr nutzen",
+      "saving": "Wird gespeichert…",
+      "delete": "Meine Bilanz löschen",
+      "deleteLead": "Ihre Rückgaben werden in allen Hold-Läden gelöscht, und Ihre nächste Reservierung ist die übliche. Eine noch offene Forderung bleibt, bis sie beglichen ist.",
+      "deleteConfirm": "Ich verstehe, dass meine Bilanz in allen Hold-Läden gelöscht wird",
+      "deleting": "Wird gelöscht…",
+      "deleted": "Ihre Bilanz ist gelöscht.",
+      "back": "Ihre Miete ansehen",
+      "link": "Ihre Rückgabebilanz",
+      "results": {
+        "renter_unknown": "Ihre Bilanz beginnt, sobald PayPal Ihre Zahlung bestätigt hat."
+      }
+    },
+    "verify": {
+      "title": "Rückgabebilanz prüfen",
+      "lead": "Mietende können Ihnen ihre Bilanz einwandfrei zurückgegebener Mieten zeigen. Hold signiert sie, und diese Seite prüft die Signatur mit dem veröffentlichten Schlüssel von Hold, hier in Ihrem Browser.",
+      "paste": "Nachweis",
+      "pasteHelp": "Scannen Sie den Code auf dem Telefon der Mietenden, oder fügen Sie den geteilten Nachweis ein.",
+      "check": "Prüfen",
+      "valid": "Von Hold signiert. Gültig bis {time}.",
+      "counts": "Mieten der letzten {months} Monate",
+      "key": "Öffentlicher Schlüssel von Hold",
+      "problems": {
+        "malformed": "Das ist kein Nachweis einer Rückgabebilanz.",
+        "unknown_key": "Dieser Nachweis wurde nicht mit dem Schlüssel von Hold signiert.",
+        "bad_signature": "Dieser Nachweis wurde nach der Signatur durch Hold verändert.",
+        "expired": "Dieser Nachweis ist abgelaufen. Bitten Sie die Mietenden, ihre Bilanz erneut zu öffnen.",
+        "not_yet_valid": "Dieser Nachweis ist noch nicht gültig. Prüfen Sie die Uhr dieses Geräts."
+      }
+    }
   }
 }
