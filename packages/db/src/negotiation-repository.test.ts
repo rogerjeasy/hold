@@ -116,13 +116,14 @@ describe('a negotiation between two advocates', () => {
 
   it('agrees through the gateway and the referee, both people confirm, and only the agreed total is captured', async () => {
     const claim = await negotiating()
-    expect(await move(claim.negotiationId, claim.renter, 'offer', offer(claim.lines, [20_00, 0], 'Both are wear under clause one.'), later(1))).toMatchObject({ outcome: 'accepted' })
+    expect(await move(claim.negotiationId, claim.renter, 'offer', offer(claim.lines, [20_00, 0], 'Both are wear under the first clause.'), later(1))).toMatchObject({ outcome: 'accepted' })
     expect(await move(claim.negotiationId, shopAgent(), 'offer', offer(claim.lines, [35_00, 10_00], 'The frame scratch stands at 35.00.'), later(2))).toMatchObject({ outcome: 'accepted' })
-    // An argument that states the renter's limit is dropped: only this move's line amounts may appear in it.
+    // An argument that states the renter's limit is dropped: only this move's line amounts may appear in it. The shop's
+    // argument above was dropped too: 35.00 is a line amount, but it is also the shop's lowest total.
     expect(await move(claim.negotiationId, claim.renter, 'offer', offer(claim.lines, [30_00, 10_00], 'I can pay up to 50.00 if I must.'), later(3))).toMatchObject({ outcome: 'accepted' })
     expect(await move(claim.negotiationId, shopAgent(), 'accept', { argument: null }, later(4))).toMatchObject({ outcome: 'accepted', state: 'agreed' })
     const transcript = await shop.act((transaction) => negotiationTranscript(transaction, claim.rentalId))
-    expect(transcript?.moves.map((each) => [each.side, each.kind, each.totalCents, each.argument])).toEqual([['shop', 'offer', 70_00, null], ['renter', 'offer', 20_00, 'Both are wear under clause one.'], ['shop', 'offer', 45_00, 'The frame scratch stands at 35.00.'], ['renter', 'offer', 40_00, null], ['shop', 'accept', null, null]])
+    expect(transcript?.moves.map((each) => [each.side, each.kind, each.totalCents, each.argument])).toEqual([['shop', 'offer', 70_00, null], ['renter', 'offer', 20_00, 'Both are wear under the first clause.'], ['shop', 'offer', 45_00, null], ['renter', 'offer', 40_00, null], ['shop', 'accept', null, null]])
     expect(transcript).toMatchObject({ state: 'agreed', agreedCents: 40_00, chainVerified: true })
     expect(JSON.stringify(transcript)).not.toMatch(/highestTotal|lowestShare|largestClaim|5000|"50\.00"/)
     expect((await shop.act((transaction) => transaction.select().from(claims).where(eq(claims.id, claim.claimId))))[0]?.state).toBe('agreed')

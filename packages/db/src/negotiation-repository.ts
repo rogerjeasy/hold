@@ -1,5 +1,5 @@
-import { checkReply, checkSettlementLimits, CLAIM_TRANSITIONS, gatewayDecision, guardNumbers, judgeMove, money, negotiationDeadline, openingOffer, otherSide, transition } from '@hold/domain'
-import type { AgentActor, GatewayDecision, NegotiationSide, PassReason, ProposedMove, RefusalReason, Table } from '@hold/domain'
+import { checkReply, checkSettlementLimits, CLAIM_TRANSITIONS, gatewayDecision, guardNumbers, judgeMove, money, negotiationDeadline, openingOffer, otherSide, shopFloorCents, transition } from '@hold/domain'
+import type { AgentActor, ForbiddenNumbers, GatewayDecision, NegotiationSide, PassReason, ProposedMove, RefusalReason, Table } from '@hold/domain'
 import { and, count, eq, gt, isNull, like } from 'drizzle-orm'
 import { replyToClaim } from './claim-reply-repository.ts'
 import { reserveEvidencePack } from './evidence-repository.ts'
@@ -145,9 +145,17 @@ function readMove(input: MoveInput, side: NegotiationSide): { readonly move: Pro
 
 // The argument is kept only if every amount in it is a line amount of this move, or of the offer it accepts. An
 // advocate cannot write its limit into the transcript (extensions.md section 9.13).
-function guardedArgument(argument: string | null, amounts: readonly number[], currency: string) {
+// As a backstop it also drops any argument that writes the side's own limits in any form, even where a limit happens
+// to equal a line amount.
+function guardedArgument(argument: string | null, amounts: readonly number[], records: NegotiationRecords, side: NegotiationSide) {
   if (argument === null || argument.trim() === '') return { argument: null, argumentDropped: false }
-  const kept = guardNumbers(argument, amounts.map((cents) => money(cents, currency)))
+  const { currency, claimTotalCents } = records.negotiation
+  const shop = records.shopMandate === null ? undefined : checkSettlementLimits('settlement_shop', records.shopMandate.limits)
+  const renter = checkSettlementLimits('settlement_renter', records.renterMandate.limits)
+  const forbidden: ForbiddenNumbers = side === 'shop'
+    ? shop?.ok === true ? { amounts: [money(shopFloorCents(claimTotalCents, shop.value.lowestSharePercent), currency), money(shop.value.largestClaimCents, currency)], wholeNumbers: [shop.value.lowestSharePercent] } : {}
+    : renter.ok ? { amounts: [money(renter.value.highestTotalCents, currency)] } : {}
+  const kept = guardNumbers(argument, amounts.map((cents) => money(cents, currency)), forbidden)
   return kept === null ? { argument: null, argumentDropped: true } : { argument: kept, argumentDropped: false }
 }
 
@@ -178,7 +186,7 @@ async function applyToNegotiation(transaction: Transaction, records: Negotiation
     return countRefusal(transaction, records, actor, judged.table, judged.reason, now)
   }
   const amounts = proposed.kind === 'offer' ? proposed.lines.map((line) => line.cents) : proposed.kind === 'accept' ? (records.table.last[otherSide(proposed.side)]?.lines ?? []).map((line) => line.cents) : []
-  const words = guardedArgument(rawArgument, amounts, negotiation.currency)
+  const words = guardedArgument(rawArgument, amounts, records, proposed.side)
   await recordMove(transaction, records, proposed, judged.table, { actor: actorLabel(actor), ...words, model: input.model, promptVersion: input.promptVersion }, now)
   await audit(transaction, negotiation, actor, `negotiation.${proposed.kind}`, { sequence: records.moves.length + 1 }, now)
   if (judged.table.status === 'escalated') {
@@ -216,7 +224,7 @@ async function applyReply(transaction: Transaction, records: NegotiationRecords,
     const refusals = { shop: 0, renter: negotiation.renterRefusals + 1 }
     return countRefusal(transaction, records, actor, { ...records.table, refusals, status: refusals.renter >= 2 ? 'escalated' : 'open' }, checked, now)
   }
-  const words = guardedArgument(rawArgument, checked.lines.map((line) => line.cents), negotiation.currency)
+  const words = guardedArgument(rawArgument, checked.lines.map((line) => line.cents), records, proposed.side)
   await recordMove(transaction, records, proposed, records.table, { actor: actorLabel(actor), ...words, model: input.model, promptVersion: input.promptVersion }, now)
   await transaction.update(negotiations).set({ state: 'replied', endedAt: now, updatedAt: now }).where(eq(negotiations.id, negotiation.id))
   await audit(transaction, negotiation, actor, 'negotiation.offer', { sequence: 1 }, now)

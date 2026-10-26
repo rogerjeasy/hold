@@ -80,6 +80,7 @@ export { checkKeptLine, INCIDENT_HINTS, INCIDENT_KINDS, INCIDENT_LIMITS, INCIDEN
 export type { IncidentHint, IncidentKind, IncidentState, IncidentTriage, KeptLineProblem, Sorted, SortInput } from './incident.ts'
 export { mentionsSafety } from './incident-safety.ts'
 export { guardNumbers } from './number-guard.ts'
+export type { ForbiddenNumbers } from './number-guard.ts'
 
 // Extension 2: the Clean Record and the trust ladder.
 export { cleanRecord, closedOutcome, countsTowardRecord, DEFAULT_WINDOW_MONTHS, INVOICE_DUE_DAYS, OUTCOME_CLASSES, outcomeNow, STORED_OUTCOMES, windowStart } from './clean-record.ts'
