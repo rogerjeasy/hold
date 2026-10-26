@@ -313,6 +313,8 @@ Testing is not the same as a shop. Every real decision is also a label.
 - **X0.5** Closing a claim writes one `finding_outcomes` row for each of its findings.
 - **X0.6** No number appears anywhere without its count.
 
+**Status, 26 October 2026.** X0.2, X0.5 and X0.6 pass in tests (`eval/src/evaluate.test.ts`, `packages/db/src/scorecard-repository.test.ts`, `packages/domain/src/evaluation.test.ts`, the scorecard screens' tests). X0.3 holds by construction, every surface rendering one run's measures through `sharePercent`, and is checked when the first run is accepted. X0.1 waits for the photographs of the hybrid set (`architecture.md` section 10.8). X0.4 needs the `hold-github-eval` role and the `hold/database/eval` secret deployed, the repository variables `AWS_EVAL_ROLE_ARN` and `HOLD_DATABASE_EVAL_SECRET_ARN` set, and one deliberately weakened run.
+
 ### 5.10 In the video
 
 Four seconds on the scorecard while the damage comparison runs, with the real numbers on screen.

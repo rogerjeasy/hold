@@ -273,7 +273,7 @@ erDiagram
 
 ### 6.3 Tables
 
-Every table except `users` and `renters` carries a `shop_id`.
+Every table except `users`, `renters` and `eval_runs` carries a `shop_id`.
 
 | Table | Key contents |
 |---|---|
@@ -298,6 +298,8 @@ Every table except `users` and `renters` carries a `shop_id`.
 | `marks` | Item, view, region, description, first seen session, status |
 | `comparisons` | Handover session, return session, alignment scores, state, model and version used |
 | `findings` | Comparison, view, region, class, confidence, description, matched mark, suggested price entry |
+| `finding_outcomes` | Finding, rental, claim, verdict (upheld, reduced, removed by staff, removed after contest), who decided, when. Append-only. |
+| `eval_runs` | Half, data set version, pipeline version, model, prompt version, thresholds, pair counts, measures for all pairs and for real ones, gate limits and result, accepted, results file. No `shop_id`. |
 | `claims` | Rental, total, state, presented at, reply due |
 | `claim_lines` | Claim, finding, price entry, amount, source |
 | `claim_replies` | Claim, renter decision, comment, added photos |
@@ -1026,6 +1028,15 @@ The owner can ask questions and give instructions in plain language.
 The set runs before every release and whenever a prompt or threshold changes.
 
 **The results are published.** The set has a tuning half and a gate half. Only the gate half is published, each number with its count, in the owner's view, on a public page and in the README. The build fails if the gate half gets worse. Every closed claim also records what a person decided about each finding. See `extensions.md` section 5.
+
+**As built (Extension 0, 26 October 2026).**
+
+- **The set.** `eval/set/manifest.json` names each pair: its half, group (`clean_easy`, `clean_hard`, `wear`, `damage`, `known_mark`, `identity`), origin (`real` or `synthetic`), view, photographs, labelled regions and known marks. `manifestSchema` refuses a damage pair without a region, a clean pair with one, and a photograph outside its half's folder. `loadHalf` reads one half only and fingerprints its cases and bytes as the data set version.
+- **Synthetic pairs.** The set was agreed on 26 October as a hybrid: real photographs of one bike in several sessions, and `eval/src/augment.ts` to draw scratches, dents, cracks, chips and missing parts with exact regions, change light and angle, and add mud. Every synthetic pair starts from two different real shots of one view, so the reuse check cannot catch it by accident, and every report shows the measures twice: all pairs, and the photographs taken as they are.
+- **The runner.** `pnpm eval --half gate|tuning` sends each pair through the shop's own steps (`photoReused`, `inspectPair`, `compareInspection` with the Bedrock model), measures it with `measureEvaluation` in `packages/domain`, checks `checkGate` against the last accepted run and the limits in `eval/gate-limits.json`, writes a report and a results file to `eval/results`, and records an `eval_runs` row. A count of zero that is the good outcome is printed with its 95 percent bound (`zeroUpperBound`): sixty clean pairs with none wrongly flagged supports "below about 6 percent".
+- **Who writes runs.** `eval_runs` belongs to no shop. The services read it. The `hold_eval` login (secret `hold/database/eval`) may insert a run that is not accepted and read runs, nothing else; accepting a run is the owner's act, run locally with `--accept`. The gate workflow `.github/workflows/comparison-gate.yml` runs on changes to the comparison, as `hold-github-eval`, which may call the model, query the database and read only that login.
+- **Where the figures appear.** `/shop/scorecard` for staff, with the field record; `/reliability` for anyone, linked from the footer and the AI page; beside each finding's confidence on the comparison screen; in the evidence record as "Last measured" (snapshot field `measurement`); and in the README between the scorecard markers, written by `pnpm --filter @hold/eval readme` from the accepted run's results file. All of them print the same `sharePercent` beside each count.
+- **The field record.** When a rental closes, `recordFindingOutcomes` writes one `finding_outcomes` row per damage or uncertain finding from photographs that were not simulated: `upheld`, `reduced`, `removed_by_staff` or `removed_after_contest` (`verdictForFinding`). `fieldRecordAlarm` warns the owner when this month's share of removed findings rises well above the months before.
 
 ---
 
