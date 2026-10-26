@@ -1,5 +1,6 @@
-export { CREDENTIAL_MINUTES, CREDENTIAL_TYPE, issueCredential, verifyCredential } from './credential.ts'
-export type { CredentialProblem, VerifiedCredential } from './credential.ts'
+export { CREDENTIAL_MINUTES, CREDENTIAL_TYPE, issueCredential } from './credential.ts'
+export { verifyCredential } from './verify.ts'
+export type { CredentialProblem, VerificationKey, VerifiedCredential } from './verify.ts'
 export { createKmsSigner, kmsCalls } from './kms-signer.ts'
 export type { KmsCalls } from './kms-signer.ts'
 export { createLocalSigner } from './local-signer.ts'

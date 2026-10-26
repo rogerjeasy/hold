@@ -14,6 +14,10 @@ const cookieKey = z
 // Where a key comes from: the key itself, allowed only on a developer's machine, or the secret holding it.
 export type KeySource = { readonly kind: 'value'; readonly key: Buffer } | { readonly kind: 'secret'; readonly secretArn: string }
 
+// The key Clean Record credentials are signed with: an asymmetric key in AWS KMS, named by its ID or alias, or, on a
+// developer's machine and in tests, a key made in the process at start.
+export type CredentialKeySource = { readonly kind: 'kms'; readonly keyId: string } | { readonly kind: 'local' }
+
 const awsServices = z
   .object({
     HOLD_ENVIRONMENT: z.enum(['development', 'production']).default('development'),
@@ -29,6 +33,13 @@ const awsServices = z
     // developer's machine it may be given as is, or fall back to the cookie key.
     HOLD_RENTER_LINK_KEY: cookieKey.optional(),
     HOLD_RENTER_LINK_KEY_SECRET_ARN: z.string().startsWith('arn:aws:secretsmanager:').optional(),
+    // The renter key, a keyed hash of the PayPal payer ID (extensions.md section 7.4), is made with a secret of its own.
+    // On a developer's machine it may be given as is, or fall back to the cookie key.
+    HOLD_TRUST_KEY: cookieKey.optional(),
+    HOLD_TRUST_KEY_SECRET_ARN: z.string().startsWith('arn:aws:secretsmanager:').optional(),
+    // The KMS key, by ID, ARN or alias, that signs Clean Record credentials. Without it, on a developer's machine, a key
+    // made at start signs them.
+    HOLD_CREDENTIAL_KEY_ID: z.string().min(1).max(300).optional(),
     // The address links in Hold's emails point to.
     HOLD_PUBLIC_URL: z.url().default('http://localhost:3210'),
     // The Secrets Manager secret holding the SMTP account Hold's own emails go through, by name or ARN.
@@ -75,6 +86,18 @@ const awsServices = z
     path: ['HOLD_RENTER_LINK_KEY'],
     message: 'Deployed, the renter link key comes from Secrets Manager only.',
   })
+  .refine((value) => value.HOLD_ENVIRONMENT === 'development' || value.HOLD_TRUST_KEY_SECRET_ARN !== undefined, {
+    path: ['HOLD_TRUST_KEY_SECRET_ARN'],
+    message: 'Deployed, renter keys are made with their own secret, from Secrets Manager.',
+  })
+  .refine((value) => value.HOLD_ENVIRONMENT === 'development' || value.HOLD_CREDENTIAL_KEY_ID !== undefined, {
+    path: ['HOLD_CREDENTIAL_KEY_ID'],
+    message: 'Deployed, credentials are signed with the key in KMS.',
+  })
+  .refine((value) => value.HOLD_ENVIRONMENT === 'development' || value.HOLD_TRUST_KEY === undefined, {
+    path: ['HOLD_TRUST_KEY'],
+    message: 'Deployed, the renter key secret comes from Secrets Manager only.',
+  })
 
 // The automated tests run the built app against in-process fakes: an identity service whose code is fixed, a
 // database in memory, and a mailer and credential store that keep what they are given. Only this environment uses
@@ -94,6 +117,8 @@ export type WebConfig =
       readonly database: { readonly clusterArn: string; readonly secretArn: string; readonly name: string }
       readonly cookieKey: KeySource
       readonly renterLinkKey: KeySource
+      readonly trustKey: KeySource
+      readonly credentialKey: CredentialKeySource
       readonly publicUrl: string
       readonly smtpSecret: string
       readonly paypalMode: 'sandbox'
@@ -106,6 +131,8 @@ export type WebConfig =
       readonly services: 'fake'
       readonly cookieKey: KeySource
       readonly renterLinkKey: KeySource
+      readonly trustKey: KeySource
+      readonly credentialKey: CredentialKeySource
       readonly publicUrl: string
       readonly paypalMode: 'sandbox'
     }
@@ -114,7 +141,7 @@ export function loadWebConfig(environment: Readonly<Record<string, string | unde
   if (environment['HOLD_ENVIRONMENT'] === 'test') {
     const parsed = fakeServices.parse(environment)
     const key = { kind: 'value', key: parsed.HOLD_COOKIE_KEY } as const
-    return { environment: 'test', services: 'fake', cookieKey: key, renterLinkKey: key, publicUrl: parsed.HOLD_PUBLIC_URL, paypalMode: 'sandbox' }
+    return { environment: 'test', services: 'fake', cookieKey: key, renterLinkKey: key, trustKey: key, credentialKey: { kind: 'local' }, publicUrl: parsed.HOLD_PUBLIC_URL, paypalMode: 'sandbox' }
   }
   const parsed = awsServices.safeParse(environment)
   if (!parsed.success) {
@@ -138,6 +165,13 @@ export function loadWebConfig(environment: Readonly<Record<string, string | unde
         : value.HOLD_RENTER_LINK_KEY !== undefined
           ? { kind: 'value', key: value.HOLD_RENTER_LINK_KEY }
           : cookieKeySource,
+    trustKey:
+      value.HOLD_TRUST_KEY_SECRET_ARN !== undefined
+        ? { kind: 'secret', secretArn: value.HOLD_TRUST_KEY_SECRET_ARN }
+        : value.HOLD_TRUST_KEY !== undefined
+          ? { kind: 'value', key: value.HOLD_TRUST_KEY }
+          : cookieKeySource,
+    credentialKey: value.HOLD_CREDENTIAL_KEY_ID === undefined ? { kind: 'local' } : { kind: 'kms', keyId: value.HOLD_CREDENTIAL_KEY_ID },
     publicUrl: value.HOLD_PUBLIC_URL.replace(/\/$/, ''),
     smtpSecret: value.HOLD_SMTP_SECRET,
     paypalMode: value.HOLD_PAYPAL_MODE,

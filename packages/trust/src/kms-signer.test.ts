@@ -1,7 +1,8 @@
 import { createPublicKey, generateKeyPairSync, sign } from 'node:crypto'
 import { GetPublicKeyCommand, SignCommand } from '@aws-sdk/client-kms'
 import { describe, expect, it } from 'vitest'
-import { issueCredential, verifyCredential } from './credential.ts'
+import { issueCredential } from './credential.ts'
+import { verifyCredential } from './verify.ts'
 import { createKmsSigner } from './kms-signer.ts'
 import type { KmsCalls } from './kms-signer.ts'
 
@@ -31,7 +32,7 @@ describe('signing credentials with a key in AWS KMS', () => {
     const { kms, calls } = fakeKms()
     const signer = await createKmsSigner({ keyId: 'alias/hold-credential-key', kms })
     const token = await issueCredential(signer, renterKey, record, NOW)
-    expect(verifyCredential(token, [await signer.publicKey()], NOW)).toMatchObject({ ok: true, value: { record } })
+    expect(await verifyCredential(token, [await signer.publicKey()], NOW)).toMatchObject({ ok: true, value: { record } })
     const signing = calls.find((call) => call instanceof SignCommand)
     expect(signing?.input).toMatchObject({ KeyId: 'alias/hold-credential-key', MessageType: 'RAW', SigningAlgorithm: 'ECDSA_SHA_256' })
   })
@@ -41,7 +42,7 @@ describe('signing credentials with a key in AWS KMS', () => {
     const key = await signer.publicKey()
     // About one in 256 values of r or s is short, and half have a leading zero byte: hundreds of signatures meet both.
     for (let index = 0; index < 400; index += 1) {
-      expect(verifyCredential(await issueCredential(signer, renterKey, { ...record, clean: index }, NOW), [key], NOW).ok).toBe(true)
+      expect((await verifyCredential(await issueCredential(signer, renterKey, { ...record, clean: index }, NOW), [key], NOW)).ok).toBe(true)
     }
   })
 

@@ -46,6 +46,24 @@ describe('loadWebConfig', () => {
     expect(() => loadWebConfig({ ...local, HOLD_ENVIRONMENT: 'production' })).toThrow(/HOLD_COOKIE_KEY/)
   })
 
+  it('names the renter key’s secret and the credential signing key in KMS, and needs both when deployed', () => {
+    const trustSecret = 'arn:aws:secretsmanager:us-east-1:1:secret:hold/web/trust-key'
+    expect(loadWebConfig({ ...AWS, HOLD_TRUST_KEY_SECRET_ARN: trustSecret, HOLD_CREDENTIAL_KEY_ID: 'alias/hold-credential-key' })).toMatchObject({
+      trustKey: { kind: 'secret', secretArn: trustSecret },
+      credentialKey: { kind: 'kms', keyId: 'alias/hold-credential-key' },
+    })
+    const deployed = { ...AWS, HOLD_ENVIRONMENT: 'production', HOLD_EXECUTIONS_QUEUE_URL: 'https://sqs.test/e.fifo', HOLD_PAYPAL_EVENTS_QUEUE_URL: 'https://sqs.test/p.fifo', HOLD_EVIDENCE_BUCKET: 'evidence', HOLD_DISPLAY_BUCKET: 'display', HOLD_RENTER_LINK_KEY_SECRET_ARN: SECRET }
+    expect(() => loadWebConfig(deployed)).toThrow(/HOLD_TRUST_KEY_SECRET_ARN, HOLD_CREDENTIAL_KEY_ID/)
+    expect(() => loadWebConfig({ ...deployed, HOLD_TRUST_KEY_SECRET_ARN: trustSecret, HOLD_CREDENTIAL_KEY_ID: 'alias/hold-credential-key', HOLD_TRUST_KEY: KEY })).toThrow(/HOLD_TRUST_KEY/)
+    expect(loadWebConfig({ ...deployed, HOLD_TRUST_KEY_SECRET_ARN: trustSecret, HOLD_CREDENTIAL_KEY_ID: 'alias/hold-credential-key' })).toMatchObject({ environment: 'production' })
+  })
+
+  it('signs credentials with a key in this process on a developer’s machine, and makes the renter key from the cookie key unless told otherwise', () => {
+    expect(loadWebConfig(AWS)).toMatchObject({ trustKey: { kind: 'secret', secretArn: SECRET }, credentialKey: { kind: 'local' } })
+    expect(loadWebConfig({ ...AWS, HOLD_TRUST_KEY: KEY }).trustKey).toMatchObject({ kind: 'value' })
+    expect(loadWebConfig({ HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: KEY })).toMatchObject({ trustKey: { kind: 'value' }, credentialKey: { kind: 'local' } })
+  })
+
   it('names the missing settings without showing any value', () => {
     expect(() => loadWebConfig({ ...AWS, HOLD_COGNITO_CLIENT_ID: undefined, HOLD_SMTP_SECRET: '' })).toThrow(/HOLD_COGNITO_CLIENT_ID, HOLD_SMTP_SECRET/)
     expect(() => loadWebConfig({ ...AWS, HOLD_DATABASE_CLUSTER_ARN: 'not-an-arn' })).not.toThrow(/not-an-arn/)

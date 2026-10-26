@@ -1,6 +1,7 @@
 import type { CleanRecord } from '@hold/domain'
 import { describe, expect, it } from 'vitest'
-import { CREDENTIAL_MINUTES, issueCredential, verifyCredential } from './credential.ts'
+import { CREDENTIAL_MINUTES, issueCredential } from './credential.ts'
+import { verifyCredential } from './verify.ts'
 import { createLocalSigner } from './local-signer.ts'
 import { renterKeyFor } from './renter-key.ts'
 
@@ -16,7 +17,7 @@ describe('a Clean Record credential', () => {
   it('verifies with the published public key alone, and shows the counts', async () => {
     const signer = createLocalSigner()
     const token = await issueCredential(signer, renterKey, record, NOW)
-    expect(verifyCredential(token, [await signer.publicKey()], new Date(NOW.getTime() + MINUTE))).toEqual({
+    expect(await verifyCredential(token, [await signer.publicKey()], new Date(NOW.getTime() + MINUTE))).toEqual({
       ok: true,
       value: { renterKey, record, issuedAt: NOW, expiresAt: new Date(NOW.getTime() + CREDENTIAL_MINUTES * MINUTE) },
     })
@@ -30,27 +31,27 @@ describe('a Clean Record credential', () => {
     const signer = createLocalSigner()
     const [header, , signature] = segments(await issueCredential(signer, renterKey, record, NOW))
     const better = Buffer.from(JSON.stringify({ ...(decode(segments(await issueCredential(signer, renterKey, record, NOW))[1]) as object), rec: { ...record, clean: 50 } })).toString('base64url')
-    expect(verifyCredential(`${header ?? ''}.${better}.${signature ?? ''}`, [await signer.publicKey()], NOW)).toEqual({ ok: false, error: 'bad_signature' })
+    expect(await verifyCredential(`${header ?? ''}.${better}.${signature ?? ''}`, [await signer.publicKey()], NOW)).toEqual({ ok: false, error: 'bad_signature' })
   })
 
   it('fails once expired', async () => {
     const signer = createLocalSigner()
     const token = await issueCredential(signer, renterKey, record, NOW)
-    expect(verifyCredential(token, [await signer.publicKey()], new Date(NOW.getTime() + CREDENTIAL_MINUTES * MINUTE))).toEqual({ ok: false, error: 'expired' })
+    expect(await verifyCredential(token, [await signer.publicKey()], new Date(NOW.getTime() + CREDENTIAL_MINUTES * MINUTE))).toEqual({ ok: false, error: 'expired' })
   })
 
   it('fails when issued in the future', async () => {
     const signer = createLocalSigner()
     const token = await issueCredential(signer, renterKey, record, new Date(NOW.getTime() + 10 * MINUTE))
-    expect(verifyCredential(token, [await signer.publicKey()], NOW)).toEqual({ ok: false, error: 'not_yet_valid' })
+    expect(await verifyCredential(token, [await signer.publicKey()], NOW)).toEqual({ ok: false, error: 'not_yet_valid' })
   })
 
   it('fails when signed by another key, even one claiming Hold’s key ID', async () => {
     const hold = createLocalSigner()
     const other = createLocalSigner()
-    expect(verifyCredential(await issueCredential(other, renterKey, record, NOW), [await hold.publicKey()], NOW)).toEqual({ ok: false, error: 'unknown_key' })
+    expect(await verifyCredential(await issueCredential(other, renterKey, record, NOW), [await hold.publicKey()], NOW)).toEqual({ ok: false, error: 'unknown_key' })
     const impostor = { ...other, keyId: hold.keyId }
-    expect(verifyCredential(await issueCredential(impostor, renterKey, record, NOW), [await hold.publicKey()], NOW)).toEqual({ ok: false, error: 'bad_signature' })
+    expect(await verifyCredential(await issueCredential(impostor, renterKey, record, NOW), [await hold.publicKey()], NOW)).toEqual({ ok: false, error: 'bad_signature' })
   })
 
   it.each([
@@ -58,7 +59,7 @@ describe('a Clean Record credential', () => {
     ['an unsigned token', `${Buffer.from(JSON.stringify({ alg: 'none' })).toString('base64url')}.e30.`],
     ['too long a token', 'a'.repeat(5000)],
   ])('refuses %s', async (_, token) => {
-    expect(verifyCredential(token, [await createLocalSigner().publicKey()], NOW)).toEqual({ ok: false, error: 'malformed' })
+    expect(await verifyCredential(token, [await createLocalSigner().publicKey()], NOW)).toEqual({ ok: false, error: 'malformed' })
   })
 
   it('contains no name, email, payer ID, shop identifier or amount (X2.5)', async () => {
