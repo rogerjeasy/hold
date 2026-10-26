@@ -27,6 +27,7 @@ CREATE TABLE "incidents" (
 	"theft_details" jsonb,
 	"staff_alerted_at" timestamp with time zone,
 	"reported_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"sent_at" timestamp with time zone,
 	"sorted_at" timestamp with time zone,
 	"resolved_at" timestamp with time zone,
 	CONSTRAINT "incidents_sessionId_unique" UNIQUE("session_id"),
@@ -62,7 +63,7 @@ CREATE POLICY "shop_isolation" ON "incidents" AS PERMISSIVE FOR ALL TO "hold_app
 -- The incident desk (extensions.md section 10). The services may read, add and move incidents, never delete one. The
 -- renter's words, the rental and item, the photographs and when it was reported are evidence and never change.
 GRANT SELECT, INSERT ON incidents TO hold_app, hold_worker;--> statement-breakpoint
-GRANT UPDATE (state, kind, safety, triage_outcome, triage, model, prompt_version, simulated, confirmation, suggested_price_entry_id, offered_price_entry_id, offer_confirmed_by_user_id, offer_confirmed_at, agreed_price_entry_id, agreed_cents, agreed_at, theft_details, staff_alerted_at, sorted_at, resolved_at) ON incidents TO hold_app, hold_worker;--> statement-breakpoint
+GRANT UPDATE (state, kind, safety, triage_outcome, triage, model, prompt_version, simulated, confirmation, suggested_price_entry_id, offered_price_entry_id, offer_confirmed_by_user_id, offer_confirmed_at, agreed_price_entry_id, agreed_cents, agreed_at, theft_details, staff_alerted_at, sent_at, sorted_at, resolved_at) ON incidents TO hold_app, hold_worker;--> statement-breakpoint
 -- A price the renter may agree to is one a named staff member confirmed, never the model's suggestion alone.
 ALTER TABLE incidents ADD CONSTRAINT incidents_confirmed_offer CHECK ((offered_price_entry_id IS NULL) = (offer_confirmed_by_user_id IS NULL) AND (offered_price_entry_id IS NULL) = (offer_confirmed_at IS NULL));--> statement-breakpoint
 -- An agreed line is a confirmed entry, its positive amount and the time, together.
@@ -70,7 +71,7 @@ ALTER TABLE incidents ADD CONSTRAINT incidents_agreed_line CHECK ((agreed_cents 
 -- A line agreed during the rental names its incident, and no other line does.
 ALTER TABLE claim_lines ADD CONSTRAINT claim_lines_agreed_incident CHECK ((source = 'agreed_in_rental') = (incident_id IS NOT NULL));--> statement-breakpoint
 -- The incident's state machine (domain incident.ts), again in the database: no move that is not listed, and neither a
--- confirmed price nor an agreed line changes once set.
+-- confirmed price, the renter's account of a theft, nor an agreed line changes once set.
 CREATE FUNCTION hold_incident_guard() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
   IF NEW.state <> OLD.state AND (OLD.state, NEW.state) NOT IN (
@@ -83,6 +84,16 @@ BEGIN
   END IF;
   IF OLD.offered_price_entry_id IS NOT NULL AND (NEW.offered_price_entry_id IS DISTINCT FROM OLD.offered_price_entry_id OR NEW.offer_confirmed_by_user_id IS DISTINCT FROM OLD.offer_confirmed_by_user_id OR NEW.offer_confirmed_at IS DISTINCT FROM OLD.offer_confirmed_at) THEN
     RAISE EXCEPTION 'A confirmed price never changes';
+  END IF;
+  IF OLD.sent_at IS NOT NULL AND NEW.sent_at IS DISTINCT FROM OLD.sent_at THEN
+    RAISE EXCEPTION 'A sent report is never unsent';
+  END IF;
+  -- The renter's account of a theft is given once; only a missing police report number may be added, once.
+  IF OLD.theft_details IS NOT NULL AND NEW.theft_details IS DISTINCT FROM OLD.theft_details AND NOT (
+    NEW.theft_details IS NOT NULL AND (NEW.theft_details - 'policeReport') = (OLD.theft_details - 'policeReport')
+    AND OLD.theft_details ->> 'policeReport' = '' AND coalesce(NEW.theft_details ->> 'policeReport', '') <> ''
+  ) THEN
+    RAISE EXCEPTION 'Theft details are never rewritten';
   END IF;
   IF OLD.agreed_cents IS NOT NULL AND (NEW.agreed_cents IS DISTINCT FROM OLD.agreed_cents OR NEW.agreed_price_entry_id IS DISTINCT FROM OLD.agreed_price_entry_id OR NEW.agreed_at IS DISTINCT FROM OLD.agreed_at) THEN
     RAISE EXCEPTION 'An agreed line never changes';

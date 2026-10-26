@@ -59,6 +59,8 @@ export const incidents = pgTable(
     theftDetails: jsonb().$type<TheftDetails>(),
     staffAlertedAt: at(),
     reportedAt: createdAt(),
+    // When the renter sent it. From then its photographs are closed, and staff see it even before it is sorted.
+    sentAt: at(),
     sortedAt: at(),
     resolvedAt: at(),
   },

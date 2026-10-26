@@ -1,6 +1,6 @@
 import { checkReportedRegion, guardNumbers, INCIDENT_LIMITS, INCIDENT_TRANSITIONS, mayAgree, mayConfirmOffer, mayMakeShopMatter, sortIncident, transition } from '@hold/domain'
 import type { IncidentHint, IncidentKind, IncidentState, IncidentTriage, Region } from '@hold/domain'
-import { and, asc, desc, eq, inArray, isNull, ne } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, isNotNull, isNull, ne } from 'drizzle-orm'
 import { liveLink, storeRenterCode } from './claim-code-repository.ts'
 import { claimStaff } from './claim-access.ts'
 import { sealSession } from './capture-repository.ts'
@@ -65,9 +65,11 @@ export type MarkedBox = { readonly view: string; readonly region: Region }
 export async function sendIncident(transaction: Transaction, rentalId: string, incidentId: string, box: MarkedBox | null, now: Date) {
   const incident = await lockedIncident(transaction, incidentId, rentalId)
   if (incident === undefined) return refused('not_found')
-  if (incident.state !== 'reported') return refused('already_sent')
+  if (incident.state !== 'reported' || incident.sentAt !== null) return refused('already_sent')
   const taken = await transaction.select({ view: photos.view }).from(photos).where(and(eq(photos.sessionId, incident.sessionId), isNull(photos.supersededAt)))
   if (box !== null && (!taken.some((photo) => photo.view === box.view) || !checkReportedRegion(box.region))) return refused('region_invalid')
+  // Sent closes the session: photographs are sealed into the item's chain, and none can be added after.
+  await transaction.update(incidents).set({ sentAt: now }).where(eq(incidents.id, incidentId))
   if (taken.length > 0) {
     const sealed = await sealSession(transaction, incident.sessionId, now)
     if (!sealed.ok) throw new Error('The incident photographs could not be sealed.')
@@ -100,8 +102,8 @@ export async function sortIncidentReport(transaction: Transaction, incidentId: s
   const incident = await lockedIncident(transaction, incidentId)
   if (incident === undefined) return refused('not_found')
   if (incident.state !== 'reported') return { ok: true, state: incident.state, kind: incident.kind } as const
+  if (incident.sentAt === null) return refused('not_sent')
   const [session] = await transaction.select({ sealedAt: captureSessions.sealedAt }).from(captureSessions).where(eq(captureSessions.id, incident.sessionId))
-  if (session?.sealedAt == null && (await transaction.select({ id: photos.id }).from(photos).where(eq(photos.sessionId, incident.sessionId))).length > 0) return refused('not_sent')
   const [rental] = await transaction.select({ priceListId: rentals.priceListId }).from(rentals).where(eq(rentals.id, incident.rentalId))
   if (rental === undefined) return refused('not_found')
   const prices = await transaction.select({ id: priceEntries.id, code: priceEntries.code }).from(priceEntries).where(eq(priceEntries.priceListId, rental.priceListId))
@@ -154,13 +156,28 @@ export async function leaveIncidentForReturn(transaction: Transaction, rentalId:
   return { ok: true } as const
 }
 
-// The fixed steps of a theft or loss, in the renter's words. A police report number may come later.
+const clip = (text: string) => text.trim().slice(0, THEFT_FIELD_LENGTH)
+
+// The fixed steps of a theft or loss, in the renter's words, given once while the report waits for a person. What the
+// renter said is evidence: it is never rewritten (the database refuses it too, migration 0021).
 export async function saveTheftDetails(transaction: Transaction, rentalId: string, incidentId: string, details: TheftDetails) {
   const incident = await lockedIncident(transaction, incidentId, rentalId)
   if (incident === undefined) return refused('not_found')
-  if (incident.kind !== 'theft_or_loss' || !['awaiting_staff', 'claim_opened'].includes(incident.state)) return refused('not_theft')
-  const clip = (text: string) => text.trim().slice(0, THEFT_FIELD_LENGTH)
+  if (incident.kind !== 'theft_or_loss' || incident.state !== 'awaiting_staff') return refused('not_theft')
+  if (incident.theftDetails !== null) return refused('already_given')
   await transaction.update(incidents).set({ theftDetails: { where: clip(details.where), when: clip(details.when), lockAndKeys: clip(details.lockAndKeys), policeReport: clip(details.policeReport) } }).where(eq(incidents.id, incidentId))
+  return { ok: true } as const
+}
+
+// The police report number, which often comes later: added once, to details given without one.
+export async function addPoliceReport(transaction: Transaction, rentalId: string, incidentId: string, policeReport: string) {
+  const incident = await lockedIncident(transaction, incidentId, rentalId)
+  if (incident === undefined) return refused('not_found')
+  if (incident.kind !== 'theft_or_loss') return refused('not_theft')
+  if (incident.theftDetails === null) return refused('no_details')
+  if (incident.theftDetails.policeReport !== '') return refused('already_given')
+  if (clip(policeReport) === '') return refused('police_report_invalid')
+  await transaction.update(incidents).set({ theftDetails: { ...incident.theftDetails, policeReport: clip(policeReport) } }).where(eq(incidents.id, incidentId))
   return { ok: true } as const
 }
 
@@ -199,9 +216,10 @@ async function priceView(transaction: Transaction, priceEntryId: string | null):
 // is the list a detector for incidents waiting too long reads (extensions.md section 6, Extension 1).
 export async function shopIncidents(transaction: Transaction, filter: { readonly waiting: boolean }) {
   const rows = await transaction
-    .select({ id: incidents.id, rentalId: incidents.rentalId, state: incidents.state, kind: incidents.kind, hint: incidents.hint, description: incidents.description, safety: incidents.safety, model: incidents.model, triageOutcome: incidents.triageOutcome, simulated: incidents.simulated, currency: incidents.currency, agreedCents: incidents.agreedCents, theftDetails: incidents.theftDetails, staffAlertedAt: incidents.staffAlertedAt, reportedAt: incidents.reportedAt, suggestedPriceEntryId: incidents.suggestedPriceEntryId, offeredPriceEntryId: incidents.offeredPriceEntryId, itemLabel: items.label, renterName: rentals.contactName })
+    .select({ id: incidents.id, rentalId: incidents.rentalId, state: incidents.state, sentAt: incidents.sentAt, kind: incidents.kind, hint: incidents.hint, description: incidents.description, safety: incidents.safety, model: incidents.model, triageOutcome: incidents.triageOutcome, simulated: incidents.simulated, currency: incidents.currency, agreedCents: incidents.agreedCents, theftDetails: incidents.theftDetails, staffAlertedAt: incidents.staffAlertedAt, reportedAt: incidents.reportedAt, suggestedPriceEntryId: incidents.suggestedPriceEntryId, offeredPriceEntryId: incidents.offeredPriceEntryId, itemLabel: items.label, renterName: rentals.contactName })
     .from(incidents).innerJoin(rentalItems, eq(rentalItems.id, incidents.rentalItemId)).innerJoin(items, eq(items.id, rentalItems.itemId)).innerJoin(rentals, eq(rentals.id, incidents.rentalId))
-    .where(filter.waiting ? inArray(incidents.state, ['triaged', 'awaiting_staff']) : ne(incidents.state, 'reported'))
+    // Only sent reports: one sent and not yet sorted, because the model failed mid-way, still waits for a person.
+    .where(and(isNotNull(incidents.sentAt), filter.waiting ? inArray(incidents.state, ['reported', 'triaged', 'awaiting_staff']) : ne(incidents.state, 'withdrawn')))
     .orderBy(desc(incidents.reportedAt), asc(incidents.id))
   return Promise.all(rows.map(async ({ suggestedPriceEntryId, offeredPriceEntryId, ...row }) => ({ ...row, suggestion: await priceView(transaction, suggestedPriceEntryId), offer: await priceView(transaction, offeredPriceEntryId) })))
 }

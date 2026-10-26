@@ -2,8 +2,8 @@ import { createHash, randomUUID } from 'node:crypto'
 import type { IncidentKind } from '@hold/domain'
 import { eq } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { recordPhoto, sealSession, startCaptureSession } from './capture-repository.ts'
-import { agreeIncident, confirmIncidentPrice, incidentAlert, incidentForRenter, issueIncidentCode, leaveIncidentForReturn, makeShopMatter, markIncidentAlerted, rentalIncidents, saveTheftDetails, sendIncident, shopIncidents, sortIncidentReport, startIncident } from './incident-repository.ts'
+import { addMark, recordPhoto, sealSession, startCaptureSession } from './capture-repository.ts'
+import { addPoliceReport, agreeIncident, confirmIncidentPrice, incidentAlert, incidentForRenter, issueIncidentCode, leaveIncidentForReturn, makeShopMatter, markIncidentAlerted, rentalIncidents, saveTheftDetails, sendIncident, shopIncidents, sortIncidentReport, startIncident } from './incident-repository.ts'
 import type { TriageAnswer } from './incident-repository.ts'
 import { captureSessions, executions, incidents, items, marks, outbox, paypalAccounts, priceEntries, renterLinks, staffRoles, users } from './schema/index.ts'
 import { createTestDatabase } from './testing/test-database.ts'
@@ -96,6 +96,18 @@ describe('sending a report', () => {
     if (!started.ok) throw new Error(started.reason)
     expect(await shop.act((transaction) => sendIncident(transaction, rental.rentalId, started.incidentId, null, NOW))).toMatchObject({ ok: true, photographed: false })
     expect(await shop.act((transaction) => transaction.select().from(marks).where(eq(marks.incidentId, started.incidentId)))).toEqual([])
+  })
+
+  it('closes the report’s session once sent, with or without photographs: nothing more can be added to it', async () => {
+    const rental = await out()
+    const started = await shop.act((transaction) => startIncident(transaction, { rentalId: rental.rentalId, itemId: rental.itemId, hint: 'gone', description: 'Taken from outside the station', language: 'en' }, NOW))
+    if (!started.ok) throw new Error(started.reason)
+    await shop.act((transaction) => sendIncident(transaction, rental.rentalId, started.incidentId, null, NOW))
+    const late = { view: 'left-side', evidenceKey: randomUUID(), sha256: sha('late'), quality: QUALITY }
+    expect(await shop.act((transaction) => recordPhoto(transaction, started.sessionId, late, NOW))).toEqual({ ok: false, reason: 'sealed' })
+    expect(await shop.act((transaction) => addMark(transaction, started.sessionId, { view: 'left-side', region: { x: 0.2, y: 0.2, width: 0.1, height: 0.1 }, description: 'Late' }))).toEqual({ ok: false, reason: 'sealed' })
+    const photographed = await reported()
+    expect(await shop.act((transaction) => recordPhoto(transaction, photographed.sessionId, { ...late, evidenceKey: randomUUID() }, NOW))).toEqual({ ok: false, reason: 'sealed' })
   })
 
   it('refuses a box on a view that was not photographed', async () => {
@@ -234,11 +246,35 @@ describe('theft or loss', () => {
   it('keeps the renter’s fixed steps as their words, and a police report number later', async () => {
     const report = await reported('gone', 'It was taken from the station')
     await shop.act((transaction) => sortIncidentReport(transaction, report.incidentId, answered('theft_or_loss', null), NOW))
+    expect(await shop.act((transaction) => addPoliceReport(transaction, report.rentalId, report.incidentId, 'PSP-1'))).toEqual({ ok: false, reason: 'no_details' })
     expect(await shop.act((transaction) => saveTheftDetails(transaction, report.rentalId, report.incidentId, { where: 'Campanhã station', when: 'This morning', lockAndKeys: 'Locked; I have the key', policeReport: '' }))).toEqual({ ok: true })
-    expect(await shop.act((transaction) => saveTheftDetails(transaction, report.rentalId, report.incidentId, { where: 'Campanhã station', when: 'This morning', lockAndKeys: 'Locked; I have the key', policeReport: 'PSP-2026-1234' }))).toEqual({ ok: true })
-    expect(await shop.act((transaction) => incidentForRenter(transaction, report.rentalId, report.incidentId))).toMatchObject({ theftDetails: { policeReport: 'PSP-2026-1234' } })
+    expect(await shop.act((transaction) => addPoliceReport(transaction, report.rentalId, report.incidentId, 'PSP-2026-1234'))).toEqual({ ok: true })
+    expect(await shop.act((transaction) => incidentForRenter(transaction, report.rentalId, report.incidentId))).toMatchObject({ theftDetails: { where: 'Campanhã station', policeReport: 'PSP-2026-1234' } })
     const damage = await reported()
     expect(await shop.act((transaction) => saveTheftDetails(transaction, damage.rentalId, damage.incidentId, { where: 'x', when: 'y', lockAndKeys: 'z', policeReport: '' }))).toEqual({ ok: false, reason: 'not_theft' })
+  })
+})
+
+describe('theft details once given', () => {
+  it('are never rewritten: written once, and a police report number added once', async () => {
+    const report = await reported('gone', 'It was taken from the station')
+    await shop.act((transaction) => sortIncidentReport(transaction, report.incidentId, answered('theft_or_loss', null), NOW))
+    const details = { where: 'Campanhã station', when: 'This morning', lockAndKeys: 'Locked; I have the key', policeReport: '' }
+    expect(await shop.act((transaction) => saveTheftDetails(transaction, report.rentalId, report.incidentId, details))).toEqual({ ok: true })
+    expect(await shop.act((transaction) => saveTheftDetails(transaction, report.rentalId, report.incidentId, { ...details, where: 'Somewhere else' }))).toEqual({ ok: false, reason: 'already_given' })
+    expect(await shop.act((transaction) => addPoliceReport(transaction, report.rentalId, report.incidentId, '  '))).toEqual({ ok: false, reason: 'police_report_invalid' })
+    expect(await shop.act((transaction) => addPoliceReport(transaction, report.rentalId, report.incidentId, 'PSP-1'))).toEqual({ ok: true })
+    expect(await shop.act((transaction) => addPoliceReport(transaction, report.rentalId, report.incidentId, 'PSP-2'))).toEqual({ ok: false, reason: 'already_given' })
+    const refusal = async (work: Promise<unknown>) => { try { await work; return 'not refused' } catch (error) { return String(error instanceof Error ? error.cause : error) } }
+    expect(await refusal(shop.act((transaction) => transaction.update(incidents).set({ theftDetails: { ...details, where: 'Rewritten', policeReport: 'PSP-1' } }).where(eq(incidents.id, report.incidentId))))).toMatch(/never rewritten/)
+    expect(await refusal(shop.act((transaction) => transaction.update(incidents).set({ theftDetails: null }).where(eq(incidents.id, report.incidentId))))).toMatch(/never rewritten/)
+  })
+
+  it('are given only while the report waits for a person', async () => {
+    const report = await reported('gone', 'It was taken from the station')
+    await shop.act((transaction) => sortIncidentReport(transaction, report.incidentId, answered('theft_or_loss', null), NOW))
+    await shop.act((transaction) => makeShopMatter(transaction, report.incidentId))
+    expect(await shop.act((transaction) => saveTheftDetails(transaction, report.rentalId, report.incidentId, { where: 'x', when: 'y', lockAndKeys: 'z', policeReport: '' }))).toEqual({ ok: false, reason: 'not_theft' })
   })
 })
 
@@ -259,7 +295,11 @@ describe('staff', () => {
     const draft = await shop.act((transaction) => startIncident(transaction, { rentalId: started.rentalId, itemId: started.itemId, hint: 'damage', description: 'Not sent yet', language: 'en' }, NOW))
     if (!draft.ok) throw new Error(draft.reason)
     const waiting = await shop.act((transaction) => shopIncidents(transaction, { waiting: true }))
-    expect(waiting.every((row) => ['awaiting_staff', 'triaged'].includes(row.state))).toBe(true)
+    expect(waiting.every((row) => ['reported', 'awaiting_staff', 'triaged'].includes(row.state) && row.sentAt !== null)).toBe(true)
+    expect(waiting.some((row) => row.id === draft.incidentId)).toBe(false)
+    // Sent but never sorted, as when the process stopped during the model's call: it still waits for a person.
+    const unsorted = await reported('damage', 'Sent, then the sorting never finished')
+    expect((await shop.act((transaction) => shopIncidents(transaction, { waiting: true }))).some((row) => row.id === unsorted.incidentId)).toBe(true)
     expect((await shop.act((transaction) => shopIncidents(transaction, { waiting: false }))).some((row) => row.id === draft.incidentId)).toBe(false)
   })
 

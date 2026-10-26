@@ -1,5 +1,5 @@
 {
-  "id": "42848877-324d-4fba-868c-ae9e77f47cfa",
+  "id": "5453d68c-5734-4064-8e7c-caa8913801fa",
   "prevId": "585e4190-040b-4977-affa-094ded825b65",
   "version": "7",
   "dialect": "postgresql",
@@ -2357,6 +2357,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "sent_at": {
+          "name": "sent_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
         },
         "sorted_at": {
           "name": "sorted_at",
