@@ -489,7 +489,7 @@ describe('the web app', () => {
 describe('the comparison gate', () => {
   const evalPolicy = () => JSON.stringify(Object.entries(delivery.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('EvalRole')).map(([, policy]) => policy))
 
-  it('lets only Hold’s repository, on main or on a pull request, take the evaluation role', () => {
+  it('lets only the main branch of Hold’s repository take the evaluation role, never a pull request’s own code', () => {
     delivery.hasResourceProperties('AWS::IAM::Role', {
       RoleName: 'hold-github-eval',
       AssumeRolePolicyDocument: Match.objectLike({
@@ -499,7 +499,7 @@ describe('the comparison gate', () => {
             Condition: {
               StringEquals: {
                 'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
-                'token.actions.githubusercontent.com:sub': ['repo:rogerjeasy@58919295/hold@1418569084:ref:refs/heads/main', 'repo:rogerjeasy@58919295/hold@1418569084:pull_request'],
+                'token.actions.githubusercontent.com:sub': 'repo:rogerjeasy@58919295/hold@1418569084:ref:refs/heads/main',
               },
             },
           }),
@@ -513,6 +513,8 @@ describe('the comparison gate', () => {
     expect(policy).toContain('bedrock-mantle:CreateInference')
     expect(policy).toContain('cluster:hold-database')
     expect(policy).toContain('secret:hold/database/eval-*')
+    expect(policy).toContain('foundation-model/anthropic.claude-opus-5-5')
+    expect(policy).not.toContain('foundation-model/*')
     for (const forbidden of ['database/admin', 'database/app', 'database/worker', 'cloudformation', 'ecr:', 's3:', 'iam:', 'sqs:']) expect(policy).not.toContain(forbidden)
   })
 

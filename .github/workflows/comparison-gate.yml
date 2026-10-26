@@ -2,17 +2,11 @@
 # comparison code changes, the gate half of the evaluation set runs through the real model and the run is recorded in
 # eval_runs. The build fails if clean returns wrongly flagged rise above their limit, or damage found falls by more than
 # its tolerance, against the last accepted run. Accepting a run is a person's act, done locally as the owner, never here.
-# GitHub signs in as hold-github-eval (infra/lib/delivery-stack.ts), which may call the model and record runs, nothing else.
+# GitHub signs in as hold-github-eval (infra/lib/delivery-stack.ts), which may call the model and record runs, nothing else,
+# and only on main: a pull request's own code never runs with these credentials.
 name: Comparison gate
 
 on:
-  pull_request:
-    paths:
-      - packages/compare/**
-      - packages/vision/**
-      - packages/domain/src/inspection.ts
-      - packages/domain/src/evaluation.ts
-      - eval/**
   push:
     branches: [main]
     paths:

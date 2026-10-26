@@ -51,8 +51,6 @@ export const CODE_KEY_ARN = 'arn:aws:kms:us-east-1:707938860881:key/ff9a40c3-97d
 // recreated repository of the same name does not match.
 export const GITHUB_REPOSITORY = 'rogerjeasy/hold'
 export const GITHUB_DEPLOY_SUBJECT = 'repo:rogerjeasy@58919295/hold@1418569084:ref:refs/heads/main'
-// A workflow run for a pull request in the same repository. A fork's pull request gets no token from GitHub.
-export const GITHUB_PULL_REQUEST_SUBJECT = 'repo:rogerjeasy@58919295/hold@1418569084:pull_request'
 // Every role Hold's stacks make carries this boundary, so none can reach beyond Hold (infra/lib/delivery-stack.ts).
 export const PERMISSIONS_BOUNDARY = 'hold-permissions-boundary'
 // The account's CDK bootstrap, shared with the other projects. Hold uses only its bucket, under a prefix of its own,
