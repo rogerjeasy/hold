@@ -22,6 +22,7 @@
     "@hold/notify": "workspace:*",
     "@hold/paypal": "workspace:*",
     "@hold/settle": "workspace:*",
+    "@hold/trust": "workspace:*",
     "@hold/vision": "workspace:*",
     "@techstark/opencv-js": "4.12.0-release.1",
     "class-variance-authority": "^0.7.1",

@@ -89,6 +89,10 @@
     "reliability": {
       "title": "Qué tan fiable es la comparación",
       "description": "La precisión medida de la comparación de fotografías, cada cifra con su recuento."
+    },
+    "verify": {
+      "title": "Comprobar un historial de devoluciones",
+      "description": "Comprueba el historial de alquileres devueltos en buen estado de un cliente, con la clave publicada por Hold."
     }
   },
   "nav": {
@@ -1208,7 +1212,8 @@
       "paypal": "PayPal",
       "settings": "Ajustes",
       "scorecard": "Fiabilidad",
-      "incidents": "Incidentes"
+      "incidents": "Incidentes",
+      "trust": "Escalera de confianza"
     },
     "setup": {
       "title": "Prepara tu tienda",
@@ -2019,6 +2024,10 @@
     "incidentCode": {
       "subject": "Tu código de verificación de Hold",
       "body": "Tu código de verificación es {code}. Caduca en diez minutos. Escríbelo solo en tu página privada de Hold, para el informe que hiciste."
+    },
+    "trustCode": {
+      "subject": "Tu código de Hold para tu historial de devoluciones",
+      "body": "Tu código es {code}. Caduca en diez minutos. Escríbelo solo en tu propia página de alquiler de Hold, para cambiar quién puede usar tu historial. Si no lo pediste, ignora este correo."
     }
   },
   "shell": {
@@ -2663,5 +2672,155 @@
     "publicLink": "Ver la precisión medida",
     "findingAccuracy": "Confianza {level}. En las pruebas, los hallazgos de este nivel fueron correctos {count} de {total}.",
     "findingLevel": "Confianza {level}. Aún sin medir en este nivel."
+  },
+  "trust": {
+    "reason": "Tu retención es de {amount}, no de {ordinary}, porque has devuelto {count, plural, one {# alquiler} other {# alquileres}} en buen estado en los últimos {months} meses.",
+    "staffReason": "Rebajada de {ordinary} por la escalera de confianza versión {version}, peldaño {rung}: {count, plural, one {# devolución sin reclamación} other {# devoluciones sin reclamación}} en los últimos {months} meses.",
+    "ladder": {
+      "title": "Escalera de confianza",
+      "lead": "Los clientes que devuelven sus alquileres en buen estado consiguen una retención más baja. La confianza solo rebaja la retención: sin historial, o con una reclamación impagada, se aplica la retención habitual.",
+      "none": "No hay ninguna escalera de confianza publicada. A cada cliente se le retiene el importe habitual.",
+      "current": "La versión {version} está publicada desde el {date}. Un alquiler mantiene la versión con la que se colocó su retención.",
+      "readOnly": "Solo el propietario puede publicar una escalera de confianza.",
+      "rungZero": "Menos devoluciones sin reclamación: toda la retención",
+      "rungLine": "{count, plural, one {# devolución sin reclamación} other {# devoluciones sin reclamación}}: el {share} % de la retención, para {cover}",
+      "anyValue": "artículos de cualquier valor",
+      "upTo": "artículos de hasta {amount}",
+      "neverReached": "Necesita un método de PayPal guardado, así que aún no se alcanza.",
+      "historyLine": "Cuenta {history}, en los últimos {months} meses. Un alquiler cuenta desde una tarifa de {fee} y {hours} horas.",
+      "historyNames": {
+        "own": "solo las devoluciones de esta tienda",
+        "network": "las devoluciones de esta tienda, y las de otras tiendas Hold si el cliente lo consiente"
+      },
+      "history": "Qué historial cuenta",
+      "historyOwn": "Solo las devoluciones de esta tienda",
+      "historyNetwork": "Las de esta tienda y las de otras tiendas Hold, si el cliente lo consiente",
+      "historyHelp": "Una tienda nunca ve dónde más alquiló un cliente. Ve el peldaño y los recuentos.",
+      "window": "Meses de historial que cuentan",
+      "minimumFee": "Tarifa mínima que cuenta, en {currency}",
+      "minimumHours": "Alquiler más corto que cuenta, en horas",
+      "minimumsHelp": "Para que un historial no se construya a bajo coste. Solo cuenta una tarifa cobrada a través de PayPal.",
+      "rungs": "Peldaños",
+      "rung": "Peldaño {number}",
+      "cleanReturns": "Devoluciones sin reclamación necesarias",
+      "share": "Parte de la retención que se mantiene, en %",
+      "largestValue": "Valor máximo del artículo, en {currency}",
+      "largestValueHelp": "Déjalo vacío para artículos de cualquier valor.",
+      "savedMethod": "Necesita un método de PayPal guardado",
+      "savedMethodNo": "No",
+      "savedMethodYes": "Sí",
+      "savedMethodNote": "Hold aún no guarda métodos de PayPal, así que un peldaño que lo necesita nunca se alcanza. Sin él, la parte más baja queda por encima de cero.",
+      "remove": "Quitar el peldaño {number}",
+      "add": "Añadir un peldaño",
+      "simulate": "Repetir sobre alquileres pasados",
+      "simulating": "Repitiendo…",
+      "publish": "Publicar esta escalera de confianza",
+      "publishing": "Publicando…",
+      "published": "Escalera de confianza publicada.",
+      "publishHelp": "Publicar crea una nueva versión. Las retenciones ya colocadas mantienen la suya.",
+      "simulation": {
+        "title": "Repetida sobre {count, plural, one {# alquiler pasado} other {# alquileres pasados}}",
+        "lowered": "Retenciones rebajadas",
+        "loweredBy": "Rebajadas en total",
+        "claimsAbove": "Reclamaciones pasadas por encima de la retención rebajada",
+        "uncovered": "Queda por facturar",
+        "note": "Calculado con código sencillo a partir de los alquileres cerrados de esta tienda y su registro de dinero."
+      },
+      "ledger": {
+        "title": "Registro de confianza",
+        "empty": "Ningún alquiler se ha cerrado desde que empezó la escalera de confianza.",
+        "outcomes": {
+          "clean": "Sin reclamación",
+          "settled": "Saldada",
+          "unpaid": "Impagada",
+          "open": "En curso"
+        },
+        "notCounted": "No cuenta",
+        "line": "{category} · cerrado el {date}",
+        "see": "Ver el alquiler"
+      },
+      "results": {
+        "currency_unset": "Publica primero tu lista de precios, para que la escalera tenga moneda.",
+        "currency_mismatch": "La escalera debe estar en la moneda de la tienda.",
+        "rows_mismatched": "Cada peldaño necesita sus devoluciones, su parte y su valor.",
+        "minimum_fee_invalid": "La tarifa mínima no es un importe. Usa cifras, como 20 o 20,00.",
+        "minimum_hours_invalid": "El alquiler más corto es un número entero de horas, hasta 672.",
+        "minimum_fee_wrong_currency": "La tarifa mínima debe estar en la moneda de la tienda.",
+        "window_invalid": "El historial que cuenta va de 1 a 36 meses.",
+        "too_many_rungs": "Una escalera tiene como máximo cinco peldaños.",
+        "clean_returns_invalid": "El peldaño {row} necesita un número entero de devoluciones, de 1 a 100.",
+        "clean_returns_not_rising": "El peldaño {row} debe necesitar más devoluciones que el anterior.",
+        "share_invalid": "La parte del peldaño {row} es un porcentaje entero menor que 100.",
+        "share_not_falling": "El peldaño {row} debe mantener menos retención que el anterior.",
+        "share_zero_needs_saved_method": "El peldaño {row} no mantiene retención, lo que necesita un método de PayPal guardado.",
+        "cover_invalid": "El valor máximo del peldaño {row} debe ser mayor que cero.",
+        "cover_amount_invalid": "El valor máximo del peldaño {row} no es un importe."
+      }
+    },
+    "record": {
+      "title": "Tu historial de devoluciones",
+      "lead": "Cada alquiler que devuelves en buen estado se cuenta aquí. No lleva nombre, correo ni importes, y tú decides si otras tiendas Hold lo usan.",
+      "notYet": "Tu historial empieza cuando PayPal confirma tu pago.",
+      "counts": "Tus alquileres de los últimos {months} meses",
+      "clean": "Devueltos en buen estado",
+      "settled": "Reclamación saldada",
+      "unpaid": "Reclamación impagada",
+      "open": "Reclamación en curso",
+      "shops": "Tiendas Hold",
+      "neverTaken": "Depósitos que nunca se te cobraron: {amount} en {count, plural, one {# alquiler} other {# alquileres}}.",
+      "neverTakenNone": "Aún no se te ha liberado ninguna retención.",
+      "credential": "Muestra tu historial",
+      "credentialLead": "Cualquiera puede escanear este código para comprobar tu historial con la clave publicada por Hold. Solo muestra los recuentos de arriba y deja de funcionar a las {time}. Vuelve a abrir esta página para obtener uno nuevo.",
+      "credentialScan": "Escanea para comprobar este historial",
+      "credentialText": "O comparte esta credencial",
+      "credentialUnavailable": "Ahora mismo no se puede firmar tu historial. Inténtalo de nuevo en un momento.",
+      "consentTitle": "Otras tiendas Hold",
+      "consentQuestion": "Usar mi historial de devoluciones sin reclamación para rebajar mis futuras retenciones en las tiendas Hold.",
+      "consentYes": "Sí, usarlo",
+      "consentNo": "No, gracias",
+      "consentIsOn": "Otras tiendas Hold pueden usar tu historial para rebajar tu retención.",
+      "consentIsOff": "Cada tienda usa solo su propio historial de tus devoluciones.",
+      "turnOn": "Usar mi historial en otras tiendas Hold",
+      "turnOff": "Dejar de usar mi historial en otras tiendas Hold",
+      "saving": "Guardando…",
+      "delete": "Borrar mi historial",
+      "deleteLead": "Tus devoluciones se borran en todas las tiendas Hold, y tu próxima retención es la habitual. Una reclamación que aún se está saldando se queda hasta que se salde.",
+      "deleteConfirm": "Entiendo que mi historial se borra en todas las tiendas Hold",
+      "deleting": "Borrando…",
+      "deleted": "Tu historial está borrado.",
+      "back": "Ver tu alquiler",
+      "link": "Tu historial de devoluciones",
+      "results": {
+        "renter_unknown": "Tu historial empieza cuando PayPal confirma tu pago.",
+        "code_expired": "Este código ha caducado o ya se usó. Pide uno nuevo.",
+        "wrong_code": "Ese código no es correcto. Revisa el correo e inténtalo de nuevo.",
+        "code_recently_sent": "Se acaba de enviar un código. Espera un minuto antes de pedir otro.",
+        "email_unavailable": "No se pudo enviar el correo. Inténtalo de nuevo en un momento.",
+        "payer_missing": "Tu historial empieza cuando PayPal confirma tu pago."
+      },
+      "codeTitle": "Demuestra que eres tú",
+      "codeLead": "Cambiar tu historial necesita un código que enviamos a la dirección que PayPal tiene para ti, para que nadie más con este enlace pueda cambiarlo.",
+      "sendCode": "Enviarme un código",
+      "sending": "Enviando…",
+      "codeSent": "Código enviado. Vale diez minutos.",
+      "code": "Código del correo"
+    },
+    "verify": {
+      "title": "Comprobar un historial de devoluciones",
+      "lead": "Un cliente puede mostrarte su historial de alquileres devueltos en buen estado. Hold lo firma, y esta página comprueba la firma con la clave publicada por Hold, aquí en tu navegador.",
+      "paste": "Credencial",
+      "pasteHelp": "Escanea el código en el teléfono del cliente, o pega la credencial que compartió.",
+      "check": "Comprobar",
+      "valid": "Firmada por Hold. Válida hasta las {time}.",
+      "counts": "Alquileres de los últimos {months} meses",
+      "key": "Clave pública de Hold",
+      "problems": {
+        "malformed": "Esto no es una credencial de historial de devoluciones.",
+        "unknown_key": "Esta credencial no se firmó con la clave de Hold.",
+        "bad_signature": "Esta credencial se modificó después de que Hold la firmara.",
+        "expired": "Esta credencial ha caducado. Pide al cliente que vuelva a abrir su historial.",
+        "not_yet_valid": "Esta credencial aún no es válida. Revisa el reloj de este dispositivo."
+      }
+    }
   }
 }

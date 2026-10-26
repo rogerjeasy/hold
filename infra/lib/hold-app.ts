@@ -62,6 +62,7 @@ export function createHoldApp(app: App, options: HoldAppOptions) {
       webClient: identity.webClient,
       cookieKey: identity.cookieKey,
       renterLinkKey: identity.renterLinkKey,
+      trustKey: identity.trustKey,
       evidenceBucket: data.evidenceBucket,
       displayBucket: data.displayBucket,
       queues: work.queues,

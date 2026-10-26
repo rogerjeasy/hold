@@ -2,7 +2,7 @@ import { authorizationClocks, checkPlacedAuthorization, HOLD_TRANSITIONS, mayAsk
 import type { HoldState, PlacedAuthorizationStatus, UpkeepSchedule } from '@hold/domain'
 import { and, eq, inArray, isNotNull, or, sql } from 'drizzle-orm'
 import { EXECUTIONS_QUEUE, markExecutionSent } from './fee-repository.ts'
-import { authorizations, executions, holds, moneyEvents, outbox, rentals } from './schema/index.ts'
+import { authorizations, executions, holds, moneyEvents, outbox, rentals, trustLadders } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
 // The hold placed at pickup (architecture.md sections 8.2 and 8.4). Staff ask for it, the renter approves it in PayPal,
@@ -24,6 +24,11 @@ export type RentalHold = {
   // Why PayPal refused to place the hold on the order the renter approved, such as `declined`. The renter may then
   // approve again, perhaps with another funding source, which makes a new order.
   readonly placementFailure: string | null
+  // The hold the renter agreed to at booking, which the reserved amount is never above.
+  readonly ordinaryCents: number
+  // Why the reserved amount is lower: the ladder version and rung, the clean returns and the window. Null when the
+  // ordinary hold applies.
+  readonly trust: { readonly version: number; readonly rung: number; readonly cleanReturns: number; readonly windowMonths: number } | null
 }
 
 export async function rentalHold(transaction: Transaction, rentalId: string): Promise<RentalHold | undefined> {
@@ -39,12 +44,19 @@ export async function rentalHold(transaction: Transaction, rentalId: string): Pr
       paypalAuthorizationId: authorizations.paypalAuthorizationId,
       assuredUntil: authorizations.assuredUntil,
       validUntil: authorizations.validUntil,
+      ordinaryCents: holds.ordinaryCents,
+      trustRung: holds.trustRung,
+      cleanReturns: holds.cleanReturns,
+      ladderVersion: trustLadders.version,
+      windowMonths: trustLadders.windowMonths,
     })
     .from(holds)
     .leftJoin(authorizations, eq(authorizations.id, holds.currentAuthorizationId))
+    .leftJoin(trustLadders, eq(trustLadders.id, holds.trustLadderId))
     .where(eq(holds.rentalId, rentalId))
   if (row === undefined) return undefined
-  const { paypalOrderId, replacementOrderId, ...hold } = row
+  const { paypalOrderId, replacementOrderId, ordinaryCents, trustRung, cleanReturns, ladderVersion, windowMonths, ...hold } = row
+  const trust = trustRung !== null && cleanReturns !== null && ladderVersion !== null && windowMonths !== null ? { version: ladderVersion, rung: trustRung, cleanReturns, windowMonths } : null
   const orderId = pendingOrder({ state: row.state, paypalOrderId, replacementOrderId })
   const [failed] =
     orderId === null
@@ -53,7 +65,7 @@ export async function rentalHold(transaction: Transaction, rentalId: string): Pr
           .select({ lastError: executions.lastError })
           .from(executions)
           .where(and(eq(executions.holdId, row.id), eq(executions.action, 'authorize'), eq(executions.state, 'failed'), sql`${executions.paypalResourceIds} ->> 'order' = ${orderId}`))
-  return { ...hold, orderId, placementFailure: failed?.lastError ?? null }
+  return { ...hold, orderId, placementFailure: failed?.lastError ?? null, ordinaryCents: ordinaryCents ?? hold.reservedCents, trust }
 }
 
 // The order the renter is approving: the hold's own while it is requested, a replacement's while the hold is placed.
@@ -64,9 +76,18 @@ function pendingOrder(hold: { readonly state: HoldState; readonly paypalOrderId:
 
 export type AskResult = { readonly ok: true; readonly holdId: string } | { readonly ok: false; readonly reason: 'not_found' | 'not_booked' }
 
-// Requests the hold the renter agreed to at booking, placed at the counter. The rental then waits for it. Asked again,
-// it gives the same hold.
-export async function askForHold(transaction: Transaction, rentalId: string, now: Date): Promise<AskResult> {
+// The hold the shop's trust ladder gives this renter (extensions.md section 7.5), worked out by plain code from their
+// record. Trust only ever lowers a hold, so anything else is ignored and the ordinary hold applies.
+export type TrustedHold = { readonly reservedCents: number; readonly ordinaryCents: number; readonly ladderId: string; readonly rung: number; readonly cleanReturns: number }
+
+function lowers(trust: TrustedHold | undefined, holdCents: number): trust is TrustedHold {
+  return trust !== undefined && trust.ordinaryCents === holdCents && Number.isSafeInteger(trust.reservedCents) && trust.reservedCents >= 0 && trust.reservedCents <= holdCents && trust.rung > 0
+}
+
+// Requests the hold the renter agreed to at booking, or the lower one the shop's ladder gives them, placed at the
+// counter. The rental then waits for it, and keeps the ladder version and rung it was placed under. Asked again, it
+// gives the same hold.
+export async function askForHold(transaction: Transaction, rentalId: string, now: Date, trust?: TrustedHold): Promise<AskResult> {
   const [rental] = await transaction
     .select({ shopId: rentals.shopId, state: rentals.state, holdCents: rentals.holdCents, currency: rentals.currency })
     .from(rentals)
@@ -76,11 +97,13 @@ export async function askForHold(transaction: Transaction, rentalId: string, now
   const [existing] = await transaction.select({ id: holds.id }).from(holds).where(eq(holds.rentalId, rentalId))
   if (existing !== undefined) return { ok: true, holdId: existing.id }
   if (!mayAskForHold(rental.state)) return { ok: false, reason: 'not_booked' }
+  const ladder = lowers(trust, rental.holdCents) ? { reservedCents: trust.reservedCents, trustLadderId: trust.ladderId, trustRung: trust.rung, cleanReturns: trust.cleanReturns } : { reservedCents: rental.holdCents }
   const [created] = await transaction
     .insert(holds)
-    .values({ shopId: rental.shopId, rentalId, currency: rental.currency, reservedCents: rental.holdCents, strategy: 'at_counter', createdAt: now })
+    .values({ shopId: rental.shopId, rentalId, currency: rental.currency, ordinaryCents: rental.holdCents, ...ladder, strategy: 'at_counter', createdAt: now })
     .returning({ id: holds.id })
   if (created === undefined) throw new Error('The hold was not created.')
+  if ('trustLadderId' in ladder) await transaction.update(rentals).set({ trustLadderId: ladder.trustLadderId, trustRung: ladder.trustRung }).where(eq(rentals.id, rentalId))
   if (transition(RENTAL_TRANSITIONS, rental.state, 'awaiting_hold').ok) await transaction.update(rentals).set({ state: 'awaiting_hold' }).where(eq(rentals.id, rentalId))
   return { ok: true, holdId: created.id }
 }

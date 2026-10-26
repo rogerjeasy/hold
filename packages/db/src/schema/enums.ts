@@ -1,4 +1,4 @@
-import { CAPTURE_SESSION_KINDS, CLAIM_STATES, CONDITION_REPLIES, DETECTOR_KINDS, FINDING_VERDICTS, HOLD_STATES, INCIDENT_HINTS, INCIDENT_KINDS, INCIDENT_STATES, ITEM_CATEGORIES, ITEM_STATUSES, MANDATE_KINDS, PRICE_CATEGORIES, PROPOSAL_KINDS, PROPOSAL_STATES, REMINDER_KINDS, RENTAL_STATES, STAFF_ROLES } from '@hold/domain'
+import { CAPTURE_SESSION_KINDS, CLAIM_STATES, CONDITION_REPLIES, DETECTOR_KINDS, FINDING_VERDICTS, HOLD_STATES, INCIDENT_HINTS, INCIDENT_KINDS, INCIDENT_STATES, ITEM_CATEGORIES, ITEM_STATUSES, MANDATE_KINDS, PRICE_CATEGORIES, PROPOSAL_KINDS, PROPOSAL_STATES, REMINDER_KINDS, RENTAL_STATES, STAFF_ROLES, STORED_OUTCOMES, TRUST_HISTORIES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
 import { check, text } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
@@ -48,6 +48,8 @@ export const INVOICE_STATES = ['draft', 'sent', 'paid', 'cancelled'] as const
 export const OUTBOX_STATES = ['pending', 'sent'] as const
 // What came of asking the model to sort an incident. Anything but answered leaves the sorting to code and a person.
 export const TRIAGE_OUTCOMES = ['answered', 'refused', 'unavailable', 'invalid'] as const
+// What a renter consents to: their record of clean returns used to lower holds at other Hold shops.
+export const CONSENT_PURPOSES = ['network_history'] as const
 
 export const rentalState = oneOf(RENTAL_STATES)
 export const holdState = oneOf(HOLD_STATES)
@@ -104,3 +106,6 @@ export const incidentHint = oneOf(INCIDENT_HINTS)
 export const incidentKind = oneOf(INCIDENT_KINDS)
 export const incidentState = oneOf(INCIDENT_STATES)
 export const triageOutcome = oneOf(TRIAGE_OUTCOMES)
+export const trustHistory = oneOf(TRUST_HISTORIES)
+export const storedOutcome = oneOf(STORED_OUTCOMES)
+export const consentPurpose = oneOf(CONSENT_PURPOSES)

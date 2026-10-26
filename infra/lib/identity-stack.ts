@@ -16,6 +16,7 @@ export type IdentityResources = {
   readonly webClient: cognito.UserPoolClient
   readonly cookieKey: secretsmanager.Secret
   readonly renterLinkKey: secretsmanager.Secret
+  readonly trustKey: secretsmanager.Secret
 }
 
 export type IdentityStackProps = StackProps & {
@@ -103,11 +104,21 @@ export function createIdentityStack(app: App, props: IdentityStackProps): Identi
     removalPolicy: RemovalPolicy.RETAIN,
   })
 
+  // Makes the renter key, a keyed hash of the PayPal payer ID that the Clean Record is filed under (extensions.md section
+  // 7.4). Apart from every other key, so nobody holding another can tell whose record a key is. The web app reads it.
+  const trustKey = new secretsmanager.Secret(stack, 'TrustKey', {
+    secretName: secretName('web', 'trust-key'),
+    description: 'Hold: makes renter keys for the Clean Record',
+    generateSecretString: { passwordLength: 64, excludePunctuation: true },
+    removalPolicy: RemovalPolicy.RETAIN,
+  })
+
   new CfnOutput(stack, 'UserPoolId', { value: userPool.userPoolId })
   new CfnOutput(stack, 'CookieKeySecretArn', { value: cookieKey.secretArn })
   new CfnOutput(stack, 'WebClientId', { value: webClient.userPoolClientId })
 
   new CfnOutput(stack, 'RenterLinkKeySecretArn', { value: renterLinkKey.secretArn })
+  new CfnOutput(stack, 'TrustKeySecretArn', { value: trustKey.secretArn })
 
-  return { stack, userPool, webClient, cookieKey, renterLinkKey }
+  return { stack, userPool, webClient, cookieKey, renterLinkKey, trustKey }
 }

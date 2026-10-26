@@ -72,3 +72,13 @@ export { checkKeptLine, INCIDENT_HINTS, INCIDENT_KINDS, INCIDENT_LIMITS, INCIDEN
 export type { IncidentHint, IncidentKind, IncidentState, IncidentTriage, KeptLineProblem, Sorted, SortInput } from './incident.ts'
 export { mentionsSafety } from './incident-safety.ts'
 export { guardNumbers } from './number-guard.ts'
+
+// Extension 2: the Clean Record and the trust ladder.
+export { cleanRecord, closedOutcome, countsTowardRecord, DEFAULT_WINDOW_MONTHS, INVOICE_DUE_DAYS, OUTCOME_CLASSES, outcomeNow, STORED_OUTCOMES, windowStart } from './clean-record.ts'
+export type { CleanRecord, OutcomeClass, OutcomeRow, RecordMinimums, StoredOutcome } from './clean-record.ts'
+export { checkLadder, holdFor, LADDER_LIMITS, rentalHoldFor, TRUST_HISTORIES } from './trust-ladder.ts'
+export type { ItemHold, LadderHold, LadderProblem, RentalLadderHold, TrustHistory, TrustLadder, TrustRung } from './trust-ladder.ts'
+export { simulateLadder } from './ladder-simulation.ts'
+export type { LadderSimulation, PastRental } from './ladder-simulation.ts'
+export { neverTaken } from './never-taken.ts'
+export type { MoneyLogLine, NeverTaken } from './never-taken.ts'

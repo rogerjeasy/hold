@@ -4,7 +4,7 @@ import { App } from 'aws-cdk-lib'
 import { Match, Template } from 'aws-cdk-lib/assertions'
 import { describe, expect, it } from 'vitest'
 import { createHoldApp } from './hold-app.ts'
-import { CODE_KEY_ARN, DATABASE_NAME, EVIDENCE_RETENTION_DAYS, PREFIX } from './settings.ts'
+import { CODE_KEY_ARN, CREDENTIAL_KEY_ALIAS, DATABASE_NAME, EVIDENCE_RETENTION_DAYS, PREFIX } from './settings.ts'
 import { QUEUES } from './work-stack.ts'
 
 // The default VPC lookup recorded by the first synth, so the tests build the same app with no AWS access.
@@ -175,6 +175,10 @@ describe('sign-in', () => {
 
   it('keeps the key renter links are signed with apart from the cookie key, so the worker can sign links without it', () => {
     identity.hasResourceProperties('AWS::SecretsManager::Secret', { Name: 'hold/web/renter-link-key' })
+  })
+
+  it('keeps the secret renter keys are made with apart from every other key (extensions.md section 7.4)', () => {
+    identity.hasResourceProperties('AWS::SecretsManager::Secret', { Name: 'hold/web/trust-key' })
   })
 
   it('gives a person ten minutes to type in the code, and hides whether an account exists', () => {
@@ -425,11 +429,13 @@ describe('the web app', () => {
 
   it('is told where its services are, and names its secrets without holding them', () => {
     const names = variables().map((variable) => variable.Name)
-    for (const setting of ['HOLD_ENVIRONMENT', 'HOLD_AWS_REGION', 'HOLD_COGNITO_USER_POOL_ID', 'HOLD_COGNITO_CLIENT_ID', 'HOLD_DATABASE_CLUSTER_ARN', 'HOLD_DATABASE_SECRET_ARN', 'HOLD_DATABASE_NAME', 'HOLD_COOKIE_KEY_SECRET_ARN', 'HOLD_RENTER_LINK_KEY_SECRET_ARN', 'HOLD_SMTP_SECRET', 'HOLD_PUBLIC_URL', 'HOLD_EXECUTIONS_QUEUE_URL', 'HOLD_PAYPAL_EVENTS_QUEUE_URL']) {
+    for (const setting of ['HOLD_ENVIRONMENT', 'HOLD_AWS_REGION', 'HOLD_COGNITO_USER_POOL_ID', 'HOLD_COGNITO_CLIENT_ID', 'HOLD_DATABASE_CLUSTER_ARN', 'HOLD_DATABASE_SECRET_ARN', 'HOLD_DATABASE_NAME', 'HOLD_COOKIE_KEY_SECRET_ARN', 'HOLD_RENTER_LINK_KEY_SECRET_ARN', 'HOLD_TRUST_KEY_SECRET_ARN', 'HOLD_CREDENTIAL_KEY_ID', 'HOLD_SMTP_SECRET', 'HOLD_PUBLIC_URL', 'HOLD_EXECUTIONS_QUEUE_URL', 'HOLD_PAYPAL_EVENTS_QUEUE_URL']) {
       expect(names).toContain(setting)
     }
     expect(names).not.toContain('HOLD_COOKIE_KEY')
     expect(names).not.toContain('HOLD_RENTER_LINK_KEY')
+    expect(names).not.toContain('HOLD_TRUST_KEY')
+    expect(variables()).toContainEqual({ Name: 'HOLD_CREDENTIAL_KEY_ID', Value: CREDENTIAL_KEY_ALIAS })
     expect(variables()).toContainEqual({ Name: 'HOLD_ENVIRONMENT', Value: 'production' })
     expect(variables()).toContainEqual({ Name: 'HOLD_SMTP_SECRET', Value: 'hold/email/smtp' })
     expect(variables()).toContainEqual({ Name: 'HOLD_PUBLIC_URL', Value: 'https://abc123.us-east-1.awsapprunner.com' })
@@ -475,10 +481,34 @@ describe('the web app', () => {
         's3:GetObjectVersion',
         's3:PutObject',
         'bedrock-mantle:CreateInference',
+        'kms:Sign',
+        'kms:GetPublicKey',
       ]),
     )
     expect(instancePolicy()).toContain('secret:hold/paypal/shops/*')
     expect(instancePolicy()).toContain('secret:hold/email/smtp-??????')
+  })
+
+  it('signs Clean Record credentials with the credential key only, by ES256, reads its public key, and reads the renter key secret', () => {
+    const statements = Object.entries(web.findResources('AWS::IAM::Policy'))
+      .filter(([key]) => key.startsWith('InstanceRole'))
+      .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: Record<string, unknown>[] } } }).Properties.PolicyDocument.Statement)
+    const onKeys = statements.filter((statement) => [statement['Action']].flat().some((action) => String(action).startsWith('kms:')))
+    expect(onKeys).toEqual([
+      {
+        Action: 'kms:Sign',
+        Effect: 'Allow',
+        Resource: 'arn:aws:kms:us-east-1:707938860881:key/*',
+        Condition: { 'StringEquals': { 'aws:ResourceTag/project': 'hold', 'kms:SigningAlgorithm': 'ECDSA_SHA_256' }, 'ForAnyValue:StringEquals': { 'kms:ResourceAliases': CREDENTIAL_KEY_ALIAS } },
+      },
+      {
+        Action: 'kms:GetPublicKey',
+        Effect: 'Allow',
+        Resource: 'arn:aws:kms:us-east-1:707938860881:key/*',
+        Condition: { 'StringEquals': { 'aws:ResourceTag/project': 'hold' }, 'ForAnyValue:StringEquals': { 'kms:ResourceAliases': CREDENTIAL_KEY_ALIAS } },
+      },
+    ])
+    expect(instancePolicy()).toContain('TrustKey')
   })
 
   it('signs uploads into the evidence bucket and reads back what arrived, reads display copies, and deletes nothing', () => {
@@ -623,6 +653,9 @@ describe('delivery', () => {
       (statement) => statement['Resource'] === 'arn:aws:kms:us-east-1:707938860881:key/*' && statement['Action'] === 'kms:Decrypt',
     )
     expect(decrypting).toEqual({ Action: 'kms:Decrypt', Condition: { StringEquals: { 'aws:ResourceTag/project': 'hold' } }, Effect: 'Allow', Resource: 'arn:aws:kms:us-east-1:707938860881:key/*' })
+    // Signing Clean Record credentials, with a key of Hold's only.
+    const signing = (JSON.parse(boundary) as { Properties: { PolicyDocument: { Statement: Record<string, unknown>[] } } }).Properties.PolicyDocument.Statement.find((statement) => JSON.stringify(statement['Action']).includes('kms:Sign'))
+    expect(signing).toEqual({ Action: ['kms:Sign', 'kms:GetPublicKey'], Condition: { StringEquals: { 'aws:ResourceTag/project': 'hold' } }, Effect: 'Allow', Resource: 'arn:aws:kms:us-east-1:707938860881:key/*' })
     expect(boundary).toContain('role/hold-scheduler')
     expect(boundary).toContain('"iam:PassedToService":"scheduler.amazonaws.com"')
     expect(boundary).not.toContain('role/hold-*')

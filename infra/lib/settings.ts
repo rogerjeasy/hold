@@ -46,6 +46,14 @@ export const SMTP_SECRET_NAME = secretName('email', 'smtp')
 // tagged project=hold and rotating, because the pipeline may not tag a key: that would let it claim another project's.
 export const CODE_KEY_ARN = 'arn:aws:kms:us-east-1:707938860881:key/ff9a40c3-97d9-4262-8954-20331622e005'
 
+// The KMS key that signs Clean Record credentials (extensions.md section 7.7): asymmetric, ECC_NIST_P256, SIGN_VERIFY.
+// Like the code key, an administrator makes it, tagged project=hold, because the pipeline may not make or tag a key:
+//   aws kms create-key --key-spec ECC_NIST_P256 --key-usage SIGN_VERIFY --tags TagKey=project,TagValue=hold \
+//     --description 'Hold: signs Clean Record credentials'
+//   aws kms create-alias --alias-name alias/hold-credential-key --target-key-id <the new key's id>
+// The web app names it by this alias, and may sign with it only through the alias.
+export const CREDENTIAL_KEY_ALIAS = 'alias/hold-credential-key'
+
 // The repository GitHub Actions deploys from. Only its main branch may take the deploy role. The repository uses
 // GitHub's immutable subject, which names the owner and the repository by their ids as well, so a renamed or
 // recreated repository of the same name does not match.

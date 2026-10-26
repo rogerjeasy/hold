@@ -23,6 +23,11 @@ export const renterLinks = pgTable(
     claimCodeHash: text(),
     claimCodeExpiresAt: at(),
     claimCodeAttempts: integer().notNull().default(0),
+    // A one-time code proving the renter is present before they change their Clean Record (extensions.md section
+    // 7.6). Staff can open a view link, so the link alone is not enough.
+    trustCodeHash: text(),
+    trustCodeExpiresAt: at(),
+    trustCodeAttempts: integer().notNull().default(0),
     createdAt: createdAt(),
   },
   (table) => [shopIsolation(table.shopId)],

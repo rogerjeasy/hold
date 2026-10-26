@@ -63,8 +63,9 @@ function StatusLine({ icon: Icon, text }: { icon: typeof Hourglass; text: string
 
 // The renter's own rental, opened from their link: where it stands, what they rent, the two amounts, the terms, and
 // the payment while it is due.
-export function RenterScreen({ token, view, canReport = false }: { token: string; view: RenterView; canReport?: boolean }) {
+export function RenterScreen({ token, view, canReport = false, askConsent = false }: { token: string; view: RenterView; canReport?: boolean; askConsent?: boolean }) {
   const t = useTranslations('renter')
+  const trust = useTranslations('trust.record')
   const records = useTranslations('records')
   const format = useShopFormat({ timeZone: view.timeZone, currency: view.currency })
   const locale = useLocale()
@@ -84,6 +85,9 @@ export function RenterScreen({ token, view, canReport = false }: { token: string
           </Button>
         ) : null}
         <Link href={linkRoutes.record(token)} referrerPolicy="no-referrer" className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{records('title')}</Link>
+        {/* Asked once, in a sentence, at the first booking (extensions.md section 7.6). The answer needs the renter's code. */}
+        {askConsent ? <p className="max-w-prose border-l-2 border-primary pl-3 text-pretty">{trust('consentQuestion')}</p> : null}
+        <Link href={linkRoutes.cleanRecord(token)} referrerPolicy="no-referrer" className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{trust('link')}</Link>
       </header>
       <Panel title={t('what')}>
         <ul>

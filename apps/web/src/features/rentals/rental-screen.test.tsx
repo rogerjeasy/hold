@@ -72,7 +72,7 @@ describe('a rental', () => {
   })
 
   it('shows a placed hold to everyone, and offers a read-only member nothing to do with it', () => {
-    const placed = { id: 'hold-1', state: 'placed', strategy: 'at_counter', reservedCents: 300_00, currency: 'EUR', orderId: null, paypalAuthorizationId: 'AUTH-1', assuredUntil: new Date('2026-10-19T09:00:00Z'), validUntil: new Date('2026-11-14T09:00:00Z'), placementFailure: null } as const
+    const placed = { id: 'hold-1', state: 'placed', strategy: 'at_counter', reservedCents: 300_00, currency: 'EUR', orderId: null, paypalAuthorizationId: 'AUTH-1', assuredUntil: new Date('2026-10-19T09:00:00Z'), validUntil: new Date('2026-11-14T09:00:00Z'), placementFailure: null, ordinaryCents: 300_00, trust: null } as const
     renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ state: 'ready' })} hold={placed} handovers={[]} canAct={false} />)
     expect(screen.getByRole('region', { name: 'Hold at pickup' })).toHaveTextContent('Ready for handover.')
     expect(screen.queryByRole('button', { name: 'Ask for the hold' })).not.toBeInTheDocument()

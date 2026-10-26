@@ -7,7 +7,7 @@ import * as iam from 'aws-cdk-lib/aws-iam'
 import type * as s3 from 'aws-cdk-lib/aws-s3'
 import type * as rds from 'aws-cdk-lib/aws-rds'
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
-import { ACCOUNT, DATABASE_NAME, name, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
+import { ACCOUNT, CREDENTIAL_KEY_ALIAS, DATABASE_NAME, name, PREFIX, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
 import type * as sqs from 'aws-cdk-lib/aws-sqs'
 
 // The web app on App Runner (tech-stack.md section 8): one container service with its own HTTPS address, no load
@@ -38,6 +38,8 @@ export type WebStackProps = StackProps & {
   readonly webClient: cognito.IUserPoolClient
   readonly cookieKey: secretsmanager.ISecret
   readonly renterLinkKey: secretsmanager.ISecret
+  // Makes renter keys for the Clean Record.
+  readonly trustKey: secretsmanager.ISecret
   // The worker's queues the app hands work to at once.
   readonly queues: ReadonlyMap<string, sqs.IQueue>
 }
@@ -68,9 +70,15 @@ function instanceRole(stack: Stack, props: WebStackProps): iam.Role {
   )
   // Secrets Manager adds six random characters to a secret's name in its ARN.
   const smtpLogin = `arn:aws:secretsmanager:${REGION}:${ACCOUNT}:secret:${SMTP_SECRET_NAME}-??????`
-  role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:GetSecretValue'], resources: [props.appUserSecret.secretArn, props.cookieKey.secretArn, props.renterLinkKey.secretArn, paypalCredentials, smtpLogin] }))
+  role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:GetSecretValue'], resources: [props.appUserSecret.secretArn, props.cookieKey.secretArn, props.renterLinkKey.secretArn, props.trustKey.secretArn, paypalCredentials, smtpLogin] }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:CreateSecret', 'secretsmanager:PutSecretValue', 'secretsmanager:TagResource'], resources: [paypalCredentials] }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['cognito-idp:AdminAddUserToGroup'], resources: [props.userPool.userPoolArn] }))
+  // Clean Record credentials: sign with the credential key, by ES256 only, and read its public key to publish it. The
+  // key is an administrator's (settings.ts), reached through its alias, and must carry Hold's tag.
+  const credentialKey = { 'ForAnyValue:StringEquals': { 'kms:ResourceAliases': CREDENTIAL_KEY_ALIAS } }
+  const keys = `arn:aws:kms:${REGION}:${ACCOUNT}:key/*`
+  role.addToPolicy(new iam.PolicyStatement({ actions: ['kms:Sign'], resources: [keys], conditions: { StringEquals: { 'aws:ResourceTag/project': PREFIX, 'kms:SigningAlgorithm': 'ECDSA_SHA_256' }, ...credentialKey } }))
+  role.addToPolicy(new iam.PolicyStatement({ actions: ['kms:GetPublicKey'], resources: [keys], conditions: { StringEquals: { 'aws:ResourceTag/project': PREFIX }, ...credentialKey } }))
   for (const queueName of HANDED_ON) queueOf(props, queueName).grantSendMessages(role)
   // Photographs: the phone puts each original through a link the app signs, and the app reads back what arrived. The
   // app reads display copies to sign links to them. It deletes nothing; Object Lock would refuse it anyway.
@@ -94,6 +102,8 @@ function settings(props: WebStackProps): apprunner.CfnService.KeyValuePairProper
     HOLD_DATABASE_NAME: DATABASE_NAME,
     HOLD_COOKIE_KEY_SECRET_ARN: props.cookieKey.secretArn,
     HOLD_RENTER_LINK_KEY_SECRET_ARN: props.renterLinkKey.secretArn,
+    HOLD_TRUST_KEY_SECRET_ARN: props.trustKey.secretArn,
+    HOLD_CREDENTIAL_KEY_ID: CREDENTIAL_KEY_ALIAS,
     HOLD_SMTP_SECRET: SMTP_SECRET_NAME,
     HOLD_EXECUTIONS_QUEUE_URL: queueOf(props, 'executions').queueUrl,
     HOLD_PAYPAL_EVENTS_QUEUE_URL: queueOf(props, 'paypal-events').queueUrl,
