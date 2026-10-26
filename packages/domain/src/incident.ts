@@ -48,36 +48,40 @@ export type SortInput = {
   readonly photographed: boolean
 }
 
-export type Sorted = { readonly kind: IncidentKind; readonly next: 'triaged' | 'shop_matter' | 'awaiting_staff'; readonly priceCode: string | null; readonly safety: boolean }
-
-// How cautious each kind's routing is. Small damage is the only kind a renter agrees to pay for.
-const CAUTION: Readonly<Record<IncidentKind, number>> = { small_damage: 0, mechanical_fault: 1, theft_or_loss: 1, unsafe_or_unclear: 2 }
+export type Sorted = { readonly kind: IncidentKind; readonly next: 'triaged' | 'awaiting_staff'; readonly suggestedCode: string | null; readonly safety: boolean }
 
 const HINT_KIND: Readonly<Record<IncidentHint, IncidentKind>> = { damage: 'small_damage', fault: 'mechanical_fault', gone: 'theft_or_loss', unsafe: 'unsafe_or_unclear', not_sure: 'unsafe_or_unclear' }
 
-// The more cautious of two kinds. Two different kinds of the same weight are unclear.
-function cautious(first: IncidentKind, second: IncidentKind): IncidentKind {
-  if (first === second) return first
-  if (CAUTION[first] === CAUTION[second]) return 'unsafe_or_unclear'
-  return CAUTION[first] > CAUTION[second] ? first : second
-}
-
-// Code decides first, from the renter's own choice and the safety words. The model can only make that more cautious.
-// Without a model, a renter's "damage" cannot be matched to a price and is unclear until a person looks.
+// Code decides first, from the renter's own choice and the safety words. The model can only agree with that or make it
+// unclear: the kinds differ in who bears the cost (the renter for damage, the shop for a fault) and in safety, so no
+// kind outranks another and any disagreement goes to a person. Without a model, a renter's "damage" cannot be matched
+// to a price and is unclear until a person looks. Every kind but small damage with a suggested price goes to a person
+// at once; a fault becomes the shop's matter only when staff confirm it (mayMakeShopMatter).
 export function sortIncident(input: SortInput): Sorted {
   const safety = mentionsSafety(input.description)
   const byCode = safety ? 'unsafe_or_unclear' : HINT_KIND[input.hint]
   const byModel = input.triage === null ? (byCode === 'small_damage' ? 'unsafe_or_unclear' : byCode) : input.triage.confidence >= INCIDENT_LIMITS.minConfidence ? input.triage.kind : 'unsafe_or_unclear'
-  const kind = cautious(byCode, byModel)
-  if (kind === 'mechanical_fault') return { kind, next: 'shop_matter', priceCode: null, safety }
+  const kind = byCode === byModel ? byCode : 'unsafe_or_unclear'
   const code = input.triage?.priceCode ?? null
-  if (kind === 'small_damage' && input.photographed && code !== null && input.priceCodes.includes(code)) return { kind, next: 'triaged', priceCode: code, safety }
-  return { kind, next: 'awaiting_staff', priceCode: null, safety }
+  if (kind === 'small_damage' && input.photographed && code !== null && input.priceCodes.includes(code)) return { kind, next: 'triaged', suggestedCode: code, safety }
+  return { kind, next: 'awaiting_staff', suggestedCode: null, safety }
 }
 
-// Only small damage, sorted with a price from the agreed list, may be agreed by the renter. The amount is the entry's.
-export function mayAgree(incident: { readonly state: IncidentState; readonly kind: IncidentKind | null; readonly offeredPriceEntryId: string | null }): boolean {
-  return incident.state === 'triaged' && incident.kind === 'small_damage' && incident.offeredPriceEntryId !== null
+// The model only suggests a price. A staff member confirms which entry of the agreed list applies before the renter
+// can agree to it, so no price becomes binding on the model's word alone.
+export function mayConfirmOffer(incident: { readonly state: IncidentState; readonly kind: IncidentKind | null }): boolean {
+  return incident.state === 'triaged' && incident.kind === 'small_damage'
+}
+
+// Only small damage, with a price a staff member confirmed from the agreed list, may be agreed by the renter. The
+// amount is the entry's.
+export function mayAgree(incident: { readonly state: IncidentState; readonly kind: IncidentKind | null; readonly offeredPriceEntryId: string | null; readonly offerConfirmedByUserId: string | null }): boolean {
+  return mayConfirmOffer(incident) && incident.offeredPriceEntryId !== null && incident.offerConfirmedByUserId !== null
+}
+
+// A report waiting for a person may be made the shop's matter by staff: a fault, or anything they take on themselves.
+export function mayMakeShopMatter(incident: { readonly state: IncidentState }): boolean {
+  return incident.state === 'awaiting_staff'
 }
 
 export type KeptLineProblem = 'raises_agreed_line' | 'empty_line'
