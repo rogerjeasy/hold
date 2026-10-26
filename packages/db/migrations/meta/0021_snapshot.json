@@ -1,5 +1,5 @@
 {
-  "id": "f08e5bf7-8d18-45d3-bba3-197ebad9d231",
+  "id": "5c2aaeac-a195-49cf-bca3-15c083a00182",
   "prevId": "585e4190-040b-4977-affa-094ded825b65",
   "version": "7",
   "dialect": "postgresql",
@@ -2407,6 +2407,25 @@
         },
         "claim_code_attempts": {
           "name": "claim_code_attempts",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "trust_code_hash": {
+          "name": "trust_code_hash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "trust_code_expires_at": {
+          "name": "trust_code_expires_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "trust_code_attempts": {
+          "name": "trust_code_attempts",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,

@@ -56,6 +56,9 @@ CREATE TABLE "trust_rungs" (
 );
 --> statement-breakpoint
 ALTER TABLE "trust_rungs" ENABLE ROW LEVEL SECURITY;--> statement-breakpoint
+ALTER TABLE "renter_links" ADD COLUMN "trust_code_hash" text;--> statement-breakpoint
+ALTER TABLE "renter_links" ADD COLUMN "trust_code_expires_at" timestamp with time zone;--> statement-breakpoint
+ALTER TABLE "renter_links" ADD COLUMN "trust_code_attempts" integer DEFAULT 0 NOT NULL;--> statement-breakpoint
 ALTER TABLE "holds" ADD COLUMN "ordinary_cents" bigint;--> statement-breakpoint
 ALTER TABLE "holds" ADD COLUMN "trust_ladder_id" uuid;--> statement-breakpoint
 ALTER TABLE "holds" ADD COLUMN "trust_rung" integer;--> statement-breakpoint

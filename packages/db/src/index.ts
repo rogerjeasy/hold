@@ -68,5 +68,7 @@ export { reserveEvidencePack, evidencePackFor, evidenceVersions, publishEvidence
 export type { EvidenceVersion } from './evidence-repository.ts'
 export { queueSettlementReceipts, receiptDeliveriesFor, leaseReceipt, finishReceipt } from './receipt-repository.ts'
 export type { ReceiptDeliverySummary } from './receipt-repository.ts'
-export { answerTrustConsent, currentTrustLadder, deleteTrustRecord, markOutcomeOpen, pastRentalsForSimulation, publishTrustLadder, rentalItemHolds, renterTrustKey, shopOutcomes, trustConsent, trustLadderById, trustMoneyLog, trustOutcomes, writeRentalOutcome } from './trust-repository.ts'
+export { answerTrustConsent, currentTrustLadder, deleteTrustRecord, markOutcomeOpen, pastRentalsForSimulation, publishTrustLadder, rentalItemHolds, rentalRenterKey, renterTrustKey, shopOutcomes, trustConsent, trustLadderById, trustMoneyLog, trustOutcomes, writeRentalOutcome } from './trust-repository.ts'
 export type { LadderPublishResult, LedgerLine, PublishedTrustLadder, TrustConsent, TrustOutcome } from './trust-repository.ts'
+export { issueTrustCode, useTrustCode } from './trust-code-repository.ts'
+export type { IssuedTrustCode, UsedTrustCode } from './trust-code-repository.ts'

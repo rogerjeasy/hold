@@ -81,6 +81,13 @@ export async function renterTrustKey(transaction: Transaction, rentalId: string,
   return set?.set === true ? key : undefined
 }
 
+// Whether PayPal has named the rental's renter, and the renter key kept for them, if any. It only reads, so a page may
+// call it.
+export async function rentalRenterKey(transaction: Transaction, rentalId: string): Promise<{ readonly known: boolean; readonly key: string | undefined }> {
+  const [row] = await transaction.select({ trustKey: renters.trustKey }).from(rentals).innerJoin(renters, eq(renters.id, rentals.renterId)).where(eq(rentals.id, rentalId))
+  return { known: row !== undefined, key: row?.trustKey ?? undefined }
+}
+
 export type TrustOutcome = OutcomeRow & { readonly here: boolean }
 
 // The renter's outcomes this transaction may see: the shop's own; others' with the renter's consent; all of them for

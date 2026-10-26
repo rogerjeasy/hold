@@ -1958,6 +1958,10 @@
     "claimCode": {
       "subject": "Your Hold claim verification code",
       "body": "Your verification code is {code}. It expires in ten minutes. Only enter it on your private Hold claim page."
+    },
+    "trustCode": {
+      "subject": "Your Hold Clean Record code",
+      "body": "Your code is {code}. It expires in ten minutes. Enter it only on your own Hold rental page, to change who may use your Clean Record. If you did not ask for it, you can ignore this email."
     }
   },
   "shell": {
@@ -2497,8 +2501,19 @@
       "back": "See your rental",
       "link": "Your Clean Record",
       "results": {
-        "renter_unknown": "Your record starts once PayPal has confirmed your payment."
-      }
+        "renter_unknown": "Your record starts once PayPal has confirmed your payment.",
+        "code_expired": "This code has expired or was already used. Ask for a new one.",
+        "wrong_code": "That code is not right. Check the email and try again.",
+        "code_recently_sent": "A code was sent a moment ago. Wait a minute before asking again.",
+        "email_unavailable": "The email could not be sent. Try again in a moment.",
+        "payer_missing": "Your record starts once PayPal has confirmed your payment."
+      },
+      "codeTitle": "Prove it is you",
+      "codeLead": "Changing your record needs a code we email to the address PayPal has for you, so nobody else holding this link can change it.",
+      "sendCode": "Email me a code",
+      "sending": "Sending…",
+      "codeSent": "Code sent. It works for ten minutes.",
+      "code": "Code from the email"
     },
     "verify": {
       "title": "Check a Clean Record",

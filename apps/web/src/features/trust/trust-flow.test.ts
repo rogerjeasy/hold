@@ -25,7 +25,7 @@ const rentalActions = await import('@/features/rentals/actions')
 const renter = await import('@/features/renter/actions')
 const shop = await import('@/features/shop/actions')
 const items = await import('@/features/items/actions')
-const { getServices } = await import('@/server/services')
+const { getServices, TEST_SIGN_IN_CODE } = await import('@/server/services')
 const { form, signIn } = await import('@/test/shop-session')
 
 vi.setConfig({ testTimeout: 60_000 })
@@ -74,6 +74,12 @@ async function paidRental(at: OpenShop): Promise<{ rentalId: string; token: stri
   ;(await getServices()).simulatedPayPal?.approveOrder(orderOf(started.value.approvalUrl))
   await renter.confirmFee(null, form({ token, orderId: orderOf(started.value.approvalUrl), locale: 'en' }))
   return { rentalId: booked.value.rentalId, token }
+}
+
+// The renter asks for the one-time code that proves they are present, and reads it from their email.
+async function codeFor(token: string): Promise<string> {
+  expect(await renterTrust.sendTrustCode(null, form({ token, locale: 'en' }))).toEqual({ ok: true, value: { sandboxContact: false } })
+  return TEST_SIGN_IN_CODE
 }
 
 // Staff ask for the hold at pickup: the amount reserved is what the shop's ladder gives this renter.
@@ -141,7 +147,7 @@ describe('the hold at another Hold shop', () => {
 
   it('is the ladder’s amount once the renter consents, the authorization PayPal reports is for it, and the rental keeps the version and rung (X2.1)', async () => {
     const { token: atA } = await paidRental(shopA)
-    expect(await renterTrust.answerConsent(null, form({ token: atA, consent: 'yes', locale: 'en' }))).toEqual({ ok: true, value: { consented: true } })
+    expect(await renterTrust.answerConsent(null, form({ token: atA, consent: 'yes', code: await codeFor(atA), locale: 'en' }))).toEqual({ ok: true, value: { consented: true } })
     const { rentalId, token, reservedCents } = await heldAtPickup(shopB)
     expect(reservedCents).toBe(150_00)
     const started = await renter.approveHold(null, form({ token, locale: 'en' }))
@@ -162,12 +168,49 @@ describe('the hold at another Hold shop', () => {
 
   it('is the ordinary hold again once the renter deletes their record (X2.6)', async () => {
     const { token } = await paidRental(shopB)
-    expect(await renterTrust.deleteRecord(null, form({ token, understood: 'yes', locale: 'en' }))).toEqual({ ok: true, value: { removed: 5 } })
+    expect(await renterTrust.deleteRecord(null, form({ token, understood: 'yes', code: await codeFor(token), locale: 'en' }))).toEqual({ ok: true, value: { removed: 5 } })
     expect((await heldAtPickup(shopB)).reservedCents).toBe(300_00)
   })
 
   it('refuses consent or deletion through a link that is not one', async () => {
-    expect(await renterTrust.answerConsent(null, form({ token: 'not-a-token', consent: 'yes', locale: 'en' }))).toEqual({ ok: false, failure: 'link_invalid' })
-    expect(await renterTrust.deleteRecord(null, form({ token: 'not-a-token', understood: 'yes', locale: 'en' }))).toEqual({ ok: false, failure: 'link_invalid' })
+    expect(await renterTrust.answerConsent(null, form({ token: 'not-a-token', consent: 'yes', code: '24681357', locale: 'en' }))).toEqual({ ok: false, failure: 'link_invalid' })
+    expect(await renterTrust.deleteRecord(null, form({ token: 'not-a-token', understood: 'yes', code: '24681357', locale: 'en' }))).toEqual({ ok: false, failure: 'link_invalid' })
+  })
+})
+
+describe('proof that the renter is present', () => {
+  // A link staff showed at the counter: they could open it as well as the renter.
+  async function staffShownLink(): Promise<string> {
+    const { rentalId } = await paidRental(shopB)
+    await signIn(jar, OWNER_B, 'email_code')
+    const shown = await rentalActions.showRenterLink(null, form({ rentalId, locale: 'en' }))
+    if (!shown.ok) throw new Error(JSON.stringify(shown))
+    jar.clear()
+    return tokenOf(shown.value.url)
+  }
+
+  it('is needed to consent or to delete: a view link alone is refused, with no code or with none sent', async () => {
+    const token = await staffShownLink()
+    expect(await renterTrust.answerConsent(null, form({ token, consent: 'yes', locale: 'en' }))).toMatchObject({ ok: false, failure: 'invalid' })
+    expect(await renterTrust.deleteRecord(null, form({ token, understood: 'yes', locale: 'en' }))).toMatchObject({ ok: false, failure: 'invalid' })
+    expect(await renterTrust.answerConsent(null, form({ token, consent: 'yes', code: TEST_SIGN_IN_CODE, locale: 'en' }))).toEqual({ ok: false, failure: 'refused', reason: 'code_expired' })
+    expect(await renterTrust.deleteRecord(null, form({ token, understood: 'yes', code: TEST_SIGN_IN_CODE, locale: 'en' }))).toEqual({ ok: false, failure: 'refused', reason: 'code_expired' })
+  })
+
+  it('refuses a wrong code and changes nothing, and a code works only once', async () => {
+    const token = await staffShownLink()
+    const code = await codeFor(token)
+    expect(await renterTrust.answerConsent(null, form({ token, consent: 'no', code: '11111111', locale: 'en' }))).toEqual({ ok: false, failure: 'refused', reason: 'wrong_code' })
+    expect(await renterTrust.answerConsent(null, form({ token, consent: 'no', code, locale: 'en' }))).toEqual({ ok: true, value: { consented: false } })
+    expect(await renterTrust.deleteRecord(null, form({ token, understood: 'yes', code, locale: 'en' }))).toEqual({ ok: false, failure: 'refused', reason: 'code_expired' })
+  })
+
+  it('goes to the address PayPal gave for the payer, never one typed at the counter', async () => {
+    const token = await staffShownLink()
+    const { mailer } = await getServices()
+    await codeFor(token)
+    const sent = (mailer as unknown as { sent: readonly { to: string; text: string }[] }).sent.at(-1)
+    expect(sent?.to).toBe('renter@fake-paypal.test')
+    expect(sent?.text).toContain(TEST_SIGN_IN_CODE)
   })
 })

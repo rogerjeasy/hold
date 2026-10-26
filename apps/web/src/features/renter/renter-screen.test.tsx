@@ -84,5 +84,15 @@ describe('the renter’s page', () => {
     expect(screen.getByText('Your rental is with you.')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'See how it left' })).toHaveAttribute('href', '/r/token/condition')
   })
-})
 
+  it('links to the renter’s Clean Record, and asks the consent question there once PayPal has named them', () => {
+    renderWithIntl(<RenterScreen token="token" view={view} askConsent />)
+    expect(screen.getByText('Use my record of clean returns to lower future holds at Hold shops.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Your Clean Record' })).toHaveAttribute('href', '/r/token/clean-record')
+  })
+
+  it('does not ask again once the renter has answered', () => {
+    renderWithIntl(<RenterScreen token="token" view={view} />)
+    expect(screen.queryByText('Use my record of clean returns to lower future holds at Hold shops.')).not.toBeInTheDocument()
+  })
+})

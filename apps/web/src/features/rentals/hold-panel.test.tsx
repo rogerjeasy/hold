@@ -70,5 +70,9 @@ describe('the hold at pickup, for staff', () => {
     renderWithIntl(<HoldPanel rentalId={RENTAL} state="out" holdCents={300_00} hold={placed} clock={clock} />)
     expect(screen.getByRole('region', { name: 'Hold at pickup' })).toHaveTextContent('A new hold was asked of the renter before this one ends.')
   })
-})
 
+  it('shows staff the rung and the counts behind a lowered hold, and nothing of where else the renter rented', () => {
+    renderWithIntl(<HoldPanel rentalId={RENTAL} state="awaiting_hold" holdCents={300_00} hold={hold({ reservedCents: 150_00, trust: { version: 3, rung: 2, cleanReturns: 5, windowMonths: 24 } })} clock={clock} />)
+    expect(screen.getByText('Lowered from €300.00 by trust ladder version 3, rung 2: 5 clean returns in the last 24 months.')).toBeInTheDocument()
+  })
+})

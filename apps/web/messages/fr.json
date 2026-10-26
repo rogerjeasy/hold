@@ -1958,6 +1958,10 @@
     "claimCode": {
       "subject": "Votre code de vérification Hold",
       "body": "Votre code est {code}. Il expire dans dix minutes. Saisissez-le uniquement sur votre page privée de réclamation Hold."
+    },
+    "trustCode": {
+      "subject": "Votre code Hold pour votre historique de retours",
+      "body": "Votre code est {code}. Il expire dans dix minutes. Saisissez-le seulement sur votre propre page de location Hold, pour changer qui peut utiliser votre historique. Si vous ne l'avez pas demandé, ignorez cet e-mail."
     }
   },
   "shell": {
@@ -2497,8 +2501,19 @@
       "back": "Voir votre location",
       "link": "Votre historique de retours",
       "results": {
-        "renter_unknown": "Votre historique commence dès que PayPal a confirmé votre paiement."
-      }
+        "renter_unknown": "Votre historique commence dès que PayPal a confirmé votre paiement.",
+        "code_expired": "Ce code a expiré ou a déjà servi. Demandez-en un nouveau.",
+        "wrong_code": "Ce code n'est pas le bon. Vérifiez l'e-mail et réessayez.",
+        "code_recently_sent": "Un code vient d'être envoyé. Attendez une minute avant d'en redemander un.",
+        "email_unavailable": "L'e-mail n'a pas pu être envoyé. Réessayez dans un instant.",
+        "payer_missing": "Votre historique commence dès que PayPal a confirmé votre paiement."
+      },
+      "codeTitle": "Prouvez que c'est vous",
+      "codeLead": "Modifier votre historique demande un code envoyé à l'adresse que PayPal a pour vous, afin que personne d'autre ayant ce lien ne puisse le modifier.",
+      "sendCode": "M'envoyer un code",
+      "sending": "Envoi…",
+      "codeSent": "Code envoyé. Il est valable dix minutes.",
+      "code": "Code reçu par e-mail"
     },
     "verify": {
       "title": "Vérifier un historique de retours",

@@ -56,5 +56,15 @@ describe('the renter’s hold page', () => {
     expect(screen.getByText(/Your hold ends on Nov 14/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Approve €300.00 with PayPal' })).toBeInTheDocument()
   })
-})
 
+  it('says why the hold is lower than the ordinary one, when the shop’s trust ladder lowered it', () => {
+    renderWithIntl(<HoldScreen token="token" view={view} hold={hold({ reservedCents: 150_00, trust: { version: 2, rung: 2, cleanReturns: 5, windowMonths: 24 } })} />)
+    expect(screen.getByText('Your hold is €150.00, not €300.00, because you have returned 5 rentals in good condition in the last 24 months.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Approve €150.00 with PayPal' })).toBeInTheDocument()
+  })
+
+  it('gives no reason for an ordinary hold', () => {
+    renderWithIntl(<HoldScreen token="token" view={view} hold={hold()} />)
+    expect(screen.queryByText(/because you have returned/)).not.toBeInTheDocument()
+  })
+})

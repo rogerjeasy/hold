@@ -1958,6 +1958,10 @@
     "claimCode": {
       "subject": "Ihr Hold-Bestätigungscode",
       "body": "Ihr Bestätigungscode lautet {code}. Er gilt zehn Minuten. Geben Sie ihn nur auf Ihrer privaten Hold-Forderungsseite ein."
+    },
+    "trustCode": {
+      "subject": "Ihr Hold-Code für Ihre Rückgabebilanz",
+      "body": "Ihr Code lautet {code}. Er läuft in zehn Minuten ab. Geben Sie ihn nur auf Ihrer eigenen Hold-Mietseite ein, um zu ändern, wer Ihre Bilanz nutzen darf. Wenn Sie ihn nicht angefordert haben, ignorieren Sie diese E-Mail."
     }
   },
   "shell": {
@@ -2497,8 +2501,19 @@
       "back": "Ihre Miete ansehen",
       "link": "Ihre Rückgabebilanz",
       "results": {
-        "renter_unknown": "Ihre Bilanz beginnt, sobald PayPal Ihre Zahlung bestätigt hat."
-      }
+        "renter_unknown": "Ihre Bilanz beginnt, sobald PayPal Ihre Zahlung bestätigt hat.",
+        "code_expired": "Dieser Code ist abgelaufen oder wurde schon verwendet. Fordern Sie einen neuen an.",
+        "wrong_code": "Dieser Code stimmt nicht. Prüfen Sie die E-Mail und versuchen Sie es erneut.",
+        "code_recently_sent": "Gerade wurde ein Code gesendet. Warten Sie eine Minute, bevor Sie einen neuen anfordern.",
+        "email_unavailable": "Die E-Mail konnte nicht gesendet werden. Versuchen Sie es gleich noch einmal.",
+        "payer_missing": "Ihre Bilanz beginnt, sobald PayPal Ihre Zahlung bestätigt hat."
+      },
+      "codeTitle": "Bestätigen Sie, dass Sie es sind",
+      "codeLead": "Für Änderungen an Ihrer Bilanz braucht es einen Code, den wir an die Adresse senden, die PayPal für Sie hat, damit niemand sonst mit diesem Link sie ändern kann.",
+      "sendCode": "Code per E-Mail senden",
+      "sending": "Wird gesendet…",
+      "codeSent": "Code gesendet. Er gilt zehn Minuten.",
+      "code": "Code aus der E-Mail"
     },
     "verify": {
       "title": "Rückgabebilanz prüfen",

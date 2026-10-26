@@ -1,35 +1,61 @@
 'use server'
 
-import { answerTrustConsent, deleteTrustRecord, renterTrustKey } from '@hold/db'
+import { createHmac, randomInt } from 'node:crypto'
+import { answerTrustConsent, auditLog, deleteTrustRecord, issueTrustCode, renterTrustKey, useTrustCode } from '@hold/db'
+import type { Transaction } from '@hold/db'
+import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
+import { readLocale } from '@/features/auth/locale-input'
 import { Refusal } from '@/server/action'
 import { renterAction, withToken } from '@/server/renter-access'
-import { getServices } from '@/server/services'
+import { getServices, TEST_SIGN_IN_CODE } from '@/server/services'
 
 // What a renter does with their Clean Record through any of their links (extensions.md section 7.6). Each is built by
 // renterAction, which checks the link, its scope and the network's rate before the work below runs, and writes the
 // audit line after it. A test checks that this file exports nothing else. Neither moves money.
+//
+// Staff open view links at the counter, so consenting, withdrawing and deleting each need a one-time code sent to the
+// address PayPal gave for the payer: proof the renter is present, as a claim reply needs.
 
-// The renter key of whoever PayPal says paid the rental's fee, kept on them so their record can be found.
-async function keyOf(rentalId: string, transaction: Parameters<typeof renterTrustKey>[0]): Promise<string | undefined> {
-  return renterTrustKey(transaction, rentalId, (await getServices()).trust.renterKey)
+const digest = (key: Buffer, linkId: string, code: string) => createHmac('sha256', key).update(`trust:${linkId}:${code}`).digest('hex')
+const withCode = <Shape extends z.ZodRawShape>(shape: Shape) => withToken({ ...shape, code: z.string().regex(/^[0-9]{8}$/) })
+
+export const sendTrustCode = renterAction({ name: 'trust.code_requested', scope: 'view', input: withToken({}) }, async (link, input, inLinkShop) => {
+  const services = await getServices()
+  const code = services.config.services === 'fake' ? TEST_SIGN_IN_CODE : String(randomInt(0, 100000000)).padStart(8, '0')
+  const issued = await inLinkShop((transaction) => issueTrustCode(transaction, link.id, digest(services.renterLinkKey, link.id, code), new Date()))
+  if (!issued.ok) return new Refusal(issued.reason)
+  const t = await getTranslations({ locale: readLocale(input.locale), namespace: 'emails.trustCode' })
+  if (!(await services.mailer.send({ to: issued.email, subject: t('subject'), text: t('body', { code }) }))) return new Refusal('email_unavailable')
+  // Simulated things say so, in the record too: the address itself stays out of it.
+  if (issued.sandboxContact) await inLinkShop((transaction) => transaction.insert(auditLog).values({ shopId: link.shopId, actorKind: 'renter', actorId: link.id, action: 'trust.code_sandbox_contact', subjectKind: 'rental', subjectId: link.rentalId, detail: { sandbox: true } }))
+  return { sandboxContact: issued.sandboxContact }
+})
+
+// Spends the code, then finds the renter key of whoever PayPal says paid the rental's fee, kept on them so their
+// record can be found. A refusal undoes nothing the renter could see, and a wrong code still counts as a try.
+async function provenRenter(transaction: Transaction, link: { readonly id: string; readonly rentalId: string }, code: string): Promise<string | Refusal> {
+  const services = await getServices()
+  const used = await useTrustCode(transaction, link.id, digest(services.renterLinkKey, link.id, code), new Date())
+  if (!used.ok) return new Refusal(used.reason)
+  return (await renterTrustKey(transaction, link.rentalId, services.trust.renterKey)) ?? new Refusal('renter_unknown')
 }
 
 // Asked once, in a sentence, and off until the renter turns it on. They may change their answer at any time.
-export const answerConsent = renterAction({ name: 'trust.consent_answered', scope: 'view', input: withToken({ consent: z.enum(['yes', 'no']) }) }, (link, input, inLinkShop) =>
+export const answerConsent = renterAction({ name: 'trust.consent_answered', scope: 'view', input: withCode({ consent: z.enum(['yes', 'no']) }) }, (link, input, inLinkShop) =>
   inLinkShop(async (transaction) => {
-    const key = await keyOf(link.rentalId, transaction)
-    if (key === undefined) return new Refusal('renter_unknown')
+    const key = await provenRenter(transaction, link, input.code)
+    if (key instanceof Refusal) return key
     const consented = input.consent === 'yes'
     return (await answerTrustConsent(transaction, key, consented, new Date())) ? { consented } : new Refusal('renter_unknown')
   }),
 )
 
 // Deleting the record returns the renter to the ordinary hold everywhere.
-export const deleteRecord = renterAction({ name: 'trust.record_deleted', scope: 'view', input: withToken({ understood: z.literal('yes') }) }, (link, _input, inLinkShop) =>
+export const deleteRecord = renterAction({ name: 'trust.record_deleted', scope: 'view', input: withCode({ understood: z.literal('yes') }) }, (link, input, inLinkShop) =>
   inLinkShop(async (transaction) => {
-    const key = await keyOf(link.rentalId, transaction)
-    if (key === undefined) return new Refusal('renter_unknown')
+    const key = await provenRenter(transaction, link, input.code)
+    if (key instanceof Refusal) return key
     const removed = await deleteTrustRecord(transaction, key, new Date())
     return removed === undefined ? new Refusal('renter_unknown') : { removed }
   }),

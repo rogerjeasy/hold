@@ -1958,6 +1958,10 @@
     "claimCode": {
       "subject": "Su código de verificación de Hold",
       "body": "Su código es {code}. Caduca en diez minutos. Introdúzcalo solo en su página privada de reclamación de Hold."
+    },
+    "trustCode": {
+      "subject": "Tu código de Hold para tu historial de devoluciones",
+      "body": "Tu código es {code}. Caduca en diez minutos. Escríbelo solo en tu propia página de alquiler de Hold, para cambiar quién puede usar tu historial. Si no lo pediste, ignora este correo."
     }
   },
   "shell": {
@@ -2497,8 +2501,19 @@
       "back": "Ver tu alquiler",
       "link": "Tu historial de devoluciones",
       "results": {
-        "renter_unknown": "Tu historial empieza cuando PayPal confirma tu pago."
-      }
+        "renter_unknown": "Tu historial empieza cuando PayPal confirma tu pago.",
+        "code_expired": "Este código ha caducado o ya se usó. Pide uno nuevo.",
+        "wrong_code": "Ese código no es correcto. Revisa el correo e inténtalo de nuevo.",
+        "code_recently_sent": "Se acaba de enviar un código. Espera un minuto antes de pedir otro.",
+        "email_unavailable": "No se pudo enviar el correo. Inténtalo de nuevo en un momento.",
+        "payer_missing": "Tu historial empieza cuando PayPal confirma tu pago."
+      },
+      "codeTitle": "Demuestra que eres tú",
+      "codeLead": "Cambiar tu historial necesita un código que enviamos a la dirección que PayPal tiene para ti, para que nadie más con este enlace pueda cambiarlo.",
+      "sendCode": "Enviarme un código",
+      "sending": "Enviando…",
+      "codeSent": "Código enviado. Vale diez minutos.",
+      "code": "Código del correo"
     },
     "verify": {
       "title": "Comprobar un historial de devoluciones",

@@ -1,5 +1,5 @@
 import 'server-only'
-import { captureSession, conditionReport, inShop, rentalHold, renterView } from '@hold/db'
+import { captureSession, conditionReport, inShop, rentalHold, rentalRenterKey, renterView, trustConsent } from '@hold/db'
 import type { RentalHold, RenterView } from '@hold/db'
 import type { Metadata } from 'next'
 import type { ConditionView } from '@/features/renter/condition-screen'
@@ -10,15 +10,22 @@ import { getServices } from './services'
 // token never reaches another site.
 export const renterPageMetadata = (title: string): Metadata => ({ title, robots: { index: false, follow: false }, referrer: 'no-referrer' })
 
-export type RenterPage = { readonly ok: true; readonly view: RenterView } | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' }
+// askConsent: PayPal has named the renter, who has not yet answered whether other Hold shops may use their Clean Record.
+// The question is asked once (extensions.md section 7.6).
+export type RenterPage = { readonly ok: true; readonly view: RenterView; readonly askConsent: boolean } | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' }
 
 export async function renterPage(token: string): Promise<RenterPage> {
   const now = new Date()
   const access = await renterAccess(token, 'view', now)
   if (!access.ok) return access
   const { database } = await getServices()
-  const view = await inShop(database, { role: 'hold_app', shopId: access.link.shopId }, (transaction) => renterView(transaction, access.link.rentalId, now))
-  return view === undefined ? { ok: false, failure: 'link_invalid' } : { ok: true, view }
+  const { rentalId } = access.link
+  const loaded = await inShop(database, { role: 'hold_app', shopId: access.link.shopId }, async (transaction) => {
+    const renter = await rentalRenterKey(transaction, rentalId)
+    const consent = renter.key === undefined ? undefined : await trustConsent(transaction, renter.key)
+    return { view: await renterView(transaction, rentalId, now), askConsent: renter.known && consent?.answered !== true }
+  })
+  return loaded.view === undefined ? { ok: false, failure: 'link_invalid' } : { ok: true, view: loaded.view, askConsent: loaded.askConsent }
 }
 
 export type RenterHoldPage = { readonly ok: true; readonly view: RenterView; readonly hold: RentalHold | undefined } | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' }

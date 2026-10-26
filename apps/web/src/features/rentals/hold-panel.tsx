@@ -11,6 +11,7 @@ import { ActionMessage } from '@/features/shop/action-message'
 import { useLookAgain } from '@/hooks/use-look-again'
 import type { ShopClock } from '@/hooks/use-shop-format'
 import { useShopFormat } from '@/hooks/use-shop-format'
+import { HoldReason } from '@/features/trust/hold-reason'
 import { askForHold } from './actions'
 import { LinkCode } from './link-code'
 
@@ -47,6 +48,7 @@ export function HoldPanel({ rentalId, state, holdCents, hold, clock }: HoldPanel
             {t('placed', { amount })}
           </p>
           {state === 'ready' ? <p className="text-muted-foreground">{t('ready')}</p> : null}
+          <HoldReason hold={hold} money={format.money} audience="staff" />
           {hold.orderId === null ? null : <p className="border-l-2 border-primary pl-3">{t('replacing')}</p>}
           {hold.assuredUntil === null || hold.validUntil === null ? null : (
             <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
@@ -72,6 +74,7 @@ export function HoldPanel({ rentalId, state, holdCents, hold, clock }: HoldPanel
         ) : (
           <p className="text-muted-foreground">{t('body', { amount })}</p>
         )}
+        {hold === undefined ? null : <HoldReason hold={hold} money={format.money} audience="staff" />}
         {hold?.placementFailure === null || hold?.placementFailure === undefined ? null : (
           <p role="alert" className="flex gap-1.5 text-[0.9375rem] text-destructive">
             <CircleAlert aria-hidden="true" className="mt-0.5 size-4.5 shrink-0" />

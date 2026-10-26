@@ -4,6 +4,7 @@ import { useTranslations } from 'next-intl'
 import { useShopFormat } from '@/hooks/use-shop-format'
 import { Link } from '@/i18n/navigation'
 import { linkRoutes } from '@/lib/routes'
+import { HoldReason } from '@/features/trust/hold-reason'
 import { HoldButton } from './hold-button'
 
 type HoldScreenProps = {
@@ -30,6 +31,7 @@ export function HoldScreen({ token, view, hold }: HoldScreenProps) {
       ) : hold.state === 'requested' || replacing ? (
         <div className="grid gap-5">
           <p className="max-w-prose text-lg text-pretty">{replacing && hold.validUntil !== null ? t('replaceLead', { amount, date: format.day(hold.validUntil) }) : t('lead', { amount })}</p>
+          <HoldReason hold={hold} money={format.money} audience="renter" />
           {hold.placementFailure === null ? null : (
             <p role="alert" className="flex gap-1.5 text-[0.9375rem] text-destructive">
               <CircleAlert aria-hidden="true" className="mt-0.5 size-4.5 shrink-0" />
@@ -44,6 +46,7 @@ export function HoldScreen({ token, view, hold }: HoldScreenProps) {
             <CircleCheck aria-hidden="true" className="mt-1 size-5 shrink-0 text-primary" />
             {t('placed', { amount })}
           </p>
+          <HoldReason hold={hold} money={format.money} audience="renter" />
           {hold.validUntil === null ? null : <p className="max-w-prose text-muted-foreground">{t('validUntil', { date: format.day(hold.validUntil) })}</p>}
         </div>
       )}

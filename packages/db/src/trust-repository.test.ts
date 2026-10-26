@@ -18,6 +18,7 @@ import {
   markOutcomeOpen,
   pastRentalsForSimulation,
   publishTrustLadder,
+  rentalRenterKey,
   renterTrustKey,
   shopOutcomes,
   trustConsent,
@@ -100,7 +101,9 @@ describe('publishing a trust ladder', () => {
 describe('the renter key', () => {
   it('is kept on the renter once, from the payer PayPal named', async () => {
     const rentalId = await shopA.paidRental(PRIYA)
+    expect(await shopA.act((transaction) => rentalRenterKey(transaction, rentalId))).toEqual({ known: true, key: undefined })
     expect(await shopA.act((transaction) => renterTrustKey(transaction, rentalId, keyFor))).toBe(PRIYA_KEY)
+    expect(await actAs(asRenter(shopA), (transaction) => rentalRenterKey(transaction, rentalId))).toEqual({ known: true, key: PRIYA_KEY })
     expect(await shopA.act((transaction) => renterTrustKey(transaction, rentalId, () => 'another'.padEnd(43, 'y')))).toBe(PRIYA_KEY)
   })
 
@@ -110,6 +113,7 @@ describe('the renter key', () => {
     )
     if (!created.ok) throw new Error(created.reason)
     expect(await shopA.act((transaction) => renterTrustKey(transaction, created.rentalId, keyFor))).toBeUndefined()
+    expect(await shopA.act((transaction) => rentalRenterKey(transaction, created.rentalId))).toEqual({ known: false, key: undefined })
   })
 
   it('cannot be set on another shop’s renter', async () => {
