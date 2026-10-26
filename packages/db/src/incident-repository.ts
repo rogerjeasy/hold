@@ -216,12 +216,19 @@ async function priceView(transaction: Transaction, priceEntryId: string | null):
 // is the list a detector for incidents waiting too long reads (extensions.md section 6, Extension 1).
 export async function shopIncidents(transaction: Transaction, filter: { readonly waiting: boolean }) {
   const rows = await transaction
-    .select({ id: incidents.id, rentalId: incidents.rentalId, state: incidents.state, sentAt: incidents.sentAt, kind: incidents.kind, hint: incidents.hint, description: incidents.description, safety: incidents.safety, model: incidents.model, triageOutcome: incidents.triageOutcome, simulated: incidents.simulated, currency: incidents.currency, agreedCents: incidents.agreedCents, theftDetails: incidents.theftDetails, staffAlertedAt: incidents.staffAlertedAt, reportedAt: incidents.reportedAt, suggestedPriceEntryId: incidents.suggestedPriceEntryId, offeredPriceEntryId: incidents.offeredPriceEntryId, itemLabel: items.label, renterName: rentals.contactName })
+    .select({ id: incidents.id, rentalId: incidents.rentalId, state: incidents.state, sentAt: incidents.sentAt, kind: incidents.kind, hint: incidents.hint, description: incidents.description, safety: incidents.safety, model: incidents.model, triageOutcome: incidents.triageOutcome, simulated: incidents.simulated, currency: incidents.currency, agreedCents: incidents.agreedCents, theftDetails: incidents.theftDetails, staffAlertedAt: incidents.staffAlertedAt, reportedAt: incidents.reportedAt, priceListId: rentals.priceListId, suggestedPriceEntryId: incidents.suggestedPriceEntryId, offeredPriceEntryId: incidents.offeredPriceEntryId, itemLabel: items.label, renterName: rentals.contactName })
     .from(incidents).innerJoin(rentalItems, eq(rentalItems.id, incidents.rentalItemId)).innerJoin(items, eq(items.id, rentalItems.itemId)).innerJoin(rentals, eq(rentals.id, incidents.rentalId))
     // Only sent reports: one sent and not yet sorted, because the model failed mid-way, still waits for a person.
     .where(and(isNotNull(incidents.sentAt), filter.waiting ? inArray(incidents.state, ['reported', 'triaged', 'awaiting_staff']) : ne(incidents.state, 'withdrawn')))
     .orderBy(desc(incidents.reportedAt), asc(incidents.id))
-  return Promise.all(rows.map(async ({ suggestedPriceEntryId, offeredPriceEntryId, ...row }) => ({ ...row, suggestion: await priceView(transaction, suggestedPriceEntryId), offer: await priceView(transaction, offeredPriceEntryId) })))
+  // The agreed list, for a staff member to confirm which entry applies to small damage still without a price.
+  const pricesFor = async (row: (typeof rows)[number]) => (mayConfirmOffer(row) && row.offeredPriceEntryId === null
+    ? transaction.select({ id: priceEntries.id, description: priceEntries.description, amountCents: priceEntries.amountCents }).from(priceEntries).where(eq(priceEntries.priceListId, row.priceListId)).orderBy(asc(priceEntries.position))
+    : [])
+  return Promise.all(rows.map(async (row) => {
+    const { suggestedPriceEntryId, offeredPriceEntryId, ...shown } = row
+    return { ...shown, suggestion: await priceView(transaction, suggestedPriceEntryId), offer: await priceView(transaction, offeredPriceEntryId), prices: await pricesFor(row) }
+  }))
 }
 
 export const incidentsWaitingForStaff = (transaction: Transaction) => shopIncidents(transaction, { waiting: true })
@@ -238,7 +245,7 @@ export async function rentalIncidents(transaction: Transaction, rentalId: string
 // One report as its renter sees it: never the model's suggestion, only a price a staff member confirmed.
 export async function incidentForRenter(transaction: Transaction, rentalId: string, incidentId: string) {
   const [row] = await transaction
-    .select({ id: incidents.id, state: incidents.state, kind: incidents.kind, hint: incidents.hint, description: incidents.description, sessionId: incidents.sessionId, confirmation: incidents.confirmation, currency: incidents.currency, agreedCents: incidents.agreedCents, theftDetails: incidents.theftDetails, simulated: incidents.simulated, reportedAt: incidents.reportedAt, offeredPriceEntryId: incidents.offeredPriceEntryId, itemId: items.id, itemLabel: items.label })
+    .select({ id: incidents.id, state: incidents.state, kind: incidents.kind, hint: incidents.hint, description: incidents.description, sessionId: incidents.sessionId, confirmation: incidents.confirmation, currency: incidents.currency, agreedCents: incidents.agreedCents, theftDetails: incidents.theftDetails, simulated: incidents.simulated, reportedAt: incidents.reportedAt, sentAt: incidents.sentAt, offeredPriceEntryId: incidents.offeredPriceEntryId, itemId: items.id, itemLabel: items.label })
     .from(incidents).innerJoin(rentalItems, eq(rentalItems.id, incidents.rentalItemId)).innerJoin(items, eq(items.id, rentalItems.itemId))
     .where(and(eq(incidents.id, incidentId), eq(incidents.rentalId, rentalId)))
   if (row === undefined) return undefined

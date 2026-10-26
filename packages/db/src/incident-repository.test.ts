@@ -88,6 +88,7 @@ describe('sending a report', () => {
     expect(item?.chainHeadFingerprint).toBe(session?.manifestFingerprint)
     expect(await shop.act((transaction) => transaction.select().from(marks).where(eq(marks.incidentId, report.incidentId)))).toMatchObject([{ status: 'reported', view: 'left-side', firstSeenSessionId: report.sessionId, itemId: report.itemId }])
     expect(report.sent).toMatchObject({ ok: true, photographed: true, hint: 'damage', priceCodes: ['scratch'] })
+    expect(await shop.act((transaction) => incidentForRenter(transaction, report.rentalId, report.incidentId))).toMatchObject({ state: 'reported', sentAt: NOW })
   })
 
   it('sends a theft with no photograph and no mark', async () => {
@@ -132,7 +133,7 @@ describe('sorting a report', () => {
     const sorted = await shop.act((transaction) => sortIncidentReport(transaction, report.incidentId, answered('small_damage', 'scratch', 'We noted the scratch on the left side.'), NOW))
     expect(sorted).toMatchObject({ ok: true, state: 'triaged', kind: 'small_damage' })
     expect(await shop.act((transaction) => incidentForRenter(transaction, report.rentalId, report.incidentId))).toMatchObject({ state: 'triaged', kind: 'small_damage', offer: null, confirmation: 'We noted the scratch on the left side.', agreedCents: null })
-    expect((await shop.act((transaction) => shopIncidents(transaction, { waiting: true }))).find((row) => row.id === report.incidentId)).toMatchObject({ suggestion: { id: priceId, description: 'Scratch', amountCents: 35_00 }, offer: null })
+    expect((await shop.act((transaction) => shopIncidents(transaction, { waiting: true }))).find((row) => row.id === report.incidentId)).toMatchObject({ suggestion: { id: priceId, description: 'Scratch', amountCents: 35_00 }, offer: null, prices: [{ id: priceId, description: 'Scratch', amountCents: 35_00 }] })
     expect(await shop.act((transaction) => confirmIncidentPrice(transaction, report.incidentId, shop.scope.userId ?? '', priceId, NOW))).toEqual({ ok: true, rentalId: report.rentalId })
     expect(await shop.act((transaction) => incidentForRenter(transaction, report.rentalId, report.incidentId))).toMatchObject({ offer: { description: 'Scratch', amountCents: 35_00, currency: 'EUR' } })
   })

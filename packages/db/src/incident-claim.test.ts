@@ -5,7 +5,7 @@ import { recordPhoto, sealSession, startCaptureSession } from './capture-reposit
 import { approveClaim, draftClaim, presentClaim } from './claim-repository.ts'
 import { claimWorkspace } from './claim-query.ts'
 import { replyToClaim } from './claim-reply-repository.ts'
-import { beginComparison } from './comparison-repository.ts'
+import { beginComparison, comparisonReport, completeComparison } from './comparison-repository.ts'
 import { agreeIncident, confirmIncidentPrice, makeShopMatter, sendIncident, sortIncidentReport, startIncident } from './incident-repository.ts'
 import type { TriageAnswer } from './incident-repository.ts'
 import { closeRentalIncidents } from './incident-closing.ts'
@@ -76,6 +76,17 @@ describe('the comparison at the return (X5.2)', () => {
     const [mark] = await shop.act((transaction) => transaction.select().from(marks).where(eq(marks.incidentId, agreed.incidentId)))
     expect(work?.reported).toEqual([{ id: mark?.id, view: 'left-side', region: BOX.region, covered: true }])
     expect(work?.known.some((known) => known.id === mark?.id)).toBe(false)
+  })
+
+  it('links a finding labelled reported to the renter’s report and its agreed line', async () => {
+    const agreed = await withIncident('damage')
+    const returnSession = await returned(agreed)
+    const [comparison] = await shop.act((transaction) => transaction.select().from(comparisons).where(eq(comparisons.returnSessionId, returnSession)))
+    const work = await shop.act((transaction) => beginComparison(transaction, comparison?.id ?? '', NOW))
+    if (work === undefined || comparison === undefined) throw new Error('No comparison')
+    const markId = work.reported[0]?.id ?? null
+    await shop.act((transaction) => completeComparison(transaction, comparison.id, work.startedAt, { state: 'clean', model: 'recorded', promptVersion: 'inspection-1', alignment: {}, reason: null, simulated: false, findings: [{ view: 'left-side', region: BOX.region, class: 'reported', confidence: 0.95, description: 'Scratch', secondLookConfirmed: true, matchedMarkId: markId, suggestedPriceEntryId: null }] }, NOW))
+    expect(await shop.act((transaction) => comparisonReport(transaction, comparison.id))).toMatchObject({ findings: [{ class: 'reported', reported: { incidentId: agreed.incidentId, state: 'agreed', agreedCents: 35_00 } }] })
   })
 
   it('treats the item’s incident photographs as earlier evidence, so a return reusing one is caught', async () => {
