@@ -176,6 +176,13 @@
       "when": 1793056847542,
       "tag": "0024_clean_record",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1793058130471,
+      "tag": "0025_proposal_execution",
+      "breakpoints": true
     }
   ]
 }

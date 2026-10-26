@@ -401,6 +401,13 @@ Extension 2 (`extensions.md` section 7). The rules are plain code in `packages/d
 - **The owner's page** (`/shop/trust`) shows the ladder in force and the shop's own trust ledger, and lets the owner, confirmed with a passkey, replay a candidate ladder over the shop's closed rentals (`simulateLadder`, totals equal a direct recomputation) and publish it. Drafting a ladder with the owner's assistant and `get_merchant_insights` (`extensions.md` section 7.8) waits for Extension 1.
 - **Deposits never taken** is read from the money log through `hold_trust_money_log`, for the renter's own link only: each rental whose hold was released and never captured adds its largest release once, by currency.
 
+### 6.10 The operations agent and the morning queue
+
+Extension 1 (`extensions.md` section 6). The detectors, proposal states, mandates and the gateway are plain code in `packages/domain` (`detectors.ts`, `proposal.ts`, `agent-gateway.ts`); the records are written by `ops-repository.ts` and `ops-settings-repository.ts` in `packages/db`.
+
+- **An approved proposal runs by the path a click takes**, in the approval's own transaction (`decideProposal`). `release_hold` is the clean-return release staff confirm on the claim page (`releaseCleanReturn`, with the approver a person or the owner's standing rule); `request_replacement_hold` sends the hold's upkeep the same `replace` message its schedule sends; `note` is done when approved. If that path refuses, for example because the rental is not back, the proposal stays pending and the person is told why. `send_invoice`, `send_message` and `respond_to_dispute` go to the `ops-execute` queue.
+- **A proposal follows its execution.** It is `executing` while the spine's execution runs, and the trigger `proposal_follows_execution` (migration `0025`) makes it `executed` when PayPal confirms the execution, or `failed` when it fails.
+
 ---
 
 ## 7. The hold core

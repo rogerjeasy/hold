@@ -3,6 +3,7 @@ import { DETECTOR_PROPOSALS, orderQueue, PROPOSAL_TRANSITIONS, proposalFingerpri
 import type { ProposalKind, ShopException, ShopSnapshot } from '@hold/domain'
 import { and, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm'
 import { approvals, auditLog, authorizations, captureSessions, claims, comparisons, holds, invoices, moneyEvents, opsRuns, outbox, proposals, rentalItems, rentals, shopExceptions, shops } from './schema/index.ts'
+import { releaseCleanReturn } from './claim-repository.ts'
 import type { Transaction } from './scope.ts'
 
 export const OPS_EXECUTE_QUEUE = 'ops-execute'
@@ -164,7 +165,7 @@ export async function morningQueue(transaction: Transaction, now: Date): Promise
 }
 
 export type DecisionInput = { readonly decision: 'approve' | 'reject' | 'postpone'; readonly reason: string; readonly mandateId?: string }
-export type DecisionResult = { readonly ok: true; readonly state: 'approved' | 'rejected' | 'pending' | 'executed'; readonly proposalId: string } | { readonly ok: false; readonly reason: 'not_found' | 'not_pending' | 'reason_required' | 'superseded' }
+export type DecisionResult = { readonly ok: true; readonly state: 'approved' | 'rejected' | 'pending' | 'executing' | 'executed'; readonly proposalId: string } | { readonly ok: false; readonly reason: string }
 
 // A person's decision on one proposal. Approval re-reads the state it was written against: if it changed, the
 // proposal is superseded and nothing is executed (X1.5). An approved proposal hands its execution to the outbox.
@@ -185,16 +186,36 @@ export async function decideProposal(transaction: Transaction, proposalId: strin
     await transaction.update(proposals).set({ state: 'superseded', decidedAt: now, updatedAt: now }).where(eq(proposals.id, proposalId))
     return { ok: false, reason: 'superseded' }
   }
+  const handed = await handOff(transaction, proposal, input, userId, now)
+  if (!handed.ok) return handed
   const method = input.mandateId === undefined ? 'on_screen' as const : 'mandate' as const
   await transaction.insert(approvals).values({ shopId: proposal.shopId, subject: 'proposal', subjectId: proposal.id, decidedByUserId: userId, decision: 'approved', method, changes: [{ kind: proposal.kind, reason: input.reason.trim(), ...(input.mandateId === undefined ? {} : { mandateId: input.mandateId }) }], createdAt: now })
-  if (proposal.kind === 'note') {
-    await transaction.update(proposals).set({ state: 'executed', decidedByUserId: userId, mandateId: input.mandateId ?? null, decidedAt: now, updatedAt: now }).where(eq(proposals.id, proposalId))
-    return { ok: true, state: 'executed', proposalId }
+  await transaction.update(proposals).set({ state: handed.state, decidedByUserId: userId, mandateId: input.mandateId ?? null, decisionReason: input.reason.trim() || null, executionId: handed.executionId, decidedAt: now, updatedAt: now }).where(eq(proposals.id, proposalId))
+  return { ok: true, state: handed.state, proposalId }
+}
+
+type Proposal = typeof proposals.$inferSelect
+type HandOff = { readonly ok: true; readonly state: 'executing' | 'executed' | 'approved'; readonly executionId: string | null } | { readonly ok: false; readonly reason: string }
+
+// Carries out an approved proposal by the path a person's click takes, in the same transaction, so a refusal there
+// leaves the proposal pending. A spine execution moves the proposal on when PayPal confirms it (migration 0025).
+async function handOff(transaction: Transaction, proposal: Proposal, input: DecisionInput, userId: string | null, now: Date): Promise<HandOff> {
+  if (proposal.kind === 'note') return { ok: true, state: 'executed', executionId: null }
+  if (proposal.kind === 'release_hold') {
+    if (proposal.rentalId === null) return { ok: false, reason: 'not_found' }
+    const approver = input.mandateId === undefined ? { userId: userId ?? '' } : { mandateId: input.mandateId }
+    const released = await releaseCleanReturn(transaction, proposal.rentalId, approver, input.reason.trim() || proposal.reason, now)
+    return released.ok ? { ok: true, state: 'executing', executionId: released.executionId } : released
+  }
+  if (proposal.kind === 'request_replacement_hold') {
+    const [hold] = await transaction.select({ id: holds.id, authorizationId: holds.currentAuthorizationId }).from(holds).where(eq(holds.id, proposal.subjectId))
+    if (hold === undefined || hold.authorizationId === null) return { ok: false, reason: 'not_found' }
+    await transaction.insert(outbox).values({ shopId: proposal.shopId, queue: 'upkeep', messageGroup: hold.id, payload: { kind: 'replace', holdId: hold.id, authorizationId: hold.authorizationId }, createdAt: now })
+    return { ok: true, state: 'executed', executionId: null }
   }
   if (!transition(PROPOSAL_TRANSITIONS, 'pending', 'approved').ok) return { ok: false, reason: 'not_pending' }
-  await transaction.update(proposals).set({ state: 'approved', decidedByUserId: userId, mandateId: input.mandateId ?? null, decisionReason: input.reason.trim() || null, decidedAt: now, updatedAt: now }).where(eq(proposals.id, proposalId))
   await transaction.insert(outbox).values({ shopId: proposal.shopId, queue: OPS_EXECUTE_QUEUE, messageGroup: proposal.rentalId ?? proposal.id, payload: { proposalId: proposal.id }, createdAt: now })
-  return { ok: true, state: 'approved', proposalId }
+  return { ok: true, state: 'approved', executionId: null }
 }
 
 // Every live proposal that names one of these holds, for releasing several in one approval.

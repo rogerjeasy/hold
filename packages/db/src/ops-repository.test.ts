@@ -1,7 +1,7 @@
 import { detectExceptions } from '@hold/domain'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { auditLog, authorizations, holds, moneyEvents, proposals, rentals, shopExceptions } from './schema/index.ts'
+import { auditLog, authorizations, executions, holds, moneyEvents, outbox, proposals, rentals, shopExceptions } from './schema/index.ts'
 import { auditAgentCall, beginOpsRun, completeOpsRun, decideProposal, exceptionFacts, holdsToReconcile, morningQueue, recordExceptions, rentalsForCaptures, shopSnapshot, writeProposal } from './ops-repository.ts'
 import { inShop } from './scope.ts'
 import type { Transaction } from './scope.ts'
@@ -72,6 +72,50 @@ describe('the operations agent\'s records', () => {
     expect(decision).toEqual({ ok: false, reason: 'superseded' })
     const [row] = await database.select().from(proposals).where(eq(proposals.id, entry?.id ?? ''))
     expect(row?.state).toBe('superseded')
+  })
+})
+
+// An exception recorded as a run would record it, and one pending proposal for it.
+async function proposalFor(kind: 'clean_return_unconfirmed' | 'hold_ending', subjectId: string, rentalId: string, proposalKind: 'release_hold' | 'request_replacement_hold') {
+  const run = await asWorker((transaction) => beginOpsRun(transaction, 'manual', now))
+  const [recorded] = await asWorker((transaction) => recordExceptions(transaction, run, [{ kind, subjectKind: 'hold', subjectId, rentalId, allowed: [proposalKind], reminder: null, deadline: null, moneyCents: 30000, fingerprint: `${kind}:${subjectId}:test` }], now))
+  const written = await asWorker((transaction) => writeProposal(transaction, { exceptionId: recorded?.id ?? '', kind: proposalKind, reason: 'Clean comparison, nobody confirmed it.', references: ['AUTH-1'], draft: null, raisedByAgent: false, runId: run, model: null, promptVersion: null }, now))
+  if (!written.written) throw new Error('No proposal')
+  return written.id
+}
+
+describe('an approved proposal is carried out by the same path as a click', () => {
+  it('releases a clean return\'s hold through the return release, and is executed once PayPal confirms it', async () => {
+    const rental = await shop.readyRental()
+    await database.update(rentals).set({ state: 'returned' }).where(eq(rentals.id, rental.rentalId))
+    const [hold] = await database.select().from(holds).where(eq(holds.rentalId, rental.rentalId))
+    const proposalId = await proposalFor('clean_return_unconfirmed', hold?.id ?? '', rental.rentalId, 'release_hold')
+    const decision = await shop.act((transaction) => decideProposal(transaction, proposalId, shop.scope.userId ?? '', { decision: 'approve', reason: '' }, now))
+    expect(decision).toMatchObject({ ok: true, state: 'executing' })
+    const [execution] = await database.select().from(executions).where(eq(executions.idempotencyKey, `return-release-${hold?.id ?? ''}`))
+    expect(execution).toMatchObject({ action: 'release', amountCents: 30000 })
+    expect((await database.select().from(holds).where(eq(holds.id, hold?.id ?? '')))[0]?.state).toBe('releasing')
+    expect((await database.select().from(proposals).where(eq(proposals.id, proposalId)))[0]).toMatchObject({ state: 'executing', executionId: execution?.id })
+    await asWorker((transaction) => transaction.update(executions).set({ state: 'confirmed' }).where(eq(executions.id, execution?.id ?? '')))
+    expect((await database.select().from(proposals).where(eq(proposals.id, proposalId)))[0]?.state).toBe('executed')
+  })
+
+  it('leaves the proposal pending and says why when the spine refuses it', async () => {
+    const rental = await shop.readyRental()
+    await database.update(rentals).set({ state: 'out' }).where(eq(rentals.id, rental.rentalId))
+    const [hold] = await database.select().from(holds).where(eq(holds.rentalId, rental.rentalId))
+    const proposalId = await proposalFor('clean_return_unconfirmed', hold?.id ?? '', rental.rentalId, 'release_hold')
+    expect(await shop.act((transaction) => decideProposal(transaction, proposalId, shop.scope.userId ?? '', { decision: 'approve', reason: '' }, now))).toEqual({ ok: false, reason: 'not_returned' })
+    expect((await database.select().from(proposals).where(eq(proposals.id, proposalId)))[0]?.state).toBe('pending')
+  })
+
+  it('asks the renter for a replacement hold through the hold\'s upkeep', async () => {
+    const { rentalId, holdId } = await holdEnding()
+    const proposalId = await proposalFor('hold_ending', holdId, rentalId, 'request_replacement_hold')
+    expect(await shop.act((transaction) => decideProposal(transaction, proposalId, shop.scope.userId ?? '', { decision: 'approve', reason: '' }, now))).toMatchObject({ ok: true, state: 'executed' })
+    const [hold] = await database.select().from(holds).where(eq(holds.id, holdId))
+    const sent = await database.select().from(outbox).where(eq(outbox.queue, 'upkeep'))
+    expect(sent.map((each) => each.payload)).toContainEqual({ kind: 'replace', holdId, authorizationId: hold?.currentAuthorizationId })
   })
 })
 

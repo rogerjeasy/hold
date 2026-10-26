@@ -126,10 +126,20 @@ async function openClaimReply(transaction: Transaction, claim: typeof claims.$in
 }
 
 export async function confirmCleanReturn(transaction: Transaction, rentalId: string, userId: string, reason: string, now: Date) {
+  return releaseCleanReturn(transaction, rentalId, { userId }, reason, now)
+}
+
+// A person on screen, or the owner's standing rule acting for them (extensions.md section 6.4).
+export type ReleaseApprover = { readonly userId: string } | { readonly mandateId: string }
+
+export async function releaseCleanReturn(transaction: Transaction, rentalId: string, approver: ReleaseApprover, reason: string, now: Date) {
   const [rental] = await transaction.select().from(rentals).where(eq(rentals.id, rentalId)).for('update')
   if (rental === undefined) return refused('not_found')
-  const staff = await claimStaff(transaction, userId, rental.currency, { kind: 'release_after_clean_return' })
-  if (!staff.ok) return staff
+  if ('userId' in approver) {
+    const staff = await claimStaff(transaction, approver.userId, rental.currency, { kind: 'release_after_clean_return' })
+    if (!staff.ok) return staff
+  }
+  const person = 'userId' in approver ? approver.userId : null
   const [hold] = await transaction.select().from(holds).where(eq(holds.rentalId, rentalId)).for('update')
   if (hold === undefined) return refused('not_found')
   const key = `return-release-${hold.id}`
@@ -143,13 +153,13 @@ export async function confirmCleanReturn(transaction: Transaction, rentalId: str
   if (claim !== undefined && claim.state !== 'waived' && claim.state !== 'closed') return refused('claim_exists')
   const [authorization] = await transaction.select().from(authorizations).where(eq(authorizations.id, hold.currentAuthorizationId ?? '00000000-0000-0000-0000-000000000000'))
   if (authorization === undefined) return refused('not_found')
-  await transaction.insert(approvals).values({ shopId: rental.shopId, subject: 'release', subjectId: hold.id, decidedByUserId: userId, decision: 'approved', method: 'on_screen', changes: [{ reason: reason.trim() }], createdAt: now })
+  await transaction.insert(approvals).values({ shopId: rental.shopId, subject: 'release', subjectId: hold.id, decidedByUserId: person, decision: 'approved', method: person === null ? 'mandate' : 'on_screen', changes: [{ reason: reason.trim(), ...('mandateId' in approver ? { mandateId: approver.mandateId } : {}) }], createdAt: now })
   const [execution] = await transaction.insert(executions).values({ shopId: rental.shopId, rentalId, holdId: hold.id, action: 'release', idempotencyKey: key, currency: hold.currency, amountCents: hold.reservedCents, paypalResourceIds: { authorization: authorization.paypalAuthorizationId, purpose: 'return' }, createdAt: now, updatedAt: now }).returning()
   if (execution === undefined) throw new Error('The release execution was not created.')
   await transaction.insert(outbox).values({ shopId: rental.shopId, queue: EXECUTIONS_QUEUE, messageGroup: rentalId, payload: { executionId: execution.id }, createdAt: now })
   if (hold.state !== 'expired') await transaction.update(holds).set({ state: 'releasing' }).where(eq(holds.id, hold.id))
   await startSettling(transaction, rentalId)
-  await transaction.insert(auditLog).values({ shopId: rental.shopId, actorKind: 'person', actorId: userId, action: 'return.clean_confirmed', subjectKind: 'rental', subjectId: rentalId, detail: { reason: reason.trim() }, at: now })
+  await transaction.insert(auditLog).values({ shopId: rental.shopId, actorKind: person === null ? 'shop_agent' : 'person', actorId: person ?? 'operations_agent', action: 'return.clean_confirmed', subjectKind: 'rental', subjectId: rentalId, detail: { reason: reason.trim() }, at: now })
   await reserveEvidencePack(transaction, rentalId, now)
   return { ok: true, executionId: execution.id, rentalId } as const
 }
