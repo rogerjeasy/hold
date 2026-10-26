@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { DETECTOR_PROPOSALS, orderQueue, PROPOSAL_TRANSITIONS, proposalFingerprintInput, transition } from '@hold/domain'
 import type { ProposalKind, ShopException, ShopSnapshot } from '@hold/domain'
 import { and, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm'
-import { approvals, authorizations, captureSessions, claims, comparisons, holds, invoices, moneyEvents, opsRuns, outbox, proposals, rentalItems, rentals, shopExceptions, shops } from './schema/index.ts'
+import { approvals, auditLog, authorizations, captureSessions, claims, comparisons, holds, invoices, moneyEvents, opsRuns, outbox, proposals, rentalItems, rentals, shopExceptions, shops } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
 export const OPS_EXECUTE_QUEUE = 'ops-execute'
@@ -200,4 +200,44 @@ export async function decideProposal(transaction: Transaction, proposalId: strin
 // Every live proposal that names one of these holds, for releasing several in one approval.
 export async function pendingProposals(transaction: Transaction, ids: readonly string[]) {
   return ids.length === 0 ? [] : transaction.select().from(proposals).where(and(inArray(proposals.id, [...ids]), eq(proposals.state, 'pending')))
+}
+
+// The holds PayPal still reserves money for, with the authorization each rests on: what the nightly check reads back.
+export async function holdsToReconcile(transaction: Transaction) {
+  return transaction.select({ holdId: holds.id, rentalId: holds.rentalId, state: holds.state, authorizationId: authorizations.paypalAuthorizationId })
+    .from(holds).innerJoin(authorizations, eq(authorizations.id, holds.currentAuthorizationId)).where(inArray(holds.state, ['placed', 'at_risk']))
+}
+
+// Which rental each captured payment belongs to, so a dispute PayPal names by its capture finds its rental.
+export async function rentalsForCaptures(transaction: Transaction, captureIds: readonly string[]): Promise<Record<string, string>> {
+  if (captureIds.length === 0) return {}
+  const rows = await transaction.select({ reference: moneyEvents.paypalReference, rentalId: moneyEvents.rentalId }).from(moneyEvents).where(inArray(moneyEvents.paypalReference, [...captureIds]))
+  return Object.fromEntries(rows.map((row) => [row.reference, row.rentalId]))
+}
+
+export type AgentCallLine = { readonly runId: string | null; readonly tool: string; readonly subjectKind: string | null; readonly subjectId: string | null; readonly outcome: string; readonly milliseconds: number }
+
+// One audit line for each tool call an agent makes, allowed or refused (extensions.md section 4.4, X1.7).
+export async function auditAgentCall(transaction: Transaction, line: AgentCallLine, now: Date): Promise<void> {
+  const [shop] = await transaction.select({ id: shops.id }).from(shops).limit(1)
+  if (shop === undefined) throw new Error('No shop in scope.')
+  await transaction.insert(auditLog).values({ shopId: shop.id, actorKind: 'shop_agent', actorId: 'operations_agent', action: `agent.tool.${line.tool}`, subjectKind: line.subjectKind, subjectId: line.subjectId, source: line.runId, detail: { outcome: line.outcome, milliseconds: line.milliseconds }, at: now })
+}
+
+// The records an exception names, for the model to read: states, amounts, dates and PayPal references. No name,
+// email or comment: what the model reads cannot steer it with a renter's words, and it learns nothing it need not.
+export async function exceptionFacts(transaction: Transaction, subjectKind: string, subjectId: string) {
+  let rentalId: string | undefined
+  if (subjectKind === 'rental') rentalId = subjectId
+  else if (subjectKind === 'hold') rentalId = (await transaction.select({ rentalId: holds.rentalId }).from(holds).where(eq(holds.id, subjectId)))[0]?.rentalId
+  else if (subjectKind === 'claim') rentalId = (await transaction.select({ rentalId: claims.rentalId }).from(claims).where(eq(claims.id, subjectId)))[0]?.rentalId
+  else if (subjectKind === 'invoice') rentalId = (await transaction.select({ rentalId: invoices.rentalId }).from(invoices).where(eq(invoices.id, subjectId)))[0]?.rentalId
+  if (rentalId === undefined) return { subjectKind, subjectId }
+  const [rental] = await transaction.select({ id: rentals.id, state: rentals.state, startsAt: rentals.startsAt, endsAt: rentals.endsAt, currency: rentals.currency, feeCents: rentals.feeCents }).from(rentals).where(eq(rentals.id, rentalId))
+  const [hold] = await transaction.select({ id: holds.id, state: holds.state, reservedCents: holds.reservedCents, currency: holds.currency, stateChangedAt: holds.stateChangedAt, authorization: authorizations.paypalAuthorizationId, validUntil: authorizations.validUntil, assuredUntil: authorizations.assuredUntil })
+    .from(holds).leftJoin(authorizations, eq(authorizations.id, holds.currentAuthorizationId)).where(eq(holds.rentalId, rentalId))
+  const [claim] = await transaction.select({ id: claims.id, state: claims.state, totalCents: claims.totalCents, replyDueAt: claims.replyDueAt }).from(claims).where(eq(claims.rentalId, rentalId))
+  const payments = await transaction.select({ kind: moneyEvents.kind, amountCents: moneyEvents.amountCents, currency: moneyEvents.currency, paypalReference: moneyEvents.paypalReference, occurredAt: moneyEvents.occurredAt }).from(moneyEvents).where(eq(moneyEvents.rentalId, rentalId))
+  const bills = await transaction.select({ state: invoices.state, amountCents: invoices.amountCents, paypalInvoiceId: invoices.paypalInvoiceId, sentAt: invoices.sentAt }).from(invoices).where(eq(invoices.rentalId, rentalId))
+  return { subjectKind, subjectId, rental, hold, claim: claim ?? null, payments, invoices: bills }
 }
