@@ -85,6 +85,10 @@
     },
     "invite": {
       "title": "Una invitación"
+    },
+    "reliability": {
+      "title": "Qué tan fiable es la comparación",
+      "description": "La precisión medida de la comparación de fotografías, cada cifra con su recuento."
     }
   },
   "nav": {
@@ -101,7 +105,8 @@
     "menuTitle": "Menú",
     "skip": "Ir al contenido",
     "signIn": "Entrar",
-    "yourShop": "Tu tienda"
+    "yourShop": "Tu tienda",
+    "reliability": "Fiabilidad"
   },
   "language": {
     "label": "Idioma",
@@ -769,8 +774,8 @@
           }
         },
         "status": {
-          "title": "La tabla de resultados aún no está publicada.",
-          "body": "Aparecerá aquí, con todos los recuentos, cuando se haya ejecutado el conjunto de evaluación."
+          "title": "Cada cifra se publica con su recuento.",
+          "body": "La página de fiabilidad muestra la última ejecución aceptada sobre el conjunto de evaluación, o dice claramente que aún no se ha aceptado ninguna."
         }
       },
       "agents": {
@@ -1201,7 +1206,8 @@
       "staff": "Equipo",
       "prices": "Precios",
       "paypal": "PayPal",
-      "settings": "Ajustes"
+      "settings": "Ajustes",
+      "scorecard": "Fiabilidad"
     },
     "setup": {
       "title": "Prepara tu tienda",
@@ -2373,5 +2379,80 @@
     },
     "acknowledge": "He revisado esta reclamación",
     "reviewFirst": "Revise las pruebas y precios. Su plazo empieza cuando confirme que ha revisado la reclamación."
+  },
+  "scorecard": {
+    "title": "Qué tan fiable es la comparación",
+    "lead": "Hold mide su comparación de fotografías en pares con los que nunca se ajustó, y publica cada cifra con su recuento. Una versión que empeore estas cifras no se publica.",
+    "measuredOn": "Medido el {date}: {pairs} pares, {real} tal como se tomaron y {synthetic} modificados por nuestra herramienta de aumento. Proceso {pipeline}, modelo {model}.",
+    "synthetic": "Un par sintético son dos fotografías reales de la misma bicicleta con daños dibujados, luz cambiada o suciedad añadida. Cada uno se marca como sintético en cada informe.",
+    "columns": {
+      "measure": "Medida",
+      "all": "Todos los pares",
+      "real": "Fotografías tal como se tomaron"
+    },
+    "share": "{count} de {total} ({percent} %)",
+    "notMeasured": "{count} de {total}, sin medir",
+    "zeroBound": "{count} de {total}: menos de aproximadamente {bound} % con un 95 % de confianza, no «nunca»",
+    "spread": "mediana {median} s, décimo más lento {slowest} s",
+    "tokens": "mediana {median}, décimo más lento {slowest}",
+    "measures": {
+      "damageFound": {
+        "name": "Daños encontrados",
+        "help": "Daños etiquetados que la comparación encontró en el lugar correcto."
+      },
+      "cleanWronglyFlagged": {
+        "name": "Devoluciones limpias señaladas por error",
+        "help": "Devoluciones sin daños que terminaron con hallazgos. Es el error que perjudica a los clientes."
+      },
+      "sentToPerson": {
+        "name": "Enviados a una persona",
+        "help": "Pares en los que la comparación dudó y que pasó al personal. Ni un error ni un acierto."
+      },
+      "knownMarksRespected": {
+        "name": "Marcas conocidas respetadas",
+        "help": "Pares con una marca ya presente en el artículo para la que no se preparó ninguna línea de reclamación."
+      },
+      "looksAgree": {
+        "name": "Acuerdo entre las dos revisiones",
+        "help": "Daños hallados en la primera revisión que la segunda, independiente, confirmó."
+      },
+      "identityCaught": {
+        "name": "Artículo equivocado o fotografía reutilizada detectados",
+        "help": "Pares que muestran otro artículo, o una fotografía antigua enviada de nuevo, que pasaron a una persona."
+      },
+      "confidence": {
+        "name": "Hallazgos con confianza {level} que eran correctos",
+        "help": "Hasta qué punto se puede fiar de la confianza que declara la comparación."
+      },
+      "time": {
+        "name": "Tiempo de una comparación",
+        "help": "Tiempo transcurrido para una vista."
+      },
+      "tokens": {
+        "name": "Tokens del modelo por comparación",
+        "help": "Tokens de entrada y salida para una vista."
+      }
+    },
+    "levels": {
+      "high": "alta",
+      "medium": "media",
+      "low": "baja"
+    },
+    "empty": {
+      "title": "Aún sin medir",
+      "body": "Todavía no se ha aceptado ninguna ejecución sobre el conjunto de evaluación. Hasta entonces, Hold no afirma ninguna precisión."
+    },
+    "field": {
+      "title": "En tu tienda",
+      "lead": "Cada hallazgo que decide una persona también es una etiqueta. Si se empiezan a retirar muchos más hallazgos que antes, la comparación y tu personal no coinciden.",
+      "month": "{month}",
+      "removed": "{removed} de {total} hallazgos retirados por una persona",
+      "alarmTitle": "Se retiran más hallazgos que antes",
+      "alarmBody": "Este mes, una parte mucho mayor de los hallazgos fue retirada por el personal o tras una impugnación. Revisa las devoluciones recientes y avísanos.",
+      "empty": "Todavía no se ha decidido ningún hallazgo en tu tienda."
+    },
+    "publicLink": "Ver la precisión medida",
+    "findingAccuracy": "Confianza {level}. En las pruebas, los hallazgos de este nivel fueron correctos {count} de {total}.",
+    "findingLevel": "Confianza {level}. Aún sin medir en este nivel."
   }
 }

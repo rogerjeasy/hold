@@ -60,7 +60,7 @@ test('a made-up invitation link says so plainly', async ({ page }) => {
   await expect(page.getByText('There is no invitation at this address.')).toBeVisible()
 })
 
-for (const path of ['/shop', '/shop/security', '/shop/staff', '/shop/prices', '/shop/paypal'] as const) {
+for (const path of ['/shop', '/shop/security', '/shop/staff', '/shop/prices', '/shop/paypal', '/shop/scorecard'] as const) {
   for (const viewport of viewports) {
     test(`${path} fits a ${viewport.name} wide screen`, async ({ page }) => {
       await signUpAs(page, `long-address-for-wrapping-${newEmail()}`, 'Ribeira Bicicletas e Caiaques do Douro Litoral')

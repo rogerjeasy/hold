@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
+import { routes } from '@/lib/routes'
 import { Logo } from './logo'
 import { navItems, type NavItem } from './nav-items'
 
@@ -26,7 +27,8 @@ function FooterLinks({ title, items }: { title: string; items: readonly NavItem[
 
 export function SiteFooter({ year }: { year: number }) {
   const t = useTranslations('footer')
-  const product = navItems.filter((item) => productKeys.includes(item.key))
+  // The published scorecard sits with the product pages, though the header has no room for it.
+  const product = [...navItems.filter((item) => productKeys.includes(item.key)), { key: 'reliability', href: routes.reliability } as const]
   const audiences = navItems.filter((item) => !productKeys.includes(item.key))
 
   return (

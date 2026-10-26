@@ -207,9 +207,10 @@ describe('AiScreen pipeline', () => {
     expect(screen.getByText('There is no such tier. No tool takes an amount, and no agent can start a charge.')).toBeInTheDocument()
   })
 
-  it('says plainly that the scorecard is not published yet', () => {
+  it('sends the reader to the published scorecard, with its counts', () => {
     renderWithIntl(<AiScreen />)
-    expect(within(screen.getByRole('note')).getByText('The scorecard is not published yet.')).toBeInTheDocument()
+    expect(within(screen.getByRole('note')).getByText('Every figure is published with its count.')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'See the measured accuracy' })).toHaveAttribute('href', '/reliability')
   })
 })
 

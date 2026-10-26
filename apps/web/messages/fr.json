@@ -85,6 +85,10 @@
     },
     "invite": {
       "title": "Une invitation"
+    },
+    "reliability": {
+      "title": "Quelle est la fiabilité de la comparaison",
+      "description": "La précision mesurée de la comparaison des photographies, chaque chiffre avec son effectif."
     }
   },
   "nav": {
@@ -101,7 +105,8 @@
     "menuTitle": "Menu",
     "skip": "Aller au contenu",
     "signIn": "Connexion",
-    "yourShop": "Votre boutique"
+    "yourShop": "Votre boutique",
+    "reliability": "Fiabilité"
   },
   "language": {
     "label": "Langue",
@@ -769,8 +774,8 @@
           }
         },
         "status": {
-          "title": "Le tableau de résultats n'est pas encore publié.",
-          "body": "Il paraîtra ici, avec chaque nombre, une fois le jeu d'évaluation exécuté."
+          "title": "Chaque chiffre est publié avec son effectif.",
+          "body": "La page de fiabilité montre la dernière exécution acceptée sur le jeu d’évaluation, ou dit clairement qu’aucune ne l’a encore été."
         }
       },
       "agents": {
@@ -1201,7 +1206,8 @@
       "staff": "Équipe",
       "prices": "Prix",
       "paypal": "PayPal",
-      "settings": "Réglages"
+      "settings": "Réglages",
+      "scorecard": "Fiabilité"
     },
     "setup": {
       "title": "Préparez votre boutique",
@@ -2373,5 +2379,80 @@
     },
     "acknowledge": "J’ai examiné cette réclamation",
     "reviewFirst": "Vérifiez les preuves et les prix. Votre délai commence quand vous confirmez avoir examiné cette réclamation."
+  },
+  "scorecard": {
+    "title": "Quelle est la fiabilité de la comparaison",
+    "lead": "Hold mesure sa comparaison de photographies sur des paires qui n’ont jamais servi à la régler, et publie chaque chiffre avec son effectif. Une version qui dégrade ces chiffres n’est pas publiée.",
+    "measuredOn": "Mesuré le {date} : {pairs} paires, {real} telles que prises et {synthetic} modifiées par notre outil d’augmentation. Chaîne {pipeline}, modèle {model}.",
+    "synthetic": "Une paire synthétique est faite de deux vraies photographies du même vélo, avec des dégâts dessinés, une lumière modifiée ou de la saleté ajoutée. Chacune est signalée comme synthétique dans chaque rapport.",
+    "columns": {
+      "measure": "Mesure",
+      "all": "Toutes les paires",
+      "real": "Photographies telles que prises"
+    },
+    "share": "{count} sur {total} ({percent} %)",
+    "notMeasured": "{count} sur {total}, non mesuré",
+    "zeroBound": "{count} sur {total} : moins d’environ {bound} % avec 95 % de confiance, pas « jamais »",
+    "spread": "médiane {median} s, dixième le plus lent {slowest} s",
+    "tokens": "médiane {median}, dixième le plus lent {slowest}",
+    "measures": {
+      "damageFound": {
+        "name": "Dégâts trouvés",
+        "help": "Dégâts étiquetés que la comparaison a trouvés au bon endroit."
+      },
+      "cleanWronglyFlagged": {
+        "name": "Retours propres signalés à tort",
+        "help": "Retours sans dégât qui ont abouti à des constats. C’est l’erreur qui nuit aux locataires."
+      },
+      "sentToPerson": {
+        "name": "Confiés à une personne",
+        "help": "Paires sur lesquelles la comparaison hésitait et qu’elle a confiées au personnel. Ni une erreur ni un succès."
+      },
+      "knownMarksRespected": {
+        "name": "Marques connues respectées",
+        "help": "Paires avec une marque déjà présente sur l’article pour laquelle aucune ligne de réclamation n’a été préparée."
+      },
+      "looksAgree": {
+        "name": "Accord entre les deux examens",
+        "help": "Dégâts trouvés au premier examen et confirmés par le second, indépendant."
+      },
+      "identityCaught": {
+        "name": "Mauvais article ou photographie réutilisée détectés",
+        "help": "Paires montrant un autre article, ou une ancienne photographie renvoyée, confiées à une personne."
+      },
+      "confidence": {
+        "name": "Constats de confiance {level} qui étaient justes",
+        "help": "Dans quelle mesure la confiance annoncée par la comparaison est fiable."
+      },
+      "time": {
+        "name": "Durée d’une comparaison",
+        "help": "Temps écoulé pour une vue."
+      },
+      "tokens": {
+        "name": "Jetons du modèle pour une comparaison",
+        "help": "Jetons d’entrée et de sortie pour une vue."
+      }
+    },
+    "levels": {
+      "high": "élevée",
+      "medium": "moyenne",
+      "low": "faible"
+    },
+    "empty": {
+      "title": "Pas encore mesuré",
+      "body": "Aucune exécution sur le jeu d’évaluation n’a encore été acceptée. D’ici là, Hold n’annonce aucune précision pour la comparaison."
+    },
+    "field": {
+      "title": "Dans votre boutique",
+      "lead": "Chaque constat tranché par une personne est aussi une étiquette. Si l’on retire beaucoup plus de constats qu’avant, la comparaison et votre personnel ne sont plus d’accord.",
+      "month": "{month}",
+      "removed": "{removed} constats sur {total} retirés par une personne",
+      "alarmTitle": "On retire plus de constats qu’avant",
+      "alarmBody": "Ce mois-ci, une part bien plus grande des constats a été retirée par le personnel ou après une contestation. Vérifiez les retours récents et prévenez-nous.",
+      "empty": "Aucun constat n’a encore été tranché dans votre boutique."
+    },
+    "publicLink": "Voir la précision mesurée",
+    "findingAccuracy": "Confiance {level}. Lors des tests, les constats à ce niveau étaient justes {count} fois sur {total}.",
+    "findingLevel": "Confiance {level}. Pas encore mesuré à ce niveau."
   }
 }

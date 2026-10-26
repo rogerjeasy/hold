@@ -85,6 +85,10 @@
     },
     "invite": {
       "title": "An invitation"
+    },
+    "reliability": {
+      "title": "How reliable is the comparison",
+      "description": "The measured accuracy of the photograph comparison, every figure with its count."
     }
   },
   "nav": {
@@ -101,7 +105,8 @@
     "menuTitle": "Menu",
     "skip": "Skip to content",
     "signIn": "Sign in",
-    "yourShop": "Your shop"
+    "yourShop": "Your shop",
+    "reliability": "Reliability"
   },
   "language": {
     "label": "Language",
@@ -769,8 +774,8 @@
           }
         },
         "status": {
-          "title": "The scorecard is not published yet.",
-          "body": "It appears here, with every count, once the evaluation set has been run."
+          "title": "Every figure is published with its count.",
+          "body": "The reliability page shows the latest accepted run over the evaluation set, or says plainly that none has been accepted yet."
         }
       },
       "agents": {
@@ -1201,7 +1206,8 @@
       "staff": "Staff",
       "prices": "Prices",
       "paypal": "PayPal",
-      "settings": "Settings"
+      "settings": "Settings",
+      "scorecard": "Reliability"
     },
     "setup": {
       "title": "Set up your shop",
@@ -2373,5 +2379,80 @@
     },
     "acknowledge": "I have reviewed this claim",
     "reviewFirst": "Review the evidence and prices. Your reply period starts when you confirm you have reviewed this claim."
+  },
+  "scorecard": {
+    "title": "How reliable is the comparison",
+    "lead": "Hold measures its photograph comparison on pairs it was never tuned on, and publishes every figure with its count. A release that makes these figures worse does not ship.",
+    "measuredOn": "Measured on {date}: {pairs} pairs, {real} taken as they are and {synthetic} changed by our augmentation tool. Pipeline {pipeline}, model {model}.",
+    "synthetic": "A synthetic pair is two real photographs of the same bike with drawn damage, changed light or dirt added. Each is labelled synthetic in every report.",
+    "columns": {
+      "measure": "Measure",
+      "all": "All pairs",
+      "real": "Photographs taken as they are"
+    },
+    "share": "{count} of {total} ({percent}%)",
+    "notMeasured": "{count} of {total}, not measured",
+    "zeroBound": "{count} of {total}: below about {bound}% at 95% confidence, not “never”",
+    "spread": "median {median} s, slowest tenth {slowest} s",
+    "tokens": "median {median}, slowest tenth {slowest}",
+    "measures": {
+      "damageFound": {
+        "name": "Damage found",
+        "help": "Labelled damage the comparison found in the right place."
+      },
+      "cleanWronglyFlagged": {
+        "name": "Clean returns wrongly flagged",
+        "help": "Clean returns that ended in findings. This is the error that harms renters."
+      },
+      "sentToPerson": {
+        "name": "Sent to a person",
+        "help": "Pairs the comparison was unsure of and handed to staff. Neither an error nor a success."
+      },
+      "knownMarksRespected": {
+        "name": "Known marks respected",
+        "help": "Pairs with a mark already on the item where no claim line was drafted for it."
+      },
+      "looksAgree": {
+        "name": "Agreement between the two looks",
+        "help": "Damage the first look found that the independent second look confirmed."
+      },
+      "identityCaught": {
+        "name": "Wrong item or reused photograph caught",
+        "help": "Pairs showing another item, or an old photograph sent again, that went to a person."
+      },
+      "confidence": {
+        "name": "Findings at {level} confidence that were correct",
+        "help": "How far the comparison’s stated confidence can be trusted."
+      },
+      "time": {
+        "name": "Time for one comparison",
+        "help": "Elapsed time for one view."
+      },
+      "tokens": {
+        "name": "Model tokens for one comparison",
+        "help": "Input and output tokens for one view."
+      }
+    },
+    "levels": {
+      "high": "high",
+      "medium": "medium",
+      "low": "low"
+    },
+    "empty": {
+      "title": "Not measured yet",
+      "body": "No run over the evaluation set has been accepted yet. Until one is, Hold claims no accuracy for the comparison."
+    },
+    "field": {
+      "title": "In your shop",
+      "lead": "Every finding a person decided on is a label too. If people start removing far more findings than before, the comparison and your staff disagree.",
+      "month": "{month}",
+      "removed": "{removed} of {total} findings removed by a person",
+      "alarmTitle": "People are removing more findings than before",
+      "alarmBody": "This month a much larger share of the comparison’s findings was removed by staff or after a renter contested. Check recent returns, and tell us.",
+      "empty": "No finding has been decided in your shop yet."
+    },
+    "publicLink": "See the measured accuracy",
+    "findingAccuracy": "Confidence {level}. In testing, findings at this level were correct {count} of {total}.",
+    "findingLevel": "Confidence {level}. Not measured at this level yet."
   }
 }

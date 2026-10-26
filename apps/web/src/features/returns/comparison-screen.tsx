@@ -1,7 +1,8 @@
 'use client'
 
 import type { ComparisonReport } from '@hold/db'
-import { formatMoney, money } from '@hold/domain'
+import { confidenceLevel, formatMoney, money } from '@hold/domain'
+import type { ConfidenceLevel, Share } from '@hold/domain'
 import { useLocale, useTranslations } from 'next-intl'
 import { PhotoWithMarks } from '@/components/photo-with-marks'
 import { Notice } from '@/components/ui/notice'
@@ -15,8 +16,17 @@ import { ReviewForm } from './review-form'
 type DisplayPhoto = { readonly view: string; readonly url: string | null }
 export type ComparisonView = Omit<ComparisonReport, 'before' | 'after' | 'reviews'> & { readonly before: readonly DisplayPhoto[]; readonly after: readonly DisplayPhoto[]; readonly reviews: readonly { readonly actorName: string | null; readonly outcome: 'clean' | 'findings' | 'deferred'; readonly reason: string }[] }
 
-export function ComparisonScreen({ shopName, report, canAct }: { shopName: string; report: ComparisonView; canAct: boolean }) {
+// How often findings at each confidence level were correct in the accepted evaluation run, when one exists.
+export type Calibration = Readonly<Record<ConfidenceLevel, Share>>
+
+export function ComparisonScreen({ shopName, report, canAct, calibration }: { shopName: string; report: ComparisonView; canAct: boolean; calibration?: Calibration | undefined }) {
   const t = useTranslations('shop.comparison')
+  const scorecard = useTranslations('scorecard')
+  const accuracy = (confidence: number) => {
+    const level = confidenceLevel(confidence)
+    const measured = calibration?.[level]
+    return measured === undefined || measured.total === 0 ? scorecard('findingLevel', { level: scorecard(`levels.${level}`) }) : scorecard('findingAccuracy', { level: scorecard(`levels.${level}`), ...measured })
+  }
   const locale = useLocale()
   const pending = report.state === 'pending' || report.state === 'running'
   useLookAgain(pending || [...report.before, ...report.after].some((photo) => photo.url === null), { forMs: 180_000 })
@@ -36,6 +46,7 @@ export function ComparisonScreen({ shopName, report, canAct }: { shopName: strin
     {report.findings.length === 0 ? null : <Panel title={t('observations')}><ul className="grid gap-4 px-4 py-4 md:px-5">{report.findings.map((finding) => <li key={finding.id} className="grid min-w-0 gap-1 border-t pt-3 first:border-t-0 first:pt-0">
       <p className="font-semibold">{t(`classes.${finding.class}`)}</p><p className="wrap-long-words">{finding.description}</p>
       {finding.secondLookConfirmed === true ? <p className="text-muted-foreground">{t('secondLook')}</p> : null}
+      {finding.class === 'known_mark' || finding.class === 'wear' ? null : <p className="text-sm text-muted-foreground wrap-long-words">{accuracy(finding.confidence)}</p>}
       {finding.amountCents !== null && finding.currency !== null && finding.class !== 'known_mark' && finding.class !== 'wear' ? <p>{t('price', { description: finding.priceDescription ?? '', amount: formatMoney(money(finding.amountCents, finding.currency), locale) })}</p> : null}
     </li>)}</ul></Panel>}
     <p className="text-sm text-muted-foreground wrap-long-words">{t('version', { model: report.model ?? t('notRun'), prompt: report.promptVersion ?? t('notRun') })}</p>

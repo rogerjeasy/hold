@@ -4,7 +4,7 @@ import { renderWithIntl } from '@/test/render'
 import { SiteFooter } from './site-footer'
 
 describe('SiteFooter', () => {
-  it('links to every header page', () => {
+  it('links to every header page, and to the published scorecard', () => {
     renderWithIntl(<SiteFooter year={2026} />)
     const footer = within(screen.getByRole('contentinfo'))
     expect(
@@ -12,7 +12,7 @@ describe('SiteFooter', () => {
         .getAllByRole('link')
         .map((link) => link.getAttribute('href'))
         .sort(),
-    ).toEqual(['/ai', '/for-renters', '/for-shops', '/how-it-works', '/paypal'])
+    ).toEqual(['/ai', '/for-renters', '/for-shops', '/how-it-works', '/paypal', '/reliability'])
   })
 
   it('says plainly that Hold is not an insurer', () => {

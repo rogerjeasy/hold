@@ -85,6 +85,10 @@
     },
     "invite": {
       "title": "Eine Einladung"
+    },
+    "reliability": {
+      "title": "Wie zuverlässig ist der Vergleich",
+      "description": "Die gemessene Genauigkeit des Fotovergleichs, jede Zahl mit ihrer Anzahl."
     }
   },
   "nav": {
@@ -101,7 +105,8 @@
     "menuTitle": "Menü",
     "skip": "Zum Inhalt springen",
     "signIn": "Anmelden",
-    "yourShop": "Ihr Verleih"
+    "yourShop": "Ihr Verleih",
+    "reliability": "Zuverlässigkeit"
   },
   "language": {
     "label": "Sprache",
@@ -769,8 +774,8 @@
           }
         },
         "status": {
-          "title": "Die Auswertung ist noch nicht veröffent­licht.",
-          "body": "Sie erscheint hier mit allen Zahlen, sobald der Testsatz durchgelaufen ist."
+          "title": "Jede Zahl wird mit ihrer Anzahl veröffentlicht.",
+          "body": "Die Seite zur Zuverlässigkeit zeigt den zuletzt angenommenen Lauf über den Bewertungssatz oder sagt klar, dass noch keiner angenommen wurde."
         }
       },
       "agents": {
@@ -1201,7 +1206,8 @@
       "staff": "Team",
       "prices": "Preise",
       "paypal": "PayPal",
-      "settings": "Einstellungen"
+      "settings": "Einstellungen",
+      "scorecard": "Zuverlässigkeit"
     },
     "setup": {
       "title": "Richten Sie Ihren Verleih ein",
@@ -2373,5 +2379,80 @@
     },
     "acknowledge": "Ich habe diese Forderung geprüft",
     "reviewFirst": "Prüfen Sie die Belege und Preise. Ihre Antwortfrist beginnt mit Ihrer Prüfbestätigung."
+  },
+  "scorecard": {
+    "title": "Wie zuverlässig ist der Vergleich",
+    "lead": "Hold misst seinen Fotovergleich an Paaren, mit denen er nie abgestimmt wurde, und veröffentlicht jede Zahl mit ihrer Anzahl. Eine Version, die diese Zahlen verschlechtert, wird nicht ausgeliefert.",
+    "measuredOn": "Gemessen am {date}: {pairs} Paare, {real} so wie aufgenommen und {synthetic} von unserem Erweiterungswerkzeug verändert. Ablauf {pipeline}, Modell {model}.",
+    "synthetic": "Ein synthetisches Paar sind zwei echte Fotos desselben Fahrrads mit gezeichneten Schäden, verändertem Licht oder hinzugefügtem Schmutz. Jedes ist in jedem Bericht als synthetisch gekennzeichnet.",
+    "columns": {
+      "measure": "Messgröße",
+      "all": "Alle Paare",
+      "real": "Fotos so wie aufgenommen"
+    },
+    "share": "{count} von {total} ({percent} %)",
+    "notMeasured": "{count} von {total}, nicht gemessen",
+    "zeroBound": "{count} von {total}: unter etwa {bound} % bei 95 % Konfidenz, nicht „nie“",
+    "spread": "Median {median} s, langsamstes Zehntel {slowest} s",
+    "tokens": "Median {median}, langsamstes Zehntel {slowest}",
+    "measures": {
+      "damageFound": {
+        "name": "Gefundene Schäden",
+        "help": "Gekennzeichnete Schäden, die der Vergleich an der richtigen Stelle fand."
+      },
+      "cleanWronglyFlagged": {
+        "name": "Saubere Rückgaben fälschlich gemeldet",
+        "help": "Rückgaben ohne Schaden, die mit Befunden endeten. Das ist der Fehler, der Mietenden schadet."
+      },
+      "sentToPerson": {
+        "name": "An eine Person übergeben",
+        "help": "Paare, bei denen der Vergleich unsicher war und an das Personal übergab. Weder Fehler noch Erfolg."
+      },
+      "knownMarksRespected": {
+        "name": "Bekannte Spuren beachtet",
+        "help": "Paare mit einer bereits vorhandenen Spur, für die keine Forderungszeile erstellt wurde."
+      },
+      "looksAgree": {
+        "name": "Übereinstimmung der beiden Prüfungen",
+        "help": "Schäden aus der ersten Prüfung, die die unabhängige zweite bestätigte."
+      },
+      "identityCaught": {
+        "name": "Falscher Artikel oder wiederverwendetes Foto erkannt",
+        "help": "Paare mit einem anderen Artikel oder einem erneut gesendeten alten Foto, die an eine Person gingen."
+      },
+      "confidence": {
+        "name": "Befunde mit {level} Konfidenz, die stimmten",
+        "help": "Wie weit man der angegebenen Konfidenz des Vergleichs trauen kann."
+      },
+      "time": {
+        "name": "Dauer eines Vergleichs",
+        "help": "Verstrichene Zeit für eine Ansicht."
+      },
+      "tokens": {
+        "name": "Modell-Tokens pro Vergleich",
+        "help": "Eingabe- und Ausgabe-Tokens für eine Ansicht."
+      }
+    },
+    "levels": {
+      "high": "hoher",
+      "medium": "mittlerer",
+      "low": "niedriger"
+    },
+    "empty": {
+      "title": "Noch nicht gemessen",
+      "body": "Bisher wurde kein Lauf über den Bewertungssatz angenommen. Bis dahin behauptet Hold keine Genauigkeit für den Vergleich."
+    },
+    "field": {
+      "title": "In Ihrem Geschäft",
+      "lead": "Jeder Befund, über den eine Person entschieden hat, ist ebenfalls eine Kennzeichnung. Werden viel mehr Befunde entfernt als zuvor, sind sich Vergleich und Personal uneins.",
+      "month": "{month}",
+      "removed": "{removed} von {total} Befunden von einer Person entfernt",
+      "alarmTitle": "Es werden mehr Befunde entfernt als zuvor",
+      "alarmBody": "In diesem Monat wurde ein deutlich größerer Anteil der Befunde vom Personal oder nach einem Einspruch entfernt. Prüfen Sie die letzten Rückgaben und sagen Sie uns Bescheid.",
+      "empty": "In Ihrem Geschäft wurde noch über keinen Befund entschieden."
+    },
+    "publicLink": "Die gemessene Genauigkeit ansehen",
+    "findingAccuracy": "Konfidenz {level}. In Tests stimmten Befunde auf dieser Stufe {count} von {total} Mal.",
+    "findingLevel": "Konfidenz {level}. Auf dieser Stufe noch nicht gemessen."
   }
 }

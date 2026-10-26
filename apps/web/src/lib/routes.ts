@@ -5,6 +5,7 @@ export const routes = {
   forRenters: '/for-renters',
   ai: '/ai',
   paypal: '/paypal',
+  reliability: '/reliability',
   demo: '/demo',
   signIn: '/sign-in',
   signUp: '/sign-up',
@@ -23,6 +24,7 @@ export const shopRoutes = {
   staff: '/shop/staff',
   prices: '/shop/prices',
   paypal: '/shop/paypal',
+  scorecard: '/shop/scorecard',
 } as const
 
 // Pages reached from the rentals page rather than from the menu.

@@ -1,6 +1,8 @@
 import { Camera, Gauge, UserCheck } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Notice } from '@/components/ui/notice'
+import { Link } from '@/i18n/navigation'
+import { routes } from '@/lib/routes'
 import { AiBoundaries } from '../ai-boundaries'
 import { ClosingCall } from '../closing-call'
 import { ComparisonPipeline } from '../comparison-pipeline'
@@ -19,6 +21,7 @@ const accuracyKeys = ['counts', 'renter', 'worse'] as const
 
 export function AiScreen() {
   const t = useTranslations('pages.ai')
+  const scorecard = useTranslations('scorecard')
 
   return (
     <>
@@ -43,7 +46,10 @@ export function AiScreen() {
           />
         }
       >
-        <Notice title={t('accuracy.status.title')} body={t('accuracy.status.body')} />
+        <div className="grid gap-4">
+          <Notice title={t('accuracy.status.title')} body={t('accuracy.status.body')} />
+          <Link href={routes.reliability} className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{scorecard('publicLink')}</Link>
+        </div>
       </SplitSection>
       <SplitSection title={t('agents.title')} lead={t('agents.lead')} aside={<ToolTiers />} asideFirst />
       <ClosingCall />
