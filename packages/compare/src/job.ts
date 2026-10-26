@@ -7,6 +7,7 @@ import { z } from 'zod'
 import { PROMPT_VERSION } from './model.ts'
 import type { ComparisonModel } from './model.ts'
 import { compareInspection } from './pipeline.ts'
+import { photoReused } from './reuse.ts'
 
 export const comparisonMessageSchema = z.strictObject({ shopId: z.uuid(), comparisonId: z.uuid() })
 export type ComparisonDependencies = { readonly database: Database; readonly role: DatabaseRole; readonly evidence: EvidenceStore; readonly model: ComparisonModel; readonly now: () => Date; readonly simulated?: boolean }
@@ -20,7 +21,7 @@ export async function runComparison(dependencies: ComparisonDependencies, messag
   const finish = (result: StoredInspection) => inShop(dependencies.database, scope, (transaction) => completeComparison(transaction, work.id, work.startedAt, result, dependencies.now()))
   const deferred = (reason: string): StoredInspection => ({ state: 'deferred', model: 'not_called', promptVersion: PROMPT_VERSION, alignment: {}, findings: [], reason, simulated })
   try {
-    const reused = work.after.some((photo) => work.previous.some((previous) => previous.sha256 === photo.sha256 || (photo.perceptualHash !== null && previous.perceptualHash === photo.perceptualHash)))
+    const reused = work.after.some((photo) => photoReused(photo, work.previous))
     if (reused) { await finish(deferred('reused_photo')); return 'completed' }
     const views: { view: string; pair: PairResult }[] = []
     for (const view of work.plan.filter((view) => view.required || work.before.some((photo) => photo.view === view.key) || work.after.some((photo) => photo.view === view.key))) {
