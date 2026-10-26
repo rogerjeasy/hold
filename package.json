@@ -13,7 +13,8 @@
     "test:e2e": "pnpm --filter @hold/web test:e2e",
     "lint": "pnpm -r --if-present run typegen && eslint .",
     "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck",
-    "check": "pnpm lint && pnpm typecheck && pnpm test"
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "eval": "pnpm --filter @hold/eval run eval"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

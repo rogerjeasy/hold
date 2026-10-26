@@ -372,6 +372,18 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.133.0
         version: 0.133.0(zod@4.6.7)
+      '@hold/compare':
+        specifier: workspace:*
+        version: link:../packages/compare
+      '@hold/db':
+        specifier: workspace:*
+        version: link:../packages/db
+      '@hold/domain':
+        specifier: workspace:*
+        version: link:../packages/domain
+      '@hold/vision':
+        specifier: workspace:*
+        version: link:../packages/vision
       sharp:
         specifier: ^0.35.5
         version: 0.35.5(@types/node@24.19.2)

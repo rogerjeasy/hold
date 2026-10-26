@@ -1,0 +1,84 @@
+import { CONFIDENCE_LEVELS, EVALUATION_GROUPS, sharePercent, zeroUpperBound } from '@hold/domain'
+import type { EvaluatedCase, Measures, Share } from '@hold/domain'
+import { SET_TARGETS } from './manifest.ts'
+
+export type RunRecord = {
+  readonly half: 'tuning' | 'gate'
+  readonly dataSetVersion: string
+  readonly pipelineVersion: string
+  readonly model: string
+  readonly completedAt: Date
+  readonly gate: { readonly pass: boolean; readonly reasons: readonly string[] }
+  readonly cases: readonly EvaluatedCase[]
+  readonly measures: Measures
+  readonly realMeasures: Measures
+}
+
+const percent = (fraction: number) => `${String(Math.round(fraction * 100))}%`
+
+// A share is always its count. Where a count of zero is the good outcome, the text says how far it can be trusted.
+export function shareText(share: Share, options: { readonly zeroIsGood?: boolean } = {}): string {
+  const counted = `${String(share.count)} of ${String(share.total)}`
+  if (share.total === 0) return `${counted} (not measured)`
+  if (share.count === 0 && options.zeroIsGood === true) return `${counted} (below about ${percent(zeroUpperBound(share.total))} at 95% confidence, not "never")`
+  return `${counted} (${String(sharePercent(share))}%)`
+}
+
+const seconds = (milliseconds: number) => `${(milliseconds / 1000).toFixed(1)} s`
+
+// The measures of extensions.md section 5.4, in the order the scorecard shows them.
+function rows(measures: Measures): readonly (readonly [string, string])[] {
+  return [
+    ['Damage found', shareText(measures.damageFound)],
+    ['Clean returns wrongly flagged', shareText(measures.cleanWronglyFlagged, { zeroIsGood: true })],
+    ['Sent to a person', shareText(measures.sentToPerson)],
+    ['Known marks respected', shareText(measures.knownMarksRespected)],
+    ['Agreement between the two looks', shareText(measures.looksAgree)],
+    ['Wrong item or reused photograph caught', shareText(measures.identityCaught)],
+    ...CONFIDENCE_LEVELS.map((level) => [`Confidence holds up: ${level}`, shareText(measures.confidence[level])] as const),
+    ['Time for one comparison', `median ${seconds(measures.milliseconds.median)}, slowest tenth ${seconds(measures.milliseconds.slowestTenth)}`],
+    ['Tokens for one comparison', `median ${String(measures.tokens.median)}, slowest tenth ${String(measures.tokens.slowestTenth)}`],
+  ]
+}
+
+function provenance(run: RunRecord): string {
+  const synthetic = run.cases.filter((each) => each.origin === 'synthetic').length
+  return `${String(run.cases.length)} pairs (${String(run.cases.length - synthetic)} real, ${String(synthetic)} synthetic), ${run.half} half, data set ${run.dataSetVersion.slice(0, 12)}, pipeline ${run.pipelineVersion}, model ${run.model}, ${run.completedAt.toISOString().slice(0, 10)}`
+}
+
+// The table the README carries between its scorecard markers. It is rendered from the same run as the report.
+export function readmeTable(run: RunRecord): string {
+  const real = new Map(rows(run.realMeasures))
+  return [
+    `Measured on ${provenance(run)}.`,
+    '',
+    '| Measure | All pairs | Photographs taken as they are |',
+    '|---|---|---|',
+    ...rows(run.measures).map(([name, value]) => `| ${name} | ${value} | ${real.get(name) ?? ''} |`),
+  ].join('\n')
+}
+
+export function renderReport(run: RunRecord): string {
+  const counts = EVALUATION_GROUPS.map((group) => `| ${group} | ${String(run.cases.filter((each) => each.group === group).length)} | ${String(SET_TARGETS[group])} |`)
+  const caseRows = run.cases.map((each) => `| ${each.id} | ${each.group} | ${each.origin} | ${each.state} | ${String(each.findings.length)} |`)
+  return [
+    `# Comparison evaluation, ${run.half} half`,
+    '',
+    `Gate: ${run.gate.pass ? 'passed' : 'failed'}${run.gate.reasons.length > 0 ? ` (${run.gate.reasons.join(', ')})` : ''}.`,
+    '',
+    readmeTable(run),
+    '',
+    '## Pairs per group',
+    '',
+    '| Group | Pairs | Target |',
+    '|---|---|---|',
+    ...counts,
+    '',
+    '## Every pair',
+    '',
+    '| Case | Group | Origin | Result | Findings |',
+    '|---|---|---|---|---|',
+    ...caseRows,
+    '',
+  ].join('\n')
+}
