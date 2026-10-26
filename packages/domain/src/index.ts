@@ -82,3 +82,7 @@ export { simulateLadder } from './ladder-simulation.ts'
 export type { LadderSimulation, PastRental } from './ladder-simulation.ts'
 export { neverTaken } from './never-taken.ts'
 export type { MoneyLogLine, NeverTaken } from './never-taken.ts'
+
+// Extension 3: renting through the renter's own assistant.
+export { AGENT_SCOPES, agentSessionLive, agentTokenExpiry, ASSISTANT_LIMITS, assistantBookingStatus, mayBookUnpaid, quoteState } from './assistant.ts'
+export type { AgentScope, AssistantBooking, AssistantBookingStatus, QuoteState } from './assistant.ts'

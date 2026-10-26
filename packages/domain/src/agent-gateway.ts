@@ -3,7 +3,8 @@ import type { ProposalKind } from './proposal.ts'
 // Who acts (extensions.md section 4.1). An agent always names the person it acts for.
 export const ACTOR_KINDS = ['staff', 'renter', 'system', 'shop_agent', 'renter_agent', 'public_agent'] as const
 export type ActorKind = (typeof ACTOR_KINDS)[number]
-export type AgentActor = { readonly kind: 'shop_agent' | 'renter_agent' | 'public_agent'; readonly shopId: string | null; readonly actsFor: string | null }
+// A renter's own assistant holds a token bound to one rental, which it names (extensions.md section 8.5).
+export type AgentActor = { readonly kind: 'shop_agent' | 'renter_agent' | 'public_agent'; readonly shopId: string | null; readonly actsFor: string | null; readonly rentalId?: string }
 
 // What a tool may do (section 4.4). There is no tier above these, and none charges.
 export const TOOL_TIERS = ['read', 'draft', 'propose', 'notify', 'act_under_mandate'] as const
@@ -51,18 +52,21 @@ export type GatewayInput = {
   readonly tool: { readonly name: string; readonly tier: ToolTier }
   // The shop the call's subject belongs to; null only for public information.
   readonly subjectShopId: string | null
+  // The rental the call is about, for an actor bound to one rental.
+  readonly subjectRentalId?: string | null
   readonly mandate: Mandate | null
   readonly now: Date
   readonly callsInWindow: number
   readonly rateLimit: number
   readonly argumentsValid: boolean
 }
-export type GatewayDecision = { readonly ok: true } | { readonly ok: false; readonly reason: 'shop' | 'actor' | 'tier' | 'mandate' | 'rate' | 'arguments' }
+export type GatewayDecision = { readonly ok: true } | { readonly ok: false; readonly reason: 'shop' | 'rental' | 'actor' | 'tier' | 'mandate' | 'rate' | 'arguments' }
 
-// Every tool call from every agent, in the order of section 4.4: the shop, the actor and who it acts for, the tier,
+// Every tool call from every agent, in the order of section 4.4: the shop (and the one rental an agent token names), the actor and who it acts for, the tier,
 // the mandate where the tier needs one, the rate, and the shape of the arguments. The caller writes the audit line.
 export function gatewayDecision(input: GatewayInput): GatewayDecision {
   if (input.actor.kind !== 'public_agent' && input.subjectShopId !== input.actor.shopId) return { ok: false, reason: 'shop' }
+  if (input.actor.rentalId !== undefined && input.subjectRentalId !== input.actor.rentalId) return { ok: false, reason: 'rental' }
   if (input.actor.kind !== 'public_agent' && (input.actor.actsFor === null || input.actor.actsFor === '')) return { ok: false, reason: 'actor' }
   const entitled = ENTITLED[input.actor.kind].includes(input.tool.tier) && (input.tool.tier !== 'act_under_mandate' || input.actor.kind !== 'shop_agent' || input.mandate !== null)
   if (!entitled) return { ok: false, reason: 'tier' }

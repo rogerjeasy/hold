@@ -47,6 +47,13 @@ describe('the one gateway every agent passes', () => {
     expect(gatewayDecision({ ...base, actor: advocate, tool: { name: 'submit_offer', tier: 'act_under_mandate' }, mandate: { ...standing, kind: 'settlement_renter', revokedAt: now } })).toEqual({ ok: false, reason: 'mandate' })
   })
 
+  it('refuses a renter’s assistant on any rental but the one its token names', () => {
+    const assistant = { kind: 'renter_agent' as const, shopId: 'shop-1', actsFor: 'renter-1', rentalId: 'rental-1' }
+    expect(gatewayDecision({ ...base, actor: assistant, subjectRentalId: 'rental-1' })).toEqual({ ok: true })
+    expect(gatewayDecision({ ...base, actor: assistant, subjectRentalId: 'rental-2', argumentsValid: false })).toEqual({ ok: false, reason: 'rental' })
+    expect(gatewayDecision({ ...base, actor: assistant, subjectRentalId: null })).toEqual({ ok: false, reason: 'rental' })
+  })
+
   it('refuses beyond the rate limit, then arguments of the wrong shape', () => {
     expect(gatewayDecision({ ...base, callsInWindow: 60 })).toEqual({ ok: false, reason: 'rate' })
     expect(gatewayDecision({ ...base, argumentsValid: false })).toEqual({ ok: false, reason: 'arguments' })
