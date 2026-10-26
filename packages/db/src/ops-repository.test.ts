@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { auditLog, authorizations, executions, holds, moneyEvents, outbox, proposals, rentals, shopExceptions } from './schema/index.ts'
 import { auditAgentCall, beginOpsRun, completeOpsRun, decideProposal, exceptionFacts, holdsToReconcile, morningQueue, recordExceptions, rentalsForCaptures, shopSnapshot, writeProposal } from './ops-repository.ts'
+import { grantStandingRule, revokeMandate } from './ops-settings-repository.ts'
 import { inShop } from './scope.ts'
 import type { Transaction } from './scope.ts'
 import { createTestDatabase } from './testing/test-database.ts'
@@ -107,6 +108,30 @@ describe('an approved proposal is carried out by the same path as a click', () =
     const proposalId = await proposalFor('clean_return_unconfirmed', hold?.id ?? '', rental.rentalId, 'release_hold')
     expect(await shop.act((transaction) => decideProposal(transaction, proposalId, shop.scope.userId ?? '', { decision: 'approve', reason: '' }, now))).toEqual({ ok: false, reason: 'not_returned' })
     expect((await database.select().from(proposals).where(eq(proposals.id, proposalId)))[0]?.state).toBe('pending')
+  })
+
+  it('acts under the owner\'s standing rule only while it is live, within its daily count, and never for a person', async () => {
+    const returnedHold = async () => {
+      const rental = await shop.readyRental()
+      await database.update(rentals).set({ state: 'returned' }).where(eq(rentals.id, rental.rentalId))
+      const [hold] = await database.select().from(holds).where(eq(holds.rentalId, rental.rentalId))
+      return proposalFor('clean_return_unconfirmed', hold?.id ?? '', rental.rentalId, 'release_hold')
+    }
+    const mandateId = await shop.act((transaction) => grantStandingRule(transaction, shop.scope.userId ?? '', { dailyCount: 1, days: 30 }, now))
+    const first = await returnedHold()
+    const second = await returnedHold()
+    expect(await shop.act((transaction) => decideProposal(transaction, first, shop.scope.userId ?? '', { decision: 'approve', reason: '', mandateId }, now))).toEqual({ ok: false, reason: 'mandate' })
+    expect(await asWorker((transaction) => decideProposal(transaction, first, null, { decision: 'approve', reason: '', mandateId: '00000000-0000-4000-8000-000000000000' }, now))).toEqual({ ok: false, reason: 'mandate' })
+    expect(await asWorker((transaction) => decideProposal(transaction, first, null, { decision: 'approve', reason: '', mandateId }, now))).toMatchObject({ ok: true, state: 'executing' })
+    expect(await asWorker((transaction) => decideProposal(transaction, second, null, { decision: 'approve', reason: '', mandateId }, now))).toEqual({ ok: false, reason: 'daily_count_reached' })
+    await shop.act((transaction) => revokeMandate(transaction, mandateId, now))
+    expect(await asWorker((transaction) => decideProposal(transaction, second, null, { decision: 'approve', reason: '', mandateId }, new Date(now.getTime() + 86_400_000)))).toEqual({ ok: false, reason: 'revoked' })
+    expect(await other.act((transaction) => decideProposal(transaction, second, null, { decision: 'approve', reason: '', mandateId }, now))).toEqual({ ok: false, reason: 'not_found' })
+  })
+
+  it('takes no approval from nobody', async () => {
+    const proposalId = await proposalFor('hold_ending', (await holdEnding()).holdId, (await shop.readyRental()).rentalId, 'request_replacement_hold')
+    expect(await asWorker((transaction) => decideProposal(transaction, proposalId, null, { decision: 'approve', reason: '' }, now))).toEqual({ ok: false, reason: 'mandate' })
   })
 
   it('asks the renter for a replacement hold through the hold\'s upkeep', async () => {

@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto'
-import { DETECTOR_PROPOSALS, orderQueue, PROPOSAL_TRANSITIONS, proposalFingerprintInput, transition } from '@hold/domain'
+import { DETECTOR_PROPOSALS, orderQueue, withinMandate, PROPOSAL_TRANSITIONS, proposalFingerprintInput, transition } from '@hold/domain'
 import type { ProposalKind, ShopException, ShopSnapshot } from '@hold/domain'
-import { and, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm'
+import { and, eq, gte, inArray, isNull, lt, or, sql } from 'drizzle-orm'
 import { approvals, auditLog, authorizations, captureSessions, claims, comparisons, holds, invoices, moneyEvents, opsRuns, outbox, proposals, rentalItems, rentals, shopExceptions, shops } from './schema/index.ts'
 import { releaseCleanReturn } from './claim-repository.ts'
+import { mandateById } from './ops-settings-repository.ts'
 import type { Transaction } from './scope.ts'
 
 export const OPS_EXECUTE_QUEUE = 'ops-execute'
@@ -186,6 +187,8 @@ export async function decideProposal(transaction: Transaction, proposalId: strin
     await transaction.update(proposals).set({ state: 'superseded', decidedAt: now, updatedAt: now }).where(eq(proposals.id, proposalId))
     return { ok: false, reason: 'superseded' }
   }
+  const authority = await approvalAuthority(transaction, proposal, userId, input.mandateId, now)
+  if (!authority.ok) return authority
   const handed = await handOff(transaction, proposal, input, userId, now)
   if (!handed.ok) return handed
   const method = input.mandateId === undefined ? 'on_screen' as const : 'mandate' as const
@@ -195,6 +198,19 @@ export async function decideProposal(transaction: Transaction, proposalId: strin
 }
 
 type Proposal = typeof proposals.$inferSelect
+
+// A person approves on screen, or the owner's standing rule approves without one; never both, and never nobody. The
+// mandate is read under the shop's own row security and checked by plain code, daily count included.
+async function approvalAuthority(transaction: Transaction, proposal: Proposal, userId: string | null, mandateId: string | undefined, now: Date): Promise<{ readonly ok: true } | { readonly ok: false; readonly reason: string }> {
+  if (mandateId === undefined) return userId === null ? { ok: false, reason: 'mandate' } : { ok: true }
+  if (userId !== null) return { ok: false, reason: 'mandate' }
+  const mandate = await mandateById(transaction, mandateId)
+  if (mandate === undefined) return { ok: false, reason: 'mandate' }
+  const [exception] = proposal.exceptionId === null ? [] : await transaction.select({ kind: shopExceptions.kind }).from(shopExceptions).where(eq(shopExceptions.id, proposal.exceptionId))
+  const dayStart = new Date(`${now.toISOString().slice(0, 10)}T00:00:00Z`)
+  const [done] = await transaction.select({ count: sql<number>`count(*)::int` }).from(proposals).where(and(eq(proposals.mandateId, mandateId), gte(proposals.decidedAt, dayStart)))
+  return withinMandate({ kind: 'execute_proposal', proposalKind: proposal.kind, condition: exception?.kind ?? '', doneToday: done?.count ?? 0 }, mandate, now)
+}
 type HandOff = { readonly ok: true; readonly state: 'executing' | 'executed' | 'approved'; readonly executionId: string | null } | { readonly ok: false; readonly reason: string }
 
 // Carries out an approved proposal by the path a person's click takes, in the same transaction, so a refusal there

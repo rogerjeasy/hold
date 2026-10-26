@@ -47,9 +47,17 @@ export async function revokeMandate(transaction: Transaction, mandateId: string,
   return updated.length > 0
 }
 
+const asMandate = (row: typeof mandates.$inferSelect): Mandate => ({ id: row.id, kind: row.kind, grantedTo: row.agent, validFrom: row.validFrom, validUntil: row.validUntil, revokedAt: row.revokedAt, limits: row.limits })
+
 export async function liveStandingRule(transaction: Transaction, now: Date): Promise<Mandate | undefined> {
   const [row] = await transaction.select().from(mandates).where(and(eq(mandates.kind, 'ops_standing_rule'), isNull(mandates.revokedAt), lte(mandates.validFrom, now), gt(mandates.validUntil, now))).orderBy(desc(mandates.createdAt)).limit(1)
-  return row === undefined ? undefined : { id: row.id, kind: row.kind, grantedTo: 'operations_agent', validFrom: row.validFrom, validUntil: row.validUntil, revokedAt: row.revokedAt, limits: row.limits }
+  return row === undefined ? undefined : asMandate(row)
+}
+
+// Any of the shop's mandates, live or not: the caller checks it with withinMandate.
+export async function mandateById(transaction: Transaction, mandateId: string): Promise<Mandate | undefined> {
+  const [row] = await transaction.select().from(mandates).where(eq(mandates.id, mandateId))
+  return row === undefined ? undefined : asMandate(row)
 }
 
 const day = (now: Date) => now.toISOString().slice(0, 10)
