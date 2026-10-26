@@ -6,10 +6,10 @@ const COUNTS = ['clean', 'settled', 'unpaid', 'open', 'shops'] as const
 
 // The counts behind a Clean Record, and only those: the renter's own page and the page that checks a credential both
 // show them, and neither names a shop or an amount.
-export function RecordCounts({ record }: { record: CleanRecord }) {
+export function RecordCounts({ record, title }: { record: CleanRecord; title: string }) {
   const t = useTranslations('trust.record')
   return (
-    <Panel title={t('counts', { months: record.windowMonths })}>
+    <Panel title={title}>
       <dl className="grid grid-cols-2 gap-px sm:grid-cols-3 lg:grid-cols-5">
         {COUNTS.map((count) => (
           <div key={count} className="min-w-0 px-4 py-4 md:px-5">

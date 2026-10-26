@@ -26,7 +26,7 @@ export function CleanRecordScreen({ token, view }: CleanRecordScreenProps) {
       </header>
       {own === undefined ? null : (
         <>
-          <RecordCounts record={own.record} />
+          <RecordCounts record={own.record} title={t('counts', { months: own.record.windowMonths })} />
           <p className="max-w-prose text-lg text-pretty">
             {own.neverTaken.length === 0
               ? t('neverTakenNone')

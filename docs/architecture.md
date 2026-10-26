@@ -288,10 +288,10 @@ Every table except `users` and `renters` carries a `shop_id`.
 | `price_lists` | Version, effective date, published text |
 | `price_entries` | Code, description, amount, category |
 | `wear_policies` | Version, rules |
-| `renters` | PayPal payer ID, email, name, language |
-| `rentals` | Renter, period, fee, agreed hold, agreed price list and wear policy versions, state, the contact staff booked for and the renter's language, whether it was booked by staff or on the shop's page, whether it is a simulated sample |
+| `renters` | PayPal payer ID, email, name, language, and the renter key once a hold is asked for (section 6.8) |
+| `rentals` | Renter, period, fee, agreed hold, agreed price list and wear policy versions, state, the contact staff booked for and the renter's language, whether it was booked by staff or on the shop's page, whether it is a simulated sample, the trust ladder version and rung its hold was placed under |
 | `rental_items` | Rental, item, the day rate and hold agreed for it at booking, accessories out, accessories back |
-| `holds` | Rental, reserved amount, placement strategy, state, current authorization |
+| `holds` | Rental, reserved amount, the ordinary amount agreed at booking, the trust ladder version, rung and clean returns that lowered it, placement strategy, state, current authorization |
 | `authorizations` | Hold, PayPal authorization ID, amount, created, assured until, valid until, state |
 | `capture_sessions` | Rental item, kind, the photo plan used, actor, started, completed, manifest fingerprint |
 | `photos` | Session, view, evidence key, display key, fingerprint, received time, quality scores |
@@ -310,13 +310,15 @@ Every table except `users` and `renters` carries a `shop_id`.
 | `disputes` | Rental, PayPal dispute ID, reason, state, evidence sent |
 | `evidence_packs` | Rental, immutable version and validated frozen snapshot, source fingerprint, renderer version, build state, PDF/manifest hashes and exact S3 object-version references |
 | `receipt_deliveries` | Rental, verified event, receipt kind, exact pack version, recipient identity and language, amounts, delivery state, lease, attempts and sent time |
-| `renter_links` | Rental, token fingerprint, scope, expiry, last used |
+| `renter_links` | Rental, token fingerprint, scope, expiry, last used, and two one-time codes kept apart: one for a claim reply, one for changing the Clean Record |
 | `outbox` | Pending messages written in the same transaction as state changes |
 | `audit_log` | Who did what, when, from where |
 
 **What the migrations hold so far.** Every table above, with `rentals.simulated` added in `0009`, the item columns in `0010` and the booking columns in `0011`, except `locations`, `shipments` and `disputes`, which arrive with the features that use them. The schema is in `packages/db/src/schema`, the migrations in `packages/db/migrations`.
 
 Migrations `0018`–`0020` add evidence publication metadata and `receipt_deliveries`, shop RLS and publication/delivery guards. A pack must be inserted as `building` without publication metadata; a receipt starts `queued` without a lease or sent time. The web role reserves work; only the worker role may publish artifacts or update delivery metadata. Frozen snapshot/version identity and published metadata cannot be rewritten, and neither service role may delete these records.
+
+Migration `0021` adds Extension 2's tables (`rental_outcomes`, `trust_ladders`, `trust_rungs`, `renter_consents`), the trust columns above, and the functions through which a renter's record is read across shops (section 6.8).
 
 **Tables added by the extensions.** `mandates`, `proposals`, `exceptions`, `ops_runs`, `eval_runs`, `finding_outcomes`, `rental_outcomes`, `trust_ladders`, `trust_rungs`, `renter_consents`, `quotes`, `agent_sessions`, `negotiations`, `negotiation_moves` and `incidents`. Their contents are listed in `extensions.md` section 4.6.
 
@@ -356,6 +358,7 @@ The rules are plain code in `packages/domain/src/hold-placement.ts`. The tables 
 - **Placed only on PayPal's word.** The worker authorizes the order with the execution's key and reads the authorization back. The hold is placed only for a `created` authorization for exactly the agreed amount and currency; a pending one waits for the event, and any other amount fails the execution. Placing records both clocks from PayPal (section 7.4), logs `hold_placed` once, moves the rental to `ready`, and schedules the hold's upkeep. A renter who approves and never comes back is placed from PayPal's `CHECKOUT.ORDER.APPROVED` event, and a reply lost on the way from `PAYMENT.AUTHORIZATION.CREATED` (section 8.5).
 - **A declined funding source** fails the execution with `declined`. The hold stays `requested`, the rental `awaiting_hold`, and both the renter's page and the staff panel say plainly that nothing was reserved. The renter approves again, which makes a new order with a new key.
 - **The staff panel looks again by itself** every three seconds while it waits, and shows the placed hold with the day to charge by and the day it ends.
+- **Lowered by the shop's trust ladder.** Asking for the hold first keeps the renter key of the payer who paid the fee, then `trustedHold` (`packages/trust`) works out the hold from the shop's published ladder and the renter's record with `rentalHoldFor` in the domain. `askForHold` keeps the lower amount only if it is below the hold agreed at booking, and stores the ordinary amount, the ladder version, the rung and the clean returns on the hold, and the version and rung on the rental. The PayPal order and authorization are for the reserved amount, as before. The renter's page and the staff panel say why the hold is lower (section 6.8).
 
 ### 6.7 The guided handover
 
@@ -368,6 +371,21 @@ The rules are plain code in `packages/domain/src/capture-session.ts`. The tables
 - **Sealing** needs every required view. The manifest (`manifestText`) lists each photograph's view, fingerprint and time and names the item's previous manifest; its SHA-256 becomes the item's chain head. When every item of the rental is sealed, the rental is `out`.
 - **The condition report.** Sealing the last item issues a link with the scopes `view` and `confirm_condition` to `/r/{token}/condition`, emailed to the contact and shown to staff as a code. For 24 hours (`CONDITION_REPLY_HOURS`) the renter confirms it, or adds photographs of anything missed into a `condition` session of their own, sealed and chained like any other, and the rental records the answer. Any link to the rental may look; only that one may answer.
 - **Display copies.** Each recorded photograph is sent to the `media` queue as soon as it is committed (the outbox is the fallback). The worker reads the original, shrinks it to 1,600 pixels, finds faces with Rekognition on the small copy, blurs them, strips all metadata, writes the copy to the display bucket and records it with a 64-bit perceptual fingerprint. Screens show display copies through five-minute signed links.
+
+### 6.8 The Clean Record and the trust ladder
+
+Extension 2 (`extensions.md` section 7). The rules are plain code in `packages/domain` (`clean-record.ts`, `trust-ladder.ts`, `ladder-simulation.ts`, `never-taken.ts`); the tables are written by `trust-repository.ts` and `trust-code-repository.ts` in `packages/db`; the renter key, the record as Hold reads it, and the credential are in `packages/trust`.
+
+- **The renter key** is the HMAC-SHA256 of the PayPal payer ID with a secret only Hold has (`hold/web/trust-key`). It is kept on the renter, through `hold_set_renter_trust_key`, when staff ask for a hold or the renter answers the consent question, so the worker can write an outcome without the secret. Trust records and credentials carry the key, never the payer ID, a name, an email, a shop or an amount.
+- **One outcome per rental.** `closeSettledRental` writes it in the transaction that closes the rental: `clean` when nothing was taken in the end (no claim, a waived claim, or a charge refunded in full), `settled` when a claim was paid from the hold or by invoice. An invoice for a decided claim that is sent and not paid writes `open`, with the day it falls due 30 days on (`INVOICE_DUE_DAYS`); after that it counts as `unpaid`, and paying it turns it `settled`. No state machine gains a state. A PayPal dispute is not an input, so opening one changes nothing.
+- **What counts.** A rental counts only if PayPal captured its fee and it met the minimum fee and length of the shop's ladder at closing. Simulated samples never count. Clean and settled returns count inside the window (24 months by default); an unpaid or open claim counts whenever it was closed.
+- **The ladder** is versioned like the price list and never changed once published. Each rung needs more clean returns than the one before and keeps less of the hold, in whole percent, up to five rungs, each with an optional largest item value. For each item, of the rungs the record reaches whose value cover the item fits, the one keeping the least applies; a share is rounded up to the cent. An unpaid claim reaches no rung. A rung that needs a saved PayPal method is stored but never reached, since Hold keeps no saved methods yet, so the lowest share without one is above zero. Property tests prove the hold is never above the ordinary hold, never below zero, and never rises as clean returns rise.
+- **Whose history.** The shop chooses its own returns only, or its own and other Hold shops'. Other shops' outcomes are read through `hold_trust_outcomes`, a security-definer function that answers only for a renter the asking shop has rented to, returns another shop's rows only with the renter's live consent or to the renter's own link, and names each shop by a number, never its id. `trustedHold` checks the consent again in code.
+- **Consent and control.** `renter_consents` has no `shop_id` and no service role may read or write it: `hold_trust_consent`, `hold_answer_trust_consent` and `hold_delete_trust_record` do, and the last two only for a transaction that names no person, which is the renter's link. Because staff can open a view link at the counter, answering the question and deleting the record also need a one-time code emailed to the address PayPal gave for the payer (the claim reply's recipient rule, sandbox contact labelled), link-bound, ten minutes, three tries, single use. Deleting removes the renter's clean and settled returns at every shop and withdraws consent; an open or unpaid claim stays until settled.
+- **The credential** is an ES256 compact JWS: the renter key, the count of each outcome, the window, the number of shops, its issue time and a ten-minute expiry, signed through a port with two adapters: the KMS key `alias/hold-credential-key` deployed, a key in the process in tests and on a developer's machine. `/r/{token}/trust` issues a fresh one on every visit, with a QR code of `/verify#{credential}`; the fragment never reaches a server. `/verify` checks the signature in the browser with Web Crypto and the key published at `/.well-known/jwks.json`.
+- **The owner's page** (`/shop/trust`) shows the ladder in force and the shop's own trust ledger, and lets the owner, confirmed with a passkey, replay a candidate ladder over the shop's closed rentals (`simulateLadder`, totals equal a direct recomputation) and publish it. Drafting a ladder with the owner's assistant and `get_merchant_insights` (`extensions.md` section 7.8) waits for Extension 1.
+- **Deposits never taken** is read from the money log through `hold_trust_money_log`, for the renter's own link only: each rental whose hold was released and never captured adds its largest release once, by currency.
+
 ---
 
 ## 7. The hold core
@@ -1343,7 +1361,7 @@ Served by `web`. Each requires a valid signed link.
 | `/r/{token}/record` | Shared evidence versions and PDF/manifest downloads; `?version={pack UUID}` selects the exact receipt version. Draft and awaiting-approval claims remain staff-only. |
 | `/r/{token}/incident` | Report something that happened during the rental |
 | `/r/{token}/negotiation` | Set an advocate's limit, read the transcript, confirm the result |
-| `/r/{token}/trust` | The Clean Record, consent and the credential |
+| `/r/{token}/trust` | The Clean Record: its counts, the deposits never taken, a fresh credential as a QR code, the consent question and deleting the record. Answering and deleting need a one-time code emailed to the payer (section 6.8). |
 | `/r/{token}/assistant` | What a connected assistant did, and a button to disconnect it |
 
 Record build/download POST actions require the signed link's `view` scope and exact rental binding. Visits only read; download actions issue a private, exact-version S3 URL lasting at most 300 seconds. Unknown or malformed selected versions are refused without revealing another rental's metadata.
@@ -1381,8 +1399,8 @@ No tool takes an amount, and none can capture a hold. Accepting or contesting a 
 | `/s/{slug}` | A shop's own page: a renter chooses dates and items, sees the prices and wear policy, and books with nobody signed in. Open only once the shop has PayPal connected, a price list and items. Bookings from it are limited per network (`apps/web/src/server/shop-page-access.ts`). |
 | `/simulated-paypal/{order}` | In the test environment only: stands in for PayPal's approval page, says so, and sends the renter back to the order's own return path. Everywhere else it is 404. |
 | `/accuracy` | The comparison's measured accuracy, with counts |
-| `/verify` | Checks a Clean Record credential |
-| `/.well-known/jwks.json` | The public key that credentials are signed with |
+| `/verify` | Checks a Clean Record credential in the browser, with the published key. The credential comes after the `#`, so it never reaches a server. |
+| `/.well-known/jwks.json` | The public key that credentials are signed with, as a JSON Web Key Set. Reads nothing from the request. |
 
 The first nine routes are the public site. They take no sign-in, read no shop data and call no service. `/sign-in` and `/sign-up` post to a server function that checks the input and, until Cognito is connected, does nothing else (section 12.1).
 
@@ -1412,6 +1430,7 @@ Served by `web` under `/shop`. Each page asks `shopAccess` itself; the frame aro
 | `/shop/items` | The item types, each with its terms, kit, photo plan and items, and where each item stands. Four figures on top: items, available, out now, in repair. Filters by standing, each its own address (`?show=`). |
 | `/shop/items/new`, `/shop/items/types/{id}` | Creating and editing an item type, with its kit and its photo plan. The plan starts from the suggestion for the kind. |
 | `/shop/items/{id}` | The item passport (section 9.4): where it is, its rentals, its known marks, its chain of photo sessions, its photo plan, its details and its status. Another shop's item answers 404. |
+| `/shop/trust` | The trust ladder in force, the owner's editor with its replay over past rentals, and the shop's trust ledger. Publishing needs the owner and a passkey. Other members read it. |
 | `/shop/prices`, `/shop/paypal`, `/shop/staff`, `/shop/security` | The shop's settings |
 
 - **One frame.** `app/[locale]/shop/layout.tsx` puts every shop page in the shop's frame (`features/shell`): a dark sidebar with the shop switcher, the menu, PayPal's state and mode, the language and theme, and the account menu. It is a rail of icons from `md` to `lg` and a top bar with a menu sheet below `md`. The public pages keep the site's header and footer through the `(site)` route group, which is not part of their address.
@@ -1532,6 +1551,7 @@ The outbox relay carries evidence and receipt identities without tokens or conta
 
 - Non-secret configuration is typed and validated at startup, in `packages/config`. A service with invalid configuration does not start, and the error names the settings that are wrong, never their values. The web app's settings are listed in `apps/web/.env.example`.
 - Secrets come from Secrets Manager at startup and are never written to logs or images. The key that seals the sign-in cookie is `hold/web/cookie-key`, made by the HoldIdentity stack: the web app reads it by its ARN (`HOLD_COOKIE_KEY_SECRET_ARN`) and uses its SHA-256 as the key. Deployed, the app refuses a key given any other way. Renter links are signed with their own key, `hold/web/renter-link-key` (`HOLD_RENTER_LINK_KEY_SECRET_ARN`), which the worker reads too. The worker is told the web app's address (`HOLD_PUBLIC_URL`) for links in its emails. Both are told the photograph buckets (`HOLD_EVIDENCE_BUCKET`, `HOLD_DISPLAY_BUCKET`), and the web app the `media` queue. The evidence bucket takes a PUT only from the web app's own address (CORS).
+- The renter key is made with its own secret, `hold/web/trust-key` (`HOLD_TRUST_KEY_SECRET_ARN`). Clean Record credentials are signed with the KMS key named by `HOLD_CREDENTIAL_KEY_ID`, `alias/hold-credential-key`, an asymmetric `ECC_NIST_P256` `SIGN_VERIFY` key an administrator makes tagged `project=hold`, as with the code key, because the pipeline may not make or tag a key (`infra/lib/settings.ts`). The web role may only `kms:Sign` with ECDSA_SHA_256 and `kms:GetPublicKey`, on that alias and tag. On a developer's machine both may be left out: the renter key falls back to the cookie key and a key made at start signs credentials.
 
 ---
 
@@ -1581,6 +1601,10 @@ The outbox relay carries evidence and receipt identities without tokens or conta
 | **A renter pays one rental with another's order, or a changed amount** | The fee is read from the rental, never from the renter. A capture is made only for the order this rental started, after PayPal shows it approved, and PayPal's captured amount must equal the stored fee or nothing is booked. Tested in `booking-flow.test.ts` and `booking-repository.test.ts`. |
 | **Every server function skips a check** | Staff functions go through `shopAction`, renter functions through `renterAction`, shop-page functions through `shopPageAction`. A test fails on any export that does not. |
 | **A row is tied to another shop's row by its id** | PostgreSQL checks a foreign key without row-level security, so a guessed id would pass it. Every repository function reads the row it refers to inside the caller's shop first, and answers "not found" when it is not there. Tested in `item-repository.test.ts` and `items.spec.ts`. |
+| **Staff consent for a renter, or delete their Clean Record, through a link they showed** | Answering the consent question and deleting the record need a one-time code emailed to the address PayPal gave for the payer, bound to the link, ten minutes, three tries, single use, kept apart from the claim code; the database functions also refuse any transaction that names a person. Tested in `trust-code-repository.test.ts`, `trust-repository.test.ts` and `trust-flow.test.ts`. |
+| **A shop learns where else a renter rented, or reads a stranger's record** | Other shops' outcomes come only through security-definer functions that answer for a renter the asking shop served, return them only with the renter's consent or to their own link, and number shops instead of naming them. Consents are out of every service role's direct reach. Tested in `trust-repository.test.ts` and `record.test.ts`. |
+| **A Clean Record credential is forged, changed or replayed later** | ES256 over the whole token with a key that never leaves KMS; checked with the published key alone; a changed, expired or other-key credential fails; ten-minute expiry. It holds no name, email, payer ID, shop or amount. Tested in `credential.test.ts`, `kms-signer.test.ts` and `credential-check.test.tsx`. |
+| **A record is built cheaply, or trust raises a hold** | Only fees PayPal captured, at the shop's minimum fee and length, count; plain code only lowers a hold, never below zero, and `askForHold` ignores anything above the agreed hold. Tested in `trust-ladder.test.ts` and `trust-repository.test.ts`. |
 | **A credential leaks** | Secrets only in Secrets Manager. Each service has its own minimal IAM role. |
 | **A hold lapses unnoticed** | Hold upkeep, the at-risk state, alarms and reconciliation. |
 

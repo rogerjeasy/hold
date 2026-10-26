@@ -88,7 +88,7 @@ describe('the renter’s page', () => {
   it('links to the renter’s Clean Record, and asks the consent question there once PayPal has named them', () => {
     renderWithIntl(<RenterScreen token="token" view={view} askConsent />)
     expect(screen.getByText('Use my record of clean returns to lower future holds at Hold shops.')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: 'Your Clean Record' })).toHaveAttribute('href', '/r/token/clean-record')
+    expect(screen.getByRole('link', { name: 'Your Clean Record' })).toHaveAttribute('href', '/r/token/trust')
   })
 
   it('does not ask again once the renter has answered', () => {

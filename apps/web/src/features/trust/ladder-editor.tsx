@@ -32,8 +32,8 @@ export function LadderEditor({ draft, currency }: { draft: LadderDraft; currency
         <legend className="text-title">{t('history')}</legend>
         {TRUST_HISTORIES.map((history) => (
           <label key={history} className="flex min-h-11 items-start gap-3">
-            <input type="radio" name="history" value={history} defaultChecked={draft.history === history} className="mt-1 size-5 shrink-0 accent-primary" />
-            <span className="text-pretty">{history === 'own' ? t('historyOwn') : t('historyNetwork')}</span>
+            <input type="radio" name="history" value={history} defaultChecked={draft.history === history} className="min-h-11 min-w-11 shrink-0 accent-primary" />
+            <span className="self-center text-pretty">{history === 'own' ? t('historyOwn') : t('historyNetwork')}</span>
           </label>
         ))}
         <p className="max-w-prose text-sm text-muted-foreground">{t('historyHelp')}</p>

@@ -569,6 +569,7 @@ Inside Hold, a shop reads the record directly. The credential is how the record 
 - **A simulation in plain code.** Replays a candidate ladder over the shop's past rentals and reports how much hold would have been lowered, and how many past claims would have exceeded the lowered hold.
 - **The assistant drafts.** From the shop's own damage and recovery figures and PayPal's `get_merchant_insights`, the owner's assistant suggests a ladder and explains the simulation in words.
 - **The owner publishes.** As with the price list, nothing takes effect unreviewed. The assistant sets no amount.
+- **Built so far.** The simulation and publishing are built (`/shop/trust`, `architecture.md` section 6.8). The assistant's draft waits for Extension 1's owner's assistant and PayPal MCP.
 
 ### 7.9 The figure the renter sees
 
@@ -611,6 +612,19 @@ Inside Hold, a shop reads the record directly. The credential is how the record 
 - **X2.6** Deleting the record returns the next booking to the ordinary hold.
 - **X2.7** Opening a dispute leaves the record unchanged. An unpaid decided claim removes the reduction, and paying it restores it.
 - **X2.8** The "never taken from you" figure equals the sum of released holds in the money log.
+
+**Progress.** Built in `packages/domain`, `packages/trust`, `packages/db` (migration `0021`), `apps/web` and `infra`; `architecture.md` section 6.8.
+
+| Check | State | Tested by |
+|---|---|---|
+| X2.1 | Passes against the simulated PayPal: two shops, consent through a code, the authorization PayPal reports is the ladder's amount, the reason shows, the rental keeps version and rung. Two real sandbox shops not yet run. | `trust-flow.test.ts`, `record.test.ts`, `hold-screen.test.tsx` |
+| X2.2 | Passes | `trust-flow.test.ts`, `record.test.ts` |
+| X2.3 | Passes | `trust-ladder.test.ts`, `clean-record.test.ts`, `ladder-simulation.test.ts`, `trust-repository.test.ts` |
+| X2.4 | Passes with the in-process key and a stand-in for KMS; the KMS key itself is not yet made | `credential.test.ts`, `kms-signer.test.ts`, `credential-check.test.tsx`, `trust.spec.ts` |
+| X2.5 | Passes | `credential.test.ts` |
+| X2.6 | Passes | `trust-flow.test.ts`, `record.test.ts` |
+| X2.7 | Passes | `clean-record.test.ts` (in `packages/settle`), `record.test.ts` |
+| X2.8 | Passes | `never-taken.test.ts`, `record.test.ts` |
 
 ### 7.14 In the video
 

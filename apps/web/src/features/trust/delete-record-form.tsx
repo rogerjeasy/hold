@@ -29,8 +29,8 @@ export function DeleteRecordForm({ token }: { token: string }) {
       <input type="hidden" name="locale" value={locale} />
       <p className="max-w-prose text-muted-foreground">{t('deleteLead')}</p>
       <label className="flex min-h-11 items-start gap-3">
-        <input type="checkbox" name="understood" value="yes" required className="mt-1 size-5 shrink-0 accent-primary" />
-        <span className="text-pretty">{t('deleteConfirm')}</span>
+        <input type="checkbox" name="understood" value="yes" required className="min-h-11 min-w-11 shrink-0 accent-primary" />
+        <span className="self-center text-pretty">{t('deleteConfirm')}</span>
       </label>
       <TrustCodeField token={token} />
       <Button type="submit" variant="outline" disabled={pending}>

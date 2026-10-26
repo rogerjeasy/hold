@@ -55,11 +55,11 @@ export const linkRoutes = {
   renter: '/r',
   record: (token: string) => `/r/${token}/record`,
   // The renter's Clean Record, its credential and their consent.
-  cleanRecord: (token: string) => `/r/${token}/clean-record`,
+  cleanRecord: (token: string) => `/r/${token}/trust`,
   // A shop's own page for renters, named by its address: /s/{slug}.
   shopPage: '/s',
 } as const
 
 // Where the public key that signs Clean Record credentials is published, as a JSON Web Key Set, so anyone can check a
 // credential without asking Hold.
-export const CREDENTIAL_KEYS_PATH = '/.well-known/hold-credential-keys.json'
+export const CREDENTIAL_KEYS_PATH = '/.well-known/jwks.json'

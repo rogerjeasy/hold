@@ -52,7 +52,7 @@ export function CredentialCheck({ keys, timeZone }: { keys: readonly Verificatio
             <CircleCheck aria-hidden="true" className="mt-1 size-5 shrink-0 text-primary" />
             {t('valid', { time: format.time(checked.value.expiresAt) })}
           </p>
-          <RecordCounts record={checked.value.record} />
+          <RecordCounts record={checked.value.record} title={t('counts', { months: checked.value.record.windowMonths })} />
         </div>
       ) : (
         <p role="alert" className="flex items-start gap-2 text-destructive">
