@@ -96,6 +96,8 @@ export type ProposalInput = {
   readonly model: string | null
   readonly promptVersion: string | null
   readonly subject?: { readonly kind: string; readonly id: string; readonly rentalId: string | null }
+  // Marks for the screen, such as which fixed reason the entry carries and whether PayPal was checked.
+  readonly payload?: Readonly<Record<string, string>>
 }
 
 export type WriteResult = { readonly written: true; readonly id: string } | { readonly written: false; readonly reason?: 'kind_not_allowed' | 'no_exception' }
@@ -117,7 +119,7 @@ export async function writeProposal(transaction: Transaction, input: ProposalInp
   if (shop === undefined) throw new Error('No shop in scope.')
   const [row] = await transaction.insert(proposals).values({
     shopId: shop.id, kind: input.kind, subjectKind: subject.kind, subjectId: subject.id, rentalId: subject.rentalId, exceptionId: input.exceptionId,
-    reason: input.reason, references: [...input.references], draft: input.draft, preconditionFingerprint: await subjectFingerprint(transaction, subject.kind, subject.id),
+    reason: input.reason, references: [...input.references], draft: input.draft, payload: { ...input.payload }, preconditionFingerprint: await subjectFingerprint(transaction, subject.kind, subject.id),
     raisedByAgent: input.raisedByAgent, runId: input.runId, model: input.model, promptVersion: input.promptVersion, createdAt: now, updatedAt: now,
   }).onConflictDoNothing().returning({ id: proposals.id })
   return row === undefined ? { written: false } : { written: true, id: row.id }
