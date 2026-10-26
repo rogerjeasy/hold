@@ -185,6 +185,16 @@ describe('the renter’s link', () => {
     expect(await renter.confirmFee(null, form({ token, orderId: 'FAKE-ORDER-0001', locale: 'en' }))).toEqual({ ok: false, failure: 'refused', reason: 'order_mismatch' })
   })
 
+  // Found on 26 October 2026: pages that look again every few seconds, and renters sharing one network, used up a
+  // limit meant for people guessing links, and every renter on that network was refused.
+  it('never slows down a renter whose own link is good, however often their page looks again', async () => {
+    forwarded.value = '198.51.100.10'
+    const { token } = await newBooking()
+    let last: unknown
+    for (let attempt = 0; attempt < 100; attempt += 1) last = await renter.payFee(null, form({ token, locale: 'en' }))
+    expect(last).toMatchObject({ ok: true })
+  })
+
   it('is slowed down for a network that asks too often', async () => {
     forwarded.value = '198.51.100.9'
     let last: unknown

@@ -12,21 +12,27 @@ import { renterTokenFingerprint } from './renter-links'
 import { getServices } from './services'
 
 // The one way in for a renter, who has no account and acts through a link (architecture.md section 12.3). Steps of
-// AGENTS.md section 7 in order: the network is rate limited, the signed token is checked and its link read, the link
+// AGENTS.md section 7 in order: the signed token is checked and rate limited, its link read, the link
 // must be live and carry the scope, the transaction is bound to the link's shop with no person named, the input is
 // validated, then the work and its audit line.
 
-// A public route: sixty requests a minute per network, whatever the link.
-const RENTER_REQUESTS = { name: 'renter-link', max: 60, windowSeconds: 60 } as const
+// A public route with two budgets. A token whose signature fails costs its network one of sixty a minute: that is
+// someone guessing. A token Hold signed has six hundred a minute of its own, so renters sharing a hotel network, and
+// pages that look again every few seconds, never lock each other out, and a flood on one link is still stopped.
+const GUESSES = { name: 'renter-link', max: 60, windowSeconds: 60 } as const
+const LINK_REQUESTS = { name: 'renter-link-signed', max: 600, windowSeconds: 60 } as const
 
 export type RenterAccess = { readonly ok: true; readonly link: RenterLink } | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' }
 
 // A changed, unknown, expired and revoked token all get the same answer, so the answer says nothing about which.
 export async function renterAccess(token: string, scope: RenterLinkScope, now: Date): Promise<RenterAccess> {
   const { database } = await getServices()
-  if (!(await takeRateToken(database, RENTER_REQUESTS, (await callerNetwork()) ?? 'local'))) return { ok: false, failure: 'rate_limited' }
   const fingerprint = await renterTokenFingerprint(token)
-  if (fingerprint === undefined) return { ok: false, failure: 'link_invalid' }
+  if (fingerprint === undefined) {
+    const allowed = await takeRateToken(database, GUESSES, (await callerNetwork()) ?? 'local')
+    return { ok: false, failure: allowed ? 'link_invalid' : 'rate_limited' }
+  }
+  if (!(await takeRateToken(database, LINK_REQUESTS, fingerprint))) return { ok: false, failure: 'rate_limited' }
   const link = await findRenterLink(database, fingerprint)
   if (link === undefined || link.revokedAt !== null || link.expiresAt <= now) return { ok: false, failure: 'link_invalid' }
   if (!link.scopes.includes(scope)) return { ok: false, failure: 'scope' }
