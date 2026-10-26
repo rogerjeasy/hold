@@ -67,3 +67,5 @@ export { reserveEvidencePack, evidencePackFor, evidenceVersions, publishEvidence
 export type { EvidenceVersion } from './evidence-repository.ts'
 export { queueSettlementReceipts, receiptDeliveriesFor, leaseReceipt, finishReceipt } from './receipt-repository.ts'
 export type { ReceiptDeliverySummary } from './receipt-repository.ts'
+export { acceptedEvalRun, acceptedEvalRunAsOwner, fieldRecord, recordEvalRun, recordFindingOutcomes } from './scorecard-repository.ts'
+export type { EvalRunRecord, FieldRecordMonth } from './scorecard-repository.ts'

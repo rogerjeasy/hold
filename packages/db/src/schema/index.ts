@@ -1,6 +1,7 @@
 export * from './catalog.ts'
 export * from './claims.ts'
 export * from './enums.ts'
+export * from './evaluation.ts'
 export * from './evidence.ts'
 export * from './messaging.ts'
 export * from './money.ts'

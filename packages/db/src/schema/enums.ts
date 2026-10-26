@@ -1,4 +1,4 @@
-import { CAPTURE_SESSION_KINDS, CLAIM_STATES, CONDITION_REPLIES, HOLD_STATES, ITEM_CATEGORIES, ITEM_STATUSES, PRICE_CATEGORIES, RENTAL_STATES, STAFF_ROLES } from '@hold/domain'
+import { CAPTURE_SESSION_KINDS, CLAIM_STATES, FINDING_VERDICTS, CONDITION_REPLIES, HOLD_STATES, ITEM_CATEGORIES, ITEM_STATUSES, PRICE_CATEGORIES, RENTAL_STATES, STAFF_ROLES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
 import { check, text } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
@@ -74,3 +74,8 @@ export const moneyEventKind = oneOf(MONEY_EVENT_KINDS)
 export const invoiceState = oneOf(INVOICE_STATES)
 export const outboxState = oneOf(OUTBOX_STATES)
 export const bookingChannel = oneOf(BOOKING_CHANNELS)
+
+// Which half of the evaluation set a run measured: the tuning half, or the gate half that is never tuned on.
+export const EVALUATION_HALVES = ['tuning', 'gate'] as const
+export const evaluationHalf = oneOf(EVALUATION_HALVES)
+export const findingVerdict = oneOf(FINDING_VERDICTS)

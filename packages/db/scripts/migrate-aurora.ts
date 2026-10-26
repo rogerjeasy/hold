@@ -29,7 +29,7 @@ const secrets = new SecretsManagerClient({ region })
 
 // Gives a service role its login, sending PostgreSQL only the password's SCRAM verifier. Nothing for a secret that
 // does not exist yet: the worker's is made by the deploy that follows the first migration, and the next run uses it.
-async function giveLogin(secretId: string, role: 'hold_app' | 'hold_worker'): Promise<boolean> {
+async function giveLogin(secretId: string, role: 'hold_app' | 'hold_worker' | 'hold_eval'): Promise<boolean> {
   let secret
   try {
     secret = await secrets.send(new GetSecretValueCommand({ SecretId: secretId }))
@@ -49,6 +49,8 @@ if (!(await giveLogin(setting('HOLD_DATABASE_APP_SECRET_ARN'), 'hold_app'))) thr
 const workerSecret = process.env['HOLD_DATABASE_WORKER_SECRET'] ?? 'hold/database/worker'
 const worker = await giveLogin(workerSecret, 'hold_worker')
 console.log(worker ? 'hold_worker can log in.' : `No ${workerSecret} secret yet: hold_worker gets its login on the next run.`)
+const evaluator = await giveLogin('hold/database/eval', 'hold_eval')
+console.log(evaluator ? 'hold_eval can log in.' : 'No hold/database/eval secret yet: hold_eval gets its login on the next run.')
 
 const [applied] = await admin.select({ count: sql<number>`count(*)::int` }).from(sql`drizzle.__drizzle_migrations`)
 console.log(`Done. ${String(applied?.count)} migrations applied. hold_app can log in.`)
