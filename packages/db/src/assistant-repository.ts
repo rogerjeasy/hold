@@ -124,6 +124,9 @@ export async function bookFromQuote(transaction: Transaction, shopId: string, in
   // The renter agreed to what the quote said. A booking at any other price or under other terms is not that.
   if (priceList.id !== quote.priceListId || terms.fee.cents !== quote.feeCents || terms.hold.cents !== quote.holdCents) return { ok: false, reason: 'prices_changed' }
 
+  // Bookings in one shop take turns from here to the end of their transaction, so two made at once cannot both count
+  // the same number of unpaid bookings and both slip under the cap.
+  await transaction.execute(sql`select pg_advisory_xact_lock(hashtext(${`assistant-unpaid:${shopId}`}))`)
   await expireUnpaidAssistantBookings(transaction, now)
   const [unpaid] = await transaction
     .select({ count: sql<number>`count(*)::int` })

@@ -217,13 +217,37 @@ describe('the cap on unpaid bookings', () => {
     if (!quoted.ok) throw new Error(quoted.reason)
     expect(await act(anonymous(shop), (transaction) => bookFromQuote(transaction, shop.shopId, booking(quoted.quote.id), later))).toEqual({ ok: false, reason: 'shop_busy' })
   })
+
+  it('serializes the shop’s bookings before counting, so bookings made at once cannot both slip under the cap', async () => {
+    // The lock is held for the rest of the booking's transaction: a second booking in the shop waits for it to end.
+    const quoted = await quote(other, at(3000), at(3024), 1, otherTypeId)
+    if (!quoted.ok) throw new Error(quoted.reason)
+    const locks = await act(anonymous(other), async (transaction) => {
+      await bookFromQuote(transaction, other.shopId, booking(quoted.quote.id), NOW)
+      return transaction.execute(sql`select objid from pg_locks where locktype = 'advisory' and pid = pg_backend_pid() and granted`)
+    })
+    expect(locks.rows).toHaveLength(1)
+  })
+
+  it('lets only the allowed number land when bookings arrive together', async () => {
+    const third = await openShop('braga', 'Braga Bikes', 'Europe/Lisbon', 10)
+    const quoted = await Promise.all(Array.from({ length: ASSISTANT_LIMITS.unpaidPerShop + 3 }, (_, index) => quote(third.scope, at(100 + index * 48), at(124 + index * 48), 1, third.typeId)))
+    const results = await Promise.all(
+      quoted.map((each) => {
+        if (!each.ok) throw new Error(each.reason)
+        return act(anonymous(third.scope), (transaction) => bookFromQuote(transaction, third.scope.shopId, booking(each.quote.id), NOW))
+      }),
+    )
+    expect(results.filter((result) => result.ok)).toHaveLength(ASSISTANT_LIMITS.unpaidPerShop)
+    expect(results.filter((result) => !result.ok && result.reason === 'shop_busy')).toHaveLength(3)
+  })
 })
 
 describe('row-level security', () => {
   it('shows a second shop none of the first shop’s quotes or sessions', async () => {
     const seen = await act(other, async (transaction) => ({
       quotes: await transaction.select().from(quotes).where(eq(quotes.shopId, shop.shopId)),
-      sessions: await transaction.select().from(agentSessions),
+      sessions: await transaction.select().from(agentSessions).where(eq(agentSessions.shopId, shop.shopId)),
     }))
     expect(seen).toEqual({ quotes: [], sessions: [] })
   })
