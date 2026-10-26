@@ -39,6 +39,14 @@ describe('the shop shell', () => {
     expect(within(menu).getByText('Settings')).toBeInTheDocument()
   })
 
+  it('lists the incidents renters reported among the day’s work', () => {
+    navigation.pathname = '/shop'
+    shell()
+    const menu = screen.getAllByRole('navigation', { name: 'Shop pages' })[0]
+    if (menu === undefined) throw new Error('No shop menu.')
+    expect(within(menu).getByRole('link', { name: 'Incidents' })).toHaveAttribute('href', '/shop/incidents')
+  })
+
   it('names the shop, the person’s role in it, and offers the person’s other shops', async () => {
     shell()
     const switcher = screen.getAllByRole('button', { name: /Switch shop, now Ribeira Bikes/ })[0]

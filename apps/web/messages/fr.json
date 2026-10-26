@@ -1201,7 +1201,8 @@
       "staff": "Équipe",
       "prices": "Prix",
       "paypal": "PayPal",
-      "settings": "Réglages"
+      "settings": "Réglages",
+      "incidents": "Incidents"
     },
     "setup": {
       "title": "Préparez votre boutique",
@@ -1667,7 +1668,8 @@
           "empty": "Aucune marque notée. Une marque vue lors d'une remise est ajoutée ici, pour qu'aucun client suivant n'ait à la payer.",
           "firstSeen": "Vue pour la première fois le {date}",
           "open": "Toujours là",
-          "repaired": "Réparée"
+          "repaired": "Réparée",
+          "reported": "Signalé pendant une location"
         },
         "rentals": {
           "title": "Locations",
@@ -1921,7 +1923,8 @@
         "missing_part": "Pièce potentiellement manquante",
         "wear": "Usure normale",
         "known_mark": "Déjà présent au départ",
-        "uncertain": "Observation incertaine"
+        "uncertain": "Observation incertaine",
+        "reported": "Signalé pendant cette location"
       },
       "secondLook": "Confirmé par une seconde vérification indépendante.",
       "price": "Tarif convenu : {description} — {amount}. Suggestion à examiner, aucun débit.",
@@ -1934,7 +1937,59 @@
       "record": "Consigner l’inspection",
       "recorded": "Votre inspection a été consignée.",
       "reviewHistory": "Inspections du personnel",
-      "staff": "Membre du personnel"
+      "staff": "Membre du personnel",
+      "reportedAgreed": "Le locataire l’a signalé pendant la location et a accepté {amount}.",
+      "reportedNotAgreed": "Le locataire l’a signalé pendant la location. Rien n’a été accepté : une personne décide.",
+      "reportedLink": "Voir la ligne acceptée",
+      "claimLink": "Ouvrir la réclamation"
+    },
+    "incidents": {
+      "title": "Incidents",
+      "lead": "Ce que les locataires ont signalé pendant leur location. Le personnel a été prévenu par e-mail aussitôt ; cette liste est complète, que le modèle ait répondu ou non.",
+      "filter": "Quels signalements",
+      "waiting": "En attente d’une personne",
+      "all": "Tous les signalements",
+      "noneWaiting": "Rien n’attend une personne.",
+      "none": "Aucun signalement pour l’instant.",
+      "reported": "Signalé {when} par {renter}",
+      "renter": "le locataire",
+      "safety": "Peut toucher à la sécurité",
+      "theft": "Où : {where}. Quand : {when}. Cadenas et clés : {lockAndKeys}. Plainte : {police}.",
+      "notYet": "pas encore",
+      "offer": "Prix confirmé : {description}, {amount}",
+      "agreed": "Le locataire a accepté {amount}. Rien n’est prélevé avant le retour.",
+      "sortedBy": "Classé par {model}, vérifié par le code.",
+      "sortedByCode": "Classé par le code seul : le modèle n’a pas répondu.",
+      "notAlerted": "Aucun e-mail n’a atteint le personnel. Cette page fait office d’alerte.",
+      "priceThatApplies": "Prix publié qui s’applique",
+      "confirmPrice": "Confirmer ce prix pour le locataire",
+      "priceConfirmed": "Prix confirmé. Le locataire peut maintenant l’accepter.",
+      "shopMatter": "Prendre en charge par la boutique",
+      "shopMatterDone": "C’est maintenant l’affaire de la boutique. Aucune ligne de réclamation ne peut en venir.",
+      "openRental": "Ouvrir la location",
+      "results": {
+        "not_to_price": "Ce signalement n’a pas de prix à confirmer maintenant.",
+        "price_not_agreed": "Ce prix n’est pas dans la liste acceptée par le locataire.",
+        "not_waiting": "Ce signalement n’attend plus une personne.",
+        "role_may_not_confirm": "Votre rôle ne permet pas de confirmer des prix."
+      },
+      "kinds": {
+        "small_damage": "Petit dommage",
+        "mechanical_fault": "Panne",
+        "theft_or_loss": "Vol ou perte",
+        "unsafe_or_unclear": "Dangereux ou incertain",
+        "unsorted": "Pas encore classé"
+      },
+      "states": {
+        "reported": "Signalé",
+        "triaged": "Classé",
+        "agreed": "Accepté par le locataire",
+        "shop_matter": "Pris en charge par la boutique",
+        "awaiting_staff": "En attente d’une personne",
+        "claim_opened": "Dans la réclamation",
+        "resolved": "Réglé",
+        "withdrawn": "Retiré"
+      }
     }
   },
   "emails": {
@@ -1953,6 +2008,10 @@
     "claimCode": {
       "subject": "Votre code de vérification Hold",
       "body": "Votre code est {code}. Il expire dans dix minutes. Saisissez-le uniquement sur votre page privée de réclamation Hold."
+    },
+    "incidentCode": {
+      "subject": "Votre code de vérification Hold",
+      "body": "Votre code de vérification est {code}. Il expire dans dix minutes. Ne le saisissez que sur votre page Hold privée, pour le signalement que vous avez fait."
     }
   },
   "shell": {
@@ -2213,7 +2272,21 @@
       "already_replied": "Vous avez déjà répondu.",
       "closed": "Le délai pour répondre est passé.",
       "not_handed_over": "La location n'a pas encore été remise.",
-      "upload_failed": "La photo n'a pas été envoyée. Réessayez."
+      "upload_failed": "La photo n'a pas été envoyée. Réessayez.",
+      "not_out": "Les signalements sont ouverts tant que vous avez les articles.",
+      "description_invalid": "Décrivez ce qui s’est passé, en 1 000 caractères au plus.",
+      "already_sent": "Ce signalement a déjà été envoyé.",
+      "region_invalid": "Gardez le cadre sur la photo, serré autour du dommage.",
+      "not_agreeable": "Ce prix ne peut pas être accepté maintenant. La page montre où en est le signalement.",
+      "not_theft": "Ces détails concernent un vol ou une perte en attente de la boutique.",
+      "already_given": "Ces détails ont déjà été donnés.",
+      "no_details": "Donnez d’abord les détails.",
+      "police_report_invalid": "Saisissez le numéro de plainte.",
+      "storage_unavailable": "Impossible de prendre des photos ici pour le moment.",
+      "key_mismatch": "Cette photo n’appartient pas à ce signalement.",
+      "not_uploaded": "La photo n’est pas arrivée. Reprenez-la.",
+      "sealed": "Ce signalement a été envoyé : aucune photo ne peut être ajoutée.",
+      "unknown_view": "Cette vue n’existe pas pour cet article."
     },
     "orderDescription": "{shop} : {items}, {days, plural, one {# jour} other {# jours}}",
     "holdPage": {
@@ -2255,6 +2328,132 @@
       "missedView": "Quelque chose d'oublié",
       "send": "Envoyer ce que j'ai ajouté",
       "back": "Voir votre location"
+    },
+    "somethingHappened": "Il s’est passé quelque chose",
+    "incident": {
+      "title": "Il s’est passé quelque chose",
+      "lead": "Dites à la boutique ce qui est arrivé à ce que vous louez. Votre signalement est daté, verrouillé et ajouté à l’historique de l’article.",
+      "toRental": "Retour à votre location",
+      "emergencyFirst": "Si quelqu’un est blessé ou en danger, appelez d’abord les secours : 112 en Europe, 911 en Amérique du Nord.",
+      "newReport": "Un nouveau signalement",
+      "closed": "Les signalements sont ouverts tant que vous avez les articles. Pour le reste, contactez la boutique.",
+      "earlier": "Vos signalements",
+      "reportTitle": "Ce qui est arrivé à {item}",
+      "back": "Tous vos signalements",
+      "yourWords": "Ce que vous avez dit à la boutique",
+      "start": {
+        "which": "Quel article",
+        "what": "Ce qui s’est passé",
+        "hints": {
+          "damage": "Une marque ou un dommage, comme une rayure ou un choc",
+          "fault": "Quelque chose ne fonctionne plus",
+          "gone": "Il a disparu : volé ou perdu",
+          "unsafe": "Quelqu’un a été blessé, ou ce n’est peut-être pas sûr",
+          "not_sure": "Je ne sais pas"
+        },
+        "describe": "Décrivez ce qui s’est passé",
+        "describeHelp": "Avec vos mots. La boutique lit exactement ce que vous écrivez.",
+        "continue": "Continuer"
+      },
+      "capture": {
+        "guidance": "Photographiez ce qui s’est passé, du côté où cela se voit. La photo prise au départ apparaît en transparence derrière l’appareil, pour retrouver l’angle. Chaque vue est facultative.",
+        "sampleTitle": "Photos d’exemple",
+        "sampleBody": "Certaines photos sont des exemples pour la démonstration, pas un vrai article."
+      },
+      "send": {
+        "noPhotos": "Pas encore de photo. Vous pouvez quand même envoyer le signalement, par exemple si l’article a disparu.",
+        "whichPhoto": "Photo à annoter",
+        "photo": "Votre photo",
+        "box": "Où c’est",
+        "boxAt": "Cadre à {x} % en largeur et {y} % en hauteur",
+        "markIt": "Indiquer où c’est",
+        "howTo": "Faites glisser le cadre sur le dommage, ou déplacez-le avec les flèches et redimensionnez-le avec Maj et les flèches. Gardez-le serré autour du dommage.",
+        "tooLarge": "Le cadre est trop grand. Gardez-le serré autour du seul dommage.",
+        "removeBox": "Retirer le cadre",
+        "send": "Envoyer le signalement",
+        "sending": "Envoi…"
+      },
+      "outcome": {
+        "simulated": "Classé par un substitut de l’environnement de test, pas par Claude.",
+        "unsafe": {
+          "title": "Arrêtez d’utiliser l’article",
+          "stop": "Arrêtez de l’utiliser maintenant et gardez-le en lieu sûr.",
+          "contact": "La boutique a été prévenue et vous contactera.",
+          "emergency": "Si quelqu’un est blessé ou en danger, appelez les secours : 112 en Europe, 911 en Amérique du Nord."
+        },
+        "photographs": {
+          "title": "Pas encore envoyé",
+          "body": "Ajoutez des photos si vous le pouvez, puis envoyez le signalement."
+        },
+        "stored": {
+          "title": "Votre signalement est enregistré",
+          "body": "La boutique a été prévenue et vous contactera."
+        },
+        "theft": {
+          "title": "Un vol ou une perte",
+          "body": "La boutique a été prévenue et vous contactera. Donnez ces détails maintenant. Le numéro de plainte peut être ajouté plus tard."
+        },
+        "fault": {
+          "title": "Une panne",
+          "body": "Une panne ne vous est pas facturée. La boutique a été prévenue et vous contactera pour un échange ou une récupération."
+        },
+        "pricing": {
+          "title": "Petit dommage",
+          "body": "La boutique confirmera lequel de ses prix publiés s’applique, et cette page l’affichera. Rien n’est prélevé maintenant."
+        },
+        "offer": {
+          "title": "Petit dommage à un prix publié",
+          "body": "Le prix publié par la boutique pour {description} est de {price}. Vous pouvez l’accepter maintenant ou attendre le retour. Rien n’est prélevé maintenant."
+        },
+        "agreed": {
+          "title": "Accepté",
+          "body": "Vous avez accepté le prix publié pour {description}.",
+          "amount": "Accepté : {price}",
+          "notCharged": "Rien n’a été prélevé. Au retour, un membre du personnel le confirme après avoir vu l’article et ne peut que le baisser. Il est prélevé une seule fois avec les autres lignes, et le reste de votre empreinte est libéré."
+        },
+        "return": {
+          "title": "Laissé pour le retour",
+          "body": "Une personne de la boutique l’examinera quand vous rapporterez l’article."
+        },
+        "resolved": {
+          "title": "Réglé",
+          "body": "La boutique a réglé ce signalement."
+        }
+      },
+      "agree": {
+        "codeGuidance": "Pour accepter {price}, demandez un code à usage unique. Il est envoyé à l’adresse que PayPal a donnée pour vous.",
+        "sendCode": "M’envoyer un code",
+        "codeSent": "Code envoyé. Il expire dans dix minutes.",
+        "codeSentSandbox": "Code envoyé à l’adresse de contact de la réservation, car il s’agit du bac à sable PayPal. Il expire dans dix minutes.",
+        "code": "Code à usage unique",
+        "agree": "Accepter {price}",
+        "leaveGuidance": "Ou laissez-le pour le retour : une personne de la boutique l’examinera.",
+        "leave": "Laisser pour le retour",
+        "codeExpired": "Ce code a expiré. Demandez-en un nouveau.",
+        "wrongCode": "Ce code n’est pas le bon. Vérifiez-le et réessayez.",
+        "codeRecentlySent": "Un code vient d’être envoyé. Regardez vos e-mails.",
+        "emailUnavailable": "Le code n’a pas pu être envoyé. Réessayez dans un instant."
+      },
+      "theft": {
+        "where": "Où c’est arrivé",
+        "when": "Quand c’est arrivé",
+        "lockAndKeys": "Le cadenas et les clés : était-il attaché, et où sont les clés ?",
+        "policeReport": "Numéro de plainte",
+        "policeLater": "Si vous ne l’avez pas encore, vous pourrez l’ajouter plus tard.",
+        "send": "Envoyer ces détails",
+        "notGiven": "Pas encore donné",
+        "addPolice": "Ajouter le numéro de plainte"
+      },
+      "states": {
+        "reported": "Signalé",
+        "triaged": "Classé",
+        "agreed": "Accepté par le locataire",
+        "shop_matter": "Pris en charge par la boutique",
+        "awaiting_staff": "En attente d’une personne",
+        "claim_opened": "Dans la réclamation",
+        "resolved": "Réglé",
+        "withdrawn": "Retiré"
+      }
     }
   },
   "shopPage": {
@@ -2369,9 +2568,18 @@
       "already_replied": "Cette réclamation a déjà une réponse.",
       "reason_required": "Indiquez votre motif avant de continuer.",
       "email_unavailable": "Le code n’a pas pu être envoyé. Réessayez plus tard.",
-      "decision_recorded": "Une décision est déjà enregistrée. Actualisez cette page pour voir le statut du règlement."
+      "decision_recorded": "Une décision est déjà enregistrée. Actualisez cette page pour voir le statut du règlement.",
+      "incident_not_agreed": "Ce signalement n’a pas été accepté par le locataire.",
+      "raises_agreed_line": "Une ligne acceptée par le locataire peut être baissée, jamais augmentée.",
+      "empty_line": "Retirez la ligne plutôt que de la garder à zéro."
     },
     "acknowledge": "J’ai examiné cette réclamation",
-    "reviewFirst": "Vérifiez les preuves et les prix. Votre délai commence quand vous confirmez avoir examiné cette réclamation."
+    "reviewFirst": "Vérifiez les preuves et les prix. Votre délai commence quand vous confirmez avoir examiné cette réclamation.",
+    "agreed": {
+      "keep": "Garder la ligne acceptée par le locataire : {price}, {amount}",
+      "amount": "Montant à garder, au plus {amount}",
+      "neverRaised": "Une ligne acceptée par le locataire peut être baissée, jamais augmentée.",
+      "drafted": "Acceptée par le locataire pendant la location, confirmée par le personnel au retour."
+    }
   }
 }

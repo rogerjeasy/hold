@@ -19,6 +19,8 @@ export const shopRoutes = {
   home: '/shop',
   rentals: '/shop/rentals',
   items: '/shop/items',
+  // What renters reported during their rentals (extensions.md section 10).
+  incidents: '/shop/incidents',
   security: '/shop/security',
   staff: '/shop/staff',
   prices: '/shop/prices',
@@ -51,6 +53,9 @@ export const linkRoutes = {
   // here too because screens import this file and must not load the server's crypto.
   renter: '/r',
   record: (token: string) => `/r/${token}/record`,
+  // "Something happened": a renter's reports during the rental, and one report by its ID.
+  incidents: (token: string) => `/r/${token}/incident`,
+  incident: (token: string, incidentId: string) => `/r/${token}/incident/${incidentId}`,
   // A shop's own page for renters, named by its address: /s/{slug}.
   shopPage: '/s',
 } as const

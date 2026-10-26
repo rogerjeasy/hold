@@ -31,6 +31,19 @@ const view: RenterView = {
 }
 
 describe('the renter’s page', () => {
+  it('offers “Something happened” while the renter has the items, through a link that may report', () => {
+    renderWithIntl(<RenterScreen token="signed-token" view={{ ...view, state: 'out' }} canReport />)
+    expect(screen.getByRole('link', { name: 'Something happened' })).toHaveAttribute('href', '/r/signed-token/incident')
+  })
+  it('does not offer it before the handover, after the return, or to a link that may not report', () => {
+    for (const state of ['booked', 'returned'] as const) {
+      const { unmount } = renderWithIntl(<RenterScreen token="t" view={{ ...view, state }} canReport />)
+      expect(screen.queryByRole('link', { name: 'Something happened' })).not.toBeInTheDocument()
+      unmount()
+    }
+    renderWithIntl(<RenterScreen token="t" view={{ ...view, state: 'out' }} canReport={false} />)
+    expect(screen.queryByRole('link', { name: 'Something happened' })).not.toBeInTheDocument()
+  })
   it('links to the rental record through the renter’s own signed token', () => {
     renderWithIntl(<RenterScreen token="signed-token" view={view} />)
     expect(screen.getByRole('link', { name: 'Your rental record' })).toHaveAttribute('href', '/r/signed-token/record')

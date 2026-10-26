@@ -1,11 +1,11 @@
-import { screen } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { renderWithIntl } from '@/test/render'
 import { ClaimScreen } from './claim-screen'
 import type { ClaimWorkspace } from '@hold/db'
 vi.mock('./actions', () => ({ prepareClaim: vi.fn(), approveAndPresent: vi.fn(), confirmClean: vi.fn(), decide: vi.fn() }))
 vi.mock('@/hooks/use-look-again', () => ({ useLookAgain: () => undefined }))
-const workspace: ClaimWorkspace = { protectedReply: false, rentalId: 'rental', rentalState: 'inspecting', currency: 'EUR', simulated: false, reservedCents: 30000, holdState: 'placed', claim: null, prices: [{ id: 'price', description: 'Scratch', amountCents: 3500 }], possibleFindings: [], lines: [], payments: [], invoices: [], execution: null, replies: [], decisions: [], amounts: { capture: { cents: 0, currency: 'EUR' }, release: { cents: 30000, currency: 'EUR' }, invoice: { cents: 0, currency: 'EUR' } } }
+const workspace: ClaimWorkspace = { protectedReply: false, agreedIncidents: [], rentalId: 'rental', rentalState: 'inspecting', currency: 'EUR', simulated: false, reservedCents: 30000, holdState: 'placed', claim: null, prices: [{ id: 'price', description: 'Scratch', amountCents: 3500 }], possibleFindings: [], lines: [], payments: [], invoices: [], execution: null, replies: [], decisions: [], amounts: { capture: { cents: 0, currency: 'EUR' }, release: { cents: 30000, currency: 'EUR' }, invoice: { cents: 0, currency: 'EUR' } } }
 describe('claim preparation and settlement screen', () => {
   it('links the shared claim record from staff review', () => {
     renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={workspace} canAct={false} />)
@@ -27,7 +27,7 @@ describe('claim preparation and settlement screen', () => {
 })
 
 it('shows paired evidence photographs before a staff approval', () => {
-  renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={{ ...workspace, claim: { id: 'claim', state: 'awaiting_approval', totalCents: 3500, raisedByUserId: 'staff', replyDueAt: null }, lines: [{ id: 'line', amountCents: 3500, description: 'Scratch', reason: null, actorName: null, findingId: 'finding', findingDescription: 'New scratch', region: null, beforeKey: 'before', afterKey: 'after' }] }} canAct photoUrls={{ before: '/before.jpg', after: '/after.jpg' }} />)
+  renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={{ ...workspace, claim: { id: 'claim', state: 'awaiting_approval', totalCents: 3500, raisedByUserId: 'staff', replyDueAt: null }, lines: [{ id: 'line', amountCents: 3500, description: 'Scratch', reason: null, actorName: null, findingId: 'finding', findingDescription: 'New scratch', incidentDescription: null, source: 'finding', incidentId: null, region: null, beforeKey: 'before', afterKey: 'after' }] }} canAct photoUrls={{ before: '/before.jpg', after: '/after.jpg' }} />)
   expect(screen.getByRole('img', { name: 'At handover' })).toHaveAttribute('src', '/before.jpg')
   expect(screen.getByRole('img', { name: 'At return' })).toHaveAttribute('src', '/after.jpg')
 })
@@ -44,4 +44,32 @@ it('asks a person whose session an emailed code proved to confirm with a passkey
   expect(screen.getByRole('button', { name: 'Confirm with my passkey' })).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: 'Confirm clean return and release hold' })).not.toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Prepare claim for review' })).toBeInTheDocument()
+})
+
+describe('a line the renter agreed during the rental (X5.3)', () => {
+  const agreed = { ...workspace, agreedIncidents: [{ id: 'incident', description: 'A scratch on the left side', agreedCents: 3500, priceDescription: 'Scratch', itemLabel: 'City e-bike 1' }] }
+  const lines = (container: HTMLElement) => JSON.parse(container.querySelector<HTMLInputElement>('input[name="lines"]')?.value ?? '[]') as unknown
+  it('is carried into the draft at its agreed amount, in the renter’s words', () => {
+    const { container } = renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={agreed} canAct />)
+    expect(screen.getByText('A scratch on the left side')).toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: /Keep the line the renter agreed: Scratch/ })).toBeChecked()
+    expect(lines(container)).toEqual([{ incidentId: 'incident', amountCents: 3500 }])
+  })
+  it('may be lowered or left out, and is never sent raised', () => {
+    const { container } = renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={agreed} canAct />)
+    const amount = screen.getByLabelText('Amount to keep, at most €35.00')
+    fireEvent.change(amount, { target: { value: '20' } })
+    expect(lines(container)).toEqual([{ incidentId: 'incident', amountCents: 2000 }])
+    fireEvent.change(amount, { target: { value: '40' } })
+    expect(screen.getByText('A line the renter agreed can be lowered, never raised.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Prepare claim for review' })).toBeDisabled()
+    fireEvent.change(amount, { target: { value: '35' } })
+    fireEvent.click(screen.getByRole('checkbox', { name: /Keep the line the renter agreed/ }))
+    expect(lines(container)).toEqual([])
+  })
+  it('shows a drafted agreed line as agreed by the renter', () => {
+    renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={{ ...agreed, claim: { id: 'claim', state: 'awaiting_approval', totalCents: 2000, raisedByUserId: 'staff', replyDueAt: null }, lines: [{ id: 'line', amountCents: 2000, description: 'Scratch', reason: null, actorName: 'Ana', findingId: null, findingDescription: null, incidentDescription: 'A scratch on the left side', source: 'agreed_in_rental', incidentId: 'incident', region: null, beforeKey: null, afterKey: null }] }} canAct />)
+    expect(screen.getByText('Agreed by the renter during the rental, confirmed by staff at the return.')).toBeInTheDocument()
+    expect(screen.getByText('A scratch on the left side')).toBeInTheDocument()
+  })
 })

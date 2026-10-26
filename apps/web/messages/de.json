@@ -1201,7 +1201,8 @@
       "staff": "Team",
       "prices": "Preise",
       "paypal": "PayPal",
-      "settings": "Einstellungen"
+      "settings": "Einstellungen",
+      "incidents": "Vorfälle"
     },
     "setup": {
       "title": "Richten Sie Ihren Verleih ein",
@@ -1667,7 +1668,8 @@
           "empty": "Keine Spuren festgehalten. Eine Spur, die bei einer Übergabe gesehen wird, wird hier ergänzt, damit späteren Mietenden nichts dafür berechnet wird.",
           "firstSeen": "Zuerst gesehen am {date}",
           "open": "Noch vorhanden",
-          "repaired": "Repariert"
+          "repaired": "Repariert",
+          "reported": "Während einer Miete gemeldet"
         },
         "rentals": {
           "title": "Mieten",
@@ -1921,7 +1923,8 @@
         "missing_part": "Möglicherweise fehlendes Teil",
         "wear": "Normale Abnutzung",
         "known_mark": "Bei Übergabe bereits vorhanden",
-        "uncertain": "Unsichere Beobachtung"
+        "uncertain": "Unsichere Beobachtung",
+        "reported": "Während dieser Miete gemeldet"
       },
       "secondLook": "Durch eine unabhängige zweite Prüfung bestätigt.",
       "price": "Vereinbarte Preisliste: {description} — {amount}. Ein Vorschlag zur Prüfung, keine Abbuchung.",
@@ -1934,7 +1937,59 @@
       "record": "Prüfung festhalten",
       "recorded": "Ihre Prüfung wurde gespeichert.",
       "reviewHistory": "Prüfprotokoll des Personals",
-      "staff": "Mitarbeiter"
+      "staff": "Mitarbeiter",
+      "reportedAgreed": "Die mietende Person hat es während der Miete gemeldet und {amount} zugestimmt.",
+      "reportedNotAgreed": "Die mietende Person hat es während der Miete gemeldet. Es wurde nichts vereinbart, daher entscheidet eine Person.",
+      "reportedLink": "Den akzeptierten Posten ansehen",
+      "claimLink": "Forderung öffnen"
+    },
+    "incidents": {
+      "title": "Vorfälle",
+      "lead": "Was Mietende während ihrer Miete gemeldet haben. Das Personal wurde sofort per E-Mail informiert; diese Liste ist vollständig, ob das Modell geantwortet hat oder nicht.",
+      "filter": "Welche Meldungen",
+      "waiting": "Wartet auf eine Person",
+      "all": "Alle Meldungen",
+      "noneWaiting": "Nichts wartet auf eine Person.",
+      "none": "Noch keine Meldungen.",
+      "reported": "Gemeldet {when} von {renter}",
+      "renter": "der mietenden Person",
+      "safety": "Kann die Sicherheit betreffen",
+      "theft": "Wo: {where}. Wann: {when}. Schloss und Schlüssel: {lockAndKeys}. Anzeige: {police}.",
+      "notYet": "noch nicht",
+      "offer": "Preis bestätigt: {description}, {amount}",
+      "agreed": "Die mietende Person hat {amount} zugestimmt. Bis zur Rückgabe wird nichts abgebucht.",
+      "sortedBy": "Eingeordnet von {model}, geprüft vom Code.",
+      "sortedByCode": "Nur vom Code eingeordnet: Das Modell hat nicht geantwortet.",
+      "notAlerted": "Keine E-Mail hat das Personal erreicht. Diese Seite ist die Warnung.",
+      "priceThatApplies": "Veröffentlichter Preis, der gilt",
+      "confirmPrice": "Diesen Preis für die mietende Person bestätigen",
+      "priceConfirmed": "Preis bestätigt. Die mietende Person kann jetzt zustimmen.",
+      "shopMatter": "Als Sache des Ladens übernehmen",
+      "shopMatterDone": "Es ist jetzt Sache des Ladens. Daraus kann kein Forderungsposten entstehen.",
+      "openRental": "Miete öffnen",
+      "results": {
+        "not_to_price": "Für diese Meldung ist jetzt kein Preis zu bestätigen.",
+        "price_not_agreed": "Dieser Preis steht nicht in der Liste, der die mietende Person zugestimmt hat.",
+        "not_waiting": "Diese Meldung wartet nicht mehr auf eine Person.",
+        "role_may_not_confirm": "Ihre Rolle kann keine Preise bestätigen."
+      },
+      "kinds": {
+        "small_damage": "Kleiner Schaden",
+        "mechanical_fault": "Defekt",
+        "theft_or_loss": "Diebstahl oder Verlust",
+        "unsafe_or_unclear": "Unsicher oder unklar",
+        "unsorted": "Noch nicht eingeordnet"
+      },
+      "states": {
+        "reported": "Gemeldet",
+        "triaged": "Eingeordnet",
+        "agreed": "Von der mietenden Person akzeptiert",
+        "shop_matter": "Sache des Ladens",
+        "awaiting_staff": "Wartet auf eine Person",
+        "claim_opened": "In der Forderung",
+        "resolved": "Erledigt",
+        "withdrawn": "Zurückgezogen"
+      }
     }
   },
   "emails": {
@@ -1953,6 +2008,10 @@
     "claimCode": {
       "subject": "Ihr Hold-Bestätigungscode",
       "body": "Ihr Bestätigungscode lautet {code}. Er gilt zehn Minuten. Geben Sie ihn nur auf Ihrer privaten Hold-Forderungsseite ein."
+    },
+    "incidentCode": {
+      "subject": "Ihr Hold-Bestätigungscode",
+      "body": "Ihr Bestätigungscode lautet {code}. Er läuft in zehn Minuten ab. Geben Sie ihn nur auf Ihrer privaten Hold-Seite für Ihre Meldung ein."
     }
   },
   "shell": {
@@ -2213,7 +2272,21 @@
       "already_replied": "Sie haben bereits geantwortet.",
       "closed": "Die Zeit zum Antworten ist abgelaufen.",
       "not_handed_over": "Die Miete wurde noch nicht übergeben.",
-      "upload_failed": "Das Foto wurde nicht hochgeladen. Versuchen Sie es erneut."
+      "upload_failed": "Das Foto wurde nicht hochgeladen. Versuchen Sie es erneut.",
+      "not_out": "Meldungen sind offen, solange Sie die Artikel haben.",
+      "description_invalid": "Beschreiben Sie, was passiert ist, in höchstens 1000 Zeichen.",
+      "already_sent": "Diese Meldung wurde schon gesendet.",
+      "region_invalid": "Halten Sie den Rahmen auf dem Foto, eng um den Schaden.",
+      "not_agreeable": "Diesem Preis kann jetzt nicht zugestimmt werden. Die Seite zeigt, wo die Meldung steht.",
+      "not_theft": "Diese Angaben gehören zu einem Diebstahl oder Verlust, der auf den Laden wartet.",
+      "already_given": "Diese Angaben wurden schon gemacht.",
+      "no_details": "Machen Sie zuerst die Angaben.",
+      "police_report_invalid": "Geben Sie die Nummer der Anzeige ein.",
+      "storage_unavailable": "Hier können gerade keine Fotos aufgenommen werden.",
+      "key_mismatch": "Dieses Foto gehört nicht zu dieser Meldung.",
+      "not_uploaded": "Das Foto ist nicht angekommen. Nehmen Sie es noch einmal auf.",
+      "sealed": "Diese Meldung wurde gesendet, daher kann kein Foto hinzugefügt werden.",
+      "unknown_view": "Diese Ansicht gehört nicht zu diesem Artikel."
     },
     "orderDescription": "{shop}: {items}, {days, plural, one {# Tag} other {# Tage}}",
     "holdPage": {
@@ -2255,6 +2328,132 @@
       "missedView": "Etwas Übersehenes",
       "send": "Hinzugefügtes senden",
       "back": "Zu Ihrer Miete"
+    },
+    "somethingHappened": "Etwas ist passiert",
+    "incident": {
+      "title": "Etwas ist passiert",
+      "lead": "Sagen Sie dem Laden, was mit dem Gemieteten passiert ist. Ihre Meldung wird datiert, gesperrt und zur Geschichte des Artikels gelegt.",
+      "toRental": "Zurück zu Ihrer Miete",
+      "emergencyFirst": "Wenn jemand verletzt oder in Gefahr ist, rufen Sie zuerst den Notruf: 112 in Europa, 911 in Nordamerika.",
+      "newReport": "Eine neue Meldung",
+      "closed": "Meldungen sind offen, solange Sie die Artikel haben. Für alles andere wenden Sie sich an den Laden.",
+      "earlier": "Ihre Meldungen",
+      "reportTitle": "Was mit {item} passiert ist",
+      "back": "Alle Ihre Meldungen",
+      "yourWords": "Was Sie dem Laden gesagt haben",
+      "start": {
+        "which": "Welcher Artikel",
+        "what": "Was passiert ist",
+        "hints": {
+          "damage": "Eine Spur oder ein Schaden, etwa ein Kratzer oder eine Delle",
+          "fault": "Etwas funktioniert nicht mehr",
+          "gone": "Er ist weg: gestohlen oder verloren",
+          "unsafe": "Jemand wurde verletzt, oder er ist vielleicht nicht sicher",
+          "not_sure": "Ich bin nicht sicher"
+        },
+        "describe": "Beschreiben Sie, was passiert ist",
+        "describeHelp": "In Ihren eigenen Worten. Der Laden liest genau, was Sie schreiben.",
+        "continue": "Weiter"
+      },
+      "capture": {
+        "guidance": "Fotografieren Sie, was passiert ist, von der Seite, auf der es zu sehen ist. Das Foto von der Übergabe erscheint blass hinter der Kamera, damit Sie den Winkel treffen. Jede Ansicht ist freiwillig.",
+        "sampleTitle": "Beispielfotos",
+        "sampleBody": "Einige Fotos hier sind Beispiele für die Vorführung, kein echter Artikel."
+      },
+      "send": {
+        "noPhotos": "Noch keine Fotos. Sie können die Meldung trotzdem senden, etwa wenn der Artikel weg ist.",
+        "whichPhoto": "Foto zum Markieren",
+        "photo": "Ihr Foto",
+        "box": "Wo es ist",
+        "boxAt": "Rahmen bei {x} % in der Breite und {y} % in der Höhe",
+        "markIt": "Markieren, wo es ist",
+        "howTo": "Ziehen Sie den Rahmen auf den Schaden, oder verschieben Sie ihn mit den Pfeiltasten und ändern Sie seine Größe mit Umschalt und den Pfeiltasten. Halten Sie ihn eng um den Schaden.",
+        "tooLarge": "Der Rahmen ist zu groß. Halten Sie ihn eng um den Schaden allein.",
+        "removeBox": "Rahmen entfernen",
+        "send": "Meldung senden",
+        "sending": "Wird gesendet…"
+      },
+      "outcome": {
+        "simulated": "Eingeordnet von einem Ersatz für die Testumgebung, nicht von Claude.",
+        "unsafe": {
+          "title": "Nutzen Sie den Artikel nicht weiter",
+          "stop": "Bitte hören Sie jetzt auf, ihn zu nutzen, und bewahren Sie ihn sicher auf.",
+          "contact": "Der Laden wurde informiert und meldet sich bei Ihnen.",
+          "emergency": "Wenn jemand verletzt oder in Gefahr ist, rufen Sie den Notruf: 112 in Europa, 911 in Nordamerika."
+        },
+        "photographs": {
+          "title": "Noch nicht gesendet",
+          "body": "Fügen Sie wenn möglich Fotos hinzu und senden Sie dann die Meldung."
+        },
+        "stored": {
+          "title": "Ihre Meldung ist gespeichert",
+          "body": "Der Laden wurde informiert und meldet sich bei Ihnen."
+        },
+        "theft": {
+          "title": "Ein Diebstahl oder Verlust",
+          "body": "Der Laden wurde informiert und meldet sich bei Ihnen. Bitte geben Sie jetzt diese Angaben. Eine Anzeigennummer kann später folgen."
+        },
+        "fault": {
+          "title": "Ein Defekt",
+          "body": "Ein Defekt wird Ihnen nicht berechnet. Der Laden wurde informiert und meldet sich wegen eines Tauschs oder einer Abholung."
+        },
+        "pricing": {
+          "title": "Kleiner Schaden",
+          "body": "Der Laden bestätigt, welcher seiner veröffentlichten Preise gilt, und diese Seite zeigt ihn. Jetzt wird nichts abgebucht."
+        },
+        "offer": {
+          "title": "Kleiner Schaden zu einem veröffentlichten Preis",
+          "body": "Der veröffentlichte Preis des Ladens für {description} beträgt {price}. Sie können ihm jetzt zustimmen oder es bei der Rückgabe klären. Jetzt wird nichts abgebucht."
+        },
+        "agreed": {
+          "title": "Zugestimmt",
+          "body": "Sie haben dem veröffentlichten Preis für {description} zugestimmt.",
+          "amount": "Zugestimmt: {price}",
+          "notCharged": "Es wurde nichts abgebucht. Bei der Rückgabe bestätigt eine Person vom Personal ihn, nachdem sie den Artikel gesehen hat, und kann ihn nur senken. Er wird einmal mit allen anderen Posten abgebucht, und der Rest Ihrer Reservierung wird freigegeben."
+        },
+        "return": {
+          "title": "Für die Rückgabe gelassen",
+          "body": "Eine Person vom Laden sieht es sich an, wenn Sie den Artikel zurückbringen."
+        },
+        "resolved": {
+          "title": "Erledigt",
+          "body": "Der Laden hat diese Meldung erledigt."
+        }
+      },
+      "agree": {
+        "codeGuidance": "Um {price} zuzustimmen, fordern Sie einen Einmalcode an. Er geht an die E-Mail-Adresse, die PayPal für Sie angegeben hat.",
+        "sendCode": "Code per E-Mail senden",
+        "codeSent": "Code gesendet. Er läuft in zehn Minuten ab.",
+        "codeSentSandbox": "Code an die Kontaktadresse der Buchung gesendet, da dies die PayPal-Sandbox ist. Er läuft in zehn Minuten ab.",
+        "code": "Einmalcode",
+        "agree": "{price} zustimmen",
+        "leaveGuidance": "Oder lassen Sie es für die Rückgabe, wenn eine Person vom Laden es sich ansieht.",
+        "leave": "Für die Rückgabe lassen",
+        "codeExpired": "Dieser Code ist abgelaufen. Fordern Sie einen neuen an.",
+        "wrongCode": "Dieser Code stimmt nicht. Prüfen Sie ihn und versuchen Sie es erneut.",
+        "codeRecentlySent": "Gerade wurde ein Code gesendet. Sehen Sie in Ihre E-Mails.",
+        "emailUnavailable": "Der Code konnte nicht gesendet werden. Versuchen Sie es gleich noch einmal."
+      },
+      "theft": {
+        "where": "Wo es passiert ist",
+        "when": "Wann es passiert ist",
+        "lockAndKeys": "Schloss und Schlüssel: War er abgeschlossen, und wo sind die Schlüssel?",
+        "policeReport": "Nummer der Anzeige",
+        "policeLater": "Wenn Sie noch keine haben, können Sie sie später ergänzen.",
+        "send": "Diese Angaben senden",
+        "notGiven": "Noch nicht angegeben",
+        "addPolice": "Nummer der Anzeige ergänzen"
+      },
+      "states": {
+        "reported": "Gemeldet",
+        "triaged": "Eingeordnet",
+        "agreed": "Von der mietenden Person akzeptiert",
+        "shop_matter": "Sache des Ladens",
+        "awaiting_staff": "Wartet auf eine Person",
+        "claim_opened": "In der Forderung",
+        "resolved": "Erledigt",
+        "withdrawn": "Zurückgezogen"
+      }
     }
   },
   "shopPage": {
@@ -2369,9 +2568,18 @@
       "already_replied": "Diese Forderung wurde bereits beantwortet.",
       "reason_required": "Geben Sie eine Begründung ein.",
       "email_unavailable": "Der Code konnte nicht gesendet werden. Versuchen Sie es später erneut.",
-      "decision_recorded": "Eine Entscheidung wurde bereits erfasst. Aktualisieren Sie die Seite, um den Abwicklungsstatus zu sehen."
+      "decision_recorded": "Eine Entscheidung wurde bereits erfasst. Aktualisieren Sie die Seite, um den Abwicklungsstatus zu sehen.",
+      "incident_not_agreed": "Diese Meldung wurde von der mietenden Person nicht akzeptiert.",
+      "raises_agreed_line": "Ein akzeptierter Posten kann gesenkt, nie erhöht werden.",
+      "empty_line": "Lassen Sie den Posten weg, statt ihn bei null zu behalten."
     },
     "acknowledge": "Ich habe diese Forderung geprüft",
-    "reviewFirst": "Prüfen Sie die Belege und Preise. Ihre Antwortfrist beginnt mit Ihrer Prüfbestätigung."
+    "reviewFirst": "Prüfen Sie die Belege und Preise. Ihre Antwortfrist beginnt mit Ihrer Prüfbestätigung.",
+    "agreed": {
+      "keep": "Den von der mietenden Person akzeptierten Posten behalten: {price}, {amount}",
+      "amount": "Zu behaltender Betrag, höchstens {amount}",
+      "neverRaised": "Ein akzeptierter Posten kann gesenkt, nie erhöht werden.",
+      "drafted": "Während der Miete von der mietenden Person akzeptiert, bei der Rückgabe vom Personal bestätigt."
+    }
   }
 }

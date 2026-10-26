@@ -1201,7 +1201,8 @@
       "staff": "Equipo",
       "prices": "Precios",
       "paypal": "PayPal",
-      "settings": "Ajustes"
+      "settings": "Ajustes",
+      "incidents": "Incidentes"
     },
     "setup": {
       "title": "Prepara tu tienda",
@@ -1667,7 +1668,8 @@
           "empty": "No hay marcas anotadas. Una marca vista en una entrega se añade aquí, para que no se cobre a ningún cliente posterior.",
           "firstSeen": "Vista por primera vez el {date}",
           "open": "Sigue ahí",
-          "repaired": "Reparada"
+          "repaired": "Reparada",
+          "reported": "Informado durante un alquiler"
         },
         "rentals": {
           "title": "Alquileres",
@@ -1921,7 +1923,8 @@
         "missing_part": "Posible pieza faltante",
         "wear": "Desgaste normal",
         "known_mark": "Ya presente en la entrega",
-        "uncertain": "Observación incierta"
+        "uncertain": "Observación incierta",
+        "reported": "Informado durante este alquiler"
       },
       "secondLook": "Confirmado por una segunda revisión independiente.",
       "price": "Tarifa acordada: {description} — {amount}. Es una sugerencia para revisar, no un cobro.",
@@ -1934,7 +1937,59 @@
       "record": "Registrar inspección",
       "recorded": "Tu inspección se ha registrado.",
       "reviewHistory": "Registro de inspecciones del personal",
-      "staff": "Miembro del personal"
+      "staff": "Miembro del personal",
+      "reportedAgreed": "Quien alquila lo informó durante el alquiler y aceptó {amount}.",
+      "reportedNotAgreed": "Quien alquila lo informó durante el alquiler. No se aceptó nada, así que decide una persona.",
+      "reportedLink": "Ver la línea aceptada",
+      "claimLink": "Abrir la reclamación"
+    },
+    "incidents": {
+      "title": "Incidentes",
+      "lead": "Lo que informaron quienes alquilan durante su alquiler. Se avisó al personal por correo al instante; esta lista está completa haya respondido o no el modelo.",
+      "filter": "Qué informes",
+      "waiting": "Esperando a una persona",
+      "all": "Todos los informes",
+      "noneWaiting": "Nada espera a una persona.",
+      "none": "Aún no hay informes.",
+      "reported": "Informado {when} por {renter}",
+      "renter": "quien alquila",
+      "safety": "Puede afectar a la seguridad",
+      "theft": "Dónde: {where}. Cuándo: {when}. Candado y llaves: {lockAndKeys}. Denuncia: {police}.",
+      "notYet": "aún no",
+      "offer": "Precio confirmado: {description}, {amount}",
+      "agreed": "Quien alquila aceptó {amount}. No se cobra nada hasta la devolución.",
+      "sortedBy": "Clasificado por {model}, comprobado por el código.",
+      "sortedByCode": "Clasificado solo por el código: el modelo no respondió.",
+      "notAlerted": "Ningún correo llegó al personal. Esta página es el aviso.",
+      "priceThatApplies": "Precio publicado que se aplica",
+      "confirmPrice": "Confirmar este precio para quien alquila",
+      "priceConfirmed": "Precio confirmado. Quien alquila ya puede aceptarlo.",
+      "shopMatter": "Asumirlo como asunto de la tienda",
+      "shopMatterDone": "Ahora es asunto de la tienda. No puede salir de él ninguna línea de reclamación.",
+      "openRental": "Abrir el alquiler",
+      "results": {
+        "not_to_price": "Este informe no tiene precio que confirmar ahora.",
+        "price_not_agreed": "Ese precio no está en la lista que aceptó quien alquila.",
+        "not_waiting": "Este informe ya no espera a una persona.",
+        "role_may_not_confirm": "Tu función no permite confirmar precios."
+      },
+      "kinds": {
+        "small_damage": "Daño menor",
+        "mechanical_fault": "Avería",
+        "theft_or_loss": "Robo o pérdida",
+        "unsafe_or_unclear": "Inseguro o incierto",
+        "unsorted": "Aún sin clasificar"
+      },
+      "states": {
+        "reported": "Informado",
+        "triaged": "Clasificado",
+        "agreed": "Aceptado por quien alquila",
+        "shop_matter": "Asunto de la tienda",
+        "awaiting_staff": "Esperando a una persona",
+        "claim_opened": "En la reclamación",
+        "resolved": "Resuelto",
+        "withdrawn": "Retirado"
+      }
     }
   },
   "emails": {
@@ -1953,6 +2008,10 @@
     "claimCode": {
       "subject": "Su código de verificación de Hold",
       "body": "Su código es {code}. Caduca en diez minutos. Introdúzcalo solo en su página privada de reclamación de Hold."
+    },
+    "incidentCode": {
+      "subject": "Tu código de verificación de Hold",
+      "body": "Tu código de verificación es {code}. Caduca en diez minutos. Escríbelo solo en tu página privada de Hold, para el informe que hiciste."
     }
   },
   "shell": {
@@ -2213,7 +2272,21 @@
       "already_replied": "Ya has respondido.",
       "closed": "El plazo para responder ha terminado.",
       "not_handed_over": "El alquiler aún no se ha entregado.",
-      "upload_failed": "La foto no se subió. Inténtalo de nuevo."
+      "upload_failed": "La foto no se subió. Inténtalo de nuevo.",
+      "not_out": "Los informes están abiertos mientras tienes los artículos.",
+      "description_invalid": "Describe qué pasó, en 1000 caracteres como máximo.",
+      "already_sent": "Este informe ya se envió.",
+      "region_invalid": "Mantén el recuadro sobre la foto, ajustado al daño.",
+      "not_agreeable": "Este precio no se puede aceptar ahora. La página muestra en qué punto está el informe.",
+      "not_theft": "Estos detalles son para un robo o una pérdida pendiente de la tienda.",
+      "already_given": "Estos detalles ya se dieron.",
+      "no_details": "Da primero los detalles.",
+      "police_report_invalid": "Escribe el número de denuncia.",
+      "storage_unavailable": "Ahora mismo no se pueden tomar fotos aquí.",
+      "key_mismatch": "Esa foto no pertenece a este informe.",
+      "not_uploaded": "La foto no llegó. Tómala de nuevo.",
+      "sealed": "Este informe ya se envió, así que no se pueden añadir fotos.",
+      "unknown_view": "Esa vista no es de este artículo."
     },
     "orderDescription": "{shop}: {items}, {days, plural, one {# día} other {# días}}",
     "holdPage": {
@@ -2255,6 +2328,132 @@
       "missedView": "Algo que se pasó por alto",
       "send": "Enviar lo que añadí",
       "back": "Ver tu alquiler"
+    },
+    "somethingHappened": "Ha pasado algo",
+    "incident": {
+      "title": "Ha pasado algo",
+      "lead": "Cuenta a la tienda qué le ha pasado a lo que alquilas. Tu informe queda fechado, bloqueado y en el historial del artículo.",
+      "toRental": "Volver a tu alquiler",
+      "emergencyFirst": "Si alguien está herido o en peligro, llama primero a emergencias: 112 en Europa, 911 en Norteamérica.",
+      "newReport": "Un nuevo informe",
+      "closed": "Los informes están abiertos mientras tienes los artículos. Para cualquier otra cosa, contacta con la tienda.",
+      "earlier": "Tus informes",
+      "reportTitle": "Qué le pasó a {item}",
+      "back": "Todos tus informes",
+      "yourWords": "Lo que contaste a la tienda",
+      "start": {
+        "which": "Qué artículo",
+        "what": "Qué pasó",
+        "hints": {
+          "damage": "Una marca o un daño, como un arañazo o una abolladura",
+          "fault": "Algo dejó de funcionar",
+          "gone": "Ya no está: robado o perdido",
+          "unsafe": "Alguien resultó herido, o puede que no sea seguro",
+          "not_sure": "No estoy seguro"
+        },
+        "describe": "Describe qué pasó",
+        "describeHelp": "Con tus palabras. La tienda lee exactamente lo que escribes.",
+        "continue": "Continuar"
+      },
+      "capture": {
+        "guidance": "Fotografía lo que pasó, desde el lado donde se ve. La foto tomada al salir aparece tenue detrás de la cámara, para que encuentres el ángulo. Cada vista es opcional.",
+        "sampleTitle": "Fotos de ejemplo",
+        "sampleBody": "Algunas fotos son ejemplos para la demostración, no de un artículo real."
+      },
+      "send": {
+        "noPhotos": "Aún no hay fotos. Puedes enviar el informe igualmente, por ejemplo si el artículo ya no está.",
+        "whichPhoto": "Foto que marcar",
+        "photo": "Tu foto",
+        "box": "Dónde está",
+        "boxAt": "Recuadro al {x} % de ancho y al {y} % de alto",
+        "markIt": "Marcar dónde está",
+        "howTo": "Arrastra el recuadro sobre el daño, o muévelo con las flechas y cambia su tamaño con Mayús y las flechas. Mantenlo ajustado al daño.",
+        "tooLarge": "El recuadro es demasiado grande. Ajústalo solo al daño.",
+        "removeBox": "Quitar el recuadro",
+        "send": "Enviar el informe",
+        "sending": "Enviando…"
+      },
+      "outcome": {
+        "simulated": "Clasificado por un sustituto del entorno de prueba, no por Claude.",
+        "unsafe": {
+          "title": "Deja de usar el artículo",
+          "stop": "Deja de usarlo ahora y guárdalo en un lugar seguro.",
+          "contact": "Se ha avisado a la tienda y se pondrá en contacto contigo.",
+          "emergency": "Si alguien está herido o en peligro, llama a emergencias: 112 en Europa, 911 en Norteamérica."
+        },
+        "photographs": {
+          "title": "Aún sin enviar",
+          "body": "Añade fotos si puedes y envía el informe."
+        },
+        "stored": {
+          "title": "Tu informe está guardado",
+          "body": "Se ha avisado a la tienda y se pondrá en contacto contigo."
+        },
+        "theft": {
+          "title": "Un robo o una pérdida",
+          "body": "Se ha avisado a la tienda y se pondrá en contacto contigo. Da estos detalles ahora. El número de denuncia puede añadirse más tarde."
+        },
+        "fault": {
+          "title": "Una avería",
+          "body": "Una avería no se te cobra. Se ha avisado a la tienda y se pondrá en contacto contigo para un cambio o una recogida."
+        },
+        "pricing": {
+          "title": "Daño menor",
+          "body": "La tienda confirmará cuál de sus precios publicados se aplica, y esta página lo mostrará. No se cobra nada ahora."
+        },
+        "offer": {
+          "title": "Daño menor a un precio publicado",
+          "body": "El precio publicado por la tienda para {description} es {price}. Puedes aceptarlo ahora o dejarlo para la devolución. No se cobra nada ahora."
+        },
+        "agreed": {
+          "title": "Aceptado",
+          "body": "Aceptaste el precio publicado para {description}.",
+          "amount": "Aceptado: {price}",
+          "notCharged": "No se ha cobrado nada. En la devolución, una persona del personal lo confirma tras ver el artículo y solo puede rebajarlo. Se cobra una sola vez con cualquier otra línea, y el resto de tu retención se libera."
+        },
+        "return": {
+          "title": "Para la devolución",
+          "body": "Una persona de la tienda lo revisará cuando devuelvas el artículo."
+        },
+        "resolved": {
+          "title": "Resuelto",
+          "body": "La tienda ha resuelto este informe."
+        }
+      },
+      "agree": {
+        "codeGuidance": "Para aceptar {price}, pide un código de un solo uso. Se envía al correo que PayPal dio para ti.",
+        "sendCode": "Enviarme un código",
+        "codeSent": "Código enviado. Caduca en diez minutos.",
+        "codeSentSandbox": "Código enviado a la dirección de contacto de la reserva, porque es el entorno de pruebas de PayPal. Caduca en diez minutos.",
+        "code": "Código de un solo uso",
+        "agree": "Aceptar {price}",
+        "leaveGuidance": "O déjalo para la devolución, cuando una persona de la tienda lo revisará.",
+        "leave": "Dejarlo para la devolución",
+        "codeExpired": "Este código ha caducado. Pide uno nuevo.",
+        "wrongCode": "Ese código no es correcto. Revísalo e inténtalo de nuevo.",
+        "codeRecentlySent": "Se acaba de enviar un código. Revisa tu correo.",
+        "emailUnavailable": "No se pudo enviar el código. Inténtalo de nuevo en un momento."
+      },
+      "theft": {
+        "where": "Dónde ocurrió",
+        "when": "Cuándo ocurrió",
+        "lockAndKeys": "El candado y las llaves: ¿estaba atado y dónde están las llaves?",
+        "policeReport": "Número de denuncia",
+        "policeLater": "Si aún no lo tienes, puedes añadirlo más tarde.",
+        "send": "Enviar estos detalles",
+        "notGiven": "Aún sin dar",
+        "addPolice": "Añadir el número de denuncia"
+      },
+      "states": {
+        "reported": "Informado",
+        "triaged": "Clasificado",
+        "agreed": "Aceptado por quien alquila",
+        "shop_matter": "Asunto de la tienda",
+        "awaiting_staff": "Esperando a una persona",
+        "claim_opened": "En la reclamación",
+        "resolved": "Resuelto",
+        "withdrawn": "Retirado"
+      }
     }
   },
   "shopPage": {
@@ -2369,9 +2568,18 @@
       "already_replied": "Esta reclamación ya tiene respuesta.",
       "reason_required": "Escriba su motivo antes de continuar.",
       "email_unavailable": "No se pudo enviar el código. Inténtelo más tarde.",
-      "decision_recorded": "Ya se ha registrado una decisión. Actualiza esta página para ver el estado de la liquidación."
+      "decision_recorded": "Ya se ha registrado una decisión. Actualiza esta página para ver el estado de la liquidación.",
+      "incident_not_agreed": "Quien alquila no aceptó ese informe.",
+      "raises_agreed_line": "Una línea aceptada por quien alquila puede rebajarse, nunca subirse.",
+      "empty_line": "Quita la línea en vez de dejarla en cero."
     },
     "acknowledge": "He revisado esta reclamación",
-    "reviewFirst": "Revise las pruebas y precios. Su plazo empieza cuando confirme que ha revisado la reclamación."
+    "reviewFirst": "Revise las pruebas y precios. Su plazo empieza cuando confirme que ha revisado la reclamación.",
+    "agreed": {
+      "keep": "Mantener la línea que aceptó quien alquila: {price}, {amount}",
+      "amount": "Importe que mantener, como máximo {amount}",
+      "neverRaised": "Una línea aceptada por quien alquila puede rebajarse, nunca subirse.",
+      "drafted": "Aceptada por quien alquila durante el alquiler, confirmada por el personal en la devolución."
+    }
   }
 }
