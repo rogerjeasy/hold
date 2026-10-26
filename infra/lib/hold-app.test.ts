@@ -442,7 +442,15 @@ describe('the web app', () => {
     expect(instancePolicy()).not.toMatch(/DatabaseSecret|database\/admin/)
   })
 
-  it('may do only what the web app does: query the database, read its secrets, keep PayPal credentials, hand work to the worker and put a person in a group', () => {
+  it('may ask Claude on Bedrock to sort an incident report, with the two models named and nothing else of Bedrock', () => {
+    const policy = instancePolicy()
+    expect(policy).toContain('bedrock-mantle:CreateInference')
+    expect(policy).toContain('anthropic.claude-opus-5-5')
+    expect(policy).toContain('anthropic.claude-opus-4-8')
+    expect(policy).not.toContain('bedrock:InvokeModel')
+  })
+
+  it('may do only what the web app does: query the database, read its secrets, keep PayPal credentials, hand work to the worker, sort an incident and put a person in a group', () => {
     const statements = Object.entries(web.findResources('AWS::IAM::Policy'))
       .filter(([key]) => key.startsWith('InstanceRole'))
       .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: { Action: unknown }[] } } }).Properties.PolicyDocument.Statement)
@@ -466,6 +474,7 @@ describe('the web app', () => {
         's3:GetObject',
         's3:GetObjectVersion',
         's3:PutObject',
+        'bedrock-mantle:CreateInference',
       ]),
     )
     expect(instancePolicy()).toContain('secret:hold/paypal/shops/*')
