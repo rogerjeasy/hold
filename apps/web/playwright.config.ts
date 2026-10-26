@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const PORT = 3211
+// Another port lets two checkouts of the repository run their end-to-end tests at the same time.
+const PORT = Number(process.env['HOLD_E2E_PORT'] ?? 3211)
 const baseURL = `http://localhost:${String(PORT)}`
 
 // The tests run against a production build, so they see what a visitor sees and no development overlay.
