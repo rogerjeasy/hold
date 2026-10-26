@@ -38,6 +38,11 @@ describe('the incidents page', () => {
     expect(screen.getByText('No email reached staff. This page is the alert.')).toBeInTheDocument()
   })
 
+  it('says when the sorting was the test environment’s stand-in', () => {
+    show([{ ...base, model: 'simulated', simulated: true }])
+    expect(screen.getByText('Sorted by a stand-in for the test environment, checked by code.')).toBeInTheDocument()
+  })
+
   it('leaves read-only members without controls', () => {
     show([base], false)
     expect(screen.queryByRole('button')).not.toBeInTheDocument()

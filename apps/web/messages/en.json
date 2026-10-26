@@ -1989,7 +1989,8 @@
         "claim_opened": "In the claim",
         "resolved": "Settled",
         "withdrawn": "Withdrawn"
-      }
+      },
+      "sortedBySimulated": "Sorted by a stand-in for the test environment, checked by code."
     }
   },
   "emails": {

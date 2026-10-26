@@ -31,7 +31,7 @@ export function IncidentCard({ incident, clock, canAct }: { incident: ShopIncide
       {incident.agreedCents === null ? null : <p className="font-semibold">{t('agreed', { amount: format.money(incident.agreedCents) })}</p>}
       <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         {incident.simulated ? <SampleTag /> : null}
-        {incident.triageOutcome === 'answered' ? t('sortedBy', { model: incident.model ?? '' }) : t('sortedByCode')}
+        {incident.triageOutcome !== 'answered' ? t('sortedByCode') : incident.simulated ? t('sortedBySimulated') : t('sortedBy', { model: incident.model ?? '' })}
       </p>
       {incident.staffAlertedAt === null ? <p className="text-sm">{t('notAlerted')}</p> : null}
       {canAct && mayConfirmOffer(incident) && incident.offer === null && incident.prices.length > 0 ? <ConfirmPriceForm incident={incident} clock={clock} /> : null}

@@ -40,7 +40,7 @@ export function IncidentStartForm({ token, items }: { token: string; items: read
         <legend className="mb-2 font-semibold">{t('what')}</legend>
         {INCIDENT_HINTS.map((hint, index) => (
           <label key={hint} className="flex min-h-11 items-center gap-3">
-            <input type="radio" name="hint" value={hint} defaultChecked={index === 0} className="size-5 shrink-0" />
+            <input type="radio" name="hint" value={hint} defaultChecked={index === 0} className="min-h-11 min-w-11 shrink-0" />
             <span className="min-w-0 wrap-long-words">{t(`hints.${hint}`)}</span>
           </label>
         ))}

@@ -1989,7 +1989,8 @@
         "claim_opened": "Dans la réclamation",
         "resolved": "Réglé",
         "withdrawn": "Retiré"
-      }
+      },
+      "sortedBySimulated": "Classé par un substitut de l’environnement de test, vérifié par le code."
     }
   },
   "emails": {
