@@ -224,9 +224,9 @@ describe('the cap on unpaid bookings', () => {
     if (!quoted.ok) throw new Error(quoted.reason)
     const locks = await act(anonymous(other), async (transaction) => {
       await bookFromQuote(transaction, other.shopId, booking(quoted.quote.id), NOW)
-      return transaction.execute(sql`select objid from pg_locks where locktype = 'advisory' and pid = pg_backend_pid() and granted`)
+      return transaction.select({ objid: sql<number>`objid` }).from(sql`pg_locks`).where(sql`locktype = 'advisory' and pid = pg_backend_pid() and granted`)
     })
-    expect(locks.rows).toHaveLength(1)
+    expect(locks).toHaveLength(1)
   })
 
   it('lets only the allowed number land when bookings arrive together', async () => {
