@@ -2,5 +2,18 @@
   "name": "@hold/trust",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@aws-sdk/client-kms": "3.1151.0",
+    "@hold/db": "workspace:*",
+    "@hold/domain": "workspace:*",
+    "drizzle-orm": "0.45.4",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.9"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  }
 }

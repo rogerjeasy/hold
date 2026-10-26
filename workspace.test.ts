@@ -47,6 +47,13 @@ describe('workspace layout', () => {
     ).toEqual([])
   })
 
+  it('trust depends on no Hold package but domain and db (extensions.md section 4.5)', () => {
+    const manifest = readManifest('packages/trust')
+    const all = [...dependencyNames(manifest, 'dependencies'), ...dependencyNames(manifest, 'devDependencies')]
+
+    expect(all.filter((name) => name.startsWith(scope)).sort()).toEqual(['@hold/db', '@hold/domain'])
+  })
+
   it.each(workspaceFolders)('%s does not depend on an app', (folder) => {
     const manifest = readManifest(folder)
     const all = [
