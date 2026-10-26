@@ -72,7 +72,7 @@ export { ESCALATION_REASONS, GROUNDS, MOVE_KINDS, NEGOTIATION_KINDS, NEGOTIATION
 export type { EscalationReason, Ground, MoveKind, NegotiationKind, NegotiationSide, NegotiationState, PassReason } from './negotiation.ts'
 export { checkGround, lineFacts, wearClauses } from './negotiation-grounds.ts'
 export type { ClaimFacts, GroundRefusal, LineFacts } from './negotiation-grounds.ts'
-export { escalate, judgeMove, openingOffer, openTable, replayTable } from './referee.ts'
+export { checkReply, escalate, judgeMove, negotiationEnding, openingOffer, openTable, replayTable } from './referee.ts'
 export type { Judgment, Offer, OfferLine, ProposedMove, RefereeContext, RefusalReason, Table } from './referee.ts'
 export { DETECTOR_KINDS, DETECTOR_PROPOSALS, detectExceptions, orderQueue, REMINDER_KINDS, reminderAllowed, suppressedByRule } from './detectors.ts'
 export type { DetectorKind, OwnerRule, ReminderKind, ShopException, ShopSnapshot } from './detectors.ts'

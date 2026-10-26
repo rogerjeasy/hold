@@ -6,7 +6,7 @@ import { settle } from './claim-arithmetic.ts'
 import { money } from './money.ts'
 import { GROUNDS } from './negotiation.ts'
 import type { LineFacts } from './negotiation-grounds.ts'
-import { judgeMove, openTable, openingOffer } from './referee.ts'
+import { judgeMove, openTable, openingOffer, replayTable } from './referee.ts'
 import type { Judgment, OfferLine, ProposedMove, RefereeContext, Table } from './referee.ts'
 
 // Extensions.md section 9.15 and X4.2: for any two mandates and any sequence of moves, hostile ones included.
@@ -79,15 +79,16 @@ function settlingMove(context: RefereeContext, table: Table, share: number, acce
 }
 
 function run(context: RefereeContext, intents: readonly Intent[], steps: readonly number[]) {
-  let table = judgeMove(context, openTable(opened), openingOffer(context), at(0)).table
-  const judged: { readonly judgment: Judgment; readonly now: Date; readonly before: Table }[] = []
+  const opening = judgeMove(context, openTable(opened), openingOffer(context), at(0))
+  let table = opening.table
+  const judged: { readonly judgment: Judgment; readonly now: Date; readonly before: Table; readonly move: ProposedMove }[] = [{ judgment: opening, now: at(0), before: openTable(opened), move: openingOffer(context) }]
   let minute = 0
   intents.forEach((each, index) => {
     minute += steps[index % steps.length] ?? 1
     const now = at(minute)
     const move = each.kind === 'hostile' ? each.move : settlingMove(context, table, each.share, each.accept)
     const judgment = judgeMove(context, table, move, now)
-    judged.push({ judgment, now, before: table })
+    judged.push({ judgment, now, before: table, move })
     table = judgment.table
   })
   return { table, judged }
@@ -177,6 +178,14 @@ describe('the referee, for any two mandates and any moves', () => {
       expect(table.status).not.toBe('open')
       expect(judgments).toBeLessThanOrEqual(2 * (2 * context.roundLimit + 1))
     }), parameters)
+  })
+
+  it('rebuilds the same table from the accepted moves alone, as the database stores them', () => {
+    property((context, _value, { table, judged }) => {
+      if (table.endedReason !== null && table.endedReason !== 'pass') return
+      const accepted = judged.filter(({ judgment }) => judgment.outcome === 'accepted').map(({ move, now }) => ({ move, at: now }))
+      expect(replayTable(opened, accepted, table.refusals)).toEqual(table)
+    })
   })
 
   it('agrees sometimes, so the properties above are not empty', () => {

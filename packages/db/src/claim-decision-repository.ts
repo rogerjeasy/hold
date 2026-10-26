@@ -16,7 +16,8 @@ export async function decideClaim(transaction: Transaction, claimId: string, use
   const replies = await transaction.select().from(claimReplies).where(eq(claimReplies.claimId, claim.id))
   const earlyCapture = (await transaction.select().from(executions).where(and(eq(executions.rentalId, claim.rentalId), eq(executions.action, 'capture')))).find((row) => row.paypalResourceIds['claim'] === claim.id && row.paypalResourceIds['early'] === 'true')
   const protectedContest = ['charging', 'charged', 'charge_failed'].includes(claim.state) && earlyCapture !== undefined && replies.some((reply) => reply.decision === 'contest')
-  const contested = claim.state === 'contested' || protectedContest
+  // A claim the advocates did not settle is decided like any contested claim (extensions.md section 9.9).
+  const contested = claim.state === 'contested' || claim.state === 'escalated' || protectedContest
   const allowed = await claimStaff(transaction, userId, claim.currency, contested ? { kind: 'decide_contested_claim', raisedBy: claim.raisedByUserId ?? '', shopStaffCount: staffCount?.count ?? 0 } : { kind: 'reduce_or_waive_claim', raisedBy: claim.raisedByUserId ?? '' })
   if (!allowed.ok) return allowed
   if (protectedContest) {

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { Mandate } from './agent-gateway.ts'
 import { lineFacts } from './negotiation-grounds.ts'
-import { judgeMove, openTable, openingOffer, replayTable } from './referee.ts'
+import { checkReply, judgeMove, openTable, openingOffer, replayTable } from './referee.ts'
 import type { OfferLine, ProposedMove, RefereeContext, Table } from './referee.ts'
 
 const opened = new Date('2026-11-01T10:00:00Z')
@@ -58,7 +58,7 @@ describe('the referee, in the walk-through of section 9.8', () => {
 
   it('rebuilds the same table from the stored moves alone', () => {
     const { table } = play(walk)
-    expect(replayTable(context, opened, walk.map((move, index) => ({ move, at: minutes(index + 1) })))).toEqual(table)
+    expect(replayTable(opened, walk.map((move, index) => ({ move, at: minutes(index + 1) })))).toEqual(table)
   })
 })
 
@@ -111,6 +111,17 @@ describe('the referee refuses', () => {
     let table = judgeMove(short, openTable(opened), openingOffer(short), minutes(1)).table
     table = judgeMove(short, table, offer('renter', [line('scratch', 20_00, 'uncertain_evidence'), line('dent', 0, 'known_mark', ['mark-1'])]), minutes(2)).table
     expect(judgeMove(short, table, offer('shop', [line('scratch', 30_00, 'uncertain_evidence'), line('dent', 0, 'known_mark', ['mark-1'])]), minutes(3))).toMatchObject({ outcome: 'refused', reason: 'no_offers_left' })
+  })
+})
+
+describe('a reply written by the renter’s advocate alone (section 9.10)', () => {
+  const reply = { currency: 'EUR', lines, claim: context.claim, renter: context.mandates.renter }
+
+  it('holds it to the same lines, prices, grounds and the renter’s highest total', () => {
+    expect(checkReply(reply, [line('scratch', 20_00, 'uncertain_evidence'), line('dent', 0, 'known_mark', ['mark-1'])], minutes(1))).toEqual({ lines: [line('scratch', 20_00, 'uncertain_evidence'), line('dent', 0, 'known_mark', ['mark-1'])], totalCents: 20_00 })
+    expect(checkReply(reply, [line('scratch', 20_00), line('dent', 0, 'known_mark', ['mark-1'])], minutes(1))).toBe('ground_missing')
+    expect(checkReply(reply, [line('scratch', 35_00), line('dent', 0, 'known_mark', ['mark-1'])], minutes(1))).toBe('above_highest_total')
+    expect(checkReply(reply, [line('scratch', 20_00, 'uncertain_evidence')], minutes(1))).toBe('lines_mismatch')
   })
 })
 
