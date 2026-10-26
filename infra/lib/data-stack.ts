@@ -7,6 +7,7 @@ import {
   ACCOUNT,
   DATABASE_ADMIN_USER,
   DATABASE_APP_USER,
+  DATABASE_EVAL_USER,
   DATABASE_WORKER_USER,
   DATABASE_MAX_CAPACITY,
   DATABASE_MIN_CAPACITY,
@@ -74,6 +75,15 @@ function createDatabase(stack: Stack) {
     masterSecret: cluster.secret,
   })
   workerUserSecret.applyRemovalPolicy(RemovalPolicy.RETAIN)
+
+  // The evaluation runner's login, which may only record and read runs of the scorecard. Migrations give it this password.
+  const evalUserSecret = new rds.DatabaseSecret(stack, 'EvalUserSecret', {
+    secretName: secretName('database', 'eval'),
+    username: DATABASE_EVAL_USER,
+    dbname: DATABASE_NAME,
+    masterSecret: cluster.secret,
+  })
+  evalUserSecret.applyRemovalPolicy(RemovalPolicy.RETAIN)
 
   return { cluster, appUserSecret, workerUserSecret }
 }

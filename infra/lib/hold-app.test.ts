@@ -486,6 +486,42 @@ describe('the web app', () => {
   })
 })
 
+describe('the comparison gate', () => {
+  const evalPolicy = () => JSON.stringify(Object.entries(delivery.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('EvalRole')).map(([, policy]) => policy))
+
+  it('lets only Hold’s repository, on main or on a pull request, take the evaluation role', () => {
+    delivery.hasResourceProperties('AWS::IAM::Role', {
+      RoleName: 'hold-github-eval',
+      AssumeRolePolicyDocument: Match.objectLike({
+        Statement: [
+          Match.objectLike({
+            Action: 'sts:AssumeRoleWithWebIdentity',
+            Condition: {
+              StringEquals: {
+                'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
+                'token.actions.githubusercontent.com:sub': ['repo:rogerjeasy@58919295/hold@1418569084:ref:refs/heads/main', 'repo:rogerjeasy@58919295/hold@1418569084:pull_request'],
+              },
+            },
+          }),
+        ],
+      }),
+    })
+  })
+
+  it('may call the comparison model, query the database and read the evaluation login, and nothing else', () => {
+    const policy = evalPolicy()
+    expect(policy).toContain('bedrock-mantle:CreateInference')
+    expect(policy).toContain('cluster:hold-database')
+    expect(policy).toContain('secret:hold/database/eval-*')
+    for (const forbidden of ['database/admin', 'database/app', 'database/worker', 'cloudformation', 'ecr:', 's3:', 'iam:', 'sqs:']) expect(policy).not.toContain(forbidden)
+  })
+
+  it('keeps the evaluation login in its own secret, which the deploy gives its password', () => {
+    data.hasResourceProperties('AWS::SecretsManager::Secret', { Name: 'hold/database/eval' })
+    expect(JSON.stringify(delivery.findResources('AWS::IAM::Policy'))).toContain('secret:hold/database/eval-*')
+  })
+})
+
 describe('delivery', () => {
   // CloudFormation's role: its own policy and the policy for running Hold's code, which is apart only for size.
   const cloudFormationPolicies = () => JSON.stringify({ ...delivery.findResources('AWS::IAM::Policy'), ...delivery.findResources('AWS::IAM::ManagedPolicy', { Properties: { ManagedPolicyName: 'hold-cloudformation-compute' } }) })

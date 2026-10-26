@@ -1,0 +1,66 @@
+# The comparison's release gate (extensions.md section 5.6). Whenever a prompt, a threshold, the model or the
+# comparison code changes, the gate half of the evaluation set runs through the real model and the run is recorded in
+# eval_runs. The build fails if clean returns wrongly flagged rise above their limit, or damage found falls by more than
+# its tolerance, against the last accepted run. Accepting a run is a person's act, done locally as the owner, never here.
+# GitHub signs in as hold-github-eval (infra/lib/delivery-stack.ts), which may call the model and record runs, nothing else.
+name: Comparison gate
+
+on:
+  pull_request:
+    paths:
+      - packages/compare/**
+      - packages/vision/**
+      - packages/domain/src/inspection.ts
+      - packages/domain/src/evaluation.ts
+      - eval/**
+  push:
+    branches: [main]
+    paths:
+      - packages/compare/**
+      - packages/vision/**
+      - packages/domain/src/inspection.ts
+      - packages/domain/src/evaluation.ts
+      - eval/**
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: comparison-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  AWS_REGION: us-east-1
+
+jobs:
+  gate:
+    name: Gate half of the evaluation set
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Sign in to AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_EVAL_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Run the gate half and check it against the accepted run
+        run: pnpm eval --half gate
+        env:
+          HOLD_DATABASE_CLUSTER_ARN: ${{ vars.HOLD_DATABASE_CLUSTER_ARN }}
+          HOLD_DATABASE_EVAL_SECRET_ARN: ${{ vars.HOLD_DATABASE_EVAL_SECRET_ARN }}
+      - name: Keep the run's report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: comparison-gate-report
+          path: eval/results
+          retention-days: 30

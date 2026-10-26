@@ -6,6 +6,7 @@ import {
   CDK_ASSETS_BUCKET,
   CDK_ASSETS_PREFIX,
   GITHUB_DEPLOY_SUBJECT,
+  GITHUB_PULL_REQUEST_SUBJECT,
   GITHUB_REPOSITORY,
   name,
   PERMISSIONS_BOUNDARY,
@@ -282,8 +283,27 @@ export function createDeliveryStack(app: App, props: StackProps): DeliveryResour
 
   // Migrations: through the Data API, as the owner, with the database logins' secrets.
   add(statement(['rds-data:ExecuteStatement', 'rds-data:BatchExecuteStatement', 'rds-data:BeginTransaction', 'rds-data:CommitTransaction', 'rds-data:RollbackTransaction'], [`arn:aws:rds:${REGION}:${ACCOUNT}:cluster:${name('database')}`]))
-  add(statement(['secretsmanager:GetSecretValue', 'secretsmanager:DescribeSecret'], ['admin', 'app', 'worker'].map((login) => `${at.secrets(`database/${login}`)}-*`)))
+  add(statement(['secretsmanager:GetSecretValue', 'secretsmanager:DescribeSecret'], ['admin', 'app', 'worker', 'eval'].map((login) => `${at.secrets(`database/${login}`)}-*`)))
 
+  // The comparison's release gate (extensions.md section 5.6): on main and on pull requests, it runs the gate half of
+  // the evaluation set through the model and records the run. It moves no money and deploys nothing.
+  const evalRole = new iam.Role(stack, 'EvalRole', {
+    roleName: name('github', 'eval'),
+    description: `Assumed by the comparison gate in ${GITHUB_REPOSITORY}, on main and on pull requests`,
+    maxSessionDuration: Duration.hours(1),
+    assumedBy: new iam.WebIdentityPrincipal(github.openIdConnectProviderArn, {
+      StringEquals: {
+        'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
+        'token.actions.githubusercontent.com:sub': [GITHUB_DEPLOY_SUBJECT, GITHUB_PULL_REQUEST_SUBJECT],
+      },
+    }),
+  })
+  evalRole.addToPolicy(statement(['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream'], [`arn:aws:bedrock:${REGION}::foundation-model/*`, `arn:aws:bedrock:*:${ACCOUNT}:inference-profile/*`]))
+  evalRole.addToPolicy(statement(['bedrock-mantle:CreateInference'], ['*'], { StringEquals: { 'aws:RequestedRegion': REGION, 'bedrock-mantle:Model': ['anthropic.claude-opus-5-5', 'anthropic.claude-opus-4-8'] } }))
+  evalRole.addToPolicy(statement(['rds-data:ExecuteStatement', 'rds-data:BeginTransaction', 'rds-data:CommitTransaction', 'rds-data:RollbackTransaction'], [`arn:aws:rds:${REGION}:${ACCOUNT}:cluster:${name('database')}`]))
+  evalRole.addToPolicy(statement(['secretsmanager:GetSecretValue'], [`${at.secrets('database/eval')}-*`]))
+
+  new CfnOutput(stack, 'EvalRoleArn', { value: evalRole.roleArn })
   new CfnOutput(stack, 'DeployRoleArn', { value: deployRole.roleArn })
   new CfnOutput(stack, 'CloudFormationRoleArn', { value: cloudFormation.roleArn })
   new CfnOutput(stack, 'PermissionsBoundaryArn', { value: boundary.managedPolicyArn })
