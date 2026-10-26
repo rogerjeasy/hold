@@ -1,6 +1,6 @@
 import { blocksItem, bookingTerms, checkBooking, money, paymentLapsed, RENTAL_TRANSITIONS, rentalDays, transition } from '@hold/domain'
 import type { ItemCategory, Period, RentalState } from '@hold/domain'
-import { and, asc, desc, eq, inArray, isNotNull, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm'
 import { items, itemTypes, priceLists, rentalItems, rentals, renterLinks, renters, shops, wearPolicies } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
@@ -278,6 +278,6 @@ export async function itemsStillFree(transaction: Transaction, rentalId: string,
     .select({ state: rentals.state, startsAt: rentals.startsAt, endsAt: rentals.endsAt, createdAt: rentals.createdAt })
     .from(rentalItems)
     .innerJoin(rentals, eq(rentals.id, rentalItems.rentalId))
-    .where(and(inArray(rentalItems.itemId, booked.map((item) => item.itemId)), sql`${rentals.id} <> ${rentalId}`))
+    .where(and(inArray(rentalItems.itemId, booked.map((item) => item.itemId)), ne(rentals.id, rentalId)))
   return booked.length > 0 && !others.some((other) => blocksItem(other, rental, now))
 }
