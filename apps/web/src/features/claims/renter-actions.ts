@@ -1,6 +1,6 @@
 'use server'
 import { createHmac, randomInt } from 'node:crypto'
-import { acknowledgeClaimReview, issueClaimCode, replyToClaim, useClaimCode } from '@hold/db'
+import { acknowledgeClaimReview, auditLog, issueClaimCode, replyToClaim, useClaimCode } from '@hold/db'
 import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
@@ -17,7 +17,9 @@ export const sendClaimCode = renterAction({ name: 'renter.claim_code_requested',
   if (!issued.ok) return new Refusal(issued.reason)
   const t = await getTranslations({ locale: readLocale(input.locale), namespace: 'emails.claimCode' })
   if (!await services.mailer.send({ to: issued.email, subject: t('subject'), text: t('body', { code }) })) return new Refusal('email_unavailable')
-  return {}
+  // Simulated things say so, in the record too: the address itself stays out of it.
+  if (issued.sandboxContact) await inLinkShop((transaction) => transaction.insert(auditLog).values({ shopId: link.shopId, actorKind: 'renter', actorId: link.id, action: 'renter.claim_code_sandbox_contact', subjectKind: 'rental', subjectId: link.rentalId, detail: { sandbox: true } }))
+  return { sandboxContact: issued.sandboxContact }
 })
 
 function reply(decision: 'accept' | 'contest') {

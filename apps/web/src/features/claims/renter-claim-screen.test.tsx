@@ -21,3 +21,11 @@ it('shows pending confirmation while a protected capture is being refunded', () 
   renderWithIntl(<RenterClaimScreen token="token" data={{ shopName: 'Ribeira Bikes', currency: 'EUR', state: 'charged', totalCents: 3500, captureCents: 0, releaseCents: 30000, invoiceCents: 0, replyDueAt: new Date('2026-10-22'), holdState: 'captured', pendingSettlement: true, lines: [], canReply: false }} />)
   expect(screen.getByRole('status')).toHaveTextContent('Waiting for PayPal confirmation')
 })
+
+it('says plainly when a sandbox code went to the booking contact rather than the PayPal account', async () => {
+  const actions = await import('./renter-actions')
+  vi.mocked(actions.sendClaimCode).mockResolvedValue({ ok: true, value: { sandboxContact: true } })
+  renderWithIntl(<RenterClaimScreen token="token" data={{ shopName: 'Ribeira Bikes', currency: 'EUR', state: 'presented', totalCents: 3500, captureCents: 3500, releaseCents: 26500, invoiceCents: 0, replyDueAt: new Date('2026-10-22'), holdState: 'placed', lines: [], canReply: true }} />)
+  screen.getByRole('button', { name: 'Email me a verification code' }).click()
+  expect(await screen.findByRole('status')).toHaveTextContent('This is the PayPal sandbox')
+})

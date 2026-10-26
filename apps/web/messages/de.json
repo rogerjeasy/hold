@@ -2333,6 +2333,7 @@
     "codeGuidance": "Wir senden einen Einmalcode an die beim Bezahlen von PayPal bestätigte E-Mail-Adresse.",
     "sendCode": "Bestätigungscode per E-Mail senden",
     "codeSent": "Bestätigungscode gesendet. Er gilt zehn Minuten.",
+    "codeSentSandbox": "Code an die bei der Buchung angegebene E-Mail-Adresse gesendet. Dies ist die PayPal-Sandbox, deren Testkonten keine E-Mails erhalten; mit einem echten PayPal-Konto geht er an Ihre PayPal-Adresse. Er läuft in zehn Minuten ab.",
     "code": "Bestätigungscode",
     "comment": "Ihre Erklärung (bei Widerspruch erforderlich)",
     "accept": "Forderung akzeptieren und abrechnen",

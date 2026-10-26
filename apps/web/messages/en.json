@@ -2333,6 +2333,7 @@
     "codeGuidance": "We send a one-time code to the email address PayPal confirmed when you paid.",
     "sendCode": "Email me a verification code",
     "codeSent": "Verification code sent. It expires in ten minutes.",
+    "codeSentSandbox": "Code sent to the email given at booking. This is the PayPal sandbox, whose test accounts receive no mail; with a real PayPal account it goes to your PayPal address. It expires in ten minutes.",
     "code": "Verification code",
     "comment": "Your explanation (required to contest)",
     "accept": "Accept claim and settle",

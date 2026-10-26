@@ -2333,6 +2333,7 @@
     "codeGuidance": "Nous envoyons un code à usage unique à l’adresse confirmée par PayPal lors du paiement.",
     "sendCode": "M’envoyer un code par e-mail",
     "codeSent": "Code envoyé. Il expire dans dix minutes.",
+    "codeSentSandbox": "Code envoyé à l'adresse e-mail indiquée à la réservation. Il s'agit du bac à sable PayPal, dont les comptes de test ne reçoivent aucun e-mail ; avec un vrai compte PayPal, il est envoyé à votre adresse PayPal. Il expire dans dix minutes.",
     "code": "Code de vérification",
     "comment": "Votre explication (obligatoire pour contester)",
     "accept": "Accepter la réclamation et régler",

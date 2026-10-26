@@ -54,3 +54,5 @@ export { INSPECTION_LIMITS, inspectFindings, regionOverlap } from './inspection.
 export type { InspectionClass, InspectionFinding } from './inspection.ts'
 
 export { claimDeadlineAction, claimReplyAllowed } from './claim-deadline.ts'
+export { claimCodeRecipient } from './claim-code-recipient.ts'
+export type { ClaimCodeRecipient } from './claim-code-recipient.ts'

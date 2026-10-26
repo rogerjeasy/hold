@@ -2333,6 +2333,7 @@
     "codeGuidance": "Enviamos un código de un solo uso al correo confirmado por PayPal al pagar.",
     "sendCode": "Enviarme un código por correo",
     "codeSent": "Código enviado. Caduca en diez minutos.",
+    "codeSentSandbox": "Código enviado al correo indicado en la reserva. Esto es el entorno de pruebas de PayPal, cuyas cuentas de prueba no reciben correo; con una cuenta real de PayPal se envía a tu dirección de PayPal. Caduca en diez minutos.",
     "code": "Código de verificación",
     "comment": "Su explicación (necesaria para impugnar)",
     "accept": "Aceptar reclamación y liquidar",
