@@ -54,6 +54,13 @@ describe('workspace layout', () => {
     expect(all.filter((name) => name.startsWith(scope)).sort()).toEqual(['@hold/db', '@hold/domain'])
   })
 
+  it('mcp depends on no Hold package but auth, db and domain: PayPal is reached through the ports the app gives it', () => {
+    const manifest = readManifest('packages/mcp')
+    const all = [...dependencyNames(manifest, 'dependencies'), ...dependencyNames(manifest, 'devDependencies')]
+
+    expect(all.filter((name) => name.startsWith(scope)).sort()).toEqual(['@hold/auth', '@hold/db', '@hold/domain'])
+  })
+
   it.each(workspaceFolders)('%s does not depend on an app', (folder) => {
     const manifest = readManifest(folder)
     const all = [

@@ -533,6 +533,9 @@ importers:
       '@anthropic-ai/sdk':
         specifier: ^0.133.0
         version: 0.133.0(zod@4.6.7)
+      '@hold/auth':
+        specifier: workspace:*
+        version: link:../auth
       '@hold/db':
         specifier: workspace:*
         version: link:../db
