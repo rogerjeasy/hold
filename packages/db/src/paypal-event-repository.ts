@@ -1,4 +1,5 @@
 import { and, eq, sql } from 'drizzle-orm'
+import { z } from 'zod'
 import { outbox, paypalEvents, rentals } from './schema/index.ts'
 import { inShop, outsideShop } from './scope.ts'
 import type { Database, Transaction } from './scope.ts'
@@ -74,16 +75,20 @@ export async function feeRentalByOrder(transaction: Transaction, orderId: string
 
 export type OutboxMessage = { readonly id: string; readonly shopId: string; readonly queue: string; readonly messageGroup: string; readonly payload: Readonly<Record<string, unknown>> }
 
-// The oldest messages waiting in every shop, read as the worker, the only role allowed to.
+const payloadSchema = z.record(z.string(), z.unknown())
+
+// The oldest messages waiting in every shop, read as the worker, the only role allowed to. Aurora sends the jsonb
+// payload of a raw query as text, and the in-memory database as an object, so both are read the same way here.
 export async function pendingOutbox(database: Database, max: number): Promise<readonly OutboxMessage[]> {
-  return outsideShop(
+  const rows = await outsideShop(
     database,
     (transaction) =>
       transaction
-        .select({ id: sql<string>`message.id`, shopId: sql<string>`message.shop_id`, queue: sql<string>`message.queue`, messageGroup: sql<string>`message.message_group`, payload: sql<Readonly<Record<string, unknown>>>`message.payload` })
+        .select({ id: sql<string>`message.id`, shopId: sql<string>`message.shop_id`, queue: sql<string>`message.queue`, messageGroup: sql<string>`message.message_group`, payload: sql<unknown>`message.payload` })
         .from(sql`hold_pending_outbox(${max}::integer) as message`),
     'hold_worker',
   )
+  return rows.map((row) => ({ ...row, payload: payloadSchema.parse(typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload) }))
 }
 
 export async function markOutboxSent(transaction: Transaction, messageId: string, now: Date): Promise<void> {
