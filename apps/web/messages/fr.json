@@ -2304,7 +2304,8 @@
       "key_mismatch": "Cette photo n’appartient pas à ce signalement.",
       "not_uploaded": "La photo n’est pas arrivée. Reprenez-la.",
       "sealed": "Ce signalement a été envoyé : aucune photo ne peut être ajoutée.",
-      "unknown_view": "Cette vue n’existe pas pour cet article."
+      "unknown_view": "Cette vue n’existe pas pour cet article.",
+      "not_connected": "Aucun assistant n'est connecté à cette location."
     },
     "orderDescription": "{shop} : {items}, {days, plural, one {# jour} other {# jours}}",
     "holdPage": {
@@ -2471,6 +2472,55 @@
         "claim_opened": "Dans la réclamation",
         "resolved": "Réglé",
         "withdrawn": "Retiré"
+      }
+    },
+    "assistant": {
+      "pageTitle": "Votre assistant",
+      "title": {
+        "connected": "Un assistant est connecté à cette location",
+        "disconnected": "L'assistant a été déconnecté",
+        "booked": "Un assistant a fait cette réservation"
+      },
+      "name": "Il se présente sous le nom <strong>{name}</strong>. Ce nom est le sien et n'est pas vérifié.",
+      "unnamed": "un assistant qui n'a pas donné de nom",
+      "lead": "Il peut consulter cette location, sa caution, son état des lieux et toute réclamation, et préparer une réponse pour vous. Il ne peut ni payer, ni approuver une caution, ni répondre à une réclamation : vous le faites vous-même, dans PayPal ou sur ce lien.",
+      "link": "Voir ce qu'il a fait, ou le déconnecter",
+      "back": "Retour à la location",
+      "disconnectLead": "Son jeton cesse de fonctionner dès son prochain appel. Ce lien continue de fonctionner comme avant.",
+      "disconnect": "Déconnecter l'assistant",
+      "disconnecting": "Déconnexion…",
+      "disconnected": "Déconnecté. Son prochain appel sera refusé.",
+      "notConnected": "Aucun assistant n'est connecté à cette location.",
+      "did": "Ce qu'il a fait",
+      "nothing": "Rien pour l'instant.",
+      "outcome": {
+        "refused": "Refusé",
+        "human_confirmation_required": "Vous attendait"
+      },
+      "draft": {
+        "title": "Une réponse qu'il a préparée pour vous",
+        "decision": {
+          "accept": "Accepter la réclamation",
+          "contest": "Contester la réclamation"
+        },
+        "note": "Ce sont les mots de l'assistant et ils ne décident rien. Pour répondre, ouvrez la réclamation depuis votre lien et confirmez avec le code que Hold vous envoie par e-mail."
+      },
+      "tools": {
+        "find_shops": "A cherché des boutiques",
+        "get_shop": "A consulté les informations de la boutique",
+        "check_availability": "A vérifié ce qui était libre",
+        "get_damage_prices": "A consulté les prix des dommages",
+        "quote_rental": "A demandé un prix",
+        "create_booking": "A fait cette réservation",
+        "get_booking": "A vérifié si les frais étaient payés",
+        "get_rental": "A consulté la location",
+        "get_hold": "A consulté la caution",
+        "get_hold_approval_link": "A demandé le lien pour approuver la caution",
+        "get_condition_report": "A consulté l'état des lieux",
+        "get_claim": "A consulté la réclamation",
+        "draft_claim_reply": "A préparé une réponse à la réclamation",
+        "submit_claim_reply": "A demandé à répondre à la réclamation",
+        "get_record": "A consulté le dossier de preuves"
       }
     }
   },

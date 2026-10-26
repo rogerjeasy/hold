@@ -1,5 +1,5 @@
 import 'server-only'
-import { captureSession, conditionReport, inShop, rentalHold, rentalRenterKey, renterView, trustConsent } from '@hold/db'
+import { captureSession, conditionReport, inShop, rentalAssistant, rentalHold, rentalRenterKey, renterView, trustConsent } from '@hold/db'
 import type { RentalHold, RenterView } from '@hold/db'
 import type { Metadata } from 'next'
 import type { ConditionView } from '@/features/renter/condition-screen'
@@ -12,7 +12,10 @@ export const renterPageMetadata = (title: string): Metadata => ({ title, robots:
 
 // askConsent: PayPal has named the renter, who has not yet answered whether other Hold shops may use their Clean Record.
 // The question is asked once (extensions.md section 7.6).
-export type RenterPage = { readonly ok: true; readonly view: RenterView; readonly canReport: boolean; readonly askConsent: boolean } | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' }
+// assistant: the renter's own assistant booked this rental (extensions.md section 8.5), and whether it is connected.
+export type RenterPage =
+  | { readonly ok: true; readonly view: RenterView; readonly canReport: boolean; readonly askConsent: boolean; readonly assistant: { readonly connected: boolean; readonly revoked: boolean } | null }
+  | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' }
 
 export async function renterPage(token: string): Promise<RenterPage> {
   const now = new Date()
@@ -23,9 +26,10 @@ export async function renterPage(token: string): Promise<RenterPage> {
   const loaded = await inShop(database, { role: 'hold_app', shopId: access.link.shopId }, async (transaction) => {
     const renter = await rentalRenterKey(transaction, rentalId)
     const consent = renter.key === undefined ? undefined : await trustConsent(transaction, renter.key)
-    return { view: await renterView(transaction, rentalId, now), askConsent: renter.known && consent?.answered !== true }
+    const assistant = await rentalAssistant(transaction, rentalId)
+    return { view: await renterView(transaction, rentalId, now), askConsent: renter.known && consent?.answered !== true, assistant: assistant === undefined ? null : { connected: assistant.connected, revoked: assistant.revokedAt !== null } }
   })
-  return loaded.view === undefined ? { ok: false, failure: 'link_invalid' } : { ok: true, view: loaded.view, canReport: access.link.scopes.includes('report_incident'), askConsent: loaded.askConsent }
+  return loaded.view === undefined ? { ok: false, failure: 'link_invalid' } : { ok: true, view: loaded.view, canReport: access.link.scopes.includes('report_incident'), askConsent: loaded.askConsent, assistant: loaded.assistant }
 }
 
 export type RenterHoldPage = { readonly ok: true; readonly view: RenterView; readonly hold: RentalHold | undefined } | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' }

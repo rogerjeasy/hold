@@ -3,6 +3,7 @@ import { money } from '@hold/domain'
 import { CircleCheck, Hourglass, TriangleAlert, XCircle } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { TermsView } from '@/components/booking/terms-view'
+import { AssistantNotice } from '@/features/assistant/assistant-notice'
 import { Button } from '@/components/ui/button'
 import { Panel } from '@/components/ui/panel'
 import { SampleTag } from '@/components/ui/sample-tag'
@@ -63,7 +64,19 @@ function StatusLine({ icon: Icon, text }: { icon: typeof Hourglass; text: string
 
 // The renter's own rental, opened from their link: where it stands, what they rent, the two amounts, the terms, and
 // the payment while it is due.
-export function RenterScreen({ token, view, canReport = false, askConsent = false }: { token: string; view: RenterView; canReport?: boolean; askConsent?: boolean }) {
+export function RenterScreen({
+  token,
+  view,
+  canReport = false,
+  askConsent = false,
+  assistant = null,
+}: {
+  token: string
+  view: RenterView
+  canReport?: boolean
+  askConsent?: boolean
+  assistant?: { readonly connected: boolean; readonly revoked: boolean } | null
+}) {
   const t = useTranslations('renter')
   const trust = useTranslations('trust.record')
   const records = useTranslations('records')
@@ -79,6 +92,7 @@ export function RenterScreen({ token, view, canReport = false, askConsent = fals
         </p>
         <h1 className="text-page-title text-balance wrap-long-words">{t('title', { shop: view.shopName })}</h1>
         <Status token={token} view={view} />
+        {assistant === null ? null : <AssistantNotice token={token} assistant={assistant} />}
         {canReport && ['out', 'overdue'].includes(view.state) ? (
           <Button asChild variant="outline" className="min-h-12 justify-self-start">
             <Link href={linkRoutes.incidents(token)} referrerPolicy="no-referrer"><TriangleAlert aria-hidden="true" />{t('somethingHappened')}</Link>

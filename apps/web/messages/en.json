@@ -2304,7 +2304,8 @@
       "key_mismatch": "That photograph does not belong to this report.",
       "not_uploaded": "The photograph did not arrive. Take it again.",
       "sealed": "This report was sent, so no photograph can be added.",
-      "unknown_view": "That view is not one of this item’s."
+      "unknown_view": "That view is not one of this item’s.",
+      "not_connected": "No assistant is connected to this rental now."
     },
     "orderDescription": "{shop}: {items}, {days, plural, one {# day} other {# days}}",
     "holdPage": {
@@ -2471,6 +2472,55 @@
         "claim_opened": "In the claim",
         "resolved": "Settled",
         "withdrawn": "Withdrawn"
+      }
+    },
+    "assistant": {
+      "pageTitle": "Your assistant",
+      "title": {
+        "connected": "An assistant is connected to this rental",
+        "disconnected": "The assistant was disconnected",
+        "booked": "An assistant made this booking"
+      },
+      "name": "It calls itself <strong>{name}</strong>. That name is its own and is not verified.",
+      "unnamed": "an assistant that gave no name",
+      "lead": "It can read this rental, its hold, its condition report and any claim, and draft a reply for you. It cannot pay, approve a hold or answer a claim: you do those yourself, in PayPal or on this link.",
+      "link": "See what it did, or disconnect it",
+      "back": "Back to the rental",
+      "disconnectLead": "Its token stops working at its next call. This link keeps working as before.",
+      "disconnect": "Disconnect the assistant",
+      "disconnecting": "Disconnecting…",
+      "disconnected": "Disconnected. Its next call will be refused.",
+      "notConnected": "No assistant is connected to this rental now.",
+      "did": "What it did",
+      "nothing": "Nothing yet.",
+      "outcome": {
+        "refused": "Refused",
+        "human_confirmation_required": "Waited for you"
+      },
+      "draft": {
+        "title": "A reply it drafted for you",
+        "decision": {
+          "accept": "Accept the claim",
+          "contest": "Contest the claim"
+        },
+        "note": "These are the assistant's words and decide nothing. To answer, open the claim from your link and confirm with the code Hold emails you."
+      },
+      "tools": {
+        "find_shops": "Looked for shops",
+        "get_shop": "Read the shop's details",
+        "check_availability": "Checked what was free",
+        "get_damage_prices": "Read the damage prices",
+        "quote_rental": "Asked for a price",
+        "create_booking": "Made this booking",
+        "get_booking": "Checked whether the fee was paid",
+        "get_rental": "Read the rental",
+        "get_hold": "Read the hold",
+        "get_hold_approval_link": "Asked for the link to approve the hold",
+        "get_condition_report": "Read the condition report",
+        "get_claim": "Read the claim",
+        "draft_claim_reply": "Drafted a reply to the claim",
+        "submit_claim_reply": "Asked to answer the claim",
+        "get_record": "Read the evidence record"
       }
     }
   },

@@ -63,6 +63,8 @@ export const linkRoutes = {
   incident: (token: string, incidentId: string) => `/r/${token}/incident/${incidentId}`,
   // The renter's Clean Record, its credential and their consent.
   cleanRecord: (token: string) => `/r/${token}/trust`,
+  // What the renter's own assistant did on the rental, and disconnecting it.
+  assistant: (token: string) => `/r/${token}/assistant`,
   // A shop's own page for renters, named by its address: /s/{slug}.
   shopPage: '/s',
 } as const

@@ -31,6 +31,10 @@ const items = await import('@/features/items/actions')
 const { getServices } = await import('@/server/services')
 const { form, signIn } = await import('@/test/shop-session')
 const { routing } = await import('@/i18n/routing')
+const assistant = await import('@/features/assistant/renter-actions')
+const rentals = await import('@/features/rentals/actions')
+const { renterPage } = await import('@/server/renter-page')
+const { assistantPage } = await import('@/server/assistant-page')
 
 vi.setConfig({ testTimeout: 30_000 })
 
@@ -51,12 +55,16 @@ async function connect(name = 'Outside assistant'): Promise<Client> {
 async function call(client: Client, name: string, args: Record<string, unknown>): Promise<Record<string, unknown>> {
   const result = await client.callTool({ name, arguments: args })
   if (result.isError === true) throw new Error(JSON.stringify(result.content))
-  return result.structuredContent ?? {}
+  return (result.structuredContent ?? {}) as Record<string, unknown>
 }
 
 const day = (offset: number) => `${new Date(Date.now() + offset * 86_400_000).toISOString().slice(0, 10)}T10:00`
 
+// Each booking from a network of its own: one caller may make only three in fifteen minutes.
+let network = 100
 async function book(client: Client, offset: number) {
+  network += 1
+  forwarded.value = `198.51.100.${String(network)}`
   const quote = await call(client, 'quote_rental', { shop: 'assistant-bikes', starts_at: day(offset), ends_at: day(offset + 3), items: [{ item_type_id: typeId, count: 1 }] })
   const booking = await call(client, 'create_booking', { quote_id: quote['quote_id'] })
   const orderId = new URL(String(booking['approval_url'])).pathname.split('/').at(-1) ?? ''
@@ -123,5 +131,59 @@ describe('/mcp', () => {
 
   it('offers bookings in the languages the renter pages are served in', () => {
     expect([...LANGUAGES].sort()).toEqual([...routing.locales].sort())
+  })
+})
+
+describe('the renter’s side of a connected assistant', () => {
+  async function connectedRental(offset: number) {
+    const client = await connect('Trip planner')
+    const { orderId, secret } = await book(client, offset)
+    const { simulatedPayPal } = await getServices()
+    simulatedPayPal?.approveOrder(orderId)
+    const token = new URL(simulatedPayPal?.orderLinks(orderId)?.returnUrl ?? '').pathname.split('/')[2] ?? ''
+    await renter.confirmFee(null, form({ token, orderId, locale: 'en' }))
+    const paid = await call(client, 'get_booking', { booking_secret: secret })
+    return { client, token, rentalId: String(paid['rental_id']), agentToken: String(paid['agent_token']) }
+  }
+
+  it('tells the renter on their link that an assistant is connected, and lists everything it did (X3.8)', async () => {
+    const { client, token, rentalId, agentToken } = await connectedRental(50)
+    await call(client, 'get_hold', { rental_id: rentalId, agent_token: agentToken })
+    await client.callTool({ name: 'submit_claim_reply', arguments: { rental_id: rentalId, agent_token: agentToken, decision: 'accept' } })
+    expect(await renterPage(token)).toMatchObject({ ok: true, assistant: { connected: true, revoked: false } })
+    const listed = await assistantPage(token)
+    if (!listed.ok) throw new Error(listed.failure)
+    expect(listed.view.clientLabel).toBe('Trip planner')
+    expect(listed.view.actions.map((action) => [action.tool, action.outcome])).toEqual([
+      ['create_booking', 'ok'],
+      ['get_booking', 'ok'],
+      ['get_hold', 'ok'],
+      ['submit_claim_reply', 'human_confirmation_required'],
+    ])
+  })
+
+  it('disconnects the assistant from the renter’s link, after which its next call is refused (X3.7)', async () => {
+    const { client, token, rentalId, agentToken } = await connectedRental(60)
+    expect(await assistant.disconnectAssistant(null, form({ token, locale: 'en' }))).toEqual({ ok: true, value: {} })
+    const refused = await client.callTool({ name: 'get_rental', arguments: { rental_id: rentalId, agent_token: agentToken } })
+    expect(refused.isError).toBe(true)
+    expect(await assistant.disconnectAssistant(null, form({ token, locale: 'en' }))).toEqual({ ok: false, failure: 'refused', reason: 'not_connected' })
+    expect(await renterPage(token)).toMatchObject({ ok: true, assistant: { connected: false, revoked: true } })
+    const listed = await assistantPage(token)
+    expect(listed.ok && listed.view.actions.at(-1)).toMatchObject({ tool: 'get_rental', outcome: 'refused' })
+  })
+
+  it('refuses a changed link, and shows nothing for a rental no assistant booked', async () => {
+    const { token } = await connectedRental(70)
+    expect(await assistant.disconnectAssistant(null, form({ token: `${token.slice(0, -2)}${token.endsWith('AA') ? 'BB' : 'AA'}`, locale: 'en' }))).toEqual({ ok: false, failure: 'link_invalid' })
+    await signIn(jar, OWNER, 'email_code')
+    const booked = await rentals.bookRental(null, form({ startsAt: day(80), endsAt: day(81), itemTypeId: typeId, count: '1', contactName: '', contactEmail: '', language: 'en', locale: 'en' }))
+    if (!booked.ok) throw new Error(JSON.stringify(booked))
+    const shown = await rentals.showRenterLink(null, form({ rentalId: booked.value.rentalId, locale: 'en' }))
+    if (!shown.ok) throw new Error(JSON.stringify(shown))
+    jar.clear()
+    const staffToken = shown.value.url.split('/r/')[1] ?? ''
+    expect(await assistantPage(staffToken)).toEqual({ ok: false, failure: 'link_invalid' })
+    expect(await renterPage(staffToken)).toMatchObject({ ok: true, assistant: null })
   })
 })
