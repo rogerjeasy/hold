@@ -20,6 +20,8 @@ test-results/
 !.env.example
 CLAUDE.local.md
 .claude/settings.local.json
+# agents' git worktrees
+.claude/worktrees/
 
 # operating system
 .DS_Store
