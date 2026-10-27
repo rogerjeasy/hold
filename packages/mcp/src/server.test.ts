@@ -1,61 +1,29 @@
-import { randomBytes } from 'node:crypto'
 import { addDays, money } from '@hold/domain'
-import { askForHold, auditLog, beginFeeCapture, beginHoldPlacement, confirmFeeCapture, confirmHoldPlaced, executions, inShop, moneyEvents, quotes, rentals, revokeAssistant, saveFeeOrder, saveHoldOrder, savePayPalAccount, sessionByBookingSecret } from '@hold/db'
+import { askForHold, auditLog, beginFeeCapture, beginHoldPlacement, confirmFeeCapture, confirmHoldPlaced, executions, inShop, moneyEvents, quotes, rentals, revokeAssistant, saveHoldOrder, savePayPalAccount, sessionByBookingSecret } from '@hold/db'
 import type { Scope, Transaction } from '@hold/db'
 import { createTestDatabase } from '@hold/db/testing'
 import type { TestDatabase } from '@hold/db/testing'
 import { readyRentalShop } from '@hold/db/testing/ready-rental'
-import { Client } from '@modelcontextprotocol/sdk/client/index.js'
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
+import type { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { and, eq } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { TOOL_NAMES } from './catalogue.ts'
-import type { McpPorts } from './ports.ts'
 import { readSecret } from './secrets.ts'
-import { handleMcpRequest } from './server.ts'
+import { connectClient, TEST_SECRET, testPorts } from './testing.ts'
 
 // Hold's MCP server driven by the MCP SDK's own client, as any outside assistant would, over streamable HTTP. The
 // database is a real PostgreSQL; PayPal is a stand-in that makes approval links and nothing else.
 
 const NOW = new Date()
-const SECRET = Buffer.alloc(32, 3)
 let database: TestDatabase
 let shop: Scope
 let typeId: string
 let readyRental: () => Promise<{ readonly rentalId: string }>
 const logged: Readonly<Record<string, unknown>>[] = []
-let orders = 0
 
 const act = <Result>(work: (transaction: Transaction) => Promise<Result>) => inShop(database, shop, work)
 
-function ports(): McpPorts {
-  return {
-    database,
-    now: () => new Date(),
-    paypalMode: 'sandbox',
-    secret: SECRET,
-    random: () => randomBytes(32),
-    publicUrl: 'https://hold.example',
-    newRenterLink: (endsAt) => Promise.resolve({ token: `link-${String(Math.random())}`, fingerprint: `link-${String(Math.random())}`, expiresAt: addDays(endsAt, 60) }),
-    async startFeePayment(booking) {
-      orders += 1
-      const orderId = `ORDER-${String(orders)}`
-      await inShop(database, { role: 'hold_app', shopId: booking.shopId }, (transaction) => saveFeeOrder(transaction, booking.rentalId, orderId))
-      return { ok: true, approvalUrl: `https://paypal.example/checkoutnow?token=${orderId}` }
-    },
-    holdApproval: () => Promise.resolve({ status: 'not_requested' }),
-    photoLink: (key) => Promise.resolve(`https://photos.example/${key}`),
-    qrCode: () => Promise.resolve('iVBORw0KGgo='),
-    log: (line) => void logged.push(line),
-  }
-}
-
-async function connect(network = '203.0.113.10', name = 'Trip planner'): Promise<Client> {
-  const client = new Client({ name, version: '1.0.0' })
-  await client.connect(new StreamableHTTPClientTransport(new URL('https://hold.example/mcp'), { fetch: async (url, init) => { const request = new Request(url, init); return handleMcpRequest(request, request.method === 'POST' ? await request.text() : '', ports(), network) } }))
-  await client.listTools()
-  return client
-}
+const connect = (network = '203.0.113.10', name = 'Trip planner') => connectClient(testPorts(database, logged), network, name)
 
 type Structured = Record<string, unknown>
 async function call(client: Client, name: string, args: Record<string, unknown>): Promise<{ readonly isError: boolean; readonly data: Structured; readonly content: readonly { readonly type: string }[] }> {
@@ -95,7 +63,7 @@ async function paidBooking(client: Client) {
 }
 
 async function rentalOfSecret(secret: string): Promise<string> {
-  const session = await sessionByBookingSecret(database, readSecret(SECRET, 'booking_secret', secret) ?? '')
+  const session = await sessionByBookingSecret(database, readSecret(TEST_SECRET, 'booking_secret', secret) ?? '')
   return session?.rentalId ?? ''
 }
 
