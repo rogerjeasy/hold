@@ -20,7 +20,7 @@ This document says what to build with and why. It is not a design or an implemen
 | Rental calendar | Bryntum Scheduler |
 | Checkout | PayPal JavaScript SDK v6 |
 | PayPal server side | Direct REST calls for the hold lifecycle, plus the Agent Toolkit and sandbox MCP server |
-| AI model | Claude Opus 5.5 on Amazon Bedrock (`anthropic.claude-opus-5-5`), through the Anthropic Bedrock SDK |
+| AI model | Claude Opus 4.6 on Amazon Bedrock (`us.anthropic.claude-opus-4-6-v1`), through the Anthropic Bedrock SDK, for building and judging. Designed for Opus 5.5, which the account has no quota for (section 6) |
 | Agent interfaces | An MCP server for renters' assistants and an MCP client for PayPal's server, both built with the MCP TypeScript SDK (`@modelcontextprotocol/sdk`) |
 | Image processing | sharp on the server, OpenCV.js for alignment |
 | Containers | Docker, one image for both services, Docker Compose locally |
@@ -174,7 +174,7 @@ This is the screen staff use most, so it gets the most care.
 ## 6. AI
 
 - **Model: Claude Opus 5.5 on Amazon Bedrock, model ID `anthropic.claude-opus-5-5`.** Used to compare photographs, classify differences, write claims, summarize contested claims and run the owner's assistant.
-- **Running for now: Claude Opus 4.6, through its US inference profile `us.anthropic.claude-opus-4-6-v1` and the `AnthropicBedrock` client (bedrock-runtime).** On 27 October 2026 AWS held this account's quota for Opus 5.5 and Opus 4.8 at zero tokens a minute, and only a support case can lift it (section 16, item 14). Every adapter sends adaptive thinking where it thinks, effort, structured output and strict tools as before; there is no refusal fallback, since Opus 4.8 is under the same quota. Tools are not sent in strict mode on this path: Bedrock refused the hosted assistant's fifteen strict schemas together (a 496 MB grammar against its 300 MB limit, after up to 107 seconds), and three strict advocate tools cost about 18 seconds a move against 3 without. Hold's gateway and the negotiation referee check every argument on the server, so strict mode was a guard on the model's writing, not an access control. Each role may invoke that profile and the model in the three regions it routes to (`CLAUDE_INVOKE_RESOURCES` in `infra/lib/settings.ts`); the Mantle grants for Opus 5.5 stay, so going back is a change to the five model constants and adapters only.
+- **Running through judging: Claude Opus 4.6, through its US inference profile `us.anthropic.claude-opus-4-6-v1` and the `AnthropicBedrock` client (bedrock-runtime).** On 27 October 2026 AWS held this account's quota for Opus 5.5 and Opus 4.8 at zero tokens a minute, and only a support case can lift it (section 16, item 14). The same day the participant decided that judging runs on Opus 4.6, verified live, rather than wait on the case. Every adapter sends adaptive thinking where it thinks, effort, structured output and strict tools as before; there is no refusal fallback, since Opus 4.8 is under the same quota. Tools are not sent in strict mode on this path: Bedrock refused the hosted assistant's fifteen strict schemas together (a 496 MB grammar against its 300 MB limit, after up to 107 seconds), and three strict advocate tools cost about 18 seconds a move against 3 without. Hold's gateway and the negotiation referee check every argument on the server, so strict mode was a guard on the model's writing, not an access control. Each role may invoke that profile and the model in the three regions it routes to (`CLAUDE_INVOKE_RESOURCES` in `infra/lib/settings.ts`); the Mantle grants for Opus 5.5 stay, so going back is a change to the five model constants and adapters only.
 - **Access: Amazon Bedrock**, through the `AnthropicBedrockMantle` client in `@anthropic-ai/bedrock-sdk`. It serves the same Messages API as Anthropic's own, so `@anthropic-ai/sdk` supplies the types, the zod structured-output helper and the tool runner. Bedrock model IDs carry the `anthropic.` prefix. Calls are signed with the task's IAM role, so there is no Claude key to store.
 - **Structured outputs** for every comparison, so each finding is a record with a view, a location, a class, a confidence and a matched price-list entry.
 - **Streaming** for the owner's assistant.
@@ -446,21 +446,21 @@ Each of these should be tried against the real services before the build depends
 **Live worker startup, 22 October 2026.** Deployed empty-batch invocations exposed eager PDFKit initialization in the CommonJS media/comparison bundles. Failing startup tests preceded a photo-only evidence import fix. The corrected JavaScript was deployed with the CI-produced Linux native dependencies; both live handlers then returned an empty failure list without a Lambda function error. Evidence and receipt handlers also started successfully. The post-fix full check passed 160 files / 1,235 tests. These startup checks do not exercise image processing, model inference, PDF rendering, SMTP delivery or settlement.
 
 13. **An outside MCP client.** Connect one common MCP client to a stub of Hold's server with no sign-in step.
-14. **Bedrock access to Opus 5.5.** Tried 27 October 2026: the Marketplace agreements for Opus 5.5 and Opus 4.8 are accepted, but the account's applied quotas are zero (Service Quotas refuses a request below the 20 million default). An AWS Support case is open for it. Until it is lifted, Hold runs on Opus 4.6 (section 6).
+14. **Bedrock access to Opus 5.5.** Tried 27 October 2026: the Marketplace agreements for Opus 5.5 and Opus 4.8 are accepted, but the account's applied quotas are zero (Service Quotas refuses a request below the 20 million default). Decided 27 October 2026: Hold runs on Opus 4.6 through judging (section 6), and the case is no longer waited on.
 
 ---
 
 ## 17. Access for judges
 
-Judges do not have a bike to photograph, so the demo must work without one.
+Judges do not have a bike to photograph, so the demo must work without one. They have no inbox Hold can send a code to either, so the demo must not need one.
 
-- **A hosted demo** at a stable address.
-- **Seeded demo accounts** in Cognito for an owner and a staff member, with sign-in details in the README.
-- **Matching sandbox PayPal accounts** for the shop and for a renter.
+- **A hosted demo** at a stable address: `https://p99faar3kp.us-east-1.awsapprunner.com`.
+- **Demo accounts with a one-tap sign-in.** The sign-in page offers the demo shop's owner, Tomás, and its counter staff, Jonas. The server signs in with passwords kept only in Secrets Manager (`hold/web/demo-accounts`), so a judge types nothing and waits for no code. A step that moves money still asks for a passkey, which each judge adds on their own device. How it works and what it allows are in `architecture.md` section 20.3.
+- **Matching sandbox PayPal accounts.** The demo shop is connected to a sandbox business account once, by an administrator on its PayPal page, and every reset carries the connection over. A sandbox personal account plays the renter; its sign-in is in the README.
 - **Sample photograph sets** built into the demo: a clean return, a return with damage, and a contested claim. One tap loads them in place of the camera.
 - **The real camera path** also works, for a judge who wants to try it on any object to hand.
-- **A reset script** that returns the demo shop to its starting state.
-- **Full setup instructions** in the repository.
+- **A reset script**, `pnpm demo:reset`, that returns the demo shop to its starting state.
+- **Full setup instructions** in the repository's README.
 - **A hosted assistant** that books through Hold's MCP server, so a judge can see an AI assistant rent a bike without setting anything up.
 - **The MCP server's address** in the README, for a judge who wants to connect their own assistant.
 
@@ -469,7 +469,7 @@ Judges do not have a bike to photograph, so the demo must work without one.
 ## 18. Cost and running through judging
 
 - The environment must stay up from submission on 12 November until judging ends on 15 December 2026.
-- Keep the App Runner service small and Aurora's maximum capacity low. Aurora's minimum is zero while building, so it pauses when idle, and is raised above zero for judging (`infra/lib/settings.ts`).
+- Keep the App Runner service small and Aurora's maximum capacity low. Aurora's minimum is zero, so it pauses when idle. Decided 27 October 2026: it is raised to 0.5 for the judging weeks only, 1 to 15 December, by a deploy on 1 December and another on 16 December that sets it back (`DATABASE_MIN_CAPACITY` in `infra/lib/settings.ts`). Until then a judge's first visit after a quiet spell waits for the database to resume.
 - Set an AWS billing alarm before deploying anything.
 - Set a spending limit on the Claude account. Image comparison uses more tokens than text, and the demo is public.
 - Each operations agent run and each negotiation has its own ceiling on calls and tokens.

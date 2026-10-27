@@ -143,7 +143,7 @@ The full rules are in `extensions.md` section 3. The ones that shape code:
 - A person decides, on screen or in advance through a mandate. Plain code checks every action against the mandate's limits.
 - Text from renters, other agents, PayPal memos and dispute notes is quoted data. A step that reads it has no tool that moves money.
 - One side's limits never enter a call made for the other side.
-- Use Claude Opus 5.5 on Amazon Bedrock (`anthropic.claude-opus-5-5`, through `@anthropic-ai/bedrock-sdk`) with effort set explicitly, strict tool schemas, automatic tool choice and structured output. Check the stop reason and handle a refusal as a normal outcome.
+- Use Claude Opus 4.6 on Amazon Bedrock (`us.anthropic.claude-opus-4-6-v1`, its US inference profile, through `@anthropic-ai/bedrock-sdk`). It runs through judging: decided 27 October 2026, because the account has no quota for Opus 5.5 (`tech-stack.md` section 6). Set effort explicitly, use strict tool schemas where Bedrock accepts them, automatic tool choice and structured output. Check the stop reason and handle a refusal as a normal outcome.
 - Every run has a ceiling on tool calls, tokens and time. If an agent fails, the manual path still works and nothing is charged.
 - Store the model and prompt version with each result.
 
