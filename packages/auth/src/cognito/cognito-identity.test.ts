@@ -98,6 +98,42 @@ describe('the Cognito identity', () => {
     expect(sent[0]?.input).toMatchObject({ ChallengeName: 'WEB_AUTHN', ChallengeResponses: { CREDENTIAL: '{"id":"c"}' } })
   })
 
+  it('signs a demo account in with its password, asking for the password factor', async () => {
+    const { identity, sent } = cognito([AUTHENTICATED])
+
+    expect(await identity.signInWithPassword('demo-owner@hold.example', 'secret-password')).toEqual({
+      ok: true,
+      value: { accessToken: 'access', refreshToken: 'refresh', expiresInSeconds: 3600 },
+    })
+    expect(sent).toEqual([
+      {
+        command: 'InitiateAuthCommand',
+        input: {
+          ClientId: 'web-client',
+          AuthFlow: 'USER_AUTH',
+          AuthParameters: { USERNAME: 'demo-owner@hold.example', PREFERRED_CHALLENGE: 'PASSWORD', PASSWORD: 'secret-password' },
+        },
+      },
+    ])
+  })
+
+  it('answers with the password when Cognito asks which way to sign in', async () => {
+    const { identity, sent } = cognito([{ ChallengeName: 'SELECT_CHALLENGE', Session: 'select' }, AUTHENTICATED])
+
+    expect((await identity.signInWithPassword('demo-owner@hold.example', 'secret-password')).ok).toBe(true)
+    expect(sent[1]?.input).toMatchObject({
+      ChallengeName: 'SELECT_CHALLENGE',
+      Session: 'select',
+      ChallengeResponses: { USERNAME: 'demo-owner@hold.example', ANSWER: 'PASSWORD', PASSWORD: 'secret-password' },
+    })
+  })
+
+  it('reads a refused password as rejected, not as an attempt that ran out', async () => {
+    const { identity } = cognito([cognitoError('NotAuthorizedException')])
+
+    expect(await identity.signInWithPassword('demo-owner@hold.example', 'wrong')).toEqual({ ok: false, error: { kind: 'rejected', detail: 'NotAuthorizedException' } })
+  })
+
   it('registers a passkey with the person’s own access token', async () => {
     const { identity, sent } = cognito([{ CredentialCreationOptions: { rp: { id: 'localhost' } } }, {}])
 

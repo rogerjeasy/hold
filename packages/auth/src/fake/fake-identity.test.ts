@@ -104,3 +104,26 @@ describe('passkeys in the fake identity', () => {
     expect(await createFakeIdentity().startPasskeySignIn('nobody@shop.example')).toMatchObject({ ok: false, error: { kind: 'no_passkey' } })
   })
 })
+
+describe('demo accounts in the fake identity', () => {
+  it('signs a demo account in with its password and no code', async () => {
+    const identity = createFakeIdentity()
+    const subject = identity.addDemoAccount('demo-owner@hold.example', 'secret-password')
+
+    const tokens = value(await identity.signInWithPassword('demo-owner@hold.example', 'secret-password'))
+
+    expect(value(await identity.verifyAccessToken(tokens.accessToken)).subject).toBe(subject)
+    expect(identity.lastCodeFor('demo-owner@hold.example')).toBeUndefined()
+  })
+
+  it('refuses a wrong password, and any password for an account that has none', async () => {
+    const identity = createFakeIdentity({ fixedCode: '24681357' })
+    identity.addDemoAccount('demo-owner@hold.example', 'secret-password')
+    value(await identity.signUp(EMAIL))
+    value(await identity.confirmSignUp(EMAIL, '24681357', undefined))
+
+    expect(await identity.signInWithPassword('demo-owner@hold.example', 'wrong')).toMatchObject({ ok: false, error: { kind: 'rejected' } })
+    expect(await identity.signInWithPassword(EMAIL, '')).toMatchObject({ ok: false, error: { kind: 'rejected' } })
+    expect(await identity.signInWithPassword('nobody@shop.example', 'secret-password')).toMatchObject({ ok: false, error: { kind: 'rejected' } })
+  })
+})

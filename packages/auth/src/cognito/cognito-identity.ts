@@ -140,6 +140,28 @@ export function createCognitoIdentity(
         ),
       ),
 
+    signInWithPassword: async (email, password) => {
+      const signedInWith = await attempt(async () => {
+        const output = await client.send(
+          new InitiateAuthCommand({ ClientId, AuthFlow: 'USER_AUTH', AuthParameters: { USERNAME: email, PREFERRED_CHALLENGE: 'PASSWORD', PASSWORD: password } }),
+        )
+        if (output.ChallengeName !== 'SELECT_CHALLENGE') return signedIn(output)
+        return signedIn(
+          await client.send(
+            new RespondToAuthChallengeCommand({
+              ClientId,
+              ChallengeName: 'SELECT_CHALLENGE',
+              Session: output.Session,
+              ChallengeResponses: { USERNAME: email, ANSWER: 'PASSWORD', PASSWORD: password },
+            }),
+          ),
+        )
+      })
+      // A wrong password is not an attempt that ran out, which is what Cognito's name means for a code.
+      if (!signedInWith.ok && signedInWith.error.detail === 'NotAuthorizedException') return fail({ kind: 'rejected', detail: 'NotAuthorizedException' })
+      return signedInWith
+    },
+
     refresh: (refreshToken) =>
       attempt(async () => {
         const output = await client.send(new InitiateAuthCommand({ ClientId, AuthFlow: 'REFRESH_TOKEN_AUTH', AuthParameters: { REFRESH_TOKEN: refreshToken } }))

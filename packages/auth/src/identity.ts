@@ -1,7 +1,8 @@
 import type { Result } from '@hold/domain'
 
 // Who owners and staff are. Cognito answers it deployed, a fake in tests (tech-stack.md section 9.1).
-// Sign-in is by a code sent to the person's email. There is no password anywhere.
+// Sign-in is by a code sent to the person's email. No person is ever given a password: only the demo accounts
+// judges use have one, which the server holds and the judge never sees (architecture.md section 20.3).
 
 export type IdentityFailure = {
   readonly kind:
@@ -56,6 +57,8 @@ export type Identity = {
   // Emails a sign-in code. An address with no account gets the same answer, so it cannot be used to find accounts.
   startSignIn(email: string): Promise<IdentityResult<Attempt>>
   answerSignInCode(email: string, code: string, attempt: Attempt): Promise<IdentityResult<Tokens>>
+  // Only for the demo accounts, whose passwords are in Secrets Manager. A refused password is `rejected`.
+  signInWithPassword(email: string, password: string): Promise<IdentityResult<Tokens>>
   refresh(refreshToken: string): Promise<IdentityResult<Tokens>>
   signOut(refreshToken: string): Promise<IdentityResult<void>>
   verifyAccessToken(accessToken: string): Promise<IdentityResult<SignedInPerson>>

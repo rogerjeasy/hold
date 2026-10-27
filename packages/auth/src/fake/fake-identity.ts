@@ -2,7 +2,8 @@ import { randomBytes, randomInt, randomUUID } from 'node:crypto'
 import { fail, ok } from '@hold/domain'
 import type { AccountType, Identity, IdentityFailure, Passkey, Tokens } from '../identity.ts'
 
-// An identity service in memory, following the rules Cognito follows for Hold's pool: no passwords, a code by
+// An identity service in memory, following the rules Cognito follows for Hold's pool: no passwords but the demo
+// accounts', a code by
 // email to confirm an address and to sign in, an attempt that lasts ten minutes and ends after three wrong codes,
 // and the same answer for an address with no account. Tests and the end-to-end run use it.
 // Passkeys are recorded by their credential ID and not checked cryptographically: a browser's virtual authenticator
@@ -19,6 +20,8 @@ export type FakeIdentity = Identity & {
   // The last code emailed to an address, as the person would read it.
   readonly lastCodeFor: (email: string) => string | undefined
   readonly groupsOf: (email: string) => readonly AccountType[]
+  // A confirmed account with a password, as the reset script makes the demo accounts. Returns its subject.
+  readonly addDemoAccount: (email: string, password: string) => string
   // The relying party passkeys are made for. The end-to-end run serves Hold from localhost.
   readonly relyingPartyId: string
 }
@@ -30,6 +33,7 @@ type Person = {
   code: string | undefined
   readonly groups: Set<AccountType>
   readonly passkeys: Passkey[]
+  readonly password?: string
 }
 type OpenAttempt = {
   readonly email: string
@@ -100,6 +104,11 @@ export function createFakeIdentity(options: FakeIdentityOptions = {}): FakeIdent
     relyingPartyId,
     lastCodeFor: (address) => lastCodes.get(key(address)),
     groupsOf: (address) => [...(people.get(key(address))?.groups ?? [])],
+    addDemoAccount(address, password) {
+      const person: Person = { subject: randomUUID(), email: key(address), confirmed: true, code: undefined, groups: new Set(), passkeys: [], password }
+      people.set(key(address), person)
+      return person.subject
+    },
 
     signUp(address) {
       if (people.has(key(address))) return Promise.resolve(failure('already_registered'))
@@ -154,6 +163,12 @@ export function createFakeIdentity(options: FakeIdentityOptions = {}): FakeIdent
       }
       attempts.delete(started.session)
       person.code = undefined
+      return Promise.resolve(ok(signInTokens(person)))
+    },
+
+    signInWithPassword(address, password) {
+      const person = people.get(key(address))
+      if (person?.password === undefined || person.password !== password) return Promise.resolve(failure('rejected'))
       return Promise.resolve(ok(signInTokens(person)))
     },
 
