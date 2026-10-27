@@ -5,11 +5,11 @@ import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
 import { Refusal } from '@/server/action'
 import { renterAction, withToken } from '@/server/renter-access'
-import { newRenterCode, renterCodeDigest } from '@/server/renter-code'
+import { CODE_PURPOSES, newRenterCode, renterCodeDigest } from '@/server/renter-code'
 import { getServices } from '@/server/services'
 import { sendSettlement } from '@/server/settlement-queue'
 
-const digest = (linkId: string, code: string) => renterCodeDigest('claim-reply', linkId, code)
+const digest = (linkId: string, code: string) => renterCodeDigest(CODE_PURPOSES.claimReply, linkId, code)
 export const sendClaimCode = renterAction({ name: 'renter.claim_code_requested', scope: 'accept', input: withToken({}) }, async (link, input, inLinkShop) => {
   const services = await getServices()
   const code = await newRenterCode()
