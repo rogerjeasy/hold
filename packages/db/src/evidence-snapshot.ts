@@ -1,5 +1,7 @@
 import { eq, sql } from 'drizzle-orm'
+import { z } from 'zod'
 import { evidenceSnapshotSchema } from './evidence-snapshot-schema.ts'
+import { readJson } from './read-json.ts'
 import { priceLists, rentals, shops, wearPolicies } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
@@ -40,8 +42,7 @@ export async function evidenceSnapshot(transaction: Transaction, rentalId: strin
   }).from(rentals).innerJoin(shops, eq(shops.id, rentals.shopId)).innerJoin(priceLists, eq(priceLists.id, rentals.priceListId)).innerJoin(wearPolicies, eq(wearPolicies.id, rentals.wearPolicyId)).where(eq(rentals.id, rentalId))
   if (row === undefined) return undefined
   const { schemaVersion, paypalMode, ...jsonFields } = row
-  // Data API returns JSONB SQL expressions as strings; the local PostgreSQL driver decodes them already.
   const decoded: Record<string, unknown> = { schemaVersion, paypalMode }
-  for (const [key, value] of Object.entries(jsonFields)) decoded[key] = typeof value === 'string' ? JSON.parse(value) as unknown : value
+  for (const [key, value] of Object.entries(jsonFields)) decoded[key] = readJson(z.unknown(), value)
   return evidenceSnapshotSchema.parse(decoded)
 }

@@ -1,7 +1,9 @@
-import { ASSISTANT_LIMITS, assistantBookingStatus, mayBookUnpaid, PENDING_PAYMENT_MINUTES, quoteState } from '@hold/domain'
+import { ASSISTANT_LIMITS, assistantBookingStatus, ITEM_CATEGORIES, mayBookUnpaid, PENDING_PAYMENT_MINUTES, quoteState } from '@hold/domain'
 import type { AssistantBookingStatus, ItemCategory, Period, RentalState } from '@hold/domain'
 import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm'
+import { z } from 'zod'
 import { bookableTypes, createBooking, priceBooking } from './booking-repository.ts'
+import { readJson } from './read-json.ts'
 import { agentSessions, auditLog, executions, moneyEvents, quotes, rentals, wearPolicies } from './schema/index.ts'
 import type { DraftReply } from './schema/index.ts'
 import { outsideShop } from './scope.ts'
@@ -19,11 +21,12 @@ export type PublicShopRow = { readonly id: string; readonly name: string; readon
 
 // Read before any shop is chosen, through a function that answers only with shops taking bookings online.
 export async function publicShops(database: Database, filter: { readonly place: string | null; readonly kind: ItemCategory | null; readonly paypalMode: PayPalMode }): Promise<readonly PublicShopRow[]> {
-  return outsideShop(database, (transaction) =>
+  const rows = await outsideShop(database, (transaction) =>
     transaction
-      .select({ id: sql<string>`shop.id`, name: sql<string>`shop.name`, slug: sql<string>`shop.slug`, timeZone: sql<string>`shop.time_zone`, currency: sql<string>`shop.currency`, kinds: sql<ItemCategory[]>`shop.kinds` })
+      .select({ id: sql<string>`shop.id`, name: sql<string>`shop.name`, slug: sql<string>`shop.slug`, timeZone: sql<string>`shop.time_zone`, currency: sql<string>`shop.currency`, kinds: sql<unknown>`shop.kinds` })
       .from(sql`hold_public_shops(${filter.place}, ${filter.kind}, ${filter.paypalMode}) as shop`),
   )
+  return rows.map((row) => ({ ...row, kinds: readJson(z.array(z.enum(ITEM_CATEGORIES)), row.kinds) }))
 }
 
 export type QuotedLine = { readonly itemTypeId: string; readonly name: string; readonly count: number; readonly dayRateCents: number; readonly holdCents: number; readonly feeCents: number }
@@ -172,7 +175,7 @@ export async function sessionByToken(database: Database, fingerprint: string): P
         id: sql<string>`session.id`,
         shopId: sql<string>`session.shop_id`,
         rentalId: sql<string>`session.rental_id`,
-        scopes: sql<readonly string[]>`session.scopes`,
+        scopes: sql<unknown>`session.scopes`,
         clientLabel: sql<string>`session.client_label`,
         expiresAt: sql<string | null>`session.expires_at`,
         revokedAt: sql<string | null>`session.revoked_at`,
@@ -181,7 +184,7 @@ export async function sessionByToken(database: Database, fingerprint: string): P
   )
   if (row === undefined) return undefined
   // Read through a function, so the times arrive as text.
-  return { ...row, expiresAt: row.expiresAt === null ? null : new Date(row.expiresAt), revokedAt: row.revokedAt === null ? null : new Date(row.revokedAt) }
+  return { ...row, scopes: readJson(z.array(z.string()), row.scopes), expiresAt: row.expiresAt === null ? null : new Date(row.expiresAt), revokedAt: row.revokedAt === null ? null : new Date(row.revokedAt) }
 }
 
 export type BookingProgress = {

@@ -1,6 +1,8 @@
 import { paymentLapsed, rentalDays } from '@hold/domain'
 import type { PriceCategory, RentalState } from '@hold/domain'
 import { asc, count, eq, sql } from 'drizzle-orm'
+import { z } from 'zod'
+import { readJson } from './read-json.ts'
 import { itemTypes, items, priceEntries, rentalItems, rentals, renters, shops, wearPolicies } from './schema/index.ts'
 import { outsideShop } from './scope.ts'
 import type { Database, Transaction } from './scope.ts'
@@ -24,7 +26,7 @@ export async function findRenterLink(database: Database, fingerprint: string): P
         id: sql<string>`link.id`,
         shopId: sql<string>`link.shop_id`,
         rentalId: sql<string>`link.rental_id`,
-        scopes: sql<readonly string[]>`link.scopes`,
+        scopes: sql<unknown>`link.scopes`,
         expiresAt: sql<string>`link.expires_at`,
         revokedAt: sql<string | null>`link.revoked_at`,
       })
@@ -32,7 +34,7 @@ export async function findRenterLink(database: Database, fingerprint: string): P
   )
   if (link === undefined) return undefined
   // Read through a function, so the times arrive as text.
-  return { ...link, expiresAt: new Date(link.expiresAt), revokedAt: link.revokedAt === null ? null : new Date(link.revokedAt) }
+  return { ...link, scopes: readJson(z.array(z.string()), link.scopes), expiresAt: new Date(link.expiresAt), revokedAt: link.revokedAt === null ? null : new Date(link.revokedAt) }
 }
 
 export type RenterView = {

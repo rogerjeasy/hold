@@ -1,5 +1,6 @@
 import { and, eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
+import { readJson } from './read-json.ts'
 import { outbox, paypalEvents, rentals } from './schema/index.ts'
 import { inShop, outsideShop } from './scope.ts'
 import type { Database, Transaction } from './scope.ts'
@@ -77,8 +78,7 @@ export type OutboxMessage = { readonly id: string; readonly shopId: string; read
 
 const payloadSchema = z.record(z.string(), z.unknown())
 
-// The oldest messages waiting in every shop, read as the worker, the only role allowed to. Aurora sends the jsonb
-// payload of a raw query as text, and the in-memory database as an object, so both are read the same way here.
+// The oldest messages waiting in every shop, read as the worker, the only role allowed to.
 export async function pendingOutbox(database: Database, max: number): Promise<readonly OutboxMessage[]> {
   const rows = await outsideShop(
     database,
@@ -88,7 +88,7 @@ export async function pendingOutbox(database: Database, max: number): Promise<re
         .from(sql`hold_pending_outbox(${max}::integer) as message`),
     'hold_worker',
   )
-  return rows.map((row) => ({ ...row, payload: payloadSchema.parse(typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload) }))
+  return rows.map((row) => ({ ...row, payload: readJson(payloadSchema, row.payload) }))
 }
 
 // The messages one change wrote, by the moment it ran, so the request that made them can send them at once. The
