@@ -77,7 +77,7 @@ describe('the operations agent\'s records', () => {
 })
 
 // An exception recorded as a run would record it, and one pending proposal for it.
-async function proposalFor(kind: 'clean_return_unconfirmed' | 'hold_ending', subjectId: string, rentalId: string, proposalKind: 'release_hold' | 'request_replacement_hold') {
+async function proposalFor(kind: 'clean_return_unconfirmed' | 'hold_ending' | 'hold_at_risk', subjectId: string, rentalId: string, proposalKind: 'release_hold' | 'request_replacement_hold' | 'send_invoice' | 'send_message') {
   const run = await asWorker((transaction) => beginOpsRun(transaction, 'manual', now))
   const [recorded] = await asWorker((transaction) => recordExceptions(transaction, run, [{ kind, subjectKind: 'hold', subjectId, rentalId, allowed: [proposalKind], reminder: null, deadline: null, moneyCents: 30000, fingerprint: `${kind}:${subjectId}:test` }], now))
   const written = await asWorker((transaction) => writeProposal(transaction, { exceptionId: recorded?.id ?? '', kind: proposalKind, reason: 'Clean comparison, nobody confirmed it.', references: ['AUTH-1'], draft: null, raisedByAgent: false, runId: run, model: null, promptVersion: null }, now))
@@ -132,6 +132,16 @@ describe('an approved proposal is carried out by the same path as a click', () =
   it('takes no approval from nobody', async () => {
     const proposalId = await proposalFor('hold_ending', (await holdEnding()).holdId, (await shop.readyRental()).rentalId, 'request_replacement_hold')
     expect(await asWorker((transaction) => decideProposal(transaction, proposalId, null, { decision: 'approve', reason: '' }, now))).toEqual({ ok: false, reason: 'mandate' })
+  })
+
+  it('refuses, and queues nothing, an approval of a kind no executor carries out yet', async () => {
+    const rental = await shop.readyRental()
+    const [hold] = await database.select().from(holds).where(eq(holds.rentalId, rental.rentalId))
+    const proposalId = await proposalFor('hold_at_risk', hold?.id ?? '', rental.rentalId, 'send_message')
+    const before = (await database.select().from(outbox)).length
+    expect(await shop.act((transaction) => decideProposal(transaction, proposalId, shop.scope.userId ?? '', { decision: 'approve', reason: '' }, now))).toEqual({ ok: false, reason: 'not_offered' })
+    expect(await database.select().from(outbox)).toHaveLength(before)
+    expect((await database.select().from(proposals).where(eq(proposals.id, proposalId)))[0]?.state).toBe('pending')
   })
 
   it('asks the renter for a replacement hold through the hold\'s upkeep', async () => {

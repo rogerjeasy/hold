@@ -1,13 +1,12 @@
 import { createHash } from 'node:crypto'
-import { DETECTOR_PROPOSALS, orderQueue, withinMandate, PROPOSAL_TRANSITIONS, proposalFingerprintInput, transition } from '@hold/domain'
+import { DETECTOR_PROPOSALS, orderQueue, proposalFingerprintInput, withinMandate } from '@hold/domain'
 import type { ProposalKind, ShopException, ShopSnapshot } from '@hold/domain'
 import { and, eq, gte, inArray, isNull, lt, or, sql } from 'drizzle-orm'
 import { approvals, auditLog, authorizations, captureSessions, claims, comparisons, holds, invoices, moneyEvents, opsRuns, outbox, proposals, rentalItems, rentals, shopExceptions, shops } from './schema/index.ts'
 import { releaseCleanReturn } from './claim-repository.ts'
 import { mandateForUse } from './ops-settings-repository.ts'
-import type { Transaction } from './scope.ts'
-
-export const OPS_EXECUTE_QUEUE = 'ops-execute'
+import { outsideShop } from './scope.ts'
+import type { Database, Transaction } from './scope.ts'
 
 const DEFAULT_SETTINGS = { confirmCleanWithinHours: 4, invoiceUnpaidDays: 7, incidentWaitHours: 2 } as const
 
@@ -213,7 +212,7 @@ async function approvalAuthority(transaction: Transaction, proposal: Proposal, u
   const [done] = await transaction.select({ count: sql<number>`count(*)::int` }).from(proposals).where(and(eq(proposals.mandateId, mandateId), gte(proposals.decidedAt, dayStart)))
   return withinMandate({ kind: 'execute_proposal', proposalKind: proposal.kind, condition: exception?.kind ?? '', doneToday: done?.count ?? 0 }, mandate, now)
 }
-type HandOff = { readonly ok: true; readonly state: 'executing' | 'executed' | 'approved'; readonly executionId: string | null } | { readonly ok: false; readonly reason: string }
+type HandOff = { readonly ok: true; readonly state: 'executing' | 'executed'; readonly executionId: string | null } | { readonly ok: false; readonly reason: string }
 
 // Carries out an approved proposal by the path a person's click takes, in the same transaction, so a refusal there
 // leaves the proposal pending. A spine execution moves the proposal on when PayPal confirms it (migration 0025).
@@ -231,9 +230,9 @@ async function handOff(transaction: Transaction, proposal: Proposal, input: Deci
     await transaction.insert(outbox).values({ shopId: proposal.shopId, queue: 'upkeep', messageGroup: hold.id, payload: { kind: 'replace', holdId: hold.id, authorizationId: hold.authorizationId }, createdAt: now })
     return { ok: true, state: 'executed', executionId: null }
   }
-  if (!transition(PROPOSAL_TRANSITIONS, 'pending', 'approved').ok) return { ok: false, reason: 'not_pending' }
-  await transaction.insert(outbox).values({ shopId: proposal.shopId, queue: OPS_EXECUTE_QUEUE, messageGroup: proposal.rentalId ?? proposal.id, payload: { proposalId: proposal.id }, createdAt: now })
-  return { ok: true, state: 'approved', executionId: null }
+  // Invoices, messages and dispute responses have no executor yet. Refusing keeps the proposal pending and writes no
+  // outbox row that no queue would take.
+  return { ok: false, reason: 'not_offered' }
 }
 
 // Every live proposal that names one of these holds, for releasing several in one approval.
@@ -279,4 +278,10 @@ export async function exceptionFacts(transaction: Transaction, subjectKind: stri
   const payments = await transaction.select({ kind: moneyEvents.kind, amountCents: moneyEvents.amountCents, currency: moneyEvents.currency, paypalReference: moneyEvents.paypalReference, occurredAt: moneyEvents.occurredAt }).from(moneyEvents).where(eq(moneyEvents.rentalId, rentalId))
   const bills = await transaction.select({ state: invoices.state, amountCents: invoices.amountCents, paypalInvoiceId: invoices.paypalInvoiceId, sentAt: invoices.sentAt }).from(invoices).where(eq(invoices.rentalId, rentalId))
   return { subjectKind, subjectId, rental, hold, claim: claim ?? null, payments, invoices: bills }
+}
+
+// Every shop the nightly run visits, read across shops by a function only the worker may call.
+export async function shopsForOperations(database: Database, paypalMode: 'sandbox' | 'live'): Promise<string[]> {
+  const rows = await outsideShop(database, (transaction) => transaction.select({ shopId: sql<string>`shop.shop_id` }).from(sql`hold_shops_for_operations(${paypalMode}) as shop`), 'hold_worker')
+  return rows.map((row) => row.shopId)
 }
