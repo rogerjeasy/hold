@@ -1,6 +1,6 @@
 import { beginOpsRun, completeOpsRun, confirmedRules, decideProposal, exceptionFacts, inShop, liveStandingRule, recordExceptions, recordReminder, shopSnapshot, writeProposal } from '@hold/db'
 import type { Database, RecordedException, Transaction } from '@hold/db'
-import { detectExceptions, orderQueue, suppressedByRule } from '@hold/domain'
+import { detectExceptions, guardNumbers, money, orderQueue, suppressedByRule } from '@hold/domain'
 import type { DetectorKind, OwnerRule, ProposalKind, ReminderKind } from '@hold/domain'
 import { gatedTools } from './gated-tools.ts'
 import type { RunBudget } from './gated-tools.ts'
@@ -47,10 +47,11 @@ type Choice = {
   readonly draft: string | null
   readonly model: string | null
   readonly investigated: boolean
+  readonly draftDropped: boolean
   readonly paypalConfirmed: boolean
   readonly observations: InvestigationAnswer['observations']
 }
-const fixedChoice = (kind: ProposalKind, investigated: boolean): Choice => ({ kind, reason: null, references: [], draft: null, model: null, investigated, paypalConfirmed: false, observations: [] })
+const fixedChoice = (kind: ProposalKind, investigated: boolean): Choice => ({ kind, reason: null, references: [], draft: null, model: null, investigated, draftDropped: false, paypalConfirmed: false, observations: [] })
 
 // One run for one shop (extensions.md section 6.3): detectors find the exceptions, reminders go out, the model
 // investigates what needs a decision within the run's ceilings, and the owner's queue is written. Nothing here moves
@@ -64,7 +65,9 @@ export async function runOperations(dependencies: OpsDependencies, input: { read
   const runId = await asWorker((transaction) => beginOpsRun(transaction, input.trigger, now))
   const reads = await dependencies.paypal(shopId).catch(() => undefined)
   const { reached, ...fromPayPal } = await paypalFacts(database, shopId, reads)
-  const found = detectExceptions(await asWorker((transaction) => shopSnapshot(transaction, now, fromPayPal)))
+  const snapshot = await asWorker((transaction) => shopSnapshot(transaction, now, fromPayPal))
+  const found = detectExceptions(snapshot)
+  const currencies = new Map(snapshot.holds.map((hold) => [hold.rentalId, hold.currency]))
   const recorded = await asWorker((transaction) => recordExceptions(transaction, runId, found, now))
   const rules = await asWorker((transaction) => confirmedRules(transaction))
 
@@ -96,7 +99,7 @@ export async function runOperations(dependencies: OpsDependencies, input: { read
       if (first === undefined) continue
       const withinCeilings = budget.toolCalls < limits.maxToolCalls && budget.tokens < limits.maxTokens && Date.now() < stopAt
       const choice = dependencies.investigator !== undefined && withinCeilings
-        ? await investigate(dependencies, { shopId, exception, candidates, rules, reader, runId, budget, limits, stopAt, usage })
+        ? await investigate(dependencies, { shopId, exception, currency: exception.rentalId === null ? undefined : currencies.get(exception.rentalId), candidates, rules, reader, runId, budget, limits, stopAt, usage })
         : fixedChoice(first, false)
       proposals += await asWorker((transaction) => writeChoice(transaction, { exception, choice, runId, paypalChecked: choice.paypalConfirmed }, now))
     }
@@ -110,6 +113,8 @@ export async function runOperations(dependencies: OpsDependencies, input: { read
 type Investigation = {
   readonly shopId: string
   readonly exception: RecordedException
+  // The currency of the amount the exception names; unknown, no number may stand in a draft.
+  readonly currency: string | undefined
   readonly candidates: readonly ProposalKind[]
   readonly rules: readonly OwnerRule[]
   readonly reader: PayPalReader | undefined
@@ -150,7 +155,9 @@ async function investigate(dependencies: OpsDependencies, work: Investigation): 
   // and nothing else, are kept.
   if (!candidates.includes(proposalKind)) return { ...fallback, model: result.model, observations }
   // The model's word that it checked PayPal counts only if a PayPal read for this exception actually answered.
-  return { kind: proposalKind, reason, references, draft, model: result.model, investigated: true, paypalConfirmed: paypalConfirmed && answered.count > 0, observations }
+  // A draft is a message about money: every number in it must be the amount the records hold (section 6.7).
+  const guarded = draft === null ? null : guardNumbers(draft, work.currency === undefined ? [] : [money(exception.moneyCents, work.currency)])
+  return { kind: proposalKind, reason, references, draft: guarded, model: result.model, investigated: true, draftDropped: draft !== null && guarded === null, paypalConfirmed: paypalConfirmed && answered.count > 0, observations }
 }
 
 // Writes the queue entry, the agent's observations as notes, and, for a clean return nobody confirmed, applies the
@@ -161,6 +168,7 @@ async function writeChoice(transaction: Transaction, entry: { readonly exception
     ...(choice.reason === null ? { fixedReason: exception.kind } : {}),
     ...(choice.investigated ? {} : { investigated: 'no' }),
     ...(entry.paypalChecked ? {} : { paypalChecked: 'no' }),
+    ...(choice.draftDropped ? { draftDropped: 'yes' } : {}),
   }
   const promptVersion = choice.model === null ? null : OPS_PROMPT_VERSION
   const written = await writeProposal(transaction, { exceptionId: exception.id, kind: choice.kind, reason: choice.reason ?? FIXED_REASONS[exception.kind], references: choice.references, draft: choice.draft, raisedByAgent: false, runId, model: choice.model, promptVersion, payload }, now)

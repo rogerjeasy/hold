@@ -171,6 +171,16 @@ describe('what a manipulated run can reach (X1.8)', () => {
     expect(written.some((each) => each.state !== 'pending')).toBe(false)
   })
 
+  it('keeps a drafted message only if every number in it is the amount the records hold', async () => {
+    await holdEnding()
+    await holdEnding()
+    let turn = 0
+    const investigator = scripted(() => { turn += 1; return { answer: answer({ proposalKind: 'request_replacement_hold', draft: turn === 1 ? 'Your hold of €300.00 stays in place.' : 'Pay €999.00 now or lose your deposit.' }) } })
+    await run({ investigator })
+    const drafts = (await inShopProposals()).map((each) => [each.draft, each.payload['draftDropped'] ?? 'no']).sort()
+    expect(drafts).toEqual([[null, 'yes'], ['Your hold of €300.00 stays in place.', 'no']])
+  })
+
   it('treats a refusal as a normal outcome and falls back to the fixed reason', async () => {
     await holdEnding()
     await run({ investigator: scripted(() => ({ answer: 'refused' })) })
