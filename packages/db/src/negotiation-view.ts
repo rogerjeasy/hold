@@ -67,6 +67,8 @@ export async function negotiationRecords(transaction: Transaction, negotiationId
     renterComments: replies.map((reply) => reply.comment ?? '').filter((comment) => comment.trim() !== ''),
     shopMandate,
     renterMandate,
+    // Whom each side's agent acts for: the owner who granted the shop's mandate, the renter who granted theirs.
+    grantors: { shop: mandateRows.find((row) => row.id === negotiation.shopMandateId)?.grantedByUserId ?? null, renter: mandateRows.find((row) => row.id === negotiation.renterMandateId)?.grantedByRenterId ?? null },
     context,
     table,
     moves,
