@@ -129,6 +129,15 @@ describe('the referee, for any two mandates and any moves', () => {
     })
   })
 
+  it('lets nothing but this rental’s record ids cross in an offer’s evidence', () => {
+    property((context, _value, { table }) => {
+      const records = new Set([...context.lines.flatMap((line) => [...line.knownMarks, ...line.wearClauses]), ...context.claim.renterPhotoIds])
+      for (const offer of [table.last.shop, table.last.renter, table.agreed]) {
+        for (const line of offer?.lines ?? []) for (const cited of line.evidence) expect(records.has(cited)).toBe(true)
+      }
+    })
+  })
+
   it('never captures above the reserved amount', () => {
     property((_context, value, { table }) => {
       if (table.agreed === null) return

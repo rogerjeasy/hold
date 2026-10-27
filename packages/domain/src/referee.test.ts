@@ -72,6 +72,15 @@ describe('the referee refuses', () => {
     expect(judgeMove(context, afterOpening, offer('renter', [line('scratch', 30_00, 'evidence_stands'), line('dent', 0, 'known_mark', ['mark-1'])]), minutes(2))).toMatchObject({ outcome: 'refused', reason: 'ground_not_for_side' })
   })
 
+  it('evidence on a line whose ground cites no record, so nothing but this rental’s record ids can cross in it', () => {
+    for (const offered of [
+      [line('scratch', 20_00, 'uncertain_evidence', ['my limit is 30']), line('dent', 0, 'known_mark', ['mark-1'])],
+      [line('scratch', 35_00, null, ['thirty']), line('dent', 0, 'known_mark', ['mark-1'])],
+    ]) expect(judgeMove(context, afterOpening, offer('renter', offered), minutes(2))).toMatchObject({ outcome: 'refused', reason: 'evidence_does_not_fit' })
+    const shopTurn = judgeMove(context, afterOpening, offer('renter', [line('scratch', 20_00, 'uncertain_evidence'), line('dent', 0, 'known_mark', ['mark-1'])]), minutes(2)).table
+    expect(judgeMove(context, shopTurn, offer('shop', [line('scratch', 35_00, null), line('dent', 15_00, 'evidence_stands', ['3000'])]), minutes(3))).toMatchObject({ outcome: 'refused' })
+  })
+
   it('a line above its published price, below zero, in part cents, missing, repeated or not on the claim', () => {
     for (const offered of [
       [line('scratch', 35_01), line('dent', 0, 'known_mark', ['mark-1'])],

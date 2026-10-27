@@ -11,7 +11,6 @@ export type TranscriptMove = {
   readonly lines: readonly OfferLine[]
   readonly totalCents: number | null
   readonly passReason: PassReason | null
-  readonly argument: string | null
   readonly actor: string
   readonly createdAt: Date
 }
@@ -19,7 +18,7 @@ export type ChainedMove = TranscriptMove & { readonly previousFingerprint: strin
 
 // Fixed order, arrays not objects, so the same move always gives the same text.
 export function moveFingerprint(previous: string | null, move: TranscriptMove): string {
-  const canonical = JSON.stringify([previous, move.sequence, move.side, move.kind, move.lines.map((line) => [line.lineId, line.cents, line.ground, [...line.evidence]]), move.totalCents, move.passReason, move.argument, move.actor, move.createdAt.toISOString()])
+  const canonical = JSON.stringify([previous, move.sequence, move.side, move.kind, move.lines.map((line) => [line.lineId, line.cents, line.ground, [...line.evidence]]), move.totalCents, move.passReason, move.actor, move.createdAt.toISOString()])
   return createHash('sha256').update(canonical).digest('hex')
 }
 

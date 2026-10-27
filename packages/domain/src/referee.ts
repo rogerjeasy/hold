@@ -39,7 +39,7 @@ export type Table = {
 
 export type RefusalReason =
   | 'not_open' | 'not_your_turn' | 'nothing_to_accept' | 'no_offers_left' | 'lines_mismatch' | 'line_out_of_range'
-  | 'ground_missing' | 'ground_does_not_fit' | 'too_much_evidence' | GroundRefusal
+  | 'ground_missing' | 'ground_does_not_fit' | 'too_much_evidence' | 'evidence_does_not_fit' | GroundRefusal
   | 'offer_rose' | 'offer_fell' | 'accept_instead'
   | Exclude<Extract<MandateCheck, { readonly ok: false }>['reason'], 'not_yet_valid' | 'expired' | 'revoked'>
 
@@ -64,6 +64,8 @@ export function escalate(table: Table, reason: EscalationReason): Table {
 }
 
 type Lines = Pick<RefereeContext, 'currency' | 'lines' | 'claim'>
+// The grounds that rest on records of this rental, and so name them as their evidence.
+const CITING_GROUNDS: readonly Ground[] = ['known_mark', 'ordinary_wear', 'renter_photo']
 const claimTotal = (context: Lines) => context.lines.reduce((sum, line) => sum + line.publishedCents, 0)
 const refused = (table: Table, reason: RefusalReason): Judgment => ({ outcome: 'refused', table, reason })
 
@@ -85,6 +87,9 @@ function checkLines(context: Lines, side: NegotiationSide, lines: readonly Offer
     if (line.evidence.length > NEGOTIATION_LIMITS.evidencePerLine) return 'too_much_evidence'
     const lowered = line.cents < facts.publishedCents
     if (lowered && line.ground === null) return 'ground_missing'
+    // Only a ground that rests on records cites them; anything else in the evidence would be free text crossing to the
+    // other side.
+    if ((line.ground === null || !CITING_GROUNDS.includes(line.ground)) && line.evidence.length > 0) return 'evidence_does_not_fit'
     if (line.ground === null) continue
     // evidence_stands keeps a line at its price; every other ground lowers it.
     if (lowered === (line.ground === 'evidence_stands')) return line.ground === 'evidence_stands' && side !== 'shop' ? 'ground_not_for_side' : 'ground_does_not_fit'

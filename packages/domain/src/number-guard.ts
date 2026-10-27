@@ -50,26 +50,31 @@ const NUMBER_WORDS = new Set([
 // fünfundzwanzig, dreihundert, veintitrés and trescientos.
 const NUMBER_PARTS = ['hundred', 'thousand', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety', 'teen', 'vingt', 'hundert', 'tausend', 'zehn', 'zig', 'ssig', 'veinti', 'cientos', 'cientas', 'ciento', 'prozent', 'percent']
 
+// Words and parts long enough to look for once every space, hyphen and mark between letters is taken out, so "t h r e e"
+// and "two-hun dred" are read as written. Shorter words would match inside ordinary ones.
+const COLLAPSED_PARTS = [...[...NUMBER_WORDS].filter((word) => word.length >= 5), 'hundred', 'thousand', 'hundert', 'tausend', 'ciento', 'veinti', 'vingt']
+
+// A valid Roman numeral, such as XII or mmxxvi. Written in capitals any run of two or more of its letters counts; a
+// single I is the pronoun.
+const ROMAN = /^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/
+
 function hasNumberWord(text: string): boolean {
-  const plain = text.normalize('NFD').replace(/\p{M}/gu, '').replace(/ß/g, 'ss').toLowerCase()
-  return (plain.match(/\p{L}+/gu) ?? []).some((word) => NUMBER_WORDS.has(word) || NUMBER_PARTS.some((part) => word.includes(part)))
+  const plain = text.normalize('NFD').replace(/\p{M}/gu, '').replace(/ß/g, 'ss')
+  const tokens = plain.match(/\p{L}+/gu) ?? []
+  if (tokens.some((token) => token.length >= 2 && (/^[IVXLCDM]+$/.test(token) || ROMAN.test(token.toUpperCase())))) return true
+  // A lone Roman letter is a number too, except the pronoun I and a French elision such as l', d' or c'.
+  if (/(?<!\p{L})[VXLCDMvxlcdm](?![\p{L}'’])/u.test(plain)) return true
+  const lower = tokens.map((token) => token.toLowerCase())
+  if (lower.some((word) => NUMBER_WORDS.has(word) || NUMBER_PARTS.some((part) => word.includes(part)))) return true
+  const collapsed = lower.join('')
+  if (COLLAPSED_PARTS.some((part) => collapsed.includes(part))) return true
+  // A short word spelled out letter by letter, such as "t w o": runs of single letters, joined.
+  const spelled = lower.reduce<string[]>((runs, word) => word.length === 1 ? [...runs.slice(0, -1), `${runs.at(-1) ?? ''}${word}`] : [...runs, ''], [''])
+  return spelled.some((run) => run.length >= 2 && NUMBER_WORDS.has(run))
 }
 
-// Every way an amount could be written in digits: its cents, and its units with a point or a comma.
-function digitWritings(amount: Money): string[] {
-  const decimals = decimalsOf(amount.currency)
-  const units = String(Math.floor(amount.cents / 10 ** decimals))
-  const fraction = decimals === 0 ? '' : String(amount.cents % 10 ** decimals).padStart(decimals, '0')
-  return decimals === 0 ? [units] : [String(amount.cents), `${units}.${fraction}`, `${units},${fraction}`, units]
-}
-
-// What one side must never write, even as an amount the move allows: its own limits (extensions.md section 9.13).
-export type ForbiddenNumbers = { readonly amounts?: readonly Money[]; readonly wholeNumbers?: readonly number[] }
-
-export function guardNumbers(text: string, allowed: readonly Money[], forbidden: ForbiddenNumbers = {}): string | null {
+export function guardNumbers(text: string, allowed: readonly Money[]): string | null {
   if (OTHER_DIGITS.test(text) || SHARE_SIGNS.test(text) || hasNumberWord(text)) return null
   const found = text.match(NUMBER) ?? []
-  if ((forbidden.amounts ?? []).some((amount) => digitWritings(amount).some((written) => found.some((number) => number === written || number.split(SEPARATOR)[0] === written)))) return null
-  if ((forbidden.wholeNumbers ?? []).some((whole) => found.some((number) => number.split(SEPARATOR)[0] === String(whole)))) return null
   return found.every((number) => allowed.some((amount) => readAmount(number, amount.currency) === amount.cents)) ? text : null
 }

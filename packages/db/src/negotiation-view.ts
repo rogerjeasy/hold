@@ -8,9 +8,9 @@ import { captureSessions, claimLines, claimReplies, claims, comparisons, finding
 import type { Transaction } from './scope.ts'
 
 type MoveRow = typeof negotiationMoves.$inferSelect
-export type StoredMove = ChainedMove & { readonly model: string | null; readonly promptVersion: string | null; readonly argumentDropped: boolean }
+export type StoredMove = ChainedMove & { readonly model: string | null; readonly promptVersion: string | null }
 
-const asChained = (row: MoveRow): StoredMove => ({ sequence: row.sequence, side: row.side, kind: row.kind, lines: row.lines, totalCents: row.totalCents, passReason: row.passReason, argument: row.argument, actor: row.actor, createdAt: row.createdAt, previousFingerprint: row.previousFingerprint, fingerprint: row.fingerprint, model: row.model, promptVersion: row.promptVersion, argumentDropped: row.argumentDropped })
+const asChained = (row: MoveRow): StoredMove => ({ sequence: row.sequence, side: row.side, kind: row.kind, lines: row.lines, totalCents: row.totalCents, passReason: row.passReason, actor: row.actor, createdAt: row.createdAt, previousFingerprint: row.previousFingerprint, fingerprint: row.fingerprint, model: row.model, promptVersion: row.promptVersion })
 
 export function proposedMove(move: StoredMove): ProposedMove {
   if (move.kind === 'offer') return { side: move.side, kind: 'offer', lines: move.lines }
@@ -74,7 +74,7 @@ export async function negotiationRecords(transaction: Transaction, negotiationId
 }
 export type NegotiationRecords = NonNullable<Awaited<ReturnType<typeof negotiationRecords>>>
 
-// The transcript both people can read (section 9.7): the moves, their grounds and arguments, how it ended. Never either
+// The transcript both people can read (section 9.7): the moves, their grounds and evidence, how it ended. Never either
 // side's limits.
 export async function negotiationTranscript(transaction: Transaction, rentalId: string) {
   const [claim] = await transaction.select({ id: claims.id }).from(claims).where(eq(claims.rentalId, rentalId))
@@ -99,7 +99,7 @@ export async function negotiationTranscript(transaction: Transaction, rentalId: 
     chainVerified: verifyTranscript(records.moves).ok,
     lines: records.lines.map((line) => ({ lineId: line.lineId, publishedCents: line.publishedCents, description: records.descriptions[line.lineId]?.description ?? '' })),
     wearClauses: records.wearClauses,
-    moves: records.moves.map((move) => ({ sequence: move.sequence, side: move.side, kind: move.kind, lines: move.lines, totalCents: move.totalCents, passReason: move.passReason, argument: move.argument, argumentDropped: move.argumentDropped, actor: move.actor, model: move.model, createdAt: move.createdAt, fingerprint: move.fingerprint })),
+    moves: records.moves.map((move) => ({ sequence: move.sequence, side: move.side, kind: move.kind, lines: move.lines, totalCents: move.totalCents, passReason: move.passReason, actor: move.actor, model: move.model, createdAt: move.createdAt, fingerprint: move.fingerprint })),
   }
 }
 export type NegotiationTranscript = NonNullable<Awaited<ReturnType<typeof negotiationTranscript>>>

@@ -1,18 +1,14 @@
-import { randomUUID } from 'node:crypto'
 import { and, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { captureSession, recordPhoto, sealSession, startCaptureSession } from './capture-repository.ts'
 import { decideClaim } from './claim-decision-repository.ts'
-import { approveClaim, draftClaim, presentClaim } from './claim-repository.ts'
 import { applyNegotiationMove, openAdvocate, stopRenterAdvocate } from './negotiation-repository.ts'
 import { confirmAgreement } from './negotiation-settlement.ts'
 import { negotiationRecords, negotiationTranscript } from './negotiation-view.ts'
 import { grantShopSettlement, liveShopSettlement, revokeShopSettlement } from './settlement-mandate-repository.ts'
-import { approvals, auditLog, claims, executions, mandates, negotiationMoves, negotiations, outbox, priceEntries, rentals, staffRoles, users } from './schema/index.ts'
-import { money } from '@hold/domain'
-import { publishPriceList } from './price-list-repository.ts'
+import { approvals, auditLog, claims, executions, mandates, negotiationMoves, negotiations, outbox, rentals, staffRoles, users } from './schema/index.ts'
 import { inShop } from './scope.ts'
 import type { Transaction } from './scope.ts'
+import { presentedClaim, twoLinePrices } from './testing/presented-claim.ts'
 import { readyRentalShop } from './testing/ready-rental.ts'
 import type { ReadyRentalShop } from './testing/ready-rental.ts'
 import { createTestDatabase } from './testing/test-database.ts'
@@ -24,28 +20,13 @@ let database: TestDatabase
 let shop: ReadyRentalShop
 let other: ReadyRentalShop
 let counterId: string
-let priceId: string
-let forkPriceId: string
+let prices: { readonly scratch: string; readonly fork: string }
 const ownerId = () => shop.scope.userId ?? ''
 const asWorker = <Result>(work: (transaction: Transaction) => Promise<Result>) => inShop(database, { role: 'hold_worker', shopId: shop.scope.shopId }, work)
 const shopLimits = { lowestSharePercent: 50, largestClaimCents: 200_00, rounds: 6, evidenceRequired: true, finalTap: true }
 
-// A returned rental with a presented claim of two manual lines at 35.00 each: 70.00 against a hold of 300.00.
-async function presented() {
-  const rental = await shop.readyRental()
-  for (const kind of ['handover', 'return'] as const) {
-    const started = await shop.act((transaction) => startCaptureSession(transaction, { rentalId: rental.rentalId, rentalItemId: rental.rentalItemIds[0] ?? '', kind, actorUserId: ownerId() }, NOW))
-    if (!started.ok) throw new Error(started.reason)
-    const session = await shop.act((transaction) => captureSession(transaction, started.sessionId))
-    for (const view of session?.plan.filter((each) => each.required) ?? []) await shop.act((transaction) => recordPhoto(transaction, started.sessionId, { view: view.key, evidenceKey: randomUUID(), sha256: 'a'.repeat(64), quality: { sharpness: 120, shadows: 20, highlights: 220, filled: .6 } }, NOW))
-    await shop.act((transaction) => sealSession(transaction, started.sessionId, NOW))
-  }
-  const draft = await shop.act((transaction) => draftClaim(transaction, rental.rentalId, counterId, [{ priceEntryId: priceId, reason: 'Scratch on the frame.' }, { priceEntryId: forkPriceId, reason: 'Scratch on the fork.' }], NOW))
-  if (!draft.ok) throw new Error(draft.reason)
-  await shop.act((transaction) => approveClaim(transaction, draft.claimId, ownerId(), NOW))
-  await shop.act((transaction) => presentClaim(transaction, draft.claimId, ownerId(), NOW))
-  return { rentalId: rental.rentalId, claimId: draft.claimId }
-}
+// A returned rental with a presented claim of two lines at 35.00 each, raised by the counter staff member.
+const presented = () => presentedClaim(shop, prices, counterId, NOW)
 
 const shopAgent = () => ({ kind: 'shop_agent' as const, shopId: shop.scope.shopId, actsFor: ownerId() })
 async function renterAgent(rentalId: string) {
@@ -62,7 +43,7 @@ async function negotiationRecordsFor(transaction: Transaction, claimId: string) 
   if (records === undefined) throw new Error('No negotiation.')
   return records
 }
-const offer = (ids: readonly string[], amounts: readonly number[], argument: string | null = null) => ({ lines: ids.map((lineId, index) => ({ lineId, cents: amounts[index] ?? 0, ground: (amounts[index] ?? 0) < 35_00 ? 'ordinary_wear' : null, evidence: (amounts[index] ?? 0) < 35_00 ? ['wear-1'] : [] })), argument })
+const offer = (ids: readonly string[], amounts: readonly number[]) => ({ lines: ids.map((lineId, index) => ({ lineId, cents: amounts[index] ?? 0, ground: (amounts[index] ?? 0) < 35_00 ? 'ordinary_wear' : null, evidence: (amounts[index] ?? 0) < 35_00 ? ['wear-1'] : [] })) })
 
 async function negotiating() {
   const claim = await presented()
@@ -77,17 +58,13 @@ beforeAll(async () => {
   database = await createTestDatabase()
   shop = await readyRentalShop(database, 'negotiation', NOW)
   other = await readyRentalShop(database, 'negotiation-other', NOW)
-  // Two entries at 35.00, so a claim can carry two lines.
-  await shop.act((transaction) => publishPriceList(transaction, shop.scope.shopId, { currency: 'EUR', ownerApprovalThreshold: undefined, entries: [{ description: 'Scratch', category: 'damage', amount: money(35_00, 'EUR') }, { description: 'Fork scratch', category: 'damage', amount: money(35_00, 'EUR') }], wearPolicy: 'Scuffs are wear.' }, NOW))
-  const entries = await shop.act((transaction) => transaction.select().from(priceEntries))
-  const fork = entries.find((entry) => entry.description === 'Fork scratch')
-  forkPriceId = fork?.id ?? ''
-  priceId = entries.find((entry) => entry.description === 'Scratch' && entry.priceListId === fork?.priceListId)?.id ?? ''
+  prices = await twoLinePrices(shop, NOW)
   const [counter] = await database.insert(users).values({ cognitoSubject: 'negotiation-counter', email: 'counter@negotiation.example', name: 'Counter' }).returning()
   counterId = counter?.id ?? ''
   await database.insert(staffRoles).values({ shopId: shop.scope.shopId, userId: counterId, role: 'counter_staff', approvalLimitCents: 100_00 })
 })
 afterAll(async () => { await database.$client.close() })
+
 
 describe('the shop’s settlement mandate', () => {
   it('is granted by the owner only, with typed limits, and is invisible to another shop', async () => {
@@ -116,14 +93,15 @@ describe('a negotiation between two advocates', () => {
 
   it('agrees through the gateway and the referee, both people confirm, and only the agreed total is captured', async () => {
     const claim = await negotiating()
-    expect(await move(claim.negotiationId, claim.renter, 'offer', offer(claim.lines, [20_00, 0], 'Both are wear under the first clause.'), later(1))).toMatchObject({ outcome: 'accepted' })
-    expect(await move(claim.negotiationId, shopAgent(), 'offer', offer(claim.lines, [35_00, 10_00], 'The frame scratch stands at 35.00.'), later(2))).toMatchObject({ outcome: 'accepted' })
-    // An argument that states the renter's limit is dropped: only this move's line amounts may appear in it. The shop's
-    // argument above was dropped too: 35.00 is a line amount, but it is also the shop's lowest total.
-    expect(await move(claim.negotiationId, claim.renter, 'offer', offer(claim.lines, [30_00, 10_00], 'I can pay up to 50.00 if I must.'), later(3))).toMatchObject({ outcome: 'accepted' })
-    expect(await move(claim.negotiationId, shopAgent(), 'accept', { argument: null }, later(4))).toMatchObject({ outcome: 'accepted', state: 'agreed' })
+    expect(await move(claim.negotiationId, claim.renter, 'offer', offer(claim.lines, [20_00, 0]), later(1))).toMatchObject({ outcome: 'accepted' })
+    expect(await move(claim.negotiationId, shopAgent(), 'offer', offer(claim.lines, [35_00, 10_00]), later(2))).toMatchObject({ outcome: 'accepted' })
+    // No words cross to the other side: a move that carries free text, which could state a limit in any writing, has
+    // the wrong shape and is refused before the referee sees it.
+    expect(await move(claim.negotiationId, claim.renter, 'offer', { ...offer(claim.lines, [30_00, 10_00]), argument: 'I can pay up to fifty if I must.' }, later(3))).toEqual({ outcome: 'gateway_refused', reason: 'arguments' })
+    expect(await move(claim.negotiationId, claim.renter, 'offer', offer(claim.lines, [30_00, 10_00]), later(3))).toMatchObject({ outcome: 'accepted' })
+    expect(await move(claim.negotiationId, shopAgent(), 'accept', {}, later(4))).toMatchObject({ outcome: 'accepted', state: 'agreed' })
     const transcript = await shop.act((transaction) => negotiationTranscript(transaction, claim.rentalId))
-    expect(transcript?.moves.map((each) => [each.side, each.kind, each.totalCents, each.argument])).toEqual([['shop', 'offer', 70_00, null], ['renter', 'offer', 20_00, 'Both are wear under the first clause.'], ['shop', 'offer', 45_00, null], ['renter', 'offer', 40_00, null], ['shop', 'accept', null, null]])
+    expect(transcript?.moves.map((each) => [each.side, each.kind, each.totalCents])).toEqual([['shop', 'offer', 70_00], ['renter', 'offer', 20_00], ['shop', 'offer', 45_00], ['renter', 'offer', 40_00], ['shop', 'accept', null]])
     expect(transcript).toMatchObject({ state: 'agreed', agreedCents: 40_00, chainVerified: true })
     expect(JSON.stringify(transcript)).not.toMatch(/highestTotal|lowestShare|largestClaim|5000|"50\.00"/)
     expect((await shop.act((transaction) => transaction.select().from(claims).where(eq(claims.id, claim.claimId))))[0]?.state).toBe('agreed')
@@ -146,7 +124,7 @@ describe('a negotiation between two advocates', () => {
 
   it('refuses a lowered line whose ground fails, tells only that side, and writes no move (X4.5)', async () => {
     const claim = await negotiating()
-    const bad = { lines: claim.lines.map((lineId) => ({ lineId, cents: 0, ground: 'known_mark', evidence: ['mark-404'] })), argument: null }
+    const bad = { lines: claim.lines.map((lineId) => ({ lineId, cents: 0, ground: 'known_mark', evidence: ['mark-404'] })) }
     expect(await move(claim.negotiationId, claim.renter, 'offer', bad, later(1))).toEqual({ outcome: 'refused', reason: 'ground_check_failed' })
     const records = await asWorker((transaction) => negotiationRecords(transaction, claim.negotiationId))
     expect(records?.moves).toHaveLength(1)
@@ -165,7 +143,7 @@ describe('a negotiation between two advocates', () => {
     expect(await move(claim.negotiationId, { ...claim.renter, shopId: other.scope.shopId }, 'offer', offer(claim.lines, [20_00, 0]), later(1))).toEqual({ outcome: 'gateway_refused', reason: 'shop' })
     expect(await move(claim.negotiationId, claim.renter, 'offer', { lines: claim.lines.map((lineId) => ({ lineId, cents: '0' })), amount: 1 }, later(1))).toEqual({ outcome: 'gateway_refused', reason: 'arguments' })
     // The shop's advocate cannot move in the renter's turn.
-    expect(await move(claim.negotiationId, shopAgent(), 'accept', { argument: null }, later(1))).toEqual({ outcome: 'refused', reason: 'not_your_turn' })
+    expect(await move(claim.negotiationId, shopAgent(), 'accept', {}, later(1))).toEqual({ outcome: 'refused', reason: 'not_your_turn' })
   })
 
   it('sends the claim to the owner with nothing captured when the renter stops the advocate (X4.6), and never negotiates it again (X4.7)', async () => {
@@ -173,7 +151,7 @@ describe('a negotiation between two advocates', () => {
     await move(claim.negotiationId, claim.renter, 'offer', offer(claim.lines, [20_00, 0]), later(1))
     expect(await shop.act((transaction) => stopRenterAdvocate(transaction, claim.rentalId, later(2)))).toEqual({ ok: true })
     expect((await shop.act((transaction) => transaction.select().from(claims).where(eq(claims.id, claim.claimId))))[0]?.state).toBe('escalated')
-    expect(await move(claim.negotiationId, shopAgent(), 'accept', { argument: null }, later(3))).toEqual({ outcome: 'refused', reason: 'not_open' })
+    expect(await move(claim.negotiationId, shopAgent(), 'accept', {}, later(3))).toEqual({ outcome: 'refused', reason: 'not_open' })
     expect((await shop.act((transaction) => transaction.select().from(executions).where(eq(executions.rentalId, claim.rentalId)))).filter((row) => row.action === 'capture')).toEqual([])
     expect(await shop.act((transaction) => openAdvocate(transaction, { rentalId: claim.rentalId, highestTotalCents: 70_00, comment: '', simulated: true }, later(4)))).toEqual({ ok: false, reason: 'already_replied' })
     const records = await asWorker((transaction) => negotiationRecords(transaction, claim.negotiationId))
@@ -187,7 +165,7 @@ describe('a negotiation between two advocates', () => {
   it('escalates when a person declines the agreed result', async () => {
     const claim = await negotiating()
     await move(claim.negotiationId, claim.renter, 'offer', offer(claim.lines, [20_00, 20_00]), later(1))
-    await move(claim.negotiationId, shopAgent(), 'accept', { argument: null }, later(2))
+    await move(claim.negotiationId, shopAgent(), 'accept', {}, later(2))
     expect(await shop.act((transaction) => confirmAgreement(transaction, claim.negotiationId, { kind: 'renter' }, 'decline', later(3)))).toEqual({ ok: true, executionId: null })
     expect((await shop.act((transaction) => transaction.select().from(claims).where(eq(claims.id, claim.claimId))))[0]?.state).toBe('escalated')
     expect((await asWorker((transaction) => negotiationRecords(transaction, claim.negotiationId)))?.negotiation).toMatchObject({ state: 'escalated', endedReason: 'declined' })
@@ -206,7 +184,7 @@ describe('the transcript', () => {
     const claim = await negotiating()
     await expect(database.update(negotiationMoves).set({ totalCents: 1 }).where(eq(negotiationMoves.negotiationId, claim.negotiationId))).rejects.toThrow()
     await expect(database.delete(negotiationMoves).where(eq(negotiationMoves.negotiationId, claim.negotiationId))).rejects.toThrow()
-    await expect(asWorker((transaction) => transaction.update(negotiationMoves).set({ argument: 'changed' }).where(eq(negotiationMoves.negotiationId, claim.negotiationId)))).rejects.toThrow()
+    await expect(asWorker((transaction) => transaction.update(negotiationMoves).set({ actor: 'changed' }).where(eq(negotiationMoves.negotiationId, claim.negotiationId)))).rejects.toThrow()
     await expect(database.insert(negotiationMoves).values({ shopId: shop.scope.shopId, negotiationId: claim.negotiationId, sequence: 2, side: 'renter', kind: 'pass', passReason: 'chose', actor: 'renter_advocate', previousFingerprint: 'f'.repeat(64), fingerprint: 'e'.repeat(64) })).rejects.toThrow()
   })
 })
@@ -220,8 +198,8 @@ describe('when only the renter has an advocate (section 9.10)', () => {
     if (!opened.ok) throw new Error(opened.reason)
     expect((await shop.act((transaction) => transaction.select().from(claims).where(eq(claims.id, claim.claimId))))[0]?.state).toBe('contested')
     const ids = await lineIds(claim.claimId)
-    expect(await move(opened.negotiationId, await renterAgent(claim.rentalId), 'offer', offer(ids, [10_00, 0], 'Both are ordinary wear.'), later(1))).toMatchObject({ outcome: 'accepted', state: 'replied' })
-    expect(await shop.act((transaction) => negotiationTranscript(transaction, claim.rentalId))).toMatchObject({ kind: 'reply', state: 'replied', moves: [{ side: 'renter', totalCents: 10_00, argument: 'Both are ordinary wear.' }] })
+    expect(await move(opened.negotiationId, await renterAgent(claim.rentalId), 'offer', offer(ids, [10_00, 0]), later(1))).toMatchObject({ outcome: 'accepted', state: 'replied' })
+    expect(await shop.act((transaction) => negotiationTranscript(transaction, claim.rentalId))).toMatchObject({ kind: 'reply', state: 'replied', moves: [{ side: 'renter', totalCents: 10_00, lines: [{ ground: 'ordinary_wear', evidence: ['wear-1'] }, { ground: 'ordinary_wear', evidence: ['wear-1'] }] }] })
     expect(await shop.act((transaction) => decideClaim(transaction, claim.claimId, ownerId(), 'uphold', 'Both scratches are fresh.', later(2)))).toMatchObject({ ok: true })
     await shop.act((transaction) => grantShopSettlement(transaction, ownerId(), shopLimits, 30, NOW))
   })

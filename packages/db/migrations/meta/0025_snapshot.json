@@ -1,5 +1,5 @@
 {
-  "id": "bc6991e3-c4b1-421e-a504-bc289d1f206e",
+  "id": "675c0d6d-1af1-48d8-8607-48bd4b06f37f",
   "prevId": "6a495ba1-ee55-4f87-91ab-f5b165d36358",
   "version": "7",
   "dialect": "postgresql",
@@ -3865,19 +3865,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
-        },
-        "argument": {
-          "name": "argument",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "argument_dropped": {
-          "name": "argument_dropped",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
         },
         "actor": {
           "name": "actor",

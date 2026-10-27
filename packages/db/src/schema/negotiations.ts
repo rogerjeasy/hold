@@ -57,7 +57,9 @@ export const negotiations = pgTable(
 
 // Each move the referee accepted, in order, chained to the one before by its fingerprint so the transcript can be
 // neither reordered nor trimmed. Append-only. A refused move is not a move: it is counted on the negotiation and
-// written to the audit trail, and only its own side hears why.
+// written to the audit trail, and only its own side hears why. No words an advocate wrote are kept: what crosses to the
+// other side is the line amounts, their grounds and the ids of the records they cite, and screens word them from fixed
+// templates, so no limit can travel in free text (security review of extensions.md section 9.13).
 export const negotiationMoves = pgTable(
   'negotiation_moves',
   {
@@ -73,9 +75,6 @@ export const negotiationMoves = pgTable(
     lines: jsonb().$type<readonly OfferLine[]>().notNull().default([]),
     totalCents: cents(),
     passReason: passReason(),
-    // The advocate's short argument, kept only if every amount in it is a line amount of this move.
-    argument: text(),
-    argumentDropped: boolean().notNull().default(false),
     // Who moved: an advocate run by Hold, a renter's own assistant, or the referee opening with the claim.
     actor: text().notNull(),
     model: text(),

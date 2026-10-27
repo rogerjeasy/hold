@@ -1,5 +1,5 @@
-import { checkReply, checkSettlementLimits, CLAIM_TRANSITIONS, gatewayDecision, guardNumbers, judgeMove, money, negotiationDeadline, openingOffer, otherSide, shopFloorCents, transition } from '@hold/domain'
-import type { AgentActor, ForbiddenNumbers, GatewayDecision, NegotiationSide, PassReason, ProposedMove, RefusalReason, Table } from '@hold/domain'
+import { checkReply, checkSettlementLimits, CLAIM_TRANSITIONS, gatewayDecision, judgeMove, negotiationDeadline, openingOffer, transition } from '@hold/domain'
+import type { AgentActor, GatewayDecision, NegotiationSide, PassReason, ProposedMove, RefusalReason, Table } from '@hold/domain'
 import { and, count, eq, gt, isNull, like } from 'drizzle-orm'
 import { replyToClaim } from './claim-reply-repository.ts'
 import { reserveEvidencePack } from './evidence-repository.ts'
@@ -53,7 +53,7 @@ export async function openAdvocate(transaction: Transaction, input: { readonly r
     const opening = openingOffer(records.context)
     const judged = judgeMove(records.context, records.table, opening, now)
     if (judged.outcome !== 'accepted') throw new Error('The claim as presented must be a move the referee accepts.')
-    await recordMove(transaction, records, opening, judged.table, { actor: 'referee', argument: null, argumentDropped: false, model: null, promptVersion: null }, now)
+    await recordMove(transaction, records, opening, judged.table, { actor: 'referee', model: null, promptVersion: null }, now)
   }
   await transaction.insert(outbox).values({ shopId: claim.shopId, queue: NEGOTIATIONS_QUEUE, messageGroup: input.rentalId, payload: { negotiationId: negotiation.id }, createdAt: now })
   await reserveEvidencePack(transaction, input.rentalId, now)
@@ -66,15 +66,15 @@ async function loadRecords(transaction: Transaction, negotiationId: string): Pro
   return records
 }
 
-type MoveFacts = { readonly actor: string; readonly argument: string | null; readonly argumentDropped: boolean; readonly model: string | null; readonly promptVersion: string | null }
+type MoveFacts = { readonly actor: string; readonly model: string | null; readonly promptVersion: string | null }
 
 // Adds a move the referee accepted to the end of the chain and records the table it left.
 async function recordMove(transaction: Transaction, records: NegotiationRecords, move: ProposedMove, table: Table, facts: MoveFacts, now: Date) {
   const { negotiation } = records
-  const stored = { sequence: records.moves.length + 1, side: move.side, kind: move.kind, lines: move.kind === 'offer' ? move.lines : [], totalCents: move.kind === 'offer' ? move.lines.reduce((sum, line) => sum + line.cents, 0) : null, passReason: move.kind === 'pass' ? move.reason : null, argument: facts.argument, actor: facts.actor, createdAt: now }
+  const stored = { sequence: records.moves.length + 1, side: move.side, kind: move.kind, lines: move.kind === 'offer' ? move.lines : [], totalCents: move.kind === 'offer' ? move.lines.reduce((sum, line) => sum + line.cents, 0) : null, passReason: move.kind === 'pass' ? move.reason : null, actor: facts.actor, createdAt: now }
   const previousFingerprint = negotiation.headFingerprint
   const fingerprint = moveFingerprint(previousFingerprint, stored)
-  await transaction.insert(negotiationMoves).values({ shopId: negotiation.shopId, negotiationId: negotiation.id, ...stored, argumentDropped: facts.argumentDropped, model: facts.model, promptVersion: facts.promptVersion, previousFingerprint, fingerprint })
+  await transaction.insert(negotiationMoves).values({ shopId: negotiation.shopId, negotiationId: negotiation.id, ...stored, model: facts.model, promptVersion: facts.promptVersion, previousFingerprint, fingerprint })
   await transaction.update(negotiations).set({ headFingerprint: fingerprint, shopRefusals: table.refusals.shop, renterRefusals: table.refusals.renter, updatedAt: now }).where(eq(negotiations.id, negotiation.id))
   return fingerprint
 }
@@ -111,7 +111,8 @@ async function audit(transaction: Transaction, negotiation: { readonly id: strin
 }
 
 // Every move from every agent, whoever runs it (Hold's advocates now, a renter's own assistant through the MCP server
-// later): the one gateway, then the referee, then the number guard on its words, then the record. The seam for X4.9.
+// later): the one gateway, then the referee, then the record. No move carries words (negotiation-tools.ts). The seam
+// for X4.9.
 export async function applyNegotiationMove(transaction: Transaction, input: MoveInput, now: Date): Promise<MoveResult> {
   const [locked] = await transaction.select().from(negotiations).where(eq(negotiations.id, input.negotiationId)).for('update')
   if (locked === undefined) return { outcome: 'refused', reason: 'not_found' }
@@ -129,34 +130,17 @@ export async function applyNegotiationMove(transaction: Transaction, input: Move
     if (reason === 'mandate' && side !== null) await escalateNegotiation(transaction, locked.id, 'mandate_ended', now)
     return { outcome: 'gateway_refused', reason }
   }
-  return locked.kind === 'reply' ? applyReply(transaction, records, input.actor, parsed.move, parsed.argument, input, now) : applyToNegotiation(transaction, records, input.actor, parsed.move, parsed.argument, input, now)
+  return locked.kind === 'reply' ? applyReply(transaction, records, input.actor, parsed, input, now) : applyToNegotiation(transaction, records, input.actor, parsed, input, now)
 }
 
 // The tool call read with its strict schema, as the move it proposes; undefined when it has the wrong shape.
-function readMove(input: MoveInput, side: NegotiationSide): { readonly move: ProposedMove; readonly argument: string | null } | undefined {
+function readMove(input: MoveInput, side: NegotiationSide): ProposedMove | undefined {
   if (input.tool === 'offer') {
     const offer = offerArguments.safeParse(input.arguments)
-    return offer.success ? { move: { side, kind: 'offer', lines: offer.data.lines }, argument: offer.data.argument } : undefined
+    return offer.success ? { side, kind: 'offer', lines: offer.data.lines } : undefined
   }
-  const other = NEGOTIATION_TOOLS[input.tool].safeParse(input.arguments)
-  if (!other.success) return undefined
-  return { move: input.tool === 'accept' ? { side, kind: 'accept' } : { side, kind: 'pass', reason: input.passReason ?? 'chose' }, argument: other.data.argument }
-}
-
-// The argument is kept only if every amount in it is a line amount of this move, or of the offer it accepts. An
-// advocate cannot write its limit into the transcript (extensions.md section 9.13).
-// As a backstop it also drops any argument that writes the side's own limits in any form, even where a limit happens
-// to equal a line amount.
-function guardedArgument(argument: string | null, amounts: readonly number[], records: NegotiationRecords, side: NegotiationSide) {
-  if (argument === null || argument.trim() === '') return { argument: null, argumentDropped: false }
-  const { currency, claimTotalCents } = records.negotiation
-  const shop = records.shopMandate === null ? undefined : checkSettlementLimits('settlement_shop', records.shopMandate.limits)
-  const renter = checkSettlementLimits('settlement_renter', records.renterMandate.limits)
-  const forbidden: ForbiddenNumbers = side === 'shop'
-    ? shop?.ok === true ? { amounts: [money(shopFloorCents(claimTotalCents, shop.value.lowestSharePercent), currency), money(shop.value.largestClaimCents, currency)], wholeNumbers: [shop.value.lowestSharePercent] } : {}
-    : renter.ok ? { amounts: [money(renter.value.highestTotalCents, currency)] } : {}
-  const kept = guardNumbers(argument, amounts.map((cents) => money(cents, currency)), forbidden)
-  return kept === null ? { argument: null, argumentDropped: true } : { argument: kept, argumentDropped: false }
+  if (!NEGOTIATION_TOOLS[input.tool].safeParse(input.arguments).success) return undefined
+  return input.tool === 'accept' ? { side, kind: 'accept' } : { side, kind: 'pass', reason: input.passReason ?? 'chose' }
 }
 
 async function countRefusal(transaction: Transaction, records: NegotiationRecords, actor: AgentActor, table: Table, reason: RefusalReason, now: Date): Promise<MoveResult> {
@@ -169,7 +153,7 @@ async function countRefusal(transaction: Transaction, records: NegotiationRecord
   return { outcome: 'refused', reason }
 }
 
-async function applyToNegotiation(transaction: Transaction, records: NegotiationRecords, actor: AgentActor, proposed: ProposedMove, rawArgument: string | null, input: MoveInput, now: Date): Promise<MoveResult> {
+async function applyToNegotiation(transaction: Transaction, records: NegotiationRecords, actor: AgentActor, proposed: ProposedMove, input: MoveInput, now: Date): Promise<MoveResult> {
   const { negotiation, context } = records
   if (context === undefined) return { outcome: 'refused', reason: 'not_open' }
   const judged = judgeMove(context, records.table, proposed, now)
@@ -185,9 +169,7 @@ async function applyToNegotiation(transaction: Transaction, records: Negotiation
     }
     return countRefusal(transaction, records, actor, judged.table, judged.reason, now)
   }
-  const amounts = proposed.kind === 'offer' ? proposed.lines.map((line) => line.cents) : proposed.kind === 'accept' ? (records.table.last[otherSide(proposed.side)]?.lines ?? []).map((line) => line.cents) : []
-  const words = guardedArgument(rawArgument, amounts, records, proposed.side)
-  await recordMove(transaction, records, proposed, judged.table, { actor: actorLabel(actor), ...words, model: input.model, promptVersion: input.promptVersion }, now)
+  await recordMove(transaction, records, proposed, judged.table, { actor: actorLabel(actor), model: input.model, promptVersion: input.promptVersion }, now)
   await audit(transaction, negotiation, actor, `negotiation.${proposed.kind}`, { sequence: records.moves.length + 1 }, now)
   if (judged.table.status === 'escalated') {
     await escalateNegotiation(transaction, negotiation.id, 'pass', now)
@@ -210,7 +192,7 @@ const actorLabel = (actor: AgentActor) => actor.kind === 'shop_agent' ? 'shop_ad
 
 // When only the renter has an advocate, its one offer is the renter's contest: lines, grounds and evidence, inside the
 // renter's highest total. The claim stays contested and the owner decides as in the spine.
-async function applyReply(transaction: Transaction, records: NegotiationRecords, actor: AgentActor, proposed: ProposedMove, rawArgument: string | null, input: MoveInput, now: Date): Promise<MoveResult> {
+async function applyReply(transaction: Transaction, records: NegotiationRecords, actor: AgentActor, proposed: ProposedMove, input: MoveInput, now: Date): Promise<MoveResult> {
   const { negotiation } = records
   if (negotiation.state !== 'open') return { outcome: 'refused', reason: 'not_open' }
   if (proposed.side !== 'renter') return { outcome: 'refused', reason: 'not_your_turn' }
@@ -224,8 +206,7 @@ async function applyReply(transaction: Transaction, records: NegotiationRecords,
     const refusals = { shop: 0, renter: negotiation.renterRefusals + 1 }
     return countRefusal(transaction, records, actor, { ...records.table, refusals, status: refusals.renter >= 2 ? 'escalated' : 'open' }, checked, now)
   }
-  const words = guardedArgument(rawArgument, checked.lines.map((line) => line.cents), records, proposed.side)
-  await recordMove(transaction, records, proposed, records.table, { actor: actorLabel(actor), ...words, model: input.model, promptVersion: input.promptVersion }, now)
+  await recordMove(transaction, records, proposed, records.table, { actor: actorLabel(actor), model: input.model, promptVersion: input.promptVersion }, now)
   await transaction.update(negotiations).set({ state: 'replied', endedAt: now, updatedAt: now }).where(eq(negotiations.id, negotiation.id))
   await audit(transaction, negotiation, actor, 'negotiation.offer', { sequence: 1 }, now)
   await reserveEvidencePack(transaction, negotiation.rentalId, now)

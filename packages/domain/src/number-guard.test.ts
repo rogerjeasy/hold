@@ -100,13 +100,23 @@ describe('the number guard', () => {
     expect(guardNumbers(text, [])).toBe(text)
   })
 
-  it('drops a side’s own limit in any written form, even where it is an allowed amount', () => {
-    const limit = money(30_00, 'EUR')
-    for (const text of ['I offer 30.00.', 'I offer 30,00.', 'I offer 30 euros.', 'That is 3000 cents.']) expect(guardNumbers(text, [limit], { amounts: [limit] })).toBeNull()
-    expect(guardNumbers('I offer 30.00.', [limit])).toBe('I offer 30.00.')
-    // A share is forbidden as a bare number too.
-    expect(guardNumbers('It stands at 60.00.', [money(60_00, 'EUR')], { wholeNumbers: [60] })).toBeNull()
-    expect(guardNumbers('It stands at 35.00.', [price], { wholeNumbers: [60] })).toBe('It stands at 35.00.')
+  it.each([
+    'It comes to CCC EUR.',
+    'At most xxx.',
+    'Section XII applies.',
+    'Up to MMXXVI.',
+    'I can pay t h r e e hundred.',
+    'Up to t-h-r-e-e.',
+    'Two-hundred is fair.',
+    'Up to th ree hun dred.',
+    'Maximal drei-hundert.',
+    'Jusqu’à t r o i s c e n t s.',
+  ])('drops Roman numerals and numbers spelled with spaces or hyphens inside them: %s', (text) => {
+    expect(guardNumbers(text, [price])).toBeNull()
+  })
+
+  it.each(['I recorded the scratch.', 'Il a noté la rayure.', 'We saw it at the counter.'])('keeps ordinary words, the pronoun I and the French il: %s', (text) => {
+    expect(guardNumbers(text, [])).toBe(text)
   })
 
   it('drops any number written in another script’s digits, whatever the number', () => {
@@ -123,6 +133,28 @@ describe('the number guard', () => {
       const cased = casing === 'upper' ? word.toUpperCase() : casing === 'lower' ? word : word.charAt(0).toUpperCase() + word.slice(1)
       expect(guardNumbers(`${around} ${cased} ${around}`, [price])).toBeNull()
     }))
+  })
+
+  // Many ways to write a whole number of units, as someone hiding it might.
+  const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen']
+  const tens = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety']
+  const words = (value: number): string => value >= 100 ? `${ones[Math.floor(value / 100)] ?? ''} hundred ${words(value % 100)}`.trim() : value >= 20 ? `${tens[Math.floor(value / 10)] ?? ''}-${ones[value % 10] ?? ''}`.replace(/-$/, '') : ones[value] ?? ''
+  const roman = (value: number): string => [[1000, 'M'], [900, 'CM'], [500, 'D'], [400, 'CD'], [100, 'C'], [90, 'XC'], [50, 'L'], [40, 'XL'], [10, 'X'], [9, 'IX'], [5, 'V'], [4, 'IV'], [1, 'I']].reduce<[number, string]>(([left, text], [unit, letters]) => [left % Number(unit), text + String(letters).repeat(Math.floor(left / Number(unit)))], [value, ''])[1]
+  const writings = (value: number) => [
+    String(value), `${String(value)}.00`, `${String(value)},00`, `${String(value)}.0`, `0${String(value)}`, `${String(value)}00`,
+    String(value).split('').join(' '), String(value).split('').join('-'),
+    roman(value), roman(value).toLowerCase(),
+    words(value), words(value).replace(/[ -]/g, ''), words(value).split('').join(' '), words(value).toUpperCase(),
+    String(value).split('').map((digit) => String.fromCodePoint(0xff10 + Number(digit))).join(''),
+  ]
+
+  it('drops every writing of an amount it was not given, so none can carry a limit', () => {
+    fc.assert(fc.property(fc.integer({ min: 2, max: 999 }), fc.integer({ min: 0, max: 14 }), (value, which) => {
+      const written = writings(value)[which] ?? ''
+      // The price it may name is any amount but this one.
+      expect(guardNumbers(`My most is ${written} euros.`, [money(value * 100 + 1, 'EUR')])).toBeNull()
+      expect(guardNumbers(`Le maximum: ${written}.`, [])).toBeNull()
+    }), { numRuns: 1000 })
   })
 
   it('never lets through an amount other than the price, whatever the amount or its writing', () => {

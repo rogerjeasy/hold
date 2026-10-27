@@ -8,8 +8,6 @@ CREATE TABLE "negotiation_moves" (
 	"lines" jsonb DEFAULT '[]'::jsonb NOT NULL,
 	"total_cents" bigint,
 	"pass_reason" text,
-	"argument" text,
-	"argument_dropped" boolean DEFAULT false NOT NULL,
 	"actor" text NOT NULL,
 	"model" text,
 	"prompt_version" text,

@@ -18,7 +18,8 @@
     ".": "./src/index.ts",
     "./testing": "./src/testing/test-database.ts",
     "./data-api": "./src/data-api.ts",
-    "./testing/ready-rental": "./src/testing/ready-rental.ts"
+    "./testing/ready-rental": "./src/testing/ready-rental.ts",
+    "./testing/presented-claim": "./src/testing/presented-claim.ts"
   },
   "scripts": {
     "migrations:generate": "drizzle-kit generate",
