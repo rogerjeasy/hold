@@ -2554,7 +2554,8 @@
     "for": "Para",
     "approve": "Aprobar",
     "cancel": "Cancelar y volver",
-    "unknown": "Este pedido no se conoce."
+    "unknown": "Este pedido no se conoce.",
+    "approveThenDispute": "Aprobar y luego disputar este pago"
   },
   "claim": {
     "title": "Reclamación y liquidación",

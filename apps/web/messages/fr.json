@@ -2554,7 +2554,8 @@
     "for": "Pour",
     "approve": "Approuver",
     "cancel": "Annuler et revenir",
-    "unknown": "Cette commande est inconnue."
+    "unknown": "Cette commande est inconnue.",
+    "approveThenDispute": "Approuver, puis contester ce paiement"
   },
   "claim": {
     "title": "Réclamation et règlement",

@@ -86,7 +86,7 @@ test('a renter who approves the fee in PayPal and never comes back is still book
   const renter = await renterBrowser(browser)
   await renter.goto(link)
   await renter.getByRole('button', { name: /^Pay .* with PayPal$/ }).click()
-  await expect(renter.getByRole('button', { name: 'Approve' })).toBeVisible()
+  await expect(renter.getByRole('button', { name: 'Approve', exact: true })).toBeVisible()
   // The renter approves and closes the page: PayPal's redirect back to Hold is never followed.
   const orderId = renter.url().split('/').at(-1) ?? ''
   const approved = await renter.request.post(`/simulated-paypal/${orderId}/approve`, { maxRedirects: 0 })
@@ -124,7 +124,7 @@ test('at pickup, staff ask for the hold, the renter approves it on their own pho
   await expect(renter.getByText('It is not a charge', { exact: false })).toBeVisible()
   await expectFitsEveryWidth(renter)
   await renter.getByRole('button', { name: /^Approve .* with PayPal$/ }).click()
-  await renter.getByRole('button', { name: 'Approve' }).click()
+  await renter.getByRole('button', { name: 'Approve', exact: true }).click()
   await expect(renter.getByText('Hold placed. Nothing was charged.')).toBeVisible()
   await expectFitsEveryWidth(renter)
   await renter.getByRole('link', { name: 'See your rental' }).click()

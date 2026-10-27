@@ -2554,7 +2554,8 @@
     "for": "For",
     "approve": "Approve",
     "cancel": "Cancel and go back",
-    "unknown": "This order is not known."
+    "unknown": "This order is not known.",
+    "approveThenDispute": "Approve, then dispute this payment"
   },
   "claim": {
     "title": "Claim and settlement",

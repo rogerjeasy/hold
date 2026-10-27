@@ -2554,7 +2554,8 @@
     "for": "Für",
     "approve": "Genehmigen",
     "cancel": "Abbrechen und zurück",
-    "unknown": "Diese Bestellung ist unbekannt."
+    "unknown": "Diese Bestellung ist unbekannt.",
+    "approveThenDispute": "Genehmigen, dann diese Zahlung beanstanden"
   },
   "claim": {
     "title": "Schadenforderung und Abrechnung",
