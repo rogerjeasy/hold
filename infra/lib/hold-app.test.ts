@@ -661,6 +661,13 @@ describe('delivery', () => {
     expect(boundary).not.toContain('role/hold-*')
   })
 
+  it('lets the outbox relay hand a manual operations run, which the web app writes, to the ops-agent queue', () => {
+    const relay = resourcesOfType(work, 'AWS::Lambda::Function').find((each) => each.Properties?.['FunctionName'] === 'hold-worker-outbox-relay')
+    expect(JSON.stringify(relay?.Properties?.['Environment'])).toContain('HOLD_OPS_AGENT_QUEUE_URL')
+    const sends = Object.entries(work.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('WorkerRole')).map(([, value]) => JSON.stringify(value)).join('')
+    expect(sends).toMatch(/OpsAgent|opsagent|ops-agent/i)
+  })
+
   it('runs the operations agent from its own queue and a nightly schedule, with a role that may read PayPal and call the model but write no photograph and schedule nothing', () => {
     const operationsFunction = (functionName: string) => resourcesOfType(work, 'AWS::Lambda::Function').find((each) => each.Properties?.['FunctionName'] === functionName)
     expect(operationsFunction('hold-worker-operations')?.Properties).toMatchObject({ Runtime: 'nodejs24.x' })

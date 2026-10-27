@@ -20,8 +20,8 @@ const ENVIRONMENT = {
 }
 
 describe('the worker’s settings', () => {
-  it.each(['comparisons', 'media', 'evidence', 'messages'])('lets the outbox relay deliver %s work when the immediate send failed', async (queue) => {
-    const settings = loadWorkerSettings({ ...ENVIRONMENT, HOLD_COMPARISONS_QUEUE_URL: 'https://sqs.test/comparisons', HOLD_MEDIA_QUEUE_URL: 'https://sqs.test/media', HOLD_EVIDENCE_QUEUE_URL: 'https://sqs.test/evidence.fifo', HOLD_MESSAGES_QUEUE_URL: 'https://sqs.test/messages' })
+  it.each(['comparisons', 'media', 'evidence', 'messages', 'ops-agent'])('lets the outbox relay deliver %s work when the immediate send failed', async (queue) => {
+    const settings = loadWorkerSettings({ ...ENVIRONMENT, HOLD_COMPARISONS_QUEUE_URL: 'https://sqs.test/comparisons', HOLD_MEDIA_QUEUE_URL: 'https://sqs.test/media', HOLD_EVIDENCE_QUEUE_URL: 'https://sqs.test/evidence.fifo', HOLD_MESSAGES_QUEUE_URL: 'https://sqs.test/messages', HOLD_OPS_AGENT_QUEUE_URL: 'https://sqs.test/ops-agent' })
     let queuedUrl: string | undefined
     const send = createSqsSender({ queues: settings.queues, client: { send: (command) => { queuedUrl = command.input.QueueUrl; return Promise.resolve({}) } } })
     await send({ queue, group: 'rental', deduplicationId: 'job', body: { shopId: 'shop', comparisonId: 'comparison' } })
