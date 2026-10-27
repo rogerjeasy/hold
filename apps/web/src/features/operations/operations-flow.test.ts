@@ -84,6 +84,13 @@ describe('checking now', () => {
     expect(proposal).toMatchObject({ kind: 'request_replacement_hold', payload: { fixedReason: 'hold_ending', investigated: 'no', paypalChecked: 'no' } })
   })
 
+  it('shows the shop only the PayPal disputes on its own payments, though the test environment\'s PayPal serves every shop', async () => {
+    ;(await getServices()).simulatedPayPal?.openDispute({ id: 'DISPUTE-ELSEWHERE', open: true, amount: { cents: 5000, currency: 'EUR' }, responseDueAt: new Date(Date.now() + 5 * 86_400_000), captureIds: ['CAPTURE-ELSEWHERE'] })
+    await as(OWNER)
+    expect(await operations.checkNow(null, form(locale))).toMatchObject({ ok: true })
+    expect((await (await database()).select().from(proposals)).filter((row) => row.subjectId === 'DISPUTE-ELSEWHERE')).toEqual([])
+  })
+
   it('is for owners and managers only', async () => {
     await as(MANAGER)
     expect(await operations.checkNow(null, form(locale))).toMatchObject({ ok: true })
