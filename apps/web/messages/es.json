@@ -130,7 +130,7 @@
   "doors": {
     "shops": {
       "label": "Para tiendas",
-      "action": "Abrir la tienda de demostración"
+      "action": "Ver lo que ve la tienda"
     },
     "renters": {
       "label": "Para clientes",
@@ -239,7 +239,7 @@
       "label": "Para tiendas",
       "title": "Protege cada artículo sin cobrar a quien lo devuelve.",
       "imageAlt": "Bicicletas de alquiler guardadas en estantes en la trastienda",
-      "action": "Abrir la tienda de demostración",
+      "action": "Ver lo que ve la tienda",
       "points": {
         "refund": "Ningún reembolso que emitir tras una devolución limpia, ni clientes preguntando dónde está.",
         "photographs": "Fotografías fechadas de cada artículo, antes y después de cada alquiler.",

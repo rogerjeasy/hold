@@ -20,9 +20,9 @@ describe('Hero', () => {
 })
 
 describe('AudienceDoors', () => {
-  it('sends shops to the demo and renters to their page', () => {
+  it('sends shops and renters each to their own page', () => {
     renderWithIntl(<AudienceDoors />)
-    expect(screen.getByRole('link', { name: 'For shops Open the demo shop' })).toHaveAttribute('href', '/demo')
+    expect(screen.getByRole('link', { name: "For shops See the shop's view" })).toHaveAttribute('href', '/for-shops')
     expect(screen.getByRole('link', { name: "For renters See the renter's view" })).toHaveAttribute('href', '/for-renters')
   })
 })
@@ -48,11 +48,11 @@ describe('StepList', () => {
 })
 
 describe('AudiencePanels', () => {
-  it('gives shops four reasons and the demo', () => {
+  it('gives shops four reasons and their own page', () => {
     renderWithIntl(<AudiencePanels />)
     const panel = within(screen.getByRole('region', { name: 'For shops' }))
     expect(panel.getAllByRole('listitem')).toHaveLength(4)
-    expect(panel.getByRole('link', { name: 'Open the demo shop' })).toHaveAttribute('href', '/demo')
+    expect(panel.getByRole('link', { name: "See the shop's view" })).toHaveAttribute('href', '/for-shops')
     expect(panel.getByAltText("Rental bicycles stored on racks in a shop's back room")).toBeInTheDocument()
   })
 
@@ -94,7 +94,7 @@ describe('ClosingCall', () => {
   it('ends on the invitation and both doors', () => {
     renderWithIntl(<ClosingCall />)
     expect(screen.getByRole('heading', { level: 2, name: 'Try a return yourself.' })).toBeInTheDocument()
-    expect(screen.getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(['/demo', '/for-renters'])
+    expect(screen.getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(['/for-shops', '/for-renters'])
   })
 })
 

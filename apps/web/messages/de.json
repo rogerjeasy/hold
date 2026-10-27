@@ -130,7 +130,7 @@
   "doors": {
     "shops": {
       "label": "Für Verleihe",
-      "action": "Demo-Verleih öffnen"
+      "action": "Die Sicht des Verleihs ansehen"
     },
     "renters": {
       "label": "Für Mietende",
@@ -239,7 +239,7 @@
       "label": "Für Verleihe",
       "title": "Schützen Sie jeden Artikel, ohne denen etwas abzubuchen, die ihn zurückbringen.",
       "imageAlt": "Mietfahrräder auf Regalen im Lagerraum eines Verleihs",
-      "action": "Demo-Verleih öffnen",
+      "action": "Die Sicht des Verleihs ansehen",
       "points": {
         "refund": "Keine Rückerstattung nach einer sauberen Rückgabe, und niemand fragt, wo sie bleibt.",
         "photographs": "Datierte Fotos von jedem Artikel, vor und nach jeder Miete.",

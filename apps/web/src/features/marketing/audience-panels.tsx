@@ -13,7 +13,7 @@ export function AudiencePanels() {
           label={t('shops.label')}
           title={t('shops.title')}
           points={shopPointKeys.map((key) => t(`shops.points.${key}`))}
-          action={{ href: routes.demo, label: t('shops.action') }}
+          action={{ href: routes.forShops, label: t('shops.action') }}
           image={{ src: audienceImages.shops, alt: t('shops.imageAlt') }}
           emphasis="primary"
         />

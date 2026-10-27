@@ -130,7 +130,7 @@
   "doors": {
     "shops": {
       "label": "For shops",
-      "action": "Open the demo shop"
+      "action": "See the shop's view"
     },
     "renters": {
       "label": "For renters",
@@ -239,7 +239,7 @@
       "label": "For shops",
       "title": "Protect every item without charging the people who bring it back.",
       "imageAlt": "Rental bicycles stored on racks in a shop's back room",
-      "action": "Open the demo shop",
+      "action": "See the shop's view",
       "points": {
         "refund": "No refund to issue after a clean return, and no customer asking where it is.",
         "photographs": "Dated photographs of every item, before and after every rental.",

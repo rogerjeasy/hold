@@ -130,7 +130,7 @@
   "doors": {
     "shops": {
       "label": "Pour les loueurs",
-      "action": "Ouvrir la boutique de démo"
+      "action": "Voir ce que voit le loueur"
     },
     "renters": {
       "label": "Pour les clients",
@@ -239,7 +239,7 @@
       "label": "Pour les loueurs",
       "title": "Protégez chaque article sans débiter ceux qui le rapportent.",
       "imageAlt": "Des vélos de location rangés sur des étagères dans une arrière-boutique",
-      "action": "Ouvrir la boutique de démo",
+      "action": "Voir ce que voit le loueur",
       "points": {
         "refund": "Aucun remboursement à émettre après un retour sans dommage, et aucun client qui demande où il en est.",
         "photographs": "Des photographies datées de chaque article, avant et après chaque location.",

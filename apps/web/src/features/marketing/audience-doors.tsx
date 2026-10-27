@@ -5,7 +5,7 @@ import { Link } from '@/i18n/navigation'
 import { routes } from '@/lib/routes'
 
 const doors = [
-  { key: 'shops', href: routes.demo, surface: 'bg-primary text-primary-foreground' },
+  { key: 'shops', href: routes.forShops, surface: 'bg-primary text-primary-foreground' },
   { key: 'renters', href: routes.forRenters, surface: 'bg-contrast text-contrast-foreground' },
 ] as const
 

@@ -47,13 +47,13 @@ test.describe('on a laptop', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('One photograph settles it.')
   })
 
-  test('the two doors lead shops to the demo and renters to their page', async ({ page }) => {
+  test('the two doors lead shops and renters each to their own page', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('link', { name: "For renters See the renter's view" }).first().click()
     await expect(page).toHaveURL('/for-renters')
     await page.goBack()
-    await page.getByRole('link', { name: 'For shops Open the demo shop' }).first().click()
-    await expect(page).toHaveURL('/demo')
+    await page.getByRole('link', { name: "For shops See the shop's view" }).first().click()
+    await expect(page).toHaveURL('/for-shops')
   })
 
   test('a page opened from the foot of the home page starts at its own top', async ({ page }) => {
