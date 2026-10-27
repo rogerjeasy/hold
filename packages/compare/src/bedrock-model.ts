@@ -1,14 +1,14 @@
-import { AnthropicBedrockMantle } from '@anthropic-ai/bedrock-sdk'
-import type { BedrockMantleClientOptions } from '@anthropic-ai/bedrock-sdk/mantle-client'
-import { APIConnectionError, APIError, APIUserAbortError, BetaFallbackState, betaRefusalFallbackMiddleware } from '@anthropic-ai/sdk'
+import { AnthropicBedrock } from '@anthropic-ai/bedrock-sdk'
+import type { ClientOptions } from '@anthropic-ai/bedrock-sdk'
+import { APIConnectionError, APIError, APIUserAbortError } from '@anthropic-ai/sdk'
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod'
 import { INSPECTION_LIMITS } from '@hold/domain'
 import { COMPARISON_MODEL, FIRST_PROMPT, lookSchema, SECOND_PROMPT } from './model.ts'
 import type { ComparisonModel } from './model.ts'
 
 // Only this adapter reaches Bedrock. No tool is offered; text read from photographs can never cause an action.
-export function createBedrockComparisonModel(options: BedrockMantleClientOptions): ComparisonModel {
-  const client = new AnthropicBedrockMantle({ ...options, maxRetries: 0, timeout: 30_000, middleware: [betaRefusalFallbackMiddleware([{ model: 'anthropic.claude-opus-4-8' }])] })
+export function createBedrockComparisonModel(options: Pick<ClientOptions, 'awsRegion' | 'skipAuth' | 'fetch'>): ComparisonModel {
+  const client = new AnthropicBedrock({ ...options, maxRetries: 0, timeout: 30_000 })
   return {
     async look(request, signal) {
       try {
@@ -25,7 +25,7 @@ export function createBedrockComparisonModel(options: BedrockMantleClientOptions
               { type: 'image' as const, source: { type: 'base64' as const, media_type: 'image/jpeg' as const, data: body.toString('base64') } },
             ]),
           ] }],
-        }, { signal, fallbackState: new BetaFallbackState() })
+        }, { signal })
         if (response.stop_reason !== 'end_turn') return { kind: response.stop_reason === 'refusal' ? 'refused' : 'unavailable', model: response.model }
         const text = response.content.filter((block) => block.type === 'text').map((block) => block.text).join('')
         let data: unknown

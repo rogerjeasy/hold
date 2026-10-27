@@ -460,12 +460,24 @@ describe('the web app', () => {
     expect(instancePolicy()).not.toMatch(/DatabaseSecret|database\/admin/)
   })
 
-  it('may ask Claude on Bedrock to sort an incident report, with the two models named and nothing else of Bedrock', () => {
+  it('may ask Claude on Bedrock to sort an incident report, with the models named and nothing else of Bedrock', () => {
     const policy = instancePolicy()
     expect(policy).toContain('bedrock-mantle:CreateInference')
     expect(policy).toContain('anthropic.claude-opus-5-5')
-    expect(policy).toContain('anthropic.claude-opus-4-8')
-    expect(policy).not.toContain('bedrock:InvokeModel')
+    expect(policy).toContain('inference-profile/us.anthropic.claude-opus-4-6-v1')
+    expect(policy).not.toContain('foundation-model/*')
+  })
+
+  // Opus 4.6 runs through its US inference profile while the account's Opus 5.5 quota is zero, and the profile may send
+  // a call to any of three regions: each role may invoke the profile and that one model there, nothing wider.
+  it('lets every role that asks Claude invoke Opus 4.6 through its US profile, on that model in the profile\'s regions only', () => {
+    const rolePolicy = (stack: Template, prefix: string) => JSON.stringify(Object.entries(stack.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith(prefix)).map(([, value]) => value))
+    const boundary = JSON.stringify(delivery.findResources('AWS::IAM::ManagedPolicy'))
+    for (const policy of [rolePolicy(work, 'ComparisonRole'), rolePolicy(work, 'NegotiationRole'), rolePolicy(work, 'OperationsRole'), instancePolicy(), rolePolicy(delivery, 'EvalRole'), boundary]) {
+      expect(policy).toContain('bedrock:InvokeModel')
+      expect(policy).toContain('inference-profile/us.anthropic.claude-opus-4-6-v1')
+      for (const region of ['us-east-1', 'us-east-2', 'us-west-2']) expect(policy).toContain(`arn:aws:bedrock:${region}::foundation-model/anthropic.claude-opus-4-6-v1`)
+    }
   })
 
   it('may do only what the web app does: query the database, read its secrets, keep PayPal credentials, hand work to the worker, sort an incident and put a person in a group', () => {
@@ -493,6 +505,8 @@ describe('the web app', () => {
         's3:GetObjectVersion',
         's3:PutObject',
         'bedrock-mantle:CreateInference',
+        'bedrock:InvokeModel',
+        'bedrock:InvokeModelWithResponseStream',
         'kms:Sign',
         'kms:GetPublicKey',
       ]),

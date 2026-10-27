@@ -174,6 +174,7 @@ This is the screen staff use most, so it gets the most care.
 ## 6. AI
 
 - **Model: Claude Opus 5.5 on Amazon Bedrock, model ID `anthropic.claude-opus-5-5`.** Used to compare photographs, classify differences, write claims, summarize contested claims and run the owner's assistant.
+- **Running for now: Claude Opus 4.6, through its US inference profile `us.anthropic.claude-opus-4-6-v1` and the `AnthropicBedrock` client (bedrock-runtime).** On 27 October 2026 AWS held this account's quota for Opus 5.5 and Opus 4.8 at zero tokens a minute, and only a support case can lift it (section 16, item 14). Every adapter sends adaptive thinking where it thinks, effort, structured output and strict tools as before; there is no refusal fallback, since Opus 4.8 is under the same quota. Each role may invoke that profile and the model in the three regions it routes to (`CLAUDE_INVOKE_RESOURCES` in `infra/lib/settings.ts`); the Mantle grants for Opus 5.5 stay, so going back is a change to the five model constants and adapters only.
 - **Access: Amazon Bedrock**, through the `AnthropicBedrockMantle` client in `@anthropic-ai/bedrock-sdk`. It serves the same Messages API as Anthropic's own, so `@anthropic-ai/sdk` supplies the types, the zod structured-output helper and the tool runner. Bedrock model IDs carry the `anthropic.` prefix. Calls are signed with the task's IAM role, so there is no Claude key to store.
 - **Structured outputs** for every comparison, so each finding is a record with a view, a location, a class, a confidence and a matched price-list entry.
 - **Streaming** for the owner's assistant.
@@ -445,6 +446,7 @@ Each of these should be tried against the real services before the build depends
 **Live worker startup, 22 October 2026.** Deployed empty-batch invocations exposed eager PDFKit initialization in the CommonJS media/comparison bundles. Failing startup tests preceded a photo-only evidence import fix. The corrected JavaScript was deployed with the CI-produced Linux native dependencies; both live handlers then returned an empty failure list without a Lambda function error. Evidence and receipt handlers also started successfully. The post-fix full check passed 160 files / 1,235 tests. These startup checks do not exercise image processing, model inference, PDF rendering, SMTP delivery or settlement.
 
 13. **An outside MCP client.** Connect one common MCP client to a stub of Hold's server with no sign-in step.
+14. **Bedrock access to Opus 5.5.** Tried 27 October 2026: the Marketplace agreements for Opus 5.5 and Opus 4.8 are accepted, but the account's applied quotas are zero (Service Quotas refuses a request below the 20 million default). An AWS Support case is open for it. Until it is lifted, Hold runs on Opus 4.6 (section 6).
 
 ---
 

@@ -3,7 +3,7 @@ import { createBedrockAssistantModel } from './bedrock-model.ts'
 import type { ModelRequest } from './model.ts'
 
 const recorded = (body: Record<string, unknown>, status = 200) => () => Promise.resolve(new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } }))
-const message = (content: unknown[], stopReason: string) => ({ id: 'msg_recorded', type: 'message', role: 'assistant', model: 'anthropic.claude-opus-5-5', content, stop_reason: stopReason, stop_sequence: null, usage: { input_tokens: 900, output_tokens: 60 } })
+const message = (content: unknown[], stopReason: string) => ({ id: 'msg_recorded', type: 'message', role: 'assistant', model: 'claude-opus-4-6', content, stop_reason: stopReason, stop_sequence: null, usage: { input_tokens: 900, output_tokens: 60 } })
 
 const request: ModelRequest = {
   system: 'You are a demonstration assistant.',
@@ -15,17 +15,20 @@ const request: ModelRequest = {
 describe('the hosted assistant’s Bedrock adapter', () => {
   it('sends strict tools, automatic tool choice and explicit effort, and returns the model’s tool calls', async () => {
     let sent: Record<string, unknown> = {}
+    let url = ''
     const model = createBedrockAssistantModel({
       awsRegion: 'us-east-1',
       skipAuth: true,
-      fetch: (_url, options) => {
+      fetch: (to, options) => {
+        url = (to instanceof Request ? to.url : to.toString())
         if (typeof options?.body !== 'string') throw new Error('Expected a JSON request body')
         sent = JSON.parse(options.body) as Record<string, unknown>
         return recorded(message([{ type: 'tool_use', id: 'toolu_1', name: 'quote_rental', input: { shop: 'ribeira-bikes' } }], 'tool_use'))()
       },
     })
-    expect(await model.reply(request, new AbortController().signal)).toEqual({ kind: 'reply', content: [{ type: 'tool_use', id: 'toolu_1', name: 'quote_rental', input: { shop: 'ribeira-bikes' } }], stopReason: 'tool_use', tokens: 960, model: 'anthropic.claude-opus-5-5' })
-    expect(sent).toMatchObject({ model: 'anthropic.claude-opus-5-5', max_tokens: 1500, tool_choice: { type: 'auto' }, output_config: { effort: 'medium' }, system: 'You are a demonstration assistant.' })
+    expect(await model.reply(request, new AbortController().signal)).toEqual({ kind: 'reply', content: [{ type: 'tool_use', id: 'toolu_1', name: 'quote_rental', input: { shop: 'ribeira-bikes' } }], stopReason: 'tool_use', tokens: 960, model: 'claude-opus-4-6' })
+    expect(url).toContain('/model/us.anthropic.claude-opus-4-6-v1/invoke')
+    expect(sent).toMatchObject({ max_tokens: 1500, tool_choice: { type: 'auto' }, output_config: { effort: 'medium' }, system: 'You are a demonstration assistant.' })
     const [tool] = sent['tools'] as Record<string, unknown>[]
     expect(tool).toMatchObject({ name: 'quote_rental', strict: true, input_schema: { type: 'object', additionalProperties: false, required: ['shop'] } })
     // Constraints strict schemas cannot carry are kept as words for the model; the server still checks them.

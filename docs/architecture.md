@@ -1078,7 +1078,7 @@ The owner can ask questions and give instructions in plain language.
 
 ### 10.7 Model configuration
 
-- Model Claude Opus 5.5 on Amazon Bedrock, `anthropic.claude-opus-5-5`, with a client-side refusal fallback to `anthropic.claude-opus-4-8`.
+- Model Claude Opus 5.5 on Amazon Bedrock, `anthropic.claude-opus-5-5`, with a client-side refusal fallback to `anthropic.claude-opus-4-8`. Until AWS lifts the account's zero quota for Opus 5.5, Opus 4.6 runs in its place through `us.anthropic.claude-opus-4-6-v1`, without a fallback (`tech-stack.md` section 6).
 - Effort is set explicitly on every call: high for both looks, medium for summaries and for sorting an incident report, low for short messages.
 - Structured output for all findings.
 - The stop reason is checked on every response. A refusal is handled as a normal outcome, and server-side fallbacks are enabled.

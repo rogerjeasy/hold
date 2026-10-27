@@ -2,7 +2,7 @@ import type { Stack } from 'aws-cdk-lib'
 import * as iam from 'aws-cdk-lib/aws-iam'
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources'
 import * as scheduler from 'aws-cdk-lib/aws-scheduler'
-import { ACCOUNT, DATABASE_NAME, name, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
+import { ACCOUNT, CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES, DATABASE_NAME, name, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
 import { workerFunction } from './worker.ts'
 import type { WorkerProps } from './worker.ts'
 
@@ -21,6 +21,7 @@ export function createOperationsWorker(stack: Stack, props: WorkerProps): void {
   role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:GetSecretValue'], resources: [props.workerUserSecret.secretArn, `${secrets}${secretName('paypal', 'shops')}/*`, `${secrets}${SMTP_SECRET_NAME}-*`] }))
   // Mantle authorizes by model condition rather than model ARN, as for the comparison worker.
   role.addToPolicy(new iam.PolicyStatement({ actions: ['bedrock-mantle:CreateInference'], resources: ['*'], conditions: { StringEquals: { 'aws:RequestedRegion': REGION, 'bedrock-mantle:Model': ['anthropic.claude-opus-5-5', 'anthropic.claude-opus-4-8'] } } }))
+  role.addToPolicy(new iam.PolicyStatement({ actions: CLAUDE_INVOKE_ACTIONS, resources: CLAUDE_INVOKE_RESOURCES }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'], resources: [`arn:aws:logs:${REGION}:${ACCOUNT}:log-group:/aws/lambda/${name('worker', 'operations')}*:*`] }))
   queue.grantSendMessages(role)
   const environment = {

@@ -49,18 +49,21 @@ describe('the simulated sorting of the test environment', () => {
 describe('the Bedrock adapter for sorting', () => {
   it('asks for structured output with explicit effort and a small ceiling, and offers no tools', async () => {
     let sent: unknown
-    const model = createBedrockIncidentModel({ awsRegion: 'us-east-1', skipAuth: true, fetch: (_url, options) => {
+    let url = ''
+    const model = createBedrockIncidentModel({ awsRegion: 'us-east-1', skipAuth: true, fetch: (to, options) => {
+      url = (to instanceof Request ? to.url : to.toString())
       if (typeof options?.body !== 'string') throw new Error('Expected a JSON request body')
       sent = JSON.parse(options.body) as unknown
-      return Promise.resolve(new Response(JSON.stringify({ id: 'msg_recorded', type: 'message', role: 'assistant', model: 'anthropic.claude-opus-5-5', content: [{ type: 'text', text: JSON.stringify(answer) }], stop_reason: 'end_turn', stop_sequence: null, usage: { input_tokens: 300, output_tokens: 60 } }), { headers: { 'content-type': 'application/json' } }))
+      return Promise.resolve(new Response(JSON.stringify({ id: 'msg_recorded', type: 'message', role: 'assistant', model: 'claude-opus-4-6', content: [{ type: 'text', text: JSON.stringify(answer) }], stop_reason: 'end_turn', stop_sequence: null, usage: { input_tokens: 300, output_tokens: 60 } }), { headers: { 'content-type': 'application/json' } }))
     } })
-    expect(await model.sort({ quoted: '{}' }, new AbortController().signal)).toEqual({ kind: 'result', data: answer, model: 'anthropic.claude-opus-5-5' })
-    expect(sent).toMatchObject({ model: 'anthropic.claude-opus-5-5', max_tokens: 1024, output_config: { effort: 'medium', format: { type: 'json_schema' } } })
+    expect(await model.sort({ quoted: '{}' }, new AbortController().signal)).toEqual({ kind: 'result', data: answer, model: 'claude-opus-4-6' })
+    expect(url).toContain('/model/us.anthropic.claude-opus-4-6-v1/invoke')
+    expect(sent).toMatchObject({ max_tokens: 1024, output_config: { effort: 'medium', format: { type: 'json_schema' } } })
     expect(sent).not.toHaveProperty('tools')
   })
 
   it('reads a refusal as a refusal, never as an answer', async () => {
-    const model = createBedrockIncidentModel({ awsRegion: 'us-east-1', skipAuth: true, fetch: () => Promise.resolve(new Response(JSON.stringify({ id: 'msg_refused', type: 'message', role: 'assistant', model: 'anthropic.claude-opus-5-5', content: [], stop_reason: 'refusal', stop_sequence: null, usage: { input_tokens: 100, output_tokens: 1 } }), { headers: { 'content-type': 'application/json' } })) })
+    const model = createBedrockIncidentModel({ awsRegion: 'us-east-1', skipAuth: true, fetch: () => Promise.resolve(new Response(JSON.stringify({ id: 'msg_refused', type: 'message', role: 'assistant', model: 'claude-opus-4-6', content: [], stop_reason: 'refusal', stop_sequence: null, usage: { input_tokens: 100, output_tokens: 1 } }), { headers: { 'content-type': 'application/json' } })) })
     expect(await model.sort({ quoted: '{}' }, new AbortController().signal)).toMatchObject({ kind: 'refused' })
   })
 

@@ -2,7 +2,8 @@
 // referee and its tests. The renter's advocate's instructions are the ones a renter may want to read before trusting
 // it: they say whose side it is on and what it may never do.
 
-export const ADVOCATE_MODEL = 'anthropic.claude-opus-5-5'
+// Opus 4.6 through its US inference profile until AWS lifts the account's zero quota for Opus 5.5 (tech-stack.md section 16).
+export const ADVOCATE_MODEL = 'us.anthropic.claude-opus-4-6-v1'
 export const ADVOCATE_PROMPT_VERSION = 'advocate-1'
 
 const SHARED = `How the negotiation works. Only the amounts on the claim's existing lines can be negotiated. An offer is a full list of the claim's lines, each with an amount in cents between zero and its published price; its total is their sum. A line kept at its published price needs no ground. A lowered or waived line must name one ground, and the evidence it rests on, from the brief: known_mark (cite the knownMarkIds of that line), ordinary_wear (cite a wear policy clause id), uncertain_evidence (only where the line's evidence is inDoubt), renter_photo (cite one of the renterPhotoIds). A referee written in plain code checks every move. It refuses a ground whose check fails, an amount outside a line's price, an offer outside your own limits, a shop offer that rises or a renter offer that falls, and an offer that reaches past the other side's last offer: accept that offer instead. When it refuses, you are told why and may try once more; a second refusal is a pass. A pass, or running out of offers or time, sends the claim to the shop's owner to decide.

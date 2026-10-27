@@ -3,7 +3,8 @@ import type { DetectorKind, OwnerRule, ProposalKind } from '@hold/domain'
 import { z } from 'zod'
 import type { PayPalTool } from './paypal-reader.ts'
 
-export const OPS_MODEL = 'anthropic.claude-opus-5-5'
+// Opus 4.6 through its US inference profile until AWS lifts the account's zero quota for Opus 5.5 (tech-stack.md section 16).
+export const OPS_MODEL = 'us.anthropic.claude-opus-4-6-v1'
 export const OPS_PROMPT_VERSION = 'ops-1'
 
 // A whole run's ceilings (extensions.md section 6.7). An exception left when one is reached goes to the queue with a

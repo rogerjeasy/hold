@@ -2,7 +2,7 @@ import { Duration } from 'aws-cdk-lib'
 import type { Stack } from 'aws-cdk-lib'
 import * as iam from 'aws-cdk-lib/aws-iam'
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources'
-import { DATABASE_NAME, name, REGION } from './settings.ts'
+import { CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES, DATABASE_NAME, name, REGION } from './settings.ts'
 import { workerFunction } from './worker.ts'
 import type { WorkerProps } from './worker.ts'
 
@@ -19,6 +19,7 @@ export function createNegotiationWorker(stack: Stack, props: WorkerProps): void 
   props.workerUserSecret.grantRead(role)
   // The advocates' model, and the model a refusal falls back to.
   role.addToPolicy(new iam.PolicyStatement({ actions: ['bedrock-mantle:CreateInference'], resources: ['*'], conditions: { StringEquals: { 'aws:RequestedRegion': REGION, 'bedrock-mantle:Model': ['anthropic.claude-opus-5-5', 'anthropic.claude-opus-4-8'] } } }))
+  role.addToPolicy(new iam.PolicyStatement({ actions: CLAUDE_INVOKE_ACTIONS, resources: CLAUDE_INVOKE_RESOURCES }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'], resources: [`arn:aws:logs:${stack.region}:${stack.account}:log-group:/aws/lambda/${name('worker', 'negotiations')}:*`] }))
   const worker = workerFunction(stack, 'NegotiationWorker', name('worker', 'negotiations'), 'negotiations-lambda.ts', role, { HOLD_DATABASE_CLUSTER_ARN: props.cluster.clusterArn, HOLD_DATABASE_SECRET_ARN: props.workerUserSecret.secretArn, HOLD_DATABASE_NAME: DATABASE_NAME }, { timeout: NEGOTIATION_TIMEOUT })
   worker.addEventSource(new SqsEventSource(queue, { batchSize: 1, reportBatchItemFailures: true }))

@@ -1,6 +1,6 @@
-import { AnthropicBedrockMantle } from '@anthropic-ai/bedrock-sdk'
-import type { BedrockMantleClientOptions } from '@anthropic-ai/bedrock-sdk/mantle-client'
-import { APIConnectionError, APIError, APIUserAbortError, BetaFallbackState, betaRefusalFallbackMiddleware } from '@anthropic-ai/sdk'
+import { AnthropicBedrock } from '@anthropic-ai/bedrock-sdk'
+import type { ClientOptions } from '@anthropic-ai/bedrock-sdk'
+import { APIConnectionError, APIError, APIUserAbortError } from '@anthropic-ai/sdk'
 import type { Anthropic } from '@anthropic-ai/sdk'
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod'
 import { investigationSchema, OPS_MODEL, OPS_PROMPT } from './investigator.ts'
@@ -20,8 +20,8 @@ const brief = (request: InvestigationRequest) => [
 // Only this adapter reaches Bedrock for the operations agent. It runs the model's tool calls through the gated tools
 // it is given and nothing else, up to the exception's limit, then reads the structured answer. PayPal's tool schemas
 // are PayPal's, so they are passed as listed rather than in strict mode; the answer itself is a strict schema.
-export function createBedrockInvestigator(options: BedrockMantleClientOptions): Investigator {
-  const client = new AnthropicBedrockMantle({ ...options, maxRetries: 1, middleware: [betaRefusalFallbackMiddleware([{ model: 'anthropic.claude-opus-4-8' }])] })
+export function createBedrockInvestigator(options: Pick<ClientOptions, 'awsRegion' | 'skipAuth' | 'fetch'>): Investigator {
+  const client = new AnthropicBedrock({ ...options, maxRetries: 1 })
   return {
     async investigate(request, tools, limits): Promise<Investigation> {
       const definitions = tools.tools.map((tool) => ({ name: tool.name, description: tool.description.slice(0, 1000), input_schema: { type: 'object' as const, ...tool.inputSchema } }))
@@ -38,8 +38,9 @@ export function createBedrockInvestigator(options: BedrockMantleClientOptions): 
             system: OPS_PROMPT,
             messages,
             ...(definitions.length === 0 ? {} : { tools: definitions, tool_choice: { type: 'auto' as const } }),
+            thinking: { type: 'adaptive' },
             output_config: { effort: 'medium', format: betaZodOutputFormat(investigationSchema) },
-          }, { signal: limits.signal, fallbackState: new BetaFallbackState() })
+          }, { signal: limits.signal })
           inputTokens += response.usage.input_tokens
           outputTokens += response.usage.output_tokens
           model = response.model

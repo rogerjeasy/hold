@@ -2,11 +2,12 @@ import { describe, expect, it } from 'vitest'
 import { createBedrockAdvocateModel } from './bedrock-advocate-model.ts'
 
 // Recorded Bedrock replies, played back through the client's fetch.
-function recorded(body: Readonly<Record<string, unknown>>, seen: unknown[] = []) {
-  return createBedrockAdvocateModel({ awsRegion: 'us-east-1', skipAuth: true, fetch: (_url, options) => {
+function recorded(body: Readonly<Record<string, unknown>>, seen: unknown[] = [], urls: string[] = []) {
+  return createBedrockAdvocateModel({ awsRegion: 'us-east-1', skipAuth: true, fetch: (to, options) => {
+    urls.push((to instanceof Request ? to.url : to.toString()))
     if (typeof options?.body !== 'string') throw new Error('Expected a JSON request body')
     seen.push(JSON.parse(options.body) as unknown)
-    return Promise.resolve(new Response(JSON.stringify({ id: 'msg_recorded', type: 'message', role: 'assistant', model: 'anthropic.claude-opus-5-5', stop_sequence: null, usage: { input_tokens: 900, output_tokens: 120 }, ...body }), { headers: { 'content-type': 'application/json' } }))
+    return Promise.resolve(new Response(JSON.stringify({ id: 'msg_recorded', type: 'message', role: 'assistant', model: 'claude-opus-4-6', stop_sequence: null, usage: { input_tokens: 900, output_tokens: 120 }, ...body }), { headers: { 'content-type': 'application/json' } }))
   } })
 }
 const request = { side: 'renter' as const, system: 'You are the renter’s advocate.', message: '<negotiation>{}</negotiation>' }
@@ -14,9 +15,11 @@ const request = { side: 'renter' as const, system: 'You are the renter’s advoc
 describe('the advocate model adapter', () => {
   it('offers exactly the three strict tools with automatic choice and explicit effort, and returns the move', async () => {
     const seen: unknown[] = []
-    const model = recorded({ content: [{ type: 'tool_use', id: 'toolu_1', name: 'offer', input: { lines: [] } }], stop_reason: 'tool_use' }, seen)
-    expect(await model.move(request, new AbortController().signal)).toEqual({ kind: 'move', tool: 'offer', input: { lines: [] }, model: 'anthropic.claude-opus-5-5', inputTokens: 900, outputTokens: 120 })
-    expect(seen[0]).toMatchObject({ model: 'anthropic.claude-opus-5-5', tool_choice: { type: 'auto' }, output_config: { effort: 'medium' }, system: request.system, messages: [{ role: 'user', content: [{ type: 'text', text: request.message }] }] })
+    const urls: string[] = []
+    const model = recorded({ content: [{ type: 'tool_use', id: 'toolu_1', name: 'offer', input: { lines: [] } }], stop_reason: 'tool_use' }, seen, urls)
+    expect(await model.move(request, new AbortController().signal)).toEqual({ kind: 'move', tool: 'offer', input: { lines: [] }, model: 'claude-opus-4-6', inputTokens: 900, outputTokens: 120 })
+    expect(urls[0]).toContain('/model/us.anthropic.claude-opus-4-6-v1/invoke')
+    expect(seen[0]).toMatchObject({ thinking: { type: 'adaptive' }, tool_choice: { type: 'auto' }, output_config: { effort: 'medium' }, system: request.system, messages: [{ role: 'user', content: [{ type: 'text', text: request.message }] }] })
     const tools = (seen[0] as { readonly tools: readonly { readonly name: string; readonly strict: boolean }[] }).tools
     expect(tools.map((tool) => [tool.name, tool.strict])).toEqual([['offer', true], ['accept', true], ['pass', true]])
   })

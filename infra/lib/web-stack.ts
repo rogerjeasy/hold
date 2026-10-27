@@ -7,7 +7,7 @@ import * as iam from 'aws-cdk-lib/aws-iam'
 import type * as s3 from 'aws-cdk-lib/aws-s3'
 import type * as rds from 'aws-cdk-lib/aws-rds'
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
-import { ACCOUNT, CREDENTIAL_KEY_ALIAS, DATABASE_NAME, name, PREFIX, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
+import { ACCOUNT, CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES, CREDENTIAL_KEY_ALIAS, DATABASE_NAME, name, PREFIX, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
 import type * as sqs from 'aws-cdk-lib/aws-sqs'
 
 // The web app on App Runner (tech-stack.md section 8): one container service with its own HTTPS address, no load
@@ -89,6 +89,7 @@ function instanceRole(stack: Stack, props: WebStackProps): iam.Role {
   // The hosted assistant (section 8.10) uses the same model; its tools are Hold's MCP server, reached over HTTP.
   // Mantle authorizes by model condition rather than model ARN, as for the comparison worker.
   role.addToPolicy(new iam.PolicyStatement({ actions: ['bedrock-mantle:CreateInference'], resources: ['*'], conditions: { StringEquals: { 'aws:RequestedRegion': REGION, 'bedrock-mantle:Model': ['anthropic.claude-opus-5-5', 'anthropic.claude-opus-4-8'] } } }))
+  role.addToPolicy(new iam.PolicyStatement({ actions: CLAUDE_INVOKE_ACTIONS, resources: CLAUDE_INVOKE_RESOURCES }))
   return role
 }
 

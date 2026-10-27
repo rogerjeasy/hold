@@ -1,5 +1,5 @@
-import { AnthropicBedrockMantle } from '@anthropic-ai/bedrock-sdk'
-import type { BedrockMantleClientOptions } from '@anthropic-ai/bedrock-sdk/mantle-client'
+import { AnthropicBedrock } from '@anthropic-ai/bedrock-sdk'
+import type { ClientOptions } from '@anthropic-ai/bedrock-sdk'
 import { APIConnectionError, APIError, APIUserAbortError } from '@anthropic-ai/sdk'
 import { transformJSONSchema } from '@anthropic-ai/sdk/lib/transform-json-schema'
 import { HOSTED_MODEL } from './model.ts'
@@ -8,8 +8,8 @@ import type { AssistantModel, Block } from './model.ts'
 // Only this adapter reaches Bedrock for the hosted assistant. Tools are strict, the model chooses when to call them,
 // effort is set, and nothing is retried: the runner's ceilings bound the whole turn, and an unreachable model is an
 // ordinary outcome the page explains.
-export function createBedrockAssistantModel(options: BedrockMantleClientOptions): AssistantModel {
-  const client = new AnthropicBedrockMantle({ ...options, maxRetries: 0 })
+export function createBedrockAssistantModel(options: Pick<ClientOptions, 'awsRegion' | 'skipAuth' | 'fetch'>): AssistantModel {
+  const client = new AnthropicBedrock({ ...options, maxRetries: 0 })
   return {
     simulated: false,
     async reply(request, signal) {

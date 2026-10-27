@@ -1,6 +1,6 @@
-import { AnthropicBedrockMantle } from '@anthropic-ai/bedrock-sdk'
-import type { BedrockMantleClientOptions } from '@anthropic-ai/bedrock-sdk/mantle-client'
-import { APIConnectionError, APIError, APIUserAbortError, BetaFallbackState, betaRefusalFallbackMiddleware } from '@anthropic-ai/sdk'
+import { AnthropicBedrock } from '@anthropic-ai/bedrock-sdk'
+import type { ClientOptions } from '@anthropic-ai/bedrock-sdk'
+import { APIConnectionError, APIError, APIUserAbortError } from '@anthropic-ai/sdk'
 import { ADVOCATE_TOOLS } from './advocate-model.ts'
 import type { AdvocateModel } from './advocate-model.ts'
 import { ADVOCATE_MODEL } from './prompts.ts'
@@ -10,8 +10,8 @@ const isTool = (name: string): name is (typeof TOOL_NAMES)[number] => (TOOL_NAME
 
 // Only this adapter reaches Bedrock for an advocate. One request per turn, no retries inside it, a small output ceiling,
 // the three moves as strict tools with automatic choice, and a refusal handled as a normal outcome.
-export function createBedrockAdvocateModel(options: BedrockMantleClientOptions, timeoutMilliseconds = 60_000): AdvocateModel {
-  const client = new AnthropicBedrockMantle({ ...options, maxRetries: 0, timeout: timeoutMilliseconds, middleware: [betaRefusalFallbackMiddleware([{ model: 'anthropic.claude-opus-4-8' }])] })
+export function createBedrockAdvocateModel(options: Pick<ClientOptions, 'awsRegion' | 'skipAuth' | 'fetch'>, timeoutMilliseconds = 60_000): AdvocateModel {
+  const client = new AnthropicBedrock({ ...options, maxRetries: 0, timeout: timeoutMilliseconds })
   return {
     async move(request, signal) {
       try {
@@ -24,7 +24,7 @@ export function createBedrockAdvocateModel(options: BedrockMantleClientOptions, 
           tool_choice: { type: 'auto' },
           system: request.system,
           messages: [{ role: 'user', content: [{ type: 'text', text: request.message }] }],
-        }, { signal, fallbackState: new BetaFallbackState() })
+        }, { signal })
         const usage = { model: response.model, inputTokens: response.usage.input_tokens, outputTokens: response.usage.output_tokens }
         if (response.stop_reason === 'refusal') return { kind: 'refused', ...usage }
         const call = response.content.find((block) => block.type === 'tool_use')

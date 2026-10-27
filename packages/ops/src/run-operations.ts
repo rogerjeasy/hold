@@ -137,7 +137,8 @@ async function investigate(dependencies: OpsDependencies, work: Investigation): 
   const fallback = fixedChoice(candidates[0] ?? 'note', true)
   const investigator = dependencies.investigator
   if (investigator === undefined) return fallback
-  const facts = await inShop(dependencies.database, { role: 'hold_worker', shopId: work.shopId }, (transaction) =>
+  // Only ever serialized for the model, so its shape is not needed here.
+  const facts = await inShop<unknown>(dependencies.database, { role: 'hold_worker', shopId: work.shopId }, (transaction) =>
     exception.rentalId === null ? Promise.resolve({ subjectKind: exception.subjectKind, subjectId: exception.subjectId }) : exceptionFacts(transaction, 'rental', exception.rentalId))
   const answered = { count: 0 }
   const tools = gatedTools({ database: dependencies.database, shopId: work.shopId, runId: work.runId, subject: { kind: exception.subjectKind, id: exception.subjectId }, reader: work.reader, budget: work.budget, answered, maxToolCalls: work.limits.maxToolCalls, now: dependencies.now })

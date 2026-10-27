@@ -1,7 +1,7 @@
 import type { Stack } from 'aws-cdk-lib'
 import * as iam from 'aws-cdk-lib/aws-iam'
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources'
-import { DATABASE_NAME, name, REGION } from './settings.ts'
+import { CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES, DATABASE_NAME, name, REGION } from './settings.ts'
 import { workerFunction } from './worker.ts'
 import type { WorkerProps } from './worker.ts'
 
@@ -15,6 +15,7 @@ export function createComparisonWorker(stack: Stack, props: WorkerProps): void {
   // Mantle authorizes by model condition rather than model ARN:
   // https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-managed-agents-openai-security.html
   role.addToPolicy(new iam.PolicyStatement({ actions: ['bedrock-mantle:CreateInference'], resources: ['*'], conditions: { StringEquals: { 'aws:RequestedRegion': REGION, 'bedrock-mantle:Model': ['anthropic.claude-opus-5-5', 'anthropic.claude-opus-4-8'] } } }))
+  role.addToPolicy(new iam.PolicyStatement({ actions: CLAUDE_INVOKE_ACTIONS, resources: CLAUDE_INVOKE_RESOURCES }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'], resources: [`arn:aws:logs:${stack.region}:${stack.account}:log-group:/aws/lambda/${name('worker', 'comparisons')}:*`] }))
   const worker = workerFunction(stack, 'ComparisonWorker', name('worker', 'comparisons'), 'comparisons-lambda.ts', role, { HOLD_DATABASE_CLUSTER_ARN: props.cluster.clusterArn, HOLD_DATABASE_SECRET_ARN: props.workerUserSecret.secretArn, HOLD_DATABASE_NAME: DATABASE_NAME, HOLD_EVIDENCE_BUCKET: props.evidenceBucket.bucketName, HOLD_DISPLAY_BUCKET: props.displayBucket.bucketName }, { memorySize: 1536, nativeModules: ['sharp', '@techstark/opencv-js'] })
   worker.addEventSource(new SqsEventSource(queue, { batchSize: 1, reportBatchItemFailures: true }))

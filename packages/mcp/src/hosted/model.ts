@@ -31,7 +31,8 @@ export type AssistantModel = {
   reply(request: ModelRequest, signal: AbortSignal): Promise<ModelReply>
 }
 
-export const HOSTED_MODEL = 'anthropic.claude-opus-5-5'
+// Opus 4.6 through its US inference profile until AWS lifts the account's zero quota for Opus 5.5 (tech-stack.md section 16).
+export const HOSTED_MODEL = 'us.anthropic.claude-opus-4-6-v1'
 export const HOSTED_PROMPT_VERSION = 'hosted-assistant-1'
 
 // The hosted assistant's instructions. Hold's tool results carry no instructions of their own; the shop's words come in

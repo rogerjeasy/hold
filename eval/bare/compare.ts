@@ -1,7 +1,6 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { basename, join } from 'node:path'
-import { AnthropicBedrockMantle } from '@anthropic-ai/bedrock-sdk'
-import { BetaFallbackState, betaRefusalFallbackMiddleware } from '@anthropic-ai/sdk'
+import { AnthropicBedrock } from '@anthropic-ai/bedrock-sdk'
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod'
 import { comparisonSchema } from './comparison-schema.ts'
 import type { Comparison } from './comparison-schema.ts'
@@ -13,9 +12,8 @@ import { PROMPT_VERSION, SYSTEM_PROMPT } from './prompt.ts'
 //   pnpm --filter @hold/eval compare:bare <handover photo> <return photo>
 // AWS credentials come from the usual AWS chain, or AWS_BEARER_TOKEN_BEDROCK. The region comes from AWS_REGION.
 
-const MODEL = 'anthropic.claude-opus-5-5'
-// Bedrock has no server-side fallback, so a declined request is retried on this model by the SDK.
-const FALLBACK_MODEL = 'anthropic.claude-opus-4-8'
+// Opus 4.6 through its US inference profile until AWS lifts the account's zero quota for Opus 5.5 (tech-stack.md section 16).
+const MODEL = 'us.anthropic.claude-opus-4-6-v1'
 const EFFORT = 'high'
 const MAX_TOKENS = 16_000
 const POSITION_LIMIT = 1000
@@ -39,7 +37,7 @@ if (handoverPath === undefined || returnPath === undefined) {
 }
 
 const [handover, returned] = await Promise.all([preparePhoto(handoverPath), preparePhoto(returnPath)])
-const client = new AnthropicBedrockMantle({ middleware: [betaRefusalFallbackMiddleware([{ model: FALLBACK_MODEL }])] })
+const client = new AnthropicBedrock()
 const startedAt = Date.now()
 
 const response = await client.beta.messages.parse(
@@ -61,7 +59,6 @@ const response = await client.beta.messages.parse(
       },
     ],
   },
-  { fallbackState: new BetaFallbackState() },
 )
 
 const comparison = response.stop_reason === 'end_turn' ? response.parsed_output : null
