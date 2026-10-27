@@ -2552,7 +2552,8 @@
     "for": "For",
     "approve": "Approve",
     "cancel": "Cancel and go back",
-    "unknown": "This order is not known."
+    "unknown": "This order is not known.",
+    "approveAged": "Approve as if {days} days ago, to try a hold near its end"
   },
   "claim": {
     "title": "Claim and settlement",

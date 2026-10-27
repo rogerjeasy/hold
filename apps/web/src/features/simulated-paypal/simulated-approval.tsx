@@ -3,6 +3,7 @@ import { FlaskConical } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { formatMoney } from '@/lib/money'
+import { SIMULATED_HOLD_AGE_DAYS } from './hold-age'
 
 type SimulatedApprovalProps = { orderId: string; amount: Money; description: string; cancelPath: string }
 
@@ -28,9 +29,12 @@ export function SimulatedApproval({ orderId, amount, description, cancelPath }: 
           <dd className="font-semibold wrap-long-words">{description}</dd>
         </div>
       </dl>
-      <form method="post" action={`/simulated-paypal/${orderId}/approve`}>
+      <form method="post" action={`/simulated-paypal/${orderId}/approve`} className="grid gap-3">
         <Button type="submit" className="min-h-12 w-full">
           {t('approve')}
+        </Button>
+        <Button type="submit" name="placedDaysAgo" value={String(SIMULATED_HOLD_AGE_DAYS)} variant="outline" className="min-h-12 w-full whitespace-normal">
+          {t('approveAged', { days: SIMULATED_HOLD_AGE_DAYS })}
         </Button>
       </form>
       <a href={cancelPath} className="inline-flex min-h-11 items-center justify-center font-semibold underline underline-offset-4">
