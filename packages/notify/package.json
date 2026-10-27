@@ -6,7 +6,7 @@
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "3.1151.0",
     "@hold/domain": "workspace:*",
-    "nodemailer": "^10.1.1",
+    "nodemailer": "^10.2.1",
     "zod": "^4.6.7"
   },
   "exports": {
