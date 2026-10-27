@@ -34,7 +34,7 @@ test('a judge rents through the hosted assistant, approves the fee in PayPal, an
   const renter = await renterBrowser(browser)
   await renter.goto((await approve.getAttribute('href')) ?? '')
   await expect(renter.getByText('Test environment. No money moves.', { exact: false })).toBeVisible()
-  await renter.getByRole('button', { name: 'Approve' }).click()
+  await renter.getByRole('button', { name: 'Approve', exact: true }).click()
   await expect(renter.getByText('Payment confirmed. Your rental is booked.')).toBeVisible()
   await renter.getByRole('link', { name: 'See your rental' }).click()
   await expect(renter.getByText('An assistant made this booking')).toBeVisible()
