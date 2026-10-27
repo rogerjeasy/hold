@@ -14,14 +14,14 @@ export type AdvocateModel = { move(request: AdvocateRequest, signal: AbortSignal
 
 const nothing = { type: 'object', additionalProperties: false, required: [], properties: {} } as const
 
-// Exactly three tools, with strict schemas: every field required and nothing else allowed. The database checks the
-// same shape again with its own schemas before the referee sees the move. No tool takes words: what reaches the other
+// Exactly three tools, with closed schemas: every field required and nothing else allowed. They are not sent in strict
+// mode while Hold runs on Opus 4.6, whose Bedrock grammar compile costs about 15 seconds a move (tech-stack.md
+// section 6). The database checks the same shape again with its own schemas before the referee sees the move. No tool takes words: what reaches the other
 // side is amounts, grounds and record ids only.
 export const ADVOCATE_TOOLS = [
   {
     name: 'offer',
     description: 'Offer a full list of the claim’s lines, each with an amount in cents between zero and its published price, and for each lowered line one ground and the ids of the records it cites.',
-    strict: true,
     input_schema: {
       type: 'object',
       additionalProperties: false,
@@ -44,6 +44,6 @@ export const ADVOCATE_TOOLS = [
       },
     },
   },
-  { name: 'accept', description: 'Accept the other side’s last offer as it stands.', strict: true, input_schema: nothing },
-  { name: 'pass', description: 'End the negotiation without agreement. The shop’s owner will decide.', strict: true, input_schema: nothing },
+  { name: 'accept', description: 'Accept the other side’s last offer as it stands.', input_schema: nothing },
+  { name: 'pass', description: 'End the negotiation without agreement. The shop’s owner will decide.', input_schema: nothing },
 ] as const

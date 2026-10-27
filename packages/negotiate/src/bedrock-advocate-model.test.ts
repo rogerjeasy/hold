@@ -13,15 +13,16 @@ function recorded(body: Readonly<Record<string, unknown>>, seen: unknown[] = [],
 const request = { side: 'renter' as const, system: 'You are the renter’s advocate.', message: '<negotiation>{}</negotiation>' }
 
 describe('the advocate model adapter', () => {
-  it('offers exactly the three strict tools with automatic choice and explicit effort, and returns the move', async () => {
+  it('offers exactly the three tools, without strict mode, with automatic choice and explicit effort, and returns the move', async () => {
     const seen: unknown[] = []
     const urls: string[] = []
     const model = recorded({ content: [{ type: 'tool_use', id: 'toolu_1', name: 'offer', input: { lines: [] } }], stop_reason: 'tool_use' }, seen, urls)
     expect(await model.move(request, new AbortController().signal)).toEqual({ kind: 'move', tool: 'offer', input: { lines: [] }, model: 'claude-opus-4-6', inputTokens: 900, outputTokens: 120 })
     expect(urls[0]).toContain('/model/us.anthropic.claude-opus-4-6-v1/invoke')
     expect(seen[0]).toMatchObject({ thinking: { type: 'adaptive' }, tool_choice: { type: 'auto' }, output_config: { effort: 'medium' }, system: request.system, messages: [{ role: 'user', content: [{ type: 'text', text: request.message }] }] })
-    const tools = (seen[0] as { readonly tools: readonly { readonly name: string; readonly strict: boolean }[] }).tools
-    expect(tools.map((tool) => [tool.name, tool.strict])).toEqual([['offer', true], ['accept', true], ['pass', true]])
+    // Strict mode costs Opus 4.6 on Bedrock about 15 seconds a move to compile; the referee checks every argument anyway.
+    const tools = (seen[0] as { readonly tools: readonly { readonly name: string; readonly strict?: boolean; readonly input_schema: { readonly additionalProperties: boolean } }[] }).tools
+    expect(tools.map((tool) => [tool.name, tool.strict ?? false, tool.input_schema.additionalProperties])).toEqual([['offer', false, false], ['accept', false, false], ['pass', false, false]])
   })
 
   it('treats a refusal as a normal outcome, and an answer without a move as no move', async () => {

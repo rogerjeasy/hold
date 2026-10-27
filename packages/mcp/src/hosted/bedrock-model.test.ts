@@ -13,7 +13,7 @@ const request: ModelRequest = {
 }
 
 describe('the hosted assistant’s Bedrock adapter', () => {
-  it('sends strict tools, automatic tool choice and explicit effort, and returns the model’s tool calls', async () => {
+  it('sends the tools without strict mode, automatic tool choice and explicit effort, and returns the model’s tool calls', async () => {
     let sent: Record<string, unknown> = {}
     let url = ''
     const model = createBedrockAssistantModel({
@@ -30,8 +30,10 @@ describe('the hosted assistant’s Bedrock adapter', () => {
     expect(url).toContain('/model/us.anthropic.claude-opus-4-6-v1/invoke')
     expect(sent).toMatchObject({ max_tokens: 1500, tool_choice: { type: 'auto' }, output_config: { effort: 'medium' }, system: 'You are a demonstration assistant.' })
     const [tool] = sent['tools'] as Record<string, unknown>[]
-    expect(tool).toMatchObject({ name: 'quote_rental', strict: true, input_schema: { type: 'object', additionalProperties: false, required: ['shop'] } })
-    // Constraints strict schemas cannot carry are kept as words for the model; the server still checks them.
+    // Fifteen strict schemas compile past Bedrock's grammar limit for Opus 4.6, so none is strict; Hold's server checks
+    // every argument, and constraints a strict schema could not carry are kept as words for the model.
+    expect(tool).toMatchObject({ name: 'quote_rental', input_schema: { type: 'object', additionalProperties: false, required: ['shop'] } })
+    expect(tool).not.toHaveProperty('strict')
     expect(JSON.stringify(tool?.['input_schema'])).not.toContain('"maxLength"')
   })
 

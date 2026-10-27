@@ -9,7 +9,7 @@ const TOOL_NAMES = ['offer', 'accept', 'pass'] as const
 const isTool = (name: string): name is (typeof TOOL_NAMES)[number] => (TOOL_NAMES as readonly string[]).includes(name)
 
 // Only this adapter reaches Bedrock for an advocate. One request per turn, no retries inside it, a small output ceiling,
-// the three moves as strict tools with automatic choice, and a refusal handled as a normal outcome.
+// the three moves as closed-schema tools with automatic choice, and a refusal handled as a normal outcome.
 export function createBedrockAdvocateModel(options: Pick<ClientOptions, 'awsRegion' | 'skipAuth' | 'fetch'>, timeoutMilliseconds = 60_000): AdvocateModel {
   const client = new AnthropicBedrock({ ...options, maxRetries: 0, timeout: timeoutMilliseconds })
   return {
