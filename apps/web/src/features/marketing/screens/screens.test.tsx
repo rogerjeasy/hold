@@ -236,21 +236,23 @@ describe('PaypalScreen', () => {
 })
 
 describe('DemoScreen', () => {
-  it('says plainly that the demo shop is not open yet', () => {
+  it('says the demo shop is open, with a one-tap sign-in and no code to wait for', () => {
     renderWithIntl(<DemoScreen />)
-    expect(within(screen.getByRole('note')).getByText('The demo shop is not open yet.')).toBeInTheDocument()
+    const note = within(screen.getByRole('note'))
+    expect(note.getByText('The demo shop is open.')).toBeInTheDocument()
+    expect(note.getByText(/one tap/)).toBeInTheDocument()
   })
 
-  it('describes the three sample rentals', () => {
+  it('describes the three sample returns', () => {
     renderWithIntl(<DemoScreen />)
     for (const name of ['A clean return', 'A scratch', 'A contested claim']) {
       expect(screen.getByRole('heading', { level: 3, name })).toBeInTheDocument()
     }
   })
 
-  it('keeps the contested hold whole until the owner decides', () => {
+  it('keeps the contested hold whole until the claim is settled', () => {
     renderWithIntl(<DemoScreen />)
-    expect(screen.getByText('Held until the owner decides')).toBeInTheDocument()
+    expect(screen.getByText('Held until it is settled')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: '€300 reserved, nothing taken' })).toBeInTheDocument()
   })
 
@@ -259,8 +261,8 @@ describe('DemoScreen', () => {
     expect(within(screen.getByRole('list', { name: 'Simulated' })).getAllByRole('listitem')).toHaveLength(3)
   })
 
-  it('sends the reader on to how it works', () => {
+  it('sends the reader on to sign in to the demo shop', () => {
     renderWithIntl(<DemoScreen />)
-    expect(screen.getByRole('link', { name: 'See how it works' })).toHaveAttribute('href', '/how-it-works')
+    expect(screen.getByRole('link', { name: 'Sign in to the demo shop' })).toHaveAttribute('href', '/sign-in')
   })
 })

@@ -70,7 +70,7 @@
     },
     "demo": {
       "title": "Der Hold-Demo-Verleih",
-      "description": "Drei Beispielmieten in der PayPal-Sandbox: eine saubere Rückgabe, ein Kratzer und eine angefochtene Forderung."
+      "description": "Drei Beispielrückgaben in der PayPal-Sandbox: eine saubere Rückgabe, ein Kratzer und eine angefochtene Forderung."
     },
     "signIn": {
       "title": "Bei Hold anmelden",
@@ -326,7 +326,7 @@
   },
   "closing": {
     "title": "Probieren Sie eine Rückgabe aus.",
-    "lead": "Der Demo-Verleih hat drei Beispielmieten: eine saubere Rückgabe, einen Kratzer und eine angefochtene Forderung. Jeder PayPal-Aufruf ist echt, in der Sandbox."
+    "lead": "Der Demo-Verleih hat drei Beispielrückgaben: eine saubere Rückgabe, einen Kratzer und eine angefochtene Forderung. Jeder PayPal-Aufruf ist echt, in der Sandbox."
   },
   "footer": {
     "tagline": "Die Kaution, die Ihr Konto nie verlässt.",
@@ -901,36 +901,36 @@
     },
     "demo": {
       "title": "Probieren Sie eine Rückgabe aus.",
-      "lead": "Der Demo-Verleih hat drei Beispielmieten. Jeder PayPal-Aufruf ist echt, in der Sandbox und mit Testgeld.",
+      "lead": "Melden Sie sich mit einem Tippen an, mieten Sie ein Rad und geben Sie es mit einem Beispielfoto zurück. Jeder PayPal-Aufruf ist echt, in der Sandbox und mit Testgeld.",
       "status": {
-        "title": "Der Demo-Verleih ist noch nicht geöffnet.",
-        "body": "Er öffnet, sobald die erste Version bereitgestellt ist. Die Zugangsdaten für die Demo-Inhaberin und das Demo-Personal stehen dann hier."
+        "title": "Der Demo-Verleih ist geöffnet.",
+        "body": "Melden Sie sich mit einem Tippen als Tomás, der Inhaber, oder als Jonas an der Theke an: nichts einzugeben und kein Code abzuwarten. Ein Schritt, der Geld bewegt, verlangt einen Passkey, den Sie auf Ihrem eigenen Gerät hinzufügen."
       },
       "samples": {
-        "title": "Drei Beispiel­mieten.",
-        "lead": "Ein Tippen lädt einen Satz Beispielfotos anstelle der Kamera. Der Rest des Ablaufs ist echt.",
+        "title": "Drei Beispiel­rückgaben.",
+        "lead": "Bei der Rückgabe lädt ein Tippen ein Beispielfoto anstelle der Kamera. Der Rest des Ablaufs ist echt.",
         "items": {
           "clean": {
             "title": "Eine saubere Rückgabe",
-            "body": "Der Vergleich findet nichts Neues, und die Reservierung wird in Sekunden freigegeben.",
+            "body": "Das Rückgabefoto entspricht der Übergabe. Der Vergleich findet nichts Neues, und die Reservierung wird freigegeben.",
             "result": "Ganz freigegeben"
           },
           "scratch": {
             "title": "Ein Kratzer",
-            "body": "Die neue Spur wird umrandet, der Preisliste zugeordnet, von einem Menschen genehmigt und zum Teil abgebucht. Der Rest wird freigegeben.",
+            "body": "Eine abgeplatzte Stelle im Lack. Code findet sie, Claude sagt, was es ist, und bepreist es nach der Liste, und ein Mensch genehmigt die Abbuchung. Der Rest wird freigegeben.",
             "result": "Zum Teil abgebucht"
           },
           "contested": {
             "title": "Eine angefochtene Forderung",
-            "body": "Die mietende Person antwortet, die Inhaberin oder der Inhaber prüft beide Seiten und passt die Abbuchung an.",
-            "result": "Reserviert, bis der Inhaber entscheidet"
+            "body": "Die leichte Schramme von der Übergabe ist zu einem Kratzer bis aufs Metall geworden. Die mietende Person ficht die Abbuchung an, jede Seite kann einen Vertreter schicken, und der Inhaber entscheidet, wenn sie sich nicht einigen.",
+            "result": "Reserviert, bis es geklärt ist"
           }
         }
       },
-      "action": "So funktioniert es",
+      "action": "Beim Demo-Verleih anmelden",
       "cast": {
         "title": "Drei Personen, drei Zugänge.",
-        "lead": "Die Zugangsdaten für jede von ihnen stehen hier, sobald der Demo-Verleih öffnet.",
+        "lead": "Tomás und Jonas melden sich mit einem Tippen an. Sie spielen Priya: Öffnen Sie den Link für die mietende Person in der Miete.",
         "items": {
           "owner": {
             "title": "Tomás, der Inhaber",
@@ -962,7 +962,7 @@
           "items": {
             "money": "Das Geld. Sandbox-Konten enthalten nur Testgeld.",
             "camera": "Die Kamera. Ein Tippen lädt an ihrer Stelle Beispielfotos.",
-            "people": "Die Personen. Tomás, Jonas und Priya sind Demo-Zugänge."
+            "people": "Die Menschen. Tomás und Jonas sind Demo-Konten, und Sie spielen Priya."
           }
         }
       }

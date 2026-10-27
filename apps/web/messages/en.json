@@ -70,7 +70,7 @@
     },
     "demo": {
       "title": "The Hold demo shop",
-      "description": "Three sample rentals in the PayPal sandbox: a clean return, a scratch and a contested claim."
+      "description": "Three sample returns in the PayPal sandbox: a clean return, a scratch and a contested claim."
     },
     "signIn": {
       "title": "Sign in to Hold",
@@ -326,7 +326,7 @@
   },
   "closing": {
     "title": "Try a return yourself.",
-    "lead": "The demo shop has three sample rentals: a clean return, a scratch and a contested claim. Every PayPal call is real, in the sandbox."
+    "lead": "The demo shop has three sample returns: a clean return, a scratch and a contested claim. Every PayPal call is real, in the sandbox."
   },
   "footer": {
     "tagline": "The deposit that never leaves your account.",
@@ -901,36 +901,36 @@
     },
     "demo": {
       "title": "Try a return yourself.",
-      "lead": "The demo shop has three sample rentals. Every PayPal call is real, in the sandbox, with test money.",
+      "lead": "Sign in with one tap, rent a bike and return it with a sample photograph. Every PayPal call is real, in the sandbox, with test money.",
       "status": {
-        "title": "The demo shop is not open yet.",
-        "body": "It opens when the first build is deployed. Sign-in details for the demo owner and staff will be listed here."
+        "title": "The demo shop is open.",
+        "body": "Sign in as Tomás, the owner, or Jonas, at the counter, with one tap: nothing to type and no code to wait for. A step that moves money asks for a passkey, which you add on your own device."
       },
       "samples": {
-        "title": "Three sample rentals.",
-        "lead": "One tap loads a set of sample photographs in place of the camera. The rest of the flow is real.",
+        "title": "Three sample returns.",
+        "lead": "At the return, one tap loads a sample photograph in place of the camera. The rest of the flow is real.",
         "items": {
           "clean": {
             "title": "A clean return",
-            "body": "The comparison finds nothing new and the hold is released in seconds.",
+            "body": "The return photograph matches the handover. The comparison finds nothing new and the hold is released.",
             "result": "Released in full"
           },
           "scratch": {
             "title": "A scratch",
-            "body": "The new mark is outlined, matched to the price list, approved by a person and charged in part. The rest is released.",
+            "body": "A chip in the paint. Code finds it, Claude says what it is and prices it from the list, and a person approves the charge. The rest is released.",
             "result": "Taken in part"
           },
           "contested": {
             "title": "A contested claim",
-            "body": "The renter replies, the owner reviews both sides and adjusts the charge.",
-            "result": "Held until the owner decides"
+            "body": "The faint scuff seen at the handover has become a scratch through the paint. The renter contests the charge, each side may send an advocate, and the owner decides if they do not agree.",
+            "result": "Held until it is settled"
           }
         }
       },
-      "action": "See how it works",
+      "action": "Sign in to the demo shop",
       "cast": {
         "title": "Three people, three ways in.",
-        "lead": "Sign-in details for each of them will be listed here when the demo shop opens.",
+        "lead": "Tomás and Jonas sign in with one tap. You play Priya: open the renter’s link from the rental.",
         "items": {
           "owner": {
             "title": "Tomás, the owner",
@@ -962,7 +962,7 @@
           "items": {
             "money": "The money. Sandbox accounts hold test funds only.",
             "camera": "The camera. One tap loads sample photographs in its place.",
-            "people": "The people. Tomás, Jonas and Priya are demo sign-ins."
+            "people": "The people. Tomás and Jonas are demo accounts, and you play Priya."
           }
         }
       }

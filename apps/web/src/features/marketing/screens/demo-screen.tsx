@@ -22,7 +22,7 @@ export function DemoScreen() {
 
   return (
     <>
-      <PageIntro title={t('title')} lead={t('lead')} action={{ href: routes.howItWorks, label: t('action') }}>
+      <PageIntro title={t('title')} lead={t('lead')} action={{ href: routes.signIn, label: t('action') }}>
         <Notice title={t('status.title')} body={t('status.body')} />
       </PageIntro>
       <TitledSection title={t('samples.title')} lead={t('samples.lead')}>

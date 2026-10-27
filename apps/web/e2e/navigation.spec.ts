@@ -25,7 +25,7 @@ test.describe('on a laptop', () => {
     await page.goto('/')
     await page.getByRole('banner').getByRole('link', { name: 'Open the demo shop' }).click()
     await expect(page).toHaveURL('/demo')
-    await expect(page.getByRole('note')).toContainText('The demo shop is not open yet.')
+    await expect(page.getByRole('note')).toContainText('The demo shop is open.')
   })
 
   test('the header leads to sign-in, and sign-in to sign-up and back', async ({ page }) => {

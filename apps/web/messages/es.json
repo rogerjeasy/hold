@@ -70,7 +70,7 @@
     },
     "demo": {
       "title": "La tienda de demostración de Hold",
-      "description": "Tres alquileres de ejemplo en el entorno de pruebas de PayPal: una devolución limpia, un arañazo y una reclamación impugnada."
+      "description": "Tres devoluciones de ejemplo en el entorno de pruebas de PayPal: una devolución limpia, un arañazo y una reclamación impugnada."
     },
     "signIn": {
       "title": "Entrar en Hold",
@@ -326,7 +326,7 @@
   },
   "closing": {
     "title": "Prueba una devolución.",
-    "lead": "La tienda de demostración tiene tres alquileres de ejemplo: una devolución limpia, un arañazo y una reclamación impugnada. Cada llamada a PayPal es real, en el entorno de pruebas."
+    "lead": "La tienda de demostración tiene tres devoluciones de ejemplo: una devolución limpia, un arañazo y una reclamación impugnada. Cada llamada a PayPal es real, en el entorno de pruebas."
   },
   "footer": {
     "tagline": "La fianza que nunca sale de tu cuenta.",
@@ -901,36 +901,36 @@
     },
     "demo": {
       "title": "Prueba una devolución.",
-      "lead": "La tienda de demostración tiene tres alquileres de ejemplo. Cada llamada a PayPal es real, en el entorno de pruebas y con dinero de prueba.",
+      "lead": "Entra con un toque, alquila una bici y devuélvela con una foto de ejemplo. Cada llamada a PayPal es real, en el entorno de pruebas y con dinero de prueba.",
       "status": {
-        "title": "La tienda de demostración aún no está abierta.",
-        "body": "Se abrirá cuando se despliegue la primera versión. Aquí aparecerán los datos de acceso del dueño y del personal de demostración."
+        "title": "La tienda de demostración está abierta.",
+        "body": "Entra con un toque como Tomás, el dueño, o Jonas, en el mostrador: nada que escribir y ningún código que esperar. Un paso que mueve dinero pide una llave de acceso, que añades en tu propio dispositivo."
       },
       "samples": {
-        "title": "Tres alquileres de ejemplo.",
-        "lead": "Un toque carga un juego de fotografías de ejemplo en lugar de la cámara. El resto del proceso es real.",
+        "title": "Tres devoluciones de ejemplo.",
+        "lead": "En la devolución, un toque carga una foto de ejemplo en lugar de la cámara. El resto del proceso es real.",
         "items": {
           "clean": {
             "title": "Una devolución limpia",
-            "body": "La comparación no encuentra nada nuevo y la retención se libera en segundos.",
+            "body": "La foto de la devolución coincide con la entrega. La comparación no encuentra nada nuevo y la retención se libera.",
             "result": "Liberada por completo"
           },
           "scratch": {
             "title": "Un arañazo",
-            "body": "La marca nueva se señala, se relaciona con la lista de precios, la aprueba una persona y se cobra en parte. El resto se libera.",
+            "body": "Un desconchón en la pintura. El código lo encuentra, Claude dice qué es y le pone precio según la lista, y una persona aprueba el cargo. El resto se libera.",
             "result": "Cobrada en parte"
           },
           "contested": {
             "title": "Una reclamación impugnada",
-            "body": "El cliente responde, el dueño revisa las dos posturas y ajusta el cargo.",
-            "result": "Retenida hasta que decida el dueño"
+            "body": "El leve roce visto en la entrega se ha convertido en un arañazo hasta el metal. El cliente impugna el cargo, cada parte puede enviar un representante y el dueño decide si no se ponen de acuerdo.",
+            "result": "Retenida hasta que se resuelva"
           }
         }
       },
-      "action": "Ver cómo funciona",
+      "action": "Entrar en la tienda de demostración",
       "cast": {
         "title": "Tres personas, tres formas de entrar.",
-        "lead": "Los datos de acceso de cada una aparecerán aquí cuando abra la tienda de demostración.",
+        "lead": "Tomás y Jonas entran con un toque. Tú haces de Priya: abre el enlace del cliente desde el alquiler.",
         "items": {
           "owner": {
             "title": "Tomás, el dueño",
@@ -962,7 +962,7 @@
           "items": {
             "money": "El dinero. Las cuentas del entorno de pruebas solo tienen fondos de prueba.",
             "camera": "La cámara. Un toque carga fotografías de ejemplo en su lugar.",
-            "people": "Las personas. Tomás, Jonas y Priya son usuarios de demostración."
+            "people": "Las personas. Tomás y Jonas son cuentas de demostración, y tú haces de Priya."
           }
         }
       }

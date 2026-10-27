@@ -70,7 +70,7 @@
     },
     "demo": {
       "title": "La boutique de démonstration Hold",
-      "description": "Trois locations d'exemple dans l'environnement de test PayPal : un retour sans dommage, une rayure et une réclamation contestée."
+      "description": "Trois retours d'exemple dans l'environnement de test PayPal : un retour sans dommage, une rayure et une réclamation contestée."
     },
     "signIn": {
       "title": "Se connecter à Hold",
@@ -326,7 +326,7 @@
   },
   "closing": {
     "title": "Essayez un retour.",
-    "lead": "La boutique de démonstration propose trois locations d'exemple : un retour sans dommage, une rayure et une réclamation contestée. Chaque appel à PayPal est réel, dans l'environnement de test."
+    "lead": "La boutique de démonstration propose trois retours d'exemple : un retour sans dommage, une rayure et une réclamation contestée. Chaque appel à PayPal est réel, dans l'environnement de test."
   },
   "footer": {
     "tagline": "La caution qui ne quitte jamais votre compte.",
@@ -901,36 +901,36 @@
     },
     "demo": {
       "title": "Essayez un retour.",
-      "lead": "La boutique de démonstration propose trois locations d'exemple. Chaque appel à PayPal est réel, dans l'environnement de test, avec de l'argent fictif.",
+      "lead": "Connectez-vous d'un appui, louez un vélo et rendez-le avec une photographie d'exemple. Chaque appel à PayPal est réel, dans l'environnement de test, avec de l'argent fictif.",
       "status": {
-        "title": "La boutique de démonstration n'est pas encore ouverte.",
-        "body": "Elle ouvrira au déploiement de la première version. Les identifiants du propriétaire et du personnel de démonstration figureront ici."
+        "title": "La boutique de démonstration est ouverte.",
+        "body": "Connectez-vous en un appui comme Tomás, le propriétaire, ou Jonas, au comptoir : rien à saisir et aucun code à attendre. Une étape qui déplace de l'argent demande une clé d'accès, que vous ajoutez sur votre propre appareil."
       },
       "samples": {
-        "title": "Trois locations d'exemple.",
-        "lead": "Un appui charge un jeu de photographies d'exemple à la place de l'appareil photo. Le reste du parcours est réel.",
+        "title": "Trois retours d'exemple.",
+        "lead": "Au retour, un appui charge une photographie d'exemple à la place de l'appareil photo. Le reste du parcours est réel.",
         "items": {
           "clean": {
             "title": "Un retour sans dommage",
-            "body": "La comparaison ne trouve rien de nouveau et l'autorisation est libérée en quelques secondes.",
+            "body": "La photographie du retour correspond à la remise. La comparaison ne trouve rien de nouveau et l'autorisation est libérée.",
             "result": "Libérée en totalité"
           },
           "scratch": {
             "title": "Une rayure",
-            "body": "La nouvelle marque est entourée, associée à la liste de prix, approuvée par une personne et facturée en partie. Le reste est libéré.",
+            "body": "Un éclat de peinture. Le code le trouve, Claude dit ce que c'est et le chiffre d'après la liste, et une personne approuve le débit. Le reste est libéré.",
             "result": "Prélevée en partie"
           },
           "contested": {
             "title": "Une réclamation contestée",
-            "body": "Le client répond, le propriétaire examine les deux positions et ajuste le débit.",
-            "result": "Maintenue jusqu'à la décision du propriétaire"
+            "body": "La légère éraflure vue à la remise est devenue une rayure jusqu'au métal. Le client conteste le débit, chaque partie peut envoyer un représentant, et le propriétaire tranche s'ils ne s'accordent pas.",
+            "result": "Maintenue jusqu'au règlement"
           }
         }
       },
-      "action": "Voir le fonctionnement",
+      "action": "Se connecter à la boutique de démonstration",
       "cast": {
         "title": "Trois personnes, trois accès.",
-        "lead": "Les identifiants de chacune figureront ici à l'ouverture de la boutique de démonstration.",
+        "lead": "Tomás et Jonas se connectent d'un appui. Vous jouez Priya : ouvrez le lien du client depuis la location.",
         "items": {
           "owner": {
             "title": "Tomás, le propriétaire",
@@ -962,7 +962,7 @@
           "items": {
             "money": "L'argent. Les comptes de test ne contiennent que des fonds fictifs.",
             "camera": "L'appareil photo. Un appui charge des photographies d'exemple à sa place.",
-            "people": "Les personnes. Tomás, Jonas et Priya sont des identifiants de démonstration."
+            "people": "Les personnes. Tomás et Jonas sont des comptes de démonstration, et vous jouez Priya."
           }
         }
       }

@@ -27,14 +27,15 @@ export function PageIntro({ title, lead, action, secondaryAction, image, childre
             <p className="max-w-prose text-lead text-muted-foreground">{lead}</p>
             {action ? (
               <div className="mt-6 flex flex-wrap gap-2.5">
-                <Button asChild>
+                {/* A translated label can be longer than a phone is wide, so the buttons wrap their text. */}
+                <Button asChild className="max-w-full py-2 whitespace-normal">
                   <Link href={action.href}>
                     {action.label}
                     <ArrowRight aria-hidden="true" />
                   </Link>
                 </Button>
                 {secondaryAction ? (
-                  <Button asChild variant="outline">
+                  <Button asChild variant="outline" className="max-w-full py-2 whitespace-normal">
                     <Link href={secondaryAction.href}>{secondaryAction.label}</Link>
                   </Button>
                 ) : null}
