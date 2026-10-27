@@ -7,7 +7,7 @@ import * as iam from 'aws-cdk-lib/aws-iam'
 import type * as s3 from 'aws-cdk-lib/aws-s3'
 import type * as rds from 'aws-cdk-lib/aws-rds'
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
-import { ACCOUNT, CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES, CREDENTIAL_KEY_ALIAS, DATABASE_NAME, name, PREFIX, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
+import { ACCOUNT, CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES, CREDENTIAL_KEY_ALIAS, DATABASE_NAME, DEMO_ACCOUNTS_SECRET_NAME, name, PREFIX, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
 import type * as sqs from 'aws-cdk-lib/aws-sqs'
 
 // The web app on App Runner (tech-stack.md section 8): one container service with its own HTTPS address, no load
@@ -70,7 +70,13 @@ function instanceRole(stack: Stack, props: WebStackProps): iam.Role {
   )
   // Secrets Manager adds six random characters to a secret's name in its ARN.
   const smtpLogin = `arn:aws:secretsmanager:${REGION}:${ACCOUNT}:secret:${SMTP_SECRET_NAME}-??????`
-  role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:GetSecretValue'], resources: [props.appUserSecret.secretArn, props.cookieKey.secretArn, props.renterLinkKey.secretArn, props.trustKey.secretArn, paypalCredentials, smtpLogin] }))
+  const demoAccounts = `arn:aws:secretsmanager:${REGION}:${ACCOUNT}:secret:${DEMO_ACCOUNTS_SECRET_NAME}-??????`
+  role.addToPolicy(
+    new iam.PolicyStatement({
+      actions: ['secretsmanager:GetSecretValue'],
+      resources: [props.appUserSecret.secretArn, props.cookieKey.secretArn, props.renterLinkKey.secretArn, props.trustKey.secretArn, paypalCredentials, smtpLogin, demoAccounts],
+    }),
+  )
   role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:CreateSecret', 'secretsmanager:PutSecretValue', 'secretsmanager:TagResource'], resources: [paypalCredentials] }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['cognito-idp:AdminAddUserToGroup'], resources: [props.userPool.userPoolArn] }))
   // Clean Record credentials: sign with the credential key, by ES256 only, and read its public key to publish it. The
@@ -107,6 +113,7 @@ function settings(props: WebStackProps): apprunner.CfnService.KeyValuePairProper
     HOLD_TRUST_KEY_SECRET_ARN: props.trustKey.secretArn,
     HOLD_CREDENTIAL_KEY_ID: CREDENTIAL_KEY_ALIAS,
     HOLD_SMTP_SECRET: SMTP_SECRET_NAME,
+    HOLD_DEMO_ACCOUNTS_SECRET: DEMO_ACCOUNTS_SECRET_NAME,
     HOLD_EXECUTIONS_QUEUE_URL: queueOf(props, 'executions').queueUrl,
     HOLD_PAYPAL_EVENTS_QUEUE_URL: queueOf(props, 'paypal-events').queueUrl,
     HOLD_MEDIA_QUEUE_URL: queueOf(props, 'media').queueUrl,

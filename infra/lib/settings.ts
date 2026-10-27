@@ -26,8 +26,9 @@ export const TAGS: Readonly<Record<string, string>> = {
 // administrator. Compliance mode cannot be undone by anyone, the account's root user included.
 export const EVIDENCE_RETENTION_DAYS = 180
 
-// Aurora capacity units. Zero lets the cluster pause when idle. Raise the minimum above zero for judging, so a
-// judge's first visit does not wait for the database to resume (tech-stack.md section 10).
+// Aurora capacity units. Zero lets the cluster pause when idle. Set the minimum to 0.5 for the judging weeks, 1 to 15
+// December 2026, and back to zero on 16 December, so a judge's first visit does not wait for the database to resume
+// (tech-stack.md section 18).
 export const DATABASE_MIN_CAPACITY = 0
 export const DATABASE_MAX_CAPACITY = 2
 // Not `hold`, which Aurora PostgreSQL reserves (SQL's WITH HOLD).
@@ -50,6 +51,11 @@ export function secretName(...parts: readonly string[]): string {
 // The SMTP account Hold sends email through: {host, port, user, password} as JSON. An administrator creates and
 // fills it from the Gmail app password, so the password is in no file, template or setting.
 export const SMTP_SECRET_NAME = secretName('email', 'smtp')
+
+// The demo accounts judges sign in to with one tap, as JSON {owner, staff: {email, password}} (architecture.md section
+// 20.3). The reset script (pnpm demo:reset) makes it as an administrator; the web app only reads it. Naming it to the web
+// app turns the demo sign-in on: drop the setting in web-stack.ts once judging ends, and the sign-in page offers none.
+export const DEMO_ACCOUNTS_SECRET_NAME = secretName('web', 'demo-accounts')
 
 // The KMS key Cognito encrypts sign-in codes with for the code sender (alias/hold-code-key). An administrator made it,
 // tagged project=hold and rotating, because the pipeline may not tag a key: that would let it claim another project's.

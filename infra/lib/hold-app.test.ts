@@ -453,6 +453,17 @@ describe('the web app', () => {
     expect(variables()).toContainEqual({ Name: 'HOLD_PUBLIC_URL', Value: 'https://abc123.us-east-1.awsapprunner.com' })
   })
 
+  it('offers the demo accounts by reading their secret, and can neither change it nor set a password', () => {
+    expect(variables()).toContainEqual({ Name: 'HOLD_DEMO_ACCOUNTS_SECRET', Value: 'hold/web/demo-accounts' })
+    const policy = instancePolicy()
+    expect(policy).toContain('secret:hold/web/demo-accounts-??????')
+    const writes = Object.values(web.findResources('AWS::IAM::Policy'))
+      .flatMap((resource) => (resource as { Properties: { PolicyDocument: { Statement: { Action: unknown; Resource: unknown }[] } } }).Properties.PolicyDocument.Statement)
+      .filter((statement) => JSON.stringify(statement.Resource).includes('demo-accounts') && JSON.stringify(statement.Action) !== '"secretsmanager:GetSecretValue"')
+    expect(writes).toEqual([])
+    expect(policy).not.toMatch(/AdminSetUserPassword|AdminCreateUser/)
+  })
+
   it('logs in to the database as hold_app, never as the owner of the tables', () => {
     const settings = JSON.stringify(variables())
     expect(settings).toContain('AppUserSecret')

@@ -14,7 +14,8 @@
     "lint": "pnpm -r --if-present run typegen && eslint .",
     "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
-    "eval": "pnpm --filter @hold/eval run eval"
+    "eval": "pnpm --filter @hold/eval run eval",
+    "demo:reset": "pnpm --filter @hold/web demo:reset"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
