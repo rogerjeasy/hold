@@ -11,8 +11,9 @@ import { ADVOCATE_PROMPT_VERSION, RENTER_ADVOCATE_PROMPT, SHOP_ADVOCATE_PROMPT }
 // transaction of its own, asks that side's model outside any transaction, and applies the move through the gateway and
 // the referee in another. A run picks up where the transcript stands, so a retried message repeats nothing.
 
-// Ceilings on one run. A side that reaches one passes, so the claim goes to the owner and nothing is captured.
-export const RUN_LIMITS = { maxCalls: 30, maxTokens: 400_000, maxMilliseconds: 9 * 60_000, perCallMilliseconds: 60_000 } as const
+// Ceilings on one run. A side that reaches one passes, so the claim goes to the owner and nothing is captured. The run
+// and one more call end inside the worker's ten minutes (infra/lib/negotiation-worker.ts).
+export const RUN_LIMITS = { maxCalls: 30, maxTokens: 400_000, maxMilliseconds: 8 * 60_000, perCallMilliseconds: 60_000 } as const
 type RunLimits = { readonly [Key in keyof typeof RUN_LIMITS]: number }
 
 export const negotiationMessageSchema = z.object({ shopId: z.uuid(), negotiationId: z.uuid() })

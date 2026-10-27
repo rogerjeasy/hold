@@ -55,9 +55,10 @@ export async function openAdvocate(transaction: Transaction, input: { readonly r
     if (judged.outcome !== 'accepted') throw new Error('The claim as presented must be a move the referee accepts.')
     await recordMove(transaction, records, opening, judged.table, { actor: 'referee', model: null, promptVersion: null }, now)
   }
-  await transaction.insert(outbox).values({ shopId: claim.shopId, queue: NEGOTIATIONS_QUEUE, messageGroup: input.rentalId, payload: { negotiationId: negotiation.id }, createdAt: now })
+  const [queued] = await transaction.insert(outbox).values({ shopId: claim.shopId, queue: NEGOTIATIONS_QUEUE, messageGroup: input.rentalId, payload: { negotiationId: negotiation.id }, createdAt: now }).returning({ id: outbox.id })
+  if (queued === undefined) throw new Error('The negotiation was not queued.')
   await reserveEvidencePack(transaction, input.rentalId, now)
-  return { ok: true, negotiationId: negotiation.id, kind: negotiate ? 'negotiation' as const : 'reply' as const, rentalId: input.rentalId } as const
+  return { ok: true, negotiationId: negotiation.id, kind: negotiate ? 'negotiation' as const : 'reply' as const, rentalId: input.rentalId, outboxId: queued.id } as const
 }
 
 async function loadRecords(transaction: Transaction, negotiationId: string): Promise<NegotiationRecords> {

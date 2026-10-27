@@ -285,9 +285,21 @@ describe('the worker', () => {
       .filter(([key]) => key.startsWith('WorkerRole'))
       .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: { Action: unknown }[] } } }).Properties.PolicyDocument.Statement)
 
+  it('runs negotiations from their own queue, in order per rental, with a role that may ask Claude and the database and nothing else', () => {
+    expect(functionNamed('hold-worker-negotiations')?.Properties).toMatchObject({ Runtime: 'nodejs24.x', Timeout: 600 })
+    work.hasResourceProperties('AWS::SQS::Queue', { QueueName: 'hold-negotiations.fifo', VisibilityTimeout: 720, FifoQueue: true })
+    work.hasResourceProperties('AWS::Lambda::EventSourceMapping', { FunctionName: { Ref: Match.stringLikeRegexp('^NegotiationWorker') }, BatchSize: 1, FunctionResponseTypes: ['ReportBatchItemFailures'] })
+    const policy = JSON.stringify(Object.entries(work.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('NegotiationRole')).map(([, value]) => value))
+    expect(policy).toContain('bedrock-mantle:CreateInference')
+    expect(policy).toContain('anthropic.claude-opus-5-5')
+    expect(policy).not.toMatch(/sqs:SendMessage|paypal\/shops|s3:|smtp|scheduler:/)
+    web.hasResourceProperties('AWS::AppRunner::Service', { SourceConfiguration: { ImageRepository: { ImageConfiguration: { RuntimeEnvironmentVariables: Match.arrayWith([{ Name: 'HOLD_NEGOTIATIONS_QUEUE_URL', Value: Match.anyValue() }]) } } } })
+    work.hasResourceProperties('AWS::Lambda::Function', { FunctionName: 'hold-worker-outbox-relay', Environment: { Variables: Match.objectLike({ HOLD_NEGOTIATIONS_QUEUE_URL: Match.anyValue() }) } })
+  })
+
   it('runs comparisons from their queue with a separate role that cannot send money work or read PayPal credentials', () => {
     expect(functionNamed('hold-worker-comparisons')?.Properties).toMatchObject({ Runtime: 'nodejs24.x', MemorySize: 1536 })
-    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 7)
+    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 8)
     const policies = Object.entries(work.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('ComparisonRole')).map(([, value]) => value)
     expect(policies.length).toBeGreaterThan(0)
     const policy = JSON.stringify(policies)
@@ -307,7 +319,7 @@ describe('the worker', () => {
   })
 
   it('takes PayPal events, executions and upkeep from their queues, and tries again only the messages that failed', () => {
-    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 7)
+    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 8)
     work.hasResourceProperties('AWS::Lambda::EventSourceMapping', { FunctionResponseTypes: ['ReportBatchItemFailures'] })
   })
 
@@ -670,7 +682,7 @@ describe('delivery', () => {
       .filter((statement) => [statement['Action']].flat().includes('iam:PassRole'))
     const allowed = passing.filter((statement) => statement['Effect'] === 'Allow' && JSON.stringify(statement).includes('role/hold-web'))
     expect(allowed).toHaveLength(1)
-    expect(new Set([allowed[0]?.['Resource']].flat())).toEqual(new Set(['role/hold-web', 'role/hold-web-access', 'role/hold-code-sender', 'role/hold-worker', 'role/hold-comparison', 'role/hold-evidence', 'role/hold-receipts', 'role/hold-scheduler'].map((role) => `arn:aws:iam::707938860881:${role}`)))
+    expect(new Set([allowed[0]?.['Resource']].flat())).toEqual(new Set(['role/hold-web', 'role/hold-web-access', 'role/hold-code-sender', 'role/hold-worker', 'role/hold-comparison', 'role/hold-negotiation', 'role/hold-evidence', 'role/hold-receipts', 'role/hold-scheduler'].map((role) => `arn:aws:iam::707938860881:${role}`)))
     // App Runner checks the pass with a service name of its own choosing, so none is named here. Both roles trust App
     // Runner alone, so no other service could use them.
     expect(allowed[0]?.['Condition']).toBeUndefined()

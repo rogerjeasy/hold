@@ -82,7 +82,7 @@ function workerRole(stack: Stack, props: WorkerProps): iam.Role {
   role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:PutObject'], resources: [props.displayBucket.arnForObjects('*')] }))
   // DetectFaces names no resource.
   role.addToPolicy(new iam.PolicyStatement({ actions: ['rekognition:DetectFaces'], resources: ['*'] }))
-  for (const queueName of ['paypal-events', 'executions', 'upkeep', 'comparisons', 'media', 'evidence', 'messages']) {
+  for (const queueName of ['paypal-events', 'executions', 'upkeep', 'comparisons', 'media', 'evidence', 'messages', 'negotiations']) {
     const queue = props.queues.get(queueName)
     if (queue === undefined) throw new Error(`No ${queueName} queue.`)
     queue.grantSendMessages(role)
@@ -92,7 +92,7 @@ function workerRole(stack: Stack, props: WorkerProps): iam.Role {
 
 // sharp ships a native binary for the machine it is installed on, so it is installed, not bundled. The deploy runs on
 // Linux x86-64, as Lambda does.
-type FunctionOptions = { readonly memorySize?: number; readonly nativeModules?: readonly string[] }
+type FunctionOptions = { readonly memorySize?: number; readonly nativeModules?: readonly string[]; readonly timeout?: Duration }
 
 export function workerFunction(stack: Stack, id: string, functionName: string, entry: string, role: iam.Role, environment: Record<string, string>, options: FunctionOptions = {}): nodejs.NodejsFunction {
   return new nodejs.NodejsFunction(stack, id, {
@@ -103,7 +103,7 @@ export function workerFunction(stack: Stack, id: string, functionName: string, e
     depsLockFilePath: join(REPO_ROOT, 'pnpm-lock.yaml'),
     runtime: lambda.Runtime.NODEJS_24_X,
     memorySize: options.memorySize ?? 512,
-    timeout: WORKER_TIMEOUT,
+    timeout: options.timeout ?? WORKER_TIMEOUT,
     role,
     environment,
     bundling: { minify: true, sourceMap: false, ...(options.nativeModules === undefined ? {} : { nodeModules: [...options.nativeModules] }) },
@@ -128,6 +128,7 @@ export function createWorker(stack: Stack, props: WorkerProps): void {
     HOLD_MEDIA_QUEUE_URL: queue('media').queueUrl,
     HOLD_EVIDENCE_QUEUE_URL: queue('evidence').queueUrl,
     HOLD_MESSAGES_QUEUE_URL: queue('messages').queueUrl,
+    HOLD_NEGOTIATIONS_QUEUE_URL: queue('negotiations').queueUrl,
     HOLD_UPKEEP_QUEUE_ARN: queue('upkeep').queueArn,
     HOLD_SCHEDULE_GROUP: props.scheduleGroup.scheduleGroupName,
     HOLD_SCHEDULER_ROLE_ARN: props.schedulerRole.roleArn,

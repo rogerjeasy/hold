@@ -45,7 +45,7 @@ export type WebStackProps = StackProps & {
 }
 
 // The queues the app hands work to: executions to capture, and the PayPal events it has stored.
-const HANDED_ON = ['executions', 'paypal-events', 'media', 'comparisons', 'evidence'] as const
+const HANDED_ON = ['executions', 'paypal-events', 'media', 'comparisons', 'evidence', 'negotiations'] as const
 
 function queueOf(props: WebStackProps, queueName: string): sqs.IQueue {
   const queue = props.queues.get(queueName)
@@ -110,6 +110,7 @@ function settings(props: WebStackProps): apprunner.CfnService.KeyValuePairProper
     HOLD_MEDIA_QUEUE_URL: queueOf(props, 'media').queueUrl,
     HOLD_COMPARISONS_QUEUE_URL: queueOf(props, 'comparisons').queueUrl,
     HOLD_EVIDENCE_QUEUE_URL: queueOf(props, 'evidence').queueUrl,
+    HOLD_NEGOTIATIONS_QUEUE_URL: queueOf(props, 'negotiations').queueUrl,
     HOLD_EVIDENCE_BUCKET: props.evidenceBucket.bucketName,
     HOLD_DISPLAY_BUCKET: props.displayBucket.bucketName,
     ...(props.publicUrl === undefined ? {} : { HOLD_PUBLIC_URL: props.publicUrl }),

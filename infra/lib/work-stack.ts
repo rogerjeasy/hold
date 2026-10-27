@@ -10,6 +10,7 @@ import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 import { name } from './settings.ts'
 import { createWorker } from './worker.ts'
 import { createComparisonWorker } from './comparison-worker.ts'
+import { createNegotiationWorker } from './negotiation-worker.ts'
 import { createEvidenceWorkers } from './evidence-worker.ts'
 
 // Background work (architecture.md section 14.7): the spine's queues, each with a dead-letter queue and an alarm on
@@ -34,6 +35,9 @@ export const QUEUES: readonly QueueSpec[] = [
   { name: 'media', orderedPerRental: false, visibilityTimeout: Duration.minutes(5) },
   { name: 'evidence', orderedPerRental: true, visibilityTimeout: Duration.minutes(5) },
   { name: 'messages', orderedPerRental: false, visibilityTimeout: Duration.minutes(6) },
+  // The advocates' turns on a contested claim (extensions.md section 9), one negotiation at a time per rental. Longer
+  // than the negotiation worker may run (negotiation-worker.ts).
+  { name: 'negotiations', orderedPerRental: true, visibilityTimeout: Duration.minutes(12) },
 ]
 
 // After this many failed attempts a message moves to its dead-letter queue, where the alarm sees it.
@@ -113,6 +117,7 @@ export function createWorkStack(app: App, props: WorkStackProps): WorkResources 
   const workerProps = { cluster: props.cluster, workerUserSecret: props.workerUserSecret, queues, scheduleGroup, schedulerRole, publicUrl: props.publicUrl, renterLinkKey: props.renterLinkKey, evidenceBucket: props.evidenceBucket, displayBucket: props.displayBucket }
   createWorker(stack, workerProps)
   createComparisonWorker(stack, workerProps)
+  createNegotiationWorker(stack, workerProps)
   createEvidenceWorkers(stack, workerProps)
 
   for (const [queueName, queue] of queues) {

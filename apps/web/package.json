@@ -19,6 +19,7 @@
     "@hold/db": "workspace:*",
     "@hold/domain": "workspace:*",
     "@hold/evidence": "workspace:*",
+    "@hold/negotiate": "workspace:*",
     "@hold/notify": "workspace:*",
     "@hold/paypal": "workspace:*",
     "@hold/settle": "workspace:*",
