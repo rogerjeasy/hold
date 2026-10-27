@@ -2,6 +2,7 @@ import { beginOpsRun, completeOpsRun, confirmedRules, decideProposal, exceptionF
 import type { Database, RecordedException, Transaction } from '@hold/db'
 import { detectExceptions, guardNumbers, money, orderQueue, suppressedByRule } from '@hold/domain'
 import type { DetectorKind, OwnerRule, ProposalKind, ReminderKind } from '@hold/domain'
+import { z } from 'zod'
 import { gatedTools } from './gated-tools.ts'
 import type { RunBudget } from './gated-tools.ts'
 import { investigationSchema, OPS_LIMITS, OPS_PROMPT_VERSION } from './investigator.ts'
@@ -53,10 +54,14 @@ type Choice = {
 }
 const fixedChoice = (kind: ProposalKind, investigated: boolean): Choice => ({ kind, reason: null, references: [], draft: null, model: null, investigated, draftDropped: false, paypalConfirmed: false, observations: [] })
 
+// One message on the ops-agent queue: from the nightly fan-out, a manual check by the owner (written to the outbox,
+// which adds the shop), or when a dispute opens, a hold becomes at risk or a capture fails.
+export const opsAgentMessageSchema = z.strictObject({ shopId: z.uuid(), trigger: z.enum(['nightly', 'dispute_opened', 'hold_at_risk', 'capture_failed', 'manual']) })
+
 // One run for one shop (extensions.md section 6.3): detectors find the exceptions, reminders go out, the model
 // investigates what needs a decision within the run's ceilings, and the owner's queue is written. Nothing here moves
 // money; the owner's standing rule alone approves, through the same check as a person's approval.
-export async function runOperations(dependencies: OpsDependencies, input: { readonly shopId: string; readonly trigger: 'nightly' | 'dispute_opened' | 'hold_at_risk' | 'capture_failed' | 'manual' }): Promise<string> {
+export async function runOperations(dependencies: OpsDependencies, input: z.infer<typeof opsAgentMessageSchema>): Promise<string> {
   const { database } = dependencies
   const { shopId } = input
   const limits = dependencies.limits ?? OPS_LIMITS

@@ -3,7 +3,7 @@ export { investigationSchema, OPS_LIMITS, OPS_MODEL, OPS_PROMPT, OPS_PROMPT_VERS
 export type { GatedTools, Investigation, InvestigationAnswer, InvestigationRequest, Investigator, OpsLimits } from './investigator.ts'
 export { openPayPalReader, PAYPAL_MCP_SANDBOX_URL, paypalTransport } from './paypal-reader.ts'
 export type { OpenedReader, PayPalReader, PayPalTool } from './paypal-reader.ts'
-export { runOperations } from './run-operations.ts'
+export { opsAgentMessageSchema, runOperations } from './run-operations.ts'
 export type { OpsDependencies, Reminder, ShopPayPalReads } from './run-operations.ts'
 export { createBedrockInvestigator } from './bedrock-investigator.ts'
 export { carryOutProposal } from './carry-out.ts'
