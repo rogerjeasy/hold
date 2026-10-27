@@ -66,7 +66,7 @@ export { mayApproveTogether, PROPOSAL_EXECUTORS, PROPOSAL_KINDS, PROPOSAL_STATES
 export type { ProposalKind, ProposalState } from './proposal.ts'
 export { ACTOR_KINDS, gatewayDecision, MANDATE_KINDS, TOOL_TIERS, withinMandate } from './agent-gateway.ts'
 export type { ActorKind, AgentActor, GatewayDecision, GatewayInput, Mandate, MandateAction, MandateCheck, MandateKind, StandingRuleLimits, ToolTier } from './agent-gateway.ts'
-export { DETECTOR_KINDS, DETECTOR_PROPOSALS, detectExceptions, orderQueue, REMINDER_KINDS, reminderAllowed, suppressedByRule } from './detectors.ts'
+export { DETECTOR_KINDS, DETECTOR_PROPOSALS, detectExceptions, orderQueue, queueBrief, REMINDER_KINDS, reminderAllowed, suppressedByRule } from './detectors.ts'
 export type { DetectorKind, OwnerRule, ReminderKind, ShopException, ShopSnapshot } from './detectors.ts'
 export { checkKeptLine, INCIDENT_HINTS, INCIDENT_KINDS, INCIDENT_LIMITS, INCIDENT_STATES, INCIDENT_TRANSITIONS, mayAgree, mayConfirmOffer, mayMakeShopMatter, sortIncident } from './incident.ts'
 export type { IncidentHint, IncidentKind, IncidentState, IncidentTriage, KeptLineProblem, Sorted, SortInput } from './incident.ts'

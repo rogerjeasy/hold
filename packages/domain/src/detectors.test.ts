@@ -1,6 +1,6 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
-import { DETECTOR_KINDS, detectExceptions, orderQueue, reminderAllowed, suppressedByRule } from './detectors.ts'
+import { DETECTOR_KINDS, detectExceptions, orderQueue, queueBrief, reminderAllowed, suppressedByRule } from './detectors.ts'
 import type { ShopSnapshot } from './detectors.ts'
 
 const now = new Date('2026-10-30T06:00:00Z')
@@ -99,6 +99,19 @@ describe('the morning queue', () => {
       { id: 'd', deadline: null, moneyCents: 90000 },
     ])
     expect(queue.map((each) => each.id)).toEqual(['c', 'b', 'd', 'a'])
+  })
+
+  it('opens with how many decisions there are and how many expire before the shop\'s day ends, the overdue included', () => {
+    const entries = [{ deadline: hours(2) }, { deadline: hours(-3) }, { deadline: hours(18) }, { deadline: hours(30) }, { deadline: null }]
+    expect(queueBrief(entries, hours(18))).toEqual({ decisions: 5, expiringToday: 2 })
+    expect(queueBrief([], hours(18))).toEqual({ decisions: 0, expiringToday: 0 })
+  })
+
+  it('never counts more expiring today than there are decisions', () => {
+    fc.assert(fc.property(fc.array(fc.option(fc.integer({ min: -100, max: 100 }))), (offsets) => {
+      const brief = queueBrief(offsets.map((offset) => ({ deadline: offset === null ? null : hours(offset) })), hours(12))
+      return brief.expiringToday <= brief.decisions && brief.decisions === offsets.length
+    }))
   })
 })
 

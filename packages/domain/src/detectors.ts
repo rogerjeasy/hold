@@ -144,6 +144,12 @@ export function orderQueue<Entry extends { readonly deadline: Date | null; reado
   })
 }
 
+// The sentence the morning brief opens with (section 6.3, step 4): how many decisions, and how many expire before the
+// shop's day ends. One already past its deadline expires today too.
+export function queueBrief(entries: readonly { readonly deadline: Date | null }[], endOfShopDay: Date): { readonly decisions: number; readonly expiringToday: number } {
+  return { decisions: entries.length, expiringToday: entries.filter((entry) => entry.deadline !== null && entry.deadline < endOfShopDay).length }
+}
+
 // At most one reminder of each kind to a renter a day, and none of a kind the shop switched off.
 export function reminderAllowed(input: { readonly kind: ReminderKind; readonly renterId: string; readonly sentToday: readonly { readonly kind: ReminderKind; readonly renterId: string }[]; readonly switchedOff: readonly ReminderKind[] }): boolean {
   return !input.switchedOff.includes(input.kind) && !input.sentToday.some((sent) => sent.kind === input.kind && sent.renterId === input.renterId)
