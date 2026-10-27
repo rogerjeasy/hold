@@ -1821,6 +1821,7 @@
       "ownerOnly": "Seul le propriétaire de la boutique peut relier PayPal.",
       "notificationsOn": "PayPal informe Hold de ce qui arrive à chaque paiement : un client qui paie puis ferme la page est tout de même réservé.",
       "notificationsOff": "PayPal n'informe pas encore Hold de ce qui arrive à chaque paiement. Un client qui paie et revient est réservé ; un client qui ferme la page ne l'est pas.",
+      "notificationsDemo": "Cette démonstration partage un compte du bac à sable PayPal avec toutes les autres, donc PayPal envoie ses événements ailleurs. Hold relit chaque étape auprès de PayPal : un client qui paie et revient est réservé ; celui qui ferme la page ne l'est pas.",
       "turnOn": "Activer les notifications",
       "turningOn": "Activation…",
       "turnedOn": "Les notifications sont activées."

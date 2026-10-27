@@ -1821,6 +1821,7 @@
       "ownerOnly": "Solo el propietario de la tienda puede conectar PayPal.",
       "notificationsOn": "PayPal avisa a Hold de lo que pasa con cada pago, así que quien paga y cierra la página queda reservado igualmente.",
       "notificationsOff": "PayPal aún no avisa a Hold de lo que pasa con cada pago. Quien paga y vuelve queda reservado; quien cierra la página, no.",
+      "notificationsDemo": "Esta demostración comparte una cuenta del entorno de pruebas de PayPal con todas las demás, así que PayPal envía sus eventos a otro sitio. Hold vuelve a leer cada paso en PayPal: un cliente que paga y vuelve queda reservado; uno que cierra la página, no.",
       "turnOn": "Activar avisos",
       "turningOn": "Activando…",
       "turnedOn": "Los avisos están activados."

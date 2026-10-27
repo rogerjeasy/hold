@@ -8,8 +8,9 @@ import { ShopFrame } from './shop-frame'
 type PayPalScreenProps = {
   shopName: string
   connectedAt: Date | undefined
-  // Whether PayPal sends this shop's events to Hold.
-  notifications: boolean
+  // Whether PayPal sends this shop's events to Hold. `demo`: a demo shop, which shares the demo's sandbox app and so
+  // never has notifications of its own (architecture.md section 20.3).
+  notifications: 'on' | 'off' | 'demo'
   isOwner: boolean
   gate: { needed: boolean; hasPasskey: boolean; email: string }
 }
@@ -32,8 +33,8 @@ export function PayPalScreen({ shopName, connectedAt, notifications, isOwner, ga
         )}
         {connectedAt === undefined ? null : (
           <div className="grid gap-3 border-l-2 border-border-strong pl-4">
-            <p>{notifications ? t('notificationsOn') : t('notificationsOff')}</p>
-            {isOwner && !notifications ? (
+            <p>{t(notifications === 'on' ? 'notificationsOn' : notifications === 'off' ? 'notificationsOff' : 'notificationsDemo')}</p>
+            {isOwner && notifications === 'off' ? (
               <PasskeyGate {...gate} returnTo="/shop/paypal">
                 <TurnOnNotifications />
               </PasskeyGate>

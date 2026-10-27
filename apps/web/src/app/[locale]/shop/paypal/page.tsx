@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { readAccessToken } from '@/features/auth/session-cookies'
 import { PayPalScreen } from '@/features/shop/paypal-screen'
-import { getServices } from '@/server/services'
+import { DEMO_PAYPAL_REFERENCE, getServices } from '@/server/services'
 import { requireShop } from '@/server/shop-page'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -23,7 +23,7 @@ export default async function Page() {
     <PayPalScreen
       shopName={context.shop.name}
       connectedAt={account?.createdAt}
-      notifications={account?.webhookId != null}
+      notifications={account?.credentialReference === DEMO_PAYPAL_REFERENCE ? 'demo' : account?.webhookId != null ? 'on' : 'off'}
       isOwner={context.role === 'owner'}
       gate={{ needed: context.passkeyNeeded, hasPasskey: passkeys.ok && passkeys.value.length > 0, email: context.person.email }}
     />

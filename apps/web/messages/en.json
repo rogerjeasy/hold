@@ -1821,6 +1821,7 @@
       "ownerOnly": "Only the shop's owner can connect PayPal.",
       "notificationsOn": "PayPal tells Hold what happens to each payment, so a renter who pays and closes the page is still booked.",
       "notificationsOff": "PayPal does not tell Hold yet what happens to each payment. Renters who pay and come back are booked; one who closes the page is not.",
+      "notificationsDemo": "This demo shares one PayPal sandbox account with every other demo, so PayPal sends its events elsewhere. Hold reads each step back from PayPal instead: a renter who pays and comes back is booked; one who closes the page is not.",
       "turnOn": "Turn on notifications",
       "turningOn": "Turning on…",
       "turnedOn": "Notifications are on."

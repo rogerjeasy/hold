@@ -9,14 +9,21 @@ const gate = { needed: false, hasPasskey: true, email: 'ana@ribeira.example' }
 
 describe('the PayPal page', () => {
   it('says PayPal tells Hold what happens to each payment', () => {
-    renderWithIntl(<PayPalScreen shopName="Ribeira Bikes" connectedAt={new Date('2026-10-14T09:00:00Z')} notifications isOwner gate={gate} />)
+    renderWithIntl(<PayPalScreen shopName="Ribeira Bikes" connectedAt={new Date('2026-10-14T09:00:00Z')} notifications="on" isOwner gate={gate} />)
     expect(screen.getByText(/PayPal tells Hold/)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Turn on notifications' })).not.toBeInTheDocument()
   })
 
   it('offers the owner to turn notifications on when PayPal does not send them yet', () => {
-    renderWithIntl(<PayPalScreen shopName="Ribeira Bikes" connectedAt={new Date('2026-10-14T09:00:00Z')} notifications={false} isOwner gate={gate} />)
+    renderWithIntl(<PayPalScreen shopName="Ribeira Bikes" connectedAt={new Date('2026-10-14T09:00:00Z')} notifications="off" isOwner gate={gate} />)
     expect(screen.getByText(/does not tell Hold yet/)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Turn on notifications' })).toBeInTheDocument()
+  })
+
+  // Every demo shop shares one sandbox app, which may not subscribe an address per shop (architecture.md section 20.3).
+  it('says a demo shop learns each step by reading PayPal back, and offers no notifications to turn on', () => {
+    renderWithIntl(<PayPalScreen shopName="Ribeira Bikes" connectedAt={new Date('2026-10-14T09:00:00Z')} notifications="demo" isOwner gate={gate} />)
+    expect(screen.getByText(/shares one PayPal sandbox account with every other demo/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Turn on notifications' })).not.toBeInTheDocument()
   })
 })
