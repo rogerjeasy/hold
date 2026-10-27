@@ -1213,7 +1213,8 @@
       "settings": "Ajustes",
       "scorecard": "Fiabilidad",
       "incidents": "Incidentes",
-      "trust": "Escalera de confianza"
+      "trust": "Escalera de confianza",
+      "settlement": "Representante de acuerdos"
     },
     "setup": {
       "title": "Prepara tu tienda",
@@ -2821,6 +2822,128 @@
         "expired": "Esta credencial ha caducado. Pide al cliente que vuelva a abrir su historial.",
         "not_yet_valid": "Esta credencial aún no es válida. Revisa el reloj de este dispositivo."
       }
+    }
+  },
+  "negotiation": {
+    "advocate": {
+      "title": "Que un representante lo defienda por mí",
+      "guidance": "Un representante lee las mismas fotos, marcas y precios que la tienda y defiende cada línea con las pruebas. Nunca ve los límites de la tienda, y la tienda nunca ve los suyos. Usa el código de verificación que le enviamos, como al aceptar o impugnar.",
+      "highest": "Lo máximo que pagaré, en {currency}",
+      "sentence": "Mi representante puede aceptar pagar hasta este importe. Me pregunta antes de aceptar.",
+      "comment": "Lo que su representante debe saber (opcional)",
+      "start": "Confiar mi impugnación a un representante",
+      "started": "Su representante defiende su impugnación.",
+      "code": "Código de verificación, para su representante"
+    },
+    "renterTitle": "Su representante",
+    "link": "Ver lo que dijeron los representantes",
+    "yourLimit": "Su total máximo: {amount}. Solo usted lo ve.",
+    "simulated": "Representantes simulados: entorno de prueba, no se consultó ningún modelo de IA.",
+    "transcript": {
+      "title": "Lo que dijeron los representantes",
+      "noLimits": "El registro muestra cada oferta y las pruebas en que se basa. Los límites de ninguna de las partes aparecen en él.",
+      "move": "Jugada {number}",
+      "side": {
+        "shop": "El representante de la tienda",
+        "renter": "El representante del arrendatario"
+      },
+      "opening": "Abrió con la reclamación tal como se presentó: {amount}",
+      "offer": "Ofreció {amount}",
+      "accept": "Aceptó la última oferta de la otra parte",
+      "pass": "Pasó",
+      "passReasons": {
+        "chose": "Decidió parar.",
+        "unavailable": "El representante no pudo responder.",
+        "ceiling": "El representante alcanzó su límite de tiempo o de llamadas."
+      },
+      "line": "{line}: {amount}",
+      "lineLowered": "{line}: {amount} en lugar de {published}",
+      "chainVerified": "La cadena de huellas se verifica: ninguna jugada se cambió, quitó ni reordenó.",
+      "chainBroken": "La cadena de huellas no se verifica."
+    },
+    "grounds": {
+      "known_mark": "Una marca que ya estaba en el artículo está al lado",
+      "ordinary_wear": "La política de desgaste lo cubre: {clause}",
+      "uncertain_evidence": "Las fotos no lo resuelven",
+      "renter_photo": "Una foto del arrendatario lo afecta",
+      "evidence_stands": "Ambas revisiones lo confirmaron",
+      "goodwill": "Gesto de buena voluntad, sin pruebas"
+    },
+    "states": {
+      "open": "Los representantes intercambian ofertas.",
+      "agreed": "Los representantes acordaron {amount}. No se cobra nada hasta que cada persona confirme.",
+      "settled": "Acordado en {amount} y confirmado. El depósito se liquida con PayPal.",
+      "escalated": "Los representantes no llegaron a un acuerdo. Decide el propietario de la tienda, con este registro.",
+      "replied": "El representante del arrendatario redactó la impugnación siguiente. Decide el propietario de la tienda."
+    },
+    "ended": {
+      "pass": "Un representante pasó.",
+      "refused_twice": "Las jugadas de un representante fueron rechazadas dos veces.",
+      "time_limit": "Un representante tardó demasiado.",
+      "deadline": "Se acabó el tiempo de la negociación.",
+      "mandate_ended": "Un representante fue detenido o sus límites terminaron.",
+      "declined": "Una persona rechazó el importe acordado.",
+      "nothing_to_charge": "Acordaron que no hay nada que pagar: el propietario renuncia a la reclamación."
+    },
+    "confirm": {
+      "renterTitle": "Confirmar el importe acordado",
+      "renterGuidance": "No se cobra nada hasta que usted confirme. Si lo rechaza, decide el propietario de la tienda.",
+      "sendCode": "Enviarme un código de verificación",
+      "codeSent": "Código enviado. Caduca en diez minutos.",
+      "codeSentSandbox": "Código enviado al correo de la reserva: es el sandbox de PayPal, cuyas cuentas de prueba no reciben correo.",
+      "code": "Código de verificación",
+      "confirm": "Confirmar y liquidar",
+      "decline": "Rechazar",
+      "done": "Su respuesta está registrada.",
+      "shopTitle": "Confirmar el acuerdo de los representantes",
+      "shopGuidance": "El propietario o un responsable confirma, como en cualquier decisión sobre una reclamación impugnada. Luego se cobra el importe acordado del depósito y se libera el resto.",
+      "shopDone": "Su respuesta está registrada.",
+      "waiting": "Esperando la confirmación del arrendatario."
+    },
+    "stop": {
+      "title": "Detener a mi representante",
+      "guidance": "Detenerlo no cobra nada. Luego decide el propietario de la tienda, y usted sigue viendo todo aquí.",
+      "button": "Detener a mi representante",
+      "done": "Su representante está detenido.",
+      "stopped": "Usted detuvo a su representante."
+    },
+    "limits": {
+      "title": "Representante de acuerdos",
+      "intro": "Cuando un arrendatario confía una reclamación impugnada a un representante, el de la tienda puede acordar dentro de estos límites. Solo usted los ve: el representante del arrendatario nunca.",
+      "current": "Límites actuales",
+      "none": "Sin representante de la tienda. Las reclamaciones impugnadas le llegan a usted, como ahora.",
+      "summary": "Al menos el {share} % de una reclamación, en reclamaciones de hasta {largest}, como mucho {rounds} ofertas por parte, hasta el {until}.",
+      "evidenceYes": "Cada reducción cita las pruebas.",
+      "evidenceNo": "También puede hacer gestos de buena voluntad.",
+      "finalTap": "Usted o un responsable confirman cada acuerdo antes de cobrar nada.",
+      "lowestShare": "Parte mínima de una reclamación que puede aceptar, en porcentaje",
+      "largestClaim": "Reclamación máxima que puede asumir, en {currency}",
+      "rounds": "Máximo de ofertas por parte",
+      "evidenceRequired": "¿Cada reducción debe citar las pruebas?",
+      "evidenceRequiredYes": "Sí",
+      "evidenceRequiredNo": "No: puede hacer gestos de buena voluntad",
+      "days": "Días hasta que terminen estos límites",
+      "save": "Guardar los límites",
+      "saved": "Guardado. Se aplican a la próxima impugnación.",
+      "end": "Retirar el representante de la tienda",
+      "endDone": "Retirado. Las reclamaciones impugnadas le llegan a usted.",
+      "ownerOnly": "Solo el propietario fija estos límites.",
+      "noCurrency": "Publique primero sus precios: los límites están en la moneda de la tienda."
+    },
+    "results": {
+      "amount_invalid": "Escriba un importe, como 30 o 30,50.",
+      "already_replied": "Esta reclamación ya tiene respuesta.",
+      "invalid_limits": "Estos límites no se pueden usar. Revise cada uno.",
+      "not_agreed": "No hay ningún acuerdo esperando respuesta.",
+      "not_found": "No hay representante en esta reclamación.",
+      "role_may_not_confirm": "Solo el propietario o un responsable puede confirmarlo.",
+      "raised_the_claim": "Debe confirmarlo alguien distinto de quien hizo la reclamación.",
+      "no_currency": "Publique primero sus precios.",
+      "code_expired": "Este código ha caducado. Pida uno nuevo.",
+      "wrong_code": "Ese código no es correcto. Revíselo e inténtelo de nuevo.",
+      "code_recently_sent": "Se envió un código hace menos de un minuto. Revise su correo.",
+      "email_unavailable": "No se pudo enviar el correo. Inténtelo en un momento.",
+      "link_invalid": "Este enlace no sirve para esto."
     }
   }
 }

@@ -1,5 +1,5 @@
 'use client'
-import type { ClaimWorkspace } from '@hold/db'
+import type { ClaimWorkspace, ShopNegotiation } from '@hold/db'
 import { formatMoney, money } from '@hold/domain'
 import { useLocale, useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
@@ -12,12 +12,14 @@ import { useLookAgain } from '@/hooks/use-look-again'
 import { Link } from '@/i18n/navigation'
 import { rentalRoutes } from '@/lib/routes'
 import { ApproveClaimForm, CleanReleaseForm, DecideClaimForm } from './claim-controls'
+import { ShopConfirmForm } from '@/features/negotiation/shop-confirm-form'
+import { TranscriptView } from '@/features/negotiation/transcript-view'
 import { ClaimDraftForm } from './claim-draft-form'
 
 // Whether this session must still be proven by a passkey before a money decision, and how to offer it.
 type PasskeyState = { readonly needed: boolean; readonly hasPasskey: boolean; readonly email: string }
 
-export function ClaimScreen({ shopName, data, canAct, photoUrls = {}, passkey }: { shopName: string; data: ClaimWorkspace; canAct: boolean; photoUrls?: Readonly<Record<string, string>>; passkey?: PasskeyState }) {
+export function ClaimScreen({ shopName, data, canAct, photoUrls = {}, passkey, negotiation }: { shopName: string; data: ClaimWorkspace; canAct: boolean; photoUrls?: Readonly<Record<string, string>>; passkey?: PasskeyState; negotiation?: ShopNegotiation }) {
   const t = useTranslations('claim'); const locale = useLocale()
   const records = useTranslations('records')
   const amount = (cents: number) => formatMoney(money(cents, data.currency), locale)
@@ -38,8 +40,10 @@ export function ClaimScreen({ shopName, data, canAct, photoUrls = {}, passkey }:
         {data.decisions.map((decision, index) => <p key={index}>{t('decisionBy', { name: decision.name ?? t('staff') })}</p>)}
         {canAct && ['awaiting_approval', 'approved', 'presented'].includes(data.claim.state) ? decision(<ApproveClaimForm claimId={data.claim.id} />) : null}
         {data.replies.map((reply, index) => <blockquote key={index} className="min-w-0 whitespace-pre-wrap border-l-2 pl-3 wrap-long-words">{reply.comment}</blockquote>)}
-        {canAct && (['awaiting_approval', 'contested'].includes(data.claim.state) || (['charging', 'charged', 'charge_failed'].includes(data.claim.state) && data.protectedReply && data.replies.some((reply) => reply.decision === 'contest'))) ? decision(<DecideClaimForm claim={data.claim} />) : null}
+        {canAct && (['awaiting_approval', 'contested', 'escalated'].includes(data.claim.state) || (['charging', 'charged', 'charge_failed'].includes(data.claim.state) && data.protectedReply && data.replies.some((reply) => reply.decision === 'contest'))) ? decision(<DecideClaimForm claim={data.claim} />) : null}
+        {canAct && negotiation?.awaitingShop === true ? decision(<ShopConfirmForm negotiationId={negotiation.transcript.id} agreed={amount(negotiation.transcript.agreedCents ?? 0)} />) : null}
       </div></Panel>
+      {negotiation === undefined ? null : <TranscriptView transcript={negotiation.transcript} />}
     </>}
   </div></ShopFrame>
 }

@@ -1213,7 +1213,8 @@
       "settings": "Settings",
       "scorecard": "Reliability",
       "incidents": "Incidents",
-      "trust": "Trust ladder"
+      "trust": "Trust ladder",
+      "settlement": "Settlement advocate"
     },
     "setup": {
       "title": "Set up your shop",
@@ -2821,6 +2822,128 @@
         "expired": "This credential has expired. Ask the renter to open their record again.",
         "not_yet_valid": "This credential is not valid yet. Check the clock on this device."
       }
+    }
+  },
+  "negotiation": {
+    "advocate": {
+      "title": "Let an advocate argue it for me",
+      "guidance": "An advocate reads the same photographs, marks and price list as the shop and argues each line on the evidence. It never sees the shop's limits, and the shop never sees yours. It uses the verification code we email you, as accepting or contesting does.",
+      "highest": "The most I will pay, in {currency}",
+      "sentence": "My advocate may agree to pay up to this amount. It asks me before agreeing.",
+      "comment": "Anything your advocate should know (optional)",
+      "start": "Hand my contest to an advocate",
+      "started": "Your advocate is arguing your contest.",
+      "code": "Verification code, for your advocate"
+    },
+    "renterTitle": "Your advocate",
+    "link": "See what the advocates said",
+    "yourLimit": "Your highest total: {amount}. Only you see this.",
+    "simulated": "Simulated advocates: this is the test environment, and no AI model was asked.",
+    "transcript": {
+      "title": "What the advocates said",
+      "noLimits": "The transcript shows each offer and the evidence it rests on. Neither side's limits are in it.",
+      "move": "Move {number}",
+      "side": {
+        "shop": "The shop's advocate",
+        "renter": "The renter's advocate"
+      },
+      "opening": "Opened with the claim as presented: {amount}",
+      "offer": "Offered {amount}",
+      "accept": "Accepted the other side's last offer",
+      "pass": "Passed",
+      "passReasons": {
+        "chose": "It chose to stop.",
+        "unavailable": "The advocate could not answer.",
+        "ceiling": "The advocate reached its limit of time or calls."
+      },
+      "line": "{line}: {amount}",
+      "lineLowered": "{line}: {amount} instead of {published}",
+      "chainVerified": "The chain of fingerprints verifies: no move was changed, removed or reordered.",
+      "chainBroken": "The chain of fingerprints does not verify."
+    },
+    "grounds": {
+      "known_mark": "A mark that was already on the item lies next to it",
+      "ordinary_wear": "The wear policy covers it: {clause}",
+      "uncertain_evidence": "The photographs do not settle it",
+      "renter_photo": "A photograph from the renter bears on it",
+      "evidence_stands": "Both looks confirmed it",
+      "goodwill": "Goodwill, with no evidence behind it"
+    },
+    "states": {
+      "open": "The advocates are exchanging offers.",
+      "agreed": "The advocates agreed on {amount}. Nothing is charged until each person confirms.",
+      "settled": "Agreed on {amount} and confirmed. The hold settles through PayPal.",
+      "escalated": "The advocates did not settle it. The shop's owner decides, with this transcript.",
+      "replied": "The renter's advocate wrote the contest below. The shop's owner decides."
+    },
+    "ended": {
+      "pass": "One advocate passed.",
+      "refused_twice": "One advocate's moves were refused twice.",
+      "time_limit": "One advocate took too long.",
+      "deadline": "The time for the negotiation ran out.",
+      "mandate_ended": "An advocate was stopped, or its limits ended.",
+      "declined": "A person declined the agreed amount.",
+      "nothing_to_charge": "They agreed on nothing to pay: the owner waives the claim."
+    },
+    "confirm": {
+      "renterTitle": "Confirm the agreed amount",
+      "renterGuidance": "Nothing is charged until you confirm. If you decline, the shop's owner decides.",
+      "sendCode": "Email me a verification code",
+      "codeSent": "Verification code sent. It expires in ten minutes.",
+      "codeSentSandbox": "Code sent to the email given at booking: this is the PayPal sandbox, whose test accounts receive no mail.",
+      "code": "Verification code",
+      "confirm": "Confirm and settle",
+      "decline": "Decline",
+      "done": "Your answer is recorded.",
+      "shopTitle": "Confirm the advocates' agreement",
+      "shopGuidance": "The owner or a manager confirms, as for any decision on a contested claim. The agreed amount is then charged from the hold and the rest released.",
+      "shopDone": "Your answer is recorded.",
+      "waiting": "Waiting for the renter to confirm."
+    },
+    "stop": {
+      "title": "Stop my advocate",
+      "guidance": "Stopping charges nothing. The shop's owner then decides, and you can still see everything here.",
+      "button": "Stop my advocate",
+      "done": "Your advocate is stopped.",
+      "stopped": "You stopped your advocate."
+    },
+    "limits": {
+      "title": "Settlement advocate",
+      "intro": "When a renter hands a contested claim to an advocate, the shop's advocate may agree within these limits. Only you see them: the renter's advocate never does.",
+      "current": "Current limits",
+      "none": "No shop advocate. Contested claims come to you, as now.",
+      "summary": "At least {share}% of a claim, on claims up to {largest}, at most {rounds} offers a side, until {until}.",
+      "evidenceYes": "Every reduction cites the evidence.",
+      "evidenceNo": "It may also concede for goodwill.",
+      "finalTap": "You or a manager confirm every agreement before anything is charged.",
+      "lowestShare": "Lowest share of a claim it may agree to, in percent",
+      "largestClaim": "Largest claim it may take on, in {currency}",
+      "rounds": "Most offers each side may make",
+      "evidenceRequired": "Must every reduction cite the evidence?",
+      "evidenceRequiredYes": "Yes",
+      "evidenceRequiredNo": "No: it may concede for goodwill",
+      "days": "Days until these limits end",
+      "save": "Save the limits",
+      "saved": "Saved. They apply to the next contest.",
+      "end": "End the shop advocate",
+      "endDone": "Ended. Contested claims come to you.",
+      "ownerOnly": "Only the owner sets these limits.",
+      "noCurrency": "Publish your prices first: the limits are in your shop's currency."
+    },
+    "results": {
+      "amount_invalid": "Write an amount, such as 30 or 30.50.",
+      "already_replied": "This claim has already been answered.",
+      "invalid_limits": "These limits cannot be used. Check each one.",
+      "not_agreed": "There is no agreement waiting for an answer.",
+      "not_found": "There is no advocate on this claim.",
+      "role_may_not_confirm": "Only the owner or a manager can confirm this.",
+      "raised_the_claim": "Someone other than the person who raised this claim must confirm it.",
+      "no_currency": "Publish your prices first.",
+      "code_expired": "This code has expired. Ask for a new one.",
+      "wrong_code": "That code is not right. Check it and try again.",
+      "code_recently_sent": "A code was sent less than a minute ago. Check your email.",
+      "email_unavailable": "The email could not be sent. Try again in a moment.",
+      "link_invalid": "This link cannot be used for this."
     }
   }
 }
