@@ -299,6 +299,17 @@ describe('a rental fee in the fake', () => {
     expect(valueOf(await paypal.readFeePayment(created.orderId))).toEqual(first)
   })
 
+  it('opens a dispute on the payment once captured, when the renter approved it meaning to dispute it', async () => {
+    const created = valueOf(await order(paypal))
+    paypal.approveOrder(created.orderId, { thenDispute: true })
+    expect(valueOf(await paypal.listOpenDisputes())).toEqual([])
+    const payment = valueOf(await paypal.captureFeeOrder({ orderId: created.orderId, idempotencyKey: key() }))
+    const [dispute] = valueOf(await paypal.listOpenDisputes())
+    expect(dispute).toMatchObject({ open: true, amount: FEE, captureIds: [payment.captureId], responseDueAt: addDays(PLACED_AT, 10) })
+    await paypal.captureFeeOrder({ orderId: created.orderId, idempotencyKey: key() })
+    expect(valueOf(await paypal.listOpenDisputes())).toHaveLength(1)
+  })
+
   it('remembers where the order sends the renter back, and what it is for', async () => {
     const created = valueOf(await order(paypal))
     expect(paypal.orderLinks(created.orderId)).toEqual({ returnUrl: 'https://hold.test/paid', cancelUrl: 'https://hold.test/r', amount: FEE, description: 'Rental fee' })
