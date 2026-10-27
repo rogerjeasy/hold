@@ -17,15 +17,21 @@ type Step = { readonly kind: 'ready' } | { readonly kind: 'checking' } | { reado
 
 // When the photograph could not be measured, it is taken as it is: the comparison checks quality again later.
 const UNMEASURED: PhotoMeasures = { sharpness: 0, shadows: 0, highlights: 0, filled: 0 }
-// The demonstration's sample, said to be one on screen (AGENTS.md section 9).
+// The demonstration's samples, said to be ones on screen (AGENTS.md section 9): the frame as handed over, and for a
+// return the same frame with a chip in the paint, or with the handover's faint scuff grown into a scratch through the
+// paint, which either side can argue about.
 const SAMPLE = '/images/sample-handover.jpg'
+const RETURN_SAMPLES = [
+  { label: 'sampleDamage', source: '/images/sample-return-damage.jpg' },
+  { label: 'sampleContested', source: '/images/sample-return-contested.jpg' },
+] as const
 
 // Puts a checked photograph where it belongs: staff's handover, or what a renter adds to the condition report.
 export type UploadTaken = (blob: Blob, measures: PhotoMeasures, onProgress: (share: number) => void, simulated?: boolean) => Promise<{ readonly ok: true } | { readonly ok: false; readonly reason: string }>
 
 // Takes one view's photograph (architecture.md section 9.1): the camera with the view's outline, a file when there is no
-// camera, or the sample. The phone checks it at once and asks for a retake before anything uploads.
-export function PhotoTaker({ view, upload, onTaken, guide }: { view: View; upload: UploadTaken; onTaken: () => void; guide?: string }) {
+// camera, or a sample. The phone checks it at once and asks for a retake before anything uploads.
+export function PhotoTaker({ view, upload, onTaken, guide, returnSamples = false }: { view: View; upload: UploadTaken; onTaken: () => void; guide?: string; returnSamples?: boolean }) {
   const t = useTranslations('shop.handover.taker')
   const check = useQualityCheck()
   const camera = useCamera(true)
@@ -49,6 +55,7 @@ export function PhotoTaker({ view, upload, onTaken, guide }: { view: View; uploa
       onTaken()
     } else setStep({ kind: 'failed', reason: uploaded.reason })
   }
+  const takeSample = (source: string) => { void take(async () => readImage(await (await fetch(source)).blob()), true) }
   const busy = step.kind === 'checking' || step.kind === 'uploading'
 
   return (
@@ -71,10 +78,16 @@ export function PhotoTaker({ view, upload, onTaken, guide }: { view: View; uploa
             <input type="file" accept="image/jpeg" capture="environment" className="sr-only" disabled={busy} onChange={(event) => { const file = event.target.files?.[0]; if (file !== undefined) void take(() => readImage(file)) }} />
           </label>
         </Button>
-        <Button type="button" variant="ghost" className="min-h-12" disabled={busy} onClick={() => { void take(async () => readImage(await (await fetch(SAMPLE)).blob()), true) }}>
+        <Button type="button" variant="ghost" className="min-h-12" disabled={busy} onClick={() => { takeSample(SAMPLE) }}>
           <FlaskConical aria-hidden="true" />
           {t('sample')}
         </Button>
+        {returnSamples ? RETURN_SAMPLES.map((sample) => (
+          <Button key={sample.source} type="button" variant="ghost" className="min-h-12" disabled={busy} onClick={() => { takeSample(sample.source) }}>
+            <FlaskConical aria-hidden="true" />
+            {t(sample.label)}
+          </Button>
+        )) : null}
       </div>
       {busy ? (
         <p role="status" className="flex items-center gap-2 text-muted-foreground">

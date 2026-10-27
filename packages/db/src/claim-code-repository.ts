@@ -1,7 +1,8 @@
 import { timingSafeEqual } from 'node:crypto'
 import { claimCodeRecipient, claimReplyAllowed } from '@hold/domain'
-import { and, desc, eq } from 'drizzle-orm'
-import { claimReplies, claims, executions, paypalAccounts, renterLinks, rentals, renters } from './schema/index.ts'
+import { and, eq } from 'drizzle-orm'
+import { claimReplies, claims, executions, renterLinks, rentals, renters } from './schema/index.ts'
+import { shopPayPalMode } from './paypal-mode.ts'
 import type { Transaction } from './scope.ts'
 
 type Link = typeof renterLinks.$inferSelect
@@ -13,9 +14,7 @@ export async function storeRenterCode(transaction: Transaction, link: Link, hash
   if (link.claimCodeExpiresAt !== null && link.claimCodeExpiresAt.getTime() - 540000 > now.getTime()) return { ok: false, reason: 'code_recently_sent' } as const
   const [payer] = await transaction.select({ email: renters.email, contactEmail: rentals.contactEmail }).from(rentals).innerJoin(renters, eq(renters.id, rentals.renterId)).where(eq(rentals.id, link.rentalId))
   if (payer === undefined) return { ok: false, reason: 'payer_missing' } as const
-  // A shop with no account on record is treated as live: the stricter rule.
-  const [account] = await transaction.select({ mode: paypalAccounts.mode }).from(paypalAccounts).where(eq(paypalAccounts.shopId, link.shopId)).orderBy(desc(paypalAccounts.createdAt)).limit(1)
-  const recipient = claimCodeRecipient({ paypalMode: account?.mode === 'sandbox' ? 'sandbox' : 'live', payerEmail: payer.email, contactEmail: payer.contactEmail })
+  const recipient = claimCodeRecipient({ paypalMode: await shopPayPalMode(transaction, link.shopId), payerEmail: payer.email, contactEmail: payer.contactEmail })
   await transaction.update(renterLinks).set({ claimCodeHash: hash, claimCodeExpiresAt: new Date(now.getTime() + 600000), claimCodeAttempts: 0 }).where(eq(renterLinks.id, link.id))
   return { ok: true, ...recipient } as const
 }

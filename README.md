@@ -20,13 +20,21 @@ Built for the PayPal AI Hackathon 2026.
    and move no money.
 2. For a real rental, tap **Sign in as Jonas, at the counter**, book a bike and open the renter's link. Pay the fee
    and approve the hold in PayPal's sandbox with the sandbox buyer account given in the submission's testing
-   instructions. Photograph the handover and the return. **Use the sample photograph** stands in for the camera, and
-   the real camera works on any object to hand.
-3. Back as Tomás, decide the return: release the hold, or claim from the shop's price list and approve it. A step
-   that moves money asks for a passkey. The first time, follow **Add a passkey** to the Security page and add one on
-   your own device (Touch ID, Windows Hello or your phone), then confirm with it. The capture and the release happen
-   in the PayPal sandbox, and no real money moves.
-4. Open the **[hosted assistant](https://p99faar3kp.us-east-1.awsapprunner.com/assistant)** and ask it to rent you a
+   instructions. Photograph the handover with **Use the sample photograph**, and the return with **Use the sample with
+   damage** for one view: the same frame with a chip in the paint. The real camera works on any object to hand.
+3. Back as Tomás, open the comparison. Code finds the chip and Claude says what it is, then takes an independent
+   second look. When both agree, the finding is offered as a claim line priced from the shop's list. When the second
+   look is not sure, the return waits for a person, who claims the same entry with a written reason. Approve the claim,
+   or release the hold for a clean return. A step that moves money asks for a passkey. The first time, follow **Add a
+   passkey** to the Security page and add one on your own device (Touch ID, Windows Hello or your phone), then confirm
+   with it. The capture and the release happen in the PayPal sandbox, and no real money moves.
+4. For a contested claim, book another bike with your own email as the renter's contact. At the handover, record
+   the faint scuff on the down tube as a known mark. At the return, use **Use the sample for a contested claim**: the
+   scuff has grown into a scratch through the paint. Claim the scratch as Tomás. Then open the renter's link and
+   contest the claim. The one-time code goes to your email, because PayPal's sandbox buyer has no inbox. Each side may
+   send an advocate with written limits. A referee in plain code checks every move against the photographs and the
+   wear policy, and the owner decides if the two do not agree.
+5. Open the **[hosted assistant](https://p99faar3kp.us-east-1.awsapprunner.com/assistant)** and ask it to rent you a
    bike. It books through Hold's own MCP server, the same one your assistant can use, and hands you the PayPal
    approval link.
 

@@ -27,19 +27,20 @@ test('staff photograph a return against the handover, review uncertainty and rec
   expect(needed).toBeGreaterThan(0)
   await expect(page.getByRole('button', { name: 'Seal return photographs' })).toBeDisabled()
   for (let count = 1; count <= needed; count += 1) {
-    await page.getByRole('button', { name: 'Use the sample photograph' }).click()
+    await page.getByRole('button', { name: count === 1 ? 'Use the sample with damage' : 'Use the sample photograph' }).click()
     await expect(views.getByText('Photographed')).toHaveCount(count, { timeout: 30_000 })
   }
   await page.getByRole('button', { name: 'Seal return photographs' }).click()
   await expect(page.getByText(/These return photographs are sealed/)).toBeVisible()
   await page.getByRole('link', { name: 'Review comparison' }).click()
   await expect(page.getByRole('heading', { name: 'Needs a person', exact: true })).toBeVisible({ timeout: 30_000 })
-  // Reusing the sample is caught by code, before any model runs. The record and screen disclose the simulation.
+  // Samples are compared like any photograph, and the record and screen disclose the simulation. The test environment
+  // has no model, so the comparison waits for a person.
   await expect(page.getByText('Simulated comparison', { exact: true })).toBeVisible()
-  await expect(page.getByText(/A return photograph matches earlier evidence/)).toBeVisible()
+  await expect(page.getByText(/A return photograph matches earlier evidence/)).toHaveCount(0)
   await expectFitsEveryWidth(page)
   await page.getByLabel('Your inspection outcome').selectOption('clean')
-  await page.getByLabel('Your inspection notes').fill('Inspected the frame in person: no new damage. The reused sample cannot establish the return condition.')
+  await page.getByLabel('Your inspection notes').fill('Inspected the frame in person: no new damage. A sample photograph cannot establish the return condition.')
   await page.getByRole('button', { name: 'Record inspection', exact: true }).click()
   await expect(page.getByText('Your inspection has been recorded.')).toBeVisible()
   await expect(page.getByRole('region', { name: 'Staff inspection record' })).toContainText('Inspected the frame in person')

@@ -17,11 +17,14 @@ export async function runComparison(dependencies: ComparisonDependencies, messag
   const scope = { role: dependencies.role, shopId: message.shopId }
   const work = await inShop(dependencies.database, scope, (transaction) => beginComparison(transaction, message.comparisonId, dependencies.now()))
   if (work === undefined) return 'nothing_to_do'
-  const simulated = dependencies.simulated === true || [...work.before, ...work.after].some((photo) => photo.quality?.['simulated'] === 1)
+  const sample = (photo: (typeof work.after)[number]) => photo.quality?.['simulated'] === 1
+  const simulated = dependencies.simulated === true || [...work.before, ...work.after].some(sample)
   const finish = (result: StoredInspection) => inShop(dependencies.database, scope, (transaction) => completeComparison(transaction, work.id, work.startedAt, result, dependencies.now()))
   const deferred = (reason: string): StoredInspection => ({ state: 'deferred', model: 'not_called', promptVersion: PROMPT_VERSION, alignment: {}, findings: [], reason, simulated })
   try {
-    const reused = work.after.some((photo) => photoReused(photo, work.previous))
+    // A sample is said on screen and in the record to show nothing about this return, so repeating one proves nothing
+    // either way. It is compared, and the whole comparison is marked simulated.
+    const reused = work.after.some((photo) => !sample(photo) && photoReused(photo, work.previous))
     if (reused) { await finish(deferred('reused_photo')); return 'completed' }
     const views: { view: string; pair: PairResult }[] = []
     for (const view of work.plan.filter((view) => view.required || work.before.some((photo) => photo.view === view.key) || work.after.some((photo) => photo.view === view.key))) {

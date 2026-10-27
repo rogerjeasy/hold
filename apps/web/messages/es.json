@@ -1859,6 +1859,8 @@
         "take": "Hacer la foto",
         "file": "Elegir una foto",
         "sample": "Usar la foto de ejemplo",
+        "sampleDamage": "Usar el ejemplo con daño",
+        "sampleContested": "Usar el ejemplo de reclamación impugnada",
         "checking": "Comprobando la foto…",
         "uploading": "Subiendo… {percent} %",
         "retake": "Hazla de nuevo: {problems}.",

@@ -1859,6 +1859,8 @@
         "take": "Take the photograph",
         "file": "Choose a photograph",
         "sample": "Use the sample photograph",
+        "sampleDamage": "Use the sample with damage",
+        "sampleContested": "Use the sample for a contested claim",
         "checking": "Checking the photograph…",
         "uploading": "Uploading… {percent}%",
         "retake": "Take it again: {problems}.",

@@ -1,7 +1,8 @@
 import { timingSafeEqual } from 'node:crypto'
 import { claimCodeRecipient } from '@hold/domain'
-import { desc, eq } from 'drizzle-orm'
-import { paypalAccounts, renterLinks, rentals, renters } from './schema/index.ts'
+import { eq } from 'drizzle-orm'
+import { renterLinks, rentals, renters } from './schema/index.ts'
+import { shopPayPalMode } from './paypal-mode.ts'
 import type { Transaction } from './scope.ts'
 
 // The one-time code a renter gives before consenting to, withdrawing or deleting their Clean Record (extensions.md
@@ -21,9 +22,7 @@ export async function issueTrustCode(transaction: Transaction, linkId: string, h
   if (link.trustCodeExpiresAt !== null && link.trustCodeExpiresAt.getTime() - CODE_MINUTES * 60_000 + RESEND_AFTER_MS > now.getTime()) return { ok: false, reason: 'code_recently_sent' }
   const [payer] = await transaction.select({ email: renters.email, contactEmail: rentals.contactEmail }).from(rentals).innerJoin(renters, eq(renters.id, rentals.renterId)).where(eq(rentals.id, link.rentalId))
   if (payer === undefined) return { ok: false, reason: 'payer_missing' }
-  // A shop with no account on record is treated as live: the stricter rule.
-  const [account] = await transaction.select({ mode: paypalAccounts.mode }).from(paypalAccounts).where(eq(paypalAccounts.shopId, link.shopId)).orderBy(desc(paypalAccounts.createdAt)).limit(1)
-  const recipient = claimCodeRecipient({ paypalMode: account?.mode === 'sandbox' ? 'sandbox' : 'live', payerEmail: payer.email, contactEmail: payer.contactEmail })
+  const recipient = claimCodeRecipient({ paypalMode: await shopPayPalMode(transaction, link.shopId), payerEmail: payer.email, contactEmail: payer.contactEmail })
   await transaction.update(renterLinks).set({ trustCodeHash: hash, trustCodeExpiresAt: new Date(now.getTime() + CODE_MINUTES * 60_000), trustCodeAttempts: 0 }).where(eq(renterLinks.id, linkId))
   return { ok: true, ...recipient }
 }

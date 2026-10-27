@@ -19,6 +19,13 @@ describe('claim preparation and settlement screen', () => {
     expect(screen.getByRole('button', { name: 'Prepare claim for review' })).toBeInTheDocument()
     expect(screen.queryByRole('textbox', { name: /amount/i })).not.toBeInTheDocument()
   })
+  // In the PayPal sandbox a finding from the demonstration's sample photographs may be billed; it says so where it is chosen.
+  it('marks a finding from sample photographs as a sample where staff choose it, and no other finding', () => {
+    const possibleFindings = [{ id: 'sample-finding', description: 'A chip in the paint on the down tube.', suggestedPriceEntryId: 'price', comparisonId: 'comparison', view: 'left-side', simulated: true }, { id: 'real-finding', description: 'A bent brake lever.', suggestedPriceEntryId: 'price', comparisonId: 'comparison', view: 'right-side', simulated: false }]
+    renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={{ ...workspace, possibleFindings }} canAct />)
+    expect(screen.getByRole('checkbox', { name: 'A chip in the paint on the down tube. Sample' })).toBeInTheDocument()
+    expect(screen.getByRole('checkbox', { name: 'A bent brake lever.' })).toBeInTheDocument()
+  })
   it('shows the stored settlement amounts and leaves read-only staff no money controls', () => {
     renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={{ ...workspace, claim: { id: 'claim', state: 'awaiting_approval', totalCents: 3500, raisedByUserId: 'staff', replyDueAt: null }, amounts: { ...workspace.amounts, capture: { cents: 3500, currency: 'EUR' }, release: { cents: 26500, currency: 'EUR' } } }} canAct={false} />)
     expect(screen.getByText('€35.00')).toBeInTheDocument()

@@ -20,6 +20,12 @@ describe('guided return capture', () => {
     expect(screen.getByRole('button', { name: 'Seal return photographs' })).toBeDisabled()
     expect(screen.queryByRole('button', { name: 'Add a mark' })).not.toBeInTheDocument()
   })
+  it('offers the sample as handed over, the sample with damage and the sample for a contested claim, so a demonstration can show each return', () => {
+    renderWithIntl(<ReturnScreen shopName="Ribeira Bikes" rentalId="rental" session={session} canAct />)
+    expect(screen.getByRole('button', { name: 'Use the sample photograph' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Use the sample with damage' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Use the sample for a contested claim' })).toBeInTheDocument()
+  })
   it('keeps sealed evidence read-only and explains that comparison follows', () => {
     renderWithIntl(<ReturnScreen shopName="Ribeira Bikes" rentalId="rental" session={{ ...session, sealed: true, photos: [{ view: 'left-side', url: '/return.jpg' }], missing: [] }} canAct />)
     expect(screen.queryByRole('button', { name: 'Seal return photographs' })).not.toBeInTheDocument()

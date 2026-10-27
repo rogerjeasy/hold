@@ -1033,7 +1033,7 @@ In the hackathon build Hold runs both advocates, and Hold's customer is the shop
 
 | Check | State | Tested by |
 |---|---|---|
-| X4.1 | Passes in the test environment with the simulated advocates and the simulated PayPal: the renter hands over the contest with a code, the advocates agree, both people confirm, the agreed total is captured as the final capture and the rest released. Not yet run against the PayPal sandbox or Claude on Bedrock; no contested claim is seeded yet. | `negotiation-flow.test.ts`, `negotiation.spec.ts`, `negotiation-repository.test.ts`, `runner.test.ts` |
+| X4.1 | Passes in the test environment with the simulated advocates and the simulated PayPal: the renter hands over the contest with a code, the advocates agree, both people confirm, the agreed total is captured as the final capture and the rest released. Not yet run against the PayPal sandbox or Claude on Bedrock. The seeded contested claim belongs to a sample rental whose PayPal references are simulated, so it cannot reach a sandbox capture. For a real one, a judge returns a sandbox rental with the contested-claim sample photograph, claims the scratch and contests it from the renter's link (`architecture.md` section 20.3). | `negotiation-flow.test.ts`, `negotiation.spec.ts`, `negotiation-repository.test.ts`, `runner.test.ts` |
 | X4.2 | Passes | `referee.property.test.ts` |
 | X4.3 | Passes | `runner.test.ts`, `negotiation-flow.test.ts`, `claim-screen.test.tsx` |
 | X4.4 | Passes: every message sent to each advocate is searched for the other side's limits, and the briefs are tested over any limits | `runner.test.ts`, `brief.test.ts`, `negotiation-repository.test.ts` |

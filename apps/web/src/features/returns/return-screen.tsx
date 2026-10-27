@@ -44,7 +44,7 @@ export function ReturnScreen({ shopName, rentalId, session, canAct }: { shopName
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
           <div className="min-w-0 max-lg:order-last"><ViewList views={session.plan.map((view) => ({ ...view, done: session.photos.some((photo) => photo.view === view.key) }))} current={current} onChoose={(key) => { setCurrent(key); setRetaking(false) }} /></div>
           {view === undefined ? null : <Panel title={view.label} className="min-w-0"><div className="grid gap-4 px-4 py-4 md:px-5">
-            {!session.sealed && canAct && (photo === undefined || retaking) ? <PhotoTaker view={view} upload={upload} onTaken={taken} guide={guide?.url ?? undefined} />
+            {!session.sealed && canAct && (photo === undefined || retaking) ? <PhotoTaker view={view} upload={upload} onTaken={taken} guide={guide?.url ?? undefined} returnSamples />
               : photo?.url == null ? <p role="status">{photo === undefined ? t('noPhoto') : t('preparing')}</p>
                 : <PhotoWithMarks src={photo.url} alt={t('returnPhoto', { view: view.label })} marks={[]} />}
             {!session.sealed && canAct && photo !== undefined && !retaking ? <Button variant="ghost" className="justify-self-start" onClick={() => { setRetaking(true) }}>{t('retake')}</Button> : null}

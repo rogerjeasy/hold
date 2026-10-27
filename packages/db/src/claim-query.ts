@@ -1,6 +1,7 @@
 import { money, settle } from '@hold/domain'
 import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm'
 import { approvals, captureSessions, claimLines, claimReplies, claims, comparisons, executions, findings, holds, incidents, invoices, items, marks, moneyEvents, photos, priceEntries, rentalItems, rentals, users } from './schema/index.ts'
+import { shopPayPalMode } from './paypal-mode.ts'
 import type { Transaction } from './scope.ts'
 
 export async function claimWorkspace(transaction: Transaction, rentalId: string) {
@@ -10,9 +11,11 @@ export async function claimWorkspace(transaction: Transaction, rentalId: string)
   if (hold === undefined) return undefined
   const [claim] = await transaction.select().from(claims).where(eq(claims.rentalId, rentalId))
   const prices = await transaction.select({ id: priceEntries.id, description: priceEntries.description, amountCents: priceEntries.amountCents }).from(priceEntries).where(eq(priceEntries.priceListId, rental.priceListId)).orderBy(asc(priceEntries.description))
-  const possibleFindings = await transaction.select({ id: findings.id, description: findings.description, suggestedPriceEntryId: findings.suggestedPriceEntryId, comparisonId: comparisons.id, view: findings.view }).from(findings)
+  // Findings from sample photographs are offered only in the PayPal sandbox, as draftClaim bills them.
+  const samples = await shopPayPalMode(transaction, rental.shopId) === 'sandbox'
+  const possibleFindings = await transaction.select({ id: findings.id, description: findings.description, suggestedPriceEntryId: findings.suggestedPriceEntryId, comparisonId: comparisons.id, view: findings.view, simulated: comparisons.simulated }).from(findings)
     .innerJoin(comparisons, eq(comparisons.id, findings.comparisonId)).innerJoin(captureSessions, eq(captureSessions.id, comparisons.returnSessionId)).innerJoin(rentalItems, eq(rentalItems.id, captureSessions.rentalItemId))
-    .where(and(eq(rentalItems.rentalId, rentalId), eq(comparisons.simulated, false), eq(findings.secondLookConfirmed, true)))
+    .where(and(eq(rentalItems.rentalId, rentalId), samples ? undefined : eq(comparisons.simulated, false), eq(findings.secondLookConfirmed, true)))
   const rows = claim === undefined ? [] : await transaction.select({ id: claimLines.id, amountCents: claimLines.amountCents, description: priceEntries.description, reason: claimLines.reason, actorName: users.name, findingId: claimLines.findingId, source: claimLines.source, incidentId: claimLines.incidentId }).from(claimLines)
     .innerJoin(priceEntries, eq(priceEntries.id, claimLines.priceEntryId)).leftJoin(users, eq(users.id, claimLines.addedByUserId)).where(eq(claimLines.claimId, claim.id)).orderBy(asc(claimLines.createdAt), asc(claimLines.id))
   const photo = async (sessionId: string, view: string) => (await transaction.select({ key: photos.displayKey }).from(photos).where(and(eq(photos.sessionId, sessionId), eq(photos.view, view), isNull(photos.supersededAt))))[0]?.key ?? null

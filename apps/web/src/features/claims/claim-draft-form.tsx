@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from 'next-intl'
 import { useActionState, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
+import { SampleTag } from '@/components/ui/sample-tag'
 import { Select } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { ActionMessage } from '@/features/shop/action-message'
@@ -39,7 +40,7 @@ export function ClaimDraftForm({ data }: { data: ClaimWorkspace }) {
       const choice = agreed[incident.id] ?? { keep: false, amount: '' }
       return <AgreedLineField key={incident.id} incident={incident} currency={data.currency} choice={choice} raised={kept.some((line) => line.incidentId === incident.id && line.raised)} onChange={(next) => { setAgreed({ ...agreed, [incident.id]: next }) }} />
     })}
-    {findings.map((finding) => <label key={finding.id} className="flex min-h-11 items-start gap-3"><input type="checkbox" className="mt-1 min-h-11 min-w-11" checked={selected.includes(finding.id)} onChange={(event) => { setSelected(event.target.checked ? [...selected, finding.id] : selected.filter((id) => id !== finding.id)) }} /><span className="min-w-0 self-center wrap-long-words">{finding.description}</span></label>)}
+    {findings.map((finding) => <label key={finding.id} className="flex min-h-11 items-start gap-3"><input type="checkbox" className="mt-1 min-h-11 min-w-11" checked={selected.includes(finding.id)} onChange={(event) => { setSelected(event.target.checked ? [...selected, finding.id] : selected.filter((id) => id !== finding.id)) }} /><span className="min-w-0 self-center wrap-long-words">{finding.description}</span>{finding.simulated ? <>{' '}<span className="self-center"><SampleTag /></span></> : null}</label>)}
     {rows.map((row, index) => <fieldset key={index} className="grid min-w-0 gap-2 border p-3"><legend className="px-1 font-semibold">{t('manualLine', { number: index + 1 })}</legend>
       <Label htmlFor={`claim-price-${String(index)}`}>{t('priceEntry')}</Label><Select id={`claim-price-${String(index)}`} value={row.priceEntryId} onChange={(event) => { setRows(rows.map((each, position) => position === index ? { ...each, priceEntryId: event.target.value } : each)) }}>{data.prices.map((entry) => <option key={entry.id} value={entry.id}>{entry.description} · {formatMoney(money(entry.amountCents, data.currency), locale)}</option>)}</Select>
       <Label htmlFor={`claim-reason-${String(index)}`}>{t('lineReason')}</Label><Textarea id={`claim-reason-${String(index)}`} value={row.reason} maxLength={1000} onChange={(event) => { setRows(rows.map((each, position) => position === index ? { ...each, reason: event.target.value } : each)) }} />

@@ -35,6 +35,27 @@ describe('taking a view’s photograph', () => {
     expect(upload.mock.calls[0]?.[3]).toBe(true)
   })
 
+  // The return offers two more samples of the same frame: one with a chip in the paint, to show damage, and one where the
+  // faint scuff seen at the handover has grown into a scratch, to show a claim the renter contests.
+  it.each([
+    ['Use the sample with damage', '/images/sample-return-damage.jpg'],
+    ['Use the sample for a contested claim', '/images/sample-return-contested.jpg'],
+  ])('offers “%s” only where return samples are asked for, and uploads it as a sample', async (name, source) => {
+    check.mockResolvedValue({ sharpness: 150, shadows: 20, highlights: 220, filled: 0.6 })
+    upload.mockResolvedValue({ ok: true, photoId: 'photo-1' })
+    const { unmount } = renderWithIntl(<PhotoTaker view={view} upload={upload} onTaken={vi.fn()} />)
+    expect(screen.queryByRole('button', { name })).toBeNull()
+    unmount()
+    const taken = vi.fn()
+    renderWithIntl(<PhotoTaker view={view} upload={upload} onTaken={taken} returnSamples />)
+    await userEvent.click(screen.getByRole('button', { name }))
+    await waitFor(() => {
+      expect(taken).toHaveBeenCalled()
+    })
+    expect(vi.mocked(fetch)).toHaveBeenCalledWith(source)
+    expect(upload.mock.calls[0]?.[3]).toBe(true)
+  })
+
   it('asks for a retake of a blurred or dark photograph, says why, and uploads nothing', async () => {
     check.mockResolvedValue({ sharpness: 5, shadows: 2, highlights: 30, filled: 0.6 })
     renderWithIntl(<PhotoTaker view={view} upload={upload} onTaken={vi.fn()} />)

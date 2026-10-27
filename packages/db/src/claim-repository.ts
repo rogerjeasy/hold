@@ -6,6 +6,7 @@ import { claimStaff, startSettling } from './claim-access.ts'
 import { EXECUTIONS_QUEUE } from './fee-repository.ts'
 import { approvals, auditLog, authorizations, captureSessions, claimLines, claims, comparisons, executions, findings, holds, incidents, outbox, photos, priceEntries, rentalItems, rentals, shops } from './schema/index.ts'
 import { openClaimIncidents } from './incident-closing.ts'
+import { shopPayPalMode } from './paypal-mode.ts'
 import type { Transaction } from './scope.ts'
 
 // A line from a finding or a named person's reason, priced from the agreed list; or the line the renter agreed during
@@ -47,7 +48,9 @@ export async function draftClaim(transaction: Transaction, rentalId: string, use
       const [finding] = await transaction.select({ row: findings, simulated: comparisons.simulated, handoverId: comparisons.handoverSessionId, returnId: comparisons.returnSessionId }).from(findings)
         .innerJoin(comparisons, eq(comparisons.id, findings.comparisonId)).innerJoin(captureSessions, eq(captureSessions.id, comparisons.returnSessionId)).innerJoin(rentalItems, eq(rentalItems.id, captureSessions.rentalItemId))
         .where(and(eq(findings.id, line.findingId), eq(rentalItems.rentalId, rentalId), isNotNull(captureSessions.sealedAt)))
-      if (finding === undefined || finding.simulated || !['new_damage', 'missing_part'].includes(finding.row.class) || finding.row.secondLookConfirmed !== true) return refused('finding_not_billable')
+      if (finding === undefined || !['new_damage', 'missing_part'].includes(finding.row.class) || finding.row.secondLookConfirmed !== true) return refused('finding_not_billable')
+      // A finding from sample photographs bills only in the PayPal sandbox, where no real money moves (section 20.3).
+      if (finding.simulated && await shopPayPalMode(transaction, rental.shopId) !== 'sandbox') return refused('finding_not_billable')
       const before = await transaction.select({ id: photos.id }).from(photos).where(and(eq(photos.sessionId, finding.handoverId), eq(photos.view, finding.row.view), isNull(photos.supersededAt)))
       const after = await transaction.select({ id: photos.id }).from(photos).where(and(eq(photos.sessionId, finding.returnId), eq(photos.view, finding.row.view), isNull(photos.supersededAt)))
       source = { kind: 'finding', findingId: line.findingId, photoCount: before.length > 0 && after.length > 0 ? 2 : 0 }

@@ -11,7 +11,7 @@ const NOW = new Date('2026-10-20T09:00:00Z')
 const sha = (body: Buffer) => createHash('sha256').update(body).digest('hex')
 const quality = { sharpness: 120, shadows: 20, highlights: 220, filled: 0.6 }
 
-async function queued(before: Buffer, after: Buffer, subject: string) {
+async function queued(before: Buffer, after: Buffer, subject: string, samples = false) {
   const database = await createTestDatabase()
   const shop = await readyRentalShop(database, subject, NOW)
   const rental = await shop.readyRental()
@@ -24,7 +24,7 @@ async function queued(before: Buffer, after: Buffer, subject: string) {
       const key = `${shop.scope.shopId}/${started.sessionId}/${view}.jpg`
       const link = await evidence.uploadLink({ key, sha256: sha(body), bytes: body.length })
       evidence.receive(key, body, link.headers['x-amz-checksum-sha256'] ?? '')
-      await shop.act((transaction) => recordPhoto(transaction, started.sessionId, { view, evidenceKey: key, sha256: sha(body), quality }, NOW))
+      await shop.act((transaction) => recordPhoto(transaction, started.sessionId, { view, evidenceKey: key, sha256: sha(body), quality, simulated: samples }, NOW))
     }
     await shop.act((transaction) => sealSession(transaction, started.sessionId, NOW))
   }
@@ -33,11 +33,16 @@ async function queued(before: Buffer, after: Buffer, subject: string) {
   return { database, shop, rental, evidence, comparison }
 }
 
+// A picture with enough texture for code to align a pair.
+async function textured() {
+  const pixels = Buffer.alloc(640 * 480 * 3, 140)
+  for (let y = 70; y < 410; y += 1) for (let x = 90; x < 550; x += 1) for (let c = 0; c < 3; c += 1) pixels[(y * 640 + x) * 3 + c] = ((x * 13 + y * 7 + ((x >> 4) * (y >> 4))) % 180) + 30
+  return sharp(pixels, { raw: { width: 640, height: 480, channels: 3 } }).jpeg().toBuffer()
+}
+
 describe('comparison queue processing', () => {
   it('stores independently checked findings and the agreed price entry, never a model amount', async () => {
-    const pixels = Buffer.alloc(640 * 480 * 3, 140)
-    for (let y = 70; y < 410; y += 1) for (let x = 90; x < 550; x += 1) for (let c = 0; c < 3; c += 1) pixels[(y * 640 + x) * 3 + c] = ((x * 13 + y * 7 + ((x >> 4) * (y >> 4))) % 180) + 30
-    const before = await sharp(pixels, { raw: { width: 640, height: 480, channels: 3 } }).jpeg().toBuffer()
+    const before = await textured()
     const fixture = await queued(before, await sharp(before).linear(1, 3).jpeg().toBuffer(), 'comparison-findings')
     const model = { look: () => Promise.resolve({ kind: 'result' as const, model: 'recorded-model', inputTokens: 100, outputTokens: 50, data: { sameItem: true, sameView: true, findings: [{ region: { x: 0.2, y: 0.2, width: 0.2, height: 0.2 }, class: 'new_damage', confidence: 0.96, description: 'New scratch', priceCode: 'scratch' }] } }) }
     const message = { shopId: fixture.shop.scope.shopId, comparisonId: fixture.comparison.id }
@@ -58,6 +63,16 @@ describe('comparison queue processing', () => {
     expect(await shop.act((transaction) => completeComparison(transaction, comparison.id, NOW, result, resumed))).toBe(false)
     expect(await shop.act((transaction) => completeComparison(transaction, comparison.id, resumed, result, resumed))).toBe(true)
   })
+  // The demonstration's samples are one file each, so a return photographed from the handover sample repeats it byte for
+  // byte. A sample claims to show nothing about this return, so it is compared, and the comparison says it is simulated.
+  it('compares sample return photographs instead of deferring them as reused, and marks the comparison simulated', async () => {
+    const body = await textured()
+    const fixture = await queued(body, body, 'comparison-samples', true)
+    const model = { look: () => Promise.resolve({ kind: 'result' as const, model: 'recorded-model', inputTokens: 100, outputTokens: 50, data: { sameItem: true, sameView: true, findings: [] } }) }
+    expect(await runComparison({ ...fixture, role: 'hold_worker', model, now: () => NOW }, { shopId: fixture.shop.scope.shopId, comparisonId: fixture.comparison.id })).toBe('completed')
+    expect((await fixture.database.select().from(comparisons))[0]).toMatchObject({ state: 'clean', model: 'recorded-model', simulated: true, deferredReason: null })
+  })
+
   it('persists a deferred result for reused photographs once, without calling a model or changing the hold', async () => {
     const database = await createTestDatabase()
     const shop = await readyRentalShop(database, 'comparison-job', NOW)
