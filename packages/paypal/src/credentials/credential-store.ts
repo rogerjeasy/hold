@@ -18,6 +18,10 @@ export type CredentialStore = {
 
 const credentialsSchema = z.object({ clientId: z.string().min(1), clientSecret: z.string().min(1) }).strict()
 
+// Where the demo's one sandbox connection is kept, in place of a shop ID: every demo session's shop shares it
+// (architecture.md section 20.3). Shop IDs are UUIDs, so it can name no real shop.
+export const DEMO_CREDENTIAL_OWNER = 'demo'
+
 export function credentialReference(shopId: string, environment: PayPalEnvironment): string {
   return `hold/paypal/shops/${shopId}/${environment}`
 }

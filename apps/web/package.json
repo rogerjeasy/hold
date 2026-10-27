@@ -11,7 +11,7 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test:e2e": "next build && playwright test",
     "test:e2e:key": "next build && HOLD_E2E_SCOPE=key playwright test",
-    "demo:reset": "node scripts/reset-demo.ts"
+    "demo:paypal": "node scripts/demo-paypal.ts"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "3.1151.0",

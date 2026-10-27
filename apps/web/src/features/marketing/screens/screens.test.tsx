@@ -240,7 +240,7 @@ describe('DemoScreen', () => {
     renderWithIntl(<DemoScreen />)
     const note = within(screen.getByRole('note'))
     expect(note.getByText('The demo shop is open.')).toBeInTheDocument()
-    expect(note.getByText(/one tap/)).toBeInTheDocument()
+    expect(note.getByText(/one tap/i)).toBeInTheDocument()
   })
 
   it('describes the three sample returns', () => {

@@ -904,7 +904,7 @@
       "lead": "Connectez-vous d'un appui, louez un vélo et rendez-le avec une photographie d'exemple. Chaque appel à PayPal est réel, dans l'environnement de test, avec de l'argent fictif.",
       "status": {
         "title": "La boutique de démonstration est ouverte.",
-        "body": "Connectez-vous en un appui comme Tomás, le propriétaire, ou Jonas, au comptoir : rien à saisir et aucun code à attendre. Une étape qui déplace de l'argent demande une clé d'accès, que vous ajoutez sur votre propre appareil."
+        "body": "Un appui lance votre propre boutique de démonstration, comme Tomás, le propriétaire, ou Jonas, au comptoir : rien à saisir, aucun code à attendre, et aucune modification d'autrui sur votre chemin. Une étape qui déplace de l'argent demande une clé d'accès, que vous ajoutez sur votre propre appareil."
       },
       "samples": {
         "title": "Trois retours d'exemple.",
@@ -1197,16 +1197,23 @@
     "demo": {
       "title": "Essayer la boutique de démonstration",
       "tag": "Démo",
-      "lead": "Ribeira Bikes est une boutique d’exemple avec des locations déjà en cours. Un geste suffit pour se connecter : rien à saisir, aucun code à attendre.",
+      "lead": "Chaque démonstration est votre propre Ribeira Bikes, avec des locations déjà en cours. Personne d’autre ne la voit, et vous ne voyez celle de personne. Un geste la lance : rien à saisir, aucun code à attendre.",
       "owner": {
-        "action": "Se connecter en tant que Tomás, le propriétaire",
+        "start": "Lancer une démo en tant que Tomás, le propriétaire",
+        "continue": "Continuer en tant que Tomás, le propriétaire",
         "hint": "Voit tout et décide de chaque réclamation."
       },
       "staff": {
-        "action": "Se connecter en tant que Jonas, au comptoir",
+        "start": "Lancer une démo en tant que Jonas, au comptoir",
+        "continue": "Continuer en tant que Jonas, au comptoir",
         "hint": "Remet et reprend les vélos, et approuve les petites réclamations."
       },
-      "note": "Une étape qui déplace de l’argent demande une clé d’accès sur votre propre appareil, que vous pouvez ajouter sur la page Sécurité. PayPal fonctionne dans son bac à sable : aucun argent réel ne circule. La boutique est réinitialisée entre les sessions du jury."
+      "leadCurrent": "Ce navigateur garde votre démonstration. Revenez-y comme l’une ou l’autre personne, ou lancez-en une nouvelle.",
+      "fresh": {
+        "action": "Lancer une nouvelle démo",
+        "hint": "Une nouvelle boutique et de nouveaux comptes, en tant que Tomás. Votre démonstration actuelle reste telle quelle."
+      },
+      "note": "Une étape qui déplace de l’argent demande une clé d’accès sur votre propre appareil, que vous pouvez ajouter sur la page Sécurité. PayPal fonctionne dans son bac à sable : aucun argent réel ne circule. Ce navigateur garde votre démonstration, pour passer de Tomás à Jonas."
     }
   },
   "shop": {

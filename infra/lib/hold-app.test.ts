@@ -453,15 +453,15 @@ describe('the web app', () => {
     expect(variables()).toContainEqual({ Name: 'HOLD_PUBLIC_URL', Value: 'https://abc123.us-east-1.awsapprunner.com' })
   })
 
-  it('offers the demo accounts by reading their secret, and can neither change it nor set a password', () => {
-    expect(variables()).toContainEqual({ Name: 'HOLD_DEMO_ACCOUNTS_SECRET', Value: 'hold/web/demo-accounts' })
+  // Each judge's demo gets accounts of its own (architecture.md section 20.3). The app may create a user, never set a
+  // password with administrator rights, so it cannot change an existing person's.
+  it('turns demo sessions on, lets the app create a demo’s users in Hold’s pool, and never set a password', () => {
+    expect(variables()).toContainEqual({ Name: 'HOLD_DEMO_SESSIONS', Value: 'on' })
     const policy = instancePolicy()
-    expect(policy).toContain('secret:hold/web/demo-accounts-??????')
-    const writes = Object.values(web.findResources('AWS::IAM::Policy'))
-      .flatMap((resource) => (resource as { Properties: { PolicyDocument: { Statement: { Action: unknown; Resource: unknown }[] } } }).Properties.PolicyDocument.Statement)
-      .filter((statement) => JSON.stringify(statement.Resource).includes('demo-accounts') && JSON.stringify(statement.Action) !== '"secretsmanager:GetSecretValue"')
-    expect(writes).toEqual([])
-    expect(policy).not.toMatch(/AdminSetUserPassword|AdminCreateUser/)
+    expect(policy).toContain('cognito-idp:AdminCreateUser')
+    expect(policy).not.toMatch(/AdminSetUserPassword|AdminDeleteUser|AdminUpdateUserAttributes|demo-accounts/)
+    const boundary = Object.values(delivery.findResources('AWS::IAM::ManagedPolicy', { Properties: { ManagedPolicyName: 'hold-permissions-boundary' } }))[0]
+    expect(JSON.stringify(boundary)).toContain('cognito-idp:AdminCreateUser')
   })
 
   it('logs in to the database as hold_app, never as the owner of the tables', () => {
@@ -491,7 +491,7 @@ describe('the web app', () => {
     }
   })
 
-  it('may do only what the web app does: query the database, read its secrets, keep PayPal credentials, hand work to the worker, sort an incident and put a person in a group', () => {
+  it('may do only what the web app does: query the database, read its secrets, keep PayPal credentials, hand work to the worker, sort an incident, put a person in a group and create a demo’s users', () => {
     const statements = Object.entries(web.findResources('AWS::IAM::Policy'))
       .filter(([key]) => key.startsWith('InstanceRole'))
       .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: { Action: unknown }[] } } }).Properties.PolicyDocument.Statement)
@@ -509,6 +509,7 @@ describe('the web app', () => {
         'secretsmanager:PutSecretValue',
         'secretsmanager:TagResource',
         'cognito-idp:AdminAddUserToGroup',
+        'cognito-idp:AdminCreateUser',
         'sqs:SendMessage',
         'sqs:GetQueueAttributes',
         'sqs:GetQueueUrl',

@@ -904,7 +904,7 @@
       "lead": "Melden Sie sich mit einem Tippen an, mieten Sie ein Rad und geben Sie es mit einem Beispielfoto zurück. Jeder PayPal-Aufruf ist echt, in der Sandbox und mit Testgeld.",
       "status": {
         "title": "Der Demo-Verleih ist geöffnet.",
-        "body": "Melden Sie sich mit einem Tippen als Tomás, der Inhaber, oder als Jonas an der Theke an: nichts einzugeben und kein Code abzuwarten. Ein Schritt, der Geld bewegt, verlangt einen Passkey, den Sie auf Ihrem eigenen Gerät hinzufügen."
+        "body": "Ein Tippen startet Ihren eigenen Demo-Verleih, als Tomás, der Inhaber, oder als Jonas an der Theke: nichts einzugeben, kein Code abzuwarten und keine fremden Änderungen im Weg. Ein Schritt, der Geld bewegt, verlangt einen Passkey, den Sie auf Ihrem eigenen Gerät hinzufügen."
       },
       "samples": {
         "title": "Drei Beispiel­rückgaben.",
@@ -1197,16 +1197,23 @@
     "demo": {
       "title": "Den Demo-Laden ausprobieren",
       "tag": "Demo",
-      "lead": "Ribeira Bikes ist ein Beispielladen mit laufenden Vermietungen. Ein Tippen meldet Sie an: nichts eingeben, auf keinen Code warten.",
+      "lead": "Jede Demo ist Ihr eigenes Ribeira Bikes, mit laufenden Vermietungen. Niemand sonst sieht sie, und Sie sehen keine fremde. Ein Tippen startet sie: nichts eingeben, auf keinen Code warten.",
       "owner": {
-        "action": "Als Tomás anmelden, der Inhaber",
+        "start": "Demo als Tomás starten, der Inhaber",
+        "continue": "Als Tomás weitermachen, der Inhaber",
         "hint": "Sieht alles und entscheidet jede Forderung."
       },
       "staff": {
-        "action": "Als Jonas anmelden, an der Theke",
+        "start": "Demo als Jonas starten, an der Theke",
+        "continue": "Als Jonas weitermachen, an der Theke",
         "hint": "Gibt Räder aus, nimmt sie zurück und genehmigt kleine Forderungen."
       },
-      "note": "Ein Schritt, der Geld bewegt, verlangt einen Passkey auf Ihrem eigenen Gerät, den Sie auf der Seite Sicherheit hinzufügen können. PayPal läuft in seiner Sandbox, es fließt also kein echtes Geld. Der Laden wird zwischen den Jurysitzungen zurückgesetzt."
+      "leadCurrent": "Dieser Browser hat Ihre eigene Demo. Kehren Sie als eine der beiden Personen zurück, oder starten Sie eine neue.",
+      "fresh": {
+        "action": "Neue Demo starten",
+        "hint": "Ein neuer Laden und neue Konten, als Tomás. Ihre jetzige Demo bleibt, wie sie ist."
+      },
+      "note": "Ein Schritt, der Geld bewegt, verlangt einen Passkey auf Ihrem eigenen Gerät, den Sie auf der Seite Sicherheit hinzufügen können. PayPal läuft in seiner Sandbox, es fließt also kein echtes Geld. Dieser Browser behält Ihre Demo, damit Sie zwischen Tomás und Jonas wechseln können."
     }
   },
   "shop": {

@@ -1,11 +1,11 @@
 import 'server-only'
 import { comparisonMessageSchema, createBedrockIncidentModel, createSimulatedIncidentModel, runComparison } from '@hold/compare'
 import type { IncidentModel } from '@hold/compare'
-import { createCognitoIdentity, createFakeIdentity, readDemoAccounts, readKeySecret } from '@hold/auth'
-import type { DemoAccounts, Identity } from '@hold/auth'
+import { createCognitoIdentity, createDemoSessionAccounts, createFakeIdentity, readKeySecret } from '@hold/auth'
+import type { Identity } from '@hold/auth'
 import { loadWebConfig } from '@hold/config'
 import type { CredentialKeySource, KeySource, WebConfig } from '@hold/config'
-import { OPS_AGENT_QUEUE, resetDemoShop } from '@hold/db'
+import { OPS_AGENT_QUEUE, openDemoSession } from '@hold/db'
 import type { Database } from '@hold/db'
 import { createDataApiDatabase } from '@hold/db/data-api'
 import { createMemoryDocumentStore, createS3DocumentStore, createMemoryEvidenceStore, createS3EvidenceStore, makeDisplayCopy, mediaMessageSchema } from '@hold/evidence'
@@ -15,13 +15,14 @@ import { opsAgentMessageSchema, runOperations } from '@hold/ops/run'
 import type { OpsDependencies } from '@hold/ops/run'
 import { createLazyMailer, createMemoryMailer, createSmtpMailer, loadSmtpSettings } from '@hold/notify'
 import type { Mailer } from '@hold/notify'
-import { createFakePayPal, createMemoryCredentialStore, createPayPalClient, createRestPayPalHolds, createSecretsManagerCredentialStore } from '@hold/paypal'
+import { createFakePayPal, createMemoryCredentialStore, createPayPalClient, createRestPayPalHolds, createSecretsManagerCredentialStore, credentialReference, DEMO_CREDENTIAL_OWNER } from '@hold/paypal'
 import type { CredentialStore, FakePayPal, PayPalCredentials, PayPalHolds } from '@hold/paypal'
 import { applyPayPalEvent, createMemoryScheduler, createSqsSender, executionMessageSchema, paypalEventMessageSchema, runExecution, runUpkeep, upkeepMessageSchema } from '@hold/settle'
 import type { Notice, QueueMessage, RequestDependencies, SettleDependencies } from '@hold/settle'
 import { createKmsSigner, createLocalSigner, kmsCalls, renterKeyFor } from '@hold/trust'
 import { createScriptedAdvocate, negotiationMessageSchema, runNegotiation } from '@hold/negotiate'
 import type { CredentialSigner, RenterKey } from '@hold/trust'
+import type { DemoSessionServices } from '@/features/auth/demo-session'
 import { createRenterAsk } from './renter-ask'
 import { simulatedOperations } from './simulated-operations'
 import { simulatedRecords } from './simulated-records'
@@ -36,8 +37,9 @@ export type Services = {
   // Signs renter links. A key of its own, which the worker reads too; never the cookie key once deployed.
   readonly renterLinkKey: Buffer
   readonly identity: Identity
-  // The demo accounts a judge signs in to with one tap. Nothing where demo mode is off, or the secret cannot be read.
-  readonly demoAccounts: () => Promise<DemoAccounts | undefined>
+  // What starts a judge's own demo: its accounts, its shop and the shared sandbox connection. Nothing where demo mode is
+  // off, which is every deployment but the demo.
+  readonly demoSessions: DemoSessionServices | undefined
   readonly database: Database
   readonly mailer: Mailer
   readonly paypalCredentials: CredentialStore
@@ -95,11 +97,6 @@ function runAtOnce(settle: () => SettleDependencies, media: DisplayJobDependenci
 
 // The code the test environment's fake identity sends every time. The end-to-end tests type it.
 export const TEST_SIGN_IN_CODE = '24681357'
-// The test environment's demo accounts, whose shop is built when the server starts, as the reset builds it deployed.
-export const TEST_DEMO_ACCOUNTS: DemoAccounts = {
-  owner: { email: 'tomas.demo@hold.example', password: 'test-demo-owner-password-0001' },
-  staff: { email: 'jonas.demo@hold.example', password: 'test-demo-staff-password-0001' },
-}
 // The test environment's PayPal check refuses this secret, so a refusal can be tested too.
 export const TEST_REFUSED_PAYPAL_SECRET = 'refused-by-paypal'
 
@@ -109,18 +106,18 @@ function loadKey(source: KeySource, region: string): Promise<Buffer> {
   return source.kind === 'value' ? Promise.resolve(source.key) : readKeySecret(source.secretArn, region)
 }
 
-// Read once, on the first sign-in page that asks. A secret that cannot be read turns the demo sign-in off, not the page,
-// and is tried again next time.
-function demoAccountsFrom(secret: string | undefined, region: string): () => Promise<DemoAccounts | undefined> {
-  if (secret === undefined) return () => Promise.resolve(undefined)
-  let accounts: Promise<DemoAccounts | undefined> | undefined
-  return () => {
-    accounts ??= readDemoAccounts(secret, region).catch((error: unknown) => {
-      accounts = undefined
-      console.warn(JSON.stringify({ event: 'demo_accounts_unreadable', name: error instanceof Error ? error.name : 'unknown' }))
+// The demo's one PayPal sandbox connection, which every demo session's shop shares by reference. An administrator
+// (pnpm demo:paypal) stores it. Until it does, a demo opens without PayPal and its PayPal page says so.
+export const DEMO_PAYPAL_REFERENCE = credentialReference(DEMO_CREDENTIAL_OWNER, 'sandbox')
+
+function demoPayPalFrom(store: CredentialStore): DemoSessionServices['paypal'] {
+  return async () => {
+    try {
+      return (await store.read(DEMO_PAYPAL_REFERENCE)) === undefined ? undefined : { credentialReference: DEMO_PAYPAL_REFERENCE, mode: 'sandbox' }
+    } catch (error) {
+      console.warn(JSON.stringify({ event: 'demo_paypal_unreadable', name: error instanceof Error ? error.name : 'unknown' }))
       return undefined
-    })
-    return accounts
+    }
   }
 }
 
@@ -176,17 +173,16 @@ async function build(): Promise<Services> {
       now: () => new Date(),
     }
     const identity = createFakeIdentity({ fixedCode: TEST_SIGN_IN_CODE })
-    await resetDemoShop(database, {
-      owner: { subject: identity.addDemoAccount(TEST_DEMO_ACCOUNTS.owner.email, TEST_DEMO_ACCOUNTS.owner.password), email: TEST_DEMO_ACCOUNTS.owner.email },
-      staff: { subject: identity.addDemoAccount(TEST_DEMO_ACCOUNTS.staff.email, TEST_DEMO_ACCOUNTS.staff.password), email: TEST_DEMO_ACCOUNTS.staff.email },
-      now: new Date(),
-    })
     return {
       config,
       cookieKey: await loadKey(config.cookieKey, 'us-east-1'),
       renterLinkKey: await loadKey(config.renterLinkKey, 'us-east-1'),
       identity,
-      demoAccounts: () => Promise.resolve(TEST_DEMO_ACCOUNTS),
+      demoSessions: {
+        accounts: { create: (account) => Promise.resolve(identity.addDemoAccount(account.email, account.password)) },
+        open: (input) => openDemoSession(database, input),
+        paypal: () => Promise.resolve({ credentialReference: DEMO_PAYPAL_REFERENCE, mode: 'sandbox' }),
+      },
       database,
       mailer,
       paypalCredentials: createMemoryCredentialStore(),
@@ -223,7 +219,9 @@ async function build(): Promise<Services> {
     cookieKey: await loadKey(config.cookieKey, config.region),
     renterLinkKey: await loadKey(config.renterLinkKey, config.region),
     identity: createCognitoIdentity({ region: config.region, ...config.cognito }),
-    demoAccounts: demoAccountsFrom(config.demoAccountsSecret, config.region),
+    demoSessions: config.demoSessions
+      ? { accounts: createDemoSessionAccounts({ region: config.region, ...config.cognito }), open: (input) => openDemoSession(database, input), paypal: demoPayPalFrom(paypalCredentials) }
+      : undefined,
     database,
     // Through the SMTP account in Secrets Manager, read when the first email is sent.
     mailer: createLazyMailer(async () => createSmtpMailer(await loadSmtpSettings(config.smtpSecret, config.region))),

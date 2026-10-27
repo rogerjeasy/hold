@@ -6,7 +6,9 @@ import { z } from 'zod'
 import { getServices } from '@/server/services'
 import { readAttempt } from './attempt'
 import type { Attempt } from './attempt'
-import { COOKIE_NAMES, cookieOptions, REFRESH_SECONDS } from './cookie-settings'
+import { COOKIE_NAMES, cookieOptions, DEMO_COOKIE, REFRESH_SECONDS } from './cookie-settings'
+import { demoSessionSchema } from './demo-session'
+import type { DemoSession } from './demo-session'
 import { seal, unseal } from './sealed'
 
 // `demo` is a demo account a judge signed in to with one tap: weaker than a passkey, like an emailed code.
@@ -68,6 +70,18 @@ export async function sessionFactor(subject: string): Promise<SignInFactor> {
   const parsed = factorSchema.safeParse(unseal(sealed, (await getServices()).cookieKey))
   const matches = parsed.success && parsed.data.subject === subject && parsed.data.session === sessionFingerprint(refreshToken)
   return matches ? parsed.data.factor : 'email_code'
+}
+
+export async function writeDemoSession(session: DemoSession): Promise<void> {
+  ;(await cookies()).set(DEMO_COOKIE, seal(session, (await getServices()).cookieKey), { ...(await baseOptions()), maxAge: REFRESH_SECONDS })
+}
+
+// The demo this browser started, if it has one and it was not altered.
+export async function readDemoSession(): Promise<DemoSession | undefined> {
+  const sealed = (await cookies()).get(DEMO_COOKIE)?.value
+  if (sealed === undefined) return undefined
+  const parsed = demoSessionSchema.safeParse(unseal(sealed, (await getServices()).cookieKey))
+  return parsed.success ? parsed.data : undefined
 }
 
 export async function chosenShopId(): Promise<string | undefined> {

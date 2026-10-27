@@ -1,4 +1,4 @@
-export { createMemoryCredentialStore, createSecretsManagerCredentialStore, credentialReference } from './credentials/credential-store.ts'
+export { createMemoryCredentialStore, createSecretsManagerCredentialStore, credentialReference, DEMO_CREDENTIAL_OWNER } from './credentials/credential-store.ts'
 export type { CredentialStore } from './credentials/credential-store.ts'
 export { createFakePayPal, FAKE_SIGNATURE } from './fake/fake-paypal.ts'
 export type { FakePayPal, FakePayPalOptions } from './fake/fake-paypal.ts'

@@ -1,5 +1,6 @@
 'use server'
 
+import { randomInt } from 'node:crypto'
 import { DEMO_ACCOUNT_KEYS } from '@hold/auth'
 import { findPerson, takeRateToken } from '@hold/db'
 import { z } from 'zod'
@@ -11,9 +12,10 @@ import type { Attempt, AttemptPage } from './attempt'
 import type { AuthFormState, CodeFormState, DemoFormState, PasskeyFormState } from './auth-form-state'
 import { parseAuthInput, readText, signInFields, signUpFields, type AuthField } from './auth-input'
 import { parseCode } from './code-input'
-import { signInAsDemo } from './demo-sign-in'
+import { continueDemo, startDemo } from './demo-session'
+import type { DemoDependencies, DemoSession } from './demo-session'
 import { readLocale } from './locale-input'
-import { clearAttempt, clearSession, currentAttempt, readAccessToken, readRefreshToken, sessionFactor, writeAttempt, writeSession } from './session-cookies'
+import { chooseShop, clearAttempt, clearSession, currentAttempt, readAccessToken, readDemoSession, readRefreshToken, sessionFactor, writeAttempt, writeDemoSession, writeSession } from './session-cookies'
 import { answerCode, answerPasskey, beginInvitation, beginPasskey, beginSignIn, beginSignUp, resendCode } from './sign-in-flow'
 import type { Begun, FlowDependencies, ProofOutcome, Requester } from './sign-in-flow'
 import { readTimeZone } from './time-zone-input'
@@ -80,16 +82,41 @@ export async function requestInvitationCode(_previous: AuthFormState, data: Form
 
 const demoAccountKey = z.enum(DEMO_ACCOUNT_KEYS)
 
-// One tap on a demo account. Its session counts as weaker than a passkey, so money steps still ask for one.
+const demoChoice = z.enum(['start', 'continue'])
+
+// One tap starts a demo of the judge's own, or signs the browser that started one in again as either of its people.
+// The session counts as weaker than a passkey, so money steps still ask for one.
 export async function signInWithDemoAccount(_previous: DemoFormState, data: FormData): Promise<DemoFormState> {
   const key = demoAccountKey.safeParse(data.get('account'))
-  if (!key.success) return { notice: 'unavailable' }
-  const { identity, demoAccounts } = await getServices()
+  const choice = demoChoice.safeParse(data.get('demo'))
+  if (!key.success || !choice.success) return { notice: 'unavailable' }
+  const { identity, demoSessions } = await getServices()
   const { allow } = await dependencies()
-  const signedIn = await signInAsDemo({ identity, allow, demoAccounts }, key.data, await requester())
-  if (!signedIn.ok) return { notice: signedIn.notice }
-  await writeSession(signedIn.tokens, 'demo')
+  const demo: DemoDependencies = { identity, allow, sessions: demoSessions, newCode: newDemoCode, now: () => new Date() }
+  // A demo this browser no longer holds cannot be continued, so a fresh one starts instead.
+  const current = choice.data === 'continue' ? await readDemoSession() : undefined
+  let session: DemoSession
+  if (current === undefined) {
+    const started = await startDemo(demo, key.data, await requester())
+    if (!started.ok) return { notice: started.notice }
+    await writeDemoSession(started.session)
+    await writeSession(started.tokens, 'demo')
+    session = started.session
+  } else {
+    const signedIn = await continueDemo(demo, current, key.data, await requester())
+    if (!signedIn.ok) return { notice: signedIn.notice }
+    await writeSession(signedIn.tokens, 'demo')
+    session = current
+  }
+  await chooseShop(session.shopId)
   return goTo(shopRoutes.home, readLocale(data.get('locale')))
+}
+
+// Eight letters and digits a reader cannot confuse, about 10^12 to choose from: a demo's shop address and accounts
+// cannot be guessed.
+const CODE_ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789'
+function newDemoCode(): string {
+  return Array.from({ length: 8 }, () => CODE_ALPHABET[randomInt(CODE_ALPHABET.length)]).join('')
 }
 
 async function finish(outcome: ProofOutcome, attempt: Attempt, factor: 'email_code' | 'passkey'): Promise<CodeFormState> {
@@ -167,14 +194,12 @@ export async function finishPasskeySignIn(response: string): Promise<PasskeyForm
 // A person's first passkey can be added from a session an emailed code proved: there is nothing stronger yet. Once
 // they have one, adding another needs a session that passkey proved. Otherwise someone who reached their inbox could
 // add a passkey of their own and pass every passkey check after it.
-// A demo account is shared by every judge, and each needs a passkey on their own device, so a demo session may always
-// add one. The account holds nothing a judge could take from another, and the reset removes them all.
 async function mayAddPasskey(accessToken: string): Promise<boolean> {
   const { identity } = await getServices()
   const [verified, existing] = await Promise.all([identity.verifyAccessToken(accessToken), identity.listPasskeys(accessToken)])
   if (!verified.ok || !existing.ok) return false
   const factor = await sessionFactor(verified.value.subject)
-  return existing.value.length === 0 || factor === 'passkey' || factor === 'demo'
+  return existing.value.length === 0 || factor === 'passkey'
 }
 
 // Registering a passkey needs a signed-in session. The options come from the identity service and go to the device.

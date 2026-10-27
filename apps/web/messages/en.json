@@ -904,7 +904,7 @@
       "lead": "Sign in with one tap, rent a bike and return it with a sample photograph. Every PayPal call is real, in the sandbox, with test money.",
       "status": {
         "title": "The demo shop is open.",
-        "body": "Sign in as Tomás, the owner, or Jonas, at the counter, with one tap: nothing to type and no code to wait for. A step that moves money asks for a passkey, which you add on your own device."
+        "body": "One tap starts a demo shop of your own, as Tomás, the owner, or Jonas, at the counter: nothing to type, no code to wait for, and nobody else’s changes in your way. A step that moves money asks for a passkey, which you add on your own device."
       },
       "samples": {
         "title": "Three sample returns.",
@@ -1197,16 +1197,23 @@
     "demo": {
       "title": "Try the demo shop",
       "tag": "Demo",
-      "lead": "Ribeira Bikes is a sample shop with rentals already under way. One tap signs you in: nothing to type, no code to wait for.",
+      "lead": "Each demo is a Ribeira Bikes of your own, with rentals already under way. Nobody else sees it, and you see nobody else’s. One tap starts it: nothing to type, no code to wait for.",
       "owner": {
-        "action": "Sign in as Tomás, the owner",
+        "start": "Start a demo as Tomás, the owner",
+        "continue": "Continue as Tomás, the owner",
         "hint": "Sees everything and decides every claim."
       },
       "staff": {
-        "action": "Sign in as Jonas, at the counter",
+        "start": "Start a demo as Jonas, at the counter",
+        "continue": "Continue as Jonas, at the counter",
         "hint": "Hands bikes over, takes them back and approves small claims."
       },
-      "note": "A step that moves money asks for a passkey on your own device, which you can add on the Security page. PayPal runs in its sandbox, so no real money moves. The shop is reset between judging sessions."
+      "leadCurrent": "This browser has a demo of your own. Come back to it as either person, or start a fresh one.",
+      "fresh": {
+        "action": "Start a fresh demo",
+        "hint": "A new shop and new accounts, as Tomás. The demo you have now stays as it is."
+      },
+      "note": "A step that moves money asks for a passkey on your own device, which you can add on the Security page. PayPal runs in its sandbox, so no real money moves. This browser keeps your demo, so you can switch between Tomás and Jonas."
     }
   },
   "shop": {

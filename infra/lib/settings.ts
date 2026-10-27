@@ -52,11 +52,6 @@ export function secretName(...parts: readonly string[]): string {
 // fills it from the Gmail app password, so the password is in no file, template or setting.
 export const SMTP_SECRET_NAME = secretName('email', 'smtp')
 
-// The demo accounts judges sign in to with one tap, as JSON {owner, staff: {email, password}} (architecture.md section
-// 20.3). The reset script (pnpm demo:reset) makes it as an administrator; the web app only reads it. Naming it to the web
-// app turns the demo sign-in on: drop the setting in web-stack.ts once judging ends, and the sign-in page offers none.
-export const DEMO_ACCOUNTS_SECRET_NAME = secretName('web', 'demo-accounts')
-
 // The KMS key Cognito encrypts sign-in codes with for the code sender (alias/hold-code-key). An administrator made it,
 // tagged project=hold and rotating, because the pipeline may not tag a key: that would let it claim another project's.
 export const CODE_KEY_ARN = 'arn:aws:kms:us-east-1:707938860881:key/ff9a40c3-97d9-4262-8954-20331622e005'

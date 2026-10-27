@@ -14,6 +14,10 @@ export const COOKIE_NAMES = {
   signedIn: 'hold_signed_in',
 } as const
 
+// The demo this browser started: its shop and the passwords of its two accounts, sealed. Kept apart from the session
+// cookies, so signing out keeps it and the judge can come back as Tomás or Jonas (architecture.md section 20.3).
+export const DEMO_COOKIE = 'hold_demo'
+
 // As long as the identity service keeps a refresh token (infra/lib/identity-stack.ts).
 export const REFRESH_SECONDS = 30 * 24 * 60 * 60
 

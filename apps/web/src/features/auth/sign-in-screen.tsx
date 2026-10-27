@@ -8,8 +8,8 @@ import { CodeStep } from './code-step'
 import { DemoAccountsForm } from './demo-accounts-form'
 
 // `codeSentTo` is the address a code went to, once the form was sent. The page then asks for the code.
-// `demo` offers the demo shop's accounts first, where demo mode is on.
-export function SignInScreen({ codeSentTo, demo = false }: { codeSentTo?: string | undefined; demo?: boolean }) {
+// `demo` offers a demo of the judge's own first, where demo mode is on: `current` where this browser started one.
+export function SignInScreen({ codeSentTo, demo }: { codeSentTo?: string | undefined; demo?: 'new' | 'current' | undefined }) {
   const t = useTranslations('auth.signIn')
   const code = useTranslations('auth.code')
 
@@ -20,7 +20,7 @@ export function SignInScreen({ codeSentTo, demo = false }: { codeSentTo?: string
       form={
         codeSentTo === undefined ? (
           <div className="grid gap-8">
-            {demo ? <DemoAccountsForm /> : null}
+            {demo === undefined ? null : <DemoAccountsForm demo={demo} />}
             <AuthForm kind="signIn" action={requestSignIn} />
           </div>
         ) : (

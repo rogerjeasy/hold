@@ -1,6 +1,6 @@
 import { STAFF_ROLES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
-import { integer, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
+import { boolean, integer, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
 import { appRole, shopIsolation, workerRole } from './access.ts'
 import { cents, createdAt, currency, id, reference } from './columns.ts'
 import { allowed, PAYPAL_MODES, paypalMode, staffRole } from './enums.ts'
@@ -44,6 +44,8 @@ export const shops = pgTable(
     // How long the operations agent waits before it asks about a clean return, an unpaid invoice or a waiting
     // incident, and which automatic reminders the shop has switched off (extensions.md section 6.4).
     opsSettings: jsonb().$type<{ readonly confirmCleanWithinHours?: number; readonly invoiceUnpaidDays?: number; readonly incidentWaitHours?: number; readonly remindersOff?: readonly string[] }>().notNull().default({}),
+    // A shop one judge's demo session opened (architecture.md section 20.3). Never listed for renters' assistants.
+    demoSession: boolean().notNull().default(false),
     createdAt: createdAt(),
   },
   (table) => [shopIsolation(table.id)],

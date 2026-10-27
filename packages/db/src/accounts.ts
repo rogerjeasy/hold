@@ -12,7 +12,8 @@ export type NewOwner = {
   readonly email: string
   readonly name: string
   readonly language: string
-  readonly shop: { readonly name: string; readonly timeZone: string }
+  // slug: the address to ask for, when it is not to be made from the name. demoSession: a demo session's shop.
+  readonly shop: { readonly name: string; readonly timeZone: string; readonly slug?: string; readonly demoSession?: boolean }
 }
 
 export type RegisteredOwner = { readonly userId: string; readonly shopId: string }
@@ -32,9 +33,9 @@ export async function openShop(transaction: Transaction, shopId: string, owner: 
     .from(sql`hold_register_user(${owner.subject}, ${owner.email}, ${owner.name}, ${owner.language}) as registered(id)`)
   if (registered === undefined) throw new Error('hold_register_user returned no row.')
   const { userId } = registered
-  const [address] = await transaction.select({ slug: sql<string>`hold_free_shop_slug(${slugOf(owner.shop.name) || 'shop'})` }).from(sql`(select 1) as one`)
+  const [address] = await transaction.select({ slug: sql<string>`hold_free_shop_slug(${owner.shop.slug ?? (slugOf(owner.shop.name) || 'shop')})` }).from(sql`(select 1) as one`)
   if (address === undefined) throw new Error('hold_free_shop_slug returned no row.')
-  await transaction.insert(shops).values({ id: shopId, name: owner.shop.name, slug: address.slug, timeZone: owner.shop.timeZone })
+  await transaction.insert(shops).values({ id: shopId, name: owner.shop.name, slug: address.slug, timeZone: owner.shop.timeZone, demoSession: owner.shop.demoSession ?? false })
   await transaction.insert(staffRoles).values({ shopId, userId, role: 'owner' })
   await transaction.insert(auditLog).values({
     shopId,

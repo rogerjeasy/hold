@@ -99,7 +99,7 @@ function permissionsBoundary(stack: Stack): iam.ManagedPolicy {
         `arn:aws:logs:${REGION}:${ACCOUNT}:log-group:/${PREFIX}/*`,
       ]),
       statement(['cloudwatch:PutMetricData'], ['*'], { StringEquals: { 'cloudwatch:namespace': 'Hold' } }),
-      statement(['cognito-idp:AdminAddUserToGroup'], [at.userPools], { StringEquals: HOLD_TAG }),
+      statement(['cognito-idp:AdminAddUserToGroup', 'cognito-idp:AdminCreateUser'], [at.userPools], { StringEquals: HOLD_TAG }),
       statement(['kms:Decrypt', 'kms:GenerateDataKey'], ['*'], { StringEquals: { 'kms:ViaService': [`secretsmanager.${REGION}.amazonaws.com`, `sqs.${REGION}.amazonaws.com`] } }),
       statement(['kms:Decrypt', 'kms:GenerateDataKey'], [at.keys], { StringEquals: { 'kms:ViaService': `s3.${REGION}.amazonaws.com`, 'kms:CallerAccount': ACCOUNT, 'kms:EncryptionContext:aws:s3:arn': [`arn:aws:s3:::${name('evidence', ACCOUNT)}`, `arn:aws:s3:::${name('display', ACCOUNT)}`] }, 'ForAnyValue:StringEquals': { 'kms:ResourceAliases': 'alias/aws/s3' } }),
       statement(['kms:Decrypt'], [at.keys], { StringEquals: HOLD_TAG }),

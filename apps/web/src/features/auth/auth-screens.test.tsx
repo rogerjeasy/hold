@@ -50,14 +50,29 @@ describe('SignInScreen', () => {
     expect(screen.queryByRole('region', { name: 'Try the demo shop' })).not.toBeInTheDocument()
   })
 
-  it('offers a judge the owner and the counter staff, one tap each, marked as a demo', () => {
-    renderWithIntl(<SignInScreen demo />)
+  // Each demo is the judge's own: a fresh one every time they start, with its own shop and accounts.
+  it('offers a judge a fresh demo of their own, as the owner or the counter staff, marked as a demo', () => {
+    renderWithIntl(<SignInScreen demo="new" />)
     const demo = within(screen.getByRole('region', { name: 'Try the demo shop' }))
-    expect(demo.getByRole('button', { name: 'Sign in as Tomás, the owner' })).toHaveAttribute('value', 'owner')
-    expect(demo.getByRole('button', { name: 'Sign in as Jonas, at the counter' })).toHaveAttribute('value', 'staff')
+    const owner = demo.getByRole('button', { name: 'Start a demo as Tomás, the owner' })
+    expect(owner).toHaveAttribute('value', 'owner')
+    expect(demo.getByRole('button', { name: 'Start a demo as Jonas, at the counter' })).toHaveAttribute('value', 'staff')
+    expect(owner.closest('form')?.querySelector('input[name="demo"]')).toHaveAttribute('value', 'start')
+    expect(demo.queryByRole('button', { name: /^Continue/ })).not.toBeInTheDocument()
     expect(demo.getByText('Demo')).toBeInTheDocument()
     // The ordinary sign-in stays for everyone else.
     expect(screen.getByRole('button', { name: 'Email me a code' })).toBeInTheDocument()
+  })
+
+  it('lets the browser that started a demo come back to it as either person, or start a fresh one', () => {
+    renderWithIntl(<SignInScreen demo="current" />)
+    const demo = within(screen.getByRole('region', { name: 'Try the demo shop' }))
+    const staff = demo.getByRole('button', { name: 'Continue as Jonas, at the counter' })
+    expect(staff).toHaveAttribute('value', 'staff')
+    expect(staff.closest('form')?.querySelector('input[name="demo"]')).toHaveAttribute('value', 'continue')
+    expect(demo.getByRole('button', { name: 'Continue as Tomás, the owner' })).toHaveAttribute('value', 'owner')
+    const fresh = demo.getByRole('button', { name: 'Start a fresh demo' })
+    expect(fresh.closest('form')?.querySelector('input[name="demo"]')).toHaveAttribute('value', 'start')
   })
 
   it('shows the shop that is waiting behind the sign-in', () => {

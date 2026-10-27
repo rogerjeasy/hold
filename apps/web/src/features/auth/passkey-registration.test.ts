@@ -53,14 +53,14 @@ describe('adding a passkey', () => {
   })
 })
 
+// A demo account belongs to the one browser that started its demo, so it follows the rule every account follows.
 describe('adding a passkey to a demo account', () => {
-  it('lets each judge add their own, though another judge added one before', async () => {
+  it('lets the judge add a first passkey from a one-tap session, and another only from a session that passkey proved', async () => {
     await signIn('demo-owner@shop.example', 'demo')
-    expect(await finishPasskeyRegistration(JSON.stringify({ id: 'first-judges-key' }))).toEqual({ registered: true })
+    expect(await finishPasskeyRegistration(JSON.stringify({ id: 'judges-key' }))).toEqual({ registered: true })
 
     await signIn('demo-owner@shop.example', 'demo')
-    expect((await startPasskeyRegistration()).creationOptions).toBeDefined()
-    expect(await finishPasskeyRegistration(JSON.stringify({ id: 'second-judges-key' }))).toEqual({ registered: true })
+    expect(await startPasskeyRegistration()).toEqual({ problem: 'confirm_first' })
   })
 })
 

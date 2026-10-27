@@ -14,12 +14,14 @@ const accounts = [
   { key: 'staff', variant: 'outline' },
 ] as const
 
-// The demo shop's two accounts, one tap each, shown only where demo mode is on (architecture.md section 20.3).
-export function DemoAccountsForm() {
+// A demo of the judge's own, one tap each, shown only where demo mode is on (architecture.md section 20.3). `new`
+// starts one. `current` is a browser that started one: it comes back to it as either person, or starts a fresh one.
+export function DemoAccountsForm({ demo }: { demo: 'new' | 'current' }) {
   const t = useTranslations('auth')
   const locale = useLocale()
   const titleId = useId()
   const [state, submit, pending] = useActionState(signInWithDemoAccount, initialDemoFormState)
+  const choice = demo === 'current' ? 'continue' : 'start'
 
   return (
     <section aria-labelledby={titleId} className="border border-border-strong bg-card p-4 text-card-foreground md:p-5">
@@ -29,19 +31,31 @@ export function DemoAccountsForm() {
         </h2>
         <SampleTag label={t('demo.tag')} />
       </div>
-      <p className="mt-2 text-muted-foreground wrap-long-words">{t('demo.lead')}</p>
+      <p className="mt-2 text-muted-foreground wrap-long-words">{t(demo === 'current' ? 'demo.leadCurrent' : 'demo.lead')}</p>
       <form action={submit} className="mt-4 grid gap-3">
         <input type="hidden" name="locale" value={locale} />
+        <input type="hidden" name="demo" value={choice} />
         {accounts.map(({ key, variant }) => (
           <div key={key} className="grid gap-1">
             <Button type="submit" name="account" value={key} variant={variant} disabled={pending} className="min-h-12 justify-between text-left whitespace-normal">
-              {t(`demo.${key}.action`)}
+              {t(`demo.${key}.${choice}`)}
               <ArrowRight aria-hidden="true" />
             </Button>
             <p className="text-[0.9375rem] text-muted-foreground">{t(`demo.${key}.hint`)}</p>
           </div>
         ))}
       </form>
+      {demo === 'current' ? (
+        <form action={submit} className="mt-3 grid gap-1">
+          <input type="hidden" name="locale" value={locale} />
+          <input type="hidden" name="demo" value="start" />
+          <Button type="submit" name="account" value="owner" variant="ghost" disabled={pending} className="min-h-12 justify-between text-left whitespace-normal">
+            {t('demo.fresh.action')}
+            <ArrowRight aria-hidden="true" />
+          </Button>
+          <p className="text-[0.9375rem] text-muted-foreground">{t('demo.fresh.hint')}</p>
+        </form>
+      ) : null}
       <p className="mt-4 text-[0.9375rem] text-muted-foreground wrap-long-words">{t('demo.note')}</p>
       {state.notice === undefined ? null : (
         <div className="mt-4">

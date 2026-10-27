@@ -2,8 +2,8 @@
 
 **The deposit that never leaves your account.**
 
-**Live demo: <https://p99faar3kp.us-east-1.awsapprunner.com>** · Sign in with one tap as the demo shop's owner or
-counter staff. Nothing to type, no code to wait for.
+**Live demo: <https://p99faar3kp.us-east-1.awsapprunner.com>** · One tap starts a demo shop of your own. Nothing to
+type, no code to wait for, and no other judge's changes in your way.
 
 > A PayPal authorization hold *is* the deposit. The renter's money is reserved, never charged, and a clean return
 > releases it on the spot. Claude compares the handover and return photographs, but plain code finds every
@@ -14,20 +14,23 @@ Built for the PayPal AI Hackathon 2026.
 
 ## For judges: five minutes
 
-1. Open the [live demo](https://p99faar3kp.us-east-1.awsapprunner.com/sign-in) and tap **Sign in as Tomás, the
-   owner**. The demo shop, Ribeira Bikes in Lisbon, is already busy: bikes out, returns due today, a claim waiting
-   for approval and one the renter contested. These are sample rentals, marked **Sample**. They show the shop's day
-   and move no money.
-2. For a real rental, tap **Sign in as Jonas, at the counter**, book a bike and open the renter's link. Pay the fee
-   and approve the hold in PayPal's sandbox with the sandbox buyer account given in the submission's testing
-   instructions. Photograph the handover with **Use the sample photograph**, and the return with **Use the sample with
-   damage** for one view: the same frame with a chip in the paint. The real camera works on any object to hand.
-3. Back as Tomás, open the comparison. Code finds the chip and Claude says what it is, then takes an independent
-   second look. When both agree, the finding is offered as a claim line priced from the shop's list. When the second
-   look is not sure, the return waits for a person, who claims the same entry with a written reason. Approve the claim,
-   or release the hold for a clean return. A step that moves money asks for a passkey. The first time, follow **Add a
-   passkey** to the Security page and add one on your own device (Touch ID, Windows Hello or your phone), then confirm
-   with it. The capture and the release happen in the PayPal sandbox, and no real money moves.
+1. Open the [live demo](https://p99faar3kp.us-east-1.awsapprunner.com/sign-in) and tap **Start a demo as Tomás, the
+   owner**. You get a Ribeira Bikes in Lisbon of your own, already busy: bikes out, returns due today, a claim
+   waiting for approval and one the renter contested. These are sample rentals, marked **Sample**. They show the
+   shop's day and move no money. Nobody else sees your demo, and you see nobody else's.
+2. To switch roles, sign out and tap **Continue as Jonas, at the counter**: the same shop, as the counter staff. Your
+   browser keeps your demo; **Start a fresh demo** opens a new one. For a real rental, book a bike and open the
+   renter's link. Pay the fee and approve the hold in PayPal's sandbox with the sandbox buyer account given in the
+   submission's testing instructions. Photograph the handover with **Use the sample photograph**, and the return with
+   **Use the sample with damage** for one view: the same frame with a chip in the paint. The real camera works on any
+   object to hand.
+3. Back as Tomás (**Continue as Tomás, the owner**), open the comparison. Code finds the chip and Claude says what it
+   is, then takes an independent second look. When both agree, the finding is offered as a claim line priced from the
+   shop's list. When the second look is not sure, the return waits for a person, who claims the same entry with a
+   written reason. Approve the claim, or release the hold for a clean return. A step that moves money asks for a
+   passkey. The first time, follow **Add a passkey** to the Security page and add one on your own device (Touch ID,
+   Windows Hello or your phone), then confirm with it. The capture and the release happen in the PayPal sandbox, and
+   no real money moves.
 4. For a contested claim, book another bike with your own email as the renter's contact. At the handover, record
    the faint scuff on the down tube as a known mark. At the return, use **Use the sample for a contested claim**: the
    scuff has grown into a scratch through the paint. Claim the scratch as Tomás. Then open the renter's link and
@@ -38,8 +41,7 @@ Built for the PayPal AI Hackathon 2026.
    bike. It books through Hold's own MCP server, the same one your assistant can use, and hands you the PayPal
    approval link.
 
-Anything simulated is labelled on screen and marked `simulated` in the record. The shop is reset between judging
-sessions with `pnpm demo:reset`.
+Anything simulated is labelled on screen and marked `simulated` in the record.
 
 ## What it is
 
@@ -132,8 +134,9 @@ Deny by default, and every check runs on the server. In short:
   writes an audit line. Text from renters, PayPal memos and other agents is treated as quoted data.
 - **Evidence** photographs are write-once under S3 Object Lock, and the money log, approvals and audit trail are
   append-only.
-- **The demo sign-in** reaches only the two demo accounts, whose passwords stay in Secrets Manager. It runs only
-  against the PayPal sandbox, and money steps still need each judge's own passkey.
+- **Each demo is its own shop** with two new accounts, walled off like any other shop. Their passwords live only in
+  the sealed cookie of the browser that started it. The app may create those accounts but never set a password, demo
+  shops use only the PayPal sandbox, and money steps still need the judge's own passkey.
 
 The rules every change follows are in [`AGENTS.md`](AGENTS.md), and the threats and their controls are in
 [`docs/architecture.md`](docs/architecture.md) section 15.
@@ -167,14 +170,11 @@ pnpm test:e2e     # builds the app and runs Playwright against the fakes
 To run the app against your own AWS services, copy `apps/web/.env.example` to `apps/web/.env.local`, fill it in, and
 run `pnpm dev`. The infrastructure is in `infra/` as CDK stacks, all named `hold-*`.
 
-**Resetting the demo shop** (administrators, with AWS credentials for the account):
+**Connecting the demo to PayPal's sandbox** (administrators, once, with AWS credentials for the account):
 
 ```sh
-HOLD_COGNITO_USER_POOL_ID=… HOLD_COGNITO_CLIENT_ID=… \
-HOLD_DATABASE_CLUSTER_ARN=… HOLD_DATABASE_ADMIN_SECRET_ARN=… \
-AWS_PROFILE=… pnpm demo:reset
+PAYPAL_SANDBOX_CLIENT_ID=… PAYPAL_SANDBOX_CLIENT_SECRET=… AWS_PROFILE=… pnpm demo:paypal
 ```
 
-It makes the demo accounts if they are missing, removes the passkeys and sessions judges left, and archives the shop
-they used with every record in it. Then it builds a fresh Ribeira Bikes at the same address, with the shop's PayPal
-sandbox connection carried over. Nothing is deleted.
+It checks the credentials with PayPal and stores them in Secrets Manager. Every demo started after that shares the
+sandbox business account. There is nothing to reset: each demo starts fresh.
