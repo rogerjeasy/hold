@@ -1,4 +1,4 @@
-# Lint, type-check and every test, on every pull request and every push to main. Deploy (deploy.yml) runs only
+# Lint, type-check, every unit test and the key end-to-end flows, on every pull request and every push to main. Deploy (deploy.yml) runs only
 # after this passes on main. It needs no AWS access and no secret: the tests run against in-process fakes.
 name: CI
 
@@ -46,7 +46,9 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Install Chromium for Playwright
         run: pnpm --filter @hold/web exec playwright install --with-deps chromium
-      - run: pnpm test:e2e
+      # The flows that sign people in, move money or guard access. The full suite, with every page at every width,
+      # runs locally with pnpm test:e2e (AGENTS.md section 2).
+      - run: pnpm test:e2e:key
       - name: Keep the report of a failed run
         if: failure()
         uses: actions/upload-artifact@v4

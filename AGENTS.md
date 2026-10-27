@@ -28,7 +28,8 @@ pnpm install
 pnpm dev                 # web, worker and PostgreSQL through Docker Compose
 pnpm test                # Vitest, every package
 pnpm test <path>         # one file or folder
-pnpm test:e2e            # Playwright
+pnpm test:e2e            # Playwright, the full suite: run it locally before work that touches a screen is done
+pnpm test:e2e:key        # the key flows only (sign-in, money, access), without the width checks: what CI runs
 pnpm lint
 pnpm typecheck
 pnpm eval                # the photo evaluation set

@@ -4,9 +4,15 @@ import { defineConfig, devices } from '@playwright/test'
 const PORT = Number(process.env['HOLD_E2E_PORT'] ?? 3211)
 const baseURL = `http://localhost:${String(PORT)}`
 
+// CI runs the key set: the flows that sign people in, move money or guard access, without the width-by-width layout
+// checks. The full suite, every page at every width, runs locally with `pnpm test:e2e` (AGENTS.md section 2).
+const KEY_FLOWS = ['sign-in', 'demo', 'shop-setup', 'rentals', 'handover', 'returns', 'claims', 'queue', 'assistant', 'evidence']
+const keyFlowsOnly = process.env['HOLD_E2E_SCOPE'] === 'key'
+
 // The tests run against a production build, so they see what a visitor sees and no development overlay.
 export default defineConfig({
   testDir: './e2e',
+  ...(keyFlowsOnly ? { testMatch: KEY_FLOWS.map((flow) => `${flow}.spec.ts`), grepInvert: /wide screen|every width/ } : {}),
   fullyParallel: true,
   forbidOnly: process.env.CI !== undefined,
   reporter: [['list']],

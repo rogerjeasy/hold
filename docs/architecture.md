@@ -1871,7 +1871,7 @@ Evidence/receipt coverage includes staff and renter PDF/manifest actions, staff-
 
 **Verification resumed, 22 October 2026:** The participant requested the clean-return, accepted-damage and contested-claim paths against real services. Deployment repair and observed results are tracked in [the real-service verification record](verification/2026-10-22-core-real-services.md). The earlier deferral no longer blocks this scope. This is not the accuracy evaluation; the extension gate remains unmet until the recorded end-to-end checks pass.
 
-1. Every pull request and every push to main runs **CI** (`.github/workflows/ci.yml`): lint, type-check and the unit tests (`pnpm check`), the end-to-end suite against the in-process fakes, and a build of the container image. CI needs no AWS access and no secret.
+1. Every pull request and every push to main runs **CI** (`.github/workflows/ci.yml`): lint, type-check and the unit tests (`pnpm check`), the key end-to-end flows against the in-process fakes (`pnpm test:e2e:key`: sign-in, the demo, shop set-up, booking, handover, return, claims, the morning queue, the assistant and the evidence page, without the width checks), and a build of the container image. The full end-to-end suite, with every page at every width, runs locally (`pnpm test:e2e`). Decided 27 October 2026, when the full suite took 19 minutes on CI. CI needs no AWS access and no secret.
 2. Once CI passes on main, **Deploy** (`.github/workflows/deploy.yml`) runs. It can also be started by hand.
 3. Database migrations run through the Data API as `hold_admin` (`pnpm --filter @hold/db migrate:aurora`).
 4. The image is built and pushed to ECR, tagged with the commit. Tags are immutable.
