@@ -59,6 +59,7 @@ describe('what the renter sees of their assistant', () => {
     renderWithIntl(<AssistantScreen token="signed-token" view={{ ...view, connected: false, revokedAt: new Date('2026-10-30T10:00:00Z') }} />)
     expect(screen.queryByRole('button', { name: 'Disconnect the assistant' })).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('The assistant was disconnected')
+    expect(screen.getByText('Disconnected. Its next call will be refused.')).toBeInTheDocument()
   })
 
   it('has plain words for every tool the server offers', () => {

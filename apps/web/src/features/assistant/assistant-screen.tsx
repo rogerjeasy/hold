@@ -1,5 +1,5 @@
 import type { RentalAssistant } from '@hold/db'
-import { Bot } from 'lucide-react'
+import { Bot, CircleCheck } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Panel } from '@/components/ui/panel'
 import { useShopFormat } from '@/hooks/use-shop-format'
@@ -32,6 +32,13 @@ export function AssistantScreen({ token, view }: { token: string; view: Assistan
         </Link>
       </header>
       {view.connected ? <DisconnectForm token={token} /> : null}
+      {/* Read from the record, so it still shows once the page has reloaded after the renter disconnected it. */}
+      {view.revokedAt === null ? null : (
+        <p role="status" className="flex items-start gap-2 font-semibold">
+          <CircleCheck aria-hidden="true" className="mt-0.5 size-4.5 shrink-0 text-primary" />
+          {t('disconnected')}
+        </p>
+      )}
       {view.draftReply === null ? null : <DraftReply draft={view.draftReply} />}
       <ActionList view={view} />
     </div>
