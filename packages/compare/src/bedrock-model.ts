@@ -8,7 +8,7 @@ import type { ComparisonModel } from './model.ts'
 
 // Only this adapter reaches Bedrock. No tool is offered; text read from photographs can never cause an action.
 export function createBedrockComparisonModel(options: Pick<ClientOptions, 'awsRegion' | 'skipAuth' | 'fetch'>): ComparisonModel {
-  const client = new AnthropicBedrock({ ...options, maxRetries: 0, timeout: 30_000 })
+  const client = new AnthropicBedrock({ ...options, maxRetries: 0, timeout: INSPECTION_LIMITS.maxMillisecondsPerCall })
   return {
     async look(request, signal) {
       try {
