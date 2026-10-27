@@ -22,9 +22,8 @@ import type {
 export const FAKE_SIGNATURE = 'fake-signature'
 
 export type FakePayPal = PayPalHolds & {
-  // Stands in for the renter approving the hold on PayPal's page. In the test environment a hold can be placed as if it
-  // were approved days ago, so a hold near the end of its 29 days can be tried without waiting for it.
-  approveOrder(orderId: string, options?: { readonly placedDaysAgo?: number }): void
+  // Stands in for the renter approving the hold on PayPal's page.
+  approveOrder(orderId: string): void
   // Stands in for the renter's funding source refusing the hold when it is authorized.
   declineFunding(orderId: string): void
   // Where an order sends the renter back, and what it is for: what a simulated approval page needs.
@@ -50,8 +49,6 @@ type FakeOrder = {
   readonly description: string
   // Set when a fee order is captured.
   payment: FeePayment | undefined
-  // How long ago the hold counts as placed, for the test environment.
-  placedDaysAgo: number
 }
 
 type FakeAuthorization = {
@@ -139,11 +136,10 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
   }
 
   return {
-    approveOrder(orderId, approval) {
+    approveOrder(orderId) {
       const order = orders.get(orderId)
       if (order === undefined) throw new Error(`The fake PayPal has no order ${orderId}.`)
       if (order.status === 'awaiting_approval') order.status = 'approved'
-      order.placedDaysAgo = approval?.placedDaysAgo ?? 0
     },
 
     declineFunding(orderId) {
@@ -167,7 +163,7 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
 
     createHoldOrder(input) {
       const order = once('create', input.idempotencyKey, () => {
-        const created: FakeOrder = { orderId: nextId('FAKE-ORDER'), amount: input.amount, status: 'awaiting_approval', returnUrl: input.returnUrl, cancelUrl: input.cancelUrl, description: input.description, payment: undefined, placedDaysAgo: 0 }
+        const created: FakeOrder = { orderId: nextId('FAKE-ORDER'), amount: input.amount, status: 'awaiting_approval', returnUrl: input.returnUrl, cancelUrl: input.cancelUrl, description: input.description, payment: undefined }
         orders.set(created.orderId, created)
         return created
       })
@@ -192,7 +188,7 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
 
     createFeeOrder(input) {
       const order = once('create', input.idempotencyKey, () => {
-        const created: FakeOrder = { orderId: nextId('FAKE-ORDER'), amount: input.amount, status: 'awaiting_approval', returnUrl: input.returnUrl, cancelUrl: input.cancelUrl, description: input.description, payment: undefined, placedDaysAgo: 0 }
+        const created: FakeOrder = { orderId: nextId('FAKE-ORDER'), amount: input.amount, status: 'awaiting_approval', returnUrl: input.returnUrl, cancelUrl: input.cancelUrl, description: input.description, payment: undefined }
         orders.set(created.orderId, created)
         return created
       })
@@ -230,7 +226,7 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
         if (order === undefined) return failure('not_found', 'No such order.')
         if (order.status !== 'approved') return failure('order_not_approved', 'The renter has not approved the order.')
         if (declined.has(order.orderId)) return failure('declined', 'The funding source was declined.', 'INSTRUMENT_DECLINED')
-        const createdAt = addDays(options.now(), -order.placedDaysAgo)
+        const createdAt = options.now()
         const authorization: FakeAuthorization = {
           authorizationId: nextId('FAKE-AUTH'),
           amount: order.amount,

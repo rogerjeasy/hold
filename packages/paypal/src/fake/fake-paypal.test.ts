@@ -117,25 +117,6 @@ describe('placing a hold', () => {
     expect(await kindOf(paypal.placeHold({ orderId: order.orderId, idempotencyKey: key() }))).toBe('declined')
     expect(valueOf(await paypal.readHoldOrder(order.orderId)).status).toBe('approved')
   })
-
-  it('places a hold as if it were approved days ago, so a hold near its end can be tried', async () => {
-    const order = valueOf(
-      await paypal.createHoldOrder({
-        amount: DEPOSIT,
-        rentalReference: 'rental-1',
-        description: 'Refundable hold',
-        returnUrl: 'https://hold.test/approved',
-        cancelUrl: 'https://hold.test/cancelled',
-        idempotencyKey: key(),
-      }),
-    )
-    paypal.approveOrder(order.orderId, { placedDaysAgo: 27 })
-
-    const hold = valueOf(await paypal.placeHold({ orderId: order.orderId, idempotencyKey: key() }))
-    expect(hold.createdAt).toEqual(addDays(PLACED_AT, -27))
-    expect(hold.expiresAt).toEqual(addDays(PLACED_AT, 2))
-    expect(valueOf(await paypal.readAuthorization(hold.authorizationId)).status).toBe('created')
-  })
 })
 
 describe('renewing a hold', () => {
