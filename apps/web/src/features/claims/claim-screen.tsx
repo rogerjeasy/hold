@@ -22,6 +22,7 @@ type PasskeyState = { readonly needed: boolean; readonly hasPasskey: boolean; re
 export function ClaimScreen({ shopName, data, canAct, photoUrls = {}, passkey, negotiation }: { shopName: string; data: ClaimWorkspace; canAct: boolean; photoUrls?: Readonly<Record<string, string>>; passkey?: PasskeyState; negotiation?: ShopNegotiation }) {
   const t = useTranslations('claim'); const locale = useLocale()
   const records = useTranslations('records')
+  const advocates = useTranslations('negotiation')
   const amount = (cents: number) => formatMoney(money(cents, data.currency), locale)
   const pending = ['releasing', 'renewing', 'capturing'].includes(data.holdState) || data.claim?.state === 'charging' || (data.execution !== null && ['pending', 'submitted'].includes(data.execution.state))
   useLookAgain(pending, { forMs: 180000 })
@@ -41,6 +42,7 @@ export function ClaimScreen({ shopName, data, canAct, photoUrls = {}, passkey, n
         {canAct && ['awaiting_approval', 'approved', 'presented'].includes(data.claim.state) ? decision(<ApproveClaimForm claimId={data.claim.id} />) : null}
         {data.replies.map((reply, index) => <blockquote key={index} className="min-w-0 whitespace-pre-wrap border-l-2 pl-3 wrap-long-words">{reply.comment}</blockquote>)}
         {canAct && (['awaiting_approval', 'contested', 'escalated'].includes(data.claim.state) || (['charging', 'charged', 'charge_failed'].includes(data.claim.state) && data.protectedReply && data.replies.some((reply) => reply.decision === 'contest'))) ? decision(<DecideClaimForm claim={data.claim} />) : null}
+        {negotiation?.transcript.state === 'agreed' && negotiation.transcript.shopConfirmedAt !== null ? <p role="status">{advocates('confirm.waiting')}</p> : null}
         {canAct && negotiation?.awaitingShop === true ? decision(<ShopConfirmForm negotiationId={negotiation.transcript.id} agreed={amount(negotiation.transcript.agreedCents ?? 0)} />) : null}
       </div></Panel>
       {negotiation === undefined ? null : <TranscriptView transcript={negotiation.transcript} />}

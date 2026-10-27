@@ -26,6 +26,12 @@ describe('the renter’s advocate page', () => {
     expect(screen.getByRole('button', { name: 'Stop my advocate' })).toBeInTheDocument()
   })
 
+  it('says, once the renter confirmed, that the agreement waits for the shop', () => {
+    renderWithIntl(<RenterNegotiationScreen token="token" shopName="Porto Bikes" data={{ ...data, awaitingRenter: false, transcript: { ...data.transcript, renterConfirmedAt: at } }} />)
+    expect(screen.getByText('You confirmed. Waiting for the shop to confirm.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Confirm and settle' })).not.toBeInTheDocument()
+  })
+
   it('offers nothing to confirm or stop once it has ended, and says when the renter stopped it', () => {
     renderWithIntl(<RenterNegotiationScreen token="token" shopName="Porto Bikes" data={{ ...data, awaitingRenter: false, stopped: true, transcript: { ...data.transcript, state: 'escalated', endedReason: 'mandate_ended', agreedCents: null } }} />)
     expect(screen.queryByRole('button', { name: 'Confirm and settle' })).not.toBeInTheDocument()

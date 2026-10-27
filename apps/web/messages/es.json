@@ -2898,7 +2898,8 @@
       "shopTitle": "Confirmar el acuerdo de los representantes",
       "shopGuidance": "El propietario o un responsable confirma, como en cualquier decisión sobre una reclamación impugnada. Luego se cobra el importe acordado del depósito y se libera el resto.",
       "shopDone": "Su respuesta está registrada.",
-      "waiting": "Esperando la confirmación del arrendatario."
+      "waiting": "Esperando la confirmación del arrendatario.",
+      "waitingShop": "Usted confirmó. Esperando la confirmación de la tienda."
     },
     "stop": {
       "title": "Detener a mi representante",

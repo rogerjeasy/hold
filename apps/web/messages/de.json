@@ -2898,7 +2898,8 @@
       "shopTitle": "Die Einigung der Vertreter bestätigen",
       "shopGuidance": "Der Inhaber oder eine leitende Person bestätigt, wie bei jeder Entscheidung über eine bestrittene Forderung. Dann wird der vereinbarte Betrag von der Kaution belastet und der Rest freigegeben.",
       "shopDone": "Ihre Antwort ist erfasst.",
-      "waiting": "Wartet auf die Bestätigung des Mieters."
+      "waiting": "Wartet auf die Bestätigung des Mieters.",
+      "waitingShop": "Sie haben bestätigt. Wartet auf die Bestätigung des Geschäfts."
     },
     "stop": {
       "title": "Meinen Vertreter stoppen",

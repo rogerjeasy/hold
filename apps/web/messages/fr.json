@@ -2898,7 +2898,8 @@
       "shopTitle": "Confirmer l'accord des représentants",
       "shopGuidance": "Le propriétaire ou un responsable confirme, comme pour toute décision sur une réclamation contestée. Le montant convenu est alors prélevé sur le dépôt et le reste libéré.",
       "shopDone": "Votre réponse est enregistrée.",
-      "waiting": "En attente de la confirmation du locataire."
+      "waiting": "En attente de la confirmation du locataire.",
+      "waitingShop": "Vous avez confirmé. En attente de la confirmation de la boutique."
     },
     "stop": {
       "title": "Arrêter mon représentant",

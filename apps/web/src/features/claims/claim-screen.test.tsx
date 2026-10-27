@@ -39,6 +39,12 @@ describe('a claim argued by the advocates', () => {
     expect(screen.queryByRole('button', { name: 'Uphold claim and settle' })).not.toBeInTheDocument()
   })
 
+  it('says, once the shop confirmed, that the agreement waits for the renter', () => {
+    renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={claimed('agreed')} canAct negotiation={{ transcript: { ...transcript, shopConfirmedAt: at }, awaitingShop: false }} />)
+    expect(screen.getByText('Waiting for the renter to confirm.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Confirm and settle' })).not.toBeInTheDocument()
+  })
+
   it('lets the owner decide an escalated claim, with the transcript beside it', () => {
     renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={claimed('escalated')} canAct negotiation={{ transcript: { ...transcript, state: 'escalated', endedReason: 'pass', agreedCents: null }, awaitingShop: false }} />)
     expect(screen.getByText('One advocate passed.')).toBeInTheDocument()

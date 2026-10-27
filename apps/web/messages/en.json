@@ -2898,7 +2898,8 @@
       "shopTitle": "Confirm the advocates' agreement",
       "shopGuidance": "The owner or a manager confirms, as for any decision on a contested claim. The agreed amount is then charged from the hold and the rest released.",
       "shopDone": "Your answer is recorded.",
-      "waiting": "Waiting for the renter to confirm."
+      "waiting": "Waiting for the renter to confirm.",
+      "waitingShop": "You confirmed. Waiting for the shop to confirm."
     },
     "stop": {
       "title": "Stop my advocate",
