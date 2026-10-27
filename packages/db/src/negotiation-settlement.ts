@@ -2,6 +2,7 @@ import { checkSettlementLimits } from '@hold/domain'
 import type { Mandate } from '@hold/domain'
 import { count, eq } from 'drizzle-orm'
 import { claimStaff } from './claim-access.ts'
+import { liveLink, storeRenterCode } from './claim-code-repository.ts'
 import { queueClaimCapture } from './claim-reply-repository.ts'
 import { escalateNegotiation } from './negotiation-ending.ts'
 import { negotiationRecords } from './negotiation-view.ts'
@@ -35,6 +36,16 @@ export async function confirmAgreement(transaction: Transaction, negotiationId: 
   if (who.kind === 'staff' && negotiation.shopConfirmedAt === null) await transaction.update(negotiations).set({ shopConfirmedByUserId: who.userId, shopConfirmedAt: now, updatedAt: now }).where(eq(negotiations.id, negotiationId))
   if (who.kind === 'renter' && negotiation.renterConfirmedAt === null) await transaction.update(negotiations).set({ renterConfirmedAt: now, updatedAt: now }).where(eq(negotiations.id, negotiationId))
   return settleIfConfirmed(transaction, negotiationId, now)
+}
+
+// The renter's one-time code to confirm or decline an agreement (section 9.9): only through a live link that may
+// accept, only while an agreement awaits them, sent where every renter money decision's code goes.
+export async function issueSettlementCode(transaction: Transaction, linkId: string, hash: string, now: Date) {
+  const link = await liveLink(transaction, linkId, ['accept'], now)
+  if (link === undefined) return { ok: false, reason: 'link_invalid' } as const
+  const [negotiation] = await transaction.select({ state: negotiations.state, kind: negotiations.kind, renterConfirmedAt: negotiations.renterConfirmedAt }).from(negotiations).where(eq(negotiations.rentalId, link.rentalId))
+  if (negotiation?.state !== 'agreed' || negotiation.renterConfirmedAt !== null) return { ok: false, reason: 'not_agreed' } as const
+  return storeRenterCode(transaction, link, hash, now)
 }
 
 async function ended(transaction: Transaction, negotiationId: string, reason: 'deadline' | 'mandate_ended' | 'declined', now: Date): Promise<SettleResult> {

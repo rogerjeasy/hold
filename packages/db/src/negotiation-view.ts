@@ -79,11 +79,51 @@ export type NegotiationRecords = NonNullable<Awaited<ReturnType<typeof negotiati
 // The transcript both people can read (section 9.7): the moves, their grounds and evidence, how it ended. Never either
 // side's limits.
 export async function negotiationTranscript(transaction: Transaction, rentalId: string) {
+  const records = await rentalNegotiation(transaction, rentalId)
+  return records === undefined ? undefined : transcriptOf(records)
+}
+
+async function rentalNegotiation(transaction: Transaction, rentalId: string) {
   const [claim] = await transaction.select({ id: claims.id }).from(claims).where(eq(claims.rentalId, rentalId))
   if (claim === undefined) return undefined
   const [row] = await transaction.select({ id: negotiations.id }).from(negotiations).where(and(eq(negotiations.claimId, claim.id), eq(negotiations.rentalId, rentalId)))
-  const records = row === undefined ? undefined : await negotiationRecords(transaction, row.id)
+  return row === undefined ? undefined : negotiationRecords(transaction, row.id)
+}
+
+// Whether a side's mandate asks that side for the final tap; a limit that cannot be read asks for it.
+const asksForTap = (mandate: Mandate | null, kind: 'settlement_shop' | 'settlement_renter') => {
+  if (mandate === null) return false
+  const limits = kind === 'settlement_shop' ? checkSettlementLimits(kind, mandate.limits) : checkSettlementLimits(kind, mandate.limits)
+  return !limits.ok || limits.value.finalTap
+}
+
+// What the shop's screens read: the transcript and whether an agreement waits for the owner or a manager. Never the
+// renter's limit.
+export async function shopNegotiation(transaction: Transaction, rentalId: string) {
+  const records = await rentalNegotiation(transaction, rentalId)
   if (records === undefined) return undefined
+  const { negotiation } = records
+  return { transcript: transcriptOf(records), awaitingShop: negotiation.state === 'agreed' && negotiation.shopConfirmedAt === null && asksForTap(records.shopMandate, 'settlement_shop') }
+}
+export type ShopNegotiation = NonNullable<Awaited<ReturnType<typeof shopNegotiation>>>
+
+// What the renter's screens read: the transcript, their own highest total, whether an agreement waits for them and
+// whether they stopped their advocate. Never the shop's limits.
+export async function renterNegotiation(transaction: Transaction, rentalId: string) {
+  const records = await rentalNegotiation(transaction, rentalId)
+  if (records === undefined) return undefined
+  const { negotiation, renterMandate } = records
+  const own = checkSettlementLimits('settlement_renter', renterMandate.limits)
+  return {
+    transcript: transcriptOf(records),
+    highestTotalCents: own.ok ? own.value.highestTotalCents : 0,
+    awaitingRenter: negotiation.state === 'agreed' && negotiation.renterConfirmedAt === null && asksForTap(renterMandate, 'settlement_renter'),
+    stopped: renterMandate.revokedAt !== null,
+  }
+}
+export type RenterNegotiation = NonNullable<Awaited<ReturnType<typeof renterNegotiation>>>
+
+function transcriptOf(records: NegotiationRecords) {
   const { negotiation } = records
   return {
     id: negotiation.id,

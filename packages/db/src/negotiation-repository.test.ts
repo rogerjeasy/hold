@@ -4,10 +4,10 @@ import { decideClaim } from './claim-decision-repository.ts'
 import { evidenceSnapshot } from './evidence-snapshot.ts'
 import { verifyTranscript } from './negotiation-fingerprint.ts'
 import { applyNegotiationMove, openAdvocate, stopRenterAdvocate } from './negotiation-repository.ts'
-import { confirmAgreement } from './negotiation-settlement.ts'
-import { negotiationRecords, negotiationTranscript } from './negotiation-view.ts'
+import { confirmAgreement, issueSettlementCode } from './negotiation-settlement.ts'
+import { negotiationRecords, negotiationTranscript, renterNegotiation, shopNegotiation } from './negotiation-view.ts'
 import { grantShopSettlement, liveShopSettlement, revokeShopSettlement } from './settlement-mandate-repository.ts'
-import { approvals, auditLog, claims, executions, mandates, negotiationMoves, negotiations, outbox, rentals, staffRoles, users } from './schema/index.ts'
+import { approvals, auditLog, claims, executions, mandates, negotiationMoves, negotiations, outbox, renterLinks, rentals, staffRoles, users } from './schema/index.ts'
 import { inShop } from './scope.ts'
 import type { Transaction } from './scope.ts'
 import { presentedClaim, twoLinePrices } from './testing/presented-claim.ts'
@@ -162,6 +162,30 @@ describe('a negotiation between two advocates', () => {
     // The owner decides with the transcript.
     expect(await shop.act((transaction) => decideClaim(transaction, claim.claimId, ownerId(), 'waive', 'The advocate was stopped; the scratches are wear.', later(5)))).toMatchObject({ ok: true })
     expect((await shop.act((transaction) => transaction.select().from(claims).where(eq(claims.id, claim.claimId))))[0]?.state).toBe('waived')
+  })
+
+  it('issues the renter’s code to confirm only for an agreement awaiting them, through a link that may accept', async () => {
+    const claim = await negotiating()
+    const [link] = await database.insert(renterLinks).values({ shopId: shop.scope.shopId, rentalId: claim.rentalId, tokenFingerprint: `settle-${claim.rentalId}`, scopes: ['view', 'accept', 'contest'], expiresAt: later(60 * 24 * 30) }).returning()
+    const [viewOnly] = await database.insert(renterLinks).values({ shopId: shop.scope.shopId, rentalId: claim.rentalId, tokenFingerprint: `view-${claim.rentalId}`, scopes: ['view'], expiresAt: later(60 * 24 * 30) }).returning()
+    expect(await shop.act((transaction) => issueSettlementCode(transaction, link?.id ?? '', 'digest', later(1)))).toEqual({ ok: false, reason: 'not_agreed' })
+    await move(claim.negotiationId, claim.renter, 'offer', offer(claim.lines, [35_00, 0]), later(1))
+    await move(claim.negotiationId, shopAgent(), 'accept', {}, later(2))
+    expect(await shop.act((transaction) => issueSettlementCode(transaction, viewOnly?.id ?? '', 'digest', later(3)))).toEqual({ ok: false, reason: 'link_invalid' })
+    expect(await shop.act((transaction) => issueSettlementCode(transaction, link?.id ?? '', 'digest', later(3)))).toMatchObject({ ok: true, email: 'priya@example.com' })
+  })
+
+  it('shapes what each side’s screen reads on the server: its own limit and taps, never the other side’s', async () => {
+    const claim = await negotiating()
+    await move(claim.negotiationId, claim.renter, 'offer', offer(claim.lines, [35_00, 0]), later(1))
+    await move(claim.negotiationId, shopAgent(), 'accept', {}, later(2))
+    const forShop = await shop.act((transaction) => shopNegotiation(transaction, claim.rentalId))
+    const forRenter = await shop.act((transaction) => renterNegotiation(transaction, claim.rentalId))
+    expect(forShop).toMatchObject({ awaitingShop: true, transcript: { state: 'agreed', agreedCents: 35_00 } })
+    expect(forRenter).toMatchObject({ awaitingRenter: true, highestTotalCents: 50_00, stopped: false, transcript: { state: 'agreed' } })
+    expect(JSON.stringify(forShop)).not.toMatch(/highestTotal|awaitingRenter|5000/)
+    expect(JSON.stringify(forRenter)).not.toMatch(/lowestShare|largestClaim|awaitingShop|evidenceRequired|20000/)
+    expect(await other.act((transaction) => shopNegotiation(transaction, claim.rentalId))).toBeUndefined()
   })
 
   it('escalates when a person declines the agreed result', async () => {
