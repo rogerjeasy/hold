@@ -971,7 +971,7 @@ In the hackathon build Hold runs both advocates, and Hold's customer is the shop
 | Writes a short argument for each move | Add a line or raise a price |
 | Accepts an offer inside its mandate | Capture anything. The claim does, after confirmation. |
 
-**The argument text is guarded.** Any amount in an advocate's written argument must equal a line amount in the same move. If not, the text is dropped and the move stands on its amounts and grounds. An advocate cannot write its limit into the transcript.
+**No words cross.** As first designed, an advocate wrote a short argument for each move, kept only if every amount in it was a line amount of the move. A security review showed a limit could still cross in words, other scripts' digits, Roman numerals or a share. As built, a move carries no text: only its line amounts, grounds and the ids of the records they cite, and Hold words them from fixed templates on every screen and in the evidence pack. A move with a free-text field is refused by the gateway. An advocate cannot write its limit into the transcript.
 
 **Text from the other side is data.** Each advocate receives the other's arguments as quoted text. Its only tools are the three moves.
 
@@ -1010,6 +1010,32 @@ In the hackathon build Hold runs both advocates, and Hold's customer is the shop
 - **X4.7** A claim that was escalated cannot enter `negotiating` again.
 - **X4.8** The evidence pack for a settled claim contains the transcript, and its chain of fingerprints verifies.
 - **X4.9** An outside assistant with a mandate can take the renter's side through the MCP server and is held to the same rules.
+
+**Progress.** Built in `packages/domain` (the referee, grounds and settlement mandates), `packages/db` (migration `0025`), `packages/negotiate`, `packages/evidence`, `apps/worker`, `apps/web` and `infra`; `architecture.md` section 6.10.
+
+| Check | State | Tested by |
+|---|---|---|
+| X4.1 | Passes in the test environment with the simulated advocates and the simulated PayPal: the renter hands over the contest with a code, the advocates agree, both people confirm, the agreed total is captured as the final capture and the rest released. Not yet run against the PayPal sandbox or Claude on Bedrock; no contested claim is seeded yet. | `negotiation-flow.test.ts`, `negotiation.spec.ts`, `negotiation-repository.test.ts`, `runner.test.ts` |
+| X4.2 | Passes | `referee.property.test.ts` |
+| X4.3 | Passes | `runner.test.ts`, `negotiation-flow.test.ts`, `claim-screen.test.tsx` |
+| X4.4 | Passes: every message sent to each advocate is searched for the other side's limits, and the briefs are tested over any limits | `runner.test.ts`, `brief.test.ts`, `negotiation-repository.test.ts` |
+| X4.5 | Passes | `referee.test.ts`, `negotiation-repository.test.ts` |
+| X4.6 | Passes for the renter stopping the advocate and the owner ending the shop's limits | `negotiation-repository.test.ts`, `referee.test.ts` |
+| X4.7 | Passes | `state-machines.test.ts`, `negotiation-repository.test.ts` |
+| X4.8 | Passes | `negotiation-repository.test.ts`, `evidence-renderer.test.ts`, `negotiation-fingerprint.test.ts` |
+| X4.9 | Not built (first on the cut line). The seam is `applyNegotiationMove` in `packages/db`: a `renter_agent` acting for the renter who granted the mandate passes the same gateway and referee, so `get_negotiation` and `submit_offer` can call it. | `negotiation-repository.test.ts` (the gateway's refusals) |
+
+**Decisions made while building.**
+
+- Goodwill is open to the shop's advocate alone, and only when the owner turned off "every reduction cites evidence". The renter's advocate is refused it whatever the shop chose, so it never learns the shop's choice by trying.
+- `evidence_stands` holds only where both looks confirmed the finding, nothing about it is in doubt and no earlier mark lies near; it keeps a line, never lowers one.
+- The round limit comes from the shop's mandate and is the same for both sides. It is procedural and visible to both advocates as offers left; the money limits never are.
+- An offer equal to or past the other side's last one is refused: the side accepts instead. This with the monotone totals and the round limit guarantees an end.
+- A claim larger than the shop's largest claim, or opened with no time left before the deadline, gets no shop advocate: the renter's advocate writes the reply and the owner decides.
+- An agreement on nothing to pay goes to the owner to waive, since the claim machine has no move from `agreed` to `waived`.
+- Revoking either mandate, or a decline, ends the negotiation at once, even after agreement; nothing is captured.
+- The agreed total becomes the claim's total, which may only fall once approved. Lines keep their published amounts; the agreed lines are in the approval and the transcript.
+- One queue message runs a negotiation to its end in one worker call, rather than one message per turn: simpler, and a retry resumes from the stored transcript.
 
 ### 9.17 In the video
 
