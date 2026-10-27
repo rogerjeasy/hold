@@ -18,7 +18,7 @@ export function GrantStandingRuleForm({ dailyCount }: { dailyCount: number }) {
   return (
     <form action={grant} className="grid gap-3">
       <input type="hidden" name="locale" value={locale} />
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid max-w-2xl gap-3 sm:grid-cols-2">
         <div className="grid min-w-0 content-start gap-1">
           <Label htmlFor={countId}>{t('dailyCount')}</Label>
           <Input id={countId} name="dailyCount" type="number" inputMode="numeric" min={1} max={20} required defaultValue={dailyCount} />
