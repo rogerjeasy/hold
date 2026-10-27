@@ -28,7 +28,7 @@ export async function payFee(renter: Page, link: string): Promise<void> {
   await expect(renter.getByRole('region', { name: 'Two amounts, kept apart' })).toContainText('This is not a charge')
   await renter.getByRole('button', { name: /^Pay .* with PayPal$/ }).click()
   await expect(renter.getByText('Test environment. No money moves.', { exact: false })).toBeVisible()
-  await renter.getByRole('button', { name: 'Approve', exact: true }).click()
+  await renter.getByRole('button', { name: 'Approve' }).click()
   await expect(renter.getByText('Payment confirmed. Your rental is booked.')).toBeVisible()
   await renter.getByRole('link', { name: 'See your rental' }).click()
   await expect(renter.getByText('Booked. Your fee is paid.')).toBeVisible()
@@ -48,7 +48,7 @@ export async function readyForHandover(page: Page, browser: Browser, shopName: s
   const holdLink = (await hold.getByTestId('renter-link').textContent()) ?? ''
   await renter.goto(holdLink)
   await renter.getByRole('button', { name: /^Approve .* with PayPal$/ }).click()
-  await renter.getByRole('button', { name: 'Approve', exact: true }).click()
+  await renter.getByRole('button', { name: 'Approve' }).click()
   await expect(renter.getByText('Hold placed. Nothing was charged.')).toBeVisible()
   await renter.context().close()
   await expect(hold.getByText('Ready for handover.')).toBeVisible({ timeout: 15_000 })

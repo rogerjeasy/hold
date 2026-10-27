@@ -2554,8 +2554,7 @@
     "for": "Para",
     "approve": "Aprobar",
     "cancel": "Cancelar y volver",
-    "unknown": "Este pedido no se conoce.",
-    "approveAged": "Aprobar como hace {days} días, para probar una retención cerca de su fin"
+    "unknown": "Este pedido no se conoce."
   },
   "claim": {
     "title": "Reclamación y liquidación",

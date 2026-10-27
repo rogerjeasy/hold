@@ -2554,8 +2554,7 @@
     "for": "Für",
     "approve": "Genehmigen",
     "cancel": "Abbrechen und zurück",
-    "unknown": "Diese Bestellung ist unbekannt.",
-    "approveAged": "Genehmigen wie vor {days} Tagen, um eine Reservierung kurz vor ihrem Ende zu testen"
+    "unknown": "Diese Bestellung ist unbekannt."
   },
   "claim": {
     "title": "Schadenforderung und Abrechnung",

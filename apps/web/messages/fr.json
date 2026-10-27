@@ -2554,8 +2554,7 @@
     "for": "Pour",
     "approve": "Approuver",
     "cancel": "Annuler et revenir",
-    "unknown": "Cette commande est inconnue.",
-    "approveAged": "Approuver comme il y a {days} jours, pour essayer une empreinte proche de sa fin"
+    "unknown": "Cette commande est inconnue."
   },
   "claim": {
     "title": "Réclamation et règlement",
