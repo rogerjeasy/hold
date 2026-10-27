@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { DETECTOR_PROPOSALS, orderQueue, proposalFingerprintInput, withinMandate } from '@hold/domain'
 import type { ProposalKind, ShopException, ShopSnapshot } from '@hold/domain'
 import { and, eq, gte, inArray, isNull, lt, or, sql } from 'drizzle-orm'
-import { approvals, auditLog, authorizations, captureSessions, claims, comparisons, holds, invoices, moneyEvents, opsRuns, outbox, proposals, rentalItems, rentals, shopExceptions, shops } from './schema/index.ts'
+import { approvals, auditLog, authorizations, captureSessions, claims, comparisons, holds, incidents, invoices, moneyEvents, opsRuns, outbox, proposals, rentalItems, rentals, shopExceptions, shops } from './schema/index.ts'
 import { releaseCleanReturn } from './claim-repository.ts'
 import { mandateForUse } from './ops-settings-repository.ts'
 import { outsideShop } from './scope.ts'
@@ -20,6 +20,9 @@ export async function shopSnapshot(transaction: Transaction, now: Date, fromPayP
     .from(comparisons).innerJoin(captureSessions, eq(captureSessions.id, comparisons.returnSessionId)).innerJoin(rentalItems, eq(rentalItems.id, captureSessions.rentalItemId))
   const claimRows = await transaction.select({ id: claims.id, rentalId: claims.rentalId, state: claims.state, totalCents: claims.totalCents, currency: claims.currency, replyDueAt: claims.replyDueAt }).from(claims)
   const invoiceRows = await transaction.select({ id: invoices.id, claimId: invoices.claimId, rentalId: invoices.rentalId, state: invoices.state, amountCents: invoices.amountCents, sentAt: invoices.sentAt }).from(invoices)
+  // An incident waits for staff from when it was sorted to them (extensions.md section 10).
+  const incidentRows = await transaction.select({ id: incidents.id, rentalId: incidents.rentalId, waitingSince: sql<Date | null>`coalesce(${incidents.sortedAt}, ${incidents.sentAt})`.mapWith(incidents.sortedAt) })
+    .from(incidents).where(and(eq(incidents.state, 'awaiting_staff'), eq(incidents.simulated, false)))
   return {
     now,
     settings: { ...DEFAULT_SETTINGS, ...shop?.opsSettings },
@@ -28,7 +31,7 @@ export async function shopSnapshot(transaction: Transaction, now: Date, fromPayP
     comparisons: comparisonRows,
     claims: claimRows,
     invoices: invoiceRows,
-    incidents: [],
+    incidents: incidentRows,
     ...fromPayPal,
   }
 }

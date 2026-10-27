@@ -1,7 +1,7 @@
 import { detectExceptions } from '@hold/domain'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { auditLog, authorizations, executions, holds, moneyEvents, outbox, proposals, rentals, shopExceptions } from './schema/index.ts'
+import { auditLog, authorizations, captureSessions, executions, holds, incidents, itemTypes, moneyEvents, outbox, proposals, rentalItems, rentals, shopExceptions } from './schema/index.ts'
 import { auditAgentCall, beginOpsRun, completeOpsRun, decideProposal, exceptionFacts, holdsToReconcile, morningQueue, recordExceptions, rentalsForCaptures, shopSnapshot, writeProposal } from './ops-repository.ts'
 import { grantStandingRule, revokeMandate } from './ops-settings-repository.ts'
 import { inShop } from './scope.ts'
@@ -36,6 +36,21 @@ describe('the operations agent\'s records', () => {
     const snapshot = await shop.act((transaction) => shopSnapshot(transaction, now, { disputes: [], differences: [] }))
     expect(snapshot.holds.find((hold) => hold.id === holdId)).toMatchObject({ state: 'placed', reservedCents: 30000, replacementStarted: false })
     expect(detectExceptions(snapshot).some((each) => each.kind === 'hold_ending' && each.subjectId === holdId)).toBe(true)
+  })
+
+  it('reads an incident waiting for staff, since it was sorted, and no other', async () => {
+    const rental = await shop.readyRental()
+    const [rentalItem] = await database.select().from(rentalItems).where(eq(rentalItems.rentalId, rental.rentalId))
+    const [type] = await database.select({ planId: itemTypes.photoPlanId }).from(itemTypes).where(eq(itemTypes.id, shop.typeId))
+    const incident = async (state: 'awaiting_staff' | 'agreed', sortedAt: Date) => {
+      const [session] = await database.insert(captureSessions).values({ shopId: shop.scope.shopId, rentalItemId: rentalItem?.id ?? '', kind: 'incident', photoPlanId: type?.planId ?? '' }).returning()
+      const [row] = await database.insert(incidents).values({ shopId: shop.scope.shopId, rentalId: rental.rentalId, rentalItemId: rentalItem?.id ?? '', sessionId: session?.id ?? '', hint: 'damage', description: 'A scratch.', language: 'en', state, currency: 'EUR', sentAt: sortedAt, sortedAt }).returning()
+      return row?.id ?? ''
+    }
+    const waiting = await incident('awaiting_staff', new Date(now.getTime() - 3 * 3_600_000))
+    await incident('agreed', new Date(now.getTime() - 3 * 3_600_000))
+    const snapshot = await shop.act((transaction) => shopSnapshot(transaction, now, { disputes: [], differences: [] }))
+    expect(snapshot.incidents).toEqual([{ id: waiting, rentalId: rental.rentalId, waitingSince: new Date(now.getTime() - 3 * 3_600_000) }])
   })
 
   it('records each exception once, however often the run repeats, and one proposal per subject and state', async () => {
