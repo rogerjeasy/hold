@@ -18,10 +18,10 @@ let counterId: string
 let prices: { readonly scratch: string; readonly fork: string }
 const ownerId = () => shop.scope.userId ?? ''
 
-// A clock that moves a minute each time it is read, so every move is inside its side's time.
+// A clock that moves ten seconds each time it is read, so every move is inside its side's time and the run's.
 function ticking() {
-  let minutes = 0
-  return () => new Date(NOW.getTime() + (minutes += 1) * 60_000)
+  let reads = 0
+  return () => new Date(NOW.getTime() + (reads += 1) * 10_000)
 }
 // Every request a model receives, for the privacy checks.
 function recording(model: AdvocateModel, seen: AdvocateRequest[]): AdvocateModel {
