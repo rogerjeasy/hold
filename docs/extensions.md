@@ -417,7 +417,7 @@ When the owner rejects a proposal with a reason, the agent drafts a rule from it
 | Refund part of a charge | Payments v2, refund | Agent Toolkit function called by code, after approval |
 | Answer a dispute | Disputes v1, provide evidence | Direct REST, after approval |
 
-**How the MCP server is connected.** The worker runs an MCP client and connects to `https://mcp.sandbox.paypal.com/http` with the shop's own access token. It lists the server's tools, keeps only those on Hold's read allowlist, and offers them to the model through Hold's gateway. Two reasons:
+**How the MCP server is connected.** The worker runs an MCP client and connects to `https://mcp.sandbox.paypal.com/sse` over server-sent events with the shop's own access token (the `/http` path answers 404; `tech-stack.md` trial 10). It lists the server's tools, keeps only those on Hold's read allowlist, and offers them to the model through Hold's gateway. Two reasons:
 
 - Every PayPal tool call is checked and logged by the same gateway as every other tool.
 - The shop's PayPal token stays inside Hold. It is not handed to the model provider to make the connection.

@@ -287,7 +287,7 @@ describe('the worker', () => {
 
   it('runs comparisons from their queue with a separate role that cannot send money work or read PayPal credentials', () => {
     expect(functionNamed('hold-worker-comparisons')?.Properties).toMatchObject({ Runtime: 'nodejs24.x', MemorySize: 1536 })
-    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 7)
+    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 8)
     const policies = Object.entries(work.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('ComparisonRole')).map(([, value]) => value)
     expect(policies.length).toBeGreaterThan(0)
     const policy = JSON.stringify(policies)
@@ -307,7 +307,7 @@ describe('the worker', () => {
   })
 
   it('takes PayPal events, executions and upkeep from their queues, and tries again only the messages that failed', () => {
-    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 7)
+    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 8)
     work.hasResourceProperties('AWS::Lambda::EventSourceMapping', { FunctionResponseTypes: ['ReportBatchItemFailures'] })
   })
 
@@ -661,6 +661,21 @@ describe('delivery', () => {
     expect(boundary).not.toContain('role/hold-*')
   })
 
+  it('runs the operations agent from its own queue and a nightly schedule, with a role that may read PayPal and call the model but write no photograph and schedule nothing', () => {
+    const operationsFunction = (functionName: string) => resourcesOfType(work, 'AWS::Lambda::Function').find((each) => each.Properties?.['FunctionName'] === functionName)
+    expect(operationsFunction('hold-worker-operations')?.Properties).toMatchObject({ Runtime: 'nodejs24.x' })
+    expect(operationsFunction('hold-worker-operations-nightly')?.Properties).toMatchObject({ Runtime: 'nodejs24.x' })
+    const policy = JSON.stringify(Object.entries(work.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('OperationsRole')).map(([, value]) => value))
+    expect(policy).toContain('bedrock-mantle:CreateInference')
+    expect(policy).toContain('paypal/shops')
+    expect(policy).toContain('sqs:SendMessage')
+    expect(policy).not.toContain('s3:')
+    expect(policy).not.toContain('scheduler:')
+    expect(policy).not.toContain('rekognition')
+    const schedules = resourcesOfType(work, 'AWS::Scheduler::Schedule').map((each) => each.Properties?.['ScheduleExpression'])
+    expect(schedules).toContain('cron(0 2 * * ? *)')
+  })
+
   it('lets CloudFormation change only roles that carry Hold’s tag, and hand on only the web app’s two roles, the code sender’s, the worker’s and the scheduler’s', () => {
     const statements = JSON.stringify(delivery.findResources('AWS::IAM::Policy'))
     expect(statements).toMatch(/iam:UpdateAssumeRolePolicy[^}]*aws:ResourceTag\/project/)
@@ -670,7 +685,7 @@ describe('delivery', () => {
       .filter((statement) => [statement['Action']].flat().includes('iam:PassRole'))
     const allowed = passing.filter((statement) => statement['Effect'] === 'Allow' && JSON.stringify(statement).includes('role/hold-web'))
     expect(allowed).toHaveLength(1)
-    expect(new Set([allowed[0]?.['Resource']].flat())).toEqual(new Set(['role/hold-web', 'role/hold-web-access', 'role/hold-code-sender', 'role/hold-worker', 'role/hold-comparison', 'role/hold-evidence', 'role/hold-receipts', 'role/hold-scheduler'].map((role) => `arn:aws:iam::707938860881:${role}`)))
+    expect(new Set([allowed[0]?.['Resource']].flat())).toEqual(new Set(['role/hold-web', 'role/hold-web-access', 'role/hold-code-sender', 'role/hold-worker', 'role/hold-comparison', 'role/hold-evidence', 'role/hold-receipts', 'role/hold-operations', 'role/hold-scheduler'].map((role) => `arn:aws:iam::707938860881:${role}`)))
     // App Runner checks the pass with a service name of its own choosing, so none is named here. Both roles trust App
     // Runner alone, so no other service could use them.
     expect(allowed[0]?.['Condition']).toBeUndefined()

@@ -55,7 +55,7 @@ const at = {
 }
 // The only roles CloudFormation may hand on: the web app's two (infra/lib/web-stack.ts), which trust App Runner alone,
 // and the code sender's (infra/lib/code-sender.ts), which trusts Lambda alone.
-const PASSED_ROLES = [name('web'), name('web', 'access'), name('code', 'sender'), name('worker'), name('comparison'), name('evidence'), name('receipts'), name('scheduler')]
+const PASSED_ROLES = [name('web'), name('web', 'access'), name('code', 'sender'), name('worker'), name('comparison'), name('evidence'), name('receipts'), name('operations'), name('scheduler')]
 const HOLD_TAG = { 'aws:ResourceTag/project': PREFIX }
 const HOLD_REQUEST_TAG = { 'aws:RequestTag/project': PREFIX }
 

@@ -1,4 +1,4 @@
-import { auditLog, authorizations, captureSessions, comparisons, decideProposal, decideRule, draftRule, grantStandingRule, holds, inShop, itemTypes, proposals, rentalItems, rentals, shopExceptions } from '@hold/db'
+import { auditLog, authorizations, captureSessions, comparisons, decideProposal, decideRule, draftRule, grantStandingRule, holds, inShop, itemTypes, opsRuns, proposals, rentalItems, rentals, shopExceptions } from '@hold/db'
 import { createTestDatabase } from '@hold/db/testing'
 import type { TestDatabase } from '@hold/db/testing'
 import { readyRentalShop } from '@hold/db/testing/ready-rental'
@@ -84,7 +84,7 @@ const paypal = (overrides: Partial<ShopPayPalReads> = {}): ShopPayPalReads => ({
   ...overrides,
 })
 
-const sent: { kind: string; rentalId: string }[] = []
+const sent: { kind: string; rentalId: string; dueAt: Date | null }[] = []
 const dependencies = (overrides: Partial<OpsDependencies> = {}): OpsDependencies => ({
   database,
   now: () => now,
@@ -109,11 +109,20 @@ describe('a nightly run', () => {
     expect(found.map((each) => each.kind).sort()).toEqual(['dispute_open', 'hold_ending', 'reconciliation_difference', 'return_overdue'])
     const written = await inShopProposals()
     expect(written.map((each) => `${each.kind}:${each.subjectId}`).sort()).toEqual([`note:${found.find((each) => each.kind === 'reconciliation_difference')?.subjectId ?? ''}`, `request_replacement_hold:${ending.holdId}`, 'respond_to_dispute:PP-D-1'].sort())
-    expect(sent.filter((each) => each.rentalId === late)).toEqual([{ kind: 'return_due', rentalId: late, shopId: shop.scope.shopId }])
+    expect(sent.filter((each) => each.rentalId === late)).toEqual([{ kind: 'return_due', rentalId: late, shopId: shop.scope.shopId, dueAt: new Date(now.getTime() - 2 * HOUR) }])
     await run({ investigator, paypal: () => Promise.resolve(reads) })
     expect(await inShopExceptions()).toHaveLength(found.length)
     expect(await inShopProposals()).toHaveLength(written.length)
     expect(sent.filter((each) => each.rentalId === late)).toHaveLength(1)
+  })
+
+  it('finishes the run when a reminder cannot be sent, and counts it', async () => {
+    await overdue()
+    const ending = await holdEnding()
+    const runId = await run({ remind: () => Promise.reject(new Error('SMTP down')) })
+    expect((await inShopProposals()).map((each) => each.subjectId)).toEqual([ending.holdId])
+    const [row] = await inShop(database, { role: 'hold_worker', shopId: shop.scope.shopId }, (transaction) => transaction.select().from(opsRuns).where(eq(opsRuns.id, runId)))
+    expect(row).toMatchObject({ state: 'completed', counts: { reminders: 0, remindersFailed: 1 } })
   })
 
   it('still lists every exception with a fixed reason when Claude is not there (X1.6)', async () => {
@@ -174,7 +183,7 @@ describe('the run\'s ceilings', () => {
     await holdEnding()
     await holdEnding()
     const investigator = scripted(() => ({ calls: [{ name: 'get_order', args: {} }], answer: answer({ proposalKind: 'request_replacement_hold' }) }))
-    await run({ investigator, limits: { maxToolCalls: 1, toolCallsPerException: 6, maxTokens: 400_000, maxMilliseconds: 240_000 } })
+    await run({ investigator, limits: { maxToolCalls: 1, toolCallsPerException: 6, maxTokens: 400_000, maxMilliseconds: 180_000 } })
     const written = await inShopProposals()
     expect(written.map((each) => each.payload['investigated'] ?? 'yes').sort()).toEqual(['no', 'yes'])
   })

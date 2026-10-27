@@ -7,13 +7,26 @@ import type { SettleDependencies } from '@hold/settle'
 import { createEmailNotifier } from './email-notifier.ts'
 import { createWorkerRenterAsk } from './renter-ask.ts'
 import { loadWorkerSettings } from './worker-settings.ts'
+import type { WorkerSettings } from './worker-settings.ts'
+
+// The shop's own PayPal REST client, through its credentials in Secrets Manager.
+export function shopPayPalClient(settings: Pick<WorkerSettings, 'region' | 'paypalMode'>, credentialReference: string) {
+  const credentials = createSecretsManagerCredentialStore(settings.region)
+  return createPayPalClient({
+    environment: settings.paypalMode,
+    credentials: async () => {
+      const found = await credentials.read(credentialReference)
+      if (found === undefined) throw new Error('The shop’s PayPal credentials are missing.')
+      return found
+    },
+  })
+}
 
 // What settling needs, built once per function instance: the database as hold_worker, each shop's PayPal account
 // through its credentials in Secrets Manager, the worker's queues and its schedules, and email through Hold's SMTP
 // account, read when the first email is sent.
 export function workerSettle(): SettleDependencies {
   const settings = loadWorkerSettings(process.env)
-  const credentials = createSecretsManagerCredentialStore(settings.region)
   const database = createDataApiDatabase({ region: settings.region, clusterArn: settings.database.clusterArn, secretArn: settings.database.secretArn, database: settings.database.name })
   const mailer = createLazyMailer(async () => createSmtpMailer(await loadSmtpSettings(settings.smtpSecret, settings.region)))
   // Read once, when the first link is signed.
@@ -23,17 +36,7 @@ export function workerSettle(): SettleDependencies {
     database,
     role: 'hold_worker',
     paypalMode: settings.paypalMode,
-    paypalFor: (credentialReference) =>
-      createRestPayPalHolds(
-        createPayPalClient({
-          environment: settings.paypalMode,
-          credentials: async () => {
-            const found = await credentials.read(credentialReference)
-            if (found === undefined) throw new Error('The shop’s PayPal credentials are missing.')
-            return found
-          },
-        }),
-      ),
+    paypalFor: (credentialReference) => createRestPayPalHolds(shopPayPalClient(settings, credentialReference)),
     send: createSqsSender({ queues: settings.queues, region: settings.region }),
     scheduler: createEventBridgeScheduler({ ...settings.schedules, region: settings.region }),
     notifier: createEmailNotifier({ database, mailer, publicUrl: settings.publicUrl }),

@@ -8,7 +8,7 @@ export const OPS_PROMPT_VERSION = 'ops-1'
 
 // A whole run's ceilings (extensions.md section 6.7). An exception left when one is reached goes to the queue with a
 // fixed reason that says it was not investigated.
-export const OPS_LIMITS = { maxToolCalls: 60, toolCallsPerException: 6, maxTokens: 400_000, maxMilliseconds: 240_000 } as const
+export const OPS_LIMITS = { maxToolCalls: 60, toolCallsPerException: 6, maxTokens: 400_000, maxMilliseconds: 180_000 } as const
 export type OpsLimits = { readonly [Key in keyof typeof OPS_LIMITS]: number }
 
 // What the model answers for one exception. It chooses a kind and explains it; it never gives an amount. The run

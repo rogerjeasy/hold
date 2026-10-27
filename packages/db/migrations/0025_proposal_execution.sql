@@ -12,3 +12,14 @@ BEGIN
 END;
 $$;--> statement-breakpoint
 CREATE TRIGGER proposal_follows_execution AFTER UPDATE OF state ON executions FOR EACH ROW EXECUTE FUNCTION hold_follow_execution();
+--> statement-breakpoint
+-- The shops the nightly operations run visits: each with a PayPal account in the worker's mode. Ids only.
+CREATE FUNCTION hold_shops_for_operations(paypal_mode text)
+RETURNS TABLE (shop_id uuid)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public, pg_temp AS $$
+  SELECT DISTINCT paypal_accounts.shop_id FROM paypal_accounts WHERE paypal_accounts.mode = paypal_mode ORDER BY paypal_accounts.shop_id
+$$;
+--> statement-breakpoint
+REVOKE EXECUTE ON FUNCTION hold_shops_for_operations(text) FROM PUBLIC;
+--> statement-breakpoint
+GRANT EXECUTE ON FUNCTION hold_shops_for_operations(text) TO hold_worker;

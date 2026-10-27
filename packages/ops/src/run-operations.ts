@@ -11,7 +11,7 @@ import type { ShopPayPalReads } from './paypal-facts.ts'
 import type { PayPalReader } from './paypal-reader.ts'
 
 export type { ShopPayPalReads } from './paypal-facts.ts'
-export type Reminder = { readonly kind: ReminderKind; readonly shopId: string; readonly rentalId: string }
+export type Reminder = { readonly kind: ReminderKind; readonly shopId: string; readonly rentalId: string; readonly dueAt: Date | null }
 
 export type OpsDependencies = {
   readonly database: Database
@@ -69,12 +69,18 @@ export async function runOperations(dependencies: OpsDependencies, input: { read
   const rules = await asWorker((transaction) => confirmedRules(transaction))
 
   let reminders = 0
+  let remindersFailed = 0
   for (const exception of recorded) {
     if (exception.reminder === null || exception.rentalId === null) continue
-    const reminder = { kind: exception.reminder, shopId, rentalId: exception.rentalId }
-    if (!await asWorker((transaction) => recordReminder(transaction, reminder, now))) continue
-    await dependencies.remind(reminder)
-    reminders += 1
+    const reminder = { kind: exception.reminder, shopId, rentalId: exception.rentalId, dueAt: exception.deadline }
+    if (!await asWorker((transaction) => recordReminder(transaction, { kind: reminder.kind, rentalId: reminder.rentalId }, now))) continue
+    // A reminder that could not be sent is counted on the run, not retried: at most one of a kind a day.
+    try {
+      await dependencies.remind(reminder)
+      reminders += 1
+    } catch {
+      remindersFailed += 1
+    }
   }
 
   const opened = dependencies.investigator === undefined || reads === undefined ? undefined : await reads.openReader().catch(() => undefined)
@@ -97,7 +103,7 @@ export async function runOperations(dependencies: OpsDependencies, input: { read
   } finally {
     await reader?.close().catch(() => undefined)
   }
-  await asWorker((transaction) => completeOpsRun(transaction, runId, { toolCalls: budget.toolCalls, inputTokens: usage.inputTokens, outputTokens: usage.outputTokens, model: usage.model, promptVersion: usage.model === null ? null : OPS_PROMPT_VERSION, paypalChecked: reached && reader !== undefined, counts: { exceptions: recorded.length, proposals, reminders } }, now))
+  await asWorker((transaction) => completeOpsRun(transaction, runId, { toolCalls: budget.toolCalls, inputTokens: usage.inputTokens, outputTokens: usage.outputTokens, model: usage.model, promptVersion: usage.model === null ? null : OPS_PROMPT_VERSION, paypalChecked: reached && reader !== undefined, counts: { exceptions: recorded.length, proposals, reminders, remindersFailed } }, now))
   return runId
 }
 
