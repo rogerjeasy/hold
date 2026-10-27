@@ -1217,7 +1217,8 @@
       "settings": "Settings",
       "scorecard": "Reliability",
       "incidents": "Incidents",
-      "trust": "Trust ladder"
+      "trust": "Trust ladder",
+      "queue": "Morning queue"
     },
     "setup": {
       "title": "Set up your shop",
@@ -1286,7 +1287,8 @@
       "paypal_unavailable": "PayPal could not be reached. Nothing was kept. Try again in a moment.",
       "no_price_list": "Publish a price list first. The sample claims use its prices.",
       "has_rentals": "This shop already has rentals, so no samples were added.",
-      "notifications_failed": "PayPal did not accept the subscription. Check the app's credentials, then try again."
+      "notifications_failed": "PayPal did not accept the subscription. Check the app's credentials, then try again.",
+      "rate_limited": "Asked too often. Wait a few minutes and try again."
     },
     "security": {
       "title": "Security",
@@ -2911,5 +2913,165 @@
     "connectTitle": "Connect your own assistant",
     "connectBody": "Any MCP client can use Hold's server at this address, over streamable HTTP, with no sign-in:",
     "connectNote": "Your assistant can find shops, quote and book. Once the fee is paid, it receives a token for that one rental, which you can disconnect from your rental link."
+  },
+  "operations": {
+    "title": "Morning queue",
+    "lead": "What the operations agent found, checked against PayPal where it could. Nothing happens until a person approves it, and nothing here is ever a charge.",
+    "briefNone": "Nothing waits for a decision.",
+    "brief": "{decisions, plural, one {# decision waits} other {# decisions wait}}, and {expiring, plural, =0 {none expires today} one {# expires today} other {# expire today}}.",
+    "checkNow": "Check now",
+    "checking": "Checking…",
+    "checked": "Check started. New entries appear on this page when it finishes.",
+    "checkNote": "The same check as the nightly one, run now.",
+    "passkeyBody": "Approving what releases or asks for money needs your passkey. Rejecting and postponing do not.",
+    "approveNeedsPasskey": "Confirm with your passkey above to approve this.",
+    "count": "{count, plural, one {# entry} other {# entries}}",
+    "kinds": {
+      "release_hold": {
+        "group": "Releases",
+        "action": "Release the hold to the renter",
+        "rule": "releasing a hold"
+      },
+      "request_replacement_hold": {
+        "group": "Replacement holds",
+        "action": "Ask the renter for a new hold",
+        "rule": "asking for a new hold"
+      },
+      "send_invoice": {
+        "group": "Invoices",
+        "action": "Send the renter an invoice for the balance",
+        "rule": "sending an invoice"
+      },
+      "refund_part": {
+        "group": "Refunds",
+        "action": "Refund part of the charge",
+        "rule": "refunding part of a charge"
+      },
+      "respond_to_dispute": {
+        "group": "PayPal disputes",
+        "action": "Send this answer to PayPal on the dispute",
+        "rule": "answering a dispute"
+      },
+      "send_message": {
+        "group": "Messages",
+        "action": "Send this message to the renter",
+        "rule": "sending a message"
+      },
+      "note": {
+        "group": "Notes",
+        "action": "Note it for the shop. Nothing is sent.",
+        "rule": "notes"
+      }
+    },
+    "amount": "Amount in the records",
+    "deadline": "Decide by {when}",
+    "why": "Why",
+    "references": "PayPal references",
+    "noReferences": "None given",
+    "draft": "Draft",
+    "marks": {
+      "raisedByAgent": "Observation raised by the agent",
+      "notInvestigated": "Not investigated",
+      "paypalNotChecked": "PayPal could not be checked",
+      "draftDropped": "Draft removed: its amounts did not match the records"
+    },
+    "openRental": "Open the rental",
+    "approve": "Approve",
+    "approved": "Approved.",
+    "reject": "Reject with a reason",
+    "rejectReason": "Why not?",
+    "rejectSubmit": "Reject",
+    "rejected": "Rejected. A rule drafted from it waits below.",
+    "postpone": "Postpone until tomorrow",
+    "postponed": "Postponed until tomorrow.",
+    "chooseRelease": "Choose to approve together",
+    "approveTogether": "Approve the chosen releases",
+    "approvedTogether": "Approved.",
+    "empty": "Nothing waits for a decision. Press Check now, or wait for tonight's check.",
+    "readOnly": "Owners and managers decide. You can read the queue.",
+    "fixedReasons": {
+      "clean_return_unconfirmed": "The comparison was clean and nobody has confirmed the return.",
+      "hold_ending": "The hold ends within three days and the rental is still open.",
+      "hold_at_risk": "The hold could not be renewed and the charge has not completed.",
+      "return_overdue": "The rental is past its end.",
+      "claim_reply_due": "The renter's reply to the claim is due within a day.",
+      "balance_above_hold": "The decided claim is more than the hold and no invoice exists.",
+      "capture_failed": "Taking the charge from the hold failed after its retry.",
+      "invoice_unpaid": "The invoice is still unpaid.",
+      "dispute_open": "A PayPal dispute is waiting for a response.",
+      "incident_waiting": "An incident has waited for staff longer than the shop allows.",
+      "reconciliation_difference": "PayPal's record of a hold differs from Hold's."
+    },
+    "recent": {
+      "title": "Decided in the last day",
+      "none": "Nothing was decided in the last day.",
+      "postponedUntil": "Back on the queue {when}.",
+      "reasonGiven": "Reason given: {reason}"
+    },
+    "states": {
+      "pending": "Postponed",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "expired": "Expired",
+      "superseded": "Superseded",
+      "executing": "Approved, being carried out",
+      "executed": "Done",
+      "failed": "Failed"
+    },
+    "stateNotes": {
+      "superseded": "The records changed after it was proposed, so nothing was done.",
+      "executing": "Waiting for PayPal or the worker to confirm it.",
+      "failed": "It could not be carried out. Do it yourself in PayPal, or check the rental."
+    },
+    "results": {
+      "superseded": "The records changed after this was proposed, so nothing was done. It has left the queue.",
+      "not_pending": "This entry was already decided.",
+      "not_found": "This entry is not in your shop's queue.",
+      "reason_required": "Write your reason before rejecting.",
+      "not_offered": "Hold cannot carry this out yet. Do it yourself in PayPal, then reject it with that reason.",
+      "draft_required": "There is no draft to send. Reject it, or write to the renter yourself.",
+      "mandate": "This needs a person's approval.",
+      "not_returned": "The rental is not back yet, so its hold cannot be released.",
+      "claim_exists": "A claim is open on this rental. Settle it on the claim page.",
+      "role_may_not_confirm": "Your role cannot confirm this.",
+      "over_approval_limit": "This is above your approval limit. Ask the owner.",
+      "simulated_rental": "A sample rental has no hold to release.",
+      "inspection_required": "Write what was inspected before releasing.",
+      "none_chosen": "Choose at least one release.",
+      "not_together": "Only releases can be approved together.",
+      "rule_not_open": "This rule was already decided.",
+      "amount_invalid": "That is not an amount above zero. Use digits, such as 10 or 10.50.",
+      "standing_rule_off": "The standing rule is already off."
+    },
+    "rules": {
+      "title": "Rules from your rejections",
+      "lead": "The agent remembers this list and nothing else. A confirmed rule stops that proposal before anyone is asked.",
+      "none": "No rules yet. Rejecting an entry with a reason drafts one.",
+      "never": "Do not propose {what}.",
+      "below": "Do not propose {what} below {amount}.",
+      "drafted": "Drafted, waiting for the owner",
+      "confirmed": "Confirmed",
+      "shape": "Which rule",
+      "shapeNever": "Never",
+      "shapeBelow": "Only below an amount",
+      "amount": "Amount, in {currency}",
+      "confirm": "Confirm this rule",
+      "confirmedDone": "Rule confirmed.",
+      "discard": "Discard",
+      "discardedDone": "Rule discarded."
+    },
+    "standing": {
+      "title": "Standing rule",
+      "lead": "Release a hold when the comparison was clean and nobody confirmed it within the set time. Off unless the owner turns it on.",
+      "live": "On until {until}, for up to {count, plural, one {# release} other {# releases}} a day.",
+      "off": "Off.",
+      "dailyCount": "Releases a day, at most (1 to 20)",
+      "days": "For how many days (1 to 90)",
+      "grant": "Turn on",
+      "granted": "Standing rule on.",
+      "revoke": "Turn off",
+      "revoked": "Standing rule off.",
+      "ownerOnly": "Only the owner turns it on or off."
+    }
   }
 }

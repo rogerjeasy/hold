@@ -1217,7 +1217,8 @@
       "settings": "Ajustes",
       "scorecard": "Fiabilidad",
       "incidents": "Incidentes",
-      "trust": "Escalera de confianza"
+      "trust": "Escalera de confianza",
+      "queue": "Cola de la mañana"
     },
     "setup": {
       "title": "Prepara tu tienda",
@@ -1286,7 +1287,8 @@
       "paypal_unavailable": "No se pudo conectar con PayPal. No se ha guardado nada. Inténtalo de nuevo en un momento.",
       "no_price_list": "Publica primero una lista de precios. Las reclamaciones de muestra usan sus precios.",
       "has_rentals": "Esta tienda ya tiene alquileres, así que no se añadió ninguna muestra.",
-      "notifications_failed": "PayPal no aceptó la suscripción. Revisa las credenciales de la app y vuelve a intentarlo."
+      "notifications_failed": "PayPal no aceptó la suscripción. Revisa las credenciales de la app y vuelve a intentarlo.",
+      "rate_limited": "Demasiadas veces. Espere unos minutos y vuelva a intentarlo."
     },
     "security": {
       "title": "Seguridad",
@@ -2911,5 +2913,165 @@
     "connectTitle": "Conecta tu propio asistente",
     "connectBody": "Cualquier cliente MCP puede usar el servidor de Hold en esta dirección, por HTTP con streaming, sin iniciar sesión:",
     "connectNote": "Tu asistente puede buscar tiendas, pedir presupuestos y reservar. Una vez pagada la tarifa, recibe un token solo para ese alquiler, que puedes desconectar desde tu enlace de alquiler."
+  },
+  "operations": {
+    "title": "Cola de la mañana",
+    "lead": "Lo que encontró el agente de operaciones, comprobado con PayPal cuando pudo. Nada ocurre hasta que una persona lo aprueba, y nada de esto es nunca un cargo.",
+    "briefNone": "No hay decisiones pendientes.",
+    "brief": "{decisions, plural, one {# decisión espera} other {# decisiones esperan}}, y {expiring, plural, =0 {ninguna vence hoy} one {# vence hoy} other {# vencen hoy}}.",
+    "checkNow": "Comprobar ahora",
+    "checking": "Comprobando…",
+    "checked": "Comprobación iniciada. Las entradas nuevas aparecen en esta página cuando termina.",
+    "checkNote": "La misma comprobación que la de cada noche, ahora.",
+    "passkeyBody": "Aprobar lo que libera o pide dinero necesita su llave de acceso. Rechazar y aplazar, no.",
+    "approveNeedsPasskey": "Confirme con su llave de acceso arriba para aprobar esto.",
+    "count": "{count, plural, one {# entrada} other {# entradas}}",
+    "kinds": {
+      "release_hold": {
+        "group": "Liberaciones",
+        "action": "Liberar la retención al cliente",
+        "rule": "liberar una retención"
+      },
+      "request_replacement_hold": {
+        "group": "Retenciones nuevas",
+        "action": "Pedir al cliente una retención nueva",
+        "rule": "pedir una retención nueva"
+      },
+      "send_invoice": {
+        "group": "Facturas",
+        "action": "Enviar al cliente una factura por el saldo",
+        "rule": "enviar una factura"
+      },
+      "refund_part": {
+        "group": "Reembolsos",
+        "action": "Reembolsar parte del cargo",
+        "rule": "reembolsar parte de un cargo"
+      },
+      "respond_to_dispute": {
+        "group": "Disputas de PayPal",
+        "action": "Enviar esta respuesta a PayPal sobre la disputa",
+        "rule": "responder a una disputa"
+      },
+      "send_message": {
+        "group": "Mensajes",
+        "action": "Enviar este mensaje al cliente",
+        "rule": "enviar un mensaje"
+      },
+      "note": {
+        "group": "Notas",
+        "action": "Anotarlo para la tienda. No se envía nada.",
+        "rule": "notas"
+      }
+    },
+    "amount": "Importe en los registros",
+    "deadline": "Decidir antes de {when}",
+    "why": "Por qué",
+    "references": "Referencias de PayPal",
+    "noReferences": "Ninguna",
+    "draft": "Borrador",
+    "marks": {
+      "raisedByAgent": "Observación del agente",
+      "notInvestigated": "Sin investigar",
+      "paypalNotChecked": "No se pudo comprobar PayPal",
+      "draftDropped": "Borrador retirado: sus importes no coincidían con los registros"
+    },
+    "openRental": "Abrir el alquiler",
+    "approve": "Aprobar",
+    "approved": "Aprobado.",
+    "reject": "Rechazar con un motivo",
+    "rejectReason": "¿Por qué no?",
+    "rejectSubmit": "Rechazar",
+    "rejected": "Rechazado. Una regla redactada a partir de ello espera más abajo.",
+    "postpone": "Aplazar hasta mañana",
+    "postponed": "Aplazado hasta mañana.",
+    "chooseRelease": "Elegir para aprobar juntas",
+    "approveTogether": "Aprobar las liberaciones elegidas",
+    "approvedTogether": "Aprobado.",
+    "empty": "No hay decisiones pendientes. Pulse Comprobar ahora, o espere a la comprobación de esta noche.",
+    "readOnly": "Deciden los propietarios y los responsables. Usted puede leer la cola.",
+    "fixedReasons": {
+      "clean_return_unconfirmed": "La comparación salió sin daños y nadie ha confirmado la devolución.",
+      "hold_ending": "La retención termina en menos de tres días y el alquiler sigue abierto.",
+      "hold_at_risk": "La retención no se pudo renovar y el cargo no se ha completado.",
+      "return_overdue": "El alquiler ha pasado su fin.",
+      "claim_reply_due": "La respuesta del cliente a la reclamación vence en un día.",
+      "balance_above_hold": "La reclamación decidida supera la retención y no existe factura.",
+      "capture_failed": "El cargo sobre la retención falló tras su reintento.",
+      "invoice_unpaid": "La factura sigue sin pagar.",
+      "dispute_open": "Una disputa de PayPal espera respuesta.",
+      "incident_waiting": "Un incidente lleva esperando al equipo más de lo que la tienda permite.",
+      "reconciliation_difference": "El registro de PayPal de una retención difiere del de Hold."
+    },
+    "recent": {
+      "title": "Decidido en el último día",
+      "none": "No se decidió nada en el último día.",
+      "postponedUntil": "Vuelve a la cola {when}.",
+      "reasonGiven": "Motivo dado: {reason}"
+    },
+    "states": {
+      "pending": "Aplazado",
+      "approved": "Aprobado",
+      "rejected": "Rechazado",
+      "expired": "Vencido",
+      "superseded": "Superado",
+      "executing": "Aprobado, en curso",
+      "executed": "Hecho",
+      "failed": "Fallido"
+    },
+    "stateNotes": {
+      "superseded": "Los registros cambiaron después de la propuesta, así que no se hizo nada.",
+      "executing": "Esperando la confirmación de PayPal o del proceso.",
+      "failed": "No se pudo llevar a cabo. Hágalo usted en PayPal, o revise el alquiler."
+    },
+    "results": {
+      "superseded": "Los registros cambiaron después de esta propuesta, así que no se hizo nada. Ha salido de la cola.",
+      "not_pending": "Esta entrada ya se decidió.",
+      "not_found": "Esta entrada no está en la cola de su tienda.",
+      "reason_required": "Escriba su motivo antes de rechazar.",
+      "not_offered": "Hold todavía no puede hacerlo. Hágalo usted en PayPal y luego rechácela con ese motivo.",
+      "draft_required": "No hay borrador que enviar. Recházela, o escriba usted al cliente.",
+      "mandate": "Esto necesita la aprobación de una persona.",
+      "not_returned": "El alquiler aún no ha vuelto, así que su retención no se puede liberar.",
+      "claim_exists": "Hay una reclamación abierta en este alquiler. Liquídela en la página de la reclamación.",
+      "role_may_not_confirm": "Su rol no puede confirmar esto.",
+      "over_approval_limit": "Esto supera su límite de aprobación. Pregunte al propietario.",
+      "simulated_rental": "Un alquiler de ejemplo no tiene retención que liberar.",
+      "inspection_required": "Escriba qué se inspeccionó antes de liberar.",
+      "none_chosen": "Elija al menos una liberación.",
+      "not_together": "Solo las liberaciones se pueden aprobar juntas.",
+      "rule_not_open": "Esta regla ya se decidió.",
+      "amount_invalid": "No es un importe mayor que cero. Use cifras, como 10 o 10,50.",
+      "standing_rule_off": "La regla permanente ya está desactivada."
+    },
+    "rules": {
+      "title": "Reglas de sus rechazos",
+      "lead": "El agente solo recuerda esta lista. Una regla confirmada detiene esa propuesta antes de preguntar a nadie.",
+      "none": "Aún no hay reglas. Rechazar una entrada con un motivo redacta una.",
+      "never": "No proponer {what}.",
+      "below": "No proponer {what} por debajo de {amount}.",
+      "drafted": "Redactada, esperando al propietario",
+      "confirmed": "Confirmada",
+      "shape": "Qué regla",
+      "shapeNever": "Nunca",
+      "shapeBelow": "Solo por debajo de un importe",
+      "amount": "Importe, en {currency}",
+      "confirm": "Confirmar esta regla",
+      "confirmedDone": "Regla confirmada.",
+      "discard": "Descartar",
+      "discardedDone": "Regla descartada."
+    },
+    "standing": {
+      "title": "Regla permanente",
+      "lead": "Liberar una retención cuando la comparación salió sin daños y nadie la confirmó en el tiempo fijado. Desactivada salvo que el propietario la active.",
+      "live": "Activa hasta el {until}, para un máximo de {count, plural, one {# liberación} other {# liberaciones}} al día.",
+      "off": "Desactivada.",
+      "dailyCount": "Liberaciones al día, como máximo (1 a 20)",
+      "days": "Durante cuántos días (1 a 90)",
+      "grant": "Activar",
+      "granted": "Regla permanente activada.",
+      "revoke": "Desactivar",
+      "revoked": "Regla permanente desactivada.",
+      "ownerOnly": "Solo el propietario la activa o la desactiva."
+    }
   }
 }

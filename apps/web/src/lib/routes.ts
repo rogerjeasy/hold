@@ -22,6 +22,8 @@ export type RoutePath = (typeof routes)[RouteKey]
 // check walks without signing in.
 export const shopRoutes = {
   home: '/shop',
+  // The operations agent's morning queue: what waits for an owner's or a manager's decision (extensions.md section 6).
+  queue: '/shop/queue',
   rentals: '/shop/rentals',
   items: '/shop/items',
   // What renters reported during their rentals (extensions.md section 10).

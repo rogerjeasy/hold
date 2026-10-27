@@ -1217,7 +1217,8 @@
       "settings": "Einstellungen",
       "scorecard": "Zuverlässigkeit",
       "incidents": "Vorfälle",
-      "trust": "Vertrauensstufen"
+      "trust": "Vertrauensstufen",
+      "queue": "Morgenliste"
     },
     "setup": {
       "title": "Richten Sie Ihren Verleih ein",
@@ -1286,7 +1287,8 @@
       "paypal_unavailable": "PayPal ist nicht erreichbar. Es wurde nichts gespeichert. Versuchen Sie es gleich noch einmal.",
       "no_price_list": "Veröffentlichen Sie zuerst eine Preisliste. Die Beispielforderungen verwenden ihre Preise.",
       "has_rentals": "Dieser Laden hat schon Vermietungen, daher wurden keine Beispiele hinzugefügt.",
-      "notifications_failed": "PayPal hat das Abonnement nicht angenommen. Prüfen Sie die Zugangsdaten der App und versuchen Sie es erneut."
+      "notifications_failed": "PayPal hat das Abonnement nicht angenommen. Prüfen Sie die Zugangsdaten der App und versuchen Sie es erneut.",
+      "rate_limited": "Zu oft angefragt. Warten Sie ein paar Minuten und versuchen Sie es erneut."
     },
     "security": {
       "title": "Sicherheit",
@@ -2911,5 +2913,165 @@
     "connectTitle": "Den eigenen Assistenten verbinden",
     "connectBody": "Jeder MCP-Client kann Holds Server unter dieser Adresse nutzen, über Streamable HTTP, ohne Anmeldung:",
     "connectNote": "Ihr Assistent kann Verleihe finden, Angebote einholen und buchen. Sobald die Gebühr bezahlt ist, erhält er ein Token nur für diese eine Miete, das Sie über Ihren Mietlink trennen können."
+  },
+  "operations": {
+    "title": "Morgenliste",
+    "lead": "Was der Betriebsagent gefunden und, wo möglich, bei PayPal geprüft hat. Nichts geschieht, bevor eine Person zustimmt, und nichts hier ist je eine Belastung.",
+    "briefNone": "Keine Entscheidung steht an.",
+    "brief": "{decisions, plural, one {# Entscheidung wartet} other {# Entscheidungen warten}}, und {expiring, plural, =0 {keine läuft heute ab} one {# läuft heute ab} other {# laufen heute ab}}.",
+    "checkNow": "Jetzt prüfen",
+    "checking": "Wird geprüft…",
+    "checked": "Prüfung gestartet. Neue Einträge erscheinen auf dieser Seite, wenn sie fertig ist.",
+    "checkNote": "Dieselbe Prüfung wie in der Nacht, jetzt.",
+    "passkeyBody": "Was Geld freigibt oder anfordert, braucht zum Genehmigen Ihren Passkey. Ablehnen und Verschieben nicht.",
+    "approveNeedsPasskey": "Bestätigen Sie oben mit Ihrem Passkey, um dies zu genehmigen.",
+    "count": "{count, plural, one {# Eintrag} other {# Einträge}}",
+    "kinds": {
+      "release_hold": {
+        "group": "Freigaben",
+        "action": "Die Reservierung für die mietende Person freigeben",
+        "rule": "Freigaben einer Reservierung"
+      },
+      "request_replacement_hold": {
+        "group": "Neue Reservierungen",
+        "action": "Die mietende Person um eine neue Reservierung bitten",
+        "rule": "Bitten um eine neue Reservierung"
+      },
+      "send_invoice": {
+        "group": "Rechnungen",
+        "action": "Der mietenden Person eine Rechnung über den Rest senden",
+        "rule": "Rechnungen"
+      },
+      "refund_part": {
+        "group": "Erstattungen",
+        "action": "Einen Teil der Belastung erstatten",
+        "rule": "Teilerstattungen"
+      },
+      "respond_to_dispute": {
+        "group": "PayPal-Konflikte",
+        "action": "Diese Antwort zum Konflikt an PayPal senden",
+        "rule": "Antworten auf Konflikte"
+      },
+      "send_message": {
+        "group": "Nachrichten",
+        "action": "Diese Nachricht an die mietende Person senden",
+        "rule": "Nachrichten"
+      },
+      "note": {
+        "group": "Notizen",
+        "action": "Für den Verleih notieren. Es wird nichts gesendet.",
+        "rule": "Notizen"
+      }
+    },
+    "amount": "Betrag laut Unterlagen",
+    "deadline": "Entscheiden bis {when}",
+    "why": "Warum",
+    "references": "PayPal-Referenzen",
+    "noReferences": "Keine",
+    "draft": "Entwurf",
+    "marks": {
+      "raisedByAgent": "Beobachtung des Agenten",
+      "notInvestigated": "Nicht untersucht",
+      "paypalNotChecked": "PayPal konnte nicht geprüft werden",
+      "draftDropped": "Entwurf entfernt: seine Beträge stimmten nicht mit den Unterlagen überein"
+    },
+    "openRental": "Vermietung öffnen",
+    "approve": "Genehmigen",
+    "approved": "Genehmigt.",
+    "reject": "Mit Begründung ablehnen",
+    "rejectReason": "Warum nicht?",
+    "rejectSubmit": "Ablehnen",
+    "rejected": "Abgelehnt. Eine daraus entworfene Regel wartet unten.",
+    "postpone": "Auf morgen verschieben",
+    "postponed": "Auf morgen verschoben.",
+    "chooseRelease": "Zum gemeinsamen Genehmigen wählen",
+    "approveTogether": "Gewählte Freigaben genehmigen",
+    "approvedTogether": "Genehmigt.",
+    "empty": "Keine Entscheidung steht an. Drücken Sie Jetzt prüfen, oder warten Sie auf die Prüfung heute Nacht.",
+    "readOnly": "Inhaber und Leitung entscheiden. Sie können die Liste lesen.",
+    "fixedReasons": {
+      "clean_return_unconfirmed": "Der Vergleich war ohne Schaden und niemand hat die Rückgabe bestätigt.",
+      "hold_ending": "Die Reservierung endet in weniger als drei Tagen und die Vermietung ist noch offen.",
+      "hold_at_risk": "Die Reservierung konnte nicht erneuert werden und die Belastung ist nicht abgeschlossen.",
+      "return_overdue": "Die Vermietung ist über ihr Ende hinaus.",
+      "claim_reply_due": "Die Antwort der mietenden Person auf die Forderung ist innerhalb eines Tages fällig.",
+      "balance_above_hold": "Die entschiedene Forderung übersteigt die Reservierung und es gibt keine Rechnung.",
+      "capture_failed": "Die Belastung der Reservierung ist nach dem erneuten Versuch gescheitert.",
+      "invoice_unpaid": "Die Rechnung ist noch unbezahlt.",
+      "dispute_open": "Ein PayPal-Konflikt wartet auf eine Antwort.",
+      "incident_waiting": "Ein Vorfall wartet länger auf das Team, als der Verleih erlaubt.",
+      "reconciliation_difference": "Der PayPal-Eintrag einer Reservierung weicht von dem in Hold ab."
+    },
+    "recent": {
+      "title": "Am letzten Tag entschieden",
+      "none": "Am letzten Tag wurde nichts entschieden.",
+      "postponedUntil": "Wieder in der Liste {when}.",
+      "reasonGiven": "Angegebene Begründung: {reason}"
+    },
+    "states": {
+      "pending": "Verschoben",
+      "approved": "Genehmigt",
+      "rejected": "Abgelehnt",
+      "expired": "Abgelaufen",
+      "superseded": "Überholt",
+      "executing": "Genehmigt, wird ausgeführt",
+      "executed": "Erledigt",
+      "failed": "Fehlgeschlagen"
+    },
+    "stateNotes": {
+      "superseded": "Die Unterlagen haben sich nach dem Vorschlag geändert, daher wurde nichts getan.",
+      "executing": "Wartet auf die Bestätigung durch PayPal oder die Verarbeitung.",
+      "failed": "Es konnte nicht ausgeführt werden. Erledigen Sie es selbst bei PayPal oder prüfen Sie die Vermietung."
+    },
+    "results": {
+      "superseded": "Die Unterlagen haben sich nach diesem Vorschlag geändert, daher wurde nichts getan. Er hat die Liste verlassen.",
+      "not_pending": "Dieser Eintrag wurde bereits entschieden.",
+      "not_found": "Dieser Eintrag steht nicht in der Liste Ihres Verleihs.",
+      "reason_required": "Schreiben Sie vor dem Ablehnen Ihre Begründung.",
+      "not_offered": "Hold kann das noch nicht ausführen. Erledigen Sie es selbst bei PayPal und lehnen Sie den Eintrag mit dieser Begründung ab.",
+      "draft_required": "Es gibt keinen Entwurf zum Senden. Lehnen Sie ab, oder schreiben Sie der mietenden Person selbst.",
+      "mandate": "Dafür braucht es die Zustimmung einer Person.",
+      "not_returned": "Die Vermietung ist noch nicht zurück, daher kann die Reservierung nicht freigegeben werden.",
+      "claim_exists": "Zu dieser Vermietung ist eine Forderung offen. Rechnen Sie sie auf der Seite der Forderung ab.",
+      "role_may_not_confirm": "Ihre Rolle kann dies nicht bestätigen.",
+      "over_approval_limit": "Das übersteigt Ihr Genehmigungslimit. Fragen Sie die Inhaberin oder den Inhaber.",
+      "simulated_rental": "Eine Beispielvermietung hat keine Reservierung zum Freigeben.",
+      "inspection_required": "Schreiben Sie vor der Freigabe, was geprüft wurde.",
+      "none_chosen": "Wählen Sie mindestens eine Freigabe.",
+      "not_together": "Nur Freigaben können gemeinsam genehmigt werden.",
+      "rule_not_open": "Über diese Regel wurde bereits entschieden.",
+      "amount_invalid": "Das ist kein Betrag über null. Verwenden Sie Ziffern, etwa 10 oder 10,50.",
+      "standing_rule_off": "Die Dauerregel ist bereits aus."
+    },
+    "rules": {
+      "title": "Regeln aus Ihren Ablehnungen",
+      "lead": "Der Agent merkt sich nur diese Liste. Eine bestätigte Regel stoppt diesen Vorschlag, bevor jemand gefragt wird.",
+      "none": "Noch keine Regeln. Wer einen Eintrag mit Begründung ablehnt, entwirft eine.",
+      "never": "Keine {what} vorschlagen.",
+      "below": "Keine {what} unter {amount} vorschlagen.",
+      "drafted": "Entworfen, wartet auf die Inhaberin oder den Inhaber",
+      "confirmed": "Bestätigt",
+      "shape": "Welche Regel",
+      "shapeNever": "Nie",
+      "shapeBelow": "Nur unter einem Betrag",
+      "amount": "Betrag, in {currency}",
+      "confirm": "Diese Regel bestätigen",
+      "confirmedDone": "Regel bestätigt.",
+      "discard": "Verwerfen",
+      "discardedDone": "Regel verworfen."
+    },
+    "standing": {
+      "title": "Dauerregel",
+      "lead": "Eine Reservierung freigeben, wenn der Vergleich ohne Schaden war und niemand ihn in der festgelegten Zeit bestätigt hat. Aus, bis die Inhaberin oder der Inhaber sie einschaltet.",
+      "live": "An bis {until}, für höchstens {count, plural, one {# Freigabe} other {# Freigaben}} am Tag.",
+      "off": "Aus.",
+      "dailyCount": "Freigaben am Tag, höchstens (1 bis 20)",
+      "days": "Für wie viele Tage (1 bis 90)",
+      "grant": "Einschalten",
+      "granted": "Dauerregel an.",
+      "revoke": "Ausschalten",
+      "revoked": "Dauerregel aus.",
+      "ownerOnly": "Nur die Inhaberin oder der Inhaber schaltet sie ein oder aus."
+    }
   }
 }
