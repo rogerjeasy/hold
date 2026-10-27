@@ -11,6 +11,8 @@ export const routes = {
   signUp: '/sign-up',
   // Anyone shown a renter's Clean Record checks it here (extensions.md section 7.7).
   verify: '/verify',
+  // A demonstration: an assistant that rents through Hold's MCP server (extensions.md section 8.10).
+  assistant: '/assistant',
 } as const
 
 export type RouteKey = keyof typeof routes

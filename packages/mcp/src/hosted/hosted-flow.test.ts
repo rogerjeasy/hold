@@ -68,6 +68,13 @@ describe('the hosted assistant, as a client of Hold’s MCP server', () => {
     expect(paid.reply).not.toMatch(/hat_/)
   })
 
+  it('looks for the shop or the place the person names', async () => {
+    const client = await connectClient(testPorts(database), '203.0.113.92', 'Hold hosted assistant')
+    const run = (text: string) => runHostedTurn({ model: createScriptedModel(() => new Date()), client, conversation: say([], text), now: () => new Date(), today: '2026-10-30' })
+    expect((await run('An e-bike at Shop hosted, please.')).toolCalls.map((call) => call.name)).toContain('quote_rental')
+    expect((await run('An e-bike in Reykjavik, please.')).reply).toMatch(/no shop/i)
+  })
+
   it('reports Hold’s refusal in plain words and stops', async () => {
     const client = await connectClient(testPorts(database), '203.0.113.91', 'Hold hosted assistant')
     const result = await runHostedTurn({ model: createScriptedModel(() => new Date()), client, conversation: say([], 'Rent me a kayak.'), now: () => new Date(), today: '2026-10-30' })

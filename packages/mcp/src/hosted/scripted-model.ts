@@ -18,6 +18,8 @@ const KINDS: readonly (readonly [RegExp, ItemCategory])[] = [
   [/tent|camping/i, 'camping'],
   [/bike|bicycle/i, 'bike'],
 ]
+// "at Ribeira Bikes", "in Lisbon": the shop or the place the person names, up to the end of the phrase.
+const PLACE = /\b(?:at|in|near)\s+([\p{L}\d' -]{2,60}?)\s*(?:[.,!?;]|$)/u
 const YES = /\b(yes|yeah|ok|okay|go ahead|book|please do|sí|si|oui|ja|vale|d'accord)\b/i
 
 const reply = (content: readonly Block[], stopReason: 'end_turn' | 'tool_use'): ModelReply => ({ kind: 'reply', content, stopReason, tokens: 0, model: SIMULATED_MODEL })
@@ -95,7 +97,8 @@ function afterPerson(conversation: Conversation, text: string): ModelReply {
   const quote = latest(conversation, 'quote_rental')
   if (quote?.ok === true && YES.test(text)) return use('create_booking', { quote_id: quote.result['quote_id'] })
   const kind = KINDS.find(([pattern]) => pattern.test(text))?.[1]
-  return use('find_shops', kind === undefined ? {} : { kind })
+  const place = PLACE.exec(text)?.[1]?.trim()
+  return use('find_shops', { ...(kind === undefined ? {} : { kind }), ...(place === undefined ? {} : { place }) })
 }
 
 export function createScriptedModel(now: () => Date): AssistantModel {

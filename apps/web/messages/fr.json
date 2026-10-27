@@ -93,6 +93,10 @@
     "verify": {
       "title": "Vérifier un historique de retours",
       "description": "Vérifiez l'historique des locations rendues en bon état d'un client, avec la clé publiée par Hold."
+    },
+    "assistant": {
+      "title": "Louer par un assistant",
+      "description": "Parlez à un assistant qui loue un vélo électrique via le serveur MCP de Hold, comme le ferait l'assistant d'un voyageur."
     }
   },
   "nav": {
@@ -2874,5 +2878,37 @@
         "not_yet_valid": "Cette attestation n'est pas encore valable. Vérifiez l'horloge de cet appareil."
       }
     }
+  },
+  "hostedAssistant": {
+    "label": "Démonstration",
+    "title": "Louer par un assistant",
+    "lead": "Demandez un vélo électrique, un kayak ou un appareil photo. L'assistant trouve une boutique, lit ses prix des dommages, obtient un devis et réserve, avec les mêmes outils que l'assistant de n'importe quel voyageur.",
+    "demonstration": "Ceci est une démonstration. L'assistant se connecte au serveur MCP de Hold comme n'importe quel assistant extérieur, et chacun de ses appels est vérifié et enregistré. Vous approuvez vous-même chaque paiement, dans PayPal.",
+    "chat": "Conversation",
+    "empty": "Essayez : « Réserve-moi un vélo électrique pour trois jours. »",
+    "you": "Vous",
+    "assistant": "Assistant",
+    "simulated": "Simulé : un script, pas Claude",
+    "used": "A utilisé {tool}",
+    "message": "Votre message",
+    "placeholder": "Réserve-moi un vélo électrique pour trois jours",
+    "send": "Envoyer",
+    "sending": "Réflexion…",
+    "approveTitle": "Approuver les frais de location",
+    "approveBody": "La réservation garde son article quinze minutes. Approuvez les frais sur la page de PayPal ; rien n'est prélevé avant.",
+    "approve": "Approuver les frais dans PayPal",
+    "scan": "Scannez pour approuver les frais sur votre téléphone",
+    "stopped": {
+      "ceiling": "L'assistant s'est arrêté à sa limite d'appels, de jetons ou de temps pour un message. Redemandez pour continuer.",
+      "refused": "Le modèle a refusé de répondre. Rien n'a été réservé.",
+      "unavailable": "L'assistant n'a pas pu être joint. Rien n'a été réservé."
+    },
+    "results": {
+      "rate_limited": "Trop de messages depuis ce réseau. Attendez quelques minutes et réessayez.",
+      "invalid": "Ce message n'a pas pu être envoyé. Rechargez la page et recommencez."
+    },
+    "connectTitle": "Connecter votre propre assistant",
+    "connectBody": "Tout client MCP peut utiliser le serveur de Hold à cette adresse, en HTTP streamable, sans connexion :",
+    "connectNote": "Votre assistant peut trouver des boutiques, obtenir un devis et réserver. Une fois les frais payés, il reçoit un jeton pour cette seule location, que vous pouvez déconnecter depuis votre lien de location."
   }
 }

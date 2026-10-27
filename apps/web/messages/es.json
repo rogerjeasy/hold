@@ -93,6 +93,10 @@
     "verify": {
       "title": "Comprobar un historial de devoluciones",
       "description": "Comprueba el historial de alquileres devueltos en buen estado de un cliente, con la clave publicada por Hold."
+    },
+    "assistant": {
+      "title": "Alquilar con un asistente",
+      "description": "Habla con un asistente que alquila una bici eléctrica a través del servidor MCP de Hold, como lo haría el asistente de un viajero."
     }
   },
   "nav": {
@@ -2874,5 +2878,37 @@
         "not_yet_valid": "Esta credencial aún no es válida. Revisa el reloj de este dispositivo."
       }
     }
+  },
+  "hostedAssistant": {
+    "label": "Demostración",
+    "title": "Alquilar con un asistente",
+    "lead": "Pide una bici eléctrica, un kayak o una cámara. El asistente encuentra una tienda, lee sus precios de daños, obtiene un presupuesto y reserva, con las mismas herramientas que usaría el asistente de cualquier viajero.",
+    "demonstration": "Esto es una demostración. El asistente se conecta al servidor MCP de Hold como cualquier asistente externo, y cada llamada que hace se comprueba y se registra. Tú apruebas cada pago, en PayPal.",
+    "chat": "Conversación",
+    "empty": "Prueba: «Resérvame una bici eléctrica para tres días».",
+    "you": "Tú",
+    "assistant": "Asistente",
+    "simulated": "Simulado: un guion, no Claude",
+    "used": "Usó {tool}",
+    "message": "Tu mensaje",
+    "placeholder": "Resérvame una bici eléctrica para tres días",
+    "send": "Enviar",
+    "sending": "Pensando…",
+    "approveTitle": "Aprobar la tarifa del alquiler",
+    "approveBody": "La reserva guarda su artículo quince minutos. Aprueba la tarifa en la página de PayPal; no se cobra nada hasta entonces.",
+    "approve": "Aprobar la tarifa en PayPal",
+    "scan": "Escanea para aprobar la tarifa en tu teléfono",
+    "stopped": {
+      "ceiling": "El asistente se detuvo en su límite de llamadas, tokens o tiempo para un mensaje. Pregunta de nuevo para seguir.",
+      "refused": "El modelo se negó a responder. No se reservó nada.",
+      "unavailable": "No se pudo contactar con el asistente. No se reservó nada."
+    },
+    "results": {
+      "rate_limited": "Demasiados mensajes desde esta red. Espera unos minutos y vuelve a intentarlo.",
+      "invalid": "No se pudo enviar ese mensaje. Recarga la página y empieza de nuevo."
+    },
+    "connectTitle": "Conecta tu propio asistente",
+    "connectBody": "Cualquier cliente MCP puede usar el servidor de Hold en esta dirección, por HTTP con streaming, sin iniciar sesión:",
+    "connectNote": "Tu asistente puede buscar tiendas, pedir presupuestos y reservar. Una vez pagada la tarifa, recibe un token solo para ese alquiler, que puedes desconectar desde tu enlace de alquiler."
   }
 }
