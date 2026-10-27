@@ -93,6 +93,10 @@
     "verify": {
       "title": "Check a Clean Record",
       "description": "Check a renter's record of rentals returned in good condition, with Hold's published key."
+    },
+    "assistant": {
+      "title": "Rent through an assistant",
+      "description": "Talk to an assistant that rents an e-bike through Hold's MCP server, the way a traveller's own assistant would."
     }
   },
   "nav": {
@@ -1431,7 +1435,8 @@
         },
         "done": "Done",
         "toDo": "Not yet",
-        "lapsedNote": "The time to pay ran out, so the items are no longer kept. The renter can still pay while nobody else has booked them."
+        "lapsedNote": "The time to pay ran out, so the items are no longer kept. The renter can still pay while nobody else has booked them.",
+        "assistant": "By the renter's own assistant"
       },
       "link": {
         "title": "The renter's link",
@@ -1488,7 +1493,8 @@
         "assuredUntil": "Best charged by",
         "validUntil": "Ends",
         "replacing": "A new hold was asked of the renter before this one ends. Waiting for their approval."
-      }
+      },
+      "fromAssistant": "Booked by the renter's assistant"
     },
     "items": {
       "title": "Items",
@@ -2302,7 +2308,8 @@
       "key_mismatch": "That photograph does not belong to this report.",
       "not_uploaded": "The photograph did not arrive. Take it again.",
       "sealed": "This report was sent, so no photograph can be added.",
-      "unknown_view": "That view is not one of this item’s."
+      "unknown_view": "That view is not one of this item’s.",
+      "not_connected": "No assistant is connected to this rental now."
     },
     "orderDescription": "{shop}: {items}, {days, plural, one {# day} other {# days}}",
     "holdPage": {
@@ -2469,6 +2476,55 @@
         "claim_opened": "In the claim",
         "resolved": "Settled",
         "withdrawn": "Withdrawn"
+      }
+    },
+    "assistant": {
+      "pageTitle": "Your assistant",
+      "title": {
+        "connected": "An assistant is connected to this rental",
+        "disconnected": "The assistant was disconnected",
+        "booked": "An assistant made this booking"
+      },
+      "name": "It calls itself <strong>{name}</strong>. That name is its own and is not verified.",
+      "unnamed": "an assistant that gave no name",
+      "lead": "It can read this rental, its hold, its condition report and any claim, and draft a reply for you. It cannot pay, approve a hold or answer a claim: you do those yourself, in PayPal or on this link.",
+      "link": "See what it did, or disconnect it",
+      "back": "Back to the rental",
+      "disconnectLead": "Its token stops working at its next call. This link keeps working as before.",
+      "disconnect": "Disconnect the assistant",
+      "disconnecting": "Disconnecting…",
+      "disconnected": "Disconnected. Its next call will be refused.",
+      "notConnected": "No assistant is connected to this rental now.",
+      "did": "What it did",
+      "nothing": "Nothing yet.",
+      "outcome": {
+        "refused": "Refused",
+        "human_confirmation_required": "Waited for you"
+      },
+      "draft": {
+        "title": "A reply it drafted for you",
+        "decision": {
+          "accept": "Accept the claim",
+          "contest": "Contest the claim"
+        },
+        "note": "These are the assistant's words and decide nothing. To answer, open the claim from your link and confirm with the code Hold emails you."
+      },
+      "tools": {
+        "find_shops": "Looked for shops",
+        "get_shop": "Read the shop's details",
+        "check_availability": "Checked what was free",
+        "get_damage_prices": "Read the damage prices",
+        "quote_rental": "Asked for a price",
+        "create_booking": "Made this booking",
+        "get_booking": "Checked whether the fee was paid",
+        "get_rental": "Read the rental",
+        "get_hold": "Read the hold",
+        "get_hold_approval_link": "Asked for the link to approve the hold",
+        "get_condition_report": "Read the condition report",
+        "get_claim": "Read the claim",
+        "draft_claim_reply": "Drafted a reply to the claim",
+        "submit_claim_reply": "Asked to answer the claim",
+        "get_record": "Read the evidence record"
       }
     }
   },
@@ -2822,5 +2878,37 @@
         "not_yet_valid": "This credential is not valid yet. Check the clock on this device."
       }
     }
+  },
+  "hostedAssistant": {
+    "label": "Demonstration",
+    "title": "Rent through an assistant",
+    "lead": "Ask for an e-bike, a kayak or a camera. The assistant finds a shop, reads its damage prices, gets a quote and books, using the same tools any traveller's own assistant would use.",
+    "demonstration": "This is a demonstration. The assistant connects to Hold's MCP server like any outside assistant, and every call it makes is checked and logged. You approve every payment yourself, in PayPal.",
+    "chat": "Conversation",
+    "empty": "Try: “Book me an e-bike for three days.”",
+    "you": "You",
+    "assistant": "Assistant",
+    "simulated": "Simulated: a script, not Claude",
+    "used": "Used {tool}",
+    "message": "Your message",
+    "placeholder": "Book me an e-bike for three days",
+    "send": "Send",
+    "sending": "Thinking…",
+    "approveTitle": "Approve the rental fee",
+    "approveBody": "The booking keeps its item for fifteen minutes. Approve the fee in PayPal's own page; nothing is charged until you do.",
+    "approve": "Approve the fee in PayPal",
+    "scan": "Scan to approve the fee on your phone",
+    "stopped": {
+      "ceiling": "The assistant stopped at its limit of tool calls, tokens or time for one message. Ask again to go on.",
+      "refused": "The model declined to answer that. Nothing was booked.",
+      "unavailable": "The assistant could not be reached. Nothing was booked."
+    },
+    "results": {
+      "rate_limited": "Too many messages from this network. Wait a few minutes and try again.",
+      "invalid": "That message could not be sent. Reload the page and start again."
+    },
+    "connectTitle": "Connect your own assistant",
+    "connectBody": "Any MCP client can use Hold's server at this address, over streamable HTTP, with no sign-in:",
+    "connectNote": "Your assistant can find shops, quote and book. Once the fee is paid, it receives a token for that one rental, which you can disconnect from your rental link."
   }
 }

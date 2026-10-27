@@ -221,8 +221,8 @@ All carry `shop_id` and row-level security, except where noted.
 | `rental_outcomes` | Renter key, item category, closed at, outcome class, hold amount released | 2 |
 | `trust_ladders`, `trust_rungs` | Version, published at. Clean returns needed, window, share of the hold, largest item value, whether a saved method is needed | 2 |
 | `renter_consents` | Renter key, what was consented to, when, withdrawn at. No `shop_id`. | 2 |
-| `quotes` | Item type, period, fee, hold amount, price list and wear policy versions, expiry | 3 |
-| `agent_sessions` | Rental, token fingerprint, scopes, client label, last used, revoked at | 3 |
+| `quotes` | Period, each item type with its count, day rate and hold, fee, hold amount, price list and wear policy, expiry, the booking made from it | 3 |
+| `agent_sessions` | Rental, booking secret fingerprint, token fingerprint, scopes, client label, token issued and end, last used, revoked at, the reply it drafted | 3 |
 | `negotiations` | Claim, both mandate IDs, state, round, deadline, transcript head fingerprint | 4 |
 | `negotiation_moves` | Negotiation, side, move, line amounts, grounds, evidence references, previous move fingerprint | 4 |
 | `incidents` | Rental item, kind, state, description, triage result, model and prompt version | 5 |
@@ -798,6 +798,22 @@ This is listed so the mapping is known. It is built only if everything else in t
 - **X3.7** After the renter disconnects the assistant, its next call is refused.
 - **X3.8** The renter's link lists every action the assistant took.
 - **X3.9** The fee is captured when the redirect is blocked, through the approval event alone.
+
+**Progress.** Built in `packages/domain` (`assistant.ts`, the rental binding in `agent-gateway.ts`), `packages/db` (migration `0026`, `assistant-repository.ts`), `packages/mcp` (the server, its gateway path, the secrets and the hosted assistant) and `apps/web` (`/mcp`, `/assistant`, `/r/{token}/assistant`, and the staff list); `architecture.md` sections 6.11 and 13.4. Every check below runs against the test environment's simulated PayPal, and the hosted assistant against its scripted stand-in.
+
+| Check | State | Tested by |
+|---|---|---|
+| X3.1 | Passes with the MCP SDK's own client over streamable HTTP, in the package and through the app's `/mcp` route, and with the hosted assistant end to end. Trial 13, a common outside client such as MCP Inspector against the deployed address, not yet run. | `server.test.ts`, `route.test.ts`, `assistant.spec.ts` |
+| X3.2 | Passes against the simulated PayPal: the person approves and returns, `get_booking` reports paid and returns the token, and the rental shows in the staff list as booked by the renter's assistant. The live sandbox not yet run. | `route.test.ts`, `assistant.spec.ts`, `rentals-screen.test.tsx` |
+| X3.3 | Passes | `server.test.ts`, `route.test.ts`, `catalogue.test.ts`, `assistant-repository.test.ts` |
+| X3.4 | Passes: after fifteen minutes with no capture begun, the rental is `abandoned` and its item is free | `assistant.test.ts`, `assistant-repository.test.ts` |
+| X3.5 | Passes | `agent-gateway.test.ts`, `server.test.ts` |
+| X3.6 | Passes | `server.test.ts`, `route.test.ts` |
+| X3.7 | Passes | `server.test.ts`, `route.test.ts`, `assistant.spec.ts` |
+| X3.8 | Passes | `route.test.ts`, `assistant-screen.test.tsx`, `assistant.spec.ts` |
+| X3.9 | Passes against the simulated PayPal, for a booking an assistant made, from `CHECKOUT.ORDER.APPROVED` alone. The live sandbox with the redirect blocked not yet run. | `route.test.ts`, `paypal-webhook.test.ts` |
+
+Also built: the contract test of every tool's input and output schema, the test that lists every tool and fails on an amount input or a capture, the unpaid-booking caps and rate limits, and the hosted assistant's ceilings, refusal and outage handling (`catalogue.test.ts`, `server.test.ts`, `runner.test.ts`, `bedrock-model.test.ts`, `hosted-flow.test.ts`). Not offered yet, and listed with the reason in `NOT_OFFERED`: `request_extension` (Hold has no extension flow; a rental's end date and fee cannot change after booking), `report_incident` (an incident needs photographs taken through the renter's link), and `get_negotiation` and `submit_offer` (Extension 4). The cut-line items, the mandated hold of 8.7 and the Cart API contract of 8.9, are not built; the `agent_hold` mandate kind remains the seam for the first. The hosted assistant has not yet been run against Claude on Bedrock.
 
 ### 8.13 In the video
 

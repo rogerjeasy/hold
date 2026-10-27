@@ -18,6 +18,9 @@ function Term({ label, children }: { label: string; children: ReactNode }) {
   )
 }
 
+// How each way of booking is named among the terms.
+const CHANNEL_LABELS = { staff: 'staff', shop_page: 'shopPage', assistant: 'assistant' } as const satisfies Record<RentalDetail['bookedThrough'], string>
+
 // What the renter agreed to: when, which items, the fee, the hold and the version of the price list.
 export function RentalTerms({ rental, clock }: { rental: RentalDetail; clock: ShopClock }) {
   const t = useTranslations('shop.rentals.detail')
@@ -42,7 +45,7 @@ export function RentalTerms({ rental, clock }: { rental: RentalDetail; clock: Sh
         <Term label={t('fee')}>{amount(rental.feeCents)}</Term>
         <Term label={t('hold')}>{amount(rental.holdCents)}</Term>
         <Term label={t('prices')}>{t('pricesVersion', { version: rental.priceListVersion })}</Term>
-        <Term label={t('bookedThrough')}>{rental.bookedThrough === 'staff' ? t('staff') : t('shopPage')}</Term>
+        <Term label={t('bookedThrough')}>{t(CHANNEL_LABELS[rental.bookedThrough])}</Term>
         {rental.contactName === null && rental.contactEmail === null ? null : (
           <Term label={t('contact')}>{[rental.contactName, rental.contactEmail].filter((part) => part !== null && part !== '').join(' · ')}</Term>
         )}

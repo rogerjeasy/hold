@@ -93,6 +93,10 @@
     "verify": {
       "title": "Rückgabebilanz prüfen",
       "description": "Prüfen Sie die Bilanz einwandfrei zurückgegebener Mieten mit dem von Hold veröffentlichten Schlüssel."
+    },
+    "assistant": {
+      "title": "Über einen Assistenten mieten",
+      "description": "Sprechen Sie mit einem Assistenten, der über Holds MCP-Server ein E-Bike mietet, so wie es der eigene Assistent eines Reisenden täte."
     }
   },
   "nav": {
@@ -1431,7 +1435,8 @@
         },
         "done": "Erledigt",
         "toDo": "Noch nicht",
-        "lapsedNote": "Die Zahlungsfrist ist abgelaufen, deshalb werden die Artikel nicht mehr freigehalten. Die mietende Person kann noch bezahlen, solange niemand sonst sie gebucht hat."
+        "lapsedNote": "Die Zahlungsfrist ist abgelaufen, deshalb werden die Artikel nicht mehr freigehalten. Die mietende Person kann noch bezahlen, solange niemand sonst sie gebucht hat.",
+        "assistant": "Durch den eigenen Assistenten des Mieters"
       },
       "link": {
         "title": "Der Link der mietenden Person",
@@ -1488,7 +1493,8 @@
         "assuredUntil": "Am besten abbuchen bis",
         "validUntil": "Endet",
         "replacing": "Vor dem Ende dieser Reservierung wurde eine neue bei der mietenden Person angefragt. Warten auf die Genehmigung."
-      }
+      },
+      "fromAssistant": "Vom Assistenten des Mieters gebucht"
     },
     "items": {
       "title": "Artikel",
@@ -2302,7 +2308,8 @@
       "key_mismatch": "Dieses Foto gehört nicht zu dieser Meldung.",
       "not_uploaded": "Das Foto ist nicht angekommen. Nehmen Sie es noch einmal auf.",
       "sealed": "Diese Meldung wurde gesendet, daher kann kein Foto hinzugefügt werden.",
-      "unknown_view": "Diese Ansicht gehört nicht zu diesem Artikel."
+      "unknown_view": "Diese Ansicht gehört nicht zu diesem Artikel.",
+      "not_connected": "Mit dieser Miete ist gerade kein Assistent verbunden."
     },
     "orderDescription": "{shop}: {items}, {days, plural, one {# Tag} other {# Tage}}",
     "holdPage": {
@@ -2469,6 +2476,55 @@
         "claim_opened": "In der Forderung",
         "resolved": "Erledigt",
         "withdrawn": "Zurückgezogen"
+      }
+    },
+    "assistant": {
+      "pageTitle": "Ihr Assistent",
+      "title": {
+        "connected": "Ein Assistent ist mit dieser Miete verbunden",
+        "disconnected": "Der Assistent wurde getrennt",
+        "booked": "Ein Assistent hat diese Buchung gemacht"
+      },
+      "name": "Er nennt sich <strong>{name}</strong>. Der Name ist seine eigene Angabe und nicht geprüft.",
+      "unnamed": "ein Assistent ohne Namen",
+      "lead": "Er kann diese Miete, ihre Kaution, ihr Zustandsprotokoll und jede Forderung lesen und eine Antwort für Sie entwerfen. Er kann weder zahlen noch eine Kaution freigeben oder eine Forderung beantworten: Das tun Sie selbst, bei PayPal oder über diesen Link.",
+      "link": "Sehen, was er getan hat, oder ihn trennen",
+      "back": "Zurück zur Miete",
+      "disconnectLead": "Sein Token funktioniert ab seinem nächsten Aufruf nicht mehr. Dieser Link funktioniert weiter wie bisher.",
+      "disconnect": "Assistenten trennen",
+      "disconnecting": "Wird getrennt…",
+      "disconnected": "Getrennt. Sein nächster Aufruf wird abgelehnt.",
+      "notConnected": "Mit dieser Miete ist gerade kein Assistent verbunden.",
+      "did": "Was er getan hat",
+      "nothing": "Noch nichts.",
+      "outcome": {
+        "refused": "Abgelehnt",
+        "human_confirmation_required": "Hat auf Sie gewartet"
+      },
+      "draft": {
+        "title": "Eine Antwort, die er für Sie entworfen hat",
+        "decision": {
+          "accept": "Forderung annehmen",
+          "contest": "Forderung bestreiten"
+        },
+        "note": "Das sind die Worte des Assistenten, sie entscheiden nichts. Zum Antworten öffnen Sie die Forderung über Ihren Link und bestätigen mit dem Code, den Hold Ihnen per E-Mail schickt."
+      },
+      "tools": {
+        "find_shops": "Hat Verleihe gesucht",
+        "get_shop": "Hat die Angaben des Verleihs gelesen",
+        "check_availability": "Hat geprüft, was frei war",
+        "get_damage_prices": "Hat die Schadenspreise gelesen",
+        "quote_rental": "Hat nach einem Preis gefragt",
+        "create_booking": "Hat diese Buchung gemacht",
+        "get_booking": "Hat geprüft, ob die Gebühr bezahlt war",
+        "get_rental": "Hat die Miete gelesen",
+        "get_hold": "Hat die Kaution gelesen",
+        "get_hold_approval_link": "Hat nach dem Link zur Freigabe der Kaution gefragt",
+        "get_condition_report": "Hat das Zustandsprotokoll gelesen",
+        "get_claim": "Hat die Forderung gelesen",
+        "draft_claim_reply": "Hat eine Antwort auf die Forderung entworfen",
+        "submit_claim_reply": "Wollte die Forderung beantworten",
+        "get_record": "Hat die Beweisakte gelesen"
       }
     }
   },
@@ -2822,5 +2878,37 @@
         "not_yet_valid": "Dieser Nachweis ist noch nicht gültig. Prüfen Sie die Uhr dieses Geräts."
       }
     }
+  },
+  "hostedAssistant": {
+    "label": "Vorführung",
+    "title": "Über einen Assistenten mieten",
+    "lead": "Fragen Sie nach einem E-Bike, einem Kajak oder einer Kamera. Der Assistent findet einen Verleih, liest dessen Schadenspreise, holt ein Angebot ein und bucht, mit denselben Werkzeugen wie der Assistent jedes Reisenden.",
+    "demonstration": "Dies ist eine Vorführung. Der Assistent verbindet sich wie jeder externe Assistent mit Holds MCP-Server, und jeder seiner Aufrufe wird geprüft und protokolliert. Jede Zahlung geben Sie selbst frei, bei PayPal.",
+    "chat": "Unterhaltung",
+    "empty": "Versuchen Sie: „Buche mir ein E-Bike für drei Tage.“",
+    "you": "Sie",
+    "assistant": "Assistent",
+    "simulated": "Simuliert: ein Skript, nicht Claude",
+    "used": "Hat {tool} benutzt",
+    "message": "Ihre Nachricht",
+    "placeholder": "Buche mir ein E-Bike für drei Tage",
+    "send": "Senden",
+    "sending": "Denkt nach…",
+    "approveTitle": "Die Mietgebühr freigeben",
+    "approveBody": "Die Buchung hält ihren Artikel fünfzehn Minuten. Geben Sie die Gebühr auf PayPals eigener Seite frei; vorher wird nichts belastet.",
+    "approve": "Gebühr bei PayPal freigeben",
+    "scan": "Scannen, um die Gebühr auf dem Telefon freizugeben",
+    "stopped": {
+      "ceiling": "Der Assistent hat an seiner Grenze für Aufrufe, Tokens oder Zeit pro Nachricht angehalten. Fragen Sie erneut, um fortzufahren.",
+      "refused": "Das Modell hat die Antwort abgelehnt. Es wurde nichts gebucht.",
+      "unavailable": "Der Assistent war nicht erreichbar. Es wurde nichts gebucht."
+    },
+    "results": {
+      "rate_limited": "Zu viele Nachrichten aus diesem Netz. Warten Sie einige Minuten und versuchen Sie es erneut.",
+      "invalid": "Diese Nachricht konnte nicht gesendet werden. Laden Sie die Seite neu und beginnen Sie von vorn."
+    },
+    "connectTitle": "Den eigenen Assistenten verbinden",
+    "connectBody": "Jeder MCP-Client kann Holds Server unter dieser Adresse nutzen, über Streamable HTTP, ohne Anmeldung:",
+    "connectNote": "Ihr Assistent kann Verleihe finden, Angebote einholen und buchen. Sobald die Gebühr bezahlt ist, erhält er ein Token nur für diese eine Miete, das Sie über Ihren Mietlink trennen können."
   }
 }

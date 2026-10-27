@@ -1,7 +1,7 @@
 import { routes, type RouteKey, type RoutePath } from '@/lib/routes'
 
 export type NavItem = {
-  key: Exclude<RouteKey, 'home' | 'demo' | 'signIn' | 'signUp' | 'verify'>
+  key: Exclude<RouteKey, 'home' | 'demo' | 'signIn' | 'signUp' | 'verify' | 'assistant'>
   href: RoutePath
 }
 

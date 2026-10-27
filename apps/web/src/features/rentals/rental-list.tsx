@@ -1,6 +1,6 @@
 import type { RentalSummary } from '@hold/db'
 import { money } from '@hold/domain'
-import { Globe } from 'lucide-react'
+import { Bot, Globe } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useId } from 'react'
 import { SampleTag } from '@/components/ui/sample-tag'
@@ -32,6 +32,11 @@ function RentalRow({ rental, clock }: { rental: RentalSummary; clock: ShopClock 
             <span className="inline-flex items-center gap-1 text-[0.8125rem] text-muted-foreground">
               <Globe aria-hidden="true" className="size-3.5" />
               {t('fromShopPage')}
+            </span>
+          ) : rental.bookedThrough === 'assistant' ? (
+            <span className="inline-flex items-center gap-1 text-[0.8125rem] text-muted-foreground">
+              <Bot aria-hidden="true" className="size-3.5" />
+              {t('fromAssistant')}
             </span>
           ) : null}
         </p>

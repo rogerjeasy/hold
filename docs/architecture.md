@@ -322,6 +322,7 @@ Migrations `0018`–`0020` add evidence publication metadata and `receipt_delive
 
 Migration `0023` (Extension 5) adds `incidents`, the capture session kind `incident`, the mark status `reported` with `marks.incident_id`, the finding class `reported`, and the claim line source `agreed_in_rental` with `claim_lines.incident_id`. Its hand-written block grants the services `SELECT, INSERT` and column-limited `UPDATE` on `incidents` (never the renter's words, the rental, the item, the session or the report time), requires a confirmed price to name its staff member and time, requires an agreed line to equal the confirmed entry with a positive amount, ties every `agreed_in_rental` line to an incident and no other line to one, and adds the trigger `hold_incident_guard`, which refuses any state move the incident machine does not list and any change to a sent time, a confirmed price, an agreed line or a theft account already given (only a missing police report number may be added, once).
 Migration `0024` adds Extension 2's tables (`rental_outcomes`, `trust_ladders`, `trust_rungs`, `renter_consents`), the trust columns above, and the functions through which a renter's record is read across shops (section 6.8).
+Migration `0026` (Extension 3) adds `quotes` and `agent_sessions` and the booking channel `assistant` (section 6.11). Its hand-written block grants the web app `SELECT, INSERT` on both, `UPDATE` only of a quote's `rental_id` and of a session's token, use, draft and revocation columns, and the worker `SELECT`; checks that a quote's amounts are not negative and its period runs forward, and that a session's token fingerprint, issue time and end date are set together; the triggers `hold_quote_guard` (a quote is booked from once) and `hold_agent_session_guard` (a token is issued once and never extended; a disconnected session stays disconnected and takes no new token or draft); and four security-definer functions read before any shop is chosen, granted to `hold_app` only: `hold_public_shops` (shops taking bookings online, by place and kind), `hold_quote_shop`, `hold_agent_booking` (a session by booking-secret fingerprint) and `hold_agent_session` (a session by token fingerprint).
 
 **Tables added by the extensions.** `mandates`, `proposals`, `exceptions`, `ops_runs`, `eval_runs`, `finding_outcomes`, `rental_outcomes`, `trust_ladders`, `trust_rungs`, `renter_consents`, `quotes`, `agent_sessions`, `negotiations`, `negotiation_moves` and `incidents`. Their contents are listed in `extensions.md` section 4.6.
 
@@ -343,13 +344,13 @@ The rules are plain code in `packages/domain` (`item-type.ts`, `item.ts`, `photo
 
 The rules are plain code in `packages/domain/src/booking.ts`. The tables are written by `booking-repository.ts`, `renter-repository.ts` and `fee-repository.ts` in `packages/db`.
 
-- **Two ways to book, one booking.** Staff book at the counter or on the phone (`/shop/rentals/new`), with an optional contact name and email. A renter books themselves on the shop's own page (`/s/{slug}`), with nobody signed in. Both choose a period on the shop's clock and a count of each item type, and both end at the renter's link, where the fee is paid. `rentals.booked_through` records which.
-- **The amounts come from the item types.** The fee is each item's day rate times the days, where each started 24 hours is a day and a rental is at least one. The hold is the sum of each item's hold. Both are stored on the rental, and each item's agreed day rate and hold on its `rental_items` row, so a later change to a type changes no booking. No form sends an amount.
+- **Three ways to book, one booking.** Staff book at the counter or on the phone (`/shop/rentals/new`), with an optional contact name and email. A renter books themselves on the shop's own page (`/s/{slug}`), with nobody signed in. Both choose a period on the shop's clock and a count of each item type, and both end at the renter's link, where the fee is paid. A renter's own assistant books from a quote through Hold's MCP server (section 6.11), and PayPal returns the person to their link after they approve the fee. `rentals.booked_through` records which (`staff`, `shop_page` or `assistant`).
+- **The amounts come from the item types.** `priceBooking` in `booking-repository.ts` is the one place a booking is priced, whether it is made at once or quoted first. The fee is each item's day rate times the days, where each started 24 hours is a day and a rental is at least one. The hold is the sum of each item's hold. Both are stored on the rental, and each item's agreed day rate and hold on its `rental_items` row, so a later change to a type changes no booking. No form sends an amount.
 - **Limits.** A rental lasts at most 28 days, so the hold placed at pickup outlives it, its return and a claim's reply. It may start up to 15 minutes in the past, for a renter at the counter, and up to a year ahead. Up to ten kinds of item, ten of each.
 - **Which items.** The booking takes specific items, the first free ones of each type by label. An item is free for a period unless it is in repair or retired, or a rental that still needs it overlaps the period. An unpaid booking keeps its items for 15 minutes (`PENDING_PAYMENT_MINUTES`). An item out, or back and being checked, is kept until now at least; an overdue one until it comes back. The candidate items are locked while the booking is written, so two bookings made at once cannot take the same item.
 - **The renter's link.** Each booking issues a link with the scopes `view` and `pay` (section 12.3). Staff can show a new link as a QR code at any time, or email it to the contact. Each showing makes a new link, since only fingerprints are kept.
 - **Paying the fee.** The renter's link page shows what they rent, the fee and the hold apart, the price list and wear policy they agree to, and the reply period. Paying creates an order with intent to capture in the shop's own PayPal account, for the stored fee, and sends the renter to PayPal. An order already awaiting approval is reused. PayPal sends the renter back to `/r/{token}/paid`, which changes nothing on arrival and confirms by a POST: the order is read back and must be approved and must be the one this rental started; then the execution is recorded and handed to the worker, which captures the order with its key and reads it back. Only that read-back books the rental (section 7.6). A renter who approves and never comes back is booked from PayPal's `CHECKOUT.ORDER.APPROVED` event (section 8.5).
-- **After the time to pay.** A booking past its 15 minutes no longer keeps its items, but its renter may still pay while nobody else has taken them. Staff can let an unpaid booking go (`abandoned`). A paid booking is not cancelled here, since that would need its fee refunded.
+- **After the time to pay.** A booking past its 15 minutes no longer keeps its items, but its renter may still pay while nobody else has taken them. Staff can let an unpaid booking go (`abandoned`). A booking an assistant made is let go by Hold itself once its 15 minutes are over and no capture of an approved fee has begun: when the assistant next asks about it, and whenever an assistant books at the same shop (section 6.11). A paid booking is not cancelled here, since that would need its fee refunded.
 - **Who the renter is.** The payer PayPal names on the capture, through `hold_renter_for_payer`. Until then a rental shows the contact staff typed, or "not paid yet".
 
 ### 6.6 The hold at pickup
@@ -413,6 +414,18 @@ Extension 1 (`extensions.md` section 6). The detectors, proposal states, mandate
 
 ---
 
+### 6.11 Renting through an assistant
+
+Extension 3 (`extensions.md` section 8). The rules are plain code in `packages/domain` (`assistant.ts`, and the rental binding in `agent-gateway.ts`). The tables are written by `assistant-repository.ts` in `packages/db`. The server is `packages/mcp`, served by `web` at `/mcp` (section 13.4).
+
+- **Quotes.** `quote_rental` prices a period and a count of each item type through `priceBooking`, checks enough items are free, and stores the price with the price list and wear policy it was priced on, for 15 minutes (`ASSISTANT_LIMITS.quoteMinutes`). Nothing is held by a quote.
+- **Bookings from a quote.** `create_booking` takes only a quote ID. The quote must be usable (`quoteState`: not used, not expired) and the shop's prices today must give the same fee, hold and price list, or the booking is refused (`prices_changed`). Each booking is made in one transaction that takes the shop's advisory lock (`pg_advisory_xact_lock` on the shop), lets go of the shop's lapsed assistant bookings, counts the unpaid ones (at most five, `mayBookUnpaid`), books through `createBooking` with a renter link, marks the quote used and stores the session with the booking secret's fingerprint and the client's declared name. The fee's PayPal order is then made outside the transaction through the same `startFeePayment` a renter's link uses, returning the person to their own link (`/r/{token}/paid`), whose token the assistant never sees. One caller may book three times in 15 minutes (`assistant-booking` in `rate_limits`, by network).
+- **Paying.** The person approves the fee in PayPal. The fee is captured from the return page, or from `CHECKOUT.ORDER.APPROVED` alone when the person never comes back (section 8.5), exactly as for any booking.
+- **Expiry.** `assistantBookingStatus` decides: a booking with PayPal's capture of the fee on record (a `fee_captured` line in the money log) is `paid`; one past its 15 minutes with no fee capture begun is `expired`, and the rental moves to `abandoned`; a booking whose approved fee is being captured is not cut short.
+- **The agent token.** `get_booking` with the booking secret returns the token once, on the first call after the fee is paid, and stores only its fingerprint, its scopes (`AGENT_SCOPES`: `rental`, `hold`, `condition`, `claim`, `record`, none of which moves money) and its end, two weeks after the rental ends (`agentTokenExpiry`). A later call reports it was issued earlier.
+- **Secrets.** The booking secret (`hbs_…`) and the agent token (`hat_…`) are random and signed like a renter link, each with a key of its own derived from the renter-link secret (`packages/mcp/src/secrets.ts`), so neither can pass for the other or for a renter link, and a changed one is refused before the database is asked.
+- **The renter is told.** The renter's link shows "An assistant made this booking", then "An assistant is connected to this rental" once its token is issued, with a link to `/r/{token}/assistant`: the name the client declared, marked as not verified, every call it made on the rental in plain words from the audit log, the reply it drafted, and a button that revokes the session (`revokeAssistant`). Its next call is refused.
+
 ## 7. The hold core
 
 This is the part of Hold that must never be wrong. It lives in `packages/domain` and is plain, deterministic code.
@@ -446,7 +459,7 @@ stateDiagram-v2
 ```
 
 - **pending_payment:** a booking exists and its fee is not yet paid. It keeps its item for fifteen minutes.
-- **abandoned:** the fee was never paid and the item was freed.
+- **abandoned:** the fee was never paid and the item was freed: staff let it go, or Hold did once an assistant's booking passed its fifteen minutes (section 6.11).
 
 **Hold**
 
@@ -1348,7 +1361,7 @@ Receipt links carry only `view`, are bound to one rental and select the immutabl
 
 ### 12.5 Assistants
 
-A renter's own AI assistant acts through an agent token: signed, bound to one rental, scoped, expiring, and revocable by the renter. It is issued only after PayPal confirms the fee was paid, and only to the caller that made the booking. Before that, an assistant has no identity and can only read public information, quote and book. No scope moves money. See `extensions.md` section 8.5.
+A renter's own AI assistant acts through an agent token: signed, bound to one rental, scoped, expiring, and revocable by the renter. It is issued only after PayPal's capture of the fee is on record, and only to the caller that presents the booking secret the booking returned. Before that, an assistant is a `public_agent`: it has no identity and can only read public information, quote and book. No scope moves money. The token is an argument of each rental tool, so any MCP client can use it without special setup. The gateway refuses a token on any rental but its own (`subjectRentalId` in `gatewayDecision`), and a changed, unknown, expired or revoked token gets the one answer `not_authorized`. The name a client declares when it connects travels in the session ID the server returns and is stored as the session's label, shown to the renter as not verified. Section 6.11 and `extensions.md` section 8.5.
 
 ---
 
@@ -1398,7 +1411,7 @@ Served by `web`. Each requires a valid signed link.
 | `/r/{token}/incident/{incident}` | One report: photographs while it is written, then the fixed message for its kind, the confirmed price and the one-time code to agree it, or the theft steps. Another rental's report answers as an unusable link. |
 | `/r/{token}/negotiation` | Set an advocate's limit, read the transcript, confirm the result |
 | `/r/{token}/trust` | The Clean Record: its counts, the deposits never taken, a fresh credential as a QR code, the consent question and deleting the record. Answering and deleting need a one-time code emailed to the payer (section 6.8). |
-| `/r/{token}/assistant` | What a connected assistant did, and a button to disconnect it |
+| `/r/{token}/assistant` | What the renter's own assistant did on the rental, in plain words from the audit log, the reply it drafted, its declared name marked as not verified, and a button to disconnect it. Any link to the rental may disconnect it, since that only takes access away. A rental no assistant booked answers as an unusable link. |
 
 Record build/download POST actions require the signed link's `view` scope and exact rental binding. Visits only read; download actions issue a private, exact-version S3 URL lasting at most 300 seconds. Unknown or malformed selected versions are refused without revealing another rental's metadata.
 
@@ -1419,6 +1432,21 @@ Served by `web` at `/mcp` over streamable HTTP. It lets a traveller's own AI ass
 
 No tool takes an amount, and none can capture a hold. Accepting or contesting a claim needs the person's confirmation or a mandate. The tools, the identity rules and the defenses are in `extensions.md` section 8.
 
+**As built.** `apps/web/src/app/mcp/route.ts` reads the body up to 64 KB and hands it to `handleMcpRequest` in `packages/mcp`, outside the language proxy. Each POST gets a fresh server over the SDK's web-standard streamable HTTP transport in stateless mode with JSON responses, so any instance answers any call; GET and DELETE are answered 405. The tools and their input and output schemas are in `packages/mcp/src/catalogue.ts`, listed with JSON Schemas generated from the same zod schemas that check every call; unknown fields are refused. Shop-written text comes back inside `{ "merchant_words": … }`.
+
+| Tool | Tier | Needs |
+|---|---|---|
+| `find_shops`, `get_shop`, `check_availability`, `get_damage_prices` | read | Nothing |
+| `quote_rental`, `create_booking` | draft | Nothing; a quote ID for a booking |
+| `get_booking` | read | The booking secret |
+| `get_rental`, `get_hold`, `get_hold_approval_link`, `get_condition_report`, `get_claim`, `get_record` | read | The agent token and its rental's ID |
+| `draft_claim_reply` | draft | The agent token |
+| `submit_claim_reply` | act under mandate | The agent token, and the person: with no mandate it returns `human_confirmation_required` and changes nothing |
+
+Every call takes one path (`callTool` in `dispatch.ts`): the actor is resolved (a `public_agent`, or the `renter_agent` a token names, acting for the payer), the rate is counted (60 calls a minute per network for public tools, per session for rental tools), `gatewayDecision` decides on shop, rental, actor, tier, mandate, rate and argument shape, the tool runs, and one audit line goes to the shop with the actor, tool (`assistant.{tool}`), subject (the token's own rental, or the shop), outcome, gateway reason, the client's name and the duration. A call that names no shop, such as `find_shops` or an unknown token, is written to the application log instead. No mandate kind lets an assistant answer a claim in this build. Not offered yet, with the reason in `NOT_OFFERED`: `request_extension` (Hold has no extension flow), `report_incident` (it needs photographs taken through the renter's link), `get_negotiation` and `submit_offer` (Extension 4).
+
+**The hosted assistant** (`/assistant`, `packages/mcp/src/hosted`) is a client of the same address: the page's server function connects the MCP SDK's client to this deployment's own `/mcp` and runs one turn of `runHostedTurn` with ceilings of eight tool calls, 30,000 tokens and 60 seconds a message. The model is Claude Opus 5.5 on Bedrock (`createBedrockAssistantModel`: strict tools, automatic tool choice, effort `medium`, no retries; a refusal or an outage is an ordinary outcome and nothing is booked), or in the test environment a scripted stand-in labelled as simulated. The approval link shown is taken from Hold's own tool result, never from the model's words. The page keeps the conversation and sends it back with each message, validated against a strict schema and capped; a network may send 20 messages in 15 minutes (`publicAction`).
+
 ### 13.5 Public pages
 
 | Route | Purpose |
@@ -1437,6 +1465,8 @@ No tool takes an amount, and none can capture a hold. Accepting or contesting a 
 | `/accuracy` | The comparison's measured accuracy, with counts |
 | `/verify` | Checks a Clean Record credential in the browser, with the published key. The credential comes after the `#`, so it never reaches a server. |
 | `/.well-known/jwks.json` | The public key that credentials are signed with, as a JSON Web Key Set. Reads nothing from the request. |
+| `/assistant` | A demonstration: chat with the hosted assistant, which rents through Hold's MCP server as any outside assistant would, and the `/mcp` address for connecting one's own. Labelled as a demonstration, and its stand-in as simulated. |
+| `/mcp` | Hold's MCP server for renters' assistants, over streamable HTTP with no sign-in (section 13.4). |
 
 The first nine routes are the public site. They take no sign-in, read no shop data and call no service. `/sign-in` and `/sign-up` post to a server function that checks the input and, until Cognito is connected, does nothing else (section 12.1).
 
@@ -1651,6 +1681,14 @@ The outbox relay carries evidence and receipt identities without tokens or conta
 | **A model-chosen price becomes binding** (security review 4) | The model only suggests an entry. A named staff member confirms the entry before the renter can agree; the database requires the confirmation's author and time, and the agreed entry to equal it. Tested in `incident.test.ts` and `incident-repository.test.ts`. |
 | **A theft account is rewritten after the fact** (security review 6) | Written once while the report waits for a person; afterwards only a missing police report number may be added, once. The `hold_incident_guard` trigger refuses any other change. Tested in `incident-repository.test.ts`. |
 | **Photographs are added to a report after it was sent** (security review 7) | Sending records `sent_at` and closes the incident session whether or not it holds photographs; `recordPhoto`, `addMark` and `confirmMarks` refuse it, and the trigger keeps `sent_at` fixed. Tested in `incident-repository.test.ts`. |
+| **An assistant books every item and pays for none** | An unpaid booking keeps its items 15 minutes, then is let go; a caller may book three times in 15 minutes; a shop holds at most five unpaid assistant bookings, counted under the shop's advisory lock so bookings made at once cannot both pass. Tested in `assistant-repository.test.ts` and `server.test.ts`. |
+| **An assistant reads or acts on someone else's rental** | The agent token names one rental and the gateway refuses it on any other; changed, unknown, expired, revoked and wrong-rental tokens get one answer. Tested in `agent-gateway.test.ts`, `server.test.ts` and `route.test.ts`. |
+| **An assistant names its own price** | No tool input has an amount, a price or a number but a count, and unknown fields are refused; a booking is made from a quote Hold priced, and refused if the shop's prices changed since. Tested in `catalogue.test.ts`, `server.test.ts` and `assistant-repository.test.ts`. |
+| **An assistant accepts a claim the person never saw, or starts its reply period** | `submit_claim_reply` without a mandate returns `human_confirmation_required` and changes nothing; the link it gives opens no rental, so no assistant ever holds a link that could acknowledge or answer a claim. Tested in `server.test.ts` and `route.test.ts`. |
+| **A booking secret or agent token is stolen or guessed** | Each is signed with its own derived key and stored only as a fingerprint; the token is issued once, only after PayPal's capture is on record, ends two weeks after the rental, carries no scope that moves money, and the renter can revoke it at once. No secret is written to the audit log. Tested in `secrets.test.ts`, `assistant-repository.test.ts`, `server.test.ts` and `route.test.ts`. |
+| **Every tool is called to see if any captures a hold** | No tool or port reaches a capture; a test calls every tool on a rental with a placed hold and finds no capture and no new line in the money log. Tested in `catalogue.test.ts` and `server.test.ts`. |
+| **Shop text steers a renter's assistant** | Shop-written text is returned only inside `merchant_words` fields; Hold's own fields state facts. The hosted assistant's instructions treat those fields as data. Tested in `catalogue.test.ts` and `server.test.ts`. |
+| **The hosted assistant runs up cost or shows a forged payment link** | Ceilings on tool calls, tokens and time per message, 20 messages per network in 15 minutes, a capped and validated conversation, and the approval link taken from Hold's tool result only. Tested in `runner.test.ts` and `hosted-flow.test.ts` (both packages). |
 | **An agreed line is raised, or charged from an unagreed report** | Staff may keep or lower an agreed line and never raise it; only an `agreed` incident yields an `agreed_in_rental` line; a check constraint ties those lines to incidents. Agreeing calls no PayPal and writes no execution. Tested in `incident-claim.test.ts`, `incident-repository.test.ts` and `claim-screen.test.tsx`. |
 
 ### 15.2 Data protection

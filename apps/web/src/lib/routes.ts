@@ -11,6 +11,8 @@ export const routes = {
   signUp: '/sign-up',
   // Anyone shown a renter's Clean Record checks it here (extensions.md section 7.7).
   verify: '/verify',
+  // A demonstration: an assistant that rents through Hold's MCP server (extensions.md section 8.10).
+  assistant: '/assistant',
 } as const
 
 export type RouteKey = keyof typeof routes
@@ -63,6 +65,8 @@ export const linkRoutes = {
   incident: (token: string, incidentId: string) => `/r/${token}/incident/${incidentId}`,
   // The renter's Clean Record, its credential and their consent.
   cleanRecord: (token: string) => `/r/${token}/trust`,
+  // What the renter's own assistant did on the rental, and disconnecting it.
+  assistant: (token: string) => `/r/${token}/assistant`,
   // A shop's own page for renters, named by its address: /s/{slug}.
   shopPage: '/s',
 } as const

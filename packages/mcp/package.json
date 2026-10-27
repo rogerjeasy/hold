@@ -2,5 +2,21 @@
   "name": "@hold/mcp",
   "version": "0.0.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/bedrock-sdk": "^0.34.4",
+    "@anthropic-ai/sdk": "^0.133.0",
+    "@hold/auth": "workspace:*",
+    "@hold/db": "workspace:*",
+    "@hold/domain": "workspace:*",
+    "@modelcontextprotocol/sdk": "1.32.1",
+    "drizzle-orm": "0.45.4",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.9"
+  }
 }

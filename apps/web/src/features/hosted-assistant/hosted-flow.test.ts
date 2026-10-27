@@ -1,0 +1,81 @@
+// @vitest-environment node
+import { auditLog, inShop, itemCatalog, registerOwner } from '@hold/db'
+import { beforeAll, describe, expect, it, vi } from 'vitest'
+
+process.env['HOLD_ENVIRONMENT'] = 'test'
+process.env['HOLD_COOKIE_KEY'] = Buffer.alloc(32, 9).toString('base64')
+
+const jar = new Map<string, string>()
+const forwarded = { value: '203.0.113.120' }
+vi.mock('next/headers', () => ({
+  cookies: () =>
+    Promise.resolve({
+      get: (name: string) => (jar.has(name) ? { name, value: jar.get(name) } : undefined),
+      set: (name: string, value: string) => jar.set(name, value),
+      delete: (name: string) => jar.delete(name),
+    }),
+  headers: () => Promise.resolve(new Headers({ 'x-forwarded-for': forwarded.value })),
+}))
+vi.mock('next/cache', () => ({ revalidatePath: () => undefined }))
+vi.mock('next-intl/server', () => ({ getTranslations: () => Promise.resolve((key: string) => key) }))
+
+const route = await import('@/app/mcp/route')
+const { askAssistant } = await import('./actions')
+const shop = await import('@/features/shop/actions')
+const items = await import('@/features/items/actions')
+const { getServices } = await import('@/server/services')
+const { form, signIn } = await import('@/test/shop-session')
+
+vi.setConfig({ testTimeout: 30_000 })
+
+// The hosted assistant reaches Hold only through the app's /mcp address, as any outside client would. Here the address
+// is answered by the route itself, in this process.
+const realFetch = globalThis.fetch
+vi.stubGlobal('fetch', (url: string | URL | Request, init?: RequestInit) => {
+  const address = url instanceof Request ? url.url : String(url)
+  return new URL(address).pathname === '/mcp' ? route.POST(new Request(address, init)) : realFetch(url, init)
+})
+
+const OWNER = 'owner@hosted.example'
+let shopId: string
+
+const ask = (conversation: unknown, text: string) => askAssistant(null, form({ conversation: JSON.stringify(conversation), text, locale: 'en' }))
+
+beforeAll(async () => {
+  const { database } = await getServices()
+  const subject = await signIn(jar, OWNER, 'passkey')
+  shopId = (await registerOwner(database, { subject, email: OWNER, name: 'Ana', language: 'en', shop: { name: 'Hosted Bikes', timeZone: 'UTC' } })).shopId
+  expect(await shop.publishPrices(null, form({ currency: 'EUR', threshold: '', wearPolicy: 'Scuffs are wear.', description: 'Scratch', category: 'damage', amount: '35', locale: 'en' }))).toMatchObject({ ok: true })
+  expect(await shop.connectPayPal(null, form({ clientId: 'sandbox-client-id', clientSecret: 'sandbox-client-secret', locale: 'en' }))).toMatchObject({ ok: true })
+  expect(await items.saveItemType(null, form({ itemTypeId: '', name: 'City e-bike', category: 'e_bike', value: '2400', hold: '300', dayRate: '40', viewLabel: 'Frame', viewOutline: 'whole_side', viewRequired: 'yes', locale: 'en' }))).toMatchObject({ ok: true })
+  const typeId = (await inShop(database, { role: 'hold_app', shopId }, itemCatalog)).types[0]?.id ?? ''
+  expect(await items.addItems(null, form({ itemTypeId: typeId, count: '2', size: '', serial: '', locale: 'en' }))).toMatchObject({ ok: true })
+  jar.clear()
+})
+
+describe('the hosted assistant’s page', () => {
+  it('books through Hold’s own MCP server, says it is simulated, and hands over PayPal’s link as a QR code', async () => {
+    const quoted = await ask([], 'Book me an e-bike for three days.')
+    if (!quoted.ok) throw new Error(JSON.stringify(quoted))
+    expect(quoted.value).toMatchObject({ simulated: true, stopped: 'done', approvalUrl: null })
+    expect(quoted.value.reply).toContain('€120.00')
+    const booked = await ask(quoted.value.conversation, 'Yes, book it.')
+    if (!booked.ok) throw new Error(JSON.stringify(booked))
+    expect(booked.value.approvalUrl).toMatch(/\/simulated-paypal\/FAKE-ORDER-/)
+    expect(booked.value.approvalQr).toMatch(/^<svg/)
+    // Each call went through the gateway into the shop's audit log, under the name the client declared.
+    const { database } = await getServices()
+    const lines = await inShop(database, { role: 'hold_app', shopId }, (transaction) => transaction.select().from(auditLog))
+    const calls = lines.filter((line) => line.action.startsWith('assistant.'))
+    expect(calls.map((line) => line.action)).toEqual(['assistant.check_availability', 'assistant.get_damage_prices', 'assistant.quote_rental', 'assistant.create_booking'])
+    expect(calls.every((line) => line.detail['client'] === 'Hold hosted assistant (demonstration)')).toBe(true)
+  })
+
+  it('refuses a conversation that is not one, and a network that asks too often', async () => {
+    forwarded.value = '198.51.100.200'
+    expect(await askAssistant(null, form({ conversation: '{"role":"system"}', text: 'Hi', locale: 'en' }))).toMatchObject({ ok: false, failure: 'invalid' })
+    let last: unknown
+    for (let index = 0; index < 20; index += 1) last = await askAssistant(null, form({ conversation: 'not json', text: 'Hi', locale: 'en' }))
+    expect(last).toEqual({ ok: false, failure: 'rate_limited' })
+  })
+})

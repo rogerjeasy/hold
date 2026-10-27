@@ -24,6 +24,7 @@ export const rentals = {
   booked: rental('a3', { state: 'booked', who: 'Lukas Weber', items: ['City e-bike 2', 'City e-bike 3'] }),
   out: rental('a4', { state: 'out', who: 'Sofia Marques' }),
   sample: rental('a5', { state: 'closed', who: 'Julia Novak', simulated: true }),
+  assistant: rental('a6', { state: 'booked', who: 'Mei Tanaka', bookedThrough: 'assistant' }),
 }
 
 export const detail = (overrides: Partial<RentalDetail> = {}): RentalDetail => ({

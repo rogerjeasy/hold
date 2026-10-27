@@ -183,6 +183,13 @@
       "when": 1793058130471,
       "tag": "0025_proposal_execution",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1793060452433,
+      "tag": "0026_assistants",
+      "breakpoints": true
     }
   ]
 }

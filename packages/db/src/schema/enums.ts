@@ -39,7 +39,9 @@ export const APPROVAL_METHODS = ['on_screen', 'mandate'] as const
 // authorize places a hold the renter approved; fee_capture takes the rental fee, before any hold.
 export const EXECUTION_ACTIONS = ['authorize', 'renew', 'release', 'capture', 'refund', 'invoice', 'fee_capture'] as const
 // Who made a booking: staff at the counter or on the phone, or the renter on the shop's page.
-export const BOOKING_CHANNELS = ['staff', 'shop_page'] as const
+// Who made a booking: staff, a renter on the shop's own page, or a renter's own assistant (extensions.md section 8).
+export const BOOKING_CHANNELS = ['staff', 'shop_page', 'assistant'] as const
+export type BookingChannel = (typeof BOOKING_CHANNELS)[number]
 export const EXECUTION_STATES = ['pending', 'submitted', 'confirmed', 'failed'] as const
 export const VERIFICATION_STATES = ['pending', 'verified', 'rejected', 'simulated'] as const
 export const PROCESSING_STATES = ['pending', 'applied', 'ignored', 'failed'] as const

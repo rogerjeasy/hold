@@ -93,6 +93,10 @@
     "verify": {
       "title": "Comprobar un historial de devoluciones",
       "description": "Comprueba el historial de alquileres devueltos en buen estado de un cliente, con la clave publicada por Hold."
+    },
+    "assistant": {
+      "title": "Alquilar con un asistente",
+      "description": "Habla con un asistente que alquila una bici eléctrica a través del servidor MCP de Hold, como lo haría el asistente de un viajero."
     }
   },
   "nav": {
@@ -1431,7 +1435,8 @@
         },
         "done": "Hecho",
         "toDo": "Aún no",
-        "lapsedNote": "El plazo de pago se agotó, así que los artículos ya no se guardan. El cliente aún puede pagar mientras nadie más los haya reservado."
+        "lapsedNote": "El plazo de pago se agotó, así que los artículos ya no se guardan. El cliente aún puede pagar mientras nadie más los haya reservado.",
+        "assistant": "Por el asistente del propio cliente"
       },
       "link": {
         "title": "El enlace del cliente",
@@ -1488,7 +1493,8 @@
         "assuredUntil": "Mejor cobrar antes del",
         "validUntil": "Termina",
         "replacing": "Se pidió una nueva retención a quien alquila antes de que termine esta. Esperando su aprobación."
-      }
+      },
+      "fromAssistant": "Reservado por el asistente del cliente"
     },
     "items": {
       "title": "Artículos",
@@ -2302,7 +2308,8 @@
       "key_mismatch": "Esa foto no pertenece a este informe.",
       "not_uploaded": "La foto no llegó. Tómala de nuevo.",
       "sealed": "Este informe ya se envió, así que no se pueden añadir fotos.",
-      "unknown_view": "Esa vista no es de este artículo."
+      "unknown_view": "Esa vista no es de este artículo.",
+      "not_connected": "Ahora no hay ningún asistente conectado a este alquiler."
     },
     "orderDescription": "{shop}: {items}, {days, plural, one {# día} other {# días}}",
     "holdPage": {
@@ -2469,6 +2476,55 @@
         "claim_opened": "En la reclamación",
         "resolved": "Resuelto",
         "withdrawn": "Retirado"
+      }
+    },
+    "assistant": {
+      "pageTitle": "Tu asistente",
+      "title": {
+        "connected": "Hay un asistente conectado a este alquiler",
+        "disconnected": "El asistente se desconectó",
+        "booked": "Un asistente hizo esta reserva"
+      },
+      "name": "Se presenta como <strong>{name}</strong>. Ese nombre es suyo y no está verificado.",
+      "unnamed": "un asistente que no dio nombre",
+      "lead": "Puede consultar este alquiler, su retención, su informe de estado y cualquier reclamación, y preparar una respuesta para ti. No puede pagar, aprobar una retención ni responder a una reclamación: eso lo haces tú, en PayPal o en este enlace.",
+      "link": "Ver qué hizo, o desconectarlo",
+      "back": "Volver al alquiler",
+      "disconnectLead": "Su token deja de funcionar en su próxima llamada. Este enlace sigue funcionando como antes.",
+      "disconnect": "Desconectar el asistente",
+      "disconnecting": "Desconectando…",
+      "disconnected": "Desconectado. Su próxima llamada será rechazada.",
+      "notConnected": "Ahora no hay ningún asistente conectado a este alquiler.",
+      "did": "Qué hizo",
+      "nothing": "Nada todavía.",
+      "outcome": {
+        "refused": "Rechazado",
+        "human_confirmation_required": "Te esperó"
+      },
+      "draft": {
+        "title": "Una respuesta que preparó para ti",
+        "decision": {
+          "accept": "Aceptar la reclamación",
+          "contest": "Impugnar la reclamación"
+        },
+        "note": "Son palabras del asistente y no deciden nada. Para responder, abre la reclamación desde tu enlace y confirma con el código que Hold te envía por correo."
+      },
+      "tools": {
+        "find_shops": "Buscó tiendas",
+        "get_shop": "Consultó los datos de la tienda",
+        "check_availability": "Comprobó qué estaba libre",
+        "get_damage_prices": "Consultó los precios de daños",
+        "quote_rental": "Pidió un precio",
+        "create_booking": "Hizo esta reserva",
+        "get_booking": "Comprobó si la tarifa estaba pagada",
+        "get_rental": "Consultó el alquiler",
+        "get_hold": "Consultó la retención",
+        "get_hold_approval_link": "Pidió el enlace para aprobar la retención",
+        "get_condition_report": "Consultó el informe de estado",
+        "get_claim": "Consultó la reclamación",
+        "draft_claim_reply": "Preparó una respuesta a la reclamación",
+        "submit_claim_reply": "Pidió responder a la reclamación",
+        "get_record": "Consultó el expediente de pruebas"
       }
     }
   },
@@ -2822,5 +2878,37 @@
         "not_yet_valid": "Esta credencial aún no es válida. Revisa el reloj de este dispositivo."
       }
     }
+  },
+  "hostedAssistant": {
+    "label": "Demostración",
+    "title": "Alquilar con un asistente",
+    "lead": "Pide una bici eléctrica, un kayak o una cámara. El asistente encuentra una tienda, lee sus precios de daños, obtiene un presupuesto y reserva, con las mismas herramientas que usaría el asistente de cualquier viajero.",
+    "demonstration": "Esto es una demostración. El asistente se conecta al servidor MCP de Hold como cualquier asistente externo, y cada llamada que hace se comprueba y se registra. Tú apruebas cada pago, en PayPal.",
+    "chat": "Conversación",
+    "empty": "Prueba: «Resérvame una bici eléctrica para tres días».",
+    "you": "Tú",
+    "assistant": "Asistente",
+    "simulated": "Simulado: un guion, no Claude",
+    "used": "Usó {tool}",
+    "message": "Tu mensaje",
+    "placeholder": "Resérvame una bici eléctrica para tres días",
+    "send": "Enviar",
+    "sending": "Pensando…",
+    "approveTitle": "Aprobar la tarifa del alquiler",
+    "approveBody": "La reserva guarda su artículo quince minutos. Aprueba la tarifa en la página de PayPal; no se cobra nada hasta entonces.",
+    "approve": "Aprobar la tarifa en PayPal",
+    "scan": "Escanea para aprobar la tarifa en tu teléfono",
+    "stopped": {
+      "ceiling": "El asistente se detuvo en su límite de llamadas, tokens o tiempo para un mensaje. Pregunta de nuevo para seguir.",
+      "refused": "El modelo se negó a responder. No se reservó nada.",
+      "unavailable": "No se pudo contactar con el asistente. No se reservó nada."
+    },
+    "results": {
+      "rate_limited": "Demasiados mensajes desde esta red. Espera unos minutos y vuelve a intentarlo.",
+      "invalid": "No se pudo enviar ese mensaje. Recarga la página y empieza de nuevo."
+    },
+    "connectTitle": "Conecta tu propio asistente",
+    "connectBody": "Cualquier cliente MCP puede usar el servidor de Hold en esta dirección, por HTTP con streaming, sin iniciar sesión:",
+    "connectNote": "Tu asistente puede buscar tiendas, pedir presupuestos y reservar. Una vez pagada la tarifa, recibe un token solo para ese alquiler, que puedes desconectar desde tu enlace de alquiler."
   }
 }

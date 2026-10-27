@@ -1,0 +1,15 @@
+export { HOLD_TERMS, LANGUAGES, NOT_OFFERED, TOOL_NAMES, TOOLS } from './catalogue.ts'
+export type { ToolDefinition, ToolInput, ToolName, ToolOutput } from './catalogue.ts'
+export { callTool } from './dispatch.ts'
+export type { ToolResult } from './dispatch.ts'
+export type { FeePayment, HoldApproval, McpPorts } from './ports.ts'
+export { issueSecret, readSecret } from './secrets.ts'
+export { clientNameOf, handleMcpRequest, holdServer, MAX_MCP_REQUEST_BYTES, SERVER_INFO, sessionIdFor } from './server.ts'
+
+// The hosted assistant: a client of this server for a public demonstration page (extensions.md section 8.10).
+export { createBedrockAssistantModel } from './hosted/bedrock-model.ts'
+export { conversationSchema, HOSTED_MODEL, HOSTED_PROMPT_VERSION } from './hosted/model.ts'
+export type { AssistantModel, Conversation } from './hosted/model.ts'
+export { HOSTED_LIMITS, runHostedTurn } from './hosted/runner.ts'
+export type { HostedTurn, ToolClient } from './hosted/runner.ts'
+export { createScriptedModel } from './hosted/scripted-model.ts'
