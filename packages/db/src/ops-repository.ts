@@ -8,6 +8,8 @@ import { mandateForUse } from './ops-settings-repository.ts'
 import { outsideShop } from './scope.ts'
 import type { Database, Transaction } from './scope.ts'
 
+export const OPS_EXECUTE_QUEUE = 'ops-execute'
+
 const DEFAULT_SETTINGS = { confirmCleanWithinHours: 4, invoiceUnpaidDays: 7, incidentWaitHours: 2 } as const
 
 // What the detectors read: the shop's own records, with what code read from PayPal beside them.
@@ -233,9 +235,26 @@ async function handOff(transaction: Transaction, proposal: Proposal, input: Deci
     await transaction.insert(outbox).values({ shopId: proposal.shopId, queue: 'upkeep', messageGroup: hold.id, payload: { kind: 'replace', holdId: hold.id, authorizationId: hold.authorizationId }, createdAt: now })
     return { ok: true, state: 'executed', executionId: null }
   }
-  // Invoices, messages and dispute responses have no executor yet. Refusing keeps the proposal pending and writes no
-  // outbox row that no queue would take.
+  // A message to the renter or an answer to PayPal on a dispute: the operations worker sends the approved draft.
+  if (proposal.kind === 'send_message' || proposal.kind === 'respond_to_dispute') {
+    if (proposal.draft === null || proposal.draft.trim() === '') return { ok: false, reason: 'draft_required' }
+    await transaction.insert(outbox).values({ shopId: proposal.shopId, queue: OPS_EXECUTE_QUEUE, messageGroup: proposal.rentalId ?? proposal.id, payload: { proposalId: proposal.id }, createdAt: now })
+    return { ok: true, state: 'executing', executionId: null }
+  }
+  // The spine invoices a balance itself once the charge is settled; refunds have no detector. Refusing keeps the
+  // proposal pending and writes nothing.
   return { ok: false, reason: 'not_offered' }
+}
+
+// An approved message or dispute answer still to be sent, for the operations worker.
+export async function proposalToCarryOut(transaction: Transaction, proposalId: string) {
+  const [proposal] = await transaction.select({ id: proposals.id, kind: proposals.kind, subjectKind: proposals.subjectKind, subjectId: proposals.subjectId, rentalId: proposals.rentalId, draft: proposals.draft })
+    .from(proposals).where(and(eq(proposals.id, proposalId), eq(proposals.state, 'executing'), isNull(proposals.executionId)))
+  return proposal
+}
+
+export async function finishProposal(transaction: Transaction, proposalId: string, state: 'executed' | 'failed', now: Date): Promise<void> {
+  await transaction.update(proposals).set({ state, updatedAt: now }).where(and(eq(proposals.id, proposalId), eq(proposals.state, 'executing')))
 }
 
 // Every live proposal that names one of these holds, for releasing several in one approval.

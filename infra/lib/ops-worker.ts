@@ -9,11 +9,12 @@ import type { WorkerProps } from './worker.ts'
 // The operations agent (extensions.md section 6): a nightly fan-out sends one message per shop to the ops-agent
 // queue, and its function runs the shop's detectors, reminders and investigation. Its role reads each shop's PayPal
 // credentials, to read PayPal and to lend the shop's token to PayPal's MCP server, and may call the model. It writes
-// no photograph, schedules nothing and sends to no money queue: an approved proposal is carried out by the web app's
-// own approval path.
+// no photograph, schedules nothing and sends to no money queue: an approved release or replacement is carried out by
+// the web app's own approval path, and its third function sends only an approved message or dispute answer.
 export function createOperationsWorker(stack: Stack, props: WorkerProps): void {
   const queue = props.queues.get('ops-agent')
-  if (queue === undefined) throw new Error('No ops-agent queue.')
+  const executeQueue = props.queues.get('ops-execute')
+  if (queue === undefined || executeQueue === undefined) throw new Error('No ops-agent or ops-execute queue.')
   const role = new iam.Role(stack, 'OperationsRole', { roleName: name('operations'), description: 'Hold operations agent: reads records and PayPal, calls the model, writes proposals; moves no money', assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com') })
   role.addToPolicy(new iam.PolicyStatement({ actions: ['rds-data:ExecuteStatement', 'rds-data:BatchExecuteStatement', 'rds-data:BeginTransaction', 'rds-data:CommitTransaction', 'rds-data:RollbackTransaction'], resources: [props.cluster.clusterArn] }))
   const secrets = `arn:aws:secretsmanager:${REGION}:${ACCOUNT}:secret:`
@@ -31,6 +32,8 @@ export function createOperationsWorker(stack: Stack, props: WorkerProps): void {
   }
   const agent = workerFunction(stack, 'OperationsWorker', name('worker', 'operations'), 'ops-agent-lambda.ts', role, environment, { memorySize: 1024 })
   agent.addEventSource(new SqsEventSource(queue, { batchSize: 1, reportBatchItemFailures: true }))
+  const execute = workerFunction(stack, 'OperationsExecuteWorker', name('worker', 'operations', 'execute'), 'ops-execute-lambda.ts', role, environment)
+  execute.addEventSource(new SqsEventSource(executeQueue, { batchSize: 1, reportBatchItemFailures: true }))
   const nightly = workerFunction(stack, 'OperationsNightlyWorker', name('worker', 'operations', 'nightly'), 'ops-nightly-lambda.ts', role, environment)
   nightly.grantInvoke(props.schedulerRole)
   new scheduler.CfnSchedule(stack, 'OperationsNightlySchedule', {

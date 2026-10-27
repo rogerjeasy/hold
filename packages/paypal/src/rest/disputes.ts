@@ -39,3 +39,12 @@ export function listOpenDisputes(client: PayPalClient): PayPalHolds['listOpenDis
     return ok(disputes)
   }
 }
+
+// Sends the shop's message on a dispute (Disputes v1 send-message). The JSON body is an assumption still to confirm in
+// a sandbox trial (tech-stack.md section 16).
+export function sendDisputeMessage(client: PayPalClient): PayPalHolds['sendDisputeMessage'] {
+  return async (input) => {
+    const sent = await client.send({ method: 'POST', path: `/v1/customer/disputes/${encodeURIComponent(input.disputeId)}/send-message`, body: { message: input.message }, idempotencyKey: input.idempotencyKey })
+    return sent.ok ? ok(undefined) : sent
+  }
+}

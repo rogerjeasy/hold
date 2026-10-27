@@ -428,6 +428,7 @@ Each of these should be tried against the real services before the build depends
 
 5. **Saved payment methods for returning renters.** In production PayPal must approve the merchant for this. Treat it as optional.
 6. **Dispute evidence in the sandbox.** Confirm that a test dispute can be opened and that evidence can be uploaded through the API.
+   **Still open.** The operations agent's approved dispute answer is sent with `POST /v1/customer/disputes/{id}/send-message` and a JSON body `{ "message": ... }`, with the proposal as `PayPal-Request-Id` (`sendDisputeMessage` in `packages/paypal/src/rest/disputes.ts`). Both the JSON body and the request-id deduplication are unconfirmed until a sandbox dispute is opened from the personal account and answered.
 7. **Camera behavior on phones.** Test resolution, focus and the installed web app on both iPhone and Android. Browsers differ.
 8. **Object Lock.** It must be switched on when the bucket is created. It cannot be added later.
 9. **Pay Later with a hold.** Pay Later may not be offered on an order that authorizes first. Treat it as optional.

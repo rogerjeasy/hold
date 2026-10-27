@@ -24,3 +24,12 @@ it('hands out the shop\'s access token for PayPal\'s own MCP server, and nothing
   const token = await client(server).accessToken()
   expect(token.ok).toBe(true)
 })
+
+it('sends the shop\'s message on a dispute once, with the idempotency key as PayPal-Request-Id', async () => {
+  const server = stubServer([TOKEN_REPLY, { status: 200, body: { links: [] } }])
+  const sent = await createRestPayPalHolds(client(server)).sendDisputeMessage({ disputeId: 'PP-D-1', message: 'The scratch is shown in the return photographs.', idempotencyKey: 'proposal-1' })
+  expect(sent).toEqual({ ok: true, value: undefined })
+  const [call] = server.apiCalls()
+  expect(call).toMatchObject({ method: 'POST', path: '/v1/customer/disputes/PP-D-1/send-message', body: { message: 'The scratch is shown in the return photographs.' } })
+  expect(call?.headers.get('PayPal-Request-Id')).toBe('proposal-1')
+})

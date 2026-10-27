@@ -2,7 +2,7 @@ import { detectExceptions } from '@hold/domain'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { auditLog, authorizations, captureSessions, executions, holds, incidents, itemTypes, moneyEvents, outbox, proposals, rentalItems, rentals, shopExceptions } from './schema/index.ts'
-import { auditAgentCall, beginOpsRun, completeOpsRun, decideProposal, exceptionFacts, holdsToReconcile, morningQueue, recordExceptions, rentalsForCaptures, shopSnapshot, writeProposal } from './ops-repository.ts'
+import { auditAgentCall, beginOpsRun, finishProposal, proposalToCarryOut, completeOpsRun, decideProposal, exceptionFacts, holdsToReconcile, morningQueue, recordExceptions, rentalsForCaptures, shopSnapshot, writeProposal } from './ops-repository.ts'
 import { grantStandingRule, revokeMandate } from './ops-settings-repository.ts'
 import { inShop } from './scope.ts'
 import type { Transaction } from './scope.ts'
@@ -149,14 +149,25 @@ describe('an approved proposal is carried out by the same path as a click', () =
     expect(await asWorker((transaction) => decideProposal(transaction, proposalId, null, { decision: 'approve', reason: '' }, now))).toEqual({ ok: false, reason: 'mandate' })
   })
 
-  it('refuses, and queues nothing, an approval of a kind no executor carries out yet', async () => {
+  it('hands an approved message with its draft to the operations worker, and refuses one with no draft', async () => {
     const rental = await shop.readyRental()
     const [hold] = await database.select().from(holds).where(eq(holds.rentalId, rental.rentalId))
-    const proposalId = await proposalFor('hold_at_risk', hold?.id ?? '', rental.rentalId, 'send_message')
-    const before = (await database.select().from(outbox)).length
+    const bare = await proposalFor('hold_at_risk', hold?.id ?? '', rental.rentalId, 'send_message')
+    expect(await shop.act((transaction) => decideProposal(transaction, bare, shop.scope.userId ?? '', { decision: 'approve', reason: '' }, now))).toEqual({ ok: false, reason: 'draft_required' })
+    await database.update(proposals).set({ draft: 'Please call the shop about your hold.' }).where(eq(proposals.id, bare))
+    expect(await shop.act((transaction) => decideProposal(transaction, bare, shop.scope.userId ?? '', { decision: 'approve', reason: '' }, now))).toMatchObject({ ok: true, state: 'executing' })
+    expect((await database.select().from(outbox).where(eq(outbox.queue, 'ops-execute'))).map((each) => each.payload)).toContainEqual({ proposalId: bare })
+    expect(await asWorker((transaction) => proposalToCarryOut(transaction, bare))).toMatchObject({ kind: 'send_message', draft: 'Please call the shop about your hold.', rentalId: rental.rentalId })
+    await asWorker((transaction) => finishProposal(transaction, bare, 'executed', now))
+    expect((await database.select().from(proposals).where(eq(proposals.id, bare)))[0]?.state).toBe('executed')
+    expect(await asWorker((transaction) => proposalToCarryOut(transaction, bare))).toBeUndefined()
+  })
+
+  it('still refuses an invoice proposal, which the spine invoices itself', async () => {
+    const rental = await shop.readyRental()
+    const [hold] = await database.select().from(holds).where(eq(holds.rentalId, rental.rentalId))
+    const proposalId = await proposalFor('hold_at_risk', hold?.id ?? '', rental.rentalId, 'send_invoice')
     expect(await shop.act((transaction) => decideProposal(transaction, proposalId, shop.scope.userId ?? '', { decision: 'approve', reason: '' }, now))).toEqual({ ok: false, reason: 'not_offered' })
-    expect(await database.select().from(outbox)).toHaveLength(before)
-    expect((await database.select().from(proposals).where(eq(proposals.id, proposalId)))[0]?.state).toBe('pending')
   })
 
   it('asks the renter for a replacement hold through the hold\'s upkeep', async () => {

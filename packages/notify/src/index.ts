@@ -9,3 +9,4 @@ export { holdExpiredEmail, holdOrderDescription, holdReplacementEmail } from './
 export { settlementReceiptEmail } from './settlement-email.ts'
 export { incidentAlertEmail } from './incident-email.ts'
 export { reminderEmail } from './reminder-email.ts'
+export { shopMessageEmail } from './shop-message-email.ts'

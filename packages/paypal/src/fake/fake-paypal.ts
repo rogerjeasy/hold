@@ -30,6 +30,8 @@ export type FakePayPal = PayPalHolds & {
   orderLinks(orderId: string): { readonly returnUrl: string; readonly cancelUrl: string; readonly amount: Money; readonly description: string } | undefined
   // Stands in for a renter opening a dispute with PayPal.
   openDispute(dispute: OpenDispute): void
+  // What the shop said on each dispute, in order.
+  readonly disputeMessages: { readonly disputeId: string; readonly message: string }[]
 }
 
 export type FakePayPalOptions = {
@@ -72,6 +74,7 @@ function failure(kind: PayPalFailureKind, description: string, issue?: string): 
 export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
   const orders = new Map<string, FakeOrder>()
   const disputes: OpenDispute[] = []
+  const disputeMessages: { disputeId: string; message: string }[] = []
   const authorizations = new Map<string, FakeAuthorization>()
   const repliesByKey = new Map<string, unknown>()
   let lastNumber = 0
@@ -149,6 +152,13 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
 
     listOpenDisputes() {
       return Promise.resolve(ok(disputes.filter((dispute) => dispute.open)))
+    },
+
+    disputeMessages,
+
+    sendDisputeMessage(input) {
+      once('dispute-message', input.idempotencyKey, () => { disputeMessages.push({ disputeId: input.disputeId, message: input.message }); return undefined })
+      return Promise.resolve(ok(undefined))
     },
 
     createHoldOrder(input) {

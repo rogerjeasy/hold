@@ -1,8 +1,8 @@
-import { findPayPalAccount, inShop } from '@hold/db'
+import { findPayPalAccount, inShop, renterContact, shopSettings } from '@hold/db'
 import { createDataApiDatabase } from '@hold/db/data-api'
-import { createLazyMailer, createSmtpMailer, loadSmtpSettings } from '@hold/notify'
+import { createLazyMailer, createSmtpMailer, loadSmtpSettings, shopMessageEmail } from '@hold/notify'
 import { createBedrockInvestigator, openPayPalReader, paypalTransport } from '@hold/ops'
-import type { OpsDependencies } from '@hold/ops'
+import type { CarryOutDependencies, OpsDependencies } from '@hold/ops'
 import { createRestPayPalHolds } from '@hold/paypal'
 import { createReminderSender } from './reminder-sender.ts'
 import { loadOperationsSettings } from './operations-settings.ts'
@@ -34,5 +34,26 @@ export function workerOperations(): OpsDependencies {
       }
     },
     remind: createReminderSender({ database, mailer }),
+  }
+}
+
+// What sending an approved message or dispute answer needs: the database, email, and the shop's own PayPal account.
+export function workerCarryOut(): CarryOutDependencies {
+  const settings = loadOperationsSettings(process.env)
+  const database = createDataApiDatabase({ region: settings.region, clusterArn: settings.database.clusterArn, secretArn: settings.database.secretArn, database: settings.database.name })
+  const mailer = createLazyMailer(async () => createSmtpMailer(await loadSmtpSettings(settings.smtpSecret, settings.region)))
+  return {
+    database,
+    now: () => new Date(),
+    async message(input) {
+      const { shop, renter } = await inShop(database, { role: 'hold_worker', shopId: input.shopId }, async (transaction) => ({ shop: await shopSettings(transaction, input.shopId), renter: await renterContact(transaction, input.rentalId) }))
+      if (shop === undefined || renter === undefined) return false
+      return mailer.send(shopMessageEmail(renter.email, renter.language, { shopName: shop.name, text: input.text }))
+    },
+    async answerDispute(shopId, input) {
+      const account = await inShop(database, { role: 'hold_worker', shopId }, (transaction) => findPayPalAccount(transaction, shopId, settings.paypalMode))
+      if (account === undefined) return false
+      return (await createRestPayPalHolds(shopPayPalClient(settings, account.credentialReference)).sendDisputeMessage(input)).ok
+    },
   }
 }

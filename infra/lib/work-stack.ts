@@ -37,6 +37,8 @@ export const QUEUES: readonly QueueSpec[] = [
   { name: 'messages', orderedPerRental: false, visibilityTimeout: Duration.minutes(6) },
   // One operations run per message, in order per shop (the shop is the message group).
   { name: 'ops-agent', orderedPerRental: true, visibilityTimeout: Duration.minutes(6) },
+  // What a person approved on the morning queue that the operations worker sends: a message or a dispute answer.
+  { name: 'ops-execute', orderedPerRental: true, visibilityTimeout: Duration.minutes(6) },
 ]
 
 // After this many failed attempts a message moves to its dead-letter queue, where the alarm sees it.

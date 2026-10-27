@@ -287,7 +287,7 @@ describe('the worker', () => {
 
   it('runs comparisons from their queue with a separate role that cannot send money work or read PayPal credentials', () => {
     expect(functionNamed('hold-worker-comparisons')?.Properties).toMatchObject({ Runtime: 'nodejs24.x', MemorySize: 1536 })
-    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 8)
+    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 9)
     const policies = Object.entries(work.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('ComparisonRole')).map(([, value]) => value)
     expect(policies.length).toBeGreaterThan(0)
     const policy = JSON.stringify(policies)
@@ -307,7 +307,7 @@ describe('the worker', () => {
   })
 
   it('takes PayPal events, executions and upkeep from their queues, and tries again only the messages that failed', () => {
-    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 8)
+    work.resourceCountIs('AWS::Lambda::EventSourceMapping', 9)
     work.hasResourceProperties('AWS::Lambda::EventSourceMapping', { FunctionResponseTypes: ['ReportBatchItemFailures'] })
   })
 
@@ -664,6 +664,7 @@ describe('delivery', () => {
   it('lets the outbox relay hand a manual operations run, which the web app writes, to the ops-agent queue', () => {
     const relay = resourcesOfType(work, 'AWS::Lambda::Function').find((each) => each.Properties?.['FunctionName'] === 'hold-worker-outbox-relay')
     expect(JSON.stringify(relay?.Properties?.['Environment'])).toContain('HOLD_OPS_AGENT_QUEUE_URL')
+    expect(JSON.stringify(relay?.Properties?.['Environment'])).toContain('HOLD_OPS_EXECUTE_QUEUE_URL')
     const sends = Object.entries(work.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('WorkerRole')).map(([, value]) => JSON.stringify(value)).join('')
     expect(sends).toMatch(/OpsAgent|opsagent|ops-agent/i)
   })
@@ -672,6 +673,7 @@ describe('delivery', () => {
     const operationsFunction = (functionName: string) => resourcesOfType(work, 'AWS::Lambda::Function').find((each) => each.Properties?.['FunctionName'] === functionName)
     expect(operationsFunction('hold-worker-operations')?.Properties).toMatchObject({ Runtime: 'nodejs24.x' })
     expect(operationsFunction('hold-worker-operations-nightly')?.Properties).toMatchObject({ Runtime: 'nodejs24.x' })
+    expect(operationsFunction('hold-worker-operations-execute')?.Properties).toMatchObject({ Runtime: 'nodejs24.x' })
     const policy = JSON.stringify(Object.entries(work.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('OperationsRole')).map(([, value]) => value))
     expect(policy).toContain('bedrock-mantle:CreateInference')
     expect(policy).toContain('paypal/shops')
