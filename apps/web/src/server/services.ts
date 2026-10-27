@@ -5,11 +5,14 @@ import { createCognitoIdentity, createFakeIdentity, readKeySecret } from '@hold/
 import type { Identity } from '@hold/auth'
 import { loadWebConfig } from '@hold/config'
 import type { CredentialKeySource, KeySource, WebConfig } from '@hold/config'
+import { OPS_AGENT_QUEUE } from '@hold/db'
 import type { Database } from '@hold/db'
 import { createDataApiDatabase } from '@hold/db/data-api'
 import { createMemoryDocumentStore, createS3DocumentStore, createMemoryEvidenceStore, createS3EvidenceStore, makeDisplayCopy, mediaMessageSchema } from '@hold/evidence'
 import type { DisplayJobDependencies, DocumentStore, EvidenceStore, MemoryEvidenceStore } from '@hold/evidence'
 import { noFaces } from '@hold/vision'
+import { opsAgentMessageSchema, runOperations } from '@hold/ops/run'
+import type { OpsDependencies } from '@hold/ops/run'
 import { createLazyMailer, createMemoryMailer, createSmtpMailer, loadSmtpSettings } from '@hold/notify'
 import type { Mailer } from '@hold/notify'
 import { createFakePayPal, createMemoryCredentialStore, createPayPalClient, createRestPayPalHolds, createSecretsManagerCredentialStore } from '@hold/paypal'
@@ -19,6 +22,7 @@ import type { Notice, QueueMessage, RequestDependencies, SettleDependencies } fr
 import { createKmsSigner, createLocalSigner, kmsCalls, renterKeyFor } from '@hold/trust'
 import type { CredentialSigner, RenterKey } from '@hold/trust'
 import { createRenterAsk } from './renter-ask'
+import { simulatedOperations } from './simulated-operations'
 import { simulatedRecords } from './simulated-records'
 
 // What a PayPal credential check found: the credentials work, PayPal refused them, or PayPal could not be reached.
@@ -70,7 +74,7 @@ function credentialSigner(source: CredentialKeySource, region: string): () => Pr
 }
 
 // The test environment has no worker: each message is handled at once, in this process, by the same code.
-function runAtOnce(settle: () => SettleDependencies, media: DisplayJobDependencies, records: ReturnType<typeof simulatedRecords>): (message: QueueMessage) => Promise<void> {
+function runAtOnce(settle: () => SettleDependencies, media: DisplayJobDependencies, records: ReturnType<typeof simulatedRecords>, operations: OpsDependencies): (message: QueueMessage) => Promise<void> {
   return async (message) => {
     if (message.queue === 'media') await makeDisplayCopy(media, mediaMessageSchema.parse(message.body))
     // This environment's model is explicitly simulated and never calls Bedrock. The same pipeline still rejects
@@ -79,6 +83,7 @@ function runAtOnce(settle: () => SettleDependencies, media: DisplayJobDependenci
     if (message.queue === 'executions') await runExecution(settle(), executionMessageSchema.parse(message.body))
     if (message.queue === 'paypal-events') await applyPayPalEvent(settle(), paypalEventMessageSchema.parse(message.body))
     if (message.queue === 'upkeep') await runUpkeep(settle(), upkeepMessageSchema.parse(message.body))
+    if (message.queue === OPS_AGENT_QUEUE) await runOperations(operations, opsAgentMessageSchema.parse(message.body))
     await records.handle(message.queue, message.body)
   }
 }
@@ -139,7 +144,7 @@ async function build(): Promise<Services> {
       role: 'hold_app',
       paypalFor,
       paypalMode: config.paypalMode,
-      send: runAtOnce(() => settle, { database, role: 'hold_app', evidence: simulatedEvidence, faces: noFaces }, records),
+      send: runAtOnce(() => settle, { database, role: 'hold_app', evidence: simulatedEvidence, faces: noFaces }, records, simulatedOperations(database, simulatedPayPal)),
       scheduler: createMemoryScheduler(),
       notifier: { tell: (notice) => Promise.resolve(void notices.push(notice)) },
       renterAsk: createRenterAsk(database),

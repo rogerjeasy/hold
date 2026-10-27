@@ -1,8 +1,8 @@
 import 'server-only'
 import { money, needsStrongSignIn } from '@hold/domain'
 import type { StaffRole } from '@hold/domain'
-import { findPerson, inShop, shopSettings, staffRoleOf } from '@hold/db'
-import type { Person, ShopSettings, Transaction } from '@hold/db'
+import { findPerson, inShop, shopSettings, staffRoleOf, takeRateToken } from '@hold/db'
+import type { Person, RateLimit, ShopSettings, Transaction } from '@hold/db'
 import { cache } from 'react'
 import { z } from 'zod'
 import { chosenShopId, readAccessToken, sessionFactor } from '@/features/auth/session-cookies'
@@ -67,7 +67,7 @@ export const shopAccess = cache(async (): Promise<ShopAccess> => {
   }
 })
 
-export type ShopActionFailure = 'signed_out' | 'no_shop' | 'role' | 'passkey_needed' | 'invalid'
+export type ShopActionFailure = 'signed_out' | 'no_shop' | 'role' | 'passkey_needed' | 'invalid' | 'rate_limited'
 
 export type ShopActionResult<Output> =
   | { readonly ok: true; readonly value: Output }
@@ -81,6 +81,8 @@ export type ShopActionSpec<Input> = {
   // Changes that need the person proven by a passkey, when their role asks for one.
   readonly needsPasskey: boolean
   readonly input: z.ZodType<Input>
+  // A limit on how often a shop may ask, for work that is costly to repeat, counted before the transaction opens.
+  readonly rateLimit?: RateLimit
 }
 
 // Work handed on once the change is committed, such as a message to the worker. Its outbox row is written with the
@@ -108,6 +110,7 @@ export function shopAction<Input, Output>(
     if (spec.needsPasskey && context.passkeyNeeded) return { ok: false, failure: 'passkey_needed' }
     const parsed = spec.input.safeParse(formObject(data))
     if (!parsed.success) return { ok: false, failure: 'invalid', fields: failedFields(parsed.error) }
+    if (spec.rateLimit !== undefined && !(await takeRateToken((await getServices()).database, spec.rateLimit, context.shop.id))) return { ok: false, failure: 'rate_limited' }
     const scope = { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId } as const
     const result = await actInScope(
       scope,

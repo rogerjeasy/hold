@@ -21,6 +21,7 @@
     "@hold/evidence": "workspace:*",
     "@hold/mcp": "workspace:*",
     "@hold/notify": "workspace:*",
+    "@hold/ops": "workspace:*",
     "@hold/paypal": "workspace:*",
     "@hold/settle": "workspace:*",
     "@hold/trust": "workspace:*",
