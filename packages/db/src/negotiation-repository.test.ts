@@ -1,6 +1,8 @@
 import { and, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { decideClaim } from './claim-decision-repository.ts'
+import { evidenceSnapshot } from './evidence-snapshot.ts'
+import { verifyTranscript } from './negotiation-fingerprint.ts'
 import { applyNegotiationMove, openAdvocate, stopRenterAdvocate } from './negotiation-repository.ts'
 import { confirmAgreement } from './negotiation-settlement.ts'
 import { negotiationRecords, negotiationTranscript } from './negotiation-view.ts'
@@ -176,6 +178,19 @@ describe('a negotiation between two advocates', () => {
     expect(await shop.act((transaction) => revokeShopSettlement(transaction, ownerId(), later(1)))).toEqual({ ok: true })
     expect((await shop.act((transaction) => transaction.select().from(claims).where(eq(claims.id, claim.claimId))))[0]?.state).toBe('escalated')
     await shop.act((transaction) => grantShopSettlement(transaction, ownerId(), shopLimits, 30, NOW))
+  })
+})
+
+describe('the transcript in the evidence pack (X4.8)', () => {
+  it('carries every move with its fingerprints, never either side’s limits, and its chain verifies', async () => {
+    const claim = await negotiating()
+    await move(claim.negotiationId, claim.renter, 'offer', offer(claim.lines, [35_00, 0]), later(1))
+    await move(claim.negotiationId, shopAgent(), 'accept', {}, later(2))
+    const snapshot = await shop.act((transaction) => evidenceSnapshot(transaction, claim.rentalId))
+    expect(snapshot?.negotiation).toMatchObject({ kind: 'negotiation', state: 'agreed', agreedCents: 35_00, moves: [{ sequence: 1, side: 'shop', totalCents: 70_00 }, { sequence: 2, side: 'renter', totalCents: 35_00, lines: [{ cents: 35_00, ground: null, evidence: [] }, { cents: 0, ground: 'ordinary_wear', evidence: ['wear-1'] }] }, { sequence: 3, kind: 'accept' }] })
+    const moves = snapshot?.negotiation?.moves.map((each) => ({ ...each, createdAt: new Date(each.createdAt) })) ?? []
+    expect(verifyTranscript(moves)).toEqual({ ok: true })
+    expect(JSON.stringify(snapshot?.negotiation)).not.toMatch(/highestTotal|lowestShare|largestClaim|finalTap|evidenceRequired|5000/)
   })
 })
 

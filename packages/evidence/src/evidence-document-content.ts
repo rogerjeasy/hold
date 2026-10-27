@@ -1,3 +1,4 @@
+import { verifyTranscript } from '@hold/db'
 import type { EvidenceSnapshot } from '@hold/db'
 import { formatMoney } from '@hold/domain'
 import type { EvidenceDocument } from './evidence-document-layout.ts'
@@ -85,6 +86,31 @@ export function renderDecisions(context: EvidenceDocument, snapshot: EvidenceSna
     context.line('comment', reply.comment)
     context.line('attached', reply.addedPhotoIds.join(', '))
   }
+}
+
+// The advocates' transcript (extensions.md section 9.7): every move with its line amounts, grounds and the records they
+// cite, and whether the chain of fingerprints still verifies. Neither side's limits are in the record to show.
+export function renderTranscript(context: EvidenceDocument, snapshot: EvidenceSnapshot) {
+  const { negotiation } = snapshot
+  if (negotiation === null) return
+  const amount = (cents: number) => formatMoney({ cents, currency: snapshot.rental.currency }, snapshot.rental.language)
+  context.heading(context.label('transcript'))
+  context.line('negotiation', `${negotiation.kind} / ${negotiation.state} (${negotiation.id})`)
+  if (negotiation.simulated) context.paragraph(context.label('simulated'))
+  if (negotiation.agreedCents !== null) context.line('agreed', amount(negotiation.agreedCents))
+  if (negotiation.endedReason !== null) context.line('ended', negotiation.endedReason)
+  for (const move of negotiation.moves) {
+    context.room(80)
+    context.paragraph(`${context.label('move')} ${String(move.sequence)}: ${move.side} / ${move.kind}${move.totalCents === null ? '' : ` / ${amount(move.totalCents)}`}${move.passReason === null ? '' : ` / ${move.passReason}`} / ${move.createdAt}`)
+    for (const line of move.lines) context.paragraph(`${line.lineId}: ${amount(line.cents)}${line.ground === null ? '' : ` / ${line.ground}`}${line.evidence.length === 0 ? '' : ` / ${line.evidence.join(', ')}`}`)
+    context.line('actor', move.actor)
+    if (move.model !== null) context.line('model', move.model)
+    if (move.promptVersion !== null) context.line('prompt', move.promptVersion)
+    context.line('moveFingerprint', move.fingerprint)
+    context.line('previousMove', move.previousFingerprint)
+  }
+  const chain = verifyTranscript(negotiation.moves.map((move) => ({ ...move, createdAt: new Date(move.createdAt) })))
+  context.paragraph(chain.ok ? context.label('chainVerified') : `${context.label('chainBroken')} ${String(chain.sequence)}`)
 }
 
 export function renderPayments(context: EvidenceDocument, snapshot: EvidenceSnapshot) {
