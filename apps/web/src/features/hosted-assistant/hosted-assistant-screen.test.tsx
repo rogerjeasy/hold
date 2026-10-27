@@ -35,12 +35,14 @@ describe('the hosted assistant’s page', () => {
     renderWithIntl(<HostedAssistantScreen mcpUrl="https://hold.example/mcp" />)
     await userEvent.type(screen.getByLabelText('Your message'), 'Book me an e-bike.')
     await userEvent.click(screen.getByRole('button', { name: 'Send' }))
+    // The reply comes from the conversation, set inside the action; the label and the link come from the action's
+    // result, which can render one commit later. Wait for both.
     await waitFor(() => {
       expect(screen.getByText('Booked. Approve the fee of €120.00 in PayPal.')).toBeInTheDocument()
+      expect(screen.getByText(/Simulated/)).toBeInTheDocument()
     })
     expect(asked.mock.calls[0]?.[1].get('conversation')).toBe('[]')
     expect(screen.getByText(/Used create_booking/)).toBeInTheDocument()
-    expect(screen.getByText(/Simulated/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Approve the fee in PayPal' })).toHaveAttribute('href', 'https://www.sandbox.paypal.com/checkoutnow?token=ORDER-1')
     expect(screen.getByRole('img', { name: /Scan to approve/ })).toBeInTheDocument()
   })
