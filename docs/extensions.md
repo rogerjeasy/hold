@@ -484,6 +484,8 @@ PayPal's write tools, such as `create_invoice`, `create_refund` and `accept_disp
 - **X1.9** A rejection with a reason produces a drafted rule. Once confirmed, the next run does not make that proposal.
 - **X1.10** Amounts on the queue screen equal the database values for the records they name.
 
+**Progress, 27 October 2026, the owner's screens.** X1.5, X1.9 and X1.10 are met in tests against the test environment's simulated PayPal. X1.5: `operations-flow.test.ts` approves a replacement whose hold was released meanwhile; it is refused and kept as superseded, and shown under "Decided in the last day". X1.9: `operations-flow.test.ts` rejects with a reason, confirms the drafted rule, and the next run makes no proposal for a second hold near its end, until the rule is discarded; `queue.spec.ts` does the same through the page with two disputed payments. X1.10: the queue page's entries carry the hold's reserved amount as the database holds it (`operations-flow.test.ts`), and the screen shows it through the shared money formatter (`queue-screen.test.tsx`, `queue.spec.ts`).
+
 ### 6.12 In the video
 
 Fifteen seconds. Tomás opens the morning queue, reads six lines, approves five and rejects one with a reason.

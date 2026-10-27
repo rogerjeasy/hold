@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { confirmedRules, decideRule, draftRule, grantStandingRule, liveStandingRule, recordReminder, remindersSentOn, revokeMandate } from './ops-settings-repository.ts'
+import { confirmedRules, confirmRule, decideRule, draftRule, grantStandingRule, liveStandingRule, recordReminder, remindersSentOn, revokeMandate, rulesForOwner } from './ops-settings-repository.ts'
 import { inShop } from './scope.ts'
 import type { Transaction } from './scope.ts'
 import { createTestDatabase } from './testing/test-database.ts'
@@ -28,6 +28,26 @@ describe('the rules the owner keeps', () => {
     const drafted = await asWorker((transaction) => draftRule(transaction, { kind: 'never', proposalKind: 'send_message' }, null, now))
     await shop.act((transaction) => decideRule(transaction, drafted, shop.scope.userId ?? '', 'discard', now))
     expect(await asWorker((transaction) => confirmedRules(transaction))).not.toContainEqual({ kind: 'never', proposalKind: 'send_message' })
+  })
+
+  it('lets the owner discard a rule already confirmed, which then leaves the agent\'s memory and the list', async () => {
+    const drafted = await asWorker((transaction) => draftRule(transaction, { kind: 'never', proposalKind: 'note' }, null, now))
+    expect(await shop.act((transaction) => decideRule(transaction, drafted, shop.scope.userId ?? '', 'confirm', now))).toBe(true)
+    expect(await shop.act((transaction) => decideRule(transaction, drafted, shop.scope.userId ?? '', 'confirm', now))).toBe(false)
+    expect(await shop.act((transaction) => decideRule(transaction, drafted, shop.scope.userId ?? '', 'discard', now))).toBe(true)
+    expect(await asWorker((transaction) => confirmedRules(transaction))).not.toContainEqual({ kind: 'never', proposalKind: 'note' })
+    expect((await shop.act((transaction) => rulesForOwner(transaction))).map((rule) => rule.id)).not.toContain(drafted)
+    expect(await shop.act((transaction) => decideRule(transaction, drafted, shop.scope.userId ?? '', 'discard', now))).toBe(false)
+  })
+
+  it('confirms a drafted rule in the shape the owner chose, for the same kind only, and lists where it came from', async () => {
+    const drafted = await asWorker((transaction) => draftRule(transaction, { kind: 'never', proposalKind: 'request_replacement_hold' }, null, now))
+    expect(await shop.act((transaction) => confirmRule(transaction, drafted, shop.scope.userId ?? '', { kind: 'below_amount', proposalKind: 'release_hold', cents: 5000 }, now))).toBe(false)
+    expect(await shop.act((transaction) => confirmRule(transaction, drafted, shop.scope.userId ?? '', { kind: 'below_amount', proposalKind: 'request_replacement_hold', cents: 5000 }, now))).toBe(true)
+    expect(await asWorker((transaction) => confirmedRules(transaction))).toContainEqual({ kind: 'below_amount', proposalKind: 'request_replacement_hold', cents: 5000 })
+    expect(await asWorker((transaction) => confirmedRules(transaction))).not.toContainEqual({ kind: 'never', proposalKind: 'request_replacement_hold' })
+    expect(await shop.act((transaction) => confirmRule(transaction, drafted, shop.scope.userId ?? '', { kind: 'never', proposalKind: 'request_replacement_hold' }, now))).toBe(false)
+    expect(await other.act((transaction) => rulesForOwner(transaction))).toEqual([])
   })
 })
 

@@ -49,6 +49,16 @@ describe('the shop shell', () => {
     expect(within(menu).getByRole('link', { name: 'Incidents' })).toHaveAttribute('href', '/shop/incidents')
   })
 
+  it('lists the morning queue right after the day', () => {
+    navigation.pathname = '/shop'
+    shell()
+    const menu = screen.getAllByRole('navigation', { name: 'Shop pages' })[0]
+    if (menu === undefined) throw new Error('No shop menu.')
+    const links = within(menu).getAllByRole('link').map((link) => link.textContent)
+    expect(links.indexOf('Morning queue')).toBe(links.indexOf('Today') + 1)
+    expect(within(menu).getByRole('link', { name: 'Morning queue' })).toHaveAttribute('href', '/shop/queue')
+  })
+
   it('names the shop, the person’s role in it, and offers the person’s other shops', async () => {
     shell()
     const switcher = screen.getAllByRole('button', { name: /Switch shop, now Ribeira Bikes/ })[0]

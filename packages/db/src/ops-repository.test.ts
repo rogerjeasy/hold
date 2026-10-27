@@ -2,8 +2,9 @@ import { detectExceptions } from '@hold/domain'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { auditLog, authorizations, captureSessions, executions, holds, incidents, itemTypes, moneyEvents, outbox, proposals, rentalItems, rentals, shopExceptions } from './schema/index.ts'
-import { auditAgentCall, beginOpsRun, finishProposal, proposalToCarryOut, completeOpsRun, decideProposal, exceptionFacts, holdsToReconcile, morningQueue, recordExceptions, rentalsForCaptures, shopSnapshot, writeProposal } from './ops-repository.ts'
+import { auditAgentCall, beginOpsRun, finishProposal, proposalToCarryOut, completeOpsRun, decideProposal, exceptionFacts, holdsToReconcile, morningQueue, proposalAmount, queueOperationsCheck, recentDecisions, recordExceptions, rentalsForCaptures, shopSnapshot, writeProposal } from './ops-repository.ts'
 import { grantStandingRule, revokeMandate } from './ops-settings-repository.ts'
+import { outboxWrittenAt } from './paypal-event-repository.ts'
 import { inShop } from './scope.ts'
 import type { Transaction } from './scope.ts'
 import { createTestDatabase } from './testing/test-database.ts'
@@ -177,6 +178,49 @@ describe('an approved proposal is carried out by the same path as a click', () =
     const [hold] = await database.select().from(holds).where(eq(holds.id, holdId))
     const sent = await database.select().from(outbox).where(eq(outbox.queue, 'upkeep'))
     expect(sent.map((each) => each.payload)).toContainEqual({ kind: 'replace', holdId, authorizationId: hold?.currentAuthorizationId })
+  })
+})
+
+describe('what the owner\'s screen reads and asks for', () => {
+  it('carries the marks for the screen on each queue entry', async () => {
+    const { rentalId, holdId } = await holdEnding()
+    const run = await asWorker((transaction) => beginOpsRun(transaction, 'manual', now))
+    const [recorded] = await asWorker((transaction) => recordExceptions(transaction, run, [{ kind: 'hold_ending', subjectKind: 'hold', subjectId: holdId, rentalId, allowed: ['request_replacement_hold'], reminder: null, deadline: null, moneyCents: 30000, fingerprint: `hold_ending:${holdId}:marks` }], now))
+    const payload = { fixedReason: 'hold_ending', investigated: 'no', paypalChecked: 'no' }
+    const written = await asWorker((transaction) => writeProposal(transaction, { exceptionId: recorded?.id ?? '', kind: 'request_replacement_hold', reason: 'The hold ends within three days and the rental is still open.', references: [], draft: null, raisedByAgent: false, runId: run, model: null, promptVersion: null, payload }, now))
+    const entry = (await shop.act((transaction) => morningQueue(transaction, now))).find((each) => written.written && each.id === written.id)
+    expect(entry?.payload).toEqual(payload)
+  })
+
+  it('reads a decided proposal\'s amount from the records it names, for the rule drafted from it, and nothing across shops', async () => {
+    const { rentalId, holdId } = await holdEnding()
+    const proposalId = await proposalFor('hold_ending', holdId, rentalId, 'request_replacement_hold')
+    await shop.act((transaction) => decideProposal(transaction, proposalId, shop.scope.userId ?? '', { decision: 'reject', reason: 'This renter always returns early.' }, now))
+    expect(await shop.act((transaction) => proposalAmount(transaction, proposalId))).toEqual({ amountCents: 30000, currency: 'EUR' })
+    expect(await other.act((transaction) => proposalAmount(transaction, proposalId))).toEqual({ amountCents: null, currency: null })
+  })
+
+  it('lists what was decided in the last day and what was put off, each with its outcome', async () => {
+    const { rentalId, holdId } = await holdEnding()
+    const rejected = await proposalFor('hold_ending', holdId, rentalId, 'request_replacement_hold')
+    await shop.act((transaction) => decideProposal(transaction, rejected, shop.scope.userId ?? '', { decision: 'reject', reason: 'Not this one.' }, now))
+    const later = await holdEnding()
+    const postponed = await proposalFor('hold_ending', later.holdId, later.rentalId, 'request_replacement_hold')
+    await shop.act((transaction) => decideProposal(transaction, postponed, shop.scope.userId ?? '', { decision: 'postpone', reason: '' }, now))
+    const recent = await shop.act((transaction) => recentDecisions(transaction, now))
+    expect(recent).toContainEqual(expect.objectContaining({ id: rejected, kind: 'request_replacement_hold', state: 'rejected', decisionReason: 'Not this one.' }))
+    expect(recent).toContainEqual(expect.objectContaining({ id: postponed, state: 'pending', postponedUntil: new Date(now.getTime() + 86_400_000) }))
+    expect(await shop.act((transaction) => recentDecisions(transaction, new Date(now.getTime() + 3 * 86_400_000)))).toEqual([])
+    expect(await other.act((transaction) => recentDecisions(transaction, now))).toEqual([])
+  })
+
+  it('asks for a manual run through the outbox, ordered per shop', async () => {
+    const outboxId = await shop.act((transaction) => queueOperationsCheck(transaction, now))
+    const [row] = await database.select().from(outbox).where(eq(outbox.id, outboxId))
+    expect(row).toMatchObject({ shopId: shop.scope.shopId, queue: 'ops-agent', messageGroup: shop.scope.shopId, payload: { trigger: 'manual' } })
+    expect(await shop.act((transaction) => outboxWrittenAt(transaction, now))).toContainEqual({ id: outboxId, shopId: shop.scope.shopId, queue: 'ops-agent', messageGroup: shop.scope.shopId, payload: { trigger: 'manual' } })
+    expect(await other.act((transaction) => outboxWrittenAt(transaction, now))).toEqual([])
+    expect(await shop.act((transaction) => outboxWrittenAt(transaction, new Date(now.getTime() + 1)))).toEqual([])
   })
 })
 

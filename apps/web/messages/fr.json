@@ -1218,7 +1218,8 @@
       "scorecard": "Fiabilité",
       "incidents": "Incidents",
       "trust": "Échelle de confiance",
-      "settlement": "Représentant de règlement"
+      "settlement": "Représentant de règlement",
+      "queue": "File du matin"
     },
     "setup": {
       "title": "Préparez votre boutique",
@@ -1287,7 +1288,8 @@
       "paypal_unavailable": "PayPal est injoignable. Rien n'a été conservé. Réessayez dans un instant.",
       "no_price_list": "Publiez d’abord une grille tarifaire. Les réclamations d’exemple utilisent ses prix.",
       "has_rentals": "Cette boutique a déjà des locations, aucun exemple n’a donc été ajouté.",
-      "notifications_failed": "PayPal n'a pas accepté l'abonnement. Vérifiez les identifiants de l'app, puis réessayez."
+      "notifications_failed": "PayPal n'a pas accepté l'abonnement. Vérifiez les identifiants de l'app, puis réessayez.",
+      "rate_limited": "Demandé trop souvent. Attendez quelques minutes et réessayez."
     },
     "security": {
       "title": "Sécurité",
@@ -2553,7 +2555,8 @@
     "for": "Pour",
     "approve": "Approuver",
     "cancel": "Annuler et revenir",
-    "unknown": "Cette commande est inconnue."
+    "unknown": "Cette commande est inconnue.",
+    "approveThenDispute": "Approuver, puis contester ce paiement"
   },
   "claim": {
     "title": "Réclamation et règlement",
@@ -3033,6 +3036,166 @@
       "code_recently_sent": "Un code a été envoyé il y a moins d'une minute. Consultez vos courriels.",
       "email_unavailable": "Le courriel n'a pas pu être envoyé. Réessayez dans un instant.",
       "link_invalid": "Ce lien ne permet pas cette action."
+    }
+  },
+  "operations": {
+    "title": "File du matin",
+    "lead": "Ce que l’agent d’exploitation a trouvé, vérifié auprès de PayPal quand il le pouvait. Rien ne se fait sans l’accord d’une personne, et rien ici n’est jamais un débit.",
+    "briefNone": "Aucune décision en attente.",
+    "brief": "{decisions, plural, one {# décision attend} other {# décisions attendent}}, et {expiring, plural, =0 {aucune n’expire aujourd’hui} one {# expire aujourd’hui} other {# expirent aujourd’hui}}.",
+    "checkNow": "Vérifier maintenant",
+    "checking": "Vérification…",
+    "checked": "Vérification lancée. Les nouvelles entrées apparaissent sur cette page quand elle se termine.",
+    "checkNote": "La même vérification que celle de la nuit, lancée maintenant.",
+    "passkeyBody": "Approuver ce qui libère ou demande de l’argent exige votre clé d’accès. Refuser et reporter, non.",
+    "approveNeedsPasskey": "Confirmez avec votre clé d’accès ci-dessus pour approuver ceci.",
+    "count": "{count, plural, one {# entrée} other {# entrées}}",
+    "kinds": {
+      "release_hold": {
+        "group": "Libérations",
+        "action": "Libérer l’empreinte au locataire",
+        "rule": "de libérer une empreinte"
+      },
+      "request_replacement_hold": {
+        "group": "Nouvelles empreintes",
+        "action": "Demander une nouvelle empreinte au locataire",
+        "rule": "de demander une nouvelle empreinte"
+      },
+      "send_invoice": {
+        "group": "Factures",
+        "action": "Envoyer au locataire une facture pour le solde",
+        "rule": "d’envoyer une facture"
+      },
+      "refund_part": {
+        "group": "Remboursements",
+        "action": "Rembourser une partie du débit",
+        "rule": "de rembourser une partie d’un débit"
+      },
+      "respond_to_dispute": {
+        "group": "Litiges PayPal",
+        "action": "Envoyer cette réponse à PayPal sur le litige",
+        "rule": "de répondre à un litige"
+      },
+      "send_message": {
+        "group": "Messages",
+        "action": "Envoyer ce message au locataire",
+        "rule": "d’envoyer un message"
+      },
+      "note": {
+        "group": "Notes",
+        "action": "Le noter pour la boutique. Rien n’est envoyé.",
+        "rule": "de notes"
+      }
+    },
+    "amount": "Montant dans les registres",
+    "deadline": "À décider avant {when}",
+    "why": "Pourquoi",
+    "references": "Références PayPal",
+    "noReferences": "Aucune",
+    "draft": "Brouillon",
+    "marks": {
+      "raisedByAgent": "Observation de l’agent",
+      "notInvestigated": "Non examiné",
+      "paypalNotChecked": "PayPal n’a pas pu être vérifié",
+      "draftDropped": "Brouillon retiré : ses montants ne correspondaient pas aux registres"
+    },
+    "openRental": "Ouvrir la location",
+    "approve": "Approuver",
+    "approved": "Approuvé.",
+    "reject": "Refuser avec un motif",
+    "rejectReason": "Pourquoi pas ?",
+    "rejectSubmit": "Refuser",
+    "rejected": "Refusé. Une règle rédigée à partir de ce refus attend plus bas.",
+    "postpone": "Reporter à demain",
+    "postponed": "Reporté à demain.",
+    "chooseRelease": "Choisir pour approuver ensemble",
+    "approveTogether": "Approuver les libérations choisies",
+    "approvedTogether": "Approuvé.",
+    "empty": "Aucune décision en attente. Appuyez sur Vérifier maintenant, ou attendez la vérification de cette nuit.",
+    "readOnly": "Les propriétaires et les responsables décident. Vous pouvez lire la file.",
+    "fixedReasons": {
+      "clean_return_unconfirmed": "La comparaison était sans dommage et personne n’a confirmé le retour.",
+      "hold_ending": "L’empreinte prend fin dans moins de trois jours et la location est toujours ouverte.",
+      "hold_at_risk": "L’empreinte n’a pas pu être renouvelée et le débit n’a pas abouti.",
+      "return_overdue": "La location a dépassé sa fin.",
+      "claim_reply_due": "La réponse du locataire à la réclamation est attendue dans la journée.",
+      "balance_above_hold": "La réclamation décidée dépasse l’empreinte et aucune facture n’existe.",
+      "capture_failed": "Le débit sur l’empreinte a échoué après sa nouvelle tentative.",
+      "invoice_unpaid": "La facture n’est toujours pas payée.",
+      "dispute_open": "Un litige PayPal attend une réponse.",
+      "incident_waiting": "Un incident attend l’équipe depuis plus longtemps que la boutique ne le permet.",
+      "reconciliation_difference": "L’enregistrement PayPal d’une empreinte diffère de celui de Hold."
+    },
+    "recent": {
+      "title": "Décidé ces dernières 24 heures",
+      "none": "Rien n’a été décidé ces dernières 24 heures.",
+      "postponedUntil": "De retour dans la file {when}.",
+      "reasonGiven": "Motif donné : {reason}"
+    },
+    "states": {
+      "pending": "Reporté",
+      "approved": "Approuvé",
+      "rejected": "Refusé",
+      "expired": "Expiré",
+      "superseded": "Dépassé",
+      "executing": "Approuvé, en cours",
+      "executed": "Fait",
+      "failed": "Échoué"
+    },
+    "stateNotes": {
+      "superseded": "Les registres ont changé après la proposition, donc rien n’a été fait.",
+      "executing": "En attente de la confirmation de PayPal ou du traitement.",
+      "failed": "Cela n’a pas pu être fait. Faites-le vous-même dans PayPal, ou vérifiez la location."
+    },
+    "results": {
+      "superseded": "Les registres ont changé après cette proposition, donc rien n’a été fait. Elle a quitté la file.",
+      "not_pending": "Cette entrée a déjà été décidée.",
+      "not_found": "Cette entrée n’est pas dans la file de votre boutique.",
+      "reason_required": "Écrivez votre motif avant de refuser.",
+      "not_offered": "Hold ne peut pas encore le faire. Faites-le vous-même dans PayPal, puis refusez l’entrée avec ce motif.",
+      "draft_required": "Il n’y a pas de brouillon à envoyer. Refusez l’entrée, ou écrivez vous-même au locataire.",
+      "mandate": "Ceci demande l’accord d’une personne.",
+      "not_returned": "La location n’est pas encore revenue, son empreinte ne peut donc pas être libérée.",
+      "claim_exists": "Une réclamation est ouverte sur cette location. Réglez-la sur la page de la réclamation.",
+      "role_may_not_confirm": "Votre rôle ne permet pas de confirmer ceci.",
+      "over_approval_limit": "Ceci dépasse votre limite d’approbation. Demandez au propriétaire.",
+      "simulated_rental": "Une location d’exemple n’a pas d’empreinte à libérer.",
+      "inspection_required": "Indiquez ce qui a été inspecté avant de libérer.",
+      "none_chosen": "Choisissez au moins une libération.",
+      "not_together": "Seules les libérations peuvent être approuvées ensemble.",
+      "rule_not_open": "Cette règle a déjà été décidée.",
+      "amount_invalid": "Ce n’est pas un montant supérieur à zéro. Utilisez des chiffres, comme 10 ou 10,50.",
+      "standing_rule_off": "La règle permanente est déjà désactivée."
+    },
+    "rules": {
+      "title": "Règles issues de vos refus",
+      "lead": "L’agent ne retient que cette liste. Une règle confirmée arrête cette proposition avant que quiconque ne soit sollicité.",
+      "none": "Aucune règle pour l’instant. Refuser une entrée avec un motif en rédige une.",
+      "never": "Ne pas proposer {what}.",
+      "below": "Ne pas proposer {what} en dessous de {amount}.",
+      "drafted": "Rédigée, en attente du propriétaire",
+      "confirmed": "Confirmée",
+      "shape": "Quelle règle",
+      "shapeNever": "Jamais",
+      "shapeBelow": "Seulement en dessous d’un montant",
+      "amount": "Montant, en {currency}",
+      "confirm": "Confirmer cette règle",
+      "confirmedDone": "Règle confirmée.",
+      "discard": "Écarter",
+      "discardedDone": "Règle écartée."
+    },
+    "standing": {
+      "title": "Règle permanente",
+      "lead": "Libérer une empreinte quand la comparaison était sans dommage et que personne ne l’a confirmée dans le délai fixé. Désactivée tant que le propriétaire ne l’active pas.",
+      "live": "Active jusqu’au {until}, pour au plus {count, plural, one {# libération} other {# libérations}} par jour.",
+      "off": "Désactivée.",
+      "dailyCount": "Libérations par jour, au plus (1 à 20)",
+      "days": "Pendant combien de jours (1 à 90)",
+      "grant": "Activer",
+      "granted": "Règle permanente activée.",
+      "revoke": "Désactiver",
+      "revoked": "Règle permanente désactivée.",
+      "ownerOnly": "Seul le propriétaire l’active ou la désactive."
     }
   }
 }

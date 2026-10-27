@@ -28,9 +28,12 @@ export function SimulatedApproval({ orderId, amount, description, cancelPath }: 
           <dd className="font-semibold wrap-long-words">{description}</dd>
         </div>
       </dl>
-      <form method="post" action={`/simulated-paypal/${orderId}/approve`}>
+      <form method="post" action={`/simulated-paypal/${orderId}/approve`} className="grid gap-3">
         <Button type="submit" className="min-h-12 w-full">
           {t('approve')}
+        </Button>
+        <Button type="submit" name="then" value="dispute" variant="outline" className="min-h-12 w-full whitespace-normal">
+          {t('approveThenDispute')}
         </Button>
       </form>
       <a href={cancelPath} className="inline-flex min-h-11 items-center justify-center font-semibold underline underline-offset-4">

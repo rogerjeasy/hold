@@ -1,5 +1,5 @@
 import type { Mandate, OwnerRule, ReminderKind } from '@hold/domain'
-import { and, desc, eq, gt, isNull, lte, or } from 'drizzle-orm'
+import { and, desc, eq, gt, inArray, isNull, lte, or } from 'drizzle-orm'
 import { mandates, opsRules, reminders, rentals, shops } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
@@ -16,9 +16,21 @@ export async function draftRule(transaction: Transaction, rule: OwnerRule, fromP
   return row.id
 }
 
+// A drafted rule is confirmed or discarded; a confirmed one can still be discarded, and then leaves the agent's memory.
 export async function decideRule(transaction: Transaction, ruleId: string, userId: string, decision: 'confirm' | 'discard', now: Date): Promise<boolean> {
-  const updated = await transaction.update(opsRules).set({ state: decision === 'confirm' ? 'confirmed' : 'discarded', decidedByUserId: userId, decidedAt: now }).where(and(eq(opsRules.id, ruleId), eq(opsRules.state, 'drafted'))).returning({ id: opsRules.id })
+  const from = decision === 'confirm' ? eq(opsRules.state, 'drafted') : inArray(opsRules.state, ['drafted', 'confirmed'])
+  const updated = await transaction.update(opsRules).set({ state: decision === 'confirm' ? 'confirmed' : 'discarded', decidedByUserId: userId, decidedAt: now }).where(and(eq(opsRules.id, ruleId), from)).returning({ id: opsRules.id })
   return updated.length > 0
+}
+
+// Confirms a drafted rule in the shape the owner chose, "never" or "below an amount", for the kind it was drafted for and
+// no other. A changed shape is a new rule: the draft is discarded and its replacement recorded, confirmed, beside it.
+export async function confirmRule(transaction: Transaction, ruleId: string, userId: string, rule: OwnerRule, now: Date): Promise<boolean> {
+  const [drafted] = await transaction.select().from(opsRules).where(and(eq(opsRules.id, ruleId), eq(opsRules.state, 'drafted'))).for('update')
+  if (drafted === undefined || drafted.rule.proposalKind !== rule.proposalKind) return false
+  if (JSON.stringify(drafted.rule) === JSON.stringify(rule)) return decideRule(transaction, ruleId, userId, 'confirm', now)
+  await decideRule(transaction, ruleId, userId, 'discard', now)
+  return decideRule(transaction, await draftRule(transaction, rule, drafted.fromProposalId, now), userId, 'confirm', now)
 }
 
 // The agent's whole memory: the rules the owner confirmed.
@@ -27,7 +39,7 @@ export async function confirmedRules(transaction: Transaction): Promise<OwnerRul
 }
 
 export async function rulesForOwner(transaction: Transaction) {
-  return transaction.select({ id: opsRules.id, rule: opsRules.rule, state: opsRules.state, createdAt: opsRules.createdAt }).from(opsRules).where(or(eq(opsRules.state, 'drafted'), eq(opsRules.state, 'confirmed'))).orderBy(desc(opsRules.createdAt))
+  return transaction.select({ id: opsRules.id, rule: opsRules.rule, state: opsRules.state, fromProposalId: opsRules.fromProposalId, createdAt: opsRules.createdAt }).from(opsRules).where(or(eq(opsRules.state, 'drafted'), eq(opsRules.state, 'confirmed'))).orderBy(desc(opsRules.createdAt))
 }
 
 // The one standing rule the hackathon build offers: release a hold when the comparison was clean and nobody confirmed

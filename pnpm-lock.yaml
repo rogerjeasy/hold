@@ -220,6 +220,9 @@ importers:
       '@hold/notify':
         specifier: workspace:*
         version: link:../../packages/notify
+      '@hold/ops':
+        specifier: workspace:*
+        version: link:../../packages/ops
       '@hold/paypal':
         specifier: workspace:*
         version: link:../../packages/paypal

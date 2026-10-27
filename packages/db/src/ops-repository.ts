@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { DETECTOR_PROPOSALS, orderQueue, proposalFingerprintInput, withinMandate } from '@hold/domain'
 import type { ProposalKind, ShopException, ShopSnapshot } from '@hold/domain'
-import { and, eq, gte, inArray, isNull, lt, or, sql } from 'drizzle-orm'
+import { and, desc, eq, gt, gte, inArray, isNull, lt, or, sql } from 'drizzle-orm'
 import { approvals, auditLog, authorizations, captureSessions, claims, comparisons, holds, incidents, invoices, moneyEvents, opsRuns, outbox, proposals, rentalItems, rentals, shopExceptions, shops } from './schema/index.ts'
 import { releaseCleanReturn } from './claim-repository.ts'
 import { mandateForUse } from './ops-settings-repository.ts'
@@ -9,6 +9,7 @@ import { outsideShop } from './scope.ts'
 import type { Database, Transaction } from './scope.ts'
 
 export const OPS_EXECUTE_QUEUE = 'ops-execute'
+export const OPS_AGENT_QUEUE = 'ops-agent'
 
 const DEFAULT_SETTINGS = { confirmCleanWithinHours: 4, invoiceUnpaidDays: 7, incidentWaitHours: 2 } as const
 
@@ -145,6 +146,8 @@ export type QueueEntry = {
   readonly amountCents: number | null
   readonly currency: string | null
   readonly moneyCents: number
+  // Marks for the screen: the fixed reason's detector, and whether the entry was investigated and checked with PayPal.
+  readonly payload: Readonly<Record<string, string>>
 }
 
 // The amount approving a proposal would act on, read from the database at this moment (X1.10).
@@ -166,9 +169,35 @@ export async function morningQueue(transaction: Transaction, now: Date): Promise
   const entries: QueueEntry[] = []
   for (const { proposal, deadline, exceptionKind, moneyCents } of rows) {
     const amount = await amountFor(transaction, proposal.kind, proposal.subjectKind, proposal.subjectId, proposal.rentalId)
-    entries.push({ id: proposal.id, kind: proposal.kind, subjectKind: proposal.subjectKind, subjectId: proposal.subjectId, rentalId: proposal.rentalId, reason: proposal.reason, references: proposal.references, draft: proposal.draft, raisedByAgent: proposal.raisedByAgent, deadline, exceptionKind, ...amount, moneyCents: amount.amountCents ?? moneyCents ?? 0 })
+    entries.push({ id: proposal.id, kind: proposal.kind, subjectKind: proposal.subjectKind, subjectId: proposal.subjectId, rentalId: proposal.rentalId, reason: proposal.reason, references: proposal.references, draft: proposal.draft, raisedByAgent: proposal.raisedByAgent, deadline, exceptionKind, ...amount, moneyCents: amount.amountCents ?? moneyCents ?? 0, payload: proposal.payload })
   }
   return orderQueue(entries)
+}
+
+// The amount a proposal names, read now from the records, whatever state it is in: what a rule drafted from its
+// rejection starts from.
+export async function proposalAmount(transaction: Transaction, proposalId: string): Promise<{ amountCents: number | null; currency: string | null }> {
+  const [proposal] = await transaction.select().from(proposals).where(eq(proposals.id, proposalId))
+  return proposal === undefined ? { amountCents: null, currency: null } : amountFor(transaction, proposal.kind, proposal.subjectKind, proposal.subjectId, proposal.rentalId)
+}
+
+// What was decided in the last day, and what is put off until later, so the owner sees each outcome after the entry
+// leaves the queue: approved, executing, done, failed, rejected, or superseded because its records changed.
+export async function recentDecisions(transaction: Transaction, now: Date) {
+  const since = new Date(now.getTime() - 24 * 3_600_000)
+  return transaction.select({ id: proposals.id, kind: proposals.kind, state: proposals.state, reason: proposals.reason, decisionReason: proposals.decisionReason, decidedAt: proposals.decidedAt, postponedUntil: proposals.postponedUntil, payload: proposals.payload })
+    .from(proposals)
+    .where(or(gte(proposals.decidedAt, since), and(eq(proposals.state, 'pending'), gt(proposals.postponedUntil, now))))
+    .orderBy(desc(proposals.updatedAt))
+}
+
+// Asks for a run now, as the nightly schedule does: through the outbox, ordered per shop. The relay adds the shop.
+export async function queueOperationsCheck(transaction: Transaction, now: Date): Promise<string> {
+  const [shop] = await transaction.select({ id: shops.id }).from(shops).limit(1)
+  if (shop === undefined) throw new Error('No shop in scope.')
+  const [row] = await transaction.insert(outbox).values({ shopId: shop.id, queue: OPS_AGENT_QUEUE, messageGroup: shop.id, payload: { trigger: 'manual' }, createdAt: now }).returning({ id: outbox.id })
+  if (row === undefined) throw new Error('The check was not queued.')
+  return row.id
 }
 
 export type DecisionInput = { readonly decision: 'approve' | 'reject' | 'postpone'; readonly reason: string; readonly mandateId?: string }
