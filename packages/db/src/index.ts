@@ -23,7 +23,7 @@ export { beginFeeCapture, confirmFeeCapture, EXECUTIONS_QUEUE, failExecution, fi
 export type { BeginResult, CapturedFee, ConfirmResult, FeeExecution, StoredExecution } from './fee-repository.ts'
 export { findRenterLink, renterContact, renterView } from './renter-repository.ts'
 export type { RenterLink, RenterView } from './renter-repository.ts'
-export { feeRentalByOrder, markOutboxSent, markPayPalEvent, PAYPAL_EVENTS_QUEUE, payPalEvent, pendingOutbox, recordPayPalEvent } from './paypal-event-repository.ts'
+export { feeRentalByOrder, markOutboxSent, outboxWrittenAt, markPayPalEvent, PAYPAL_EVENTS_QUEUE, payPalEvent, pendingOutbox, recordPayPalEvent } from './paypal-event-repository.ts'
 export type { Delivery, OutboxMessage, RecordResult, StoredEvent } from './paypal-event-repository.ts'
 export type { TrustedHold } from './hold-repository.ts'
 export { askForHold, beginHoldPlacement, confirmHoldPlaced, holdRentalByAuthorization, holdRentalByOrder, rentalHold, saveHoldOrder } from './hold-repository.ts'

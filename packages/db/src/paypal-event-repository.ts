@@ -91,6 +91,13 @@ export async function pendingOutbox(database: Database, max: number): Promise<re
   return rows.map((row) => ({ ...row, payload: payloadSchema.parse(typeof row.payload === 'string' ? JSON.parse(row.payload) : row.payload) }))
 }
 
+// The messages one change wrote, by the moment it ran, so the request that made them can send them at once. The
+// relay sends any it could not.
+export async function outboxWrittenAt(transaction: Transaction, at: Date): Promise<readonly OutboxMessage[]> {
+  return transaction.select({ id: outbox.id, shopId: outbox.shopId, queue: outbox.queue, messageGroup: outbox.messageGroup, payload: outbox.payload })
+    .from(outbox).where(and(eq(outbox.createdAt, at), eq(outbox.state, 'pending')))
+}
+
 export async function markOutboxSent(transaction: Transaction, messageId: string, now: Date): Promise<void> {
   await transaction.update(outbox).set({ state: 'sent', sentAt: now }).where(and(eq(outbox.id, messageId), eq(outbox.state, 'pending')))
 }

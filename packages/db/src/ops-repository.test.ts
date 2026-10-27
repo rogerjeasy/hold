@@ -4,6 +4,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { auditLog, authorizations, captureSessions, executions, holds, incidents, itemTypes, moneyEvents, outbox, proposals, rentalItems, rentals, shopExceptions } from './schema/index.ts'
 import { auditAgentCall, beginOpsRun, finishProposal, proposalToCarryOut, completeOpsRun, decideProposal, exceptionFacts, holdsToReconcile, morningQueue, proposalAmount, queueOperationsCheck, recentDecisions, recordExceptions, rentalsForCaptures, shopSnapshot, writeProposal } from './ops-repository.ts'
 import { grantStandingRule, revokeMandate } from './ops-settings-repository.ts'
+import { outboxWrittenAt } from './paypal-event-repository.ts'
 import { inShop } from './scope.ts'
 import type { Transaction } from './scope.ts'
 import { createTestDatabase } from './testing/test-database.ts'
@@ -217,6 +218,9 @@ describe('what the owner\'s screen reads and asks for', () => {
     const outboxId = await shop.act((transaction) => queueOperationsCheck(transaction, now))
     const [row] = await database.select().from(outbox).where(eq(outbox.id, outboxId))
     expect(row).toMatchObject({ shopId: shop.scope.shopId, queue: 'ops-agent', messageGroup: shop.scope.shopId, payload: { trigger: 'manual' } })
+    expect(await shop.act((transaction) => outboxWrittenAt(transaction, now))).toContainEqual({ id: outboxId, shopId: shop.scope.shopId, queue: 'ops-agent', messageGroup: shop.scope.shopId, payload: { trigger: 'manual' } })
+    expect(await other.act((transaction) => outboxWrittenAt(transaction, now))).toEqual([])
+    expect(await shop.act((transaction) => outboxWrittenAt(transaction, new Date(now.getTime() + 1)))).toEqual([])
   })
 })
 
