@@ -32,6 +32,8 @@ export const shopRoutes = {
   paypal: '/shop/paypal',
   scorecard: '/shop/scorecard',
   trust: '/shop/trust',
+  // The limits within which the shop's advocate may settle a contested claim (extensions.md section 9.4).
+  settlement: '/shop/settlement',
 } as const
 
 // Pages reached from the rentals page rather than from the menu.
@@ -60,6 +62,7 @@ export const linkRoutes = {
   // here too because screens import this file and must not load the server's crypto.
   renter: '/r',
   record: (token: string) => `/r/${token}/record`,
+  claim: (token: string) => `/r/${token}/claim`,
   // "Something happened": a renter's reports during the rental, and one report by its ID.
   incidents: (token: string) => `/r/${token}/incident`,
   incident: (token: string, incidentId: string) => `/r/${token}/incident/${incidentId}`,
@@ -67,6 +70,8 @@ export const linkRoutes = {
   cleanRecord: (token: string) => `/r/${token}/trust`,
   // What the renter's own assistant did on the rental, and disconnecting it.
   assistant: (token: string) => `/r/${token}/assistant`,
+  // The renter's advocate: the transcript, their own limit, confirming an agreement and stopping the advocate.
+  negotiation: (token: string) => `/r/${token}/negotiation`,
   // A shop's own page for renters, named by its address: /s/{slug}.
   shopPage: '/s',
 } as const

@@ -34,8 +34,9 @@ export async function queueClaimCapture(transaction: Transaction, claimId: strin
   return { ok: true, executionId: execution.id, rentalId: claim.rentalId } as const
 }
 
-// The shared renter handler verifies a claim-scoped token and consumes its one-time code in this transaction.
-export async function replyToClaim(transaction: Transaction, rentalId: string, decision: 'accept' | 'contest', comment: string, now: Date) {
+// The shared renter handler verifies a claim-scoped token and consumes its one-time code in this transaction. A contest
+// handed to an advocate needs no written reason: the advocate writes the arguments (extensions.md section 9).
+export async function replyToClaim(transaction: Transaction, rentalId: string, decision: 'accept' | 'contest', comment: string, now: Date, reasonRequired = true) {
   const [claim] = await transaction.select().from(claims).where(eq(claims.rentalId, rentalId)).for('update')
   if (claim === undefined) return { ok: false, reason: 'not_found' } as const
   const capture = (await transaction.select().from(executions).where(and(eq(executions.rentalId, rentalId), eq(executions.action, 'capture')))).find((row) => row.paypalResourceIds['claim'] === claim.id && row.paypalResourceIds['early'] === 'true')
@@ -43,7 +44,7 @@ export async function replyToClaim(transaction: Transaction, rentalId: string, d
   if (claim.state !== 'presented' && !early) return { ok: false, reason: 'already_replied' } as const
   if ((await transaction.select().from(claimReplies).where(eq(claimReplies.claimId, claim.id))).length > 0) return { ok: false, reason: 'already_replied' } as const
   if (claim.replyDueAt === null || now >= claim.replyDueAt) return { ok: false, reason: 'reply_expired' } as const
-  if (decision === 'contest' && comment.trim() === '') return { ok: false, reason: 'reason_required' } as const
+  if (decision === 'contest' && reasonRequired && comment.trim() === '') return { ok: false, reason: 'reason_required' } as const
   if (early) {
     await transaction.insert(claimReplies).values({ shopId: claim.shopId, claimId: claim.id, decision, comment: comment.trim(), createdAt: now })
     const executionId = await resolveClaimSettlement(transaction, claim.id, now)

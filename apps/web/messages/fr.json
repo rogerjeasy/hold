@@ -1217,7 +1217,8 @@
       "settings": "Réglages",
       "scorecard": "Fiabilité",
       "incidents": "Incidents",
-      "trust": "Échelle de confiance"
+      "trust": "Échelle de confiance",
+      "settlement": "Représentant de règlement"
     },
     "setup": {
       "title": "Préparez votre boutique",
@@ -2910,5 +2911,128 @@
     "connectTitle": "Connecter votre propre assistant",
     "connectBody": "Tout client MCP peut utiliser le serveur de Hold à cette adresse, en HTTP streamable, sans connexion :",
     "connectNote": "Votre assistant peut trouver des boutiques, obtenir un devis et réserver. Une fois les frais payés, il reçoit un jeton pour cette seule location, que vous pouvez déconnecter depuis votre lien de location."
+  },
+  "negotiation": {
+    "advocate": {
+      "title": "Laisser un représentant défendre ma contestation",
+      "guidance": "Un représentant lit les mêmes photos, marques et prix que la boutique, et défend chaque ligne sur les preuves. Il ne voit jamais les limites de la boutique, et la boutique ne voit jamais les vôtres. Il utilise le code de vérification que nous vous envoyons, comme pour accepter ou contester.",
+      "highest": "Le maximum que je paierai, en {currency}",
+      "sentence": "Mon représentant peut accepter de payer jusqu'à ce montant. Il me demande avant d'accepter.",
+      "comment": "Ce que votre représentant doit savoir (facultatif)",
+      "start": "Confier ma contestation à un représentant",
+      "started": "Votre représentant défend votre contestation.",
+      "code": "Code de vérification, pour votre représentant"
+    },
+    "renterTitle": "Votre représentant",
+    "link": "Voir les échanges des représentants",
+    "yourLimit": "Votre total maximum : {amount}. Vous seul le voyez.",
+    "simulated": "Représentants simulés : environnement de test, aucun modèle d'IA n'a été sollicité.",
+    "transcript": {
+      "title": "Les échanges des représentants",
+      "noLimits": "Les échanges montrent chaque offre et les preuves sur lesquelles elle repose. Les limites des deux parties n'y figurent pas.",
+      "move": "Coup {number}",
+      "side": {
+        "shop": "Le représentant de la boutique",
+        "renter": "Le représentant du locataire"
+      },
+      "opening": "Ouverture avec la réclamation telle que présentée : {amount}",
+      "offer": "Offre de {amount}",
+      "accept": "A accepté la dernière offre de l'autre partie",
+      "pass": "A passé",
+      "passReasons": {
+        "chose": "Il a choisi d'arrêter.",
+        "unavailable": "Le représentant n'a pas pu répondre.",
+        "ceiling": "Le représentant a atteint sa limite de temps ou d'appels."
+      },
+      "line": "{line} : {amount}",
+      "lineLowered": "{line} : {amount} au lieu de {published}",
+      "chainVerified": "La chaîne des empreintes est vérifiée : aucun coup n'a été modifié, retiré ou déplacé.",
+      "chainBroken": "La chaîne des empreintes n'est pas vérifiée."
+    },
+    "grounds": {
+      "known_mark": "Une marque déjà présente sur l'article se trouve à côté",
+      "ordinary_wear": "Les règles d'usure la couvrent : {clause}",
+      "uncertain_evidence": "Les photos ne permettent pas de trancher",
+      "renter_photo": "Une photo du locataire la concerne",
+      "evidence_stands": "Les deux examens l'ont confirmée",
+      "goodwill": "Geste commercial, sans preuve"
+    },
+    "states": {
+      "open": "Les représentants échangent des offres.",
+      "agreed": "Les représentants se sont accordés sur {amount}. Rien n'est prélevé avant la confirmation de chacun.",
+      "settled": "Accord sur {amount} confirmé. Le dépôt est réglé via PayPal.",
+      "escalated": "Les représentants n'ont pas trouvé d'accord. Le propriétaire de la boutique décide, avec ces échanges.",
+      "replied": "Le représentant du locataire a rédigé la contestation ci-dessous. Le propriétaire de la boutique décide."
+    },
+    "ended": {
+      "pass": "Un représentant a passé.",
+      "refused_twice": "Les coups d'un représentant ont été refusés deux fois.",
+      "time_limit": "Un représentant a mis trop de temps.",
+      "deadline": "Le temps de la négociation est écoulé.",
+      "mandate_ended": "Un représentant a été arrêté, ou ses limites ont pris fin.",
+      "declined": "Une personne a refusé le montant convenu.",
+      "nothing_to_charge": "Ils se sont accordés sur rien à payer : le propriétaire renonce à la réclamation."
+    },
+    "confirm": {
+      "renterTitle": "Confirmer le montant convenu",
+      "renterGuidance": "Rien n'est prélevé avant votre confirmation. Si vous refusez, le propriétaire de la boutique décide.",
+      "sendCode": "M'envoyer un code de vérification",
+      "codeSent": "Code envoyé. Il expire dans dix minutes.",
+      "codeSentSandbox": "Code envoyé à l'adresse donnée à la réservation : c'est le bac à sable PayPal, dont les comptes de test ne reçoivent pas de courriel.",
+      "code": "Code de vérification",
+      "confirm": "Confirmer et régler",
+      "decline": "Refuser",
+      "done": "Votre réponse est enregistrée.",
+      "shopTitle": "Confirmer l'accord des représentants",
+      "shopGuidance": "Le propriétaire ou un responsable confirme, comme pour toute décision sur une réclamation contestée. Le montant convenu est alors prélevé sur le dépôt et le reste libéré.",
+      "shopDone": "Votre réponse est enregistrée.",
+      "waiting": "En attente de la confirmation du locataire.",
+      "waitingShop": "Vous avez confirmé. En attente de la confirmation de la boutique."
+    },
+    "stop": {
+      "title": "Arrêter mon représentant",
+      "guidance": "Arrêter ne prélève rien. Le propriétaire de la boutique décide alors, et vous voyez toujours tout ici.",
+      "button": "Arrêter mon représentant",
+      "done": "Votre représentant est arrêté.",
+      "stopped": "Vous avez arrêté votre représentant."
+    },
+    "limits": {
+      "title": "Représentant de règlement",
+      "intro": "Quand un locataire confie une réclamation contestée à un représentant, celui de la boutique peut s'accorder dans ces limites. Vous seul les voyez : le représentant du locataire jamais.",
+      "current": "Limites actuelles",
+      "none": "Pas de représentant de la boutique. Les réclamations contestées vous parviennent, comme aujourd'hui.",
+      "summary": "Au moins {share} % d'une réclamation, pour des réclamations jusqu'à {largest}, au plus {rounds} offres par partie, jusqu'au {until}.",
+      "evidenceYes": "Chaque réduction cite les preuves.",
+      "evidenceNo": "Il peut aussi faire un geste commercial.",
+      "finalTap": "Vous ou un responsable confirmez chaque accord avant tout prélèvement.",
+      "lowestShare": "Part minimale d'une réclamation qu'il peut accepter, en pour cent",
+      "largestClaim": "Réclamation maximale qu'il peut traiter, en {currency}",
+      "rounds": "Nombre maximal d'offres par partie",
+      "evidenceRequired": "Chaque réduction doit-elle citer les preuves ?",
+      "evidenceRequiredYes": "Oui",
+      "evidenceRequiredNo": "Non : il peut faire un geste commercial",
+      "days": "Jours avant la fin de ces limites",
+      "save": "Enregistrer les limites",
+      "saved": "Enregistré. Elles s'appliquent à la prochaine contestation.",
+      "end": "Arrêter le représentant de la boutique",
+      "endDone": "Arrêté. Les réclamations contestées vous parviennent.",
+      "ownerOnly": "Seul le propriétaire fixe ces limites.",
+      "noCurrency": "Publiez d'abord vos prix : les limites sont dans la devise de la boutique."
+    },
+    "results": {
+      "amount_invalid": "Indiquez un montant, comme 30 ou 30,50.",
+      "already_replied": "Cette réclamation a déjà reçu une réponse.",
+      "invalid_limits": "Ces limites ne peuvent pas être utilisées. Vérifiez chacune.",
+      "not_agreed": "Aucun accord n'attend de réponse.",
+      "not_found": "Aucun représentant sur cette réclamation.",
+      "role_may_not_confirm": "Seul le propriétaire ou un responsable peut confirmer.",
+      "raised_the_claim": "Une autre personne que celle qui a établi la réclamation doit confirmer.",
+      "no_currency": "Publiez d'abord vos prix.",
+      "code_expired": "Ce code a expiré. Demandez-en un nouveau.",
+      "wrong_code": "Ce code n'est pas le bon. Vérifiez-le et réessayez.",
+      "code_recently_sent": "Un code a été envoyé il y a moins d'une minute. Consultez vos courriels.",
+      "email_unavailable": "Le courriel n'a pas pu être envoyé. Réessayez dans un instant.",
+      "link_invalid": "Ce lien ne permet pas cette action."
+    }
   }
 }

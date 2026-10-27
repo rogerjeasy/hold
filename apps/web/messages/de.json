@@ -1217,7 +1217,8 @@
       "settings": "Einstellungen",
       "scorecard": "Zuverlässigkeit",
       "incidents": "Vorfälle",
-      "trust": "Vertrauensstufen"
+      "trust": "Vertrauensstufen",
+      "settlement": "Vergleichsvertreter"
     },
     "setup": {
       "title": "Richten Sie Ihren Verleih ein",
@@ -2910,5 +2911,128 @@
     "connectTitle": "Den eigenen Assistenten verbinden",
     "connectBody": "Jeder MCP-Client kann Holds Server unter dieser Adresse nutzen, über Streamable HTTP, ohne Anmeldung:",
     "connectNote": "Ihr Assistent kann Verleihe finden, Angebote einholen und buchen. Sobald die Gebühr bezahlt ist, erhält er ein Token nur für diese eine Miete, das Sie über Ihren Mietlink trennen können."
+  },
+  "negotiation": {
+    "advocate": {
+      "title": "Einen Vertreter für mich verhandeln lassen",
+      "guidance": "Ein Vertreter liest dieselben Fotos, Markierungen und Preise wie das Geschäft und vertritt jede Position anhand der Beweise. Er sieht nie die Grenzen des Geschäfts, und das Geschäft sieht nie Ihre. Er nutzt den Bestätigungscode, den wir Ihnen senden, wie beim Annehmen oder Widersprechen.",
+      "highest": "Höchstens zahle ich, in {currency}",
+      "sentence": "Mein Vertreter darf bis zu diesem Betrag zustimmen. Er fragt mich vor einer Einigung.",
+      "comment": "Was Ihr Vertreter wissen sollte (freiwillig)",
+      "start": "Meinen Widerspruch einem Vertreter übergeben",
+      "started": "Ihr Vertreter vertritt Ihren Widerspruch.",
+      "code": "Bestätigungscode, für Ihren Vertreter"
+    },
+    "renterTitle": "Ihr Vertreter",
+    "link": "Sehen, was die Vertreter gesagt haben",
+    "yourLimit": "Ihr Höchstbetrag: {amount}. Nur Sie sehen ihn.",
+    "simulated": "Simulierte Vertreter: Testumgebung, kein KI-Modell wurde gefragt.",
+    "transcript": {
+      "title": "Was die Vertreter gesagt haben",
+      "noLimits": "Der Verlauf zeigt jedes Angebot und die Beweise, auf denen es beruht. Die Grenzen beider Seiten stehen nicht darin.",
+      "move": "Zug {number}",
+      "side": {
+        "shop": "Der Vertreter des Geschäfts",
+        "renter": "Der Vertreter des Mieters"
+      },
+      "opening": "Eröffnet mit der Forderung wie vorgelegt: {amount}",
+      "offer": "Bot {amount}",
+      "accept": "Nahm das letzte Angebot der anderen Seite an",
+      "pass": "Hat gepasst",
+      "passReasons": {
+        "chose": "Er hat sich entschieden aufzuhören.",
+        "unavailable": "Der Vertreter konnte nicht antworten.",
+        "ceiling": "Der Vertreter hat seine Grenze an Zeit oder Aufrufen erreicht."
+      },
+      "line": "{line}: {amount}",
+      "lineLowered": "{line}: {amount} statt {published}",
+      "chainVerified": "Die Prüfsummenkette stimmt: Kein Zug wurde geändert, entfernt oder umgestellt.",
+      "chainBroken": "Die Prüfsummenkette stimmt nicht."
+    },
+    "grounds": {
+      "known_mark": "Eine Markierung, die schon am Artikel war, liegt daneben",
+      "ordinary_wear": "Die Verschleißregeln decken es ab: {clause}",
+      "uncertain_evidence": "Die Fotos klären es nicht",
+      "renter_photo": "Ein Foto des Mieters betrifft es",
+      "evidence_stands": "Beide Prüfungen haben es bestätigt",
+      "goodwill": "Kulanz, ohne Beweis"
+    },
+    "states": {
+      "open": "Die Vertreter tauschen Angebote aus.",
+      "agreed": "Die Vertreter haben sich auf {amount} geeinigt. Nichts wird belastet, bevor jede Person bestätigt.",
+      "settled": "Auf {amount} geeinigt und bestätigt. Die Kaution wird über PayPal abgerechnet.",
+      "escalated": "Die Vertreter haben sich nicht geeinigt. Der Inhaber entscheidet, mit diesem Verlauf.",
+      "replied": "Der Vertreter des Mieters hat den Widerspruch unten verfasst. Der Inhaber entscheidet."
+    },
+    "ended": {
+      "pass": "Ein Vertreter hat gepasst.",
+      "refused_twice": "Die Züge eines Vertreters wurden zweimal abgelehnt.",
+      "time_limit": "Ein Vertreter hat zu lange gebraucht.",
+      "deadline": "Die Zeit für die Verhandlung ist abgelaufen.",
+      "mandate_ended": "Ein Vertreter wurde gestoppt, oder seine Grenzen sind abgelaufen.",
+      "declined": "Eine Person hat den vereinbarten Betrag abgelehnt.",
+      "nothing_to_charge": "Sie haben sich auf keine Zahlung geeinigt: Der Inhaber verzichtet auf die Forderung."
+    },
+    "confirm": {
+      "renterTitle": "Den vereinbarten Betrag bestätigen",
+      "renterGuidance": "Nichts wird belastet, bevor Sie bestätigen. Wenn Sie ablehnen, entscheidet der Inhaber.",
+      "sendCode": "Bestätigungscode per E-Mail senden",
+      "codeSent": "Code gesendet. Er läuft in zehn Minuten ab.",
+      "codeSentSandbox": "Code an die Adresse der Buchung gesendet: Dies ist die PayPal-Sandbox, deren Testkonten keine E-Mails erhalten.",
+      "code": "Bestätigungscode",
+      "confirm": "Bestätigen und abrechnen",
+      "decline": "Ablehnen",
+      "done": "Ihre Antwort ist erfasst.",
+      "shopTitle": "Die Einigung der Vertreter bestätigen",
+      "shopGuidance": "Der Inhaber oder eine leitende Person bestätigt, wie bei jeder Entscheidung über eine bestrittene Forderung. Dann wird der vereinbarte Betrag von der Kaution belastet und der Rest freigegeben.",
+      "shopDone": "Ihre Antwort ist erfasst.",
+      "waiting": "Wartet auf die Bestätigung des Mieters.",
+      "waitingShop": "Sie haben bestätigt. Wartet auf die Bestätigung des Geschäfts."
+    },
+    "stop": {
+      "title": "Meinen Vertreter stoppen",
+      "guidance": "Das Stoppen belastet nichts. Dann entscheidet der Inhaber, und Sie sehen hier weiterhin alles.",
+      "button": "Meinen Vertreter stoppen",
+      "done": "Ihr Vertreter ist gestoppt.",
+      "stopped": "Sie haben Ihren Vertreter gestoppt."
+    },
+    "limits": {
+      "title": "Vergleichsvertreter",
+      "intro": "Wenn ein Mieter eine bestrittene Forderung einem Vertreter übergibt, darf der Vertreter des Geschäfts sich innerhalb dieser Grenzen einigen. Nur Sie sehen sie: Der Vertreter des Mieters nie.",
+      "current": "Aktuelle Grenzen",
+      "none": "Kein Vertreter des Geschäfts. Bestrittene Forderungen kommen wie bisher zu Ihnen.",
+      "summary": "Mindestens {share} % einer Forderung, bei Forderungen bis {largest}, höchstens {rounds} Angebote je Seite, bis {until}.",
+      "evidenceYes": "Jede Minderung nennt die Beweise.",
+      "evidenceNo": "Er darf auch aus Kulanz nachgeben.",
+      "finalTap": "Sie oder eine leitende Person bestätigen jede Einigung, bevor etwas belastet wird.",
+      "lowestShare": "Kleinster Anteil einer Forderung, dem er zustimmen darf, in Prozent",
+      "largestClaim": "Größte Forderung, die er übernehmen darf, in {currency}",
+      "rounds": "Höchstzahl der Angebote je Seite",
+      "evidenceRequired": "Muss jede Minderung die Beweise nennen?",
+      "evidenceRequiredYes": "Ja",
+      "evidenceRequiredNo": "Nein: Er darf aus Kulanz nachgeben",
+      "days": "Tage, bis diese Grenzen enden",
+      "save": "Grenzen speichern",
+      "saved": "Gespeichert. Sie gelten ab dem nächsten Widerspruch.",
+      "end": "Vertreter des Geschäfts beenden",
+      "endDone": "Beendet. Bestrittene Forderungen kommen zu Ihnen.",
+      "ownerOnly": "Nur der Inhaber legt diese Grenzen fest.",
+      "noCurrency": "Veröffentlichen Sie zuerst Ihre Preise: Die Grenzen gelten in der Währung des Geschäfts."
+    },
+    "results": {
+      "amount_invalid": "Geben Sie einen Betrag ein, etwa 30 oder 30,50.",
+      "already_replied": "Diese Forderung wurde bereits beantwortet.",
+      "invalid_limits": "Diese Grenzen sind nicht verwendbar. Prüfen Sie jede.",
+      "not_agreed": "Keine Einigung wartet auf eine Antwort.",
+      "not_found": "Diese Forderung hat keinen Vertreter.",
+      "role_may_not_confirm": "Nur der Inhaber oder eine leitende Person kann das bestätigen.",
+      "raised_the_claim": "Jemand anderes als die Person, die die Forderung erhoben hat, muss bestätigen.",
+      "no_currency": "Veröffentlichen Sie zuerst Ihre Preise.",
+      "code_expired": "Dieser Code ist abgelaufen. Fordern Sie einen neuen an.",
+      "wrong_code": "Dieser Code stimmt nicht. Prüfen Sie ihn und versuchen Sie es erneut.",
+      "code_recently_sent": "Vor weniger als einer Minute wurde ein Code gesendet. Prüfen Sie Ihre E-Mails.",
+      "email_unavailable": "Die E-Mail konnte nicht gesendet werden. Versuchen Sie es gleich noch einmal.",
+      "link_invalid": "Dieser Link kann dafür nicht verwendet werden."
+    }
   }
 }

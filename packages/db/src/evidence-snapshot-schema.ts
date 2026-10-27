@@ -1,3 +1,4 @@
+import { ESCALATION_REASONS, GROUNDS, MOVE_KINDS, NEGOTIATION_KINDS, NEGOTIATION_SIDES, NEGOTIATION_STATES, PASS_REASONS } from '@hold/domain'
 import { z } from 'zod'
 
 const cents = z.number().int().nonnegative()
@@ -26,5 +27,15 @@ export const evidenceSnapshotSchema = z.strictObject({
   // The accepted evaluation run the comparison was last measured in (extensions.md section 5.5). Older versions
   // of the record were written before it existed.
   measurement: z.strictObject({ pipelineVersion: z.string(), dataSetVersion: z.string(), completedAt: timestamp, damageFound: share, cleanWronglyFlagged: share }).nullable().default(null),
+  // The advocates' transcript (extensions.md section 9.7). Records written before Extension 4 have none.
+  negotiation: z.strictObject({
+    id: z.uuid(), kind: z.enum(NEGOTIATION_KINDS), state: z.enum(NEGOTIATION_STATES), endedReason: z.enum(ESCALATION_REASONS).nullable(), agreedCents: cents.nullable(), simulated: z.boolean(),
+    moves: z.array(z.strictObject({
+      sequence: z.number().int().positive(), side: z.enum(NEGOTIATION_SIDES), kind: z.enum(MOVE_KINDS),
+      lines: z.array(z.strictObject({ lineId: z.string(), cents, ground: z.enum(GROUNDS).nullable(), evidence: z.array(z.string()) })),
+      totalCents: cents.nullable(), passReason: z.enum(PASS_REASONS).nullable(), actor: z.string(), model: z.string().nullable(), promptVersion: z.string().nullable(),
+      createdAt: timestamp, previousFingerprint: z.string().nullable(), fingerprint: z.string(),
+    })),
+  }).nullable().default(null),
 })
 export type EvidenceSnapshot = z.infer<typeof evidenceSnapshotSchema>

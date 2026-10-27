@@ -31,7 +31,50 @@ function readAmount(text: string, currency: string): number | undefined {
   return Number(parts.join('')) * 10 ** decimals + fraction
 }
 
+// Any digit, numeral or number sign of a script other than ASCII: Arabic-Indic, Devanagari, full-width, superscripts,
+// circled and Roman numerals. None may stand for an amount, so none may appear at all.
+const OTHER_DIGITS = /[^\P{N}0-9]/u
+// A share of anything: percent, per mille and their full-width and small forms.
+const SHARE_SIGNS = /[%％﹪‰‱٪]/u
+
+// Number words in English, French, Spanish and German, lower case and without accents. The French, Spanish and German
+// word for one is also the indefinite article (un, une, uno, una, ein, eine), so it is left out: dropping it would drop
+// nearly every sentence, while a limit of exactly one unit is the only thing it could carry.
+const NUMBER_WORDS = new Set([
+  'zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety', 'hundred', 'hundreds', 'thousand', 'thousands', 'million', 'millions', 'dozen', 'percent', 'half', 'quarter',
+  'deux', 'trois', 'quatre', 'cinq', 'sept', 'huit', 'neuf', 'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'vingt', 'vingts', 'trente', 'quarante', 'cinquante', 'soixante', 'septante', 'huitante', 'octante', 'nonante', 'cent', 'cents', 'mille', 'milliers', 'pourcent', 'moitie', 'quart',
+  'cero', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciseis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa', 'cien', 'ciento', 'mil', 'millon', 'millones', 'mitad',
+  'null', 'eins', 'zwei', 'drei', 'vier', 'funf', 'fuenf', 'sechs', 'sieben', 'acht', 'neun', 'zehn', 'elf', 'zwolf', 'zwoelf', 'zwanzig', 'dreissig', 'hundert', 'tausend', 'millionen', 'prozent', 'halfte', 'haelfte', 'viertel',
+])
+// Parts that only number words are built from: German and Spanish write whole numbers as one word, as in
+// fünfundzwanzig, dreihundert, veintitrés and trescientos.
+const NUMBER_PARTS = ['hundred', 'thousand', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety', 'teen', 'vingt', 'hundert', 'tausend', 'zehn', 'zig', 'ssig', 'veinti', 'cientos', 'cientas', 'ciento', 'prozent', 'percent']
+
+// Words and parts long enough to look for once every space, hyphen and mark between letters is taken out, so "t h r e e"
+// and "two-hun dred" are read as written. Shorter words would match inside ordinary ones.
+const COLLAPSED_PARTS = [...[...NUMBER_WORDS].filter((word) => word.length >= 5), 'hundred', 'thousand', 'hundert', 'tausend', 'ciento', 'veinti', 'vingt']
+
+// A valid Roman numeral, such as XII or mmxxvi. Written in capitals any run of two or more of its letters counts; a
+// single I is the pronoun.
+const ROMAN = /^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$/
+
+function hasNumberWord(text: string): boolean {
+  const plain = text.normalize('NFD').replace(/\p{M}/gu, '').replace(/ß/g, 'ss')
+  const tokens = plain.match(/\p{L}+/gu) ?? []
+  if (tokens.some((token) => token.length >= 2 && (/^[IVXLCDM]+$/.test(token) || ROMAN.test(token.toUpperCase())))) return true
+  // A lone Roman letter is a number too, except the pronoun I and a French elision such as l', d' or c'.
+  if (/(?<!\p{L})[VXLCDMvxlcdm](?![\p{L}'’])/u.test(plain)) return true
+  const lower = tokens.map((token) => token.toLowerCase())
+  if (lower.some((word) => NUMBER_WORDS.has(word) || NUMBER_PARTS.some((part) => word.includes(part)))) return true
+  const collapsed = lower.join('')
+  if (COLLAPSED_PARTS.some((part) => collapsed.includes(part))) return true
+  // A short word spelled out letter by letter, such as "t w o": runs of single letters, joined.
+  const spelled = lower.reduce<string[]>((runs, word) => word.length === 1 ? [...runs.slice(0, -1), `${runs.at(-1) ?? ''}${word}`] : [...runs, ''], [''])
+  return spelled.some((run) => run.length >= 2 && NUMBER_WORDS.has(run))
+}
+
 export function guardNumbers(text: string, allowed: readonly Money[]): string | null {
+  if (OTHER_DIGITS.test(text) || SHARE_SIGNS.test(text) || hasNumberWord(text)) return null
   const found = text.match(NUMBER) ?? []
   return found.every((number) => allowed.some((amount) => readAmount(number, amount.currency) === amount.cents)) ? text : null
 }

@@ -1,4 +1,4 @@
-import { CAPTURE_SESSION_KINDS, CLAIM_STATES, CONDITION_REPLIES, DETECTOR_KINDS, FINDING_VERDICTS, HOLD_STATES, INCIDENT_HINTS, INCIDENT_KINDS, INCIDENT_STATES, ITEM_CATEGORIES, ITEM_STATUSES, MANDATE_KINDS, PRICE_CATEGORIES, PROPOSAL_KINDS, PROPOSAL_STATES, REMINDER_KINDS, RENTAL_STATES, STAFF_ROLES, STORED_OUTCOMES, TRUST_HISTORIES } from '@hold/domain'
+import { CAPTURE_SESSION_KINDS, CLAIM_STATES, CONDITION_REPLIES, DETECTOR_KINDS, ESCALATION_REASONS, FINDING_VERDICTS, HOLD_STATES, INCIDENT_HINTS, INCIDENT_KINDS, INCIDENT_STATES, ITEM_CATEGORIES, ITEM_STATUSES, MANDATE_KINDS, MOVE_KINDS, NEGOTIATION_KINDS, NEGOTIATION_SIDES, NEGOTIATION_STATES, PASS_REASONS, PRICE_CATEGORIES, PROPOSAL_KINDS, PROPOSAL_STATES, REMINDER_KINDS, RENTAL_STATES, STAFF_ROLES, STORED_OUTCOMES, TRUST_HISTORIES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
 import { check, text } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
@@ -108,6 +108,13 @@ export const incidentHint = oneOf(INCIDENT_HINTS)
 export const incidentKind = oneOf(INCIDENT_KINDS)
 export const incidentState = oneOf(INCIDENT_STATES)
 export const triageOutcome = oneOf(TRIAGE_OUTCOMES)
+// Extension 4: an advocate for each side.
+export const negotiationKind = oneOf(NEGOTIATION_KINDS)
+export const negotiationState = oneOf(NEGOTIATION_STATES)
+export const negotiationSide = oneOf(NEGOTIATION_SIDES)
+export const moveKind = oneOf(MOVE_KINDS)
+export const passReason = oneOf(PASS_REASONS)
+export const escalationReason = oneOf(ESCALATION_REASONS)
 export const trustHistory = oneOf(TRUST_HISTORIES)
 export const storedOutcome = oneOf(STORED_OUTCOMES)
 export const consentPurpose = oneOf(CONSENT_PURPOSES)

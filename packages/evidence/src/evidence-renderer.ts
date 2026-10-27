@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import type { EvidenceSnapshot } from '@hold/db'
 import PDFDocument from 'pdfkit'
-import { renderAgreement, renderComparisons, renderDecisions, renderFingerprints, renderPayments } from './evidence-document-content.ts'
+import { renderAgreement, renderComparisons, renderDecisions, renderFingerprints, renderPayments, renderTranscript } from './evidence-document-content.ts'
 import { documentLabels } from './evidence-document-labels.ts'
 import { evidenceDocument } from './evidence-document-layout.ts'
 import { renderItemPhotos } from './evidence-document-photos.ts'
@@ -34,6 +34,7 @@ export async function renderEvidencePdf({ snapshot, version, createdAt, photos }
     renderItemPhotos(context, snapshot, photos)
     renderComparisons(context, snapshot)
     renderDecisions(context, snapshot)
+    renderTranscript(context, snapshot)
     renderPayments(context, snapshot)
     renderFingerprints(context, snapshot, hashes)
     context.footers()

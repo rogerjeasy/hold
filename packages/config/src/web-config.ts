@@ -53,6 +53,8 @@ const awsServices = z
     HOLD_MEDIA_QUEUE_URL: z.url().optional(),
     HOLD_COMPARISONS_QUEUE_URL: z.url().optional(),
     HOLD_EVIDENCE_QUEUE_URL: z.url().optional(),
+    // The advocates' turns on a contested claim (extensions.md section 9).
+    HOLD_NEGOTIATIONS_QUEUE_URL: z.url().optional(),
     // Where photographs go: the locked originals, and the face-blurred copies people see. Without them, on a
     // developer's machine, no photograph can be taken.
     HOLD_EVIDENCE_BUCKET: z.string().min(3).optional(),
@@ -123,7 +125,7 @@ export type WebConfig =
       readonly smtpSecret: string
       readonly paypalMode: 'sandbox'
       // By queue name, as the outbox names them.
-      readonly queues: Readonly<Record<'executions' | 'paypal-events', string> & Partial<Record<'media' | 'comparisons' | 'evidence', string>>> | undefined
+      readonly queues: Readonly<Record<'executions' | 'paypal-events', string> & Partial<Record<'media' | 'comparisons' | 'evidence' | 'negotiations', string>>> | undefined
       readonly photoBuckets: { readonly evidence: string; readonly display: string } | undefined
     }
   | {
@@ -184,6 +186,7 @@ export function loadWebConfig(environment: Readonly<Record<string, string | unde
             ...(value.HOLD_MEDIA_QUEUE_URL === undefined ? {} : { media: value.HOLD_MEDIA_QUEUE_URL }),
             ...(value.HOLD_COMPARISONS_QUEUE_URL === undefined ? {} : { comparisons: value.HOLD_COMPARISONS_QUEUE_URL }),
             ...(value.HOLD_EVIDENCE_QUEUE_URL === undefined ? {} : { evidence: value.HOLD_EVIDENCE_QUEUE_URL }),
+            ...(value.HOLD_NEGOTIATIONS_QUEUE_URL === undefined ? {} : { negotiations: value.HOLD_NEGOTIATIONS_QUEUE_URL }),
           },
     photoBuckets: value.HOLD_EVIDENCE_BUCKET === undefined || value.HOLD_DISPLAY_BUCKET === undefined ? undefined : { evidence: value.HOLD_EVIDENCE_BUCKET, display: value.HOLD_DISPLAY_BUCKET },
   }

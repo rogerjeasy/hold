@@ -10,6 +10,7 @@
     "@hold/db": "workspace:*",
     "@hold/domain": "workspace:*",
     "@hold/evidence": "workspace:*",
+    "@hold/negotiate": "workspace:*",
     "@hold/notify": "workspace:*",
     "@hold/ops": "workspace:*",
     "@hold/paypal": "workspace:*",

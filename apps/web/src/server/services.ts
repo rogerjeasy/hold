@@ -17,6 +17,7 @@ import type { CredentialStore, FakePayPal, PayPalCredentials, PayPalHolds } from
 import { applyPayPalEvent, createMemoryScheduler, createSqsSender, executionMessageSchema, paypalEventMessageSchema, runExecution, runUpkeep, upkeepMessageSchema } from '@hold/settle'
 import type { Notice, QueueMessage, RequestDependencies, SettleDependencies } from '@hold/settle'
 import { createKmsSigner, createLocalSigner, kmsCalls, renterKeyFor } from '@hold/trust'
+import { createScriptedAdvocate, negotiationMessageSchema, runNegotiation } from '@hold/negotiate'
 import type { CredentialSigner, RenterKey } from '@hold/trust'
 import { createRenterAsk } from './renter-ask'
 import { simulatedRecords } from './simulated-records'
@@ -79,6 +80,8 @@ function runAtOnce(settle: () => SettleDependencies, media: DisplayJobDependenci
     if (message.queue === 'executions') await runExecution(settle(), executionMessageSchema.parse(message.body))
     if (message.queue === 'paypal-events') await applyPayPalEvent(settle(), paypalEventMessageSchema.parse(message.body))
     if (message.queue === 'upkeep') await runUpkeep(settle(), upkeepMessageSchema.parse(message.body))
+    // Both advocates are the simulated stand-in here, which never calls Bedrock and marks every move simulated.
+    if (message.queue === 'negotiations') await runNegotiation({ database: media.database, role: 'hold_worker', models: { shop: createScriptedAdvocate(), renter: createScriptedAdvocate() }, now: () => new Date() }, negotiationMessageSchema.parse(message.body))
     await records.handle(message.queue, message.body)
   }
 }

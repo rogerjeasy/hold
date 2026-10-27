@@ -3,7 +3,8 @@ import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
 import { evidenceManifest, EvidenceRenderError } from './evidence-manifest.ts'
 import { renderEvidencePdf } from './evidence-renderer.ts'
-import { evidenceFixtureTime, evidenceRenderFixture } from './evidence-render-fixture.ts'
+import { chainMoves } from '@hold/db'
+import { evidenceFixtureId, evidenceFixtureTime, evidenceRenderFixture } from './evidence-render-fixture.ts'
 
 // PDFKit uses hex-encoded WinAnsi text operators; inspect document text without a PDF parser dependency.
 function textOf(pdf: Buffer): string {
@@ -54,6 +55,23 @@ describe('immutable evidence documents', () => {
     for (const value of ['Evidence record', 'Handover', 'Return', 'Renter reported impact', 'Reduced repair', 'quoted renter text', 'VERIFIED-CAPTURE', 'INVOICE-UNPAID', 'AUTH-EXPIRED', 'comparison-model', 'prompt-7', 'SHA-256', 'SANDBOX', 'SIMULATED', 'Uncertain scratch', 'Existing scuffs']) expect(text).toContain(value)
     expect(text).not.toContain('private/display/key')
     expect(pdf.toString('latin1')).toContain('/Subtype /Image')
+  })
+
+  it('adds the advocates’ transcript and says whether its chain of fingerprints verifies (X4.8)', async () => {
+    const fixture = await input()
+    const line = evidenceFixtureId(23)
+    const chained = chainMoves([
+      { sequence: 1, side: 'shop', kind: 'offer', lines: [{ lineId: line, cents: 1250, ground: 'evidence_stands', evidence: [] }], totalCents: 1250, passReason: null, actor: 'referee', createdAt: new Date(evidenceFixtureTime) },
+      { sequence: 2, side: 'renter', kind: 'offer', lines: [{ lineId: line, cents: 600, ground: 'ordinary_wear', evidence: ['wear-1'] }], totalCents: 600, passReason: null, actor: 'renter_advocate', createdAt: new Date(evidenceFixtureTime) },
+      { sequence: 3, side: 'shop', kind: 'accept', lines: [], totalCents: null, passReason: null, actor: 'shop_advocate', createdAt: new Date(evidenceFixtureTime) },
+    ]).map((move) => ({ ...move, lines: move.lines.map((each) => ({ ...each, evidence: [...each.evidence] })), model: move.actor === 'referee' ? null : 'simulated', promptVersion: move.actor === 'referee' ? null : 'advocate-1', createdAt: move.createdAt.toISOString() }))
+    fixture.snapshot.negotiation = { id: evidenceFixtureId(40), kind: 'negotiation', state: 'settled', endedReason: null, agreedCents: 600, simulated: true, moves: chained }
+    const text = textOf(await renderEvidencePdf(fixture))
+    for (const value of ['Transcript of the advocates', 'Move SHA-256', 'Chain of fingerprints verified', 'ordinary_wear', 'wear-1', 'advocate-1', chained[2]?.fingerprint ?? 'missing']) expect(text).toContain(value)
+    const second = chained[1]
+    if (second === undefined) throw new Error('fixture')
+    fixture.snapshot.negotiation = { ...fixture.snapshot.negotiation, moves: [chained[0], { ...second, totalCents: 650 }, chained[2]].filter((move) => move !== undefined) }
+    expect(textOf(await renderEvidencePdf(fixture))).toContain('BROKEN at move 2')
   })
 
   it.each([['fr', 'Dossier de location'], ['de', 'Mietnachweis'], ['es', 'Registro de alquiler']] as const)('localizes %s document labels and paginates long text', async (language, heading) => {

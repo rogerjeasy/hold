@@ -64,14 +64,23 @@ export { fieldRecordAlarm } from './field-record.ts'
 export type { FieldRecordMonthCounts } from './field-record.ts'
 export { mayApproveTogether, PROPOSAL_EXECUTORS, PROPOSAL_KINDS, PROPOSAL_STATES, PROPOSAL_TRANSITIONS, proposalFingerprintInput, proposalMovesMoney } from './proposal.ts'
 export type { ProposalKind, ProposalState } from './proposal.ts'
-export { ACTOR_KINDS, gatewayDecision, MANDATE_KINDS, TOOL_TIERS, withinMandate } from './agent-gateway.ts'
-export type { ActorKind, AgentActor, GatewayDecision, GatewayInput, Mandate, MandateAction, MandateCheck, MandateKind, StandingRuleLimits, ToolTier } from './agent-gateway.ts'
+export { ACTOR_KINDS, checkSettlementLimits, gatewayDecision, MANDATE_KINDS, SETTLEMENT_LIMITS, shopFloorCents, TOOL_TIERS, withinMandate } from './agent-gateway.ts'
+export type { ActorKind, AgentActor, GatewayDecision, GatewayInput, Mandate, MandateAction, MandateCheck, MandateKind, RenterSettlementLimits, ShopSettlementLimits, StandingRuleLimits, ToolTier } from './agent-gateway.ts'
+
+// Extension 4: an advocate for each side, and the referee.
+export { ESCALATION_REASONS, GROUNDS, MOVE_KINDS, NEGOTIATION_KINDS, NEGOTIATION_LIMITS, NEGOTIATION_SIDES, NEGOTIATION_STATES, NEGOTIATION_TRANSITIONS, negotiationDeadline, otherSide, PASS_REASONS } from './negotiation.ts'
+export type { EscalationReason, Ground, MoveKind, NegotiationKind, NegotiationSide, NegotiationState, PassReason } from './negotiation.ts'
+export { checkGround, lineFacts, wearClauses } from './negotiation-grounds.ts'
+export type { ClaimFacts, GroundRefusal, LineFacts } from './negotiation-grounds.ts'
+export { checkReply, escalate, judgeMove, negotiationEnding, openingOffer, openTable, replayTable } from './referee.ts'
+export type { Judgment, Offer, OfferLine, ProposedMove, RefereeContext, RefusalReason, Table } from './referee.ts'
 export { DETECTOR_KINDS, DETECTOR_PROPOSALS, detectExceptions, orderQueue, REMINDER_KINDS, reminderAllowed, suppressedByRule } from './detectors.ts'
 export type { DetectorKind, OwnerRule, ReminderKind, ShopException, ShopSnapshot } from './detectors.ts'
 export { checkKeptLine, INCIDENT_HINTS, INCIDENT_KINDS, INCIDENT_LIMITS, INCIDENT_STATES, INCIDENT_TRANSITIONS, mayAgree, mayConfirmOffer, mayMakeShopMatter, sortIncident } from './incident.ts'
 export type { IncidentHint, IncidentKind, IncidentState, IncidentTriage, KeptLineProblem, Sorted, SortInput } from './incident.ts'
 export { mentionsSafety } from './incident-safety.ts'
 export { guardNumbers } from './number-guard.ts'
+
 
 // Extension 2: the Clean Record and the trust ladder.
 export { cleanRecord, closedOutcome, countsTowardRecord, DEFAULT_WINDOW_MONTHS, INVOICE_DUE_DAYS, OUTCOME_CLASSES, outcomeNow, STORED_OUTCOMES, windowStart } from './clean-record.ts'

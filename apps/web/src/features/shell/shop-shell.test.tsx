@@ -38,6 +38,7 @@ describe('the shop shell', () => {
     expect(within(menu).getByRole('link', { name: 'Today' })).not.toHaveAttribute('aria-current')
     expect(within(menu).getByText('Settings')).toBeInTheDocument()
     expect(within(menu).getByRole('link', { name: 'Trust ladder' })).toHaveAttribute('href', '/shop/trust')
+    expect(within(menu).getByRole('link', { name: 'Settlement advocate' })).toHaveAttribute('href', '/shop/settlement')
   })
 
   it('lists the incidents renters reported among the day’s work', () => {

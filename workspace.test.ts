@@ -61,6 +61,13 @@ describe('workspace layout', () => {
     expect(all.filter((name) => name.startsWith(scope)).sort()).toEqual(['@hold/auth', '@hold/db', '@hold/domain'])
   })
 
+  it('negotiate depends on no Hold package but domain and db, never on another extension (extensions.md section 4.5)', () => {
+    const manifest = readManifest('packages/negotiate')
+    const all = [...dependencyNames(manifest, 'dependencies'), ...dependencyNames(manifest, 'devDependencies')]
+
+    expect(all.filter((name) => name.startsWith(scope)).sort()).toEqual(['@hold/db', '@hold/domain'])
+  })
+
   it.each(workspaceFolders)('%s does not depend on an app', (folder) => {
     const manifest = readManifest(folder)
     const all = [
