@@ -1,14 +1,17 @@
 'use server'
 
+import { DEMO_ACCOUNT_KEYS } from '@hold/auth'
 import { findPerson, takeRateToken } from '@hold/db'
+import { z } from 'zod'
 import { redirect } from '@/i18n/navigation'
 import { linkRoutes, routes, shopRoutes } from '@/lib/routes'
 import { callerNetwork } from '@/server/network'
 import { getServices } from '@/server/services'
 import type { Attempt, AttemptPage } from './attempt'
-import type { AuthFormState, CodeFormState, PasskeyFormState } from './auth-form-state'
+import type { AuthFormState, CodeFormState, DemoFormState, PasskeyFormState } from './auth-form-state'
 import { parseAuthInput, readText, signInFields, signUpFields, type AuthField } from './auth-input'
 import { parseCode } from './code-input'
+import { signInAsDemo } from './demo-sign-in'
 import { readLocale } from './locale-input'
 import { clearAttempt, clearSession, currentAttempt, readAccessToken, readRefreshToken, sessionFactor, writeAttempt, writeSession } from './session-cookies'
 import { answerCode, answerPasskey, beginInvitation, beginPasskey, beginSignIn, beginSignUp, resendCode } from './sign-in-flow'
@@ -73,6 +76,20 @@ export async function requestInvitationCode(_previous: AuthFormState, data: Form
   const token = readText(data.get('token'))
   const begun = await beginInvitation(await dependencies(), { token, name: parsed.value.name, language: readLocale(data.get('locale')) }, await requester())
   return continueWith(begun, values)
+}
+
+const demoAccountKey = z.enum(DEMO_ACCOUNT_KEYS)
+
+// One tap on a demo account. Its session counts as weaker than a passkey, so money steps still ask for one.
+export async function signInWithDemoAccount(_previous: DemoFormState, data: FormData): Promise<DemoFormState> {
+  const key = demoAccountKey.safeParse(data.get('account'))
+  if (!key.success) return { notice: 'unavailable' }
+  const { identity, demoAccounts } = await getServices()
+  const { allow } = await dependencies()
+  const signedIn = await signInAsDemo({ identity, allow, demoAccounts }, key.data, await requester())
+  if (!signedIn.ok) return { notice: signedIn.notice }
+  await writeSession(signedIn.tokens, 'demo')
+  return goTo(shopRoutes.home, readLocale(data.get('locale')))
 }
 
 async function finish(outcome: ProofOutcome, attempt: Attempt, factor: 'email_code' | 'passkey'): Promise<CodeFormState> {
@@ -150,11 +167,14 @@ export async function finishPasskeySignIn(response: string): Promise<PasskeyForm
 // A person's first passkey can be added from a session an emailed code proved: there is nothing stronger yet. Once
 // they have one, adding another needs a session that passkey proved. Otherwise someone who reached their inbox could
 // add a passkey of their own and pass every passkey check after it.
+// A demo account is shared by every judge, and each needs a passkey on their own device, so a demo session may always
+// add one. The account holds nothing a judge could take from another, and the reset removes them all.
 async function mayAddPasskey(accessToken: string): Promise<boolean> {
   const { identity } = await getServices()
   const [verified, existing] = await Promise.all([identity.verifyAccessToken(accessToken), identity.listPasskeys(accessToken)])
   if (!verified.ok || !existing.ok) return false
-  return existing.value.length === 0 || (await sessionFactor(verified.value.subject)) === 'passkey'
+  const factor = await sessionFactor(verified.value.subject)
+  return existing.value.length === 0 || factor === 'passkey' || factor === 'demo'
 }
 
 // Registering a passkey needs a signed-in session. The options come from the identity service and go to the device.

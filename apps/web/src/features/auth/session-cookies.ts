@@ -9,10 +9,11 @@ import type { Attempt } from './attempt'
 import { COOKIE_NAMES, cookieOptions, REFRESH_SECONDS } from './cookie-settings'
 import { seal, unseal } from './sealed'
 
-export type SignInFactor = 'email_code' | 'passkey'
+// `demo` is a demo account a judge signed in to with one tap: weaker than a passkey, like an emailed code.
+export type SignInFactor = 'email_code' | 'passkey' | 'demo'
 
 // Bound to the person and to the session, so it cannot be carried to another account's tokens.
-const factorSchema = z.object({ factor: z.enum(['email_code', 'passkey']), subject: z.string(), session: z.string() }).strict()
+const factorSchema = z.object({ factor: z.enum(['email_code', 'passkey', 'demo']), subject: z.string(), session: z.string() }).strict()
 
 // Names the session the factor belongs to without keeping the refresh token itself in a second place.
 function sessionFingerprint(refreshToken: string): string {

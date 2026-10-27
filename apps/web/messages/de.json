@@ -1193,6 +1193,20 @@
         "expired": "Diese Einladung ist abgelaufen.",
         "missing": "Unter dieser Adresse gibt es keine Einladung."
       }
+    },
+    "demo": {
+      "title": "Den Demo-Laden ausprobieren",
+      "tag": "Demo",
+      "lead": "Ribeira Bikes ist ein Beispielladen mit laufenden Vermietungen. Ein Tippen meldet Sie an: nichts eingeben, auf keinen Code warten.",
+      "owner": {
+        "action": "Als Tomás anmelden, der Inhaber",
+        "hint": "Sieht alles und entscheidet jede Forderung."
+      },
+      "staff": {
+        "action": "Als Jonas anmelden, an der Theke",
+        "hint": "Gibt Räder aus, nimmt sie zurück und genehmigt kleine Forderungen."
+      },
+      "note": "Ein Schritt, der Geld bewegt, verlangt einen Passkey auf Ihrem eigenen Gerät, den Sie auf der Seite Sicherheit hinzufügen können. PayPal läuft in seiner Sandbox, es fließt also kein echtes Geld. Der Laden wird zwischen den Jurysitzungen zurückgesetzt."
     }
   },
   "shop": {
@@ -1256,7 +1270,8 @@
       "confirmBody": "Um Preise, Team oder PayPal zu ändern, braucht es Ihren Passkey, nicht nur einen Code per E-Mail.",
       "addBody": "Um Preise, Team oder PayPal zu ändern, braucht es einen Passkey. Fügen Sie zuerst einen auf diesem Gerät hinzu.",
       "confirm": "Mit meinem Passkey bestätigen",
-      "add": "Passkey hinzufügen"
+      "add": "Passkey hinzufügen",
+      "addHere": "Kein Passkey auf diesem Gerät? Einen hinzufügen"
     },
     "results": {
       "signed_out": "Ihre Sitzung ist beendet. Melden Sie sich erneut an.",

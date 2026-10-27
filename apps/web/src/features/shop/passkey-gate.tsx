@@ -33,7 +33,13 @@ export function PasskeyGate({ needed, hasPasskey, email, returnTo, confirmBody, 
         </div>
       </div>
       {hasPasskey ? (
-        <PasskeyButton label={t('confirm')} email={email} returnTo={returnTo} variant="default" />
+        <div className="grid gap-2">
+          <PasskeyButton label={t('confirm')} email={email} returnTo={returnTo} variant="default" />
+          {/* A person on a new device, or a judge on the shared demo account, has none here yet. */}
+          <Link href={shopRoutes.security} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
+            {t('addHere')}
+          </Link>
+        </div>
       ) : (
         <Link href={shopRoutes.security} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
           {t('add')}

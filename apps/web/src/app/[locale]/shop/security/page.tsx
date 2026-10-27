@@ -19,7 +19,7 @@ export default async function Page() {
       shopName={context.shop.name}
       passkeys={listed.ok ? listed.value : undefined}
       required={required}
-      emailCodeSession={context.factor !== 'passkey'}
+      emailCodeSession={context.factor === 'email_code'}
       email={context.person.email}
     />
   )

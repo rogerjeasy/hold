@@ -22,6 +22,10 @@ describe('loadWebConfig', () => {
   it('hands return comparisons directly to their queue when configured', () => {
     expect(loadWebConfig({ ...AWS, HOLD_EXECUTIONS_QUEUE_URL: 'https://sqs.test/e.fifo', HOLD_PAYPAL_EVENTS_QUEUE_URL: 'https://sqs.test/p.fifo', HOLD_COMPARISONS_QUEUE_URL: 'https://sqs.test/comparisons' })).toMatchObject({ queues: { comparisons: 'https://sqs.test/comparisons' } })
   })
+  it('turns the demo sign-in on only where the demo accounts secret is named', () => {
+    expect(loadWebConfig(AWS)).toMatchObject({ demoAccountsSecret: undefined })
+    expect(loadWebConfig({ ...AWS, HOLD_DEMO_ACCOUNTS_SECRET: 'hold/web/demo-accounts' })).toMatchObject({ demoAccountsSecret: 'hold/web/demo-accounts' })
+  })
   it('reads the AWS services, with defaults for the region, database name and public address', () => {
     expect(loadWebConfig(AWS)).toMatchObject({
       environment: 'development',

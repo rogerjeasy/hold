@@ -11,6 +11,7 @@ type SecurityScreenProps = {
   passkeys: readonly Passkey[] | undefined
   required: boolean
   // True when this session was proven by an emailed code: a person with a passkey confirms with it before adding more.
+  // A demo session is not: every judge adds their own passkey to the shared demo account.
   emailCodeSession: boolean
   email: string
 }

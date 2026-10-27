@@ -1193,6 +1193,20 @@
         "expired": "This invitation has expired.",
         "missing": "There is no invitation at this address."
       }
+    },
+    "demo": {
+      "title": "Try the demo shop",
+      "tag": "Demo",
+      "lead": "Ribeira Bikes is a sample shop with rentals already under way. One tap signs you in: nothing to type, no code to wait for.",
+      "owner": {
+        "action": "Sign in as Tomás, the owner",
+        "hint": "Sees everything and decides every claim."
+      },
+      "staff": {
+        "action": "Sign in as Jonas, at the counter",
+        "hint": "Hands bikes over, takes them back and approves small claims."
+      },
+      "note": "A step that moves money asks for a passkey on your own device, which you can add on the Security page. PayPal runs in its sandbox, so no real money moves. The shop is reset between judging sessions."
     }
   },
   "shop": {
@@ -1256,7 +1270,8 @@
       "confirmBody": "Changing prices, staff or PayPal needs your passkey, not only an emailed code.",
       "addBody": "Changing prices, staff or PayPal needs a passkey. Add one on this device first.",
       "confirm": "Confirm with my passkey",
-      "add": "Add a passkey"
+      "add": "Add a passkey",
+      "addHere": "No passkey on this device? Add one"
     },
     "results": {
       "signed_out": "Your session has ended. Sign in again.",

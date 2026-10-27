@@ -1193,6 +1193,20 @@
         "expired": "Cette invitation a expiré.",
         "missing": "Il n'y a aucune invitation à cette adresse."
       }
+    },
+    "demo": {
+      "title": "Essayer la boutique de démonstration",
+      "tag": "Démo",
+      "lead": "Ribeira Bikes est une boutique d’exemple avec des locations déjà en cours. Un geste suffit pour se connecter : rien à saisir, aucun code à attendre.",
+      "owner": {
+        "action": "Se connecter en tant que Tomás, le propriétaire",
+        "hint": "Voit tout et décide de chaque réclamation."
+      },
+      "staff": {
+        "action": "Se connecter en tant que Jonas, au comptoir",
+        "hint": "Remet et reprend les vélos, et approuve les petites réclamations."
+      },
+      "note": "Une étape qui déplace de l’argent demande une clé d’accès sur votre propre appareil, que vous pouvez ajouter sur la page Sécurité. PayPal fonctionne dans son bac à sable : aucun argent réel ne circule. La boutique est réinitialisée entre les sessions du jury."
     }
   },
   "shop": {
@@ -1256,7 +1270,8 @@
       "confirmBody": "Pour modifier les prix, l'équipe ou PayPal, il faut votre clé d'accès, pas seulement un code reçu par e-mail.",
       "addBody": "Pour modifier les prix, l'équipe ou PayPal, il faut une clé d'accès. Ajoutez-en d'abord une sur cet appareil.",
       "confirm": "Confirmer avec ma clé d'accès",
-      "add": "Ajouter une clé d'accès"
+      "add": "Ajouter une clé d'accès",
+      "addHere": "Pas de clé d’accès sur cet appareil ? En ajouter une"
     },
     "results": {
       "signed_out": "Votre session est terminée. Reconnectez-vous.",

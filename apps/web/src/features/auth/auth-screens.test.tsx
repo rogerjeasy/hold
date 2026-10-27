@@ -45,6 +45,21 @@ describe('SignInScreen', () => {
     expect(screen.getByRole('link', { name: 'Create a shop account' })).toHaveAttribute('href', '/sign-up')
   })
 
+  it('offers the demo shop’s two accounts only where demo mode is on', () => {
+    renderWithIntl(<SignInScreen />)
+    expect(screen.queryByRole('region', { name: 'Try the demo shop' })).not.toBeInTheDocument()
+  })
+
+  it('offers a judge the owner and the counter staff, one tap each, marked as a demo', () => {
+    renderWithIntl(<SignInScreen demo />)
+    const demo = within(screen.getByRole('region', { name: 'Try the demo shop' }))
+    expect(demo.getByRole('button', { name: 'Sign in as Tomás, the owner' })).toHaveAttribute('value', 'owner')
+    expect(demo.getByRole('button', { name: 'Sign in as Jonas, at the counter' })).toHaveAttribute('value', 'staff')
+    expect(demo.getByText('Demo')).toBeInTheDocument()
+    // The ordinary sign-in stays for everyone else.
+    expect(screen.getByRole('button', { name: 'Email me a code' })).toBeInTheDocument()
+  })
+
   it('shows the shop that is waiting behind the sign-in', () => {
     renderWithIntl(<SignInScreen />)
     expect(screen.getByText('Example shop. Illustrative figures.')).toBeInTheDocument()

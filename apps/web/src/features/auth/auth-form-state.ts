@@ -29,3 +29,8 @@ export type PasskeyFormState = {
   creationOptions?: string
   registered?: boolean
 }
+
+// What the server answers a tap on a demo account with. A good tap moves on to the shop instead.
+export type DemoFormState = { notice?: Extract<FlowNotice, 'busy' | 'unavailable'> }
+
+export const initialDemoFormState: DemoFormState = {}

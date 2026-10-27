@@ -1193,6 +1193,20 @@
         "expired": "Esta invitación ha caducado.",
         "missing": "No hay ninguna invitación en esta dirección."
       }
+    },
+    "demo": {
+      "title": "Prueba la tienda de demostración",
+      "tag": "Demo",
+      "lead": "Ribeira Bikes es una tienda de ejemplo con alquileres ya en curso. Un toque te da acceso: nada que escribir, ningún código que esperar.",
+      "owner": {
+        "action": "Entrar como Tomás, el propietario",
+        "hint": "Lo ve todo y decide cada reclamación."
+      },
+      "staff": {
+        "action": "Entrar como Jonas, en el mostrador",
+        "hint": "Entrega y recibe las bicicletas y aprueba reclamaciones pequeñas."
+      },
+      "note": "Un paso que mueve dinero pide una llave de acceso en tu propio dispositivo, que puedes añadir en la página Seguridad. PayPal funciona en su entorno de pruebas, así que no se mueve dinero real. La tienda se restablece entre sesiones del jurado."
     }
   },
   "shop": {
@@ -1256,7 +1270,8 @@
       "confirmBody": "Para cambiar precios, equipo o PayPal hace falta tu llave de acceso, no solo un código por correo.",
       "addBody": "Para cambiar precios, equipo o PayPal hace falta una llave de acceso. Añade una en este dispositivo primero.",
       "confirm": "Confirmar con mi llave de acceso",
-      "add": "Añadir una llave de acceso"
+      "add": "Añadir una llave de acceso",
+      "addHere": "¿No hay llave de acceso en este dispositivo? Añade una"
     },
     "results": {
       "signed_out": "Tu sesión ha terminado. Vuelve a entrar.",

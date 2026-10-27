@@ -23,7 +23,7 @@ const { getServices, TEST_SIGN_IN_CODE } = await import('@/server/services')
 
 vi.setConfig({ testTimeout: 30_000 })
 
-async function signIn(email: string, factor: 'email_code' | 'passkey') {
+async function signIn(email: string, factor: 'email_code' | 'passkey' | 'demo') {
   const identity = (await getServices()).identity as FakeIdentity
   if ((await identity.signUp(email)).ok) await identity.confirmSignUp(email, TEST_SIGN_IN_CODE, undefined)
   const started = await identity.startSignIn(email)
@@ -50,6 +50,17 @@ describe('adding a passkey', () => {
 
     await signIn('second@shop.example', 'passkey')
     expect(await finishPasskeyRegistration(JSON.stringify({ id: 'second-key' }))).toEqual({ registered: true })
+  })
+})
+
+describe('adding a passkey to a demo account', () => {
+  it('lets each judge add their own, though another judge added one before', async () => {
+    await signIn('demo-owner@shop.example', 'demo')
+    expect(await finishPasskeyRegistration(JSON.stringify({ id: 'first-judges-key' }))).toEqual({ registered: true })
+
+    await signIn('demo-owner@shop.example', 'demo')
+    expect((await startPasskeyRegistration()).creationOptions).toBeDefined()
+    expect(await finishPasskeyRegistration(JSON.stringify({ id: 'second-judges-key' }))).toEqual({ registered: true })
   })
 })
 

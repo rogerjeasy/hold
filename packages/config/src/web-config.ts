@@ -44,6 +44,9 @@ const awsServices = z
     HOLD_PUBLIC_URL: z.url().default('http://localhost:3210'),
     // The Secrets Manager secret holding the SMTP account Hold's own emails go through, by name or ARN.
     HOLD_SMTP_SECRET: z.string().min(1),
+    // The secret holding the demo accounts judges sign in to with one tap, by name or ARN. Set only on the demo
+    // deployment: without it the sign-in page offers no demo account (architecture.md section 20.3).
+    HOLD_DEMO_ACCOUNTS_SECRET: z.string().min(1).optional(),
     // Only sandbox accounts are connected in the hackathon build.
     HOLD_PAYPAL_MODE: z.literal('sandbox').default('sandbox'),
     // The worker's queues, for work the app hands on at once. Without them, work waits in the outbox for the relay.
@@ -123,6 +126,7 @@ export type WebConfig =
       readonly credentialKey: CredentialKeySource
       readonly publicUrl: string
       readonly smtpSecret: string
+      readonly demoAccountsSecret: string | undefined
       readonly paypalMode: 'sandbox'
       // By queue name, as the outbox names them.
       readonly queues: Readonly<Record<'executions' | 'paypal-events', string> & Partial<Record<'media' | 'comparisons' | 'evidence' | 'negotiations', string>>> | undefined
@@ -176,6 +180,7 @@ export function loadWebConfig(environment: Readonly<Record<string, string | unde
     credentialKey: value.HOLD_CREDENTIAL_KEY_ID === undefined ? { kind: 'local' } : { kind: 'kms', keyId: value.HOLD_CREDENTIAL_KEY_ID },
     publicUrl: value.HOLD_PUBLIC_URL.replace(/\/$/, ''),
     smtpSecret: value.HOLD_SMTP_SECRET,
+    demoAccountsSecret: value.HOLD_DEMO_ACCOUNTS_SECRET,
     paypalMode: value.HOLD_PAYPAL_MODE,
     queues:
       value.HOLD_EXECUTIONS_QUEUE_URL === undefined || value.HOLD_PAYPAL_EVENTS_QUEUE_URL === undefined
