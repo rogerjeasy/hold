@@ -1884,7 +1884,11 @@
           "too_bright": "it is too bright",
           "badly_framed": "the item does not fill the outline"
         },
-        "guide": "Handover guide: {view}"
+        "guide": "Handover guide: {view}",
+        "ghostShown": "Show the handover photograph over the camera",
+        "ghostStrength": "How strongly the handover photograph shows",
+        "ghostPercent": "{percent}%",
+        "guideNoCamera": "The handover photograph of this view. Take the return photograph from the same angle."
       },
       "back": "Back to the rental",
       "preparing": "Preparing the photograph…",

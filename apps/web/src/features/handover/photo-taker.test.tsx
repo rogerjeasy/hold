@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { renderWithIntl } from '@/test/render'
@@ -7,6 +7,9 @@ import { PhotoTaker } from './photo-taker'
 const check = vi.fn()
 const upload = vi.fn()
 vi.mock('./use-quality-check', () => ({ useQualityCheck: () => check }))
+// jsdom has no camera: unless a test turns it on, the screen is as on a device without one.
+const camera = { state: 'unavailable' as 'live' | 'unavailable' }
+vi.mock('./use-camera', () => ({ useCamera: () => ({ video: { current: null }, state: camera.state }) }))
 vi.mock('./read-image', () => ({ readImage: () => Promise.resolve({ blob: new Blob(['jpeg'], { type: 'image/jpeg' }), pixels: { data: new Uint8ClampedArray(4), width: 1, height: 1 } }) }))
 
 beforeEach(() => {
@@ -14,6 +17,7 @@ beforeEach(() => {
 })
 
 afterEach(() => {
+  camera.state = 'unavailable'
   vi.unstubAllGlobals()
   check.mockReset()
   upload.mockReset()
@@ -72,5 +76,45 @@ describe('taking a view’s photograph', () => {
     renderWithIntl(<PhotoTaker view={view} upload={upload} onTaken={vi.fn()} />)
     await userEvent.click(screen.getByRole('button', { name: 'Use the sample photograph' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('did not upload')
+  })
+})
+
+// architecture.md section 9.1: in a return session the camera also shows the handover photograph faintly, to match the angle.
+describe('the handover ghost at a return', () => {
+  const guide = '/images/sample-handover.jpg'
+
+  it('lays the handover photograph faintly over the live camera, and lets staff hide it or change how strongly it shows', async () => {
+    camera.state = 'live'
+    renderWithIntl(<PhotoTaker view={view} upload={upload} onTaken={vi.fn()} guide={guide} returnSamples />)
+    const ghost = screen.getByRole('img', { name: 'Handover guide: Left side' })
+    expect(ghost).toHaveStyle({ opacity: '0.4' })
+    const strength = screen.getByRole('slider', { name: 'How strongly the handover photograph shows' })
+    expect(strength).toHaveAttribute('aria-valuetext', '40%')
+    fireEvent.change(strength, { target: { value: '70' } })
+    expect(ghost).toHaveStyle({ opacity: '0.7' })
+    expect(screen.getByText('70%')).toBeInTheDocument()
+    const shown = screen.getByRole('checkbox', { name: 'Show the handover photograph over the camera' })
+    expect(shown).toBeChecked()
+    await userEvent.click(shown)
+    expect(screen.queryByRole('img', { name: 'Handover guide: Left side' })).toBeNull()
+    expect(strength).toBeDisabled()
+    await userEvent.click(shown)
+    expect(screen.getByRole('img', { name: 'Handover guide: Left side' })).toHaveStyle({ opacity: '0.7' })
+  })
+
+  it('shows the handover photograph whole as the framing guide when there is no camera to lay it over', () => {
+    renderWithIntl(<PhotoTaker view={view} upload={upload} onTaken={vi.fn()} guide={guide} returnSamples />)
+    expect(screen.getByRole('img', { name: 'Handover guide: Left side' })).toHaveStyle({ opacity: '1' })
+    expect(screen.getByText('The handover photograph of this view. Take the return photograph from the same angle.')).toBeInTheDocument()
+    expect(screen.queryByRole('slider')).toBeNull()
+    expect(screen.queryByRole('checkbox')).toBeNull()
+  })
+
+  it('shows no ghost and no controls at the handover, which has nothing earlier to match', () => {
+    camera.state = 'live'
+    renderWithIntl(<PhotoTaker view={view} upload={upload} onTaken={vi.fn()} />)
+    expect(screen.queryByRole('img', { name: /Handover guide/ })).toBeNull()
+    expect(screen.queryByRole('slider')).toBeNull()
+    expect(screen.queryByRole('checkbox')).toBeNull()
   })
 })

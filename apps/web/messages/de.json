@@ -1884,7 +1884,11 @@
           "too_bright": "es ist zu hell",
           "badly_framed": "der Artikel füllt den Rahmen nicht"
         },
-        "guide": "Übergabevorlage: {view}"
+        "guide": "Übergabevorlage: {view}",
+        "ghostShown": "Übergabefoto über der Kamera einblenden",
+        "ghostStrength": "Wie deutlich das Übergabefoto erscheint",
+        "ghostPercent": "{percent} %",
+        "guideNoCamera": "Das Übergabefoto dieser Ansicht. Nehmen Sie das Rückgabefoto aus demselben Winkel auf."
       },
       "back": "Zurück zur Miete",
       "preparing": "Foto wird vorbereitet…",

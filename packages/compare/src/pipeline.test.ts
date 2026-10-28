@@ -3,13 +3,17 @@ import { describe, expect, it } from 'vitest'
 import type { LookRequest } from './model.ts'
 import { compareInspection } from './pipeline.ts'
 
+const IDENTITY = [1, 0, 0, 0, 1, 0, 0, 0, 1] as const
+// The return photograph taken a little to one side: a handover position lands 0.05 further right.
+const SHIFTED = [1, 0, 0.05, 0, 1, 0, 0, 0, 1] as const
+
 const region = { x: 0.2, y: 0.2, width: 0.2, height: 0.2 }
 const damage = { region, class: 'new_damage', confidence: 0.96, description: 'New scratch on the frame', priceCode: 'scratch' }
 const result = (findings: readonly unknown[] = [], dismissed: readonly unknown[] = []) => ({ sameItem: true, sameView: true, findings, dismissed })
 const reply = (data: unknown) => ({ kind: 'result' as const, model: 'recorded-model', data, inputTokens: 100, outputTokens: 50 })
 async function input() {
   const image = await sharp({ create: { width: 640, height: 480, channels: 3, background: 'grey' } }).jpeg().toBuffer()
-  return { views: [{ view: 'left-side', pair: { ok: true as const, before: image, after: image, candidates: [region], alignment: 0.99, offset: { x: 0, y: 0 } } }], marks: [], wearPolicy: 'Scuffs are wear', itemType: 'E-bike', priceCodes: ['scratch'] }
+  return { views: [{ view: 'left-side', pair: { ok: true as const, before: image, after: image, alignedBefore: image, candidates: [region], alignment: 0.99, homography: IDENTITY } }], marks: [], wearPolicy: 'Scuffs are wear', itemType: 'E-bike', priceCodes: ['scratch'] }
 }
 
 describe('the return comparison pipeline', () => {
@@ -71,19 +75,45 @@ describe('the return comparison pipeline', () => {
     let calls = 0
     expect(await compareInspection(await input(), { look: () => Promise.resolve(reply(result(calls++ === 0 ? [damage] : [damage, { ...damage, class: 'uncertain' }]))) })).toMatchObject({ state: 'deferred', findings: [{ secondLookConfirmed: false }] })
   })
-  it('matches known marks in return coordinates after accepted camera translation', async () => {
+  it('matches known marks in return coordinates after an accepted camera move', async () => {
     const given = await input()
     const pair = given.views[0]?.pair
     if (pair === undefined) throw new Error('No prepared pair')
     const previous = { x: 0.2, y: 0.2, width: 0.1, height: 0.1 }
-    expect(await compareInspection({ ...given, views: [{ view: 'left-side', pair: { ...pair, offset: { x: 0.05, y: 0 } } }], marks: [{ id: 'known', view: 'left-side', region: previous }] }, { look: () => Promise.resolve(reply(result([{ ...damage, region: { ...previous, x: 0.25 } }]))) })).toMatchObject({ state: 'clean', findings: [{ class: 'known_mark', matchedMarkId: 'known' }] })
+    expect(await compareInspection({ ...given, views: [{ view: 'left-side', pair: { ...pair, homography: SHIFTED } }], marks: [{ id: 'known', view: 'left-side', region: previous }] }, { look: () => Promise.resolve(reply(result([{ ...damage, region: { ...previous, x: 0.25 } }]))) })).toMatchObject({ state: 'clean', findings: [{ class: 'known_mark', matchedMarkId: 'known' }] })
+  })
+  it('carries a known mark through a turned camera to the box around where its corners land', async () => {
+    const given = await input()
+    const pair = given.views[0]?.pair
+    if (pair === undefined) throw new Error('No prepared pair')
+    // Turned 90 degrees about the photograph's centre: (x, y) lands at (1 - y, x).
+    const turned = [0, -1, 1, 1, 0, 0, 0, 0, 1] as const
+    const previous = { x: 0.2, y: 0.6, width: 0.1, height: 0.2 }
+    const where = { x: 0.2, y: 0.2, width: 0.2, height: 0.1 }
+    expect(await compareInspection({ ...given, views: [{ view: 'left-side', pair: { ...pair, homography: turned } }], marks: [{ id: 'known', view: 'left-side', region: previous }] }, { look: () => Promise.resolve(reply(result([{ ...damage, region: where }]))) })).toMatchObject({ state: 'clean', findings: [{ class: 'known_mark', matchedMarkId: 'known' }] })
+  })
+  it('cuts the handover crop from the handover lined up on the return photograph, at the same region', async () => {
+    const given = await input()
+    const pair = given.views[0]?.pair
+    if (pair === undefined) throw new Error('No prepared pair')
+    const white = await sharp({ create: { width: 640, height: 480, channels: 3, background: 'white' } }).jpeg().toBuffer()
+    const requests: LookRequest[] = []
+    await compareInspection({ ...given, views: [{ view: 'left-side', pair: { ...pair, alignedBefore: white, homography: SHIFTED } }] }, { look: (request) => { requests.push(request); return Promise.resolve(reply(result([damage]))) } })
+    for (const request of requests) {
+      const crop = request.images.find((image) => image.label === 'Handover crop')?.body
+      const { channels } = await sharp(crop).stats()
+      expect(channels[0]?.mean).toBeGreaterThan(250)
+      const returned = request.images.find((image) => image.label === 'Return crop')?.body
+      expect((await sharp(crop).metadata()).width).toBe((await sharp(returned).metadata()).width)
+    }
+    expect(requests).toHaveLength(2)
   })
   it('labels damage the renter reported and agreed during the rental as reported, in return coordinates (X5.2)', async () => {
     const given = await input()
     const pair = given.views[0]?.pair
     if (pair === undefined) throw new Error('No prepared pair')
     const reported = [{ id: 'reported', view: 'left-side', region: { x: 0.2, y: 0.2, width: 0.2, height: 0.2 }, covered: true }]
-    expect(await compareInspection({ ...given, views: [{ view: 'left-side', pair: { ...pair, offset: { x: 0.05, y: 0 } } }], reported }, { look: () => Promise.resolve(reply(result([{ ...damage, region: { ...region, x: 0.25 } }]))) })).toMatchObject({ state: 'clean', findings: [{ class: 'reported', matchedMarkId: 'reported' }] })
+    expect(await compareInspection({ ...given, views: [{ view: 'left-side', pair: { ...pair, homography: SHIFTED } }], reported }, { look: () => Promise.resolve(reply(result([{ ...damage, region: { ...region, x: 0.25 } }]))) })).toMatchObject({ state: 'clean', findings: [{ class: 'reported', matchedMarkId: 'reported' }] })
     expect(await compareInspection({ ...given, reported }, { look: () => Promise.resolve(reply(result([{ ...damage, region: { x: 0.1, y: 0.1, width: 0.3, height: 0.3 } }]))) })).toMatchObject({ state: 'deferred', findings: [{ class: 'uncertain', matchedMarkId: 'reported' }] })
   })
   it('excludes known marks with code and discards an unknown price code', async () => {

@@ -1884,7 +1884,11 @@
           "too_bright": "está demasiado clara",
           "badly_framed": "el artículo no llena el contorno"
         },
-        "guide": "Guía de entrega: {view}"
+        "guide": "Guía de entrega: {view}",
+        "ghostShown": "Mostrar la foto de la entrega sobre la cámara",
+        "ghostStrength": "Intensidad de la foto de la entrega",
+        "ghostPercent": "{percent} %",
+        "guideNoCamera": "La foto de la entrega de esta vista. Haz la foto de la devolución desde el mismo ángulo."
       },
       "back": "Volver al alquiler",
       "preparing": "Preparando la foto…",

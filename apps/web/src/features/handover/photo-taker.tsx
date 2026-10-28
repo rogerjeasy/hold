@@ -6,6 +6,7 @@ import { Camera, FlaskConical, ImageUp, LoaderCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { GHOST_STRENGTH, GhostControls } from './ghost-controls'
 import { OutlineOverlay } from './outline-overlay'
 import { readFrame, readImage } from './read-image'
 import type { ReadImage } from './read-image'
@@ -30,12 +31,17 @@ const RETURN_SAMPLES = [
 export type UploadTaken = (blob: Blob, measures: PhotoMeasures, onProgress: (share: number) => void, simulated?: boolean) => Promise<{ readonly ok: true } | { readonly ok: false; readonly reason: string }>
 
 // Takes one view's photograph (architecture.md section 9.1): the camera with the view's outline, a file when there is no
-// camera, or a sample. The phone checks it at once and asks for a retake before anything uploads.
+// camera, or a sample. The phone checks it at once and asks for a retake before anything uploads. At a return, guide is
+// the handover photograph of the view: a ghost over the live camera to match the angle, or, with no camera to lay it
+// over, the photograph itself shown whole as the framing guide.
 export function PhotoTaker({ view, upload, onTaken, guide, returnSamples = false }: { view: View; upload: UploadTaken; onTaken: () => void; guide?: string; returnSamples?: boolean }) {
   const t = useTranslations('shop.handover.taker')
   const check = useQualityCheck()
   const camera = useCamera(true)
   const [step, setStep] = useState<Step>({ kind: 'ready' })
+  const [ghostShown, setGhostShown] = useState(true)
+  const [ghostStrength, setGhostStrength] = useState<number>(GHOST_STRENGTH.initial)
+  const noCamera = camera.state === 'unavailable'
 
   const take = async (read: () => Promise<ReadImage>, simulated = false) => {
     setStep({ kind: 'checking' })
@@ -62,10 +68,12 @@ export function PhotoTaker({ view, upload, onTaken, guide, returnSamples = false
     <div className="grid gap-3">
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
         <video ref={camera.video} playsInline muted aria-label={t('camera', { view: view.label })} className="size-full object-contain" />
-        {guide === undefined ? null : <img src={guide} alt={t('guide', { view: view.label })} className="pointer-events-none absolute inset-0 size-full object-contain opacity-40" />}
+        {guide === undefined || (!ghostShown && !noCamera) ? null : <img src={guide} alt={t('guide', { view: view.label })} style={{ opacity: noCamera ? 1 : ghostStrength / 100 }} className="pointer-events-none absolute inset-0 size-full object-contain" />}
         <OutlineOverlay outline={view.outline} />
-        {camera.state === 'unavailable' ? <p className="absolute inset-x-0 bottom-0 bg-black/70 p-3 text-sm text-white">{t('noCamera')}</p> : null}
+        {noCamera && guide === undefined ? <p className="absolute inset-x-0 bottom-0 bg-black/70 p-3 text-sm text-white">{t('noCamera')}</p> : null}
       </div>
+      {guide !== undefined && noCamera ? <div className="grid gap-1 text-sm"><p>{t('noCamera')}</p><p className="text-muted-foreground">{t('guideNoCamera')}</p></div> : null}
+      {guide !== undefined && camera.state === 'live' ? <GhostControls shown={ghostShown} onShown={setGhostShown} strength={ghostStrength} onStrength={setGhostStrength} /> : null}
       <div className="flex flex-wrap gap-2">
         <Button type="button" className="min-h-12" disabled={busy || camera.state !== 'live'} onClick={() => { const video = camera.video.current; if (video !== null) void take(() => readFrame(video)) }}>
           <Camera aria-hidden="true" />

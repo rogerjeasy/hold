@@ -2,6 +2,9 @@ import { expectFitsEveryWidth } from './support/responsive'
 import { readyForHandover } from './support/rental'
 import { expect, test } from './support/test'
 
+// A camera that shows Chromium's test pattern, so the return shows the handover ghost over a live preview.
+test.use({ launchOptions: { args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'] } })
+
 test('staff photograph a return against the handover, review uncertainty and record a manual inspection', async ({ page, browser }) => {
   test.setTimeout(240_000)
   await readyForHandover(page, browser, 'Porto Return Bikes')
@@ -21,7 +24,14 @@ test('staff photograph a return against the handover, review uncertainty and rec
   await page.getByRole('button', { name: /^Start return for / }).click()
   await expect(page).toHaveURL(/\/return\/[0-9a-f-]{36}$/)
   await expect(page.getByRole('img', { name: /^Handover guide:/ })).toBeVisible({ timeout: 30_000 })
+  const ghost = page.getByRole('checkbox', { name: 'Show the handover photograph over the camera' })
+  await expect(ghost).toBeChecked()
+  await expect(page.getByRole('slider', { name: 'How strongly the handover photograph shows' })).toHaveValue('40')
   await expectFitsEveryWidth(page)
+  await ghost.uncheck()
+  await expect(page.getByRole('img', { name: /^Handover guide:/ })).toHaveCount(0)
+  await ghost.check()
+  await expect(page.getByRole('img', { name: /^Handover guide:/ })).toBeVisible()
   views = page.getByRole('list', { name: 'Views' })
   needed = await views.getByText('Needed').count()
   expect(needed).toBeGreaterThan(0)
