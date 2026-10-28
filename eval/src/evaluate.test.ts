@@ -22,7 +22,7 @@ beforeAll(async () => {
 afterAll(async () => { await database.$client.close() })
 
 // The model sees no change on either clean pair.
-const quietModel: ComparisonModel = { look: () => Promise.resolve({ kind: 'result', model: 'recorded-model', inputTokens: 500, outputTokens: 50, data: { sameItem: true, sameView: true, findings: [] } }) }
+const quietModel: ComparisonModel = { look: () => Promise.resolve({ kind: 'result', model: 'recorded-model', inputTokens: 500, outputTokens: 50, data: { sameItem: true, sameView: true, findings: [], dismissed: [] } }) }
 // Every photograph a different shot.
 let shot = 0
 const fingerprint = () => { shot += 1; return Promise.resolve({ sha256: String(shot), perceptualHash: String(shot) }) }
@@ -40,7 +40,7 @@ describe('one command over one half of the set', () => {
   })
 
   it('does not accept a run that fails the gate against the accepted one', async () => {
-    const flagging: ComparisonModel = { look: () => Promise.resolve({ kind: 'result', model: 'recorded-model', inputTokens: 500, outputTokens: 50, data: { sameItem: true, sameView: true, findings: [{ region: { x: 0.4, y: 0.4, width: 0.1, height: 0.1 }, class: 'new_damage', confidence: 0.97, description: 'A scratch.', priceCode: null }] } }) }
+    const flagging: ComparisonModel = { look: () => Promise.resolve({ kind: 'result', model: 'recorded-model', inputTokens: 500, outputTokens: 50, data: { sameItem: true, sameView: true, findings: [{ region: { x: 0.4, y: 0.4, width: 0.1, height: 0.1 }, class: 'new_damage', confidence: 0.97, description: 'A scratch.', priceCode: null }], dismissed: [] } }) }
     const resultsDir = await mkdtemp(join(tmpdir(), 'hold-results-'))
     const outcome = await runEvaluation({ root, half: 'gate', resultsDir, accept: true, limits: { maxCleanWronglyFlagged: 0.05, maxDamageFoundDrop: 0.05 } }, { model: flagging, fingerprint, database, now: () => new Date('2026-10-28T11:00:00Z'), pipelineVersion: 'inspection-1+weakened' })
     expect(outcome.gate).toEqual({ pass: false, reasons: ['clean_wrongly_flagged_above_limit'] })

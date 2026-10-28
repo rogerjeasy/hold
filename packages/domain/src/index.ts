@@ -50,7 +50,7 @@ export { blocksItem, BOOKING_LIMITS, bookingTerms, checkBooking, paymentLapsed, 
 export type { BookingDraft, BookingLine, BookingProblem, BookingTerms, Period } from './booking.ts'
 export { CAPTURE_SESSION_KINDS, checkPhotoQuality, checkRegion, CONDITION_REPLIES, CONDITION_REPLY_HOURS, conditionReplyOpen, manifestText, MISSED_VIEWS, missingViews, PHOTO_QUALITY } from './capture-session.ts'
 export type { CaptureSessionKind, ConditionReply, PhotoMeasures, PhotoProblem, Region, SealedSession } from './capture-session.ts'
-export { checkReportedRegion, INSPECTION_LIMITS, inspectFindings, regionOverlap } from './inspection.ts'
+export { checkReportedRegion, INSPECTION_LIMITS, inspectFindings, regionOverlap, unaccountedCandidates } from './inspection.ts'
 export type { InspectionClass, InspectionFinding } from './inspection.ts'
 
 export { claimDeadlineAction, claimReplyAllowed } from './claim-deadline.ts'

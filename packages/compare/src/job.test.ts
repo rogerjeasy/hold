@@ -44,7 +44,7 @@ describe('comparison queue processing', () => {
   it('stores independently checked findings and the agreed price entry, never a model amount', async () => {
     const before = await textured()
     const fixture = await queued(before, await sharp(before).linear(1, 3).jpeg().toBuffer(), 'comparison-findings')
-    const model = { look: () => Promise.resolve({ kind: 'result' as const, model: 'recorded-model', inputTokens: 100, outputTokens: 50, data: { sameItem: true, sameView: true, findings: [{ region: { x: 0.2, y: 0.2, width: 0.2, height: 0.2 }, class: 'new_damage', confidence: 0.96, description: 'New scratch', priceCode: 'scratch' }] } }) }
+    const model = { look: () => Promise.resolve({ kind: 'result' as const, model: 'recorded-model', inputTokens: 100, outputTokens: 50, data: { sameItem: true, sameView: true, findings: [{ region: { x: 0.2, y: 0.2, width: 0.2, height: 0.2 }, class: 'new_damage', confidence: 0.96, description: 'New scratch', priceCode: 'scratch' }], dismissed: [] } }) }
     const message = { shopId: fixture.shop.scope.shopId, comparisonId: fixture.comparison.id }
     expect(await runComparison({ ...fixture, role: 'hold_worker', model, now: () => NOW }, message)).toBe('completed')
     const report = await fixture.shop.act((transaction) => comparisonReport(transaction, fixture.comparison.id))
@@ -68,7 +68,7 @@ describe('comparison queue processing', () => {
   it('compares sample return photographs instead of deferring them as reused, and marks the comparison simulated', async () => {
     const body = await textured()
     const fixture = await queued(body, body, 'comparison-samples', true)
-    const model = { look: () => Promise.resolve({ kind: 'result' as const, model: 'recorded-model', inputTokens: 100, outputTokens: 50, data: { sameItem: true, sameView: true, findings: [] } }) }
+    const model = { look: () => Promise.resolve({ kind: 'result' as const, model: 'recorded-model', inputTokens: 100, outputTokens: 50, data: { sameItem: true, sameView: true, findings: [], dismissed: [] } }) }
     expect(await runComparison({ ...fixture, role: 'hold_worker', model, now: () => NOW }, { shopId: fixture.shop.scope.shopId, comparisonId: fixture.comparison.id })).toBe('completed')
     expect((await fixture.database.select().from(comparisons))[0]).toMatchObject({ state: 'clean', model: 'recorded-model', simulated: true, deferredReason: null })
   })
@@ -97,7 +97,7 @@ describe('comparison queue processing', () => {
     const message = { shopId: shop.scope.shopId, comparisonId: comparison.id }
     expect(await runComparison(dependencies, message)).toBe('completed')
     expect(await runComparison(dependencies, message)).toBe('nothing_to_do')
-    expect((await database.select().from(comparisons))[0]).toMatchObject({ state: 'deferred', promptVersion: 'inspection-2', model: 'not_called', completedAt: NOW })
+    expect((await database.select().from(comparisons))[0]).toMatchObject({ state: 'deferred', promptVersion: 'inspection-3', model: 'not_called', completedAt: NOW })
     expect((await database.select().from(rentals))[0]?.state).toBe('inspecting')
     expect((await database.select().from(holds))[0]?.state).toBe('placed')
     expect(await database.select().from(findings)).toEqual([])

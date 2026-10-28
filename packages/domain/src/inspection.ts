@@ -15,6 +15,12 @@ export function regionOverlap(first: Region, second: Region): number {
   return area / (first.width * first.height + second.width * second.height - area)
 }
 
+// Code finds the candidate areas, and the model may not pass over one. Each is accounted for by a finding that touches
+// it, of any class, or by the model dismissing its index with a reason. The rest go to a person.
+export function unaccountedCandidates(candidates: readonly Region[], findings: readonly { readonly region: Region }[], dismissed: readonly number[]): readonly Region[] {
+  return candidates.filter((candidate, index) => !dismissed.includes(index) && !findings.some((finding) => regionOverlap(candidate, finding.region) > 0))
+}
+
 // A box a renter draws on their incident photograph: on the photograph, and no larger than the cap.
 export function checkReportedRegion(region: Region): boolean {
   return checkRegion(region) && region.width * region.height <= INSPECTION_LIMITS.maxReportedArea

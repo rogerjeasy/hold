@@ -28,7 +28,7 @@ function recordedModel(): ComparisonModel & { readonly requests: LookRequest[] }
     requests,
     look(request) {
       requests.push(request)
-      return Promise.resolve({ kind: 'result', model: 'recorded-model', inputTokens: 1000, outputTokens: 100, data: { sameItem: true, sameView: true, findings: [request.kind === 'first' ? finding : { ...finding, priceCode: null }] } })
+      return Promise.resolve({ kind: 'result', model: 'recorded-model', inputTokens: 1000, outputTokens: 100, data: { sameItem: true, sameView: true, findings: [request.kind === 'first' ? finding : { ...finding, priceCode: null }], dismissed: [] } })
     },
   }
 }

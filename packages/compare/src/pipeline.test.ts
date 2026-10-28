@@ -5,7 +5,7 @@ import { compareInspection } from './pipeline.ts'
 
 const region = { x: 0.2, y: 0.2, width: 0.2, height: 0.2 }
 const damage = { region, class: 'new_damage', confidence: 0.96, description: 'New scratch on the frame', priceCode: 'scratch' }
-const result = (findings: readonly unknown[] = []) => ({ sameItem: true, sameView: true, findings })
+const result = (findings: readonly unknown[] = [], dismissed: readonly unknown[] = []) => ({ sameItem: true, sameView: true, findings, dismissed })
 const reply = (data: unknown) => ({ kind: 'result' as const, model: 'recorded-model', data, inputTokens: 100, outputTokens: 50 })
 async function input() {
   const image = await sharp({ create: { width: 640, height: 480, channels: 3, background: 'grey' } }).jpeg().toBuffer()
@@ -20,8 +20,26 @@ describe('the return comparison pipeline', () => {
     expect(calls).toBe(10)
     expect(compared.state).toBe('deferred')
   })
-  it('reports clean only after a valid model result on every view', async () => {
-    expect(await compareInspection(await input(), { look: () => Promise.resolve(reply(result())) })).toMatchObject({ state: 'clean', findings: [], model: 'recorded-model' })
+  it('reports clean only after a valid model result on every view that accounts for each candidate', async () => {
+    const dismissed = [{ candidate: 0, reason: 'shadow' }]
+    expect(await compareInspection(await input(), { look: () => Promise.resolve(reply(result([], dismissed))) })).toMatchObject({ state: 'clean', findings: [], model: 'recorded-model' })
+  })
+  // Code finds the candidate areas, so the model may not pass over one in silence (AGENTS.md section 8).
+  it('sends a candidate the model neither reported nor dismissed to a person, as an uncertain finding over it', async () => {
+    const compared = await compareInspection(await input(), { look: () => Promise.resolve(reply(result())) })
+    expect(compared).toMatchObject({ state: 'deferred', findings: [{ view: 'left-side', region, class: 'uncertain', confidence: 0, priceCode: null, secondLookConfirmed: null }] })
+  })
+  it('does not take a dismissal that names no candidate', async () => {
+    const compared = await compareInspection(await input(), { look: () => Promise.resolve(reply(result([], [{ candidate: 3, reason: 'light' }]))) })
+    expect(compared).toMatchObject({ state: 'deferred', findings: [{ class: 'uncertain', region }] })
+  })
+  it('records how many candidates code found, how many the model dismissed and how many went to a person', async () => {
+    const given = await input()
+    const pair = given.views[0]?.pair
+    if (pair === undefined) throw new Error('No prepared pair')
+    const elsewhere = { x: 0.7, y: 0.7, width: 0.1, height: 0.1 }
+    const compared = await compareInspection({ ...given, views: [{ view: 'left-side', pair: { ...pair, candidates: [region, elsewhere] } }] }, { look: () => Promise.resolve(reply(result([], [{ candidate: 0, reason: 'reflection' }]))) })
+    expect(compared.alignment).toMatchObject({ candidates: 2, dismissed: 1, unaccounted: 1 })
   })
   it('checks damage in a fresh call that contains crops and none of the first look’s reasoning', async () => {
     const requests: unknown[] = []

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkReportedRegion, INSPECTION_LIMITS, inspectFindings } from './inspection.ts'
+import { checkReportedRegion, INSPECTION_LIMITS, inspectFindings, unaccountedCandidates } from './inspection.ts'
 import fc from 'fast-check'
 
 const region = { x: 0.2, y: 0.2, width: 0.2, height: 0.2 }
@@ -61,5 +61,33 @@ describe('marks reported during this rental (comparison step 7)', () => {
   })
   it('lets a mark from before the rental win, as it always did', () => {
     expect(inspectFindings([damage], [{ id: 'known', view: 'left-side', region }], [reported])).toMatchObject({ findings: [{ class: 'known_mark', matchedMarkId: 'known' }] })
+  })
+})
+
+// Code finds the candidate areas and the model may not pass over one: it reports a finding over it or dismisses it.
+describe('the candidate areas code found', () => {
+  const elsewhere = { x: 0.7, y: 0.7, width: 0.1, height: 0.1 }
+
+  it('are accounted for by a finding over them, of any class, or by a dismissal of their index', () => {
+    expect(unaccountedCandidates([region], [{ region: { ...region, x: 0.3 } }], [])).toEqual([])
+    expect(unaccountedCandidates([region, elsewhere], [], [0, 1])).toEqual([])
+  })
+
+  it('leave every one the model neither reported nor dismissed, in order', () => {
+    expect(unaccountedCandidates([region, elsewhere], [], [])).toEqual([region, elsewhere])
+    expect(unaccountedCandidates([region, elsewhere], [{ region }], [])).toEqual([elsewhere])
+    // A dismissal names a candidate by its index; one naming no candidate dismisses nothing.
+    expect(unaccountedCandidates([region], [], [1])).toEqual([region])
+  })
+
+  it('never lets a candidate go unaccounted unless some finding touches it or its index is dismissed', () => {
+    const area = fc.record({ x: fc.double({ min: 0, max: 0.8, noNaN: true }), y: fc.double({ min: 0, max: 0.8, noNaN: true }), width: fc.double({ min: 0.01, max: 0.2, noNaN: true }), height: fc.double({ min: 0.01, max: 0.2, noNaN: true }) })
+    fc.assert(fc.property(fc.array(area, { maxLength: 8 }), fc.array(area, { maxLength: 8 }), fc.array(fc.nat({ max: 9 }), { maxLength: 8 }), (candidates, findings, dismissed) => {
+      const left = unaccountedCandidates(candidates, findings.map((each) => ({ region: each })), dismissed)
+      candidates.forEach((candidate, index) => {
+        const touched = findings.some((each) => each.x < candidate.x + candidate.width && candidate.x < each.x + each.width && each.y < candidate.y + candidate.height && candidate.y < each.y + each.height)
+        expect(left.includes(candidate)).toBe(!touched && !dismissed.includes(index))
+      })
+    }))
   })
 })

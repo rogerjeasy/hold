@@ -1,4 +1,4 @@
-import { checkRegion, INSPECTION_LIMITS, inspectFindings } from '@hold/domain'
+import { checkRegion, INSPECTION_LIMITS, inspectFindings, unaccountedCandidates } from '@hold/domain'
 import type { Region } from '@hold/domain'
 import type { PairResult } from '@hold/vision/inspect-pair'
 import { pairedCrops } from './crops.ts'
@@ -9,6 +9,9 @@ import type { ComparisonModel, ModelFinding } from './model.ts'
 // Measured on the demonstration's sample pair on 28 October 2026: at 0.03 it agreed on the class every time but was
 // unsure of a featureless crop twice in five runs.
 export const SECOND_LOOK_MARGIN = 0.1
+
+// What a person reads on a candidate area the model neither reported nor dismissed.
+export const UNACCOUNTED = 'Code found a difference here that the model neither reported nor dismissed. A person decides.'
 
 type Mark = { readonly id: string; readonly view: string; readonly region: Region }
 // reported: marks the renter reported during this rental (step 7), covered when agreed or made the shop's matter.
@@ -24,9 +27,10 @@ export async function compareInspection(input: Input, model: ComparisonModel) {
   const alignedMarks: Mark[] = []
   const alignedReported: (Mark & { covered: boolean })[] = []
   const alignment: Record<string, number> = {}
+  let candidates = 0; let dismissed = 0; let unaccounted = 0
   const finish = (deferred: boolean) => {
     const inspected = inspectFindings(findings, alignedMarks, alignedReported)
-    return { ...inspected, state: deferred ? 'deferred' as const : inspected.state, model: [...models].join(', ') || 'not_called', promptVersion: PROMPT_VERSION, alignment: { ...alignment, calls, inputTokens, outputTokens } }
+    return { ...inspected, state: deferred ? 'deferred' as const : inspected.state, model: [...models].join(', ') || 'not_called', promptVersion: PROMPT_VERSION, alignment: { ...alignment, calls, inputTokens, outputTokens, candidates, dismissed, unaccounted } }
   }
   const look: ComparisonModel['look'] = async (request) => {
     if (calls >= INSPECTION_LIMITS.maxCalls || signal.aborted) return { kind: 'unavailable', model: 'not_called' }
@@ -59,6 +63,13 @@ export async function compareInspection(input: Input, model: ComparisonModel) {
       }
       findings.push({ ...finding, view, priceCode: finding.priceCode !== null && input.priceCodes.includes(finding.priceCode) ? finding.priceCode : null, secondLookConfirmed })
     }
+    // A candidate the model passed over in silence goes to a person, as an uncertain finding over it.
+    const dismissedHere = parsed.data.dismissed.map((each) => each.candidate).filter((index) => index < pair.candidates.length)
+    const left = unaccountedCandidates(pair.candidates, parsed.data.findings, dismissedHere)
+    candidates += pair.candidates.length
+    dismissed += new Set(dismissedHere).size
+    unaccounted += left.length
+    for (const region of left) findings.push({ region, class: 'uncertain', confidence: 0, description: UNACCOUNTED, priceCode: null, view, secondLookConfirmed: null })
   }
   return finish(false)
 }
