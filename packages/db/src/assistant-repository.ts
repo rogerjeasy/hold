@@ -1,6 +1,6 @@
 import { ASSISTANT_LIMITS, assistantBookingStatus, ITEM_CATEGORIES, mayBookUnpaid, PENDING_PAYMENT_MINUTES, quoteState } from '@hold/domain'
 import type { AssistantBookingStatus, ItemCategory, Period, RentalState } from '@hold/domain'
-import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNull, lt, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { bookableTypes, createBooking, priceBooking } from './booking-repository.ts'
 import { readJson } from './read-json.ts'
@@ -95,7 +95,7 @@ export async function expireUnpaidAssistantBookings(transaction: Transaction, no
   const expired = await transaction
     .update(rentals)
     .set({ state: 'abandoned' })
-    .where(and(eq(rentals.bookedThrough, 'assistant'), eq(rentals.state, 'pending_payment'), sql`${rentals.createdAt} < ${lapsedBefore(now)}`, sql`not ${captureBegun}`))
+    .where(and(eq(rentals.bookedThrough, 'assistant'), eq(rentals.state, 'pending_payment'), lt(rentals.createdAt, lapsedBefore(now)), sql`not ${captureBegun}`))
     .returning({ id: rentals.id })
   return expired.length
 }
