@@ -15,7 +15,7 @@ export function GhostControls({ shown, onShown, strength, onStrength }: GhostCon
   const id = useId()
   const percent = t('ghostPercent', { percent: strength })
   return (
-    <div className="grid gap-x-6 gap-y-2 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center">
+    <div className="grid gap-2">
       <label className="flex min-h-11 min-w-0 items-center gap-3">
         <input type="checkbox" checked={shown} onChange={(event) => { onShown(event.target.checked) }} className="min-h-11 min-w-11 shrink-0 accent-primary" />
         <span className="min-w-0 wrap-long-words">{t('ghostShown')}</span>
