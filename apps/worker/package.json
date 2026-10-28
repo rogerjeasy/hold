@@ -5,6 +5,7 @@
   "type": "module",
   "dependencies": {
     "@aws-crypto/client-node": "^5.0.2",
+    "@aws-sdk/client-s3": "3.1151.0",
     "@hold/auth": "workspace:*",
     "@hold/compare": "workspace:*",
     "@hold/db": "workspace:*",

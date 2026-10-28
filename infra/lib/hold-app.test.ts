@@ -285,16 +285,26 @@ describe('the worker', () => {
       .filter(([key]) => key.startsWith('WorkerRole'))
       .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: { Action: unknown }[] } } }).Properties.PolicyDocument.Statement)
 
-  it('runs negotiations from their own queue, in order per rental, with a role that may ask Claude and the database and nothing else', () => {
-    expect(functionNamed('hold-worker-negotiations')?.Properties).toMatchObject({ Runtime: 'nodejs24.x', Timeout: 600 })
+  it('runs negotiations from their own queue, in order per rental, with a role that may ask Claude, use the database and read display copies, and nothing else', () => {
+    expect(functionNamed('hold-worker-negotiations')?.Properties).toMatchObject({ Runtime: 'nodejs24.x', Timeout: 600, Environment: { Variables: expect.objectContaining({ HOLD_DISPLAY_BUCKET: expect.anything() as unknown }) as unknown } })
     work.hasResourceProperties('AWS::SQS::Queue', { QueueName: 'hold-negotiations.fifo', VisibilityTimeout: 720, FifoQueue: true })
     work.hasResourceProperties('AWS::Lambda::EventSourceMapping', { FunctionName: { Ref: Match.stringLikeRegexp('^NegotiationWorker') }, BatchSize: 1, FunctionResponseTypes: ['ReportBatchItemFailures'] })
-    const policy = JSON.stringify(Object.entries(work.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('NegotiationRole')).map(([, value]) => value))
+    const statements = Object.entries(work.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('NegotiationRole')).flatMap(([, value]) => (value as { Properties: { PolicyDocument: { Statement: { Action: unknown; Resource: unknown }[] } } }).Properties.PolicyDocument.Statement)
+    const policy = JSON.stringify(statements)
     expect(policy).toContain('bedrock-mantle:CreateInference')
     expect(policy).toContain('anthropic.claude-opus-5-5')
-    expect(policy).not.toMatch(/sqs:SendMessage|paypal\/shops|s3:|smtp|scheduler:/)
+    // The advocates look at the display copies of a claim's photographs, and at nothing else in storage.
+    const storage = statements.filter((statement) => JSON.stringify(statement.Action).includes('s3:'))
+    expect(storage.map((statement) => [statement.Action].flat())).toEqual([['s3:GetObject']])
+    expect(JSON.stringify(storage[0]?.Resource)).toContain('DisplayBucket')
+    expect(policy).not.toMatch(/sqs:SendMessage|paypal\/shops|s3:PutObject|s3:GetObjectVersion|EvidenceBucket|smtp|scheduler:/)
     web.hasResourceProperties('AWS::AppRunner::Service', { SourceConfiguration: { ImageRepository: { ImageConfiguration: { RuntimeEnvironmentVariables: Match.arrayWith([{ Name: 'HOLD_NEGOTIATIONS_QUEUE_URL', Value: Match.anyValue() }]) } } } })
     work.hasResourceProperties('AWS::Lambda::Function', { FunctionName: 'hold-worker-outbox-relay', Environment: { Variables: Match.objectLike({ HOLD_NEGOTIATIONS_QUEUE_URL: Match.anyValue() }) } })
+  })
+
+  it('sends to the owner, every five minutes, a negotiation nobody moved in time, with the negotiation role', () => {
+    expect(functionNamed('hold-worker-negotiation-sweep')?.Properties).toMatchObject({ Runtime: 'nodejs24.x', Role: { 'Fn::GetAtt': [expect.stringMatching(/^NegotiationRole/) as unknown, 'Arn'] } })
+    work.hasResourceProperties('AWS::Scheduler::Schedule', { Name: 'hold-negotiation-sweep', ScheduleExpression: 'rate(5 minutes)', Target: Match.objectLike({ Arn: { 'Fn::GetAtt': [Match.stringLikeRegexp('^NegotiationSweep'), 'Arn'] } }) })
   })
 
   it('runs comparisons from their queue with a separate role that cannot send money work or read PayPal credentials', () => {
