@@ -11,6 +11,13 @@ import type { Transaction } from './scope.ts'
 
 export const SHOP_ADVOCATE = 'shop_advocate'
 export const RENTER_ADVOCATE = 'renter_advocate'
+// A renter's own assistant, named by its session, may be the agent of the renter's mandate instead of Hold's advocate
+// (extensions.md section 9.11). The mandate then names that one session, on that one rental's claim.
+const ASSISTANT_PREFIX = 'assistant:'
+export const assistantAdvocate = (sessionId: string): string => `${ASSISTANT_PREFIX}${sessionId}`
+export const isAssistantAdvocate = (agent: string): boolean => agent.startsWith(ASSISTANT_PREFIX)
+// Whether Hold runs the side whose mandate names this agent.
+export const isHoldAdvocate = (agent: string): boolean => agent === SHOP_ADVOCATE || agent === RENTER_ADVOCATE
 
 export function mandateFromRow(row: typeof mandates.$inferSelect): Mandate {
   return { id: row.id, kind: row.kind, grantedTo: row.agent, validFrom: row.validFrom, validUntil: row.validUntil, revokedAt: row.revokedAt, limits: row.limits }

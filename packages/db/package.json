@@ -5,7 +5,8 @@
   "type": "module",
   "devDependencies": {
     "@electric-sql/pglite": "0.5.9",
-    "drizzle-kit": "0.31.11"
+    "drizzle-kit": "0.31.11",
+    "fast-check": "^4.10.2"
   },
   "dependencies": {
     "@aws-sdk/client-rds-data": "3.1151.0",
@@ -19,7 +20,8 @@
     "./testing": "./src/testing/test-database.ts",
     "./data-api": "./src/data-api.ts",
     "./testing/ready-rental": "./src/testing/ready-rental.ts",
-    "./testing/presented-claim": "./src/testing/presented-claim.ts"
+    "./testing/presented-claim": "./src/testing/presented-claim.ts",
+    "./testing/assistant-session": "./src/testing/assistant-session.ts"
   },
   "scripts": {
     "migrations:generate": "drizzle-kit generate",

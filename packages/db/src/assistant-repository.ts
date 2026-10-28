@@ -3,6 +3,7 @@ import type { AssistantBookingStatus, ItemCategory, Period, RentalState } from '
 import { and, asc, eq, inArray, isNull, lt, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { bookableTypes, createBooking, priceBooking } from './booking-repository.ts'
+import { endAssistantGrants } from './negotiation-assistant.ts'
 import { readJson } from './read-json.ts'
 import { agentSessions, auditLog, executions, moneyEvents, quotes, rentals, wearPolicies } from './schema/index.ts'
 import type { DraftReply } from './schema/index.ts'
@@ -252,7 +253,8 @@ export async function touchAgentSession(transaction: Transaction, sessionId: str
   await transaction.update(agentSessions).set({ lastUsedAt: now }).where(and(eq(agentSessions.id, sessionId), isNull(agentSessions.revokedAt)))
 }
 
-// The renter disconnects their assistant. Its next call is refused. False when there was nothing to disconnect.
+// The renter disconnects their assistant. Its next call is refused, and a claim it was arguing as the renter's advocate
+// goes to the owner. False when there was nothing to disconnect.
 export async function revokeAssistant(transaction: Transaction, rentalId: string, now: Date): Promise<boolean> {
   if (!UUID.test(rentalId)) return false
   const revoked = await transaction
@@ -260,6 +262,7 @@ export async function revokeAssistant(transaction: Transaction, rentalId: string
     .set({ revokedAt: now })
     .where(and(eq(agentSessions.rentalId, rentalId), isNull(agentSessions.revokedAt)))
     .returning({ id: agentSessions.id })
+  for (const session of revoked) await endAssistantGrants(transaction, session.id, now)
   return revoked.length > 0
 }
 
