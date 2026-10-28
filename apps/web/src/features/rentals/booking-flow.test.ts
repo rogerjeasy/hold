@@ -148,7 +148,11 @@ describe('the renter’s link', () => {
     if (!started.ok) throw new Error(JSON.stringify(started))
     expect(started.value.approvalUrl).toMatch(/\/simulated-paypal\/FAKE-ORDER-/)
     const orderId = started.value.approvalUrl.split('/').at(-1) ?? ''
+    // PayPal's own button returns to where PayPal's page would, with the order named as PayPal names it.
+    expect(started.value.orderId).toBe(orderId)
     const { simulatedPayPal, database } = await getServices()
+    expect(started.value.returnUrl).toBe(`${simulatedPayPal?.orderLinks(orderId)?.returnUrl ?? ''}?token=${orderId}`)
+    expect(started.value.returnUrl).toContain(`/r/${token}/paid?token=`)
     expect(simulatedPayPal?.orderLinks(orderId)?.amount).toEqual({ cents: 3 * 40_00, currency: 'EUR' })
     // What the renter reads in PayPal names what they rent, not a bare count.
     expect(simulatedPayPal?.orderLinks(orderId)?.description).toContain('1 × City e-bike')

@@ -18,5 +18,5 @@ export default async function Page({ params, searchParams }: { params: Promise<{
   const page = await renterHoldPage(token)
   if (!page.ok) return <LinkRefused failure={page.failure} />
   if (typeof orderId === 'string') return <HoldReturnScreen token={token} orderId={orderId} shopName={page.view.shopName} placed={page.hold?.state === 'placed'} />
-  return <HoldScreen token={token} view={page.view} hold={page.hold} />
+  return <HoldScreen token={token} view={page.view} hold={page.hold} checkout={page.checkout} />
 }

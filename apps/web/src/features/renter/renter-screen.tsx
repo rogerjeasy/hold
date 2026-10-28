@@ -13,6 +13,7 @@ import { formatMoney } from '@/lib/money'
 import { linkRoutes } from '@/lib/routes'
 import { PayButton } from './pay-button'
 import { TwoAmounts } from './two-amounts'
+import type { PayPalCheckout } from './paypal-sdk'
 
 function Status({ token, view }: { token: string; view: RenterView }) {
   const t = useTranslations('renter.status')
@@ -70,12 +71,15 @@ export function RenterScreen({
   canReport = false,
   askConsent = false,
   assistant = null,
+  checkout,
 }: {
   token: string
   view: RenterView
   canReport?: boolean
   askConsent?: boolean
   assistant?: { readonly connected: boolean; readonly revoked: boolean } | null
+  // The shop's PayPal app, for PayPal's own button. Absent where it is not known.
+  checkout?: PayPalCheckout | undefined
 }) {
   const t = useTranslations('renter')
   const trust = useTranslations('trust.record')
@@ -120,7 +124,7 @@ export function RenterScreen({
       </Panel>
       <TwoAmounts view={view} />
       <TermsView currency={view.currency} prices={view.prices} wearPolicy={view.wearPolicy} />
-      {due ? <PayButton token={token} amount={formatMoney(money(view.feeCents, view.currency), locale)} /> : null}
+      {due ? <PayButton token={token} amount={formatMoney(money(view.feeCents, view.currency), locale)} checkout={checkout} /> : null}
     </div>
   )
 }

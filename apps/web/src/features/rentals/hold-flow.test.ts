@@ -125,6 +125,9 @@ describe('the renter approving the hold', () => {
     const orderId = orderOf(started.value.approvalUrl)
     const { simulatedPayPal, database } = await getServices()
     expect(simulatedPayPal?.orderLinks(orderId)?.amount).toEqual({ cents: HOLD_CENTS, currency: 'EUR' })
+    // PayPal's own button returns to where PayPal's page would, with the order named as PayPal names it.
+    expect(started.value.orderId).toBe(orderId)
+    expect(started.value.returnUrl).toBe(`${simulatedPayPal?.orderLinks(orderId)?.returnUrl ?? ''}?token=${orderId}`)
     expect(simulatedPayPal?.orderLinks(orderId)?.returnUrl).toMatch(/\/r\/[A-Za-z0-9_-]{65}\/pay$/)
 
     expect(await renter.confirmHold(null, form({ token, orderId, locale: 'en' }))).toEqual({ ok: false, failure: 'refused', reason: 'not_approved' })

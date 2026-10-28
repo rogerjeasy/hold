@@ -1,5 +1,5 @@
 import type { RenterView } from '@hold/db'
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { renderWithIntl } from '@/test/render'
 import { RenterScreen } from './renter-screen'
@@ -30,7 +30,19 @@ const view: RenterView = {
   feeOrderId: null,
 }
 
+// PayPal's v6 web SDK, enough to make its button: eligible, with a session that is never started here.
+const fakePayPal = () => Object.assign(window, { paypal: { createInstance: () => Promise.resolve({ findEligibleMethods: () => Promise.resolve({ isEligible: () => true }), createPayPalOneTimePaymentSession: () => Promise.resolve({ start: () => Promise.resolve() }) }) } })
+
 describe('the renter’s page', () => {
+  it('pays the fee with PayPal’s own button when the shop’s PayPal app is known', async () => {
+    fakePayPal()
+    const { container } = renderWithIntl(<RenterScreen token="t" view={view} checkout={{ clientId: 'shop-client-id', environment: 'sandbox' }} />)
+    await waitFor(() => {
+      expect(container.querySelector('paypal-button')).not.toBeNull()
+    })
+    Reflect.deleteProperty(window, 'paypal')
+  })
+
   it('offers “Something happened” while the renter has the items, through a link that may report', () => {
     renderWithIntl(<RenterScreen token="signed-token" view={{ ...view, state: 'out' }} canReport />)
     expect(screen.getByRole('link', { name: 'Something happened' })).toHaveAttribute('href', '/r/signed-token/incident')

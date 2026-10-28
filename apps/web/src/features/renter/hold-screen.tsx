@@ -6,17 +6,20 @@ import { Link } from '@/i18n/navigation'
 import { linkRoutes } from '@/lib/routes'
 import { HoldReason } from '@/features/trust/hold-reason'
 import { HoldButton } from './hold-button'
+import type { PayPalCheckout } from './paypal-sdk'
 
 type HoldScreenProps = {
   token: string
   view: Pick<RenterView, 'shopName' | 'timeZone' | 'currency' | 'holdCents' | 'replyPeriodHours'>
   // Absent until staff ask for the hold at pickup.
   hold: RentalHold | undefined
+  // The shop's PayPal app, for PayPal's own button. Absent where it is not known.
+  checkout?: PayPalCheckout | undefined
 }
 
 // Where the renter approves the hold at pickup, from the code staff show. It says what the hold is, that it is not a
 // charge, and sends them to PayPal for exactly the amount agreed at booking.
-export function HoldScreen({ token, view, hold }: HoldScreenProps) {
+export function HoldScreen({ token, view, hold, checkout }: HoldScreenProps) {
   const t = useTranslations('renter.holdPage')
   const format = useShopFormat({ timeZone: view.timeZone, currency: view.currency })
   const amount = format.money(hold?.reservedCents ?? view.holdCents)
@@ -38,7 +41,7 @@ export function HoldScreen({ token, view, hold }: HoldScreenProps) {
               {t('declined')}
             </p>
           )}
-          <HoldButton token={token} amount={amount} />
+          <HoldButton token={token} amount={amount} checkout={checkout} />
         </div>
       ) : (
         <div className="grid gap-3">

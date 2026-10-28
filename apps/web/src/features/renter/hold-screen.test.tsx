@@ -1,5 +1,5 @@
 import type { RentalHold } from '@hold/db'
-import { screen } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { renderWithIntl } from '@/test/render'
 import { HoldScreen } from './hold-screen'
@@ -24,6 +24,15 @@ const hold = (overrides: Partial<RentalHold> = {}): RentalHold => ({
 })
 
 describe('the renter’s hold page', () => {
+  it('approves the hold with PayPal’s own button when the shop’s PayPal app is known', async () => {
+    Object.assign(window, { paypal: { createInstance: () => Promise.resolve({ findEligibleMethods: () => Promise.resolve({ isEligible: () => true }), createPayPalOneTimePaymentSession: () => Promise.resolve({ start: () => Promise.resolve() }) }) } })
+    const { container } = renderWithIntl(<HoldScreen token="token" view={view} hold={hold()} checkout={{ clientId: 'shop-client-id', environment: 'sandbox' }} />)
+    await waitFor(() => {
+      expect(container.querySelector('paypal-button')).not.toBeNull()
+    })
+    Reflect.deleteProperty(window, 'paypal')
+  })
+
   it('explains the hold and offers to approve exactly the agreed amount in PayPal', () => {
     renderWithIntl(<HoldScreen token="token" view={view} hold={hold()} />)
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Approve your hold')

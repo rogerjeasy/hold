@@ -7,6 +7,7 @@ import type { RenterLink } from '@hold/db'
 import type { Locale } from '@/i18n/routing'
 import { Refusal } from './action'
 import { paypalForShop } from './paypal-for-shop'
+import type { StartedPayment } from './fee-payment'
 import type { InLinkShop } from './renter-access'
 import { renterUrl } from './renter-links'
 import { getServices } from './services'
@@ -15,7 +16,7 @@ import { getServices } from './services'
 // it first. The amount is the hold agreed at booking, stored on the hold. The worker authorizes the order; this only
 // records the execution and sends it.
 
-export async function startHoldApproval(link: RenterLink, inLinkShop: InLinkShop, token: string, language: Locale): Promise<{ readonly approvalUrl: string } | Refusal> {
+export async function startHoldApproval(link: RenterLink, inLinkShop: InLinkShop, token: string, language: Locale): Promise<StartedPayment | Refusal> {
   const { hold, view } = await inLinkShop(async (transaction) => ({ hold: await rentalHold(transaction, link.rentalId), view: await renterView(transaction, link.rentalId, new Date()) }))
   if (hold === undefined || view === undefined) return new Refusal('not_requested')
   // A placed hold asks for approval only while a replacement for it waits.
@@ -25,11 +26,12 @@ export async function startHoldApproval(link: RenterLink, inLinkShop: InLinkShop
 
   // An order still waiting for approval is reused, the hold's own or a replacement's. One approved and then declined
   // needs a new one.
+  const url = `${await renterUrl(token, language)}/pay`
+  const started = (orderId: string, approvalUrl: string): StartedPayment => ({ approvalUrl, orderId, returnUrl: `${url}?token=${encodeURIComponent(orderId)}` })
   if (hold.orderId !== null) {
     const order = await paypal.readHoldOrder(hold.orderId)
-    if (order.ok && order.value.status === 'awaiting_approval' && order.value.approvalUrl !== undefined) return { approvalUrl: order.value.approvalUrl }
+    if (order.ok && order.value.status === 'awaiting_approval' && order.value.approvalUrl !== undefined) return started(hold.orderId, order.value.approvalUrl)
   }
-  const url = `${await renterUrl(token, language)}/pay`
   const created = await paypal.createHoldOrder({
     amount: money(hold.reservedCents, hold.currency),
     rentalReference: link.rentalId,
@@ -42,7 +44,7 @@ export async function startHoldApproval(link: RenterLink, inLinkShop: InLinkShop
   if (!created.ok || created.value.approvalUrl === undefined) return new Refusal('paypal_unavailable')
   const { orderId, approvalUrl } = created.value
   await inLinkShop((transaction) => saveHoldOrder(transaction, link.rentalId, orderId))
-  return { approvalUrl }
+  return started(orderId, approvalUrl)
 }
 
 // The renter is back from PayPal. Once PayPal shows the order approved, the authorization is recorded and handed to

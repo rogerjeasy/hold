@@ -15,7 +15,10 @@ import { getServices } from './services'
 // one stored on the rental. Each step can be repeated: an order the renter is approving is reused, and a capture is
 // keyed by the rental and its order. The worker calls PayPal to capture; this only records the execution and sends it.
 
-export async function startFeePayment(link: RenterLink, inLinkShop: InLinkShop, token: string, language: Locale): Promise<{ readonly approvalUrl: string } | Refusal> {
+// approvalUrl: PayPal's page; returnUrl: where that page returns to, for PayPal's own button to return to as well.
+export type StartedPayment = { readonly approvalUrl: string; readonly orderId: string; readonly returnUrl: string }
+
+export async function startFeePayment(link: RenterLink, inLinkShop: InLinkShop, token: string, language: Locale): Promise<StartedPayment | Refusal> {
   const now = new Date()
   const view = await inLinkShop((transaction) => renterView(transaction, link.rentalId, now))
   if (view === undefined) return new Refusal('not_found')
@@ -24,11 +27,12 @@ export async function startFeePayment(link: RenterLink, inLinkShop: InLinkShop, 
   const paypal = await inLinkShop((transaction) => paypalForShop(transaction, link.shopId))
   if (paypal === undefined) return new Refusal('paypal_not_connected')
 
+  const url = await renterUrl(token, language)
+  const started = (orderId: string, approvalUrl: string): StartedPayment => ({ approvalUrl, orderId, returnUrl: `${url}/paid?token=${encodeURIComponent(orderId)}` })
   if (view.feeOrderId !== null) {
     const order = await paypal.readHoldOrder(view.feeOrderId)
-    if (order.ok && order.value.status === 'awaiting_approval' && order.value.approvalUrl !== undefined) return { approvalUrl: order.value.approvalUrl }
+    if (order.ok && order.value.status === 'awaiting_approval' && order.value.approvalUrl !== undefined) return started(view.feeOrderId, order.value.approvalUrl)
   }
-  const url = await renterUrl(token, language)
   // What the renter reads in PayPal, in their language. PayPal takes up to 127 characters.
   const t = await getTranslations({ locale: language, namespace: 'renter' })
   const created = await paypal.createFeeOrder({
@@ -43,7 +47,7 @@ export async function startFeePayment(link: RenterLink, inLinkShop: InLinkShop, 
   if (!created.ok || created.value.approvalUrl === undefined) return new Refusal('paypal_unavailable')
   const { orderId, approvalUrl } = created.value
   await inLinkShop((transaction) => saveFeeOrder(transaction, link.rentalId, orderId))
-  return { approvalUrl }
+  return started(orderId, approvalUrl)
 }
 
 // The renter is back from PayPal. Once PayPal shows the order approved, the capture is recorded and handed to the
