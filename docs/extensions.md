@@ -87,7 +87,7 @@ These extend the product principles and the safeguards. A feature that cannot me
 
 1. **A charge still begins from a claim.** A capture can only come from a claim that reached `charging`. An agent can shorten the path to a decision. It cannot create the evidence, the claim lines or the prices.
 2. **No amount is model output.** Every amount shown or charged is read from the database or computed by plain code from records. The one place an agent names amounts is an offer in Extension 4, and each amount there is checked by code against the line's published price and the agent's limits.
-3. **Detect with code, explain with the model.** Anything that must never be missed is found by deterministic code. If the model is unavailable, the list of things that need attention is still complete.
+3. **Detect with code, explain with the model.** Anything that must never be missed is found by deterministic code. If the model is unavailable, the list of things that need attention is still complete. In the photo comparison, code finds the areas that changed and the problems with a photograph, and every finding is the model's; with no model, the return goes to a person, and nothing is charged.
 4. **A person decides, at the moment or in advance.** An agent acts on money only after a person's approval on screen, or inside a mandate that a person granted. No third way exists.
 5. **One gateway.** Every tool call from every agent passes the same gateway, which checks identity, shop, tier, mandate and rate, and writes the audit log.
 6. **Text from outside is data.** Renter comments, messages from another agent, memos on PayPal transactions and dispute notes are passed to a model as quoted data. Steps that read them have no tools that move money.
@@ -169,11 +169,11 @@ stateDiagram-v2
 |---|---|---|
 | `release_hold` | Voids the authorization | Direct REST |
 | `request_replacement_hold` | Sends the renter a link to approve a new hold, or uses their saved method | Direct REST |
-| `send_invoice` | Creates and sends an invoice for a decided balance | Agent Toolkit function, called by code |
-| `refund_part` | Refunds part of a capture | Agent Toolkit function, called by code |
-| `respond_to_dispute` | Uploads the evidence pack and the drafted note | Direct REST |
+| `send_invoice` | Creates and sends an invoice for a decided balance | Not offered in this build: approval is refused, and the spine invoices a balance itself once the charge is settled |
+| `refund_part` | Refunds part of a capture | Not offered in this build: no detector proposes it |
+| `respond_to_dispute` | Gives PayPal the drafted note as evidence, with the rental's latest published evidence pack as a PDF | Direct REST, `provide-evidence` |
 | `send_message` | Sends a drafted message to a renter | SES |
-| `move_booking` | Moves a booking that has not started to another free item of the same type, for the same period. Added with the rental calendar in section 12.5. | Hold's rentals path. No PayPal call. |
+| `move_booking` | Moves a booking that has not started to another free item of the same type, for the same period. Planned with the rental calendar in section 12.5; not built. | Hold's rentals path. No PayPal call. |
 | `note` | Nothing. It informs the owner. | |
 
 There is no proposal kind for a capture. A test enumerates the kinds and fails if any maps to one.
@@ -313,7 +313,7 @@ Testing is not the same as a shop. Every real decision is also a label.
 - **X0.5** Closing a claim writes one `finding_outcomes` row for each of its findings.
 - **X0.6** No number appears anywhere without its count.
 
-**Status, 26 October 2026.** X0.2, X0.5 and X0.6 pass in tests (`eval/src/evaluate.test.ts`, `packages/db/src/scorecard-repository.test.ts`, `packages/domain/src/evaluation.test.ts`, the scorecard screens' tests). X0.3 holds by construction, every surface rendering one run's measures through `sharePercent`, and is checked when the first run is accepted. X0.1 waits for the photographs of the hybrid set (`architecture.md` section 10.8). X0.4 needs the `hold-github-eval` role and the `hold/database/eval` secret deployed, the repository variables `AWS_EVAL_ROLE_ARN` and `HOLD_DATABASE_EVAL_SECRET_ARN` set, and one deliberately weakened run.
+**Status, 26 October 2026.** X0.2, X0.5 and X0.6 pass in tests (`eval/src/evaluate.test.ts`, `packages/db/src/scorecard-repository.test.ts`, `packages/domain/src/evaluation.test.ts`, the scorecard screens' tests). X0.3 holds by construction, every surface rendering one run's measures through `sharePercent`, and is checked when the first run is accepted. X0.1 waits for the photographs of the hybrid set (`architecture.md` section 10.8). **28 October 2026:** still waiting. The set needs real photographs, which only the team can take: one bike (A) photographed view by view on separate occasions, sessions 1 to 3 at least, and one other bike (B) once, named like `A-s1-frame-left.jpg` and `B-s1-frame-left.jpg`, at least four views so each half has two. `pnpm --filter @hold/eval augment --raw <folder>` then builds both halves, with synthetic pairs filling each group and labelled as synthetic. Meanwhile, on the demonstration's own sample pair, the second look was unsure of a featureless tube twice in five runs; with a wider crop (`SECOND_LOOK_MARGIN`, prompt version `inspection-2`) it confirmed the chip 8 of 8 times and still sent the contested sample to a person 3 of 3. That is a check on one pair, not a measurement, and no figure is published from it. X0.4 needs the `hold-github-eval` role and the `hold/database/eval` secret deployed, the repository variables `AWS_EVAL_ROLE_ARN` and `HOLD_DATABASE_EVAL_SECRET_ARN` set, and one deliberately weakened run.
 
 ### 5.10 In the video
 
@@ -412,9 +412,9 @@ When the owner rejects a proposal with a reason, the agent drafts a rule from it
 | Read disputes, invoices and tracking | `list_disputes`, `get_dispute`, `list_invoices`, `get_invoice`, `get_shipment_tracking` | PayPal remote MCP server |
 | Release a hold | Payments v2, void | Direct REST, after approval |
 | Replacement hold | Orders v2, authorize | Direct REST, after approval |
-| Invoice a balance | Invoicing v2, create and send | Agent Toolkit function called by code, after approval |
-| Remind about an invoice | `send_invoice_reminder` | Agent Toolkit function called by code, automatic tier |
-| Refund part of a charge | Payments v2, refund | Agent Toolkit function called by code, after approval |
+| Invoice a balance | Invoicing v2, create and send | Direct REST, by the spine once a charge is settled |
+| Remind about an invoice | Hold's own email reminder | Automatic tier; PayPal's `send_invoice_reminder` is not used |
+| Refund part of a charge | Payments v2, refund | Direct REST, from a decided claim; not from the queue in this build |
 | Answer a dispute | Disputes v1, provide evidence | Direct REST, after approval |
 
 **How the MCP server is connected.** The worker runs an MCP client and connects to `https://mcp.sandbox.paypal.com/sse` over server-sent events with the shop's own access token (the `/http` path answers 404; `tech-stack.md` trial 10). It lists the server's tools, keeps only those on Hold's read allowlist, and offers them to the model through Hold's gateway. Two reasons:
@@ -805,7 +805,7 @@ This is listed so the mapping is known. It is built only if everything else in t
 
 | Check | State | Tested by |
 |---|---|---|
-| X3.1 | Passes with the MCP SDK's own client over streamable HTTP, in the package and through the app's `/mcp` route, and with the hosted assistant end to end. Trial 13, a common outside client such as MCP Inspector against the deployed address, not yet run. | `server.test.ts`, `route.test.ts`, `assistant.spec.ts` |
+| X3.1 | On the deployed app on 27 October 2026, `create_booking` failed: the expiry of unpaid assistant bookings bound its date as untyped text, which Aurora's Data API refuses and the in-memory PostgreSQL accepts. Fixed with a typed comparison and a Data API test (`assistant-data-api.test.ts`); a tool call that fails inside the server now reaches the model as a failed result instead of ending the turn. Passes with the MCP SDK's own client over streamable HTTP, in the package and through the app's `/mcp` route, and with the hosted assistant end to end. Trial 13, a common outside client such as MCP Inspector against the deployed address, not yet run. | `server.test.ts`, `route.test.ts`, `assistant.spec.ts` |
 | X3.2 | Passes against the simulated PayPal: the person approves and returns, `get_booking` reports paid and returns the token, and the rental shows in the staff list as booked by the renter's assistant. The live sandbox not yet run. | `route.test.ts`, `assistant.spec.ts`, `rentals-screen.test.tsx` |
 | X3.3 | Passes | `server.test.ts`, `route.test.ts`, `catalogue.test.ts`, `assistant-repository.test.ts` |
 | X3.4 | Passes: after fifteen minutes with no capture begun, the rental is `abandoned` and its item is free | `assistant.test.ts`, `assistant-repository.test.ts` |
@@ -1352,6 +1352,8 @@ Page `/shop/insights`, for the owner and managers. Its data comes from one serve
 - **Custom widgets.** A hold's life: each authorization on its 29-day line, with assured, valid and ending marked. A settlement waterfall: reserved, then captured and released, showing that captured plus released never exceeds reserved. Both use Hold's design tokens in both themes.
 - **The insights agent.** A custom agent on the Studio Agent Framework that works with Studio's built-in agents to add and change widgets on request, such as "damage rate by item type this month". Its tier is `read`. It has no PayPal tool and no tool that writes. Every number on a widget is computed by Studio's data engine from the rows the server sent, never written by the model. The rows it sees carry no renter names or emails. If the model is down, the dashboard still shows every widget already saved.
 - **Model.** Claude Opus 5.5 on Bedrock, as for every agent in Hold, if Studio accepts a swapped-in harness. The prize page suggests it does. Confirm on the trial before building.
+
+**Status, 28 October 2026.** The calendar is built, read only: `/shop/calendar` on Bryntum Scheduler's trial package, each item a row and each rental a bar with its standing in words (held on PayPal, waiting for the renter in PayPal, late, being settled, done), opening on today with a line marking now; a bar opens its rental; below `md` a list by item (`apps/web/src/features/calendar`, `shopCalendar` in `packages/db`). S1 passes in tests and in the width checks; S2 holds because the calendar reads only states the spine records after verified events. Not built: the finer flags of S3, moving bookings and `move_booking` (S4 to S6), and the AG Studio dashboard (S8, S9).
 
 **Done when**
 

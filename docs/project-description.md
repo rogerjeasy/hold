@@ -2,11 +2,13 @@
 
 **The deposit that never leaves your account.**
 
-Product description. PayPal AI Hackathon 2026. Draft 2, 13 October 2026.
+Product description. PayPal AI Hackathon 2026. Draft 3, 28 October 2026.
 
 This document describes the product: the problem, the audience, the features, the business value and the impact. It does not describe the implementation.
 
 Draft 2 adds six extensions. They are described in sections 6.11 to 6.16 and specified in `extensions.md`. They do not change what Hold is. Each one strengthens a promise the product already makes.
+
+Draft 3 marks what this build does not do yet as planned, where it is described, so the description matches the code.
 
 ---
 
@@ -136,19 +138,19 @@ Priya sees the same two photographs, the outlined mark and the price. She accept
 ### 6.1 Shop setup
 
 - **The catalog.** Each rentable item, or each type of item, with its value and the hold amount that protects it.
-- **The damage price list.** A plain list of what each kind of damage, loss or lateness costs. The shop writes it in ordinary language and Hold turns it into a consistent list that renters can read before they rent.
+- **The damage price list.** A plain list of what each kind of damage, loss or lateness costs. The shop writes each entry with its price, and renters read the list before they rent. Drafting the list from the shop's own words is planned, not in this build.
 - **The wear policy.** The shop states what it considers ordinary wear, such as small scuffs on pedals or light tyre wear. Hold applies it the same way to every customer.
 - **The photo plan.** For each type of item, the set of views that must be captured. Hold suggests a plan from the item type and the shop adjusts it.
-- **Rental terms in plain language.** Hold drafts clear terms from the shop's choices, in the languages its customers speak.
+- **Rental terms in plain language.** Hold drafts clear terms from the shop's choices, in the languages its customers speak. *Planned, not in this build.*
 
 ### 6.2 Booking and the hold
 
 - **Two amounts, clearly separated.** The rental fee is paid. The deposit is held. The page explains the difference in a sentence.
-- **The hold is placed close to pickup.** A PayPal hold lasts up to 29 days, so a renter who books weeks ahead approves the hold when they collect the item. A walk-in customer approves the fee and the hold together.
+- **The hold is placed close to pickup.** A PayPal hold lasts up to 29 days, so a renter who books weeks ahead approves the hold when they collect the item. A walk-in customer approves the fee and the hold one after the other; approving both at once is planned.
 - **The price list is agreed up front.** The renter sees the damage prices and accepts them as part of the booking.
-- **Returning customers.** A renter who has used the shop before can rent again without re-entering anything.
+- **Returning customers.** A renter who has used the shop before can rent again without re-entering anything. *Planned, not in this build.*
 - **Hold amounts that fit the item.** A helmet and an e-bike do not need the same protection. The shop can also lower the hold for trusted repeat customers.
-- **Long rentals.** A PayPal hold lasts up to 29 days. Hold keeps it valid during the rental, and for rentals that run longer it switches, with the renter's agreement, to a saved payment method.
+- **Long rentals.** A PayPal hold lasts up to 29 days. Hold keeps it valid during the rental by renewing it when it charges. This build books rentals of up to four weeks; switching longer rentals to a saved payment method is planned.
 
 ### 6.3 Guided handover
 
@@ -165,7 +167,7 @@ Priya sees the same two photographs, the outlined mark and the price. She accept
 - **Three outcomes for each difference.** No change, ordinary wear, or damage. Each comes with a stated level of confidence.
 - **Matched to the price list.** Each item of damage is linked to its entry in the published list.
 - **Honest about doubt.** When the photographs do not allow a confident answer, Hold says so and asks a person to look at the item itself.
-- **Missing and late.** Missing accessories and late returns are picked up automatically and priced from the same list.
+- **Missing and late.** A late return is flagged on the day's list, and staff claim it, or a missing accessory, from the same price list. Finding and pricing them automatically is planned.
 
 ### 6.5 Settlement
 
@@ -182,10 +184,12 @@ Priya sees the same two photographs, the outlined mark and the price. She accept
 - **Live status of the hold.** Reserved, extended, released or partly taken, always visible.
 - **The full evidence.** Every photograph from handover and return, the comparison and the claim.
 - **A right to reply.** The renter can accept a claim or contest it, with their own photographs and comments, within a period the shop sets.
-- **A fair summary.** When a claim is contested, Hold lays out both positions neutrally for the person who decides.
+- **A fair summary.** When a claim is contested, Hold lays out both positions neutrally for the person who decides. *Planned, not in this build.* The owner sees the renter's words, the advocates' exchange and the evidence.
 - **A clean record.** A renter who returns items in good condition builds a history the shop can reward with smaller holds.
 
 ### 6.7 Shipped rentals
+
+*Planned, not in this build.*
 
 - **Proof at both ends.** The shop photographs the item before packing. The renter is guided through the same views when the parcel is opened and again before sending it back.
 - **Tracked both ways.** Outbound and return shipments are followed, so lateness and loss are attributed correctly.
@@ -195,16 +199,16 @@ Priya sees the same two photographs, the outlined mark and the price. She accept
 
 - **A condition history for every item.** Each rental adds a dated set of photographs.
 - **Old damage stays old.** Because every mark has a first-seen date, no renter is charged for a previous renter's damage.
-- **Maintenance signals.** Hold shows which items are wearing fastest and which are due for repair or retirement.
-- **Resale and insurance.** A documented history supports a better resale price and a stronger insurance claim.
+- **Maintenance signals.** Hold shows which items are wearing fastest and which are due for repair or retirement. *Planned, not in this build.*
+- **Resale and insurance.** A documented history supports a better resale price and a stronger insurance claim. The history is built; the reports for resale and insurance are planned.
 
 ### 6.9 The owner's view
 
 - **Today at a glance.** Items out, items due back, holds in place and claims awaiting a decision.
 - **Holds that need attention.** Any hold approaching the end of its life is flagged before it lapses.
 - **Damage and recovery.** How much damage occurred, how much was recovered, and from which items.
-- **Staff consistency.** Whether handovers and returns are being done fully, by whom, and how long they take.
-- **Ask the shop.** The owner can ask in plain language: "Which holds are still open from last week?" "Release the hold on Priya's rental." "What did damage cost me in August?" The assistant answers from the records and acts only after confirmation.
+- **Staff consistency.** Whether handovers and returns are being done fully, by whom, and how long they take. *Planned, not in this build.*
+- **Ask the shop.** The owner can ask in plain language: "Which holds are still open from last week?" "Release the hold on Priya's rental." "What did damage cost me in August?" The assistant answers from the records and acts only after confirmation. *Planned, not in this build.*
 
 ### 6.10 Safeguards
 
@@ -213,7 +217,7 @@ Priya sees the same two photographs, the outlined mark and the price. She accept
 - **A cap by design.** A claim cannot exceed the published price list for the damage found.
 - **A cooling period where the shop chooses one.** The shop can give the renter time to reply before a claim is final.
 - **Tamper-evident records.** Photographs are dated at capture and cannot be replaced afterwards.
-- **Checks on the photographs themselves.** Hold flags images that appear reused, taken of a different item or taken somewhere else.
+- **Checks on the photographs themselves.** Hold flags images that appear reused, by their fingerprints, and the comparison says when a photograph shows a different item or view. Checking where a photograph was taken is planned.
 - **Privacy.** Faces and bystanders are not needed and are blurred. Photographs are kept only as long as the shop's policy and the law require.
 - **Agents have written limits.** An agent acting for a renter or an owner stays inside limits that person set, and its actions are listed for them.
 - **No agent can charge.** An agent can release a hold when approved, argue a claim down, or prepare a decision. A charge still begins from a claim with photographs, published prices and a person's approval.
@@ -226,13 +230,14 @@ Priya sees the same two photographs, the outlined mark and the price. She accept
 - **Shown beside each finding.** Next to a finding's confidence is how often findings at that level proved correct.
 - **It cannot quietly get worse.** A new version that does worse on the test is not released.
 - **Every decision teaches.** When a person removes a finding from a claim, that is recorded and tracked over time.
+- **Where it stands.** The runner, the gate and the pages are built. The evaluation set's photographs are still to be taken, so no run has been accepted, and until one is, Hold claims no accuracy.
 
 ### 6.12 The morning queue
 
 - **An agent that works overnight.** While the shop is closed, it checks every hold, claim, invoice and dispute against PayPal's records.
-- **A short list of decisions.** In the morning the owner finds a handful of lines: release this hold, send this invoice, answer this dispute. Each has a one-line reason and the PayPal reference behind it.
+- **A short list of decisions.** In the morning the owner finds a handful of lines: release this hold, ask the renter for a fresh hold, answer this dispute with the rental's evidence pack. Proposing an invoice or a refund from the queue is planned; Hold already invoices a balance itself once a charge is settled. Each has a one-line reason and the PayPal reference behind it.
 - **One screen to approve.** The owner approves, rejects or postpones each line. Approved lines are carried out at once.
-- **It reminds on its own, and nothing more.** Reminders about a return, a reply or an unpaid invoice go out without asking. Anything that moves money waits for the owner.
+- **It reminds on its own, and nothing more.** Reminders about a return, a reply or an unpaid invoice go out without asking. Anything that moves money waits for the owner, unless the owner turned on the one standing rule: release the hold of a clean return nobody confirmed in time.
 - **It never proposes a charge.** A charge can only come from a claim.
 - **It learns the shop's habits in the open.** When the owner rejects a suggestion and says why, the agent drafts a rule. The owner confirms it, and it joins a visible list.
 
@@ -250,7 +255,7 @@ Priya sees the same two photographs, the outlined mark and the price. She accept
 
 - **Bookable by AI assistants.** A traveller can ask their own AI assistant to find a shop, read its damage prices, get a quote and book.
 - **The person approves the money.** The assistant hands over a PayPal link or QR code. The fee and the hold are approved by the renter, in PayPal.
-- **The assistant can follow the rental.** It can check the hold, read the condition report, ask for an extra day and read a claim with its photographs.
+- **The assistant can follow the rental.** It can check the hold, read the condition report and read a claim with its photographs. Asking for an extra day is planned.
 - **It cannot decide a claim alone.** Accepting or contesting a claim needs the renter, unless the renter has given it written limits.
 - **Always visible.** The renter sees that an assistant is connected, everything it did, and a button to disconnect it.
 - **No account, still.** The renter's identity remains their PayPal payment.
@@ -282,26 +287,26 @@ Priya sees the same two photographs, the outlined mark and the price. She accept
 
 PayPal is the mechanism that makes the product possible. The whole idea rests on the difference between reserving money and charging it, and on being able to take a part and release the rest.
 
-| Rental need | PayPal capability |
-|---|---|
-| The renter pays the rental fee | Checkout |
-| The deposit is reserved without being charged | Authorization hold |
-| A clean return frees the full amount | Release of the hold |
-| Damage is charged for that amount only | Partial capture, with the remainder released |
-| A longer rental keeps its protection | Renewal of the hold |
-| A returning customer rents in one step | Saved payment method |
-| Damage exceeds the hold | Invoicing |
-| The renter wants to spread the rental fee | Pay Later |
-| A shipped rental is followed both ways | Shipment tracking |
-| A claim is corrected after review | Refund |
-| A renter disputes a charge | Disputes, with the evidence pack attached |
-| Hold knows the true state of every payment | Transaction records and live payment notifications |
-| The owner signs up in a minute | Log in with PayPal |
-| The owner's assistant acts on instructions | PayPal's agent toolkit and MCP server |
-| The operations agent checks every payment overnight | PayPal's MCP server |
-| A renter's own assistant books a rental | Checkout, approved by the renter in PayPal |
-| A trusted renter gets a smaller hold | Authorization hold, for the lower amount |
-| An agreed settlement is taken | Partial capture, with the remainder released |
+| Rental need | PayPal capability | In this build |
+|---|---|---|
+| The renter pays the rental fee | Checkout, with PayPal's own button | Built |
+| The deposit is reserved without being charged | Authorization hold | Built |
+| A clean return frees the full amount | Release of the hold | Built |
+| Damage is charged for that amount only | Partial capture, with the remainder released | Built |
+| A longer rental keeps its protection | Renewal of the hold | Built, and observed live in the sandbox |
+| Damage exceeds the hold | Invoicing | Built |
+| A claim is corrected after review | Refund | Built |
+| A renter disputes a charge | Disputes, with the evidence pack attached | Built |
+| Hold knows the true state of every payment | Live payment notifications, each read back from PayPal | Built |
+| The operations agent checks every payment overnight | PayPal's MCP server, read tools only | Built |
+| A renter's own assistant books a rental | Checkout, approved by the renter in PayPal | Built |
+| A trusted renter gets a smaller hold | Authorization hold, for the lower amount | Built |
+| An agreed settlement is taken | Partial capture, with the remainder released | Built |
+| A returning customer rents in one step | Saved payment method | Planned |
+| The renter wants to spread the rental fee | Pay Later | Planned |
+| A shipped rental is followed both ways | Shipment tracking | Planned |
+| The owner signs up in a minute | Log in with PayPal | Planned |
+| The owner's assistant acts on instructions | PayPal's MCP server | Planned |
 
 PayPal also brings two advantages over the card holds found in rental software today. A PayPal hold can last up to 29 days, where many card holds expire in about a week. And a renter paying from a PayPal wallet does not need to hand a card to a shop they have never visited.
 
@@ -318,10 +323,10 @@ For the hackathon, all of this runs in the PayPal sandbox with test money.
 - Classifies each change as no change, ordinary wear or damage, with a stated confidence.
 - Matches damage to the shop's price list.
 - Writes the claim in plain words, in the renter's language.
-- Summarizes both sides of a contested claim neutrally.
-- Turns the shop's rules, written in ordinary language, into a consistent price list and wear policy.
+- Summarizes both sides of a contested claim neutrally. (Planned.)
+- Turns the shop's rules, written in ordinary language, into a consistent price list and wear policy. (Planned.)
 - Spots photographs that look reused or wrong.
-- Answers the owner's questions about the business and carries out confirmed instructions.
+- Answers the owner's questions about the business and carries out confirmed instructions. (Planned.)
 - Checks every hold, invoice and dispute overnight and prepares decisions for the owner.
 - Helps a renter's own assistant book and follow a rental.
 - Argues each side of a contested claim from the evidence, inside limits each person set.
@@ -433,7 +438,7 @@ The submission demonstrates one shop and three rentals, end to end, in the PayPa
 5. **A return with damage:** the new mark is outlined, matched to the price list, approved by a person, charged in part, and the rest released.
 6. **A contested claim:** the renter replies, the owner reviews both sides and adjusts the charge.
 7. The item passport shows the item's history across the three rentals.
-8. The owner asks the assistant about open holds and releases one by instruction.
+8. The owner asks the assistant about open holds and releases one by instruction. (Planned, not in this build.)
 
 On top of those eight steps, in this order, each only once the one before it works:
 
@@ -450,7 +455,7 @@ On top of those eight steps, in this order, each only once the one before it wor
 
 **How it answers the judging criteria:**
 
-- **Technological implementation.** The fullest use of PayPal's authorize, capture and release flow, supported by a dozen other capabilities and the agent toolkit, each doing a necessary job. AI agents on both sides of the rental, all behind the same checks, with PayPal's MCP server as working plumbing and the comparison's accuracy measured in public.
+- **Technological implementation.** The fullest use of PayPal's authorize, capture, renew and release flow, supported by checkout with PayPal's own button, invoicing, refunds, disputes with evidence, verified webhooks and PayPal's MCP server, each doing a necessary job. The Agent Toolkit was considered for the assistant's payment step and not used, because its order tool takes an amount from the model. AI agents on both sides of the rental, all behind the same checks, with PayPal's MCP server as working plumbing and the comparison's accuracy measured in public.
 - **Design.** A complete product for owner, staff and renter, with a counter routine that takes under a minute.
 - **Potential impact.** A specific audience with a familiar, costly problem, and a demonstration that removes it. Careful renters earn smaller holds wherever they rent.
 - **Innovation.** The deposit and the evidence joined into one object, with human approval and renter visibility built in. Two agents settling a claim from shared evidence, each inside limits a person wrote.

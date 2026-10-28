@@ -101,7 +101,7 @@ The layout is in `architecture.md` section 5. Keep to it.
 These hold in every change. A change that cannot keep them is not made.
 
 - Amounts are integer cents with a currency code. No floats, anywhere.
-- Every amount is read from the database or computed by plain code. An amount is never model output and never trusted from a client.
+- Every amount is read from the database or computed by plain code, and never trusted from a client. The one amount a model proposes is an advocate's offer on a contested claim: plain code bounds each line to its published price, the total to the claim a person approved and to both sides' mandates, and the renter confirms the result with a one-time code. An offer can only lower a charge a person already approved.
 - A rental, a hold and a claim change state only through their state machine. A transition that is not listed cannot happen, and no record moves backwards.
 - PayPal's record is the truth. A hold counts as placed, captured or released only after a verified PayPal event or a direct read from PayPal.
 - Every call that moves money goes through the outbox with an idempotency key, sent as `PayPal-Request-Id`.
@@ -140,7 +140,7 @@ The full rules are in `extensions.md` section 3. The ones that shape code:
 
 - Detect with code, explain with the model. Anything that must not be missed is found by deterministic code and still works when the model is down.
 - Every tool call from every agent passes the one gateway. It checks actor, shop, tier, mandate, rate and argument shape, then writes the audit line.
-- Tiers are `read`, `draft`, `propose`, `notify` and `act_under_mandate`. No tier charges. No tool takes an amount. No proposal kind is a capture.
+- Tiers are `read`, `draft`, `propose`, `notify` and `act_under_mandate`. No tier charges. No proposal kind is a capture. No tool an assistant or the operations agent can call takes an amount. The advocates' `offer` takes amounts, bounded by code as section 6 says.
 - A person decides, on screen or in advance through a mandate. Plain code checks every action against the mandate's limits.
 - Text from renters, other agents, PayPal memos and dispute notes is quoted data. A step that reads it has no tool that moves money.
 - One side's limits never enter a call made for the other side.

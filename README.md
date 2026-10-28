@@ -14,32 +14,34 @@ Built for the PayPal AI Hackathon 2026.
 
 ## For judges: five minutes
 
-1. Open the [live demo](https://p99faar3kp.us-east-1.awsapprunner.com/sign-in) and tap **Start a demo as Tomás, the
-   owner**. You get a Ribeira Bikes in Lisbon of your own, already busy: bikes out, returns due today, a claim
-   waiting for approval and one the renter contested. These are sample rentals, marked **Sample**. They show the
-   shop's day and move no money. Nobody else sees your demo, and you see nobody else's.
-2. To switch roles, sign out and tap **Continue as Jonas, at the counter**: the same shop, as the counter staff. Your
-   browser keeps your demo; **Start a fresh demo** opens a new one. For a real rental, book a bike and open the
-   renter's link. Pay the fee and approve the hold in PayPal's sandbox with the sandbox buyer account given in the
-   submission's testing instructions. Photograph the handover with **Use the sample photograph**, and the return with
-   **Use the sample with damage** for one view: the same frame with a chip in the paint. The real camera works on any
-   object to hand.
-3. Back as Tomás (**Continue as Tomás, the owner**), open the comparison. Code finds the chip and Claude says what it
-   is, then takes an independent second look. When both agree, the finding is offered as a claim line priced from the
-   shop's list. When the second look is not sure, the return waits for a person, who claims the same entry with a
-   written reason. Approve the claim, or release the hold for a clean return. A step that moves money asks for a
-   passkey. The first time, follow **Add a passkey** to the Security page and add one on your own device (Touch ID,
-   Windows Hello or your phone), then confirm with it. The capture and the release happen in the PayPal sandbox, and
-   no real money moves.
-4. For a contested claim, book another bike with your own email as the renter's contact. At the handover, record
-   the faint scuff on the down tube as a known mark. At the return, use **Use the sample for a contested claim**: the
-   scuff has grown into a scratch through the paint. Claim the scratch as Tomás. Then open the renter's link and
-   contest the claim. The one-time code goes to your email, because PayPal's sandbox buyer has no inbox. Each side may
-   send an advocate with written limits. A referee in plain code checks every move against the photographs and the
-   wear policy, and the owner decides if the two do not agree.
-5. Open the **[hosted assistant](https://p99faar3kp.us-east-1.awsapprunner.com/assistant)** and ask it to rent you a
-   bike. It books through Hold's own MCP server, the same one your assistant can use, and hands you the PayPal
-   approval link.
+The whole money loop below runs as Jonas, at the counter, and needs **no passkey**: the shop sends claims above €150
+to its owner, and Jonas approves up to €100. Keep two things to hand: the PayPal sandbox buyer login from the
+submission's testing instructions, and an email address of your own.
+
+1. Open the [live demo](https://p99faar3kp.us-east-1.awsapprunner.com/sign-in) and tap **Start a demo as Jonas, at
+   the counter**. You get a Ribeira Bikes in Lisbon of your own, already busy with sample rentals marked **Sample**,
+   which show the shop's day and move no money. Nobody else sees your demo, and you see nobody else's.
+2. Open **Rentals**, then **New rental**. Add one **City bike**, give any name and **your own email**, and book. Tap
+   **Show the link**, open it, and pay the rental fee with PayPal's own button, signed in as the sandbox buyer. Back on
+   the rental, tap **Ask for the hold** and approve the €250 hold the same way. Nothing is charged by the hold.
+3. Photograph the handover with **Use the sample photograph** and seal it. Start the return and photograph it with
+   **Use the sample with damage**: the same frame with a chip in the paint. The real camera works on any object to hand.
+4. Open the comparison. Code finds the candidate areas, Claude says what changed, then takes an independent second
+   look at a wider crop. When both agree, the chip is offered as a claim line priced from the shop's list. When the
+   second look is not sure, the return waits for a person: choose **Scratch on the frame, through the paint · €35.00**
+   and say what you see. Tap **Prepare claim for review**, then **Approve and show renter link**.
+5. Open the renter's link, as the renter would on their phone. Tap **I have reviewed this claim** and **Email me a
+   verification code**: it goes to your email, because the sandbox buyer has no inbox. Accept the claim. PayPal
+   captures €35 of the hold and releases the other €215, in the sandbox, and the rental shows **Settlement
+   confirmed**. For a clean return, use **Use the sample photograph** at the return instead and release the hold.
+6. Open the **[hosted assistant](https://p99faar3kp.us-east-1.awsapprunner.com/assistant)** in the same browser and ask
+   it to rent you a bike. It rents from your own demo shop through Hold's own MCP server, the same one your own
+   assistant can use, and hands you the PayPal approval link.
+
+**As the owner.** Sign out and tap **Continue as Tomás, the owner** for the same shop. **Today** lists the claims that
+need a decision, **Calendar** shows every bike as a row and every rental as a bar marked by where its PayPal hold
+stands, and one sample claim is one the renter contested. Tomás's own money decisions ask for a passkey,
+which **Add a passkey** sets up on your device. **Start a fresh demo** opens a new shop.
 
 Anything simulated is labelled on screen and marked `simulated` in the record.
 
@@ -124,10 +126,12 @@ captured or released only after a verified PayPal event or a direct read from Pa
 
 Deny by default, and every check runs on the server. In short:
 
-- **People decide money.** No agent tier charges, no tool takes an amount, and a capture starts only from a claim a
-  named person approved. Owners and managers confirm money steps with a passkey.
-- **Every shop is walled off** by PostgreSQL row-level security, with a test per table that a second shop reads
-  nothing.
+- **People decide money.** No agent tier charges, no assistant's tool takes an amount, and a capture starts only from a claim a
+  named person approved. Owners and managers confirm money steps with a passkey. The one amount a model proposes is an
+  advocate's offer on a contested claim: code bounds it by the published prices, the approved claim and both sides'
+  limits, so it can only lower a charge, and the renter confirms it with a one-time code.
+- **Every shop is walled off** by PostgreSQL row-level security. A test checks that every table has a policy, and
+  others that a second shop reads nothing.
 - **Renters** reach their rental through a signed, expiring link bound to it, and accepting or contesting a claim
   needs a one-time code.
 - **Assistants and agents** pass one gateway that checks actor, shop, tier, mandate, rate and argument shape, and
@@ -145,9 +149,10 @@ The rules every change follows are in [`AGENTS.md`](AGENTS.md), and the threats 
 
 | Part | Choice |
 |---|---|
-| Payments | PayPal Orders v2 (authorize, capture, void, reauthorize), webhooks with read-back, Invoicing v2, the PayPal MCP server |
+| Payments | PayPal Orders v2 (authorize, capture, void, reauthorize), the PayPal JavaScript SDK v6 button on the renter's pages, webhooks with read-back (one shared webhook for every demo shop, routed by the order's `custom_id`), Invoicing v2, refunds, Disputes v1 (the shop's answer as evidence, with the rental's evidence pack attached), PayPal's MCP server read-only for the operations agent |
 | AI | Claude Opus 4.6 on Amazon Bedrock for judging (designed for Opus 5.5, which the account has no quota for yet), OpenCV.js on the phone for photo quality |
 | Web | Next.js, React, Tailwind CSS and shadcn/ui, in English, German, Spanish and French |
+| Scheduling | Bryntum Scheduler (trial package) for the shop's calendar: items as rows, rentals as bars marked by their PayPal hold |
 | Data | Aurora PostgreSQL Serverless v2 through the RDS Data API, Drizzle ORM |
 | Work | SQS queues and Lambda workers, EventBridge Scheduler for hold upkeep |
 | Identity | Amazon Cognito with emailed codes and passkeys |
@@ -178,3 +183,7 @@ PAYPAL_SANDBOX_CLIENT_ID=… PAYPAL_SANDBOX_CLIENT_SECRET=… AWS_PROFILE=… pn
 
 It checks the credentials with PayPal and stores them in Secrets Manager. Every demo started after that shares the
 sandbox business account. There is nothing to reset: each demo starts fresh.
+
+## License
+
+[MIT](LICENSE).

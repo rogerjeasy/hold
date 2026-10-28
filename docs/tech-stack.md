@@ -121,53 +121,59 @@ This is the screen staff use most, so it gets the most care.
 
 ## 5. PayPal
 
-| Hold feature | PayPal product | How Hold reaches it |
-|---|---|---|
-| The rental fee is paid | Orders v2, capture | JavaScript SDK v6 in the browser, REST on the server |
-| The deposit is reserved as its own hold | Orders v2 with intent to authorize | PayPal approval by link or QR code, REST on the server |
-| A clean return releases it | Void of the authorization | Direct REST |
-| Damage is charged | Partial capture | Direct REST |
-| A longer rental keeps its protection | Reauthorization | Direct REST |
-| A returning renter | Vault payment token | Direct REST |
-| Damage beyond the hold | Invoicing v2 | Agent Toolkit |
-| A claim is reduced after review | Refunds | Agent Toolkit |
-| Shipped rentals | Shipment tracking | Agent Toolkit |
-| A renter disputes a charge | Disputes, with evidence upload | Agent Toolkit to read, direct REST to upload evidence |
-| The true state of every payment | Webhooks and Transaction Search | Webhook endpoint, Agent Toolkit |
-| Owner signs up | Log in with PayPal | Direct OAuth exchange |
-| The owner's assistant | Agent Toolkit and sandbox MCP server | Read tools only |
-| Rental fee spread over time | Pay Later | JavaScript SDK v6, where offered |
-| The operations agent's overnight checks | Transactions, insights, disputes, invoices and tracking | Sandbox MCP server, read tools only, through Hold's own MCP client |
-| A booking made by a renter's assistant | Orders v2, with PayPal's approval link | Direct REST, with the `CHECKOUT.ORDER.APPROVED` event as a backstop |
-| A smaller hold for a trusted renter | Orders v2 with intent to authorize, for the ladder's amount | Direct REST |
-| A settlement agreed by two advocates | Partial capture as the final capture | Direct REST |
+Built means in the code and its tests; planned means designed here and not in this build.
+
+| Hold feature | PayPal product | How Hold reaches it | In this build |
+|---|---|---|---|
+| The rental fee is paid | Orders v2, capture | The JavaScript SDK v6 button on the renter's page, or PayPal's approval page; REST on the server | Built |
+| The deposit is reserved as its own hold | Orders v2 with intent to authorize | The same button, or approval by link or QR code; REST on the server | Built |
+| A clean return releases it | Void of the authorization | Direct REST | Built |
+| Damage is charged | Partial capture as the final capture | Direct REST | Built |
+| A longer rental keeps its protection | Reauthorization at the moment of charging | Direct REST | Built; observed live on 28 October 2026 (section 16, item 3) |
+| Damage beyond the hold | Invoicing v2 | Direct REST | Built |
+| A claim is reduced after review | Refunds | Direct REST | Built |
+| A renter disputes a charge | Disputes v1: read, and the shop's answer as evidence with the rental's evidence pack | Direct REST, multipart for the evidence | Built; the evidence call is not yet tried on a sandbox dispute |
+| The true state of every payment | Webhooks, verified and read back | A webhook address per shop, and one shared address for every demo shop, routed by the order's `custom_id` | Built |
+| The operations agent's overnight checks | Transactions, orders, disputes and invoices | PayPal's sandbox MCP server over `/sse`, read tools only, through Hold's own MCP client | Built |
+| A booking made by a renter's assistant | Orders v2, with PayPal's approval link | Direct REST, with the `CHECKOUT.ORDER.APPROVED` event as a backstop | Built |
+| A smaller hold for a trusted renter | Orders v2 with intent to authorize, for the ladder's amount | Direct REST | Built |
+| A settlement agreed by two advocates | Partial capture as the final capture | Direct REST | Built |
+| A returning renter | Vault payment token | Direct REST | Planned |
+| Shipped rentals | Shipment tracking | Direct REST | Planned |
+| Owner signs up | Log in with PayPal | Direct OAuth exchange | Planned |
+| Rental fee spread over time | Pay Later | JavaScript SDK v6, where offered | Planned |
+| The owner's assistant | PayPal's MCP server | Read tools only | Planned |
+| A shop connects its account | PayPal's partner onboarding | Partner referrals | Planned; a shop pastes its own app's client ID and secret today |
 
 **Packages and endpoints**
 
-- PayPal REST APIs called directly for the hold lifecycle: Orders v2 and Payments v2.
-- `@paypal/agent-toolkit` for invoices, refunds, tracking, dispute reading and transaction data.
-- The hosted sandbox MCP server at `https://mcp.sandbox.paypal.com`, with `/sse` and `/http` transports, for the owner's assistant.
-- PayPal JavaScript SDK v6 in the browser.
+- PayPal REST APIs called directly: Orders v2, Payments v2 (authorizations, captures, refunds), Webhooks v1, Invoicing v2 and Disputes v1.
+- PayPal's hosted sandbox MCP server at `https://mcp.sandbox.paypal.com/sse`, through `@modelcontextprotocol/sdk`, read tools only, for the operations agent.
+- The PayPal JavaScript SDK v6 (`https://www.sandbox.paypal.com/web-sdk/v6/core`), loaded on the renter's fee and hold pages with the shop's public client ID. Where it cannot load, the page sends the renter to PayPal's approval page as before.
+- `@paypal/agent-toolkit` is not used. See below.
 
 **The hold lifecycle is not in the Agent Toolkit.** The toolkit's payment tools create an order, read it, capture it and refund it. It has no tool to authorize, partially capture, void or reauthorize. Those calls are the core of Hold, so they go directly to the REST API. This suits the product, because each of them must sit behind Hold's own approval record.
 
-**How Claude reaches PayPal's tools.** The toolkit's pages list adapters for the Vercel AI SDK, the OpenAI Agents SDK, LangChain, Amazon Bedrock and MCP. They list none for the Anthropic SDK. Hold therefore connects its own MCP client to PayPal's sandbox MCP server, keeps only the read tools on its allowlist, and offers them to Claude through Hold's tool gateway. The shop's PayPal token stays inside Hold, and every call is logged. Tool names are matched against what the server lists, because PayPal's pages spell some of them differently.
+**The Agent Toolkit for the assistant's payment step: considered and not used (28 October 2026).** A renter's assistant pays nothing itself: `create_booking` makes the order from a quote Hold priced and returns PayPal's approval link, and the renter approves in PayPal. The toolkit's `create_order` takes its amount from the model, which would break the rule that no assistant's tool takes an amount. Its pages also list no adapter for the Anthropic SDK. Hold reaches PayPal's own MCP server directly where an agent needs PayPal's records.
+
+**How Claude reaches PayPal's tools.** Hold connects its own MCP client to PayPal's sandbox MCP server, keeps only the read tools on its allowlist, and offers them to Claude through Hold's tool gateway. The shop's PayPal token stays inside Hold, and every call is logged. Tool names are matched against what the server lists, because PayPal's pages spell some of them differently.
 
 **Facts about PayPal holds that shape the product**
 
 - A hold reserves funds for up to 29 days.
 - Capture is best assured in the first three days. After that, Hold renews the hold at the moment it charges, so the capture falls inside the renewal's own three days (`architecture.md` section 7.4).
 - A renewal issues a new authorization identifier, and later captures must use it.
-- A hold can be renewed only once, from day 4 to day 29. This is PayPal's own wording in the sandbox, confirmed on 14 October 2026.
+- A hold can be renewed only once, from day 4 to day 29. This is PayPal's own wording in the sandbox, confirmed on 14 October 2026. A second renewal is refused with `REAUTHORIZATION_NOT_SUPPORTED` (28 October 2026).
+- A renewal keeps the original end of validity, give or take a second: PayPal reported it one second later (28 October 2026).
 - A capture can be for less than the held amount.
 
 **Rules for every PayPal call**
 
-- **Webhooks are the source of truth.** A hold is recorded as placed, captured or released only when PayPal says so. Every webhook signature is verified.
+- **PayPal's record is the truth.** A hold is recorded as placed, captured or released only after a verified webhook or a direct read from PayPal. Every webhook signature is verified, and what it names is read back.
 - **Every write carries an idempotency key,** so a retry never captures twice.
 - **Every capture sits behind a named person's approval** in Hold's own database.
 
-**The shop's PayPal account.** Each shop is paid into its own PayPal business account. In the hackathon, each demo shop maps to a sandbox business account whose credentials are kept in Secrets Manager. In production, Hold would act for shops through PayPal's partner model.
+**The shop's PayPal account.** Each shop is paid into its own PayPal business account, whose app credentials it pastes in once and Hold keeps in Secrets Manager. Every demo shop shares one sandbox business account. In production, Hold would act for shops through PayPal's partner model, which is not built.
 
 ---
 
@@ -394,9 +400,9 @@ A project can win one sponsor prize. Using more than one tool means being consid
 
 | Tool | Use in Hold | Verdict |
 |---|---|---|
-| **Bryntum** | The rental calendar on Bryntum Scheduler, with flags from PayPal state and moves proposed by the operations agent | Use. The prize page's own example is an equipment rental calendar that locks a booking only once its PayPal payment clears, which is Hold. Three winners. |
-| **AG Grid** | The owner's insights dashboard on AG Studio, with custom widgets and an insights agent on the Studio Agent Framework | Use. Largest sponsor prize. The judges ask for AG Studio, "not just AG Grid or AG Charts on their own", so plain data tables would not compete. |
-| **Postman** | Sandbox testing of the hold lifecycle, and a published collection for judges | Use. No prize. |
+| **Bryntum** | The shop's calendar on Bryntum Scheduler: each item a row, each rental a bar marked by where its PayPal hold stands, read only, a bar opening its rental (`apps/web/src/features/calendar`) | Built, on the trial package (`@bryntum/scheduler@npm:@bryntum/scheduler-trial@7.3.7`). Moves proposed by the operations agent are not built. Three winners. |
+| **AG Grid** | The owner's insights dashboard on AG Studio, with custom widgets and an insights agent on the Studio Agent Framework | Not built. A project wins one sponsor prize, and Bryntum fits Hold's calendar. |
+| **Postman** | Sandbox testing of the hold lifecycle, and a published collection for judges | Not built. No prize. |
 | **APIMatic** | Context plugins while coding the PayPal integration | Not chosen for now |
 | **Channel3** | Could enrich item types from a product catalog. Not central to Hold. | Not chosen for now |
 | **Render** | Hosting | Not used, because hosting is on AWS |
@@ -410,7 +416,7 @@ A project can win one sponsor prize. Using more than one tool means being consid
 - **Channel3,** one prize of 1,500 USD: the API or MCP server called as a meaningful part of the product, for search, product enrichment or recommendations.
 - **Render,** credits: deployment on Render with Render Workflows.
 
-**Trial licences.** AG Studio and Bryntum both offer a 45-day trial. A trial started before 31 October 2026 ends before judging closes on 15 December, and judges must be able to run the hosted demo throughout. Start both on or after 31 October, or ask each team on the PayPal Discord for a licence that runs through judging. What an expired trial does to the page has not been checked. Bryntum's trial is installed as `@bryntum/scheduler@npm:@bryntum/scheduler-trial`.
+**Trial licences.** AG Studio and Bryntum both offer a 45-day trial. Bryntum's trial package keeps its start under a `-trial-start` key, which reads as a clock per browser, so each judge's browser would start its own 45 days; this is read from the package, not confirmed with Bryntum (28 October 2026). A trial started before 31 October 2026 ends before judging closes on 15 December, and judges must be able to run the hosted demo throughout. Start both on or after 31 October, or ask each team on the PayPal Discord for a licence that runs through judging. What an expired trial does to the page has not been checked. Bryntum's trial is installed as `@bryntum/scheduler@npm:@bryntum/scheduler-trial`.
 
 ---
 
@@ -423,13 +429,14 @@ Each of these should be tried against the real services before the build depends
 2. **One approval for walk-ins.** PayPal does not allow an authorize-first order with more than one purchase unit, so the fee and deposit cannot be two parts of one order. The alternative is a single authorization for fee plus deposit, with the fee captured at once as a non-final capture. Confirm that the remainder stays held and can then be renewed and released. If it cannot, walk-ins approve twice.
    **Confirmed in the sandbox on 14 October 2026, ten of ten checks, except renewal.** After a 45.00 non-final capture of a 195.00 CHF authorization, it reads `PARTIALLY_CAPTURED`. A later 40.00 final capture succeeds and the authorization reads `CAPTURED`. Voiding instead succeeds and the authorization reads `VOIDED`, after which capture is refused. Walk-ins approve once. Renewal after a partial capture cannot be tried before day 4, so it is part of the two-step trial under item 3.
 3. **Renewal.** PayPal allows renewal once per hold, from the fourth day, giving a new identifier. The sandbox refused a renewal on day 1 with `REAUTHORIZATION_TOO_SOON`: "A reauthorization is only allowed once from Day 4 to Day 29 since the date of the original authorization." The sandbox cannot fast-forward time, so renewal rules are tested against a fake PayPal with a controllable clock. One real renewal is also tried by waiting: `trial:renewal place` places a plain hold and a walk-in hold on day 1, and `trial:renewal renew` renews both after day 3 and records what the new and old identifiers allow. Hold renews only at the moment it charges, and falls back to capturing without a renewal, so `trial:renewal place-unrenewed` places a third hold on day 1 and `trial:renewal capture-unrenewed` captures it after day 3 with no renewal. Placed on 14 October 2026: E and F at 02:54 UTC, G later the same day.
+   **Renewed live on 28 October 2026 (day 14), with `trial:renewal renew`.** Hold E renewed with a new identifier for the full 150.00 CHF; a second renewal of the new one was refused with `REAUTHORIZATION_NOT_SUPPORTED`; 40.00 was captured as the final capture on the new identifier, which then read `CAPTURED`. Three things differed from what the fake assumed, and the fake now does as PayPal did: the renewal's end of validity was one second after the original's, which Hold's renewal check refused, so a charge after day 3 would have retried forever (fixed: `keepsOriginalEnd` in `packages/domain/src/hold-placement.ts` allows a minute); the old identifier still accepted a capture after the renewal; and hold F, whose fee was captured from it first, refused a renewal sent with no amount (`AUTHORIZATION_AMOUNT_EXCEEDED`). Hold places no such hold today, so no code depends on that last one. Still open: whether the original authorization keeps the renter's money reserved after a renewal until its own end, which would call for voiding it once the renewal is captured. The trial stopped at F before writing its recording.
 4. **Comparison accuracy.** Photograph a real item before and after adding a small mark, in shop lighting, and run the pipeline. Do this before building any screens.
    The bare comparison, the model alone with no alignment, is `pnpm --filter @hold/eval compare:bare <handover photo> <return photo>`. It writes each result, with the model, prompt version, usage and the photographs' fingerprints, to `eval/results/`, which git ignores.
 **How to run the first three.** Trials 1 and 2 are scripts that call the sandbox through Hold's PayPal adapter: `pnpm --filter @hold/paypal trial:baseline` and `pnpm --filter @hold/paypal trial:combined`. Each prints approval links for a sandbox personal account, waits, then prints a pass or fail per check and records PayPal's replies in `packages/paypal/trials/recordings/`, which git ignores. Trial 3 is the renewal tests in `packages/paypal/src/fake/fake-paypal.test.ts`. The fake marks the rules the sandbox has not yet confirmed.
 
 5. **Saved payment methods for returning renters.** In production PayPal must approve the merchant for this. Treat it as optional.
 6. **Dispute evidence in the sandbox.** Confirm that a test dispute can be opened and that evidence can be uploaded through the API.
-   **Still open.** The operations agent's approved dispute answer is sent with `POST /v1/customer/disputes/{id}/send-message` and a JSON body `{ "message": ... }`, with the proposal as `PayPal-Request-Id` (`sendDisputeMessage` in `packages/paypal/src/rest/disputes.ts`). Both the JSON body and the request-id deduplication are unconfirmed until a sandbox dispute is opened from the personal account and answered.
+   **Still open.** Since 28 October 2026 the operations agent's approved dispute answer goes to PayPal as evidence: `POST /v1/customer/disputes/{id}/provide-evidence`, a multipart form with the notes as JSON in `input` (`evidence_type` `OTHER`) and the rental's latest published evidence pack as a PDF in `evidence-file`, with the proposal as `PayPal-Request-Id` (`provideDisputeEvidence` in `packages/paypal/src/rest/disputes.ts`). The part names follow PayPal's reference and a public sample; they, the evidence type and the request-id deduplication are unconfirmed until a sandbox dispute is opened from the personal account and answered.
 7. **Camera behavior on phones.** Test resolution, focus and the installed web app on both iPhone and Android. Browsers differ.
 8. **Object Lock.** It must be switched on when the bucket is created. It cannot be added later.
 9. **Pay Later with a hold.** Pay Later may not be offered on an order that authorizes first. Treat it as optional.
@@ -455,13 +462,15 @@ Each of these should be tried against the real services before the build depends
 Judges do not have a bike to photograph, so the demo must work without one. They have no inbox Hold can send a code to either, so the demo must not need one.
 
 - **A hosted demo** at a stable address: `https://p99faar3kp.us-east-1.awsapprunner.com`.
+- **Real bikes to book.** Every demo shop has four City bikes beside its samples, so a judge can book one at the counter, on the shop's page or through the hosted assistant, and take it through a live sandbox hold.
+- **A sample claim with its evidence.** The sample claim awaiting approval rests on a finding, with the handover and return photographs of the frame and the chip outlined, from a comparison marked as a sample.
 - **A demo of each judge's own, with a one-tap sign-in.** One tap on the sign-in page opens a new Ribeira Bikes, busy with sample rentals, with two new accounts: Tomás the owner and Jonas at the counter. A judge types nothing and waits for no code, sees no other judge's demo, and can switch between Tomás and Jonas from the same browser. A step that moves money still asks for a passkey, which the judge adds on their own device. How it works and what it allows are in `architecture.md` section 20.3.
 - **Matching sandbox PayPal accounts.** Every demo shop shares one sandbox business account, which an administrator stores once with `pnpm demo:paypal`. A sandbox personal account plays the renter; its sign-in is in the submission's testing instructions.
-- **Sample photograph sets** built into the demo, one for each return a judge may want to see. The handover uses the frame as handed over, which has a faint scuff on the down tube. At the return, one tap loads one of three samples in place of the camera: the same photograph again (a clean return), the frame with a chip in the paint (damage), or the frame with the scuff grown into a scratch through the paint (a contested claim). In the sandbox a confirmed finding from them may be billed, so a damaged return can reach a real sandbox capture (`architecture.md` section 20.3). The independent second look confirmed the chip in 2 of 10 runs on Opus 4.6; otherwise the finding waits for a person, who claims it with a written reason. The contested sample is built so that each side has a case: the wear policy says a mark recorded at the handover is never charged again, and the scratch runs on from that mark but is longer and through the paint.
+- **Sample photograph sets** built into the demo, one for each return a judge may want to see. The handover uses the frame as handed over, which has a faint scuff on the down tube. At the return, one tap loads one of three samples in place of the camera: the same photograph again (a clean return), the frame with a chip in the paint (damage), or the frame with the scuff grown into a scratch through the paint (a contested claim). In the sandbox a confirmed finding from them may be billed, so a damaged return can reach a real sandbox capture (`architecture.md` section 20.3). The independent second look confirmed the chip in 2 of 10 runs on Opus 4.6 when its crops kept 3 percent of the photograph around the finding. Unsure of a featureless tube, it said new damage but below 0.9 confidence. With a tenth of the photograph around the finding (`SECOND_LOOK_MARGIN`, prompt version `inspection-2`) it confirmed the chip in 8 of 8 runs on 28 October 2026, and the contested sample still went to a person in 3 of 3. These are runs on the demonstration's own pair, not a measurement: the evaluation set has none yet. When the second look is not sure, the finding waits for a person, who claims it with a written reason. The contested sample is built so that each side has a case: the wear policy says a mark recorded at the handover is never charged again, and the scratch runs on from that mark but is longer and through the paint.
 - **The real camera path** also works, for a judge who wants to try it on any object to hand.
 - **Nothing to reset.** Each demo starts from the same state, so judges never see each other's changes.
 - **Full setup instructions** in the repository's README.
-- **A hosted assistant** that books through Hold's MCP server, so a judge can see an AI assistant rent a bike without setting anything up.
+- **A hosted assistant** that books through Hold's MCP server, so a judge can see an AI assistant rent a bike without setting anything up. In the browser that started a demo, it rents from that demo's own shop, which no assistant can otherwise find.
 - **The MCP server's address** in the README, for a judge who wants to connect their own assistant.
 
 ---
