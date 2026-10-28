@@ -10,7 +10,7 @@ test('an owner adds a passkey, confirms with it, then sets up prices, staff and 
 
   // Changing the shop needs a passkey. An emailed code alone is not enough.
   await menu.getByRole('link', { name: 'Staff' }).click()
-  await expect(page.getByText('Changing prices, staff or PayPal needs a passkey.', { exact: false })).toBeVisible()
+  await expect(page.getByText('Changing prices, staff or PayPal needs your passkey', { exact: false })).toBeVisible()
   await page.getByRole('link', { name: 'Add a passkey' }).click()
   await page.getByRole('button', { name: 'Add a passkey on this device' }).click()
   // The list is the lasting proof. "Passkey added." shows only until the page refreshes and asks for the passkey
@@ -60,7 +60,7 @@ test('a made-up invitation link says so plainly', async ({ page }) => {
   await expect(page.getByText('There is no invitation at this address.')).toBeVisible()
 })
 
-for (const path of ['/shop', '/shop/queue', '/shop/security', '/shop/staff', '/shop/prices', '/shop/paypal', '/shop/scorecard'] as const) {
+for (const path of ['/shop', '/shop/queue', '/shop/calendar', '/shop/security', '/shop/staff', '/shop/prices', '/shop/paypal', '/shop/scorecard'] as const) {
   for (const viewport of viewports) {
     test(`${path} fits a ${viewport.name} wide screen`, async ({ page }) => {
       await signUpAs(page, `long-address-for-wrapping-${newEmail()}`, 'Ribeira Bicicletas e Caiaques do Douro Litoral')

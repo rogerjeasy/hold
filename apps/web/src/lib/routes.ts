@@ -25,6 +25,8 @@ export const shopRoutes = {
   // The operations agent's morning queue: what waits for an owner's or a manager's decision (extensions.md section 6).
   queue: '/shop/queue',
   rentals: '/shop/rentals',
+  // Every item as a row and every rental as a bar, on Bryntum Scheduler (extensions.md section 12.5).
+  calendar: '/shop/calendar',
   items: '/shop/items',
   // What renters reported during their rentals (extensions.md section 10).
   incidents: '/shop/incidents',

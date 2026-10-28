@@ -193,6 +193,12 @@ importers:
       '@aws-sdk/client-secrets-manager':
         specifier: 3.1151.0
         version: 3.1151.0
+      '@bryntum/scheduler':
+        specifier: npm:@bryntum/scheduler-trial@7.3.7
+        version: '@bryntum/scheduler-trial@7.3.7'
+      '@bryntum/scheduler-react':
+        specifier: 7.3.7
+        version: 7.3.7
       '@hold/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -1135,6 +1141,17 @@ packages:
   '@bramus/specificity@2.4.3':
     resolution: {integrity: sha512-0GEz8qJWokkUVYQYRukmkSHIFNoBH8QTreeHrAFbvz1XFYc3Y+puhMs8PQ5x8GNugiC2l5jvDBXKLbBIByeSBw==}
     hasBin: true
+
+  '@bryntum/scheduler-react@7.3.7':
+    resolution: {integrity: sha512-brqGVJ0Q/LjH3/z8tkUTyoUT2R96nTYL98jjUXU/ezHHD5L//RqkZYK5HLkQ+zl2sDlsbliQx3l+NE/l8hWlGw==}
+    engines: {node: '>=0.10.0'}
+
+  '@bryntum/scheduler-trial-lib@1.0.1':
+    resolution: {integrity: sha512-gTrNKz2O7JdNalEU9hma0fYyZ1mGhXXb6yCn/+E+SPjRyg/qFad1bQ7vfBUFitw3S3eB66IdtAZLD+QCtiIUKw==}
+
+  '@bryntum/scheduler-trial@7.3.7':
+    resolution: {integrity: sha512-O5qpP6cmdgUZ6OelP7IqmJ6ZqSN4h2aqqsUP4maoagvNl9xl8jMYdzT9W3VrIXaFHbNRsNbeFa9eDWTP2oNOFA==}
+    engines: {node: '>=0.10.0'}
 
   '@cacheable/memory@2.2.0':
     resolution: {integrity: sha512-CTLKqLItRCEixEAewD3/j9DB3/o96gpTPD4eJ1v+DGOlxZRZncRQkGYqqnAGCscYd6RNeXfGeiuCphsPtqyIfQ==}
@@ -6468,6 +6485,14 @@ snapshots:
   '@bramus/specificity@2.4.3':
     dependencies:
       css-tree: 3.2.1
+
+  '@bryntum/scheduler-react@7.3.7': {}
+
+  '@bryntum/scheduler-trial-lib@1.0.1': {}
+
+  '@bryntum/scheduler-trial@7.3.7':
+    dependencies:
+      '@bryntum/scheduler-trial-lib': 1.0.1
 
   '@cacheable/memory@2.2.0':
     dependencies:

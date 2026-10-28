@@ -8,6 +8,9 @@ allowBuilds:
   '@parcel/watcher': false
   '@swc/core': false
   esbuild: false
+  # Bryntum's trial runs a helper from its companion package on install; the scheduler's bundle does not need it.
+  '@bryntum/scheduler-trial': false
+  '@bryntum/scheduler-trial-lib': false
 minimumReleaseAgeExclude:
   - '@aws-sdk/client-rds-data@3.1151.0'
   - '@aws-sdk/client-secrets-manager@3.1151.0'
