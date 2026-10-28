@@ -9,7 +9,16 @@ export const IDENTITY: Homography = [1, 0, 0, 0, 1, 0, 0, 0, 1]
 
 // What a handheld second photograph of the same view can plausibly be: about as near, not mirrored, not stretched,
 // not seen from a very different side. Starting values, to be measured on the evaluation set's tuning half.
-export const HOMOGRAPHY_LIMITS = { minScale: 0.67, maxScale: 1.5, maxAnisotropy: 1.25, maxPerspective: 0.2 } as const
+export const HOMOGRAPHY_LIMITS = {
+  // The zoom at the frame's centre, as the square root of the area a small square there covers once mapped.
+  minScale: 0.67,
+  maxScale: 1.5,
+  // The largest stretch at the centre over the smallest: a turn or a zoom stretches every direction alike.
+  maxAnisotropy: 1.25,
+  // How far the perspective divisor at a corner of the frame may differ from the one at its centre. By geometry, not
+  // measurement: with a phone's field of view of about 65 degrees, 0.2 is a camera turned about 18 degrees aside.
+  maxPerspective: 0.2,
+} as const
 
 export function mapPoint(homography: Homography, point: Point): Point {
   const [a, b, c, d, e, f, g, h, i] = homography

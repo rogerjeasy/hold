@@ -5,11 +5,10 @@ import type { PairCv, Raster } from './pair-cv.ts'
 
 // Feature alignment: ORB keypoints in both photographs, each matched to its two nearest in the other, kept only when
 // clearly better than the second (the ratio test), then a homography fitted by RANSAC. The RANSAC is OpenCV's
-// MAGSAC++ variant: on the sample photograph zoomed five percent, classic RANSAC put the frame's corners 4 to 11
-// working pixels off, which drew false changes along every strong edge there, and MAGSAC++ under one pixel (measured
-// 28 October 2026). A pair is aligned only when enough matches agree on one plausible camera move; otherwise it goes
-// to a person, never a guess.
-// Starting values, measured only on synthetic moves of the sample photograph (inspect-pair.test.ts); the evaluation
+// MAGSAC++ variant: on the sample photograph zoomed five percent, classic RANSAC put the frame's corners 3 to 11
+// working pixels off, which drew false changes along strong edges there; MAGSAC++ put them under one pixel off
+// (measured 28 October 2026). A pair is aligned only when enough matches agree on one plausible camera move; otherwise
+// it goes to a person, never a guess. Starting values, measured only on synthetic moves of the sample photograph (inspect-pair.test.ts); the evaluation
 // set's tuning half measures them before the accuracy gate is released.
 export const ALIGNMENT_LIMITS = {
   // Keypoints looked for in each photograph at the working size.
