@@ -1,9 +1,9 @@
 import { themeQuartz } from 'ag-grid-community'
 
-// AG Grid in Hold's own design tokens, so the grid reads as part of the ledger, in the light theme and the dark one
-// alike: the tokens change with the theme and the grid follows them. Square corners, the shop's type, one orange
-// accent for focus and choice, and headers set like Hold's labels.
-export const decisionGridTheme = themeQuartz.withParams({
+// AG Grid in Hold's own design tokens, for every grid in the app, so each reads as part of the ledger, in the light
+// theme and the dark one alike: the tokens change with the theme and the grid follows them. Square corners, Hold's
+// type, one orange accent for focus and choice, and headers set like Hold's labels.
+export const holdGridTheme = themeQuartz.withParams({
   backgroundColor: 'var(--card)',
   foregroundColor: 'var(--card-foreground)',
   textColor: 'var(--card-foreground)',

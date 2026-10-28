@@ -1,17 +1,16 @@
 'use client'
 
-import { CellStyleModule, ClientSideRowModelModule, ModuleRegistry, RowApiModule, RowSelectionModule, ValidationModule } from 'ag-grid-community'
 import type { CellClickedEvent, CellFocusedEvent, CellKeyDownEvent, ColDef, GridApi, GridReadyEvent, IRowNode, SelectionChangedEvent } from 'ag-grid-community'
 import { AgGridReact } from 'ag-grid-react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { registerGridModules } from '@/components/grid/grid-modules'
+import { holdGridTheme } from '@/components/grid/grid-theme'
 import type { BoardRow } from './board'
 import { AmountCell, ChooseCell, DecisionCell, DueCell, GridStateContext } from './decision-cells'
-import { decisionGridTheme } from './grid-theme'
 import type { RowText } from './use-row-text'
 
-// Only what the board uses; the validation module explains a misconfiguration while developing and is left out of a build.
-ModuleRegistry.registerModules([ClientSideRowModelModule, RowSelectionModule, RowApiModule, CellStyleModule, ...(process.env.NODE_ENV === 'production' ? [] : [ValidationModule])])
+registerGridModules()
 
 export type DecisionGridProps = {
   rows: readonly BoardRow[]
@@ -75,9 +74,9 @@ export function DecisionGrid({ rows, text, chosenId, selectedIds, onChoose, onSe
   const state = useMemo(() => ({ text, chosenId, selectedIds }), [text, chosenId, selectedIds])
   return (
     <GridStateContext.Provider value={state}>
-      <div className="decision-grid min-w-0" role="region" aria-label={t('grid')}>
+      <div className="hold-grid min-w-0" role="region" aria-label={t('grid')}>
         <AgGridReact<BoardRow>
-          theme={decisionGridTheme}
+          theme={holdGridTheme}
           rowData={rowData}
           columnDefs={columns}
           getRowId={({ data }) => data.id}
