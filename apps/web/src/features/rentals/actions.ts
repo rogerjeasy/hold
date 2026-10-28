@@ -26,6 +26,8 @@ export const bookRental = shopAction(
       contactName: z.string().trim().max(120).default(''),
       contactEmail: z.union([z.email().max(254), z.literal('')]).default(''),
       language: z.string().max(5),
+      // A walk-in who approves the fee and the hold at once (architecture.md section 8.2), for a rental starting today.
+      walkIn: z.literal('on').optional(),
     }),
   },
   async (context, input, transaction) => {
@@ -35,7 +37,7 @@ export const bookRental = shopAction(
     const language = readLocale(input.language)
     const name = input.contactName.trim()
     const contact = name === '' && input.contactEmail === '' ? undefined : { name, email: input.contactEmail }
-    const placed = await placeBooking(transaction, context.shop, input, { contact, language, bookedThrough: 'staff' })
+    const placed = await placeBooking(transaction, context.shop, input, { contact, language, bookedThrough: 'staff', placement: input.walkIn === 'on' ? 'combined' : 'at_counter' })
     if (placed instanceof Refusal) return placed
     const emailed = input.contactEmail === '' ? false : await emailRenterLink(input.contactEmail, placed.token, language, context.shop.name)
     return { rentalId: placed.rentalId, emailed }

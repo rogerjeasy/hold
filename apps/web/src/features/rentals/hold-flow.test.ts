@@ -117,6 +117,41 @@ describe('asking for the hold at pickup', () => {
   })
 })
 
+// architecture.md section 8.2: staff let a walk-in approve the fee and the hold once, for a rental that starts today.
+describe('a walk-in', () => {
+  it('pays the fee and approves the hold in one PayPal approval, and is then ready for handover', async () => {
+    await signIn(jar, OWNER, 'email_code')
+    const soon = new Date(Date.now() + 2 * 60_000).toISOString().slice(0, 16)
+    const later = new Date(Date.now() + 26 * 3_600_000).toISOString().slice(0, 16)
+    const booked = await rentals.bookRental(null, form({ startsAt: soon, endsAt: later, itemTypeId: ebikeTypeId, count: '1', contactName: 'Walk-in', contactEmail: '', language: 'en', locale: 'en', walkIn: 'on' }))
+    if (!booked.ok) throw new Error(JSON.stringify(booked))
+    const { rentalId } = booked.value
+    const shown = await rentals.showRenterLink(null, form({ rentalId, locale: 'en' }))
+    if (!shown.ok) throw new Error(JSON.stringify(shown))
+    jar.clear()
+    const token = tokenOf(shown.value.url)
+    const started = await renter.approveHold(null, form({ token, locale: 'en' }))
+    if (!started.ok) throw new Error(JSON.stringify(started))
+    const orderId = orderOf(started.value.approvalUrl)
+    const { simulatedPayPal, database } = await getServices()
+    const fee = (await detail(rentalId))?.feeCents ?? 0
+    expect(simulatedPayPal?.orderLinks(orderId)?.amount).toEqual({ cents: fee + HOLD_CENTS, currency: 'EUR' })
+    simulatedPayPal?.approveOrder(orderId)
+    expect(await renter.confirmHold(null, form({ token, orderId, locale: 'en' }))).toEqual({ ok: true, value: { state: 'placed' } })
+    expect((await detail(rentalId))?.state).toBe('ready')
+    const lines = await inShop(database, { role: 'hold_app', shopId }, (transaction) => transaction.select().from(moneyEvents)).then((rows) => rows.filter((row) => row.rentalId === rentalId))
+    expect(lines.map((line) => [line.kind, line.amountCents])).toEqual(expect.arrayContaining([['hold_placed', fee + HOLD_CENTS], ['fee_captured', fee]]))
+  })
+
+  it('pays the fee first, as any booking does, for a rental that starts on another day', async () => {
+    await signIn(jar, OWNER, 'email_code')
+    nextFrom += 3
+    const booked = await rentals.bookRental(null, form({ startsAt: day(nextFrom), endsAt: day(nextFrom + 1), itemTypeId: ebikeTypeId, count: '1', contactName: '', contactEmail: '', language: 'en', locale: 'en', walkIn: 'on' }))
+    if (!booked.ok) throw new Error(JSON.stringify(booked))
+    expect(await inShop((await getServices()).database, { role: 'hold_app', shopId }, (transaction) => rentalHold(transaction, booked.value.rentalId))).toBeUndefined()
+  })
+})
+
 describe('the renter approving the hold', () => {
   it('sends the renter to PayPal for exactly the agreed hold, and places it once PayPal has authorized it', async () => {
     const { rentalId, token } = await askedAtPickup()

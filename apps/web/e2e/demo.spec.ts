@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 import { acceptClaim, handedOverAndReturned } from './support/claim'
 import { addVirtualAuthenticator } from './support/passkey'
+import { expectFitsEveryWidth } from './support/responsive'
 import { bookAtTheCounter, feePaidAndHoldPlaced, renterBrowser } from './support/rental'
 import { expectInShop } from './support/sign-in'
 import { expect, test } from './support/test'
@@ -98,6 +99,32 @@ test('as Jonas, a judge takes a damaged return to a PayPal capture without addin
   await page.reload()
   await expect(page.getByText('Settlement confirmed', { exact: true })).toBeVisible()
   await expect(page.getByRole('region', { name: 'Settlement amounts' })).toContainText('€35.00')
+})
+
+// architecture.md section 8.2: staff let a walk-in pay the fee and approve the hold in one PayPal approval.
+test('as Jonas, a judge books a walk-in whose renter approves the fee and the hold at once', async ({ page, browser }) => {
+  await startDemo(page, 'Jonas, at the counter')
+  await page.getByRole('navigation', { name: 'Shop pages' }).getByRole('link', { name: 'Rentals' }).click()
+  await page.getByRole('link', { name: 'New rental' }).first().click()
+  await page.getByRole('button', { name: 'One more City bike' }).click()
+  await page.getByLabel('Name').fill('Walk-in Renter')
+  await page.getByRole('checkbox', { name: /Walk-in: fee and hold in one PayPal approval/ }).check()
+  await expectFitsEveryWidth(page)
+  await page.getByRole('button', { name: 'Book', exact: true }).click()
+  await expect(page).toHaveURL(/\/shop\/rentals\/[0-9a-f-]{36}$/)
+  await expect(page.getByText(/A walk-in: the renter approves the fee and the hold together/)).toBeVisible()
+  await page.getByRole('button', { name: 'Show the link' }).click()
+  const link = (await page.getByTestId('renter-link').textContent()) ?? ''
+  const renter = await renterBrowser(browser)
+  await renter.goto(link)
+  await expect(renter.getByRole('button', { name: /^Pay .* and approve the .* hold with PayPal$/ })).toBeVisible()
+  await expectFitsEveryWidth(renter)
+  await renter.getByRole('button', { name: /^Pay .* and approve the .* hold with PayPal$/ }).click()
+  await renter.getByRole('button', { name: 'Approve', exact: true }).click()
+  await expect(renter.getByText('Hold placed. Only your fee is charged.')).toBeVisible()
+  await renter.context().close()
+  await page.reload()
+  await expect(page.getByRole('region', { name: 'Hold at pickup' }).getByText('Ready for handover.')).toBeVisible({ timeout: 15_000 })
 })
 
 test('on a wide screen the calendar draws each rental as a bar, and a bar opens its rental', async ({ page }) => {

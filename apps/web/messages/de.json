@@ -1433,7 +1433,9 @@
         "language": "Sprache der mietenden Person",
         "book": "Buchen",
         "booking": "Wird gebucht…",
-        "booked": "Gebucht."
+        "booked": "Gebucht.",
+        "walkIn": "Laufkundschaft: Gebühr und Reservierung mit einer PayPal-Genehmigung",
+        "walkInHelp": "Für Mieter, die jetzt an der Theke stehen und beides auf einmal genehmigen. Für wiederkehrende Mieter ausgeschaltet lassen: Ihr Clean Record kann die Reservierung erst senken, wenn ihre Gebühr Hold sagt, wer sie sind."
       },
       "detail": {
         "label": "Miete",
@@ -1475,7 +1477,8 @@
         "email": "Per E-Mail an {email} senden",
         "emailing": "Wird gesendet…",
         "emailed": "Gesendet an {email}.",
-        "paid": "Der Mietpreis ist bezahlt. Derselbe Link zeigt die Miete und fragt bei der Abholung nach der Reservierung."
+        "paid": "Der Mietpreis ist bezahlt. Derselbe Link zeigt die Miete und fragt bei der Abholung nach der Reservierung.",
+        "walkIn": "Laufkundschaft: Gebühr und Reservierung werden zusammen mit einer PayPal-Genehmigung genehmigt, danach ist das Rad bereit zur Übergabe."
       },
       "letGo": {
         "title": "Diese Buchung aufgeben",
@@ -2579,6 +2582,14 @@
         "submit_claim_reply": "Wollte die Forderung beantworten",
         "get_record": "Hat die Beweisakte gelesen"
       }
+    },
+    "walkIn": {
+      "approve": "{fee} bezahlen und Reservierung über {hold} mit PayPal genehmigen",
+      "approving": "PayPal wird geöffnet…",
+      "agree": "Sie genehmigen beides auf einmal in PayPal. Abgebucht wird nur die Gebühr. Die Reservierung wird nicht abgebucht. Mit der Genehmigung stimmen Sie der Reservierung und den Preisen oben zu.",
+      "placed": "Ihre Gebühr über {fee} ist bezahlt und Ihre Reservierung über {hold} ist gesetzt. Abgebucht wurde nur die Gebühr.",
+      "taking": "Ihre Reservierung über {hold} ist gesetzt. PayPal bucht jetzt Ihre Gebühr über {fee} ab.",
+      "done": "Reservierung gesetzt. Abgebucht wird nur Ihre Gebühr."
     }
   },
   "shopPage": {

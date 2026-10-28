@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { holdExpiredEmail, holdOrderDescription, holdReplacementEmail } from './hold-emails.ts'
+import { holdExpiredEmail, holdOrderDescription, holdReplacementEmail, walkInOrderDescription } from './hold-emails.ts'
 
 const facts = { shopName: 'Ribeira Bikes', renter: 'Priya Natarajan', amount: { cents: 300_00, currency: 'EUR' }, rentalUrl: 'https://hold.test/shop/rentals/r-1' }
 
@@ -29,6 +29,10 @@ describe('the email that tells an owner a hold expired', () => {
 describe('the words PayPal shows a renter approving a hold', () => {
   it('say it is a refundable hold at the shop, not a charge, in the renter’s language', () => {
     expect(holdOrderDescription('en', 'Ribeira Bikes')).toBe('Refundable hold for your rental at Ribeira Bikes. Not a charge.')
+    // A walk-in's one order carries the fee too, which is charged: it never says "not a charge".
+    expect(walkInOrderDescription('en', 'Ribeira Bikes')).toBe('Rental fee and refundable hold at Ribeira Bikes. Only the fee is charged.')
+    expect(walkInOrderDescription('fr', 'Ribeira Bikes')).toBe('Frais de location et empreinte remboursable chez Ribeira Bikes. Seuls les frais sont prélevés.')
+    expect(walkInOrderDescription('en', 'x'.repeat(200))).toHaveLength(127)
     expect(holdOrderDescription('de', 'Ribeira Bikes')).toBe('Rückzahlbare Reservierung für Ihre Miete bei Ribeira Bikes. Keine Abbuchung.')
     expect(holdOrderDescription('xx', 'Ribeira Bikes')).toBe('Refundable hold for your rental at Ribeira Bikes. Not a charge.')
   })

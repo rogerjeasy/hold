@@ -1,4 +1,4 @@
-import { authorizationClocks, checkPlacedAuthorization, HOLD_TRANSITIONS, mayAskForHold, money, planUpkeep, RENTAL_TRANSITIONS, transition } from '@hold/domain'
+import { authorizationClocks, checkPlacedAuthorization, HOLD_TRANSITIONS, holdOrderCents, mayAskForHold, money, planUpkeep, RENTAL_TRANSITIONS, transition } from '@hold/domain'
 import type { HoldState, PlacedAuthorizationStatus, UpkeepSchedule } from '@hold/domain'
 import { and, eq, inArray, isNotNull, or, sql } from 'drizzle-orm'
 import { EXECUTIONS_QUEUE, markExecutionSent } from './fee-repository.ts'
@@ -152,22 +152,24 @@ export type BeginPlacementResult = { readonly ok: true; readonly execution: Hold
 // state.
 export async function beginHoldPlacement(transaction: Transaction, rentalId: string, now: Date, options: { readonly confirming?: boolean; readonly orderId?: string } = {}): Promise<BeginPlacementResult> {
   const [hold] = await transaction
-    .select({ id: holds.id, shopId: holds.shopId, state: holds.state, paypalOrderId: holds.paypalOrderId, replacementOrderId: holds.replacementOrderId, reservedCents: holds.reservedCents, currency: holds.currency })
+    .select({ id: holds.id, shopId: holds.shopId, state: holds.state, strategy: holds.strategy, paypalOrderId: holds.paypalOrderId, replacementOrderId: holds.replacementOrderId, reservedCents: holds.reservedCents, currency: holds.currency, feeCents: rentals.feeCents })
     .from(holds)
+    .innerJoin(rentals, eq(rentals.id, holds.rentalId))
     .where(eq(holds.rentalId, rentalId))
-    .for('update')
+    .for('update', { of: holds })
   if (hold === undefined) return { ok: false, reason: 'not_found' }
+  const amountCents = holdOrderCents(hold)
   const named = options.confirming === true && options.orderId !== undefined && [hold.paypalOrderId, hold.replacementOrderId].includes(options.orderId) ? options.orderId : null
   const orderId = named ?? pendingOrder(hold)
   if (orderId === null) return { ok: false, reason: 'no_order' }
   const idempotencyKey = `hold-authorize-${hold.id}-${orderId}`
-  const execution = (id: string): HoldExecution => ({ id, rentalId, holdId: hold.id, orderId, idempotencyKey, amountCents: hold.reservedCents, currency: hold.currency })
+  const execution = (id: string): HoldExecution => ({ id, rentalId, holdId: hold.id, orderId, idempotencyKey, amountCents, currency: hold.currency })
   const [existing] = await transaction.select({ id: executions.id }).from(executions).where(eq(executions.idempotencyKey, idempotencyKey))
   if (existing !== undefined) return { ok: true, execution: execution(existing.id) }
   if (options.confirming !== true && hold.state !== 'requested' && hold.replacementOrderId === null) return { ok: false, reason: 'not_requested' }
   const [created] = await transaction
     .insert(executions)
-    .values({ shopId: hold.shopId, rentalId, holdId: hold.id, action: 'authorize', idempotencyKey, currency: hold.currency, amountCents: hold.reservedCents, paypalResourceIds: { order: orderId }, createdAt: now, updatedAt: now })
+    .values({ shopId: hold.shopId, rentalId, holdId: hold.id, action: 'authorize', idempotencyKey, currency: hold.currency, amountCents, paypalResourceIds: { order: orderId }, createdAt: now, updatedAt: now })
     .returning({ id: executions.id })
   if (created === undefined) throw new Error('The execution was not created.')
   await transaction.insert(outbox).values({ shopId: hold.shopId, queue: EXECUTIONS_QUEUE, messageGroup: rentalId, payload: { executionId: created.id }, createdAt: now })
@@ -189,7 +191,8 @@ export type HoldUpkeep = UpkeepSchedule & { readonly holdId: string; readonly au
 export type ConfirmPlacementResult =
   // `replaced` names the authorization a replacement took over from, whose schedules end, and the execution that
   // releases it.
-  | { readonly ok: true; readonly upkeep: HoldUpkeep; readonly replaced: { readonly authorizationId: string; readonly releaseExecutionId: string; readonly rentalId: string } | undefined }
+  // `fee` names the execution that captures a walk-in's fee from the authorization just placed.
+  | { readonly ok: true; readonly upkeep: HoldUpkeep; readonly replaced: { readonly authorizationId: string; readonly releaseExecutionId: string; readonly rentalId: string } | undefined; readonly fee?: { readonly executionId: string; readonly rentalId: string } }
   | { readonly ok: false; readonly reason: 'not_found' | 'pending' | 'amount_mismatch' | 'not_placed' }
 
 // Applies what PayPal read back: both clocks are recorded, the hold is placed, the money log gets one line and the
@@ -207,7 +210,7 @@ export async function confirmHoldPlaced(transaction: Transaction, executionId: s
   }
 
   // A placed hold getting a new authorization is a replacement: the hold moves onto it, and the old one is released.
-  const [hold] = await transaction.select({ state: holds.state, current: holds.currentAuthorizationId }).from(holds).where(eq(holds.id, holdId)).for('update')
+  const [hold] = await transaction.select({ state: holds.state, current: holds.currentAuthorizationId, strategy: holds.strategy }).from(holds).where(eq(holds.id, holdId)).for('update')
   if (hold === undefined) return { ok: false, reason: 'not_found' }
   const [known] = await transaction.select({ id: authorizations.id }).from(authorizations).where(eq(authorizations.paypalAuthorizationId, placed.authorizationId))
   const replacing = known === undefined && hold.current !== null && (hold.state === 'placed' || hold.state === 'at_risk') ? hold.current : null
@@ -243,9 +246,32 @@ export async function confirmHoldPlaced(transaction: Transaction, executionId: s
     const releaseExecutionId = await beginRelease(transaction, { shopId: execution.shopId, rentalId: execution.rentalId, holdId, authorizationId: stored.id }, now)
     return { ok: true, upkeep, replaced: { authorizationId: stored.id, releaseExecutionId, rentalId: execution.rentalId } }
   }
-  if (replacing === null) return { ok: true, upkeep, replaced: undefined }
+  if (replacing === null) {
+    const fee = hold.strategy === 'combined' ? await beginCombinedFeeCapture(transaction, { shopId: execution.shopId, rentalId: execution.rentalId, orderId: execution.paypalResourceIds['order'], authorizationId: placed.authorizationId }, now) : undefined
+    return { ok: true, upkeep, replaced: undefined, ...(fee === undefined ? {} : { fee: { ...fee, rentalId: execution.rentalId } }) }
+  }
   const releaseExecutionId = await beginRelease(transaction, { shopId: execution.shopId, rentalId: execution.rentalId, holdId, authorizationId: replacing }, now)
   return { ok: true, upkeep, replaced: { authorizationId: replacing, releaseExecutionId, rentalId: execution.rentalId } }
+}
+
+// Records that a walk-in's fee is to be captured from the authorization of their one order, as a capture that is not
+// the final one, so the rest stays held. Its key is the fee's own, fixed by the rental and its order, so it is
+// captured once.
+async function beginCombinedFeeCapture(transaction: Transaction, of: { readonly shopId: string; readonly rentalId: string; readonly orderId: string | undefined; readonly authorizationId: string }, now: Date): Promise<{ readonly executionId: string } | undefined> {
+  const [rental] = await transaction.select({ feeCents: rentals.feeCents, currency: rentals.currency }).from(rentals).where(eq(rentals.id, of.rentalId))
+  if (rental === undefined || of.orderId === undefined) return undefined
+  const idempotencyKey = `fee-capture-${of.rentalId}-${of.orderId}`
+  const [created] = await transaction
+    .insert(executions)
+    .values({ shopId: of.shopId, rentalId: of.rentalId, action: 'fee_capture', idempotencyKey, currency: rental.currency, amountCents: rental.feeCents, paypalResourceIds: { order: of.orderId, authorization: of.authorizationId }, createdAt: now, updatedAt: now })
+    .onConflictDoNothing()
+    .returning({ id: executions.id })
+  if (created !== undefined) {
+    await transaction.insert(outbox).values({ shopId: of.shopId, queue: EXECUTIONS_QUEUE, messageGroup: of.rentalId, payload: { executionId: created.id }, createdAt: now })
+    return { executionId: created.id }
+  }
+  const [existing] = await transaction.select({ id: executions.id }).from(executions).where(eq(executions.idempotencyKey, idempotencyKey))
+  return existing === undefined ? undefined : { executionId: existing.id }
 }
 
 // Records that an authorization a replacement took over from is to be voided, with its outbox message. Its key is fixed

@@ -1,7 +1,7 @@
-import { blocksItem, bookingTerms, checkBooking, money, paymentLapsed, RENTAL_TRANSITIONS, rentalDays, transition } from '@hold/domain'
-import type { BookingTerms, ItemCategory, Period, RentalState } from '@hold/domain'
+import { blocksItem, bookingTerms, checkBooking, money, paymentLapsed, placementStrategy, RENTAL_TRANSITIONS, rentalDays, transition } from '@hold/domain'
+import type { BookingTerms, ItemCategory, Period, PlacementStrategy, RentalState } from '@hold/domain'
 import { and, asc, desc, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm'
-import { items, itemTypes, priceLists, rentalItems, rentals, renterLinks, renters, shops, wearPolicies } from './schema/index.ts'
+import { holds, items, itemTypes, priceLists, rentalItems, rentals, renterLinks, renters, shops, wearPolicies } from './schema/index.ts'
 import type { BookingChannel } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
@@ -59,6 +59,9 @@ export type NewBooking = Period & {
   readonly contact: { readonly name: string; readonly email: string } | undefined
   readonly language: string
   readonly bookedThrough: BookingChannel
+  // How staff asked for the hold to be placed: combined for a walk-in who approves the fee and the hold once. Only
+  // honoured for a rental at the counter that starts today (placementStrategy).
+  readonly placement?: PlacementStrategy
   // The renter link sent or shown with the booking. Only its fingerprint is kept.
   readonly link: { readonly fingerprint: string; readonly expiresAt: Date }
 }
@@ -146,6 +149,11 @@ export async function createBooking(transaction: Transaction, shopId: string, bo
     .returning({ id: rentals.id })
   if (rental === undefined) throw new Error('The rental was not created.')
   await transaction.insert(rentalItems).values(chosen.map((item) => ({ ...item, shopId, rentalId: rental.id })))
+  // A walk-in's hold is asked for now, at the ordinary amount: its one approval comes before Hold knows the renter.
+  const [shop] = await transaction.select({ timeZone: shops.timeZone }).from(shops).where(eq(shops.id, shopId))
+  if (shop !== undefined && placementStrategy({ asked: booking.placement ?? 'at_counter', bookedThrough: booking.bookedThrough, startsAt: booking.startsAt, timeZone: shop.timeZone, now }) === 'combined') {
+    await transaction.insert(holds).values({ shopId, rentalId: rental.id, currency, ordinaryCents: terms.hold.cents, reservedCents: terms.hold.cents, strategy: 'combined', createdAt: now })
+  }
   await issueRenterLink(transaction, shopId, rental.id, booking.link, BOOKING_LINK_SCOPES)
   return { ok: true, rentalId: rental.id }
 }

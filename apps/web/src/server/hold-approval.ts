@@ -1,7 +1,7 @@
 import 'server-only'
-import { money } from '@hold/domain'
+import { holdOrderCents, money } from '@hold/domain'
 import { rentalHold, renterView, saveHoldOrder } from '@hold/db'
-import { holdOrderDescription } from '@hold/notify'
+import { holdOrderDescription, walkInOrderDescription } from '@hold/notify'
 import { requestHoldPlacement } from '@hold/settle'
 import type { RenterLink } from '@hold/db'
 import type { Locale } from '@/i18n/routing'
@@ -33,10 +33,11 @@ export async function startHoldApproval(link: RenterLink, inLinkShop: InLinkShop
     if (order.ok && order.value.status === 'awaiting_approval' && order.value.approvalUrl !== undefined) return started(hold.orderId, order.value.approvalUrl)
   }
   const created = await paypal.createHoldOrder({
-    amount: money(hold.reservedCents, hold.currency),
+    // A walk-in's first order carries the fee with the hold, approved together.
+    amount: money(holdOrderCents({ ...hold, feeCents: view.feeCents }), hold.currency),
     rentalReference: link.rentalId,
     // What the renter reads in PayPal, in their language. The worker words a replacement the same way.
-    description: holdOrderDescription(language, view.shopName),
+    description: hold.strategy === 'combined' && hold.state === 'requested' ? walkInOrderDescription(language, view.shopName) : holdOrderDescription(language, view.shopName),
     returnUrl: url,
     cancelUrl: url,
     idempotencyKey: hold.orderId === null ? `hold-order-${hold.id}` : `hold-order-${hold.id}-after-${hold.orderId}`,

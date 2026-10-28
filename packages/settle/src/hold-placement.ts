@@ -25,6 +25,8 @@ async function confirmPlacement(dependencies: SettleDependencies, shopId: string
   if (!confirmed.ok) return confirmed.reason === 'pending' ? 'waiting' : 'failed'
   // A failure here throws, so the queue tries again and ensureUpkeep makes the schedules then.
   await scheduleUpkeep(dependencies, shopId, confirmed.upkeep)
+  // A walk-in's fee is captured from the hold just placed. Its execution is in the outbox if sending fails.
+  if (confirmed.fee !== undefined) await sendExecution(dependencies, shopId, confirmed.fee.rentalId, confirmed.fee.executionId)
   if (confirmed.replaced !== undefined) {
     // A replacement: the old hold's schedules end, and it is released. Its execution is in the outbox if sending fails.
     await dependencies.scheduler.remove(upkeepScheduleName('replace', confirmed.replaced.authorizationId))

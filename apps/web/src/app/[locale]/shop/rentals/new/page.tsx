@@ -1,4 +1,5 @@
 import { bookableTypes, findPayPalAccount, inShop } from '@hold/db'
+import { shopDay } from '@hold/domain'
 import type { Metadata } from 'next'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { readPeriod } from '@/components/booking/period'
@@ -28,5 +29,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ f
     any: (await bookableTypes(transaction, { startsAt: now, endsAt: now }, now)).length > 0,
   }))
   const ready = loaded.paypal === undefined ? 'needs_paypal' : loaded.any ? 'ready' : 'needs_items'
-  return <NewRentalScreen shopName={context.shop.name} currency={currency} period={period} types={loaded.types} ready={ready} />
+  // A walk-in may approve the fee and the hold at once only for a rental that starts on the shop's own today.
+  const startsToday = period.period !== undefined && period.period.startsAt < shopDay(context.shop.timeZone, now).end
+  return <NewRentalScreen shopName={context.shop.name} currency={currency} period={period} types={loaded.types} ready={ready} startsToday={startsToday} />
 }

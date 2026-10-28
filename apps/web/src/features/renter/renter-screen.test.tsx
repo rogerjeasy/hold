@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { renderWithIntl } from '@/test/render'
 import { RenterScreen } from './renter-screen'
 
-vi.mock('./actions', () => ({ payFee: () => Promise.resolve(null), confirmFee: () => Promise.resolve(null) }))
+vi.mock('./actions', () => ({ payFee: () => Promise.resolve(null), confirmFee: () => Promise.resolve(null), approveHold: () => Promise.resolve(null) }))
 
 const view: RenterView = {
   rentalId: 'rental-1',
@@ -28,6 +28,7 @@ const view: RenterView = {
   simulated: false,
   paymentLapsed: false,
   feeOrderId: null,
+  walkIn: false,
 }
 
 // PayPal's v6 web SDK, enough to make its button: eligible, with a session that is never started here.
@@ -41,6 +42,13 @@ describe('the renter’s page', () => {
       expect(container.querySelector('paypal-button')).not.toBeNull()
     })
     Reflect.deleteProperty(window, 'paypal')
+  })
+
+  it('asks a walk-in to pay the fee and approve the hold together, in one PayPal approval', () => {
+    renderWithIntl(<RenterScreen token="t" view={{ ...view, walkIn: true }} />)
+    expect(screen.getByRole('button', { name: 'Pay €120.00 and approve the €300.00 hold with PayPal' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Pay €120.00 with PayPal' })).not.toBeInTheDocument()
+    expect(screen.getByText(/Only the fee is charged/)).toBeInTheDocument()
   })
 
   it('offers “Something happened” while the renter has the items, through a link that may report', () => {

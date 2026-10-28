@@ -6,11 +6,12 @@ import { Link } from '@/i18n/navigation'
 import { linkRoutes } from '@/lib/routes'
 import { HoldReason } from '@/features/trust/hold-reason'
 import { HoldButton } from './hold-button'
+import { WalkInButton } from './walk-in-button'
 import type { PayPalCheckout } from './paypal-sdk'
 
 type HoldScreenProps = {
   token: string
-  view: Pick<RenterView, 'shopName' | 'timeZone' | 'currency' | 'holdCents' | 'replyPeriodHours'>
+  view: Pick<RenterView, 'shopName' | 'timeZone' | 'currency' | 'holdCents' | 'replyPeriodHours' | 'feeCents' | 'state'>
   // Absent until staff ask for the hold at pickup.
   hold: RentalHold | undefined
   // The shop's PayPal app, for PayPal's own button. Absent where it is not known.
@@ -21,6 +22,7 @@ type HoldScreenProps = {
 // charge, and sends them to PayPal for exactly the amount agreed at booking.
 export function HoldScreen({ token, view, hold, checkout }: HoldScreenProps) {
   const t = useTranslations('renter.holdPage')
+  const walkIn = useTranslations('renter.walkIn')
   const format = useShopFormat({ timeZone: view.timeZone, currency: view.currency })
   const amount = format.money(hold?.reservedCents ?? view.holdCents)
   // A placed hold with an order waiting is being replaced before it ends.
@@ -41,13 +43,14 @@ export function HoldScreen({ token, view, hold, checkout }: HoldScreenProps) {
               {t('declined')}
             </p>
           )}
-          <HoldButton token={token} amount={amount} checkout={checkout} />
+          {hold.strategy === 'combined' && hold.state === 'requested' ? <WalkInButton token={token} fee={format.money(view.feeCents)} hold={amount} checkout={checkout} /> : <HoldButton token={token} amount={amount} checkout={checkout} />}
         </div>
       ) : (
         <div className="grid gap-3">
           <p role="status" className="flex items-start gap-2 text-lg font-semibold">
             <CircleCheck aria-hidden="true" className="mt-1 size-5 shrink-0 text-primary" />
-            {t('placed', { amount })}
+            {/* A walk-in's fee is captured from the hold just placed, so the page waits for it before saying it is paid. */}
+            {hold.strategy !== 'combined' ? t('placed', { amount }) : view.state === 'pending_payment' ? walkIn('taking', { hold: amount, fee: format.money(view.feeCents) }) : walkIn('placed', { hold: amount, fee: format.money(view.feeCents) })}
           </p>
           <HoldReason hold={hold} money={format.money} audience="renter" />
           {hold.validUntil === null ? null : <p className="max-w-prose text-muted-foreground">{t('validUntil', { date: format.day(hold.validUntil) })}</p>}

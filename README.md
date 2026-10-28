@@ -24,6 +24,8 @@ submission's testing instructions, and an email address of your own.
 2. Open **Rentals**, then **New rental**. Add one **City bike**, give any name and **your own email**, and book. Tap
    **Show the link**, open it, and pay the rental fee with PayPal's own button, signed in as the sandbox buyer. Back on
    the rental, tap **Ask for the hold** and approve the €250 hold the same way. Nothing is charged by the hold.
+   For a walk-in, tick **Walk-in: fee and hold in one PayPal approval** when booking: the renter then approves both at
+   once, and the bike is ready to hand over.
 3. Photograph the handover with **Use the sample photograph** and seal it. Start the return and photograph it with
    **Use the sample with damage**: the same frame with a chip in the paint. The real camera works on any object to hand.
 4. Open the comparison. Code finds the candidate areas, Claude says what changed, then takes an independent second

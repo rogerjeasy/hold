@@ -5,6 +5,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { registerOwner } from './accounts.ts'
 import { abandonBooking, bookableTypes, createBooking, issueRenterLink, rentalDetail, rentalList } from './booking-repository.ts'
 import { beginFeeCapture, confirmFeeCapture, saveFeeOrder } from './fee-repository.ts'
+import { rentalHold } from './hold-repository.ts'
 import { addItems, changeStatus, itemCatalog, saveItemType } from './item-repository.ts'
 import { publishPriceList } from './price-list-repository.ts'
 import { findRenterLink, renterView } from './renter-repository.ts'
@@ -94,6 +95,28 @@ describe('what can be booked', () => {
       ['Child seat', 1, 8_00, 50_00],
       ['City e-bike', 3, 40_00, 300_00],
     ])
+  })
+})
+
+// architecture.md section 8.2: a walk-in staff let approve the fee and the hold once. The hold is asked for at booking.
+describe('a walk-in booking', () => {
+  let lockTypeId: string
+  beforeAll(async () => { lockTypeId = await newType(type('Spare lock', 3_00, 20_00), 2) })
+
+  it('asks for a combined hold at booking when staff choose it for a rental that starts today', async () => {
+    const created = await act(owner, (transaction) => createBooking(transaction, shopId, { ...booking([{ itemTypeId: lockTypeId, count: 1 }], at(1), at(5)), placement: 'combined' }, NOW))
+    if (!created.ok) throw new Error(created.reason)
+    expect(await act(owner, (transaction) => rentalDetail(transaction, created.rentalId, NOW))).toMatchObject({ state: 'pending_payment', feeCents: 3_00, holdCents: 20_00 })
+    expect(await act(owner, (transaction) => rentalHold(transaction, created.rentalId))).toMatchObject({ state: 'requested', strategy: 'combined', reservedCents: 20_00, ordinaryCents: 20_00, currency: 'EUR' })
+    // The renter's page then asks for the fee and the hold in one approval.
+    expect((await act(owner, (transaction) => renterView(transaction, created.rentalId, NOW)))?.walkIn).toBe(true)
+  })
+
+  it('asks for no hold at booking for a rental on another day, whatever staff chose', async () => {
+    const created = await act(owner, (transaction) => createBooking(transaction, shopId, { ...booking([{ itemTypeId: lockTypeId, count: 1 }], at(30), at(40)), placement: 'combined' }, NOW))
+    if (!created.ok) throw new Error(created.reason)
+    expect(await act(owner, (transaction) => rentalHold(transaction, created.rentalId))).toBeUndefined()
+    expect((await act(owner, (transaction) => renterView(transaction, created.rentalId, NOW)))?.walkIn).toBe(false)
   })
 })
 

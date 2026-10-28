@@ -1433,7 +1433,9 @@
         "language": "Idioma del cliente",
         "book": "Reservar",
         "booking": "Reservando…",
-        "booked": "Reservado."
+        "booked": "Reservado.",
+        "walkIn": "Cliente en el mostrador: tarifa y retención con una sola aprobación de PayPal",
+        "walkInHelp": "Para quien alquila ahora en el mostrador y aprueba las dos cosas a la vez. Déjalo desactivado para quien ya alquiló antes: su Clean Record solo puede reducir la retención cuando su tarifa le dice a Hold quién es."
       },
       "detail": {
         "label": "Alquiler",
@@ -1475,7 +1477,8 @@
         "email": "Enviar por correo a {email}",
         "emailing": "Enviando…",
         "emailed": "Enviado a {email}.",
-        "paid": "El precio está pagado. El mismo enlace muestra el alquiler y, en la recogida, pide la retención."
+        "paid": "El precio está pagado. El mismo enlace muestra el alquiler y, en la recogida, pide la retención.",
+        "walkIn": "Cliente en el mostrador: aprueba la tarifa y la retención juntas, con una sola aprobación de PayPal, y la bici queda lista para entregar."
       },
       "letGo": {
         "title": "Abandonar esta reserva",
@@ -2579,6 +2582,14 @@
         "submit_claim_reply": "Pidió responder a la reclamación",
         "get_record": "Consultó el expediente de pruebas"
       }
+    },
+    "walkIn": {
+      "approve": "Pagar {fee} y aprobar la retención de {hold} con PayPal",
+      "approving": "Abriendo PayPal…",
+      "agree": "Apruebas las dos cosas a la vez en PayPal. Solo se cobra la tarifa. La retención no se cobra. Al aprobar, aceptas la retención y los precios de arriba.",
+      "placed": "Tu tarifa de {fee} está pagada y tu retención de {hold} está hecha. Solo se cobró la tarifa.",
+      "taking": "Tu retención de {hold} está hecha. PayPal está cobrando tu tarifa de {fee}.",
+      "done": "Retención hecha. Solo se cobra tu tarifa."
     }
   },
   "shopPage": {

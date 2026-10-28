@@ -16,6 +16,8 @@ export type NewRentalScreenProps = {
   types: readonly BookableType[]
   // What the shop still needs before it can book: PayPal, where the fee is paid, and items to book.
   ready: 'ready' | 'needs_paypal' | 'needs_items'
+  // The rental starts on the shop's own today, so staff may let a walk-in approve the fee and the hold at once.
+  startsToday?: boolean
 }
 
 function SetUpFirst({ need }: { need: 'needs_paypal' | 'needs_items' }) {
@@ -31,7 +33,7 @@ function SetUpFirst({ need }: { need: 'needs_paypal' | 'needs_items' }) {
 }
 
 // Booking at the counter or on the phone: when, then what is free then, then for whom.
-export function NewRentalScreen({ shopName, currency, period, types, ready }: NewRentalScreenProps) {
+export function NewRentalScreen({ shopName, currency, period, types, ready, startsToday = false }: NewRentalScreenProps) {
   const t = useTranslations('shop.rentals')
   const booking = useTranslations('booking')
   return (
@@ -45,7 +47,7 @@ export function NewRentalScreen({ shopName, currency, period, types, ready }: Ne
           <>
             <PeriodForm from={period.from} to={period.to} invalid={period.invalid} />
             {period.period === undefined ? null : types.some((type) => type.available > 0) ? (
-              <BookingForm types={types} currency={currency} days={period.days} from={period.from} to={period.to} />
+              <BookingForm types={types} currency={currency} days={period.days} from={period.from} to={period.to} startsToday={startsToday} />
             ) : (
               <p className="text-muted-foreground">{booking('nothingFree')}</p>
             )}

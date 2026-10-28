@@ -1,7 +1,7 @@
 import { paymentLapsed, RENTAL_TRANSITIONS, transition } from '@hold/domain'
 import { itemsStillFree } from './booking-repository.ts'
 import { and, eq, sql } from 'drizzle-orm'
-import { auditLog, executions, moneyEvents, outbox, rentals } from './schema/index.ts'
+import { auditLog, executions, holds, moneyEvents, outbox, rentals } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
 // The rental fee, paid through PayPal and captured through an execution (architecture.md section 7.6). Each step is
@@ -78,7 +78,14 @@ export async function confirmFeeCapture(transaction: Transaction, executionId: s
   // PayPal took the fee, and that is the truth. A booking let go in the meantime does not move back: a person is asked
   // to refund it.
   const booked = transition(RENTAL_TRANSITIONS, rental.state, 'booked')
-  if (booked.ok) await transaction.update(rentals).set({ state: 'booked', renterId: renter.id }).where(eq(rentals.id, execution.rentalId))
+  if (booked.ok) {
+    await transaction.update(rentals).set({ state: 'booked', renterId: renter.id }).where(eq(rentals.id, execution.rentalId))
+    // A walk-in's hold was placed with the fee, from the same approval, so the rental is ready for handover.
+    const [hold] = await transaction.select({ state: holds.state }).from(holds).where(eq(holds.rentalId, execution.rentalId))
+    if (hold?.state === 'placed' && transition(RENTAL_TRANSITIONS, 'booked', 'awaiting_hold').ok && transition(RENTAL_TRANSITIONS, 'awaiting_hold', 'ready').ok) {
+      await transaction.update(rentals).set({ state: 'ready' }).where(eq(rentals.id, execution.rentalId))
+    }
+  }
   else if (rental.state !== 'booked') {
     await transaction.insert(auditLog).values({ shopId: execution.shopId, actorKind: 'system', action: 'fee.captured_on_closed_booking', subjectKind: 'rental', subjectId: execution.rentalId, detail: { state: rental.state }, at: now })
   }
@@ -88,7 +95,7 @@ export async function confirmFeeCapture(transaction: Transaction, executionId: s
     .onConflictDoNothing()
   await transaction
     .update(executions)
-    .set({ state: 'confirmed', attempts: execution.attempts + 1, paypalResourceIds: { order: payment.orderId, capture: payment.captureId }, updatedAt: now })
+    .set({ state: 'confirmed', attempts: execution.attempts + 1, paypalResourceIds: { ...execution.paypalResourceIds, order: payment.orderId, capture: payment.captureId }, updatedAt: now })
     .where(eq(executions.id, executionId))
   await markExecutionSent(transaction, executionId, now)
   return { ok: true }
@@ -103,18 +110,20 @@ export type StoredExecution = {
   readonly state: 'pending' | 'submitted' | 'confirmed' | 'failed'
   readonly idempotencyKey: string
   readonly orderId: string | undefined
-  // The PayPal authorization a release voids.
+  // The PayPal authorization a release voids, or a walk-in's fee is captured from.
   readonly authorizationId: string | undefined
+  // What the execution moves, when it moves an amount.
+  readonly amount: { readonly cents: number; readonly currency: string } | undefined
 }
 
 export async function findExecution(transaction: Transaction, executionId: string): Promise<StoredExecution | undefined> {
   const [row] = await transaction
-    .select({ id: executions.id, rentalId: executions.rentalId, holdId: executions.holdId, action: executions.action, state: executions.state, idempotencyKey: executions.idempotencyKey, resources: executions.paypalResourceIds })
+    .select({ id: executions.id, rentalId: executions.rentalId, holdId: executions.holdId, action: executions.action, state: executions.state, idempotencyKey: executions.idempotencyKey, resources: executions.paypalResourceIds, amountCents: executions.amountCents, currency: executions.currency })
     .from(executions)
     .where(eq(executions.id, executionId))
   if (row === undefined) return undefined
-  const { resources, ...execution } = row
-  return { ...execution, orderId: resources['order'], authorizationId: resources['authorization'] }
+  const { resources, amountCents, currency, ...execution } = row
+  return { ...execution, orderId: resources['order'], authorizationId: resources['authorization'], amount: amountCents === null || currency === null ? undefined : { cents: amountCents, currency } }
 }
 
 // The execution's outbox message reached its queue, or is no longer needed. Other messages of the rental wait on.

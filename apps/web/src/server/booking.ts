@@ -1,6 +1,7 @@
 import 'server-only'
 import { renterLinkPath } from '@hold/auth'
 import { atShopTime } from '@hold/domain'
+import type { PlacementStrategy } from '@hold/domain'
 import { createBooking } from '@hold/db'
 import type { Transaction } from '@hold/db'
 import { getTranslations } from 'next-intl/server'
@@ -27,7 +28,7 @@ export async function placeBooking(
   transaction: Transaction,
   shop: { readonly id: string; readonly timeZone: string },
   input: BookingInput,
-  who: { readonly contact: { readonly name: string; readonly email: string } | undefined; readonly language: Locale; readonly bookedThrough: 'staff' | 'shop_page' },
+  who: { readonly contact: { readonly name: string; readonly email: string } | undefined; readonly language: Locale; readonly bookedThrough: 'staff' | 'shop_page'; readonly placement?: PlacementStrategy },
 ): Promise<Placed | Refusal> {
   const startsAt = atShopTime(shop.timeZone, input.startsAt)
   const endsAt = atShopTime(shop.timeZone, input.endsAt)
@@ -36,7 +37,7 @@ export async function placeBooking(
   // A type asked for none is left out, as a form with a counter at zero sends it.
   const lines = input.itemTypeId.map((itemTypeId, index) => ({ itemTypeId, count: Number(input.count[index]) })).filter((line) => line.count !== 0)
   const link = await newRenterLink(endsAt)
-  const booked = await createBooking(transaction, shop.id, { startsAt, endsAt, lines, contact: who.contact, language: who.language, bookedThrough: who.bookedThrough, link }, new Date())
+  const booked = await createBooking(transaction, shop.id, { startsAt, endsAt, lines, contact: who.contact, language: who.language, bookedThrough: who.bookedThrough, ...(who.placement === undefined ? {} : { placement: who.placement }), link }, new Date())
   if (!booked.ok) return new Refusal(booked.reason === 'not_available' && 'itemTypeId' in booked ? `not_available:${String(input.itemTypeId.indexOf(booked.itemTypeId))}` : booked.reason)
   return { rentalId: booked.rentalId, token: link.token, path: renterLinkPath(link.token, who.language) }
 }

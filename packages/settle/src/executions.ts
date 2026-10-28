@@ -2,7 +2,7 @@ import { failExecution, findExecution } from '@hold/db'
 import type { SettleDependencies } from './dependencies.ts'
 import { inWorkerShop } from './execution-queue.ts'
 import type { ExecutionOutcome } from './execution-queue.ts'
-import { captureFee } from './fee-capture.ts'
+import { captureCombinedFee, captureFee } from './fee-capture.ts'
 import { authorizeHold, ensureUpkeep, releaseReplaced } from './hold-placement.ts'
 import { refundApprovedClaim } from './claim-refund.ts'
 import { invoiceApprovedClaim } from './claim-invoice.ts'
@@ -27,7 +27,7 @@ export async function runExecution(dependencies: SettleDependencies, message: { 
     await inWorkerShop(dependencies, shopId, (transaction) => failExecution(transaction, executionId, 'No PayPal account.', dependencies.now()))
     return 'failed'
   }
-  if (execution.action === 'fee_capture') return captureFee(dependencies, shopId, execution, account.paypal)
+  if (execution.action === 'fee_capture') return execution.authorizationId === undefined ? captureFee(dependencies, shopId, execution, account.paypal) : captureCombinedFee(dependencies, shopId, execution, account.paypal)
   if (execution.action === 'authorize') return authorizeHold(dependencies, shopId, execution, account.paypal)
   if (execution.action === 'refund') return refundApprovedClaim(dependencies, shopId, execution.id, account.paypal)
   if (execution.action === 'invoice') return invoiceApprovedClaim(dependencies, shopId, execution.id, account.paypal)

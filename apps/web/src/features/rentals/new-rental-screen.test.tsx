@@ -31,6 +31,17 @@ describe('a new rental', () => {
     expect(container.querySelector('input[name="endsAt"]')).toHaveValue('2026-10-19T10:00')
   })
 
+  // architecture.md section 8.2: staff choose one approval for a walk-in, off by default so a Clean Record can apply.
+  it('offers a walk-in one approval of the fee and the hold, off by default, for a rental that starts today', () => {
+    const { unmount } = renderWithIntl(<NewRentalScreen {...props} startsToday />)
+    const walkIn = screen.getByRole('checkbox', { name: /Walk-in: fee and hold in one PayPal approval/ })
+    expect(walkIn).not.toBeChecked()
+    expect(walkIn).toHaveAttribute('name', 'walkIn')
+    unmount()
+    renderWithIntl(<NewRentalScreen {...props} />)
+    expect(screen.queryByRole('checkbox', { name: /Walk-in/ })).not.toBeInTheDocument()
+  })
+
   it('says what to set up first', () => {
     const { unmount } = renderWithIntl(<NewRentalScreen {...props} ready="needs_paypal" />)
     expect(screen.getByRole('link', { name: 'Go to PayPal' })).toHaveAttribute('href', '/shop/paypal')

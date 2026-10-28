@@ -10,7 +10,15 @@ vi.mock('@/i18n/navigation', async (original) => ({ ...(await original<object>()
 
 const clock = { timeZone: 'Europe/Lisbon', currency: 'EUR' }
 
+const walkInHold = { id: 'hold', state: 'requested' as const, strategy: 'combined' as const, reservedCents: 300_00, currency: 'EUR', orderId: null, paypalAuthorizationId: null, assuredUntil: null, validUntil: null, placementFailure: null, ordinaryCents: 300_00, trust: null }
+
 describe('a rental', () => {
+  it('tells staff a walk-in approves the fee and the hold together, and asks for no hold at pickup', () => {
+    renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail()} hold={walkInHold} handovers={[]} canAct />)
+    expect(screen.getByText(/A walk-in: the renter approves the fee and the hold together/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Ask for the hold' })).not.toBeInTheDocument()
+  })
+
   it('links even read-only staff to the rental record', () => {
     renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail()} hold={undefined} handovers={[]} canAct={false} />)
     expect(screen.getByRole('link', { name: 'Your rental record' })).toHaveAttribute('href', `/shop/rentals/${detail().id}/record`)

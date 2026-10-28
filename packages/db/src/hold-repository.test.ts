@@ -97,6 +97,62 @@ beforeAll(async () => {
   await act(shop, (transaction) => addItems(transaction, { itemTypeId: typeId, count: 1, size: '', serial: '' }, NOW))
 })
 
+// A walk-in staff let approve the fee and the hold once: one authorization for both, the fee captured from it at once
+// (architecture.md section 8.2).
+async function walkIn(): Promise<{ rentalId: string; executionId: string; orderId: string }> {
+  const created = await act(shop, (transaction) =>
+    createBooking(
+      transaction,
+      shop.shopId,
+      { lines: [{ itemTypeId: typeId, count: 1 }], startsAt: at(1), endsAt: at(25), contact: undefined, language: 'en', bookedThrough: 'staff', placement: 'combined', link: { fingerprint: 'walk-in-fingerprint', expiresAt: at(2000) } },
+      NOW,
+    ),
+  )
+  if (!created.ok) throw new Error(created.reason)
+  const { rentalId } = created
+  const orderId = `WALK-IN-ORDER-${rentalId}`
+  await act(shop, (transaction) => saveHoldOrder(transaction, rentalId, orderId))
+  const begun = await act(shop, (transaction) => beginHoldPlacement(transaction, rentalId, NOW))
+  if (!begun.ok) throw new Error(begun.reason)
+  return { rentalId, executionId: begun.execution.id, orderId }
+}
+
+describe('a walk-in’s one approval', () => {
+  const FEE = 40_00
+  let walkedIn: { rentalId: string; executionId: string; orderId: string }
+  beforeAll(async () => { walkedIn = await walkIn() })
+
+  it('authorizes the fee and the hold together, and refuses an authorization for the hold alone', async () => {
+    const [execution] = await act(shop, (transaction) => transaction.select().from(executions).where(eq(executions.id, walkedIn.executionId)))
+    expect(execution).toMatchObject({ action: 'authorize', amountCents: FEE + HOLD })
+    expect(await act(shop, (transaction) => confirmHoldPlaced(transaction, walkedIn.executionId, authorization(walkedIn.rentalId, { cents: HOLD }), NOW))).toEqual({ ok: false, reason: 'amount_mismatch' })
+  })
+
+  it('places the hold, then asks for the fee to be captured from its authorization, the rental waiting for it', async () => {
+    const { rentalId, executionId, orderId } = walkedIn
+    await act(shop, (transaction) => transaction.update(executions).set({ state: 'submitted' }).where(eq(executions.id, executionId)))
+    const placed = await act(shop, (transaction) => confirmHoldPlaced(transaction, executionId, authorization(rentalId, { cents: FEE + HOLD }), NOW))
+    if (!placed.ok || placed.fee === undefined) throw new Error('No fee capture was asked for.')
+    const [fee] = await act(shop, (transaction) => transaction.select().from(executions).where(eq(executions.id, placed.fee?.executionId ?? '')))
+    expect(fee).toMatchObject({ action: 'fee_capture', amountCents: FEE, currency: 'EUR', idempotencyKey: `fee-capture-${rentalId}-${orderId}`, paypalResourceIds: { order: orderId, authorization: `AUTH-${rentalId}` } })
+    expect(await act(shop, (transaction) => rentalHold(transaction, rentalId))).toMatchObject({ state: 'placed', reservedCents: HOLD })
+    expect(await stateOf(rentalId)).toBe('pending_payment')
+    // Placed again, it asks for the same capture.
+    const again = await act(shop, (transaction) => confirmHoldPlaced(transaction, executionId, authorization(rentalId, { cents: FEE + HOLD }), NOW))
+    expect(again.ok && again.fee?.executionId).toBe(placed.fee.executionId)
+  })
+
+  it('is ready for handover once the fee captured from its authorization is confirmed', async () => {
+    const { rentalId, orderId } = walkedIn
+    const [fee] = await act(shop, (transaction) => transaction.select().from(executions).where(eq(executions.idempotencyKey, `fee-capture-${rentalId}-${orderId}`)))
+    const payer = { payerId: `PAYER-${rentalId}`, email: 'walk-in@example.com', name: 'Walk In' }
+    expect(await act(shop, (transaction) => confirmFeeCapture(transaction, fee?.id ?? '', { orderId, captureId: `FEE-CAPTURE-${rentalId}`, status: 'completed', amount: eur(FEE), payer }, NOW))).toEqual({ ok: true })
+    expect(await stateOf(rentalId)).toBe('ready')
+    const [confirmed] = await act(shop, (transaction) => transaction.select().from(executions).where(eq(executions.id, fee?.id ?? '')))
+    expect(confirmed?.paypalResourceIds).toEqual({ order: orderId, authorization: `AUTH-${rentalId}`, capture: `FEE-CAPTURE-${rentalId}` })
+  })
+})
+
 describe('asking for the hold at pickup', () => {
   it('requests the hold the renter agreed to at booking, and the rental waits for it', async () => {
     const rentalId = await booked()

@@ -1433,7 +1433,9 @@
         "language": "The renter's language",
         "book": "Book",
         "booking": "Booking…",
-        "booked": "Booked."
+        "booked": "Booked.",
+        "walkIn": "Walk-in: fee and hold in one PayPal approval",
+        "walkInHelp": "For a renter at the counter now, who approves both at once. Leave it off for a returning renter: their Clean Record can lower the hold only once their fee tells Hold who they are."
       },
       "detail": {
         "label": "Rental",
@@ -1475,7 +1477,8 @@
         "email": "Email it to {email}",
         "emailing": "Sending…",
         "emailed": "Sent to {email}.",
-        "paid": "The fee is paid. The same link shows the rental and, at pickup, asks for the hold."
+        "paid": "The fee is paid. The same link shows the rental and, at pickup, asks for the hold.",
+        "walkIn": "A walk-in: the renter approves the fee and the hold together, in one PayPal approval, and the bike is then ready to hand over."
       },
       "letGo": {
         "title": "Let go of this booking",
@@ -2579,6 +2582,14 @@
         "submit_claim_reply": "Asked to answer the claim",
         "get_record": "Read the evidence record"
       }
+    },
+    "walkIn": {
+      "approve": "Pay {fee} and approve the {hold} hold with PayPal",
+      "approving": "Opening PayPal…",
+      "agree": "You approve both in PayPal at once. Only the fee is charged. The hold is reserved, not charged. By approving, you agree to the hold and the prices above.",
+      "placed": "Your fee of {fee} is paid and your hold of {hold} is placed. Only the fee was charged.",
+      "taking": "Your hold of {hold} is placed. PayPal is taking your fee of {fee}.",
+      "done": "Hold placed. Only your fee is charged."
     }
   },
   "shopPage": {

@@ -52,7 +52,7 @@ export function RentalScreen({ shopName, clock, rental, hold, handovers, returns
             {rental.simulated && returns.some((item) => item.comparisonId !== null) ? <ReturnPanel rentalId={rental.id} returns={returns} canAct={false} /> : null}
             {handingOver ? <HandoverPanel rentalId={rental.id} handovers={handovers} /> : null}
             {asking || hold?.state === 'placed' ? <HoldPanel rentalId={rental.id} state={rental.state} holdCents={rental.holdCents} hold={hold} clock={clock} /> : null}
-            {canAct && live ? <LinkPanel rentalId={rental.id} contactEmail={rental.contactEmail} paid={!waiting} /> : null}
+            {canAct && live ? <LinkPanel rentalId={rental.id} contactEmail={rental.contactEmail} paid={!waiting} walkIn={waiting && hold?.strategy === 'combined'} /> : null}
             {canAct && waiting ? <LetGo rentalId={rental.id} /> : null}
           </div>
         </div>

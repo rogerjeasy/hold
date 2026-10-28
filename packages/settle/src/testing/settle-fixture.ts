@@ -29,6 +29,8 @@ export type SettleFixture = {
   // A rental whose fee is paid and whose hold staff asked for at pickup, with the renter's order for it in PayPal,
   // approved unless told otherwise.
   approvedHold(dependencies: SettleDependencies, options?: { readonly approve?: boolean }): Promise<{ readonly rentalId: string; readonly orderId: string }>
+  // A walk-in staff booked at the counter for now, who approved the fee and the hold in one order in PayPal.
+  approvedWalkIn(): Promise<{ readonly rentalId: string; readonly orderId: string }>
 }
 
 export async function createSettleFixture(now: () => Date = () => new Date()): Promise<SettleFixture> {
@@ -49,6 +51,13 @@ export async function createSettleFixture(now: () => Date = () => new Date()): P
     return saved.id
   })
   const accountId = (await inShop(database, owner, (transaction) => findPayPalAccount(transaction, shopId, 'sandbox')))?.id ?? ''
+  // Walk-ins rent from a type of their own, so a walk-in starting now never meets an advance booking's item.
+  const walkInTypeId = await inShop(database, owner, async (transaction) => {
+    const saved = await saveItemType(transaction, shopId, { draft: { name: 'Walk-in bike', category: 'bike', currency: 'EUR', value: eur(900_00), hold: eur(HOLD), dayRate: eur(FEE), accessories: [], views: [{ label: 'Frame', outline: 'whole_side', required: true }] } }, now())
+    if (!saved.ok) throw new Error(saved.reason)
+    await addItems(transaction, { itemTypeId: saved.id, count: 20, size: '', serial: '' }, now())
+    return saved.id
+  })
   const inThisShop = <Result>(work: (transaction: Transaction) => Promise<Result>) => inShop(database, { role: 'hold_app', shopId }, work)
   let day = 0
 
@@ -88,6 +97,24 @@ export async function createSettleFixture(now: () => Date = () => new Date()): P
       await inThisShop((transaction) => saveHoldOrder(transaction, rentalId, order.value.orderId))
       if (options.approve !== false) fake.approveOrder(order.value.orderId)
       return { rentalId, orderId: order.value.orderId }
+    },
+    async approvedWalkIn() {
+      day += 2
+      const startsAt = new Date(now().getTime() + 3_600_000)
+      const booked = await inThisShop((transaction) =>
+        createBooking(
+          transaction,
+          shopId,
+          { startsAt, endsAt: new Date(startsAt.getTime() + 86_400_000), lines: [{ itemTypeId: walkInTypeId, count: 1 }], contact: undefined, language: 'en', bookedThrough: 'staff', placement: 'combined', link: { fingerprint: `walk-in-${String(day)}`, expiresAt: new Date('2027-06-01') } },
+          now(),
+        ),
+      )
+      if (!booked.ok) throw new Error(booked.reason)
+      const order = await fake.createHoldOrder({ amount: eur(FEE + HOLD), rentalReference: booked.rentalId, description: 'Fee and hold', returnUrl: 'https://hold.test/pay', cancelUrl: 'https://hold.test/r', idempotencyKey: `walk-in-order-${booked.rentalId}` })
+      if (!order.ok) throw new Error(order.error.kind)
+      await inThisShop((transaction) => saveHoldOrder(transaction, booked.rentalId, order.value.orderId))
+      fake.approveOrder(order.value.orderId)
+      return { rentalId: booked.rentalId, orderId: order.value.orderId }
     },
     async delivered(type, resource, signature = FAKE_SIGNATURE) {
       const paypalEventId = `WH-${String(Math.random()).slice(2, 12)}`

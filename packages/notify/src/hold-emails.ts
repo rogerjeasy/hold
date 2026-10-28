@@ -47,6 +47,18 @@ export function holdOrderDescription(language: string, shopName: string): string
   return ORDER_DESCRIPTION[isLanguage(language) ? language : 'en'](shopName).slice(0, 127)
 }
 
+// A walk-in's one order, for the fee and the hold together (architecture.md section 8.2). PayPal takes 127 characters.
+const WALK_IN_ORDER_DESCRIPTION: Readonly<Record<Language, (shopName: string) => string>> = {
+  en: (shop) => `Rental fee and refundable hold at ${shop}. Only the fee is charged.`,
+  de: (shop) => `Mietgebühr und rückzahlbare Reservierung bei ${shop}. Abgebucht wird nur die Gebühr.`,
+  es: (shop) => `Tarifa de alquiler y retención reembolsable en ${shop}. Solo se cobra la tarifa.`,
+  fr: (shop) => `Frais de location et empreinte remboursable chez ${shop}. Seuls les frais sont prélevés.`,
+}
+
+export function walkInOrderDescription(language: string, shopName: string): string {
+  return WALK_IN_ORDER_DESCRIPTION[isLanguage(language) ? language : 'en'](shopName).slice(0, 127)
+}
+
 type ReplacementFacts = { readonly shopName: string; readonly amount: Money; readonly approveUrl: string; readonly endsOn: string }
 
 const REPLACEMENT: Readonly<Record<Language, { readonly subject: (shop: string) => string; readonly text: (facts: ReplacementFacts, amount: string) => string }>> = {

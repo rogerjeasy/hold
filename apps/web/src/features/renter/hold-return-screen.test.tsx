@@ -16,6 +16,15 @@ describe('coming back from approving the hold', () => {
     expect((confirmHold.mock.calls[0]?.[1] as FormData).get('orderId')).toBe('ORDER-7')
   })
 
+  // A walk-in's fee is taken from the hold just placed, so the page never says nothing was charged.
+  it('says a walk-in’s hold is placed and only their fee is charged', async () => {
+    confirmHold.mockReset()
+    confirmHold.mockResolvedValue({ ok: true, value: { state: 'placed' } })
+    renderWithIntl(<HoldReturnScreen token="token" orderId="ORDER-8" shopName="Ribeira Bikes" placed={false} walkIn />)
+    expect(await screen.findByText('Hold placed. Only your fee is charged.')).toBeInTheDocument()
+    expect(screen.queryByText(/Nothing was charged/)).not.toBeInTheDocument()
+  })
+
   it('says a declined hold reserved nothing, and offers to approve again', async () => {
     confirmHold.mockReset()
     confirmHold.mockResolvedValue({ ok: false, failure: 'refused', reason: 'declined' })

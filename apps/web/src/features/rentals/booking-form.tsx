@@ -14,12 +14,13 @@ import { routing } from '@/i18n/routing'
 import { rentalRoutes } from '@/lib/routes'
 import { bookRental } from './actions'
 
-type BookingFormProps = { types: readonly BookableType[]; currency: string; days: number; from: string; to: string }
+// startsToday: the rental starts on the shop's own today, so a walk-in may approve the fee and the hold at once.
+type BookingFormProps = { types: readonly BookableType[]; currency: string; days: number; from: string; to: string; startsToday?: boolean }
 
 const LANGUAGE_NAMES: Readonly<Record<string, string>> = { en: 'English', de: 'Deutsch', es: 'Español', fr: 'Français' }
 
 // What to book and for whom. The dates come from the form above it; the booking opens once it is made.
-export function BookingForm({ types, currency, days, from, to }: BookingFormProps) {
+export function BookingForm({ types, currency, days, from, to, startsToday = false }: BookingFormProps) {
   const t = useTranslations('shop.rentals.form')
   const locale = useLocale()
   const router = useRouter()
@@ -59,6 +60,15 @@ export function BookingForm({ types, currency, days, from, to }: BookingFormProp
           </div>
         </div>
       </fieldset>
+      {startsToday ? (
+        <div className="flex max-w-prose items-start gap-3">
+          <input id="walkIn" name="walkIn" type="checkbox" value="on" className="mt-0.5 min-h-11 min-w-11 shrink-0 accent-primary" />
+          <Label htmlFor="walkIn" className="grid min-h-11 gap-1 font-normal">
+            <span className="font-semibold">{t('walkIn')}</span>
+            <span className="text-muted-foreground">{t('walkInHelp')}</span>
+          </Label>
+        </div>
+      ) : null}
       <div className="grid gap-3">
         <Button type="submit" disabled={pending} className="min-h-12 justify-self-start">
           {pending ? t('booking') : t('book')}

@@ -3,7 +3,7 @@ import type { PriceCategory, RentalState } from '@hold/domain'
 import { asc, count, eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { readJson } from './read-json.ts'
-import { itemTypes, items, priceEntries, rentalItems, rentals, renters, shops, wearPolicies } from './schema/index.ts'
+import { holds, itemTypes, items, priceEntries, rentalItems, rentals, renters, shops, wearPolicies } from './schema/index.ts'
 import { outsideShop } from './scope.ts'
 import type { Database, Transaction } from './scope.ts'
 
@@ -56,6 +56,8 @@ export type RenterView = {
   readonly simulated: boolean
   readonly paymentLapsed: boolean
   readonly feeOrderId: string | null
+  // A walk-in staff let approve the fee and the hold together, in one order (architecture.md section 8.2).
+  readonly walkIn: boolean
 }
 
 // The rental as its renter sees it: what they rent, the fee, the hold, and the prices and wear policy they agree to.
@@ -78,11 +80,13 @@ export async function renterView(transaction: Transaction, rentalId: string, now
       simulated: rentals.simulated,
       createdAt: rentals.createdAt,
       feeOrderId: rentals.paypalFeeOrderId,
+      holdStrategy: holds.strategy,
     })
     .from(rentals)
     .innerJoin(shops, eq(shops.id, rentals.shopId))
     .innerJoin(wearPolicies, eq(wearPolicies.id, rentals.wearPolicyId))
     .leftJoin(renters, eq(renters.id, rentals.renterId))
+    .leftJoin(holds, eq(holds.rentalId, rentals.id))
     .where(eq(rentals.id, rentalId))
   if (rental === undefined) return undefined
   const lines = await transaction
@@ -113,6 +117,7 @@ export async function renterView(transaction: Transaction, rentalId: string, now
     renterName: rental.renterName,
     simulated: rental.simulated,
     feeOrderId: rental.feeOrderId,
+    walkIn: rental.holdStrategy === 'combined',
     days: rentalDays(rental.startsAt, rental.endsAt),
     lines,
     prices,

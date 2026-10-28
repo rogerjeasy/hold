@@ -34,6 +34,28 @@ export async function captureFee(dependencies: SettleDependencies, shopId: strin
   return confirmed.ok ? 'confirmed' : 'failed'
 }
 
+// A walk-in's fee, captured from the authorization of their one order as a capture that is not the final one, so the
+// rest stays held (architecture.md section 8.2). The order is read back for who approved it: no fee order names them.
+export async function captureCombinedFee(dependencies: SettleDependencies, shopId: string, execution: Pick<StoredExecution, 'id' | 'orderId' | 'authorizationId' | 'amount' | 'idempotencyKey'>, paypal: PayPalHolds): Promise<ExecutionOutcome> {
+  const now = dependencies.now()
+  const fail = async (reason: string) => {
+    await inWorkerShop(dependencies, shopId, (transaction) => failExecution(transaction, execution.id, reason, now))
+    return 'failed' as const
+  }
+  if (execution.orderId === undefined || execution.authorizationId === undefined || execution.amount === undefined) return fail('No order, authorization or amount.')
+  const captured = await paypal.captureFromHold({ authorizationId: execution.authorizationId, amount: execution.amount, finalCapture: false, idempotencyKey: execution.idempotencyKey })
+  if (!captured.ok) {
+    if (TRANSIENT.has(captured.error.kind)) throw new PayPalUnavailable(captured.error.kind)
+    return fail(captured.error.kind)
+  }
+  const order = await paypal.readHoldOrder(execution.orderId)
+  if (!order.ok) throw new PayPalUnavailable(order.error.kind)
+  if (order.value.payer === undefined) return fail('PayPal names no payer on the order.')
+  const payment = { orderId: execution.orderId, captureId: captured.value.captureId, status: captured.value.status, amount: captured.value.amount, payer: order.value.payer }
+  const confirmed = await inWorkerShop(dependencies, shopId, (transaction) => confirmFeeCapture(transaction, execution.id, payment, now))
+  return confirmed.ok ? 'confirmed' : 'failed'
+}
+
 export type EventProcessing = 'applied' | 'ignored' | 'failed'
 
 // An event about a fee order. Nothing in the event is believed: the order is read back from PayPal.

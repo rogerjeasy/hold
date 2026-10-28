@@ -9,11 +9,12 @@ import { ActionMessage } from '@/features/shop/action-message'
 import { emailRenterLinkAgain, showRenterLink } from './actions'
 import { LinkCode } from './link-code'
 
-type LinkPanelProps = { rentalId: string; contactEmail: string | null; paid: boolean }
+// walkIn: a walk-in still to approve the fee and the hold, together, in one PayPal approval.
+type LinkPanelProps = { rentalId: string; contactEmail: string | null; paid: boolean; walkIn?: boolean }
 
 // The renter's link: a QR code to scan at the counter, the address to copy, or an email. Each shows a new link, since
 // only a link's fingerprint is kept and an earlier one cannot be shown again.
-export function LinkPanel({ rentalId, contactEmail, paid }: LinkPanelProps) {
+export function LinkPanel({ rentalId, contactEmail, paid, walkIn = false }: LinkPanelProps) {
   const t = useTranslations('shop.rentals.link')
   const locale = useLocale()
   const [shown, show, showing] = useActionState(showRenterLink, null)
@@ -22,7 +23,7 @@ export function LinkPanel({ rentalId, contactEmail, paid }: LinkPanelProps) {
   return (
     <Panel title={t('title')}>
       <div className="grid gap-4 px-4 py-4 md:px-5">
-        <p className="text-muted-foreground">{paid ? t('paid') : t('body')}</p>
+        <p className="text-muted-foreground">{paid ? t('paid') : walkIn ? t('walkIn') : t('body')}</p>
         <div className="flex flex-wrap gap-2">
           <form action={show}>
             <input type="hidden" name="locale" value={locale} />

@@ -6,7 +6,7 @@ import { HoldScreen } from './hold-screen'
 
 vi.mock('./actions', () => ({ approveHold: () => Promise.resolve(null) }))
 
-const view = { shopName: 'Ribeira Bikes', timeZone: 'Europe/Lisbon', currency: 'EUR', holdCents: 300_00, replyPeriodHours: 48 }
+const view = { shopName: 'Ribeira Bikes', timeZone: 'Europe/Lisbon', currency: 'EUR', holdCents: 300_00, replyPeriodHours: 48, feeCents: 25_00, state: 'awaiting_hold' as const }
 const hold = (overrides: Partial<RentalHold> = {}): RentalHold => ({
   id: 'hold-1',
   state: 'requested',
@@ -57,6 +57,20 @@ describe('the renter’s hold page', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Your hold of €300.00 is placed. Nothing was charged.')
     expect(screen.getByText(/Nov 14/)).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'See your rental' })).toHaveAttribute('href', '/r/token')
+  })
+
+  it('asks a walk-in who comes here first for the fee and the hold together', () => {
+    renderWithIntl(<HoldScreen token="token" view={{ ...view, state: 'pending_payment' }} hold={hold({ strategy: 'combined' })} />)
+    expect(screen.getByRole('button', { name: 'Pay €25.00 and approve the €300.00 hold with PayPal' })).toBeInTheDocument()
+  })
+
+  // The fee is captured from the hold just after it is placed; the page never says nothing was charged.
+  it('says a walk-in’s fee is being taken once the hold is placed, then that only the fee was charged', () => {
+    const { unmount } = renderWithIntl(<HoldScreen token="token" view={{ ...view, state: 'pending_payment' }} hold={hold({ state: 'placed', strategy: 'combined' })} />)
+    expect(screen.getByRole('status')).toHaveTextContent('Your hold of €300.00 is placed. PayPal is taking your fee of €25.00.')
+    unmount()
+    renderWithIntl(<HoldScreen token="token" view={{ ...view, state: 'ready' }} hold={hold({ state: 'placed', strategy: 'combined' })} />)
+    expect(screen.getByRole('status')).toHaveTextContent('Your fee of €25.00 is paid and your hold of €300.00 is placed. Only the fee was charged.')
   })
 
   it('asks for a new hold before the placed one ends, and says the old one is released once approved', () => {
