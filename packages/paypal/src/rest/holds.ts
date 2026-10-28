@@ -13,6 +13,7 @@ import type {
   FeePayment,
   HoldOrder,
   HoldOrderStatus,
+  Payer,
   PayPalHolds,
   PayPalResult,
 } from '../port.ts'
@@ -80,8 +81,15 @@ function toHoldOrder(order: PayPalOrder): HoldOrder {
     orderId: order.id,
     status,
     approvalUrl: status === 'awaiting_approval' ? order.links?.find((link) => APPROVAL_LINKS.has(link.rel))?.href : undefined,
-    payerId: order.payer?.payer_id,
+    payer: payerOf(order.payer),
   }
+}
+
+// Who approved or paid, when PayPal names them in full. Without an email address Hold cannot say who the renter is.
+function payerOf(payer: { readonly payer_id?: string | undefined; readonly email_address?: string | undefined; readonly name?: { readonly given_name?: string | undefined; readonly surname?: string | undefined } | undefined } | undefined): Payer | undefined {
+  if (payer?.payer_id === undefined || payer.email_address === undefined) return undefined
+  const name = [payer.name?.given_name, payer.name?.surname].filter((part) => part !== undefined && part !== '').join(' ')
+  return { payerId: payer.payer_id, email: payer.email_address, name: name === '' ? undefined : name }
 }
 
 function toAuthorization(authorization: PayPalAuthorization): Authorization {
@@ -108,14 +116,14 @@ function toFeePayment(order: PayPalFeeOrder, debugId: string | undefined): PayPa
   const capture = order.purchase_units?.[0]?.payments?.captures?.[0]
   if (capture === undefined) return fail({ kind: 'not_paid', issue: undefined, description: `Order ${order.id} has no capture.`, debugId })
   // A captured order always names who paid. Without that, Hold cannot say who the renter is.
-  if (order.payer?.email_address === undefined) return fail({ kind: 'unexpected_response', issue: undefined, description: `Order ${order.id} names no payer.`, debugId })
-  const name = [order.payer.name?.given_name, order.payer.name?.surname].filter((part) => part !== undefined && part !== '').join(' ')
+  const payer = payerOf(order.payer)
+  if (payer === undefined) return fail({ kind: 'unexpected_response', issue: undefined, description: `Order ${order.id} names no payer.`, debugId })
   return ok({
     orderId: order.id,
     captureId: capture.id,
     status: CAPTURE_STATUS[capture.status],
     amount: capture.amount,
-    payer: { payerId: order.payer.payer_id, email: order.payer.email_address, name: name === '' ? undefined : name },
+    payer,
   })
 }
 

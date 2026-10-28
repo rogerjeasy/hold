@@ -9,8 +9,8 @@ export type HoldOrder = {
   readonly status: HoldOrderStatus
   // Where the renter approves the hold. Absent once the order no longer needs approving.
   readonly approvalUrl: string | undefined
-  // Known once the renter has approved.
-  readonly payerId: string | undefined
+  // Who approved, once the renter has: how a walk-in's one order tells Hold who the renter is.
+  readonly payer: Payer | undefined
 }
 
 export type AuthorizationStatus = 'pending' | 'created' | 'partially_captured' | 'captured' | 'voided' | 'denied' | 'expired'

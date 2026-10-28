@@ -30,7 +30,7 @@ export const orderSchema = z.object({
   id: z.string().min(1),
   status: z.enum(['CREATED', 'SAVED', 'APPROVED', 'VOIDED', 'COMPLETED', 'PAYER_ACTION_REQUIRED']),
   links: z.array(z.object({ href: z.string(), rel: z.string() })).optional(),
-  payer: z.object({ payer_id: z.string().optional() }).optional(),
+  payer: z.object({ payer_id: z.string().optional(), email_address: z.string().min(1).optional(), name: z.object({ given_name: z.string().optional(), surname: z.string().optional() }).optional() }).optional(),
 })
 
 // The reply to authorizing an order. Only the new authorization's identifier is taken, and the rest is read back.

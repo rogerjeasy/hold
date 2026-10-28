@@ -108,7 +108,7 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
       orderId: order.orderId,
       status: order.status,
       approvalUrl: awaiting ? (options.approvalUrl?.(order.orderId) ?? `https://fake-paypal.test/approve/${order.orderId}`) : undefined,
-      payerId: awaiting ? undefined : FAKE_PAYER.payerId,
+      payer: awaiting ? undefined : FAKE_PAYER,
     }
   }
 

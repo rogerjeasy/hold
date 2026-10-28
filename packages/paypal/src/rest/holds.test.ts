@@ -69,14 +69,15 @@ describe('createHoldOrder', () => {
     })
   })
 
-  it('reads an approved order with the renter payer ID and no approval link', async () => {
+  // A walk-in's one order is how Hold learns who the renter is, as no fee order names them (architecture.md section 8.2).
+  it('reads an approved order with who approved it and no approval link', async () => {
     const { holds } = holdsAgainst([
       {
         status: 200,
         body: {
           id: 'ORDER-1',
           status: 'APPROVED',
-          payer: { payer_id: 'PAYER123' },
+          payer: { payer_id: 'PAYER123', email_address: 'priya@example.com', name: { given_name: 'Priya', surname: 'Natarajan' } },
           links: [{ href: 'https://www.sandbox.paypal.com/checkoutnow?token=ORDER-1', rel: 'payer-action' }],
         },
       },
@@ -84,8 +85,14 @@ describe('createHoldOrder', () => {
 
     expect(await holds.readHoldOrder('ORDER-1')).toEqual({
       ok: true,
-      value: { orderId: 'ORDER-1', status: 'approved', approvalUrl: undefined, payerId: 'PAYER123' },
+      value: { orderId: 'ORDER-1', status: 'approved', approvalUrl: undefined, payer: { payerId: 'PAYER123', email: 'priya@example.com', name: 'Priya Natarajan' } },
     })
+  })
+
+  it('names no payer for an order that does not say who approved it', async () => {
+    const { holds } = holdsAgainst([{ status: 200, body: { id: 'ORDER-1', status: 'APPROVED', payer: { payer_id: 'PAYER123' } } }])
+
+    expect(await holds.readHoldOrder('ORDER-1')).toMatchObject({ ok: true, value: { payer: undefined } })
   })
 })
 
