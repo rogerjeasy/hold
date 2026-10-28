@@ -1,5 +1,6 @@
-import { findPayPalAccount, inShop, renterContact, shopSettings } from '@hold/db'
+import { findPayPalAccount, inShop, publishedEvidencePack, renterContact, shopSettings } from '@hold/db'
 import { createDataApiDatabase } from '@hold/db/data-api'
+import { createS3DocumentStore } from '@hold/evidence'
 import { createLazyMailer, createSmtpMailer, loadSmtpSettings, shopMessageEmail } from '@hold/notify'
 import { createBedrockInvestigator, openPayPalReader, paypalTransport } from '@hold/ops'
 import type { CarryOutDependencies, OpsDependencies } from '@hold/ops'
@@ -37,11 +38,13 @@ export function workerOperations(): OpsDependencies {
   }
 }
 
-// What sending an approved message or dispute answer needs: the database, email, and the shop's own PayPal account.
+// What sending an approved message or dispute answer needs: the database, email, the shop's own PayPal account, and
+// the evidence packs a dispute answer attaches.
 export function workerCarryOut(): CarryOutDependencies {
   const settings = loadOperationsSettings(process.env)
   const database = createDataApiDatabase({ region: settings.region, clusterArn: settings.database.clusterArn, secretArn: settings.database.secretArn, database: settings.database.name })
   const mailer = createLazyMailer(async () => createSmtpMailer(await loadSmtpSettings(settings.smtpSecret, settings.region)))
+  const documents = createS3DocumentStore({ evidenceBucket: settings.evidenceBucket, region: settings.region })
   return {
     database,
     now: () => new Date(),
@@ -50,10 +53,16 @@ export function workerCarryOut(): CarryOutDependencies {
       if (shop === undefined || renter === undefined) return false
       return mailer.send(shopMessageEmail(renter.email, renter.language, { shopName: shop.name, text: input.text }))
     },
+    // The approved notes go to PayPal as evidence, with the disputed rental's latest published record as a PDF.
     async answerDispute(shopId, input) {
-      const account = await inShop(database, { role: 'hold_worker', shopId }, (transaction) => findPayPalAccount(transaction, shopId, settings.paypalMode))
+      const { account, pack } = await inShop(database, { role: 'hold_worker', shopId }, async (transaction) => ({
+        account: await findPayPalAccount(transaction, shopId, settings.paypalMode),
+        pack: input.rentalId === null ? undefined : await publishedEvidencePack(transaction, input.rentalId),
+      }))
       if (account === undefined) return false
-      return (await createRestPayPalHolds(shopPayPalClient(settings, account.credentialReference)).sendDisputeMessage(input)).ok
+      const document = pack === undefined ? undefined : { fileName: `hold-record-v${String(pack.version)}.pdf`, bytes: await documents.read(pack.evidenceKey, pack.pdfVersionId) }
+      const paypal = createRestPayPalHolds(shopPayPalClient(settings, account.credentialReference))
+      return (await paypal.provideDisputeEvidence({ disputeId: input.disputeId, notes: input.notes, document, idempotencyKey: input.idempotencyKey })).ok
     },
   }
 }

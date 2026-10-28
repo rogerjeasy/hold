@@ -33,6 +33,8 @@ export type PayPalClientOptions = {
 export type PayPalRequest =
   | { readonly method: 'GET'; readonly path: string }
   | { readonly method: 'POST'; readonly path: string; readonly body?: unknown; readonly idempotencyKey: string }
+  // A multipart upload, such as evidence on a dispute. fetch sets its Content-Type, with the boundary.
+  | { readonly method: 'POST'; readonly path: string; readonly form: FormData; readonly idempotencyKey: string }
 
 export type PayPalReply = {
   readonly status: number
@@ -137,7 +139,7 @@ export function createPayPalClient(options: PayPalClientOptions): PayPalClient {
     method: string,
     path: string,
     headers: Record<string, string>,
-    body: string | undefined,
+    body: string | FormData | undefined,
   ): Promise<PayPalReply | undefined> {
     let reply: PayPalReply | undefined
     try {
@@ -210,13 +212,13 @@ export function createPayPalClient(options: PayPalClientOptions): PayPalClient {
       Prefer: 'return=representation',
     }
     if (request.method === 'POST') {
-      headers['Content-Type'] = 'application/json'
+      if (!('form' in request)) headers['Content-Type'] = 'application/json'
       headers['PayPal-Request-Id'] = request.idempotencyKey
     }
     return headers
   }
 
-  async function attemptSend(request: PayPalRequest, body: string | undefined, attempt: number): Promise<Attempt<PayPalReply>> {
+  async function attemptSend(request: PayPalRequest, body: string | FormData | undefined, attempt: number): Promise<Attempt<PayPalReply>> {
     const token = await accessToken()
     if (!token.ok) return { retry: false, result: token }
     const reply = await exchange(attempt, request.method, request.path, headersFor(token.value, request), body)
@@ -231,7 +233,7 @@ export function createPayPalClient(options: PayPalClientOptions): PayPalClient {
 
   return {
     send(request) {
-      const body = request.method === 'POST' && request.body !== undefined ? JSON.stringify(request.body) : undefined
+      const body = request.method !== 'POST' ? undefined : 'form' in request ? request.form : request.body === undefined ? undefined : JSON.stringify(request.body)
       return withRetries((attempt) => attemptSend(request, body, attempt))
     },
     async checkCredentials() {

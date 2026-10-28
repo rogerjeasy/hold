@@ -31,8 +31,8 @@ export type FakePayPal = PayPalHolds & {
   orderLinks(orderId: string): { readonly returnUrl: string; readonly cancelUrl: string; readonly amount: Money; readonly description: string } | undefined
   // Stands in for a renter opening a dispute with PayPal.
   openDispute(dispute: OpenDispute): void
-  // What the shop said on each dispute, in order.
-  readonly disputeMessages: { readonly disputeId: string; readonly message: string }[]
+  // The evidence the shop gave on each dispute, in order: its notes and the name of the document it attached.
+  readonly disputeEvidence: { readonly disputeId: string; readonly notes: string; readonly fileName: string | null }[]
 }
 
 export type FakePayPalOptions = {
@@ -77,7 +77,7 @@ function failure(kind: PayPalFailureKind, description: string, issue?: string): 
 export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
   const orders = new Map<string, FakeOrder>()
   const disputes: OpenDispute[] = []
-  const disputeMessages: { disputeId: string; message: string }[] = []
+  const disputeEvidence: { disputeId: string; notes: string; fileName: string | null }[] = []
   const authorizations = new Map<string, FakeAuthorization>()
   const repliesByKey = new Map<string, unknown>()
   let lastNumber = 0
@@ -125,13 +125,15 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
     authorizations.set(authorization.authorizationId, authorization)
   }
 
-  // Finds an authorization that can still be acted on, or says why it cannot.
-  function usable(authorizationId: string): PayPalResult<FakeAuthorization> {
+  // Finds an authorization that can still be acted on, or says why it cannot. PayPal's sandbox still captured on a
+  // renewed authorization's old identifier on 28 October 2026; voiding or renewing it again was not tried, and is
+  // refused here.
+  function usable(authorizationId: string, action: 'capture' | 'other' = 'other'): PayPalResult<FakeAuthorization> {
     const authorization = authorizations.get(authorizationId)
     if (authorization === undefined) return failure('not_found', 'No such authorization.')
     if (authorization.status === 'voided') return failure('hold_voided', 'The authorization was voided.')
     if (authorization.status === 'captured') return failure('hold_already_captured', 'The authorization was captured in full.')
-    if (authorization.renewedBy !== undefined) {
+    if (authorization.renewedBy !== undefined && action !== 'capture') {
       return failure('rejected', `The authorization was renewed. Use ${authorization.renewedBy}.`, 'FAKE_AUTHORIZATION_RENEWED')
     }
     if (options.now() >= authorization.expiresAt) return failure('hold_expired', 'The authorization has expired.')
@@ -158,10 +160,10 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
       return Promise.resolve(ok(disputes.filter((dispute) => dispute.open)))
     },
 
-    disputeMessages,
+    disputeEvidence,
 
-    sendDisputeMessage(input) {
-      once('dispute-message', input.idempotencyKey, () => { disputeMessages.push({ disputeId: input.disputeId, message: input.message }); return undefined })
+    provideDisputeEvidence(input) {
+      once('dispute-evidence', input.idempotencyKey, () => { disputeEvidence.push({ disputeId: input.disputeId, notes: input.notes, fileName: input.document?.fileName ?? null }); return undefined })
       return Promise.resolve(ok(undefined))
     },
 
@@ -267,13 +269,16 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
         if (now < addDays(current.value.createdAt, HOLD_ASSURED_DAYS)) {
           return failure('renewal_too_soon', 'A renewal is allowed once the assured period has passed.')
         }
+        // PayPal's sandbox, 28 October 2026 (tech-stack.md section 16, item 3): a renewal with no amount asks for the
+        // original amount, which PayPal refuses once part of the hold was captured.
+        if (current.value.capturedCents > 0) return failure('rejected', 'The renewal asks for more than is still reserved.', 'AUTHORIZATION_AMOUNT_EXCEEDED')
         const renewed: FakeAuthorization = {
           authorizationId: nextId('FAKE-AUTH'),
-          // Not confirmed in the sandbox: the renewal is taken to cover what is still reserved.
-          amount: { cents: current.value.amount.cents - current.value.capturedCents, currency: current.value.amount.currency },
+          amount: current.value.amount,
           createdAt: now,
-          // A renewal starts a new assured period and leaves the end of validity where it was.
-          expiresAt: current.value.expiresAt,
+          // A renewal starts a new assured period. Its end of validity stays where the original's was, give or take
+          // the second PayPal reported it one second later in the sandbox on 28 October 2026.
+          expiresAt: new Date(current.value.expiresAt.getTime() + 1000),
           status: 'created',
           capturedCents: 0,
           isRenewal: true,
@@ -322,7 +327,7 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
 
     captureFromHold(input) {
       const result = once('capture', input.idempotencyKey, (): PayPalResult<Capture> => {
-        const current = usable(input.authorizationId)
+        const current = usable(input.authorizationId, 'capture')
         if (!current.ok) return current
         const authorization = current.value
         if (input.amount.currency !== authorization.amount.currency || input.amount.cents <= 0) {

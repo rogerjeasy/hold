@@ -59,3 +59,16 @@ it('never lets the web service insert a document already marked published', asyn
   if (pack === undefined) throw new Error('Missing pack')
   await expect(shop.act((transaction) => transaction.insert(repository.evidencePacks).values({ shopId: shop.scope.shopId, rentalId: rental.rentalId, version: 2, snapshot: pack.snapshot, sourceFingerprint: 'c'.repeat(64), state: 'ready', evidenceKey: `packs/${shop.scope.shopId}/${rental.rentalId}/2/record.pdf`, manifestFingerprint: 'b'.repeat(64), pdfSha256: 'a'.repeat(64), pdfVersionId: 'p', manifestVersionId: 'm', snapshotVersionId: 's' }))).rejects.toThrow()
 })
+
+// A dispute is answered with the rental's latest published record (extensions.md section 6.3, step 6).
+it('finds the latest published evidence pack of a rental, for a dispute answer, and nothing before one is published', async () => {
+  const rental = await shop.readyRental()
+  const worker = <Result>(work: (transaction: repository.Transaction) => Promise<Result>) => repository.inShop(database, { role: 'hold_worker', shopId: shop.scope.shopId }, work)
+  const pack = await shop.act((transaction) => repository.reserveEvidencePack(transaction, rental.rentalId, now))
+  if (pack === undefined) throw new Error('Missing pack')
+  expect(await worker((transaction) => repository.publishedEvidencePack(transaction, rental.rentalId))).toBeUndefined()
+
+  await worker((transaction) => repository.publishEvidencePack(transaction, pack.id, { pdfSha256: 'c'.repeat(64), manifestSha256: 'd'.repeat(64), pdfVersionId: 'pdf-v9', manifestVersionId: 'm-v9', snapshotVersionId: 's-v9' }))
+
+  expect(await worker((transaction) => repository.publishedEvidencePack(transaction, rental.rentalId))).toEqual({ evidenceKey: pack.evidenceKey, pdfVersionId: 'pdf-v9', version: pack.version })
+})

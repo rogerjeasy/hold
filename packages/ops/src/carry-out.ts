@@ -6,8 +6,9 @@ export type CarryOutDependencies = {
   readonly now: () => Date
   // Emails the renter of the rental the shop's approved message. False when it could not be sent.
   readonly message: (input: { readonly shopId: string; readonly rentalId: string; readonly text: string }) => Promise<boolean>
-  // Sends the shop's approved answer on a PayPal dispute. False when PayPal refused it.
-  readonly answerDispute: (shopId: string, input: { readonly disputeId: string; readonly message: string; readonly idempotencyKey: string }) => Promise<boolean>
+  // Gives PayPal the shop's approved answer on a dispute as evidence: the notes, and the disputed rental's evidence pack
+  // when it has one. False when PayPal refused it.
+  readonly answerDispute: (shopId: string, input: { readonly disputeId: string; readonly notes: string; readonly rentalId: string | null; readonly idempotencyKey: string }) => Promise<boolean>
 }
 
 export type CarryOutOutcome = 'executed' | 'failed' | 'nothing_to_do'
@@ -22,7 +23,7 @@ export async function carryOutProposal(dependencies: CarryOutDependencies, input
   const { draft } = proposal
   let done = false
   if (proposal.kind === 'send_message' && proposal.rentalId !== null) done = await dependencies.message({ shopId: input.shopId, rentalId: proposal.rentalId, text: draft })
-  if (proposal.kind === 'respond_to_dispute' && proposal.subjectKind === 'dispute') done = await dependencies.answerDispute(input.shopId, { disputeId: proposal.subjectId, message: draft, idempotencyKey: `proposal-${proposal.id}` })
+  if (proposal.kind === 'respond_to_dispute' && proposal.subjectKind === 'dispute') done = await dependencies.answerDispute(input.shopId, { disputeId: proposal.subjectId, notes: draft, rentalId: proposal.rentalId, idempotencyKey: `proposal-${proposal.id}` })
   const outcome = done ? 'executed' : 'failed'
   const now = dependencies.now()
   await asWorker(async (transaction) => {

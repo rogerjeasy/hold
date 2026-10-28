@@ -7,6 +7,7 @@ const ENVIRONMENT = {
   HOLD_DATABASE_SECRET_ARN: 'arn:aws:secretsmanager:us-east-1:1:secret:hold/database/worker',
   HOLD_OPS_AGENT_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-ops-agent.fifo',
   HOLD_SMTP_SECRET: 'hold/email/smtp',
+  HOLD_EVIDENCE_BUCKET: 'hold-evidence-707938860881',
 }
 
 it('reads only what the operations agent needs, with the database name, PayPal mode and MCP address defaulted', () => {
@@ -17,6 +18,8 @@ it('reads only what the operations agent needs, with the database name, PayPal m
     smtpSecret: 'hold/email/smtp',
     paypalMode: 'sandbox',
     paypalMcpUrl: 'https://mcp.sandbox.paypal.com/sse',
+    // Where the evidence packs a dispute answer attaches are kept.
+    evidenceBucket: 'hold-evidence-707938860881',
   })
 })
 

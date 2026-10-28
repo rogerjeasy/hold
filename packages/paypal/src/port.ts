@@ -170,8 +170,9 @@ export type PayPalHolds = {
   readCapture(captureId: string): Promise<PayPalResult<Capture & { readonly authorizationId: string }>>
   // The disputes waiting on the shop, with their due dates and the captures they name.
   listOpenDisputes(): Promise<PayPalResult<readonly OpenDispute[]>>
-  // The shop's answer on a dispute, after a person approved it. It moves no money.
-  sendDisputeMessage(input: { readonly disputeId: string; readonly message: string; readonly idempotencyKey: string }): Promise<PayPalResult<void>>
+  // The shop's evidence on a dispute, after a person approved it: their notes, and the rental's evidence pack as a PDF
+  // when there is one. It moves no money.
+  provideDisputeEvidence(input: { readonly disputeId: string; readonly notes: string; readonly document: { readonly fileName: string; readonly bytes: Uint8Array } | undefined; readonly idempotencyKey: string }): Promise<PayPalResult<void>>
 }
 
 export type OpenDispute = { readonly id: string; readonly open: boolean; readonly amount: Money | null; readonly responseDueAt: Date | null; readonly captureIds: readonly string[] }

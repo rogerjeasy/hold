@@ -137,23 +137,35 @@ describe('renewing a hold', () => {
     expect(renewed).toMatchObject({ status: 'created', amount: DEPOSIT, createdAt: now })
   })
 
-  it('does not extend the 29 days', async () => {
+  // PayPal's sandbox, 28 October 2026: the renewal of a hold placed on 14 October ends one second after the original.
+  it('does not extend the 29 days, beyond the second PayPal adds', async () => {
     const hold = await placeHold()
     onDay(20)
 
     const renewed = valueOf(await paypal.renewHold({ authorizationId: hold.authorizationId, idempotencyKey: key() }))
 
-    expect(renewed.expiresAt).toEqual(hold.expiresAt)
+    expect(renewed.expiresAt.getTime() - hold.expiresAt.getTime()).toBe(1000)
   })
 
-  it('refuses a capture or a release that still uses the old identifier', async () => {
+  // PayPal's sandbox, 28 October 2026: a capture on the old identifier was accepted after the renewal. Hold always
+  // captures on the current one. A release on the old identifier was not tried, and the fake refuses it.
+  it('still captures on the old identifier, as the sandbox did, and refuses a release on it', async () => {
     const hold = await placeHold()
     onDay(5)
     const renewed = valueOf(await paypal.renewHold({ authorizationId: hold.authorizationId, idempotencyKey: key() }))
 
-    expect(await kindOf(capture(hold.authorizationId, 40_00, true))).toBe('rejected')
     expect(await kindOf(paypal.releaseHold({ authorizationId: hold.authorizationId, idempotencyKey: key() }))).toBe('rejected')
+    expect(await kindOf(capture(hold.authorizationId, 1_00, false))).toBe('ok')
     expect(await kindOf(capture(renewed.authorizationId, 40_00, true))).toBe('ok')
+  })
+
+  // PayPal's sandbox, 28 October 2026: AUTHORIZATION_AMOUNT_EXCEEDED, for a renewal sent with no amount.
+  it('refuses to renew a hold part of which was captured', async () => {
+    const hold = await placeHold({ cents: 195_00, currency: 'EUR' })
+    await capture(hold.authorizationId, 45_00, false)
+    onDay(5)
+
+    expect(await kindOf(paypal.renewHold({ authorizationId: hold.authorizationId, idempotencyKey: key() }))).toBe('rejected')
   })
 
   it('is allowed only once per hold', async () => {
@@ -191,7 +203,7 @@ describe('renewing a hold', () => {
     const hold = await placeHold()
     onDay(27)
     const renewed = valueOf(await paypal.renewHold({ authorizationId: hold.authorizationId, idempotencyKey: key() }))
-    onDay(29)
+    onDay(30)
 
     expect(await kindOf(paypal.renewHold({ authorizationId: renewed.authorizationId, idempotencyKey: key() }))).toBe('hold_expired')
     expect(await kindOf(capture(renewed.authorizationId, 40_00, true))).toBe('hold_expired')

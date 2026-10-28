@@ -40,11 +40,15 @@ export function listOpenDisputes(client: PayPalClient): PayPalHolds['listOpenDis
   }
 }
 
-// Sends the shop's message on a dispute (Disputes v1 send-message). The JSON body is an assumption still to confirm in
-// a sandbox trial (tech-stack.md section 16).
-export function sendDisputeMessage(client: PayPalClient): PayPalHolds['sendDisputeMessage'] {
+// Answers a dispute with evidence (Disputes v1 provide-evidence): the shop's notes as JSON in "input", and the rental's
+// evidence pack, when there is one, as a PDF in "evidence-file". The part names follow PayPal's reference; a sandbox
+// dispute has yet to confirm them (tech-stack.md section 16). It moves no money.
+export function provideDisputeEvidence(client: PayPalClient): PayPalHolds['provideDisputeEvidence'] {
   return async (input) => {
-    const sent = await client.send({ method: 'POST', path: `/v1/customer/disputes/${encodeURIComponent(input.disputeId)}/send-message`, body: { message: input.message }, idempotencyKey: input.idempotencyKey })
+    const form = new FormData()
+    form.append('input', new Blob([JSON.stringify({ evidences: [{ evidence_type: 'OTHER', notes: input.notes }] })], { type: 'application/json' }))
+    if (input.document !== undefined) form.append('evidence-file', new Blob([Uint8Array.from(input.document.bytes)], { type: 'application/pdf' }), input.document.fileName)
+    const sent = await client.send({ method: 'POST', path: `/v1/customer/disputes/${encodeURIComponent(input.disputeId)}/provide-evidence`, form, idempotencyKey: input.idempotencyKey })
     return sent.ok ? ok(undefined) : sent
   }
 }

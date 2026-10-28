@@ -10,7 +10,8 @@ import type { WorkerProps } from './worker.ts'
 // queue, and its function runs the shop's detectors, reminders and investigation. Its role reads each shop's PayPal
 // credentials, to read PayPal and to lend the shop's token to PayPal's MCP server, and may call the model. It writes
 // no photograph, schedules nothing and sends to no money queue: an approved release or replacement is carried out by
-// the web app's own approval path, and its third function sends only an approved message or dispute answer.
+// the web app's own approval path, and its third function sends only an approved message or dispute answer, which
+// attaches the rental's published evidence pack.
 export function createOperationsWorker(stack: Stack, props: WorkerProps): void {
   const queue = props.queues.get('ops-agent')
   const executeQueue = props.queues.get('ops-execute')
@@ -23,6 +24,8 @@ export function createOperationsWorker(stack: Stack, props: WorkerProps): void {
   role.addToPolicy(new iam.PolicyStatement({ actions: ['bedrock-mantle:CreateInference'], resources: ['*'], conditions: { StringEquals: { 'aws:RequestedRegion': REGION, 'bedrock-mantle:Model': ['anthropic.claude-opus-5-5', 'anthropic.claude-opus-4-8'] } } }))
   role.addToPolicy(new iam.PolicyStatement({ actions: CLAUDE_INVOKE_ACTIONS, resources: CLAUDE_INVOKE_RESOURCES }))
   role.addToPolicy(new iam.PolicyStatement({ actions: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'], resources: [`arn:aws:logs:${REGION}:${ACCOUNT}:log-group:/aws/lambda/${name('worker', 'operations')}*:*`] }))
+  // A dispute answer attaches the rental's published record, read by its version. No photograph, and nothing written.
+  role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:GetObjectVersion'], resources: [props.evidenceBucket.arnForObjects('packs/*')] }))
   queue.grantSendMessages(role)
   const environment = {
     HOLD_DATABASE_CLUSTER_ARN: props.cluster.clusterArn,
@@ -30,6 +33,7 @@ export function createOperationsWorker(stack: Stack, props: WorkerProps): void {
     HOLD_DATABASE_NAME: DATABASE_NAME,
     HOLD_OPS_AGENT_QUEUE_URL: queue.queueUrl,
     HOLD_SMTP_SECRET: SMTP_SECRET_NAME,
+    HOLD_EVIDENCE_BUCKET: props.evidenceBucket.bucketName,
   }
   const agent = workerFunction(stack, 'OperationsWorker', name('worker', 'operations'), 'ops-agent-lambda.ts', role, environment, { memorySize: 1024 })
   agent.addEventSource(new SqsEventSource(queue, { batchSize: 1, reportBatchItemFailures: true }))

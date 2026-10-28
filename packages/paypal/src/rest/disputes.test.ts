@@ -25,11 +25,30 @@ it('hands out the shop\'s access token for PayPal\'s own MCP server, and nothing
   expect(token.ok).toBe(true)
 })
 
-it('sends the shop\'s message on a dispute once, with the idempotency key as PayPal-Request-Id', async () => {
+// Disputes v1 provide-evidence, as PayPal's reference shows it: a multipart form with the evidence as JSON in "input"
+// and the document in "evidence-file". Not yet tried against a sandbox dispute (tech-stack.md section 16, item 6).
+it('answers a dispute with the shop\'s notes and the rental\'s evidence pack as a PDF, once', async () => {
   const server = stubServer([TOKEN_REPLY, { status: 200, body: { links: [] } }])
-  const sent = await createRestPayPalHolds(client(server)).sendDisputeMessage({ disputeId: 'PP-D-1', message: 'The scratch is shown in the return photographs.', idempotencyKey: 'proposal-1' })
+  const pdf = new TextEncoder().encode('%PDF-1.7 the evidence pack')
+  const sent = await createRestPayPalHolds(client(server)).provideDisputeEvidence({ disputeId: 'PP-D-1', notes: 'The renter agreed the price list; the photographs show the chip.', document: { fileName: 'hold-record-v2.pdf', bytes: pdf }, idempotencyKey: 'proposal-1' })
+
   expect(sent).toEqual({ ok: true, value: undefined })
   const [call] = server.apiCalls()
-  expect(call).toMatchObject({ method: 'POST', path: '/v1/customer/disputes/PP-D-1/send-message', body: { message: 'The scratch is shown in the return photographs.' } })
+  expect(call).toMatchObject({ method: 'POST', path: '/v1/customer/disputes/PP-D-1/provide-evidence' })
   expect(call?.headers.get('PayPal-Request-Id')).toBe('proposal-1')
+  const form = call?.body as FormData
+  const input = form.get('input') as Blob
+  expect(input.type).toBe('application/json')
+  expect(JSON.parse(await input.text())).toEqual({ evidences: [{ evidence_type: 'OTHER', notes: 'The renter agreed the price list; the photographs show the chip.' }] })
+  const file = form.get('evidence-file') as File
+  expect(file.name).toBe('hold-record-v2.pdf')
+  expect(file.type).toBe('application/pdf')
+  expect(new Uint8Array(await file.arrayBuffer())).toEqual(pdf)
+})
+
+it('answers with notes alone when there is no evidence pack yet', async () => {
+  const server = stubServer([TOKEN_REPLY, { status: 200, body: { links: [] } }])
+  await createRestPayPalHolds(client(server)).provideDisputeEvidence({ disputeId: 'PP-D-1', notes: 'Notes only.', document: undefined, idempotencyKey: 'proposal-2' })
+  const form = server.apiCalls()[0]?.body as FormData
+  expect(form.get('evidence-file')).toBeNull()
 })

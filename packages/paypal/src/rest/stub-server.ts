@@ -28,6 +28,8 @@ export const TOKEN_REPLY: StubReply = { status: 200, body: { access_token: 'stub
 export const NO_ANSWER = 'no answer'
 
 function readBody(body: unknown): unknown {
+  // A multipart form is kept as it was sent, for a test to read its parts.
+  if (body instanceof FormData) return body
   if (typeof body !== 'string') return undefined
   try {
     return JSON.parse(body)

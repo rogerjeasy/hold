@@ -12,6 +12,8 @@ const schema = z.object({
   HOLD_PAYPAL_MODE: z.literal('sandbox').default('sandbox'),
   // PayPal's remote MCP server, which answers over server-sent events (tech-stack.md trial 10).
   HOLD_PAYPAL_MCP_URL: z.url().default('https://mcp.sandbox.paypal.com/sse'),
+  // The evidence bucket, from which a dispute answer attaches the rental's published record.
+  HOLD_EVIDENCE_BUCKET: z.string().min(3),
 })
 
 export type OperationsSettings = {
@@ -21,6 +23,7 @@ export type OperationsSettings = {
   readonly smtpSecret: string
   readonly paypalMode: 'sandbox'
   readonly paypalMcpUrl: string
+  readonly evidenceBucket: string
 }
 
 export function loadOperationsSettings(environment: Readonly<Record<string, string | undefined>>): OperationsSettings {
@@ -34,5 +37,6 @@ export function loadOperationsSettings(environment: Readonly<Record<string, stri
     smtpSecret: value.HOLD_SMTP_SECRET,
     paypalMode: value.HOLD_PAYPAL_MODE,
     paypalMcpUrl: value.HOLD_PAYPAL_MCP_URL,
+    evidenceBucket: value.HOLD_EVIDENCE_BUCKET,
   }
 }

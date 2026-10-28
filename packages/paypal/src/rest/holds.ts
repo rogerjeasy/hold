@@ -30,7 +30,7 @@ import {
   webhookSchema,
 } from './schemas.ts'
 import type { PayPalAuthorization, PayPalCapture, PayPalFeeOrder, PayPalOrder } from './schemas.ts'
-import { listOpenDisputes, sendDisputeMessage } from './disputes.ts'
+import { listOpenDisputes, provideDisputeEvidence } from './disputes.ts'
 
 const ORDERS_PATH = '/v2/checkout/orders'
 const AUTHORIZATIONS_PATH = '/v2/payments/authorizations'
@@ -267,7 +267,7 @@ export function createRestPayPalHolds(client: PayPalClient): PayPalHolds {
     readRefund: readRefund(client),
 
     listOpenDisputes: listOpenDisputes(client),
-    sendDisputeMessage: sendDisputeMessage(client),
+    provideDisputeEvidence: provideDisputeEvidence(client),
     async readCapture(captureId) {
       const reply = read(captureReadSchema, await client.send({ method: 'GET', path: `/v2/payments/captures/${encodeURIComponent(captureId)}` }))
       return mapped(reply, (capture) => ({ ...toCapture(capture), authorizationId: capture.supplementary_data.related_ids.authorization_id }))

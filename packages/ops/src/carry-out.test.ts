@@ -31,12 +31,12 @@ async function approved(kind: 'send_message' | 'respond_to_dispute', draft: stri
   return { proposalId: written.id, rentalId: rental.rentalId, disputeId: exception.subjectId }
 }
 
-const sent: { kind: string; to: string; text: string; key?: string }[] = []
+const sent: { kind: string; to: string; text: string; key?: string; rental?: string | null }[] = []
 const dependencies = (overrides: Partial<CarryOutDependencies> = {}): CarryOutDependencies => ({
   database,
   now: () => now,
   message: (input) => { sent.push({ kind: 'message', to: input.rentalId, text: input.text }); return Promise.resolve(true) },
-  answerDispute: (_shopId, input) => { sent.push({ kind: 'dispute', to: input.disputeId, text: input.message, key: input.idempotencyKey }); return Promise.resolve(true) },
+  answerDispute: (_shopId, input) => { sent.push({ kind: 'dispute', to: input.disputeId, text: input.notes, key: input.idempotencyKey, rental: input.rentalId }); return Promise.resolve(true) },
   ...overrides,
 })
 const stateOf = async (proposalId: string) => (await database.select().from(proposals).where(eq(proposals.id, proposalId)))[0]?.state
@@ -51,10 +51,10 @@ it('emails the renter the approved message, once, and marks it done', async () =
   expect(line).toMatchObject({ action: 'proposal.executed', actorKind: 'system' })
 })
 
-it('answers PayPal on the dispute with the proposal as the idempotency key', async () => {
-  const { proposalId, disputeId } = await approved('respond_to_dispute', 'The scratch is in the return photographs.')
+it('answers PayPal on the dispute as evidence from the disputed rental, with the proposal as the idempotency key', async () => {
+  const { proposalId, disputeId, rentalId } = await approved('respond_to_dispute', 'The scratch is in the return photographs.')
   expect(await carryOutProposal(dependencies(), { shopId: shop.scope.shopId, proposalId })).toBe('executed')
-  expect(sent.find((each) => each.to === disputeId)).toEqual({ kind: 'dispute', to: disputeId, text: 'The scratch is in the return photographs.', key: `proposal-${proposalId}` })
+  expect(sent.find((each) => each.to === disputeId)).toEqual({ kind: 'dispute', to: disputeId, text: 'The scratch is in the return photographs.', key: `proposal-${proposalId}`, rental: rentalId })
 })
 
 it('marks the proposal failed, and says so, when PayPal or the mail refuses it', async () => {

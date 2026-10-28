@@ -125,6 +125,19 @@ describe('sending a call', () => {
     expect(call?.body).toEqual({ final_capture: true })
   })
 
+  it('sends a form as multipart, with its idempotency key, leaving the boundary to fetch', async () => {
+    const { client, server } = harness([TOKEN_REPLY, OK])
+    const form = new FormData()
+    form.append('input', '{"evidences":[]}')
+
+    await client.send({ method: 'POST', path: '/v1/customer/disputes/PP-D-1/provide-evidence', form, idempotencyKey: 'proposal-1' })
+
+    const [call] = server.apiCalls()
+    expect(call?.headers.get('paypal-request-id')).toBe('proposal-1')
+    expect(call?.headers.get('content-type')).toBeNull()
+    expect(call?.body).toBe(form)
+  })
+
   it('returns the reply with PayPal debug ID', async () => {
     const { client } = harness([TOKEN_REPLY, OK])
 

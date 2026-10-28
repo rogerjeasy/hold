@@ -42,6 +42,13 @@ export async function evidenceVersions(transaction: Transaction, rentalId: strin
 }
 export type EvidenceVersion = Awaited<ReturnType<typeof evidenceVersions>>[number]
 
+// The rental's latest published record, as the PDF a dispute answer attaches. Nothing until one is published.
+export async function publishedEvidencePack(transaction: Transaction, rentalId: string) {
+  const [pack] = await transaction.select({ evidenceKey: evidencePacks.evidenceKey, pdfVersionId: evidencePacks.pdfVersionId, version: evidencePacks.version }).from(evidencePacks)
+    .where(and(eq(evidencePacks.rentalId, rentalId), eq(evidencePacks.state, 'ready'))).orderBy(desc(evidencePacks.version)).limit(1)
+  return pack === undefined || pack.pdfVersionId === null ? undefined : { evidenceKey: pack.evidenceKey, pdfVersionId: pack.pdfVersionId, version: pack.version }
+}
+
 export const evidenceArtifactsSchema = z.strictObject({ pdfSha256: z.string().regex(/^[a-f0-9]{64}$/), manifestSha256: z.string().regex(/^[a-f0-9]{64}$/), pdfVersionId: z.string().min(1), manifestVersionId: z.string().min(1), snapshotVersionId: z.string().min(1) })
 export async function publishEvidencePack(transaction: Transaction, packId: string, input: z.infer<typeof evidenceArtifactsSchema>) {
   const artifacts = evidenceArtifactsSchema.parse(input)

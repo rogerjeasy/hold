@@ -707,7 +707,8 @@ describe('delivery', () => {
     expect(sends).toMatch(/OpsAgent|opsagent|ops-agent/i)
   })
 
-  it('runs the operations agent from its own queue and a nightly schedule, with a role that may read PayPal and call the model but write no photograph and schedule nothing', () => {
+  it('runs the operations agent from its own queue and a nightly schedule, with a role that may read PayPal, evidence packs and call the model but write no photograph and schedule nothing', () => {
+    expect(JSON.stringify(resourcesOfType(work, 'AWS::Lambda::Function').find((each) => each.Properties?.['FunctionName'] === 'hold-worker-operations-execute')?.Properties?.['Environment'])).toContain('HOLD_EVIDENCE_BUCKET')
     const operationsFunction = (functionName: string) => resourcesOfType(work, 'AWS::Lambda::Function').find((each) => each.Properties?.['FunctionName'] === functionName)
     expect(operationsFunction('hold-worker-operations')?.Properties).toMatchObject({ Runtime: 'nodejs24.x' })
     expect(operationsFunction('hold-worker-operations-nightly')?.Properties).toMatchObject({ Runtime: 'nodejs24.x' })
@@ -716,7 +717,9 @@ describe('delivery', () => {
     expect(policy).toContain('bedrock-mantle:CreateInference')
     expect(policy).toContain('paypal/shops')
     expect(policy).toContain('sqs:SendMessage')
-    expect(policy).not.toContain('s3:')
+    // A dispute answer attaches the rental's published record: it may read evidence packs, and no photograph.
+    expect(policy.match(/s3:[A-Za-z]+/g) ?? []).toEqual(['s3:GetObjectVersion'])
+    expect(policy).toContain('/packs/*')
     expect(policy).not.toContain('scheduler:')
     expect(policy).not.toContain('rekognition')
     const schedules = resourcesOfType(work, 'AWS::Scheduler::Schedule').map((each) => each.Properties?.['ScheduleExpression'])
