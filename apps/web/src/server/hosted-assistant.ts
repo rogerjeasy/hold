@@ -1,6 +1,6 @@
 import 'server-only'
 import { createBedrockAssistantModel, createScriptedModel, HOSTED_PROMPT_VERSION, runHostedTurn, SERVER_INFO } from '@hold/mcp'
-import type { Conversation, HostedTurn } from '@hold/mcp'
+import type { Conversation, HostedTurn, OwnShop } from '@hold/mcp'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
 import { qrSvg } from './qr'
@@ -14,7 +14,8 @@ export const HOSTED_CLIENT_NAME = 'Hold hosted assistant (demonstration)'
 
 export type HostedAnswer = Omit<HostedTurn, 'conversation'> & { readonly conversation: Conversation; readonly approvalQr: string | null }
 
-export async function askHostedAssistant(conversation: Conversation, text: string): Promise<HostedAnswer> {
+// ownShop: the demo shop this browser started, which the assistant rents from unless the person names another.
+export async function askHostedAssistant(conversation: Conversation, text: string, ownShop?: OwnShop): Promise<HostedAnswer> {
   const { config } = await getServices()
   const model = config.services === 'fake' ? createScriptedModel(() => new Date()) : createBedrockAssistantModel({ awsRegion: config.region })
   const asked: Conversation = [...conversation, { role: 'user', content: [{ type: 'text', text }] }]
@@ -26,7 +27,7 @@ export async function askHostedAssistant(conversation: Conversation, text: strin
     return { conversation, reply: '', toolCalls: [], approvalUrl: null, approvalQr: null, stopped: 'unavailable', simulated: model.simulated, model: '', promptVersion: HOSTED_PROMPT_VERSION }
   }
   try {
-    const turn = await runHostedTurn({ model, client, conversation: asked, now: () => new Date(), today: new Date().toISOString().slice(0, 10) })
+    const turn = await runHostedTurn({ model, client, conversation: asked, now: () => new Date(), today: new Date().toISOString().slice(0, 10), ...(ownShop === undefined ? {} : { ownShop }) })
     // A turn the model declined or never reached is not kept, so the next one starts from a whole exchange.
     const kept = turn.stopped === 'refused' || turn.stopped === 'unavailable' ? conversation : turn.conversation
     return { ...turn, conversation: kept, approvalQr: turn.approvalUrl === null ? null : await qrSvg(turn.approvalUrl) }

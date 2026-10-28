@@ -54,6 +54,19 @@ describe('a turn of the hosted assistant', () => {
     expect(model.asked[0]?.system).toContain('2026-10-30')
   })
 
+  it('starts from the person’s own demo shop, which find_shops never lists, when they are trying a demo', async () => {
+    const model = scriptedReplies([turn([{ type: 'text', text: 'Ribeira Bikes has city bikes.' }])])
+    await runHostedTurn({ model, client: toolClient(), conversation: start, ...clock(), today: '2026-10-30', ownShop: { slug: 'ribeira-bikes-k3v9q2', name: 'Ribeira Bikes' } })
+    expect(model.asked[0]?.system).toContain('"ribeira-bikes-k3v9q2"')
+    expect(model.asked[0]?.system).toContain('find_shops does not list it')
+  })
+
+  it('names no shop of the person’s own when they are not trying a demo', async () => {
+    const model = scriptedReplies([turn([{ type: 'text', text: 'Which town?' }])])
+    await runHostedTurn({ model, client: toolClient(), conversation: start, ...clock(), today: '2026-10-30' })
+    expect(model.asked[0]?.system).not.toContain('find_shops does not list it')
+  })
+
   it('takes the approval link from Hold’s own result, never from the model’s words', async () => {
     const model = scriptedReplies([turn([useTool('t1', 'create_booking', { quote_id: 'q' })], 'tool_use'), turn([{ type: 'text', text: 'Pay at https://evil.example/pay' }])])
     const client = toolClient({ create_booking: { structuredContent: { status: 'awaiting_payment', approval_url: 'https://www.sandbox.paypal.com/checkoutnow?token=ORDER-1' } } })
@@ -95,5 +108,16 @@ describe('a turn of the hosted assistant', () => {
     const result = await runHostedTurn({ model, client: toolClient({ get_hold: { isError: true } }), conversation: start, ...clock(), today: '2026-10-30' })
     expect(result.toolCalls).toEqual([{ name: 'get_hold', ok: false }])
     expect(result.conversation[2]?.content[0]).toMatchObject({ type: 'tool_result', is_error: true })
+  })
+
+  // Found on 28 October 2026: a booking that failed inside Hold's server threw out of the turn, and the page showed
+  // only "Something went wrong", with the whole conversation lost.
+  it('passes a tool call that failed inside Hold’s server to the model as an error, and goes on', async () => {
+    const model = scriptedReplies([turn([useTool('t1', 'create_booking', { quote_id: 'q' })], 'tool_use'), turn([{ type: 'text', text: 'Hold could not book it just now.' }])])
+    const listed = toolClient()
+    const client: ToolClient = { listTools: () => listed.listTools(), callTool: () => Promise.reject(new Error('MCP error -32603: Failed query')) }
+    const result = await runHostedTurn({ model, client, conversation: start, ...clock(), today: '2026-10-30' })
+    expect(result).toMatchObject({ stopped: 'done', reply: 'Hold could not book it just now.', toolCalls: [{ name: 'create_booking', ok: false }] })
+    expect(result.conversation[2]?.content[0]).toMatchObject({ type: 'tool_result', is_error: true, content: JSON.stringify({ error: 'unavailable' }) })
   })
 })

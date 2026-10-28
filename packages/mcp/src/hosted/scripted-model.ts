@@ -58,6 +58,8 @@ function afterTool(conversation: Conversation, now: Date): ModelReply {
   if (!last.ok) return say(`Hold refused that (${typeof last.result['error'] === 'string' ? last.result['error'] : 'refused'}).`)
   const { result } = last
   switch (last.name) {
+    case 'get_shop':
+      return use('check_availability', { shop: result['shop'], starts_at: shopMorning(String(result['time_zone']), now, 1), ends_at: shopMorning(String(result['time_zone']), now, 4) })
     case 'find_shops': {
       const shop = (result['shops'] as readonly Result[])[0]
       if (shop === undefined) return say('I found no shop on Hold with that to rent.')
@@ -91,13 +93,18 @@ function afterTool(conversation: Conversation, now: Date): ModelReply {
   }
 }
 
-function afterPerson(conversation: Conversation, text: string): ModelReply {
+// The person's own demo shop, as the system prompt names it.
+const OWN_SHOP = /shop "([a-z0-9-]+)"/
+
+function afterPerson(conversation: Conversation, text: string, system: string): ModelReply {
   const booking = latest(conversation, 'create_booking')
   if (booking?.ok === true) return use('get_booking', { booking_secret: booking.result['booking_secret'] })
   const quote = latest(conversation, 'quote_rental')
   if (quote?.ok === true && YES.test(text)) return use('create_booking', { quote_id: quote.result['quote_id'] })
   const kind = KINDS.find(([pattern]) => pattern.test(text))?.[1]
   const place = PLACE.exec(text)?.[1]?.trim()
+  const own = OWN_SHOP.exec(system)?.[1]
+  if (own !== undefined && place === undefined) return use('get_shop', { shop: own })
   return use('find_shops', { ...(kind === undefined ? {} : { kind }), ...(place === undefined ? {} : { place }) })
 }
 
@@ -107,7 +114,7 @@ export function createScriptedModel(now: () => Date): AssistantModel {
     reply(request) {
       const last = request.messages.at(-1)
       const said = last?.role === 'user' ? last.content.flatMap((block) => (block.type === 'text' ? [block.text] : [])).join(' ') : ''
-      return Promise.resolve(said === '' ? afterTool(request.messages, now()) : afterPerson(request.messages, said))
+      return Promise.resolve(said === '' ? afterTool(request.messages, now()) : afterPerson(request.messages, said, request.system))
     },
   }
 }

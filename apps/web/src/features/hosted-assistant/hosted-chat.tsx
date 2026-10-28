@@ -4,6 +4,7 @@ import type { Conversation } from '@hold/mcp'
 import { CircleAlert } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useActionState, useId, useState } from 'react'
+import type { KeyboardEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { askAssistant } from './actions'
 import { ApprovalPanel } from './approval-panel'
@@ -36,13 +37,21 @@ export function HostedChat() {
         <label htmlFor={fieldId} className="font-semibold">
           {t('message')}
         </label>
-        <textarea id={fieldId} name="text" required maxLength={1000} rows={3} placeholder={t('placeholder')} className="min-h-24 w-full rounded-md border bg-background px-3 py-2 text-base" />
+        <textarea id={fieldId} name="text" required maxLength={1000} rows={3} placeholder={t('placeholder')} onKeyDown={sendOnEnter(pending)} className="min-h-24 w-full rounded-md border bg-background px-3 py-2 text-base" />
         <Button type="submit" className="min-h-12 justify-self-start" disabled={pending}>
           {pending ? t('sending') : t('send')}
         </Button>
       </form>
     </section>
   )
+}
+
+// Enter sends, as in any chat; Shift+Enter starts a new line, and a word still being composed is left alone. While a
+// message is on its way, Enter sends nothing more.
+const sendOnEnter = (pending: boolean) => (event: KeyboardEvent<HTMLTextAreaElement>) => {
+  if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return
+  event.preventDefault()
+  if (!pending) event.currentTarget.form?.requestSubmit()
 }
 
 function Problem({ text }: { text: string }) {

@@ -1,5 +1,5 @@
 import { HOSTED_PROMPT_VERSION, hostedPrompt } from './model.ts'
-import type { AssistantModel, Block, Conversation, Message } from './model.ts'
+import type { AssistantModel, Block, Conversation, Message, OwnShop } from './model.ts'
 
 // One turn of the hosted assistant: the model and Hold's MCP server take turns until the model has answered or a
 // ceiling is reached (AGENTS.md section 8). The assistant reaches Hold only as an MCP client, through the same tools,
@@ -37,7 +37,18 @@ const approvalOf = (structured: unknown) => {
   return typeof url === 'string' && /^https:\/\/|^http:\/\/localhost[:/]/.test(url) ? url : null
 }
 
-export async function runHostedTurn(input: { readonly model: AssistantModel; readonly client: ToolClient; readonly conversation: Conversation; readonly now: () => Date; readonly today: string }): Promise<HostedTurn> {
+// A call that failed inside Hold's server reaches the model as a failed tool result, like a refusal, so the turn and
+// the conversation survive it. It is logged by tool and error name, never with its arguments.
+async function callOrFail(client: ToolClient, name: string, input: Record<string, unknown>): Promise<Readonly<Record<string, unknown>>> {
+  try {
+    return await client.callTool({ name, arguments: input })
+  } catch (error) {
+    console.warn(JSON.stringify({ event: 'hosted_tool_failed', tool: name, error: error instanceof Error ? error.name : 'unknown' }))
+    return { isError: true, content: [{ type: 'text', text: JSON.stringify({ error: 'unavailable' }) }] }
+  }
+}
+
+export async function runHostedTurn(input: { readonly model: AssistantModel; readonly client: ToolClient; readonly conversation: Conversation; readonly now: () => Date; readonly today: string; readonly ownShop?: OwnShop }): Promise<HostedTurn> {
   const { model, client, now } = input
   const started = now().getTime()
   const listed = await client.listTools()
@@ -53,7 +64,7 @@ export async function runHostedTurn(input: { readonly model: AssistantModel; rea
   for (;;) {
     if (outOfRoom()) return finish('ceiling')
     const remaining = Math.max(1, HOSTED_LIMITS.milliseconds - (now().getTime() - started))
-    const answer = await model.reply({ system: hostedPrompt(input.today), messages: conversation, tools, maxTokens: HOSTED_LIMITS.tokensPerReply }, AbortSignal.timeout(remaining))
+    const answer = await model.reply({ system: hostedPrompt(input.today, input.ownShop), messages: conversation, tools, maxTokens: HOSTED_LIMITS.tokensPerReply }, AbortSignal.timeout(remaining))
     modelName = answer.model
     if (answer.kind !== 'reply') return finish(answer.kind)
     tokens += answer.tokens
@@ -71,7 +82,7 @@ export async function runHostedTurn(input: { readonly model: AssistantModel; rea
         results.push({ type: 'tool_result', tool_use_id: use.id, content: JSON.stringify({ error: 'call_limit' }), is_error: true })
         continue
       }
-      const result = await client.callTool({ name: use.name, arguments: use.input })
+      const result = await callOrFail(client, use.name, use.input)
       const ok = result['isError'] !== true
       toolCalls.push({ name: use.name, ok })
       approvalUrl = (ok ? approvalOf(result['structuredContent']) : null) ?? approvalUrl

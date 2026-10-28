@@ -54,4 +54,20 @@ describe('the hosted assistant’s page', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Send' }))
     expect(await screen.findByText(/could not be reached/)).toBeInTheDocument()
   })
+
+  it('sends with Enter, keeps Shift+Enter for a new line, and empties the box once sent', async () => {
+    asked.mockClear()
+    renderWithIntl(<HostedAssistantScreen mcpUrl="https://hold.example/mcp" />)
+    const box = screen.getByLabelText('Your message')
+    await userEvent.type(box, 'Book me{Shift>}{Enter}{/Shift}an e-bike.')
+    expect(asked).not.toHaveBeenCalled()
+    await userEvent.type(box, '{Enter}')
+    await waitFor(() => {
+      expect(asked).toHaveBeenCalledTimes(1)
+    })
+    expect(asked.mock.calls[0]?.[1].get('text')).toBe('Book me\nan e-bike.')
+    await waitFor(() => {
+      expect(box).toHaveValue('')
+    })
+  })
 })

@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { auditLog, inShop, itemCatalog, registerOwner } from '@hold/db'
+import { auditLog, inShop, itemCatalog, openDemoSession, registerOwner } from '@hold/db'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 
 process.env['HOLD_ENVIRONMENT'] = 'test'
@@ -25,6 +25,7 @@ const shop = await import('@/features/shop/actions')
 const items = await import('@/features/items/actions')
 const { getServices } = await import('@/server/services')
 const { form, signIn } = await import('@/test/shop-session')
+const { writeDemoSession } = await import('@/features/auth/session-cookies')
 
 vi.setConfig({ testTimeout: 30_000 })
 
@@ -69,6 +70,30 @@ describe('the hosted assistant’s page', () => {
     const calls = lines.filter((line) => line.action.startsWith('assistant.'))
     expect(calls.map((line) => line.action)).toEqual(['assistant.check_availability', 'assistant.get_damage_prices', 'assistant.quote_rental', 'assistant.create_booking'])
     expect(calls.every((line) => line.detail['client'] === 'Hold hosted assistant (demonstration)')).toBe(true)
+  })
+
+  it('rents from the judge’s own demo shop, which no assistant can find, when this browser started a demo', async () => {
+    forwarded.value = '203.0.113.121'
+    const { database } = await getServices()
+    const demo = await openDemoSession(database, {
+      owner: { subject: 'owner-hosted1', email: 'tomas.hosted1@demo.hold.example' },
+      staff: { subject: 'staff-hosted1', email: 'jonas.hosted1@demo.hold.example' },
+      slug: 'ribeira-bikes-hosted1',
+      paypal: { credentialReference: 'hold/paypal/shops/demo/sandbox', mode: 'sandbox' },
+      now: new Date(),
+    })
+    const password = 'x'.repeat(24)
+    await writeDemoSession({ shopId: demo.shopId, owner: { email: 'tomas.hosted1@demo.hold.example', password }, staff: { email: 'jonas.hosted1@demo.hold.example', password } })
+
+    const quoted = await ask([], 'Book me a bike for three days.')
+    if (!quoted.ok) throw new Error(JSON.stringify(quoted))
+    expect(quoted.value.reply).toContain('City bike')
+    const booked = await ask(quoted.value.conversation, 'Yes, book it.')
+    if (!booked.ok) throw new Error(JSON.stringify(booked))
+    expect(booked.value.approvalUrl).toMatch(/\/simulated-paypal\/FAKE-ORDER-/)
+    const lines = await inShop(database, { role: 'hold_app', shopId: demo.shopId }, (transaction) => transaction.select().from(auditLog))
+    expect(lines.map((line) => line.action)).toContain('assistant.create_booking')
+    jar.clear()
   })
 
   it('refuses a conversation that is not one, and a network that asks too often', async () => {

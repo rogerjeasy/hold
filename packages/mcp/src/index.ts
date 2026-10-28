@@ -9,7 +9,7 @@ export { clientNameOf, handleMcpRequest, holdServer, MAX_MCP_REQUEST_BYTES, SERV
 // The hosted assistant: a client of this server for a public demonstration page (extensions.md section 8.10).
 export { createBedrockAssistantModel } from './hosted/bedrock-model.ts'
 export { conversationSchema, HOSTED_MODEL, HOSTED_PROMPT_VERSION } from './hosted/model.ts'
-export type { AssistantModel, Conversation } from './hosted/model.ts'
+export type { AssistantModel, Conversation, OwnShop } from './hosted/model.ts'
 export { HOSTED_LIMITS, runHostedTurn } from './hosted/runner.ts'
 export type { HostedTurn, ToolClient } from './hosted/runner.ts'
 export { createScriptedModel } from './hosted/scripted-model.ts'
