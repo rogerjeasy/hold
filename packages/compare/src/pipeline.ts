@@ -5,6 +5,11 @@ import { pairedCrops } from './crops.ts'
 import { lookSchema, PROMPT_VERSION } from './model.ts'
 import type { ComparisonModel, ModelFinding } from './model.ts'
 
+// The second look sees more of the item around the finding than the first look's crops, so it can tell what part it is.
+// Measured on the demonstration's sample pair on 28 October 2026: at 0.03 it agreed on the class every time but was
+// unsure of a featureless crop twice in five runs.
+export const SECOND_LOOK_MARGIN = 0.1
+
 type Mark = { readonly id: string; readonly view: string; readonly region: Region }
 // reported: marks the renter reported during this rental (step 7), covered when agreed or made the shop's matter.
 type Input = { readonly views: readonly { readonly view: string; readonly pair: PairResult }[]; readonly marks: readonly Mark[]; readonly reported?: readonly (Mark & { readonly covered: boolean })[]; readonly wearPolicy: string; readonly itemType: string; readonly priceCodes: readonly string[] }
@@ -48,7 +53,7 @@ export async function compareInspection(input: Input, model: ComparisonModel) {
       if (!checkRegion(finding.region)) return finish(true)
       let secondLookConfirmed: boolean | null = null
       if (finding.class === 'new_damage' || finding.class === 'missing_part') {
-        const second = await look({ kind: 'second', context: '', images: await pairedCrops(pair, finding.region) }, signal)
+        const second = await look({ kind: 'second', context: '', images: await pairedCrops(pair, finding.region, SECOND_LOOK_MARGIN) }, signal)
         const checked = second.kind === 'result' ? lookSchema.safeParse(second.data) : null
         secondLookConfirmed = checked?.success === true && checked.data.sameItem && checked.data.sameView && checked.data.findings.length > 0 && checked.data.findings.every((each) => each.class === finding.class && each.confidence >= INSPECTION_LIMITS.minConfidence && checkRegion(each.region))
       }

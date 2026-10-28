@@ -1,5 +1,6 @@
 import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
+import type { LookRequest } from './model.ts'
 import { compareInspection } from './pipeline.ts'
 
 const region = { x: 0.2, y: 0.2, width: 0.2, height: 0.2 }
@@ -29,6 +30,18 @@ describe('the return comparison pipeline', () => {
     expect(requests).toHaveLength(2)
     expect(JSON.stringify(requests[1])).not.toContain('New scratch on the frame')
     expect(JSON.stringify(requests[1])).not.toContain('scratch')
+  })
+  // Measured on the demonstration's sample pair on 28 October 2026: on crops this tight the second look agreed on the
+  // class every time but was unsure of a featureless tube twice in five runs; with more of the frame it confirmed 8 of 8.
+  it('shows the second look more of the item around the finding than the first look’s crops', async () => {
+    const requests: LookRequest[] = []
+    await compareInspection(await input(), { look: (request) => { requests.push(request); return Promise.resolve(reply(result([damage]))) } })
+    const widthOf = async (body: Buffer | undefined) => (await sharp(body).metadata()).width
+    const firstCrop = requests[0]?.images.find((image) => image.label === 'Return crop')?.body
+    const secondCrop = requests[1]?.images.find((image) => image.label === 'Return crop')?.body
+    // The finding is a fifth of the photograph wide: a tenth more on each side makes the crop 0.4 of 640 pixels.
+    expect(await widthOf(secondCrop)).toBe(256)
+    expect(await widthOf(secondCrop)).toBeGreaterThan(await widthOf(firstCrop))
   })
   it('defers disagreement, refusal and malformed or invented money output', async () => {
     let calls = 0

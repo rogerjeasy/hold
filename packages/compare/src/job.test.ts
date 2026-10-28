@@ -97,7 +97,7 @@ describe('comparison queue processing', () => {
     const message = { shopId: shop.scope.shopId, comparisonId: comparison.id }
     expect(await runComparison(dependencies, message)).toBe('completed')
     expect(await runComparison(dependencies, message)).toBe('nothing_to_do')
-    expect((await database.select().from(comparisons))[0]).toMatchObject({ state: 'deferred', promptVersion: 'inspection-1', model: 'not_called', completedAt: NOW })
+    expect((await database.select().from(comparisons))[0]).toMatchObject({ state: 'deferred', promptVersion: 'inspection-2', model: 'not_called', completedAt: NOW })
     expect((await database.select().from(rentals))[0]?.state).toBe('inspecting')
     expect((await database.select().from(holds))[0]?.state).toBe('placed')
     expect(await database.select().from(findings)).toEqual([])
