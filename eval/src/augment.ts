@@ -1,5 +1,6 @@
 import { EVALUATION_GROUPS } from '@hold/domain'
 import type { EvaluationGroup, Region } from '@hold/domain'
+import { mapPoint } from '@hold/vision/homography'
 import { inspectPair } from '@hold/vision/inspect-pair'
 import sharp from 'sharp'
 import type { EvaluationCase, Half } from './manifest.ts'
@@ -213,8 +214,7 @@ export async function buildSet(input: BuildInput): Promise<BuiltSet> {
       const original = await input.read(handover.file)
       const marked = await drawDamage(original, { kind: 'scratch', size: 'small' }, seededRandom(shape))
       const measured = await inspectPair(original, bytes)
-      const offset = measured.ok ? measured.offset : { x: 0, y: 0 }
-      const returned = await drawDamage(bytes, { kind: 'scratch', size: 'small' }, seededRandom(shape), { x: marked.center.x + offset.x, y: marked.center.y + offset.y })
+      const returned = await drawDamage(bytes, { kind: 'scratch', size: 'small' }, seededRandom(shape), measured.ok ? mapPoint(measured.homography, marked.center) : marked.center)
       const markedBefore = put(`known-${String(number)}-handover`, marked.image, label(handover))
       cases.push({ id: `${half}-${view}-known-mark-${String(number)}`, half, group: 'known_mark', origin: 'synthetic', view, before: markedBefore, after: put(`known-${String(number)}`, returned.image, label(photo)), earlier: [], labels: [], knownMarks: [marked.region], note: `synthetic: a scratch on the item at handover, still there at return (${label(photo)})` })
     }

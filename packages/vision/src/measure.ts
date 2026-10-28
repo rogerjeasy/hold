@@ -4,7 +4,7 @@ import type { PhotoMeasures } from '@hold/domain'
 // how much of the frame the item fills. OpenCV.js runs in a worker on the phone; it is passed in, so this runs the
 // same in a test. The domain's checkPhotoQuality decides what the measures mean.
 
-type Mat = {
+export type Mat = {
   readonly rows: number
   readonly cols: number
   readonly data: Uint8Array

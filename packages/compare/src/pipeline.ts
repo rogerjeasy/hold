@@ -1,5 +1,6 @@
 import { checkRegion, INSPECTION_LIMITS, inspectFindings, unaccountedCandidates } from '@hold/domain'
 import type { Region } from '@hold/domain'
+import { mapRegion } from '@hold/vision/homography'
 import type { PairResult } from '@hold/vision/inspect-pair'
 import { pairedCrops } from './crops.ts'
 import { lookSchema, PROMPT_VERSION } from './model.ts'
@@ -44,10 +45,11 @@ export async function compareInspection(input: Input, model: ComparisonModel) {
   for (const { view, pair } of input.views) {
     if (!pair.ok) return finish(true)
     alignment[view] = pair.alignment
-    const knownMarks = input.marks.filter((mark) => mark.view === view).map((mark) => ({ ...mark, region: { ...mark.region, x: mark.region.x + pair.offset.x, y: mark.region.y + pair.offset.y } }))
+    // Marks are drawn on the handover photograph; findings are in the return photograph's frame (see PreparedPair).
+    const knownMarks = input.marks.filter((mark) => mark.view === view).map((mark) => ({ ...mark, region: mapRegion(pair.homography, mark.region) }))
     alignedMarks.push(...knownMarks)
     // Reported marks are matched by code alone and never shown to the model, which compares only the two photographs.
-    alignedReported.push(...(input.reported ?? []).filter((mark) => mark.view === view).map((mark) => ({ ...mark, region: { ...mark.region, x: mark.region.x + pair.offset.x, y: mark.region.y + pair.offset.y } })))
+    alignedReported.push(...(input.reported ?? []).filter((mark) => mark.view === view).map((mark) => ({ ...mark, region: mapRegion(pair.homography, mark.region) })))
     const crops = (await Promise.all(pair.candidates.map((region) => pairedCrops(pair, region)))).flat()
     const first = await look({ kind: 'first', context: JSON.stringify({ itemType: input.itemType, wearPolicy: input.wearPolicy, priceCodes: input.priceCodes, knownMarks, candidateRegions: pair.candidates }), images: [{ label: 'Full handover photograph', body: pair.before }, { label: 'Full return photograph', body: pair.after }, ...crops] }, signal)
     if (first.kind !== 'result') return finish(true)
