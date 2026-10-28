@@ -135,6 +135,8 @@ export const PAYPAL_EVENT_TYPES = [
   'PAYMENT.AUTHORIZATION.VOIDED',
   'INVOICING.INVOICE.PAID',
   'CUSTOMER.DISPUTE.CREATED',
+  // A dispute that first sits in PayPal's own review comes to the shop later, as an update.
+  'CUSTOMER.DISPUTE.UPDATED',
 ] as const
 
 // The headers PayPal signs an event delivery with.

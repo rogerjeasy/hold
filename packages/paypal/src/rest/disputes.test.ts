@@ -25,30 +25,44 @@ it('hands out the shop\'s access token for PayPal\'s own MCP server, and nothing
   expect(token.ok).toBe(true)
 })
 
-// Disputes v1 provide-evidence, as PayPal's reference shows it: a multipart form with the evidence as JSON in "input"
-// and the document in "evidence-file". Not yet tried against a sandbox dispute (tech-stack.md section 16, item 6).
-it('answers a dispute with the shop\'s notes and the rental\'s evidence pack as a PDF, once', async () => {
-  const server = stubServer([TOKEN_REPLY, { status: 200, body: { links: [] } }])
+// Disputes v1 provide-evidence: a multipart form with the evidence as JSON in "input" and the document in
+// "evidence-file". Confirmed in the sandbox on 28 October 2026 (tech-stack.md section 16, item 6): PayPal refused the
+// evidence type OTHER for a dispute that the item was not received, with EVIDENCE_TYPE_IS_NOT_ALLOWED, and took
+// PROOF_OF_FULFILLMENT with the PDF. So the dispute is read back first, and its reason chooses the type.
+const disputeOf = (reason: string) => ({ status: 200, body: { dispute_id: 'PP-D-1', status: 'WAITING_FOR_SELLER_RESPONSE', reason } })
+
+it('answers a dispute that the rental was not received with proof of fulfilment and the evidence pack as a PDF', async () => {
+  const server = stubServer([TOKEN_REPLY, disputeOf('MERCHANDISE_OR_SERVICE_NOT_RECEIVED'), { status: 200, body: { links: [] } }])
   const pdf = new TextEncoder().encode('%PDF-1.7 the evidence pack')
-  const sent = await createRestPayPalHolds(client(server)).provideDisputeEvidence({ disputeId: 'PP-D-1', notes: 'The renter agreed the price list; the photographs show the chip.', document: { fileName: 'hold-record-v2.pdf', bytes: pdf }, idempotencyKey: 'proposal-1' })
+  const sent = await createRestPayPalHolds(client(server)).provideDisputeEvidence({ disputeId: 'PP-D-1', notes: 'The renter collected the bike; the handover photographs are attached.', document: { fileName: 'hold-record-v2.pdf', bytes: pdf }, idempotencyKey: 'proposal-1' })
 
   expect(sent).toEqual({ ok: true, value: undefined })
-  const [call] = server.apiCalls()
+  const [read, call] = server.apiCalls()
+  expect(read).toMatchObject({ method: 'GET', path: '/v1/customer/disputes/PP-D-1' })
   expect(call).toMatchObject({ method: 'POST', path: '/v1/customer/disputes/PP-D-1/provide-evidence' })
   expect(call?.headers.get('PayPal-Request-Id')).toBe('proposal-1')
   const form = call?.body as FormData
   const input = form.get('input') as Blob
   expect(input.type).toBe('application/json')
-  expect(JSON.parse(await input.text())).toEqual({ evidences: [{ evidence_type: 'OTHER', notes: 'The renter agreed the price list; the photographs show the chip.' }] })
+  expect(JSON.parse(await input.text())).toEqual({ evidences: [{ evidence_type: 'PROOF_OF_FULFILLMENT', notes: 'The renter collected the bike; the handover photographs are attached.' }] })
   const file = form.get('evidence-file') as File
   expect(file.name).toBe('hold-record-v2.pdf')
   expect(file.type).toBe('application/pdf')
   expect(new Uint8Array(await file.arrayBuffer())).toEqual(pdf)
 })
 
+// Only the type above has been seen accepted. For any other reason Hold sends OTHER, and a refusal fails the approved
+// answer where the owner sees it, rather than Hold guessing another type.
+it('answers a dispute for any other reason with the evidence type other', async () => {
+  const server = stubServer([TOKEN_REPLY, disputeOf('MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED'), { status: 200, body: { links: [] } }])
+  await createRestPayPalHolds(client(server)).provideDisputeEvidence({ disputeId: 'PP-D-1', notes: 'Notes.', document: undefined, idempotencyKey: 'proposal-3' })
+  const input = (server.apiCalls()[1]?.body as FormData).get('input') as Blob
+  expect(JSON.parse(await input.text())).toMatchObject({ evidences: [{ evidence_type: 'OTHER' }] })
+})
+
 it('answers with notes alone when there is no evidence pack yet', async () => {
-  const server = stubServer([TOKEN_REPLY, { status: 200, body: { links: [] } }])
+  const server = stubServer([TOKEN_REPLY, disputeOf('MERCHANDISE_OR_SERVICE_NOT_RECEIVED'), { status: 200, body: { links: [] } }])
   await createRestPayPalHolds(client(server)).provideDisputeEvidence({ disputeId: 'PP-D-1', notes: 'Notes only.', document: undefined, idempotencyKey: 'proposal-2' })
-  const form = server.apiCalls()[0]?.body as FormData
+  const form = server.apiCalls()[1]?.body as FormData
   expect(form.get('evidence-file')).toBeNull()
 })

@@ -129,6 +129,16 @@ describe('an event from PayPal', () => {
     expect(await disputeChecks()).toHaveLength(before + 1)
   })
 
+  // PayPal's sandbox, 28 October 2026: a new dispute sat in PayPal's own review for its first minutes, so the shop was
+  // asked for nothing when it was created; it came to the shop later, which PayPal reports as an update.
+  it('asks the operations agent to look when an update brings a dispute to the shop', async () => {
+    const before = (await disputeChecks()).length
+    fixture.fake.openDispute({ id: 'PP-D-3', open: true, amount: { cents: 9_00, currency: 'EUR' }, responseDueAt: new Date('2026-11-17T16:04:18Z'), captureIds: ['CAPTURE-3'] })
+    const eventId = await delivered('CUSTOMER.DISPUTE.UPDATED', { id: 'PP-D-3' })
+    expect(await applyPayPalEvent(dependencies(), { shopId: fixture.shopId, eventId })).toBe('applied')
+    expect(await disputeChecks()).toHaveLength(before + 1)
+  })
+
   it('believes PayPal’s list, not the event: a dispute PayPal does not show open asks for nothing', async () => {
     const before = (await disputeChecks()).length
     const eventId = await delivered('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-NOT-OPEN' })

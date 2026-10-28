@@ -76,8 +76,9 @@ export async function applyPayPalEvent(dependencies: SettleDependencies, message
     }
   }
   // A dispute is answered from the operations agent's queue, where a person approves the answer. Nothing in the event
-  // is believed: PayPal's own list must show it open, and then the agent is asked to look now, not the next night.
-  if (body?.event_type === 'CUSTOMER.DISPUTE.CREATED' && body.resource?.id !== undefined) {
+  // is believed: PayPal's own list must show it waiting on the shop, and then the agent is asked to look now, not the
+  // next night. A new dispute may first sit in PayPal's review (sandbox, 28 October 2026), so its update counts too.
+  if ((body?.event_type === 'CUSTOMER.DISPUTE.CREATED' || body?.event_type === 'CUSTOMER.DISPUTE.UPDATED') && body.resource?.id !== undefined) {
     const disputeId = body.resource.id
     const open = await paypal.listOpenDisputes()
     if (!open.ok) throw new PayPalUnavailable(open.error.kind)

@@ -40,13 +40,24 @@ export function listOpenDisputes(client: PayPalClient): PayPalHolds['listOpenDis
   }
 }
 
+// The evidence type each dispute reason takes. PayPal's sandbox, 28 October 2026 (tech-stack.md section 16, item 6):
+// for an item not received it refused OTHER with EVIDENCE_TYPE_IS_NOT_ALLOWED and took PROOF_OF_FULFILLMENT, which a
+// rental's handover record is. Any other reason sends OTHER until a sandbox dispute shows what it takes.
+const EVIDENCE_FOR_REASON: Readonly<Record<string, string>> = { MERCHANDISE_OR_SERVICE_NOT_RECEIVED: 'PROOF_OF_FULFILLMENT' }
+const reasonSchema = z.object({ dispute_id: z.string().min(1), reason: z.string().optional() })
+
 // Answers a dispute with evidence (Disputes v1 provide-evidence): the shop's notes as JSON in "input", and the rental's
-// evidence pack, when there is one, as a PDF in "evidence-file". The part names follow PayPal's reference; a sandbox
-// dispute has yet to confirm them (tech-stack.md section 16). It moves no money.
+// evidence pack, when there is one, as a PDF in "evidence-file", both confirmed in the sandbox. The dispute is read
+// back first, as its reason decides the evidence type. It moves no money.
 export function provideDisputeEvidence(client: PayPalClient): PayPalHolds['provideDisputeEvidence'] {
   return async (input) => {
+    const read = await client.send({ method: 'GET', path: `/v1/customer/disputes/${encodeURIComponent(input.disputeId)}` })
+    if (!read.ok) return read
+    const dispute = reasonSchema.safeParse(read.value.body)
+    if (!dispute.success || dispute.data.dispute_id !== input.disputeId) return unreadable()
+    const evidenceType = EVIDENCE_FOR_REASON[dispute.data.reason ?? ''] ?? 'OTHER'
     const form = new FormData()
-    form.append('input', new Blob([JSON.stringify({ evidences: [{ evidence_type: 'OTHER', notes: input.notes }] })], { type: 'application/json' }))
+    form.append('input', new Blob([JSON.stringify({ evidences: [{ evidence_type: evidenceType, notes: input.notes }] })], { type: 'application/json' }))
     if (input.document !== undefined) form.append('evidence-file', new Blob([Uint8Array.from(input.document.bytes)], { type: 'application/pdf' }), input.document.fileName)
     const sent = await client.send({ method: 'POST', path: `/v1/customer/disputes/${encodeURIComponent(input.disputeId)}/provide-evidence`, form, idempotencyKey: input.idempotencyKey })
     return sent.ok ? ok(undefined) : sent
