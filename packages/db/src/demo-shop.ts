@@ -76,7 +76,7 @@ export async function furnishDemoShop(transaction: Transaction, shopId: string, 
   if (!saved.ok) throw new Error(`The demo item type was refused: ${saved.reason}.`)
   const added = await addItems(transaction, { itemTypeId: saved.id, count: bike.count, size: '', serial: '' }, now)
   if (!added.ok) throw new Error(`The demo bikes were refused: ${added.reason}.`)
-  const samples = await addSampleRentals(transaction, { shopId, userId: ownerUserId, timeZone: DEMO_SHOP.timeZone, now })
+  const samples = await addSampleRentals(transaction, { shopId, userId: ownerUserId, raisedByUserId: staff.userId, timeZone: DEMO_SHOP.timeZone, now })
   if (!samples.ok) throw new Error(`The sample rentals were refused: ${samples.reason}.`)
   return { rentals: samples.rentals }
 }

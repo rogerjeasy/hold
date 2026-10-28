@@ -40,6 +40,11 @@ describe('the morning queue', () => {
     expect(within(card).getByText('Reject with a reason')).toBeInTheDocument()
   })
 
+  it('marks a sample entry as a sample, so it is never read as a real payment', () => {
+    renderWithIntl(<QueueScreen {...props({ entries: [entry({ payload: { fixedReason: 'hold_ending', simulated: 'yes' } })] })} />)
+    expect(within(screen.getByRole('article', { name: 'Ask the renter for a new hold' })).getByText('Sample')).toBeInTheDocument()
+  })
+
   it('shows the agent\'s own reason, references and draft as text, and labels an observation and a removed draft', () => {
     renderWithIntl(<QueueScreen {...props({ entries: [entry({ kind: 'note', amountCents: null, currency: null, raisedByAgent: true, reason: 'Bike 3 came back scratched <b>three</b> times.', references: ['CAPTURE-9'], draft: 'Dear Priya', payload: { draftDropped: 'yes' } })] })} />)
     expect(screen.getByText('Bike 3 came back scratched <b>three</b> times.')).toBeInTheDocument()

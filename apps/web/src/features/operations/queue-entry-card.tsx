@@ -4,6 +4,7 @@ import type { DetectorKind } from '@hold/domain'
 import { Bot, CircleSlash, SearchX, WifiOff } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import type { ShopClock } from '@/hooks/use-shop-format'
+import { SampleTag } from '@/components/ui/sample-tag'
 import { useShopFormat } from '@/hooks/use-shop-format'
 import { Link } from '@/i18n/navigation'
 import { rentalRoutes } from '@/lib/routes'
@@ -30,7 +31,10 @@ export function QueueEntryCard({ entry, clock, canDecide, passkeyNeeded, togethe
   const titleId = `entry-${entry.id}`
   return (
     <article aria-labelledby={titleId} className="grid h-full min-w-0 content-start gap-3 border bg-card p-4 text-card-foreground md:p-5">
-      <h3 id={titleId} className="font-semibold text-pretty wrap-long-words">{t(`kinds.${entry.kind}.action`)}</h3>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+        <h3 id={titleId} className="font-semibold text-pretty wrap-long-words">{t(`kinds.${entry.kind}.action`)}</h3>
+        {entry.payload['simulated'] === 'yes' ? <SampleTag /> : null}
+      </div>
       {entry.amountCents === null || entry.currency === null ? null : (
         <p className="grid">
           <span className="text-sm text-muted-foreground">{t('amount')}</span>

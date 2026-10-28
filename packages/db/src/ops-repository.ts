@@ -252,6 +252,8 @@ type HandOff = { readonly ok: true; readonly state: 'executing' | 'executed'; re
 // Carries out an approved proposal by the path a person's click takes, in the same transaction, so a refusal there
 // leaves the proposal pending. A spine execution moves the proposal on when PayPal confirms it (migration 0025).
 async function handOff(transaction: Transaction, proposal: Proposal, input: DecisionInput, userId: string | null, now: Date): Promise<HandOff> {
+  // A sample's proposal names simulated records: the decision is kept, and nothing is sent to PayPal or anyone.
+  if (proposal.payload['simulated'] === 'yes') return { ok: true, state: 'executed', executionId: null }
   if (proposal.kind === 'note') return { ok: true, state: 'executed', executionId: null }
   if (proposal.kind === 'release_hold') {
     if (proposal.rentalId === null) return { ok: false, reason: 'not_found' }

@@ -22,9 +22,11 @@ import {
   priceLists,
   rentalItems,
   rentals,
+  shopExceptions,
   shops,
   wearPolicies,
 } from './schema/index.ts'
+import { writeProposal } from './ops-repository.ts'
 import type { Transaction } from './scope.ts'
 
 // Sample rentals for a demonstration (architecture.md section 20.3): a shop's day with items out, returns due,
@@ -82,6 +84,8 @@ type SampleRental = {
   readonly claim?: { readonly state: Extract<ClaimState, 'awaiting_approval' | 'contested' | 'charged'>; readonly kind: PriceCategory; readonly reply?: string }
   // Photographed at the handover and the return, and compared: the claim rests on the finding.
   readonly photographed?: true
+  // What the operations agent would propose about it, had it read sample rentals: shown as a sample, it moves nothing.
+  readonly proposal?: 'replacement_hold' | 'dispute_answer'
 }
 
 const SAMPLES: readonly SampleRental[] = [
@@ -92,7 +96,7 @@ const SAMPLES: readonly SampleRental[] = [
   { renter: 'Hannah Svensson', items: ['gravel'], starts: { fromNow: 210 }, ends: [2, 18, 0], state: 'awaiting_hold', hold: 'requested' },
   { renter: 'Ahmed Khan', items: ['hybrid', 'seat'], starts: [-1, 16, 30], ends: { fromNow: 300 }, state: 'out', hold: 'placed' },
   { renter: 'Lea Fischer', items: ['emtb'], starts: [-4, 10, 0], ends: [-1, 18, 0], state: 'overdue', hold: 'placed' },
-  { renter: 'Marco Rossi', items: ['ebike'], starts: [-26, 10, 0], ends: [-1, 17, 0], state: 'returned', hold: 'placed' },
+  { renter: 'Marco Rossi', items: ['ebike'], starts: [-26, 10, 0], ends: [-1, 17, 0], state: 'returned', hold: 'placed', proposal: 'replacement_hold' },
   { renter: 'Priya Natarajan', items: ['hybrid'], starts: [-6, 10, 0], ends: [-1, 17, 30], state: 'settling', hold: 'placed', claim: { state: 'awaiting_approval', kind: 'damage' }, photographed: true },
   {
     renter: 'Tom Becker',
@@ -104,7 +108,7 @@ const SAMPLES: readonly SampleRental[] = [
     claim: { state: 'contested', kind: 'loss', reply: 'The lock was in the bag when I handed it back.' },
   },
   { renter: 'Julia Novak', items: ['ebike'], starts: [-9, 10, 0], ends: [-7, 17, 0], state: 'closed', hold: 'released' },
-  { renter: 'Daniel Ortiz', items: ['hybrid'], starts: [-8, 9, 0], ends: [-6, 18, 0], state: 'closed', hold: 'captured', claim: { state: 'charged', kind: 'damage' } },
+  { renter: 'Daniel Ortiz', items: ['hybrid'], starts: [-8, 9, 0], ends: [-6, 18, 0], state: 'closed', hold: 'captured', claim: { state: 'charged', kind: 'damage' }, proposal: 'dispute_answer' },
 ]
 
 const MINUTE = 60 * 1000
@@ -112,7 +116,15 @@ const SIMULATED = { simulated: true } as const
 
 export type SampleRentalsResult = { readonly ok: true; readonly rentals: number } | { readonly ok: false; readonly reason: 'no_price_list' | 'has_rentals' }
 
-export type SampleRentalsInput = { readonly shopId: string; readonly userId: string; readonly timeZone: string; readonly now: Date }
+export type SampleRentalsInput = {
+  readonly shopId: string
+  readonly userId: string
+  readonly timeZone: string
+  readonly now: Date
+  // Who raised the sample claims at the counter. In a demo it is the counter staff, so the owner, who did not raise
+  // the contested one, may decide it (architecture.md section 7.3). Otherwise the person adding the samples.
+  readonly raisedByUserId?: string
+}
 
 async function publishedTerms(transaction: Transaction) {
   const [list] = await transaction
@@ -139,6 +151,7 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
   if ((existing?.count ?? 0) > 0) return { ok: false, reason: 'has_rentals' }
 
   const { shopId, userId, now } = input
+  const raiser = input.raisedByUserId ?? userId
   const day = shopDay(input.timeZone, now)
   const moment = (at: Moment): Date => {
     if ('fromNow' in at) {
@@ -204,8 +217,8 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
       .returning({ id: rentals.id })
     if (rental === undefined) throw new Error('A sample rental was not created.')
     const reference = (kind: string) => `SIMULATED-${rental.id}-${kind}`
-    const audit = (action: string, at: Date, actorKind = 'person') =>
-      transaction.insert(auditLog).values({ shopId, actorKind, actorId: actorKind === 'person' ? userId : null, action, subjectKind: 'rental', subjectId: rental.id, detail: SIMULATED, at })
+    const audit = (action: string, at: Date, actorKind = 'person', actorId = userId) =>
+      transaction.insert(auditLog).values({ shopId, actorKind, actorId: actorKind === 'person' ? actorId : null, action, subjectKind: 'rental', subjectId: rental.id, detail: SIMULATED, at })
 
     const rentalItemIds: { readonly key: SampleItem; readonly itemId: string; readonly rentalItemId: string }[] = []
     for (const key of sample.items) {
@@ -261,7 +274,7 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
       const presented = sample.claim.state !== 'awaiting_approval'
       const [claim] = await transaction
         .insert(claims)
-        .values({ shopId, rentalId: rental.id, currency, totalCents: entry.amountCents, state: sample.claim.state, raisedByUserId: userId, presentedAt: presented ? raisedAt : null, createdAt: raisedAt })
+        .values({ shopId, rentalId: rental.id, currency, totalCents: entry.amountCents, state: sample.claim.state, raisedByUserId: raiser, presentedAt: presented ? raisedAt : null, createdAt: raisedAt })
         .returning({ id: claims.id })
       if (claim === undefined) throw new Error('A sample claim was not created.')
       const [photographed] = rentalItemIds
@@ -277,12 +290,12 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
         amountCents: entry.amountCents,
         source: findingId === undefined ? 'person' : 'finding',
         findingId: findingId ?? null,
-        addedByUserId: userId,
+        addedByUserId: raiser,
         // A line on a finding speaks through the finding; any other says it is a sample.
         reason: findingId === undefined ? 'Sample data, added to show how a claim looks.' : null,
         createdAt: raisedAt,
       })
-      await audit('claim.raised', raisedAt)
+      await audit('claim.raised', raisedAt, 'person', raiser)
       if (sample.claim.reply !== undefined) {
         const repliedAt = inMonth(new Date(raisedAt.getTime() + 18 * 60 * MINUTE))
         await transaction.insert(claimReplies).values({ shopId, claimId: claim.id, decision: 'contest', comment: sample.claim.reply, createdAt: repliedAt })
@@ -305,10 +318,43 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
         .values({ shopId, rentalId: rental.id, holdId: hold.id, kind: 'hold_released', currency, amountCents: reservedCents - capturedCents, paypalReference: reference('released'), occurredAt: settledAt })
       await audit('hold.released', settledAt, capturedCents > 0 ? 'system' : 'person')
     }
+    if (sample.proposal === 'replacement_hold') {
+      const validUntil = addDays(startsAt, HOLD_VALIDITY_DAYS)
+      await sampleProposal(transaction, { exception: { kind: 'hold_ending', subjectKind: 'hold', subjectId: hold.id, rentalId: rental.id, deadline: validUntil, moneyCents: reservedCents }, kind: 'request_replacement_hold', references: [reference('authorization')], draft: null }, now)
+    }
+    if (sample.proposal === 'dispute_answer') {
+      const dispute = reference('dispute')
+      await sampleProposal(transaction, { exception: { kind: 'dispute_open', subjectKind: 'dispute', subjectId: dispute, rentalId: rental.id, deadline: addDays(now, 9), moneyCents: capturedCents }, kind: 'respond_to_dispute', references: [dispute, reference('captured')], draft: SAMPLE_DISPUTE_ANSWER }, now)
+    }
   }
   // A shop that had not yet chosen a currency takes the price list's, as publishing it would have done.
   await transaction.update(shops).set({ currency }).where(and(eq(shops.id, shopId), sql`${shops.currency} is null`))
   return { ok: true, rentals: SAMPLES.length }
+}
+
+// The answer the sample dispute proposal offers to send. It names no amount: an amount comes only from the records.
+const SAMPLE_DISPUTE_ANSWER = 'The renter returned the bike with a scratch through the paint on the frame. It is in the return photograph and not in the handover photograph, and both are in the evidence pack attached. The renter saw both photographs and the price from the published list, and accepted the claim before it was charged.'
+
+// The detector's own words for each sample, as the operations agent writes them when no model ran.
+const SAMPLE_REASONS = { hold_ending: 'The hold ends within three days and the rental is still open.', dispute_open: 'A PayPal dispute is waiting for a response.' } as const
+
+type SampleProposal = {
+  readonly exception: { readonly kind: keyof typeof SAMPLE_REASONS; readonly subjectKind: string; readonly subjectId: string; readonly rentalId: string; readonly deadline: Date; readonly moneyCents: number }
+  readonly kind: 'request_replacement_hold' | 'respond_to_dispute'
+  readonly references: readonly string[]
+  readonly draft: string | null
+}
+
+// One exception and the proposal for it, as a run would write them, marked as a sample: approving it records the
+// decision and carries nothing out (decideProposal), so no PayPal call is ever made with a sample's references.
+async function sampleProposal(transaction: Transaction, sample: SampleProposal, now: Date): Promise<void> {
+  const { exception } = sample
+  const [shop] = await transaction.select({ id: shops.id }).from(shops).limit(1)
+  if (shop === undefined) throw new Error('No shop in scope.')
+  const [row] = await transaction.insert(shopExceptions).values({ shopId: shop.id, ...exception, fingerprint: `sample:${exception.kind}:${exception.subjectId}`, detectedAt: now }).returning({ id: shopExceptions.id })
+  if (row === undefined) throw new Error('A sample exception was not created.')
+  const written = await writeProposal(transaction, { exceptionId: row.id, kind: sample.kind, reason: SAMPLE_REASONS[exception.kind], references: sample.references, draft: sample.draft, raisedByAgent: false, runId: null, model: null, promptVersion: null, payload: { fixedReason: exception.kind, investigated: 'no', paypalChecked: 'no', simulated: 'yes' } }, now)
+  if (!written.written) throw new Error(`A sample proposal was not written: ${written.reason ?? 'unknown'}.`)
 }
 
 type PhotographedSample = {

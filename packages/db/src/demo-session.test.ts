@@ -1,4 +1,4 @@
-import { money } from '@hold/domain'
+import { mayConfirm, money } from '@hold/domain'
 import { and, eq, sql } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { findPerson } from './accounts.ts'
@@ -7,7 +7,7 @@ import { demoAccountForRental, openDemoSession } from './demo-session.ts'
 import { DEMO_SHOP } from './demo-shop.ts'
 import { addItems, saveItemType } from './item-repository.ts'
 import { bookableTypes } from './booking-repository.ts'
-import { auditLog, itemTypes, paypalAccounts, photoPlans, rentals, shops } from './schema/index.ts'
+import { auditLog, claims, itemTypes, paypalAccounts, photoPlans, rentals, shops } from './schema/index.ts'
 import { inShop } from './scope.ts'
 import { createTestDatabase } from './testing/test-database.ts'
 import type { TestDatabase } from './testing/test-database.ts'
@@ -41,6 +41,17 @@ describe('a demo session', () => {
     ])
     const started = await database.select().from(auditLog).where(and(eq(auditLog.shopId, opened.shopId), eq(auditLog.action, 'demo.session_started')))
     expect(started).toHaveLength(1)
+  })
+
+  it('raises its sample claims at the counter, as Jonas, so the owner can decide the contested one', async () => {
+    const opened = await openDemoSession(database, { ...people('claim1'), slug: 'ribeira-bikes-claim1', paypal: PAYPAL, now: NOW })
+    const owner = await findPerson(database, 'owner-claim1')
+    const staff = await findPerson(database, 'staff-claim1')
+    const raised = await database.select({ state: claims.state, raisedBy: claims.raisedByUserId }).from(claims).where(eq(claims.shopId, opened.shopId))
+    expect(raised.length).toBeGreaterThan(0)
+    expect(raised.every((claim) => claim.raisedBy === staff?.userId)).toBe(true)
+    const contested = raised.find((claim) => claim.state === 'contested')
+    expect(mayConfirm({ staffId: owner?.userId ?? '', role: 'owner', approvalLimit: money(0, 'EUR') }, { kind: 'decide_contested_claim', raisedBy: contested?.raisedBy ?? '', shopStaffCount: 2 }).ok).toBe(true)
   })
 
   it('offers real bikes a judge can book at the counter, on the shop page or through an assistant, beside the samples', async () => {
