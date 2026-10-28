@@ -15,7 +15,7 @@ import { opsAgentMessageSchema, runOperations } from '@hold/ops/run'
 import type { OpsDependencies } from '@hold/ops/run'
 import { createLazyMailer, createMemoryMailer, createSmtpMailer, loadSmtpSettings } from '@hold/notify'
 import type { Mailer } from '@hold/notify'
-import { createFakePayPal, createMemoryCredentialStore, createPayPalClient, createRestPayPalHolds, createSecretsManagerCredentialStore, credentialReference, DEMO_CREDENTIAL_OWNER } from '@hold/paypal'
+import { createFakePayPal, createMemoryCredentialStore, createPayPalClient, createRestPayPalHolds, createSecretsManagerCredentialStore, credentialReference, DEMO_CREDENTIAL_OWNER, PAYPAL_EVENT_TYPES } from '@hold/paypal'
 import type { CredentialStore, FakePayPal, PayPalCredentials, PayPalHolds } from '@hold/paypal'
 import { applyPayPalEvent, createMemoryScheduler, createSqsSender, executionMessageSchema, paypalEventMessageSchema, runExecution, runUpkeep, upkeepMessageSchema } from '@hold/settle'
 import type { Notice, QueueMessage, RequestDependencies, SettleDependencies } from '@hold/settle'
@@ -26,6 +26,8 @@ import type { DemoSessionServices } from '@/features/auth/demo-session'
 import { createRenterAsk } from './renter-ask'
 import { simulatedOperations } from './simulated-operations'
 import { simulatedRecords } from './simulated-records'
+import { DEMO_WEBHOOK_PATH } from './demo-webhook-address'
+import { withSamplePhotos } from './sample-photos'
 
 // What a PayPal credential check found: the credentials work, PayPal refused them, or PayPal could not be reached.
 export type CredentialCheck = 'accepted' | 'refused' | 'unavailable'
@@ -110,14 +112,27 @@ function loadKey(source: KeySource, region: string): Promise<Buffer> {
 // (pnpm demo:paypal) stores it. Until it does, a demo opens without PayPal and its PayPal page says so.
 export const DEMO_PAYPAL_REFERENCE = credentialReference(DEMO_CREDENTIAL_OWNER, 'sandbox')
 
-function demoPayPalFrom(store: CredentialStore): DemoSessionServices['paypal'] {
+// The shared app's one webhook, at the demo's own address. Subscribing an address that is already subscribed finds
+// the earlier subscription, so every demo start gets the same one. PayPal takes only an HTTPS address, so on a
+// developer's machine there is none, and the demo reads every step back from PayPal instead.
+async function demoWebhook(paypal: PayPalHolds, publicUrl: string): Promise<string | undefined> {
+  if (!publicUrl.startsWith('https://')) return undefined
+  const subscribed = await paypal.createWebhook({ url: `${publicUrl}${DEMO_WEBHOOK_PATH}`, eventTypes: PAYPAL_EVENT_TYPES })
+  if (subscribed.ok) return subscribed.value.webhookId
+  console.warn(JSON.stringify({ event: 'demo_webhook_unsubscribed', kind: subscribed.error.kind }))
+  return undefined
+}
+
+function demoPayPalFrom(store: CredentialStore, paypalFor: (credentialReference: string) => PayPalHolds, publicUrl: string): DemoSessionServices['paypal'] {
   return async () => {
     try {
-      return (await store.read(DEMO_PAYPAL_REFERENCE)) === undefined ? undefined : { credentialReference: DEMO_PAYPAL_REFERENCE, mode: 'sandbox' }
+      if ((await store.read(DEMO_PAYPAL_REFERENCE)) === undefined) return undefined
     } catch (error) {
       console.warn(JSON.stringify({ event: 'demo_paypal_unreadable', name: error instanceof Error ? error.name : 'unknown' }))
       return undefined
     }
+    const webhookId = await demoWebhook(paypalFor(DEMO_PAYPAL_REFERENCE), publicUrl)
+    return { credentialReference: DEMO_PAYPAL_REFERENCE, mode: 'sandbox', ...(webhookId === undefined ? {} : { webhookId }) }
   }
 }
 
@@ -181,7 +196,10 @@ async function build(): Promise<Services> {
       demoSessions: {
         accounts: { create: (account) => Promise.resolve(identity.addDemoAccount(account.email, account.password)) },
         open: (input) => openDemoSession(database, input),
-        paypal: () => Promise.resolve({ credentialReference: DEMO_PAYPAL_REFERENCE, mode: 'sandbox' }),
+        paypal: async () => {
+          const subscribed = await simulatedPayPal.createWebhook({ url: `${config.publicUrl}${DEMO_WEBHOOK_PATH}`, eventTypes: PAYPAL_EVENT_TYPES })
+          return { credentialReference: DEMO_PAYPAL_REFERENCE, mode: 'sandbox', ...(subscribed.ok ? { webhookId: subscribed.value.webhookId } : {}) }
+        },
       },
       database,
       mailer,
@@ -191,7 +209,7 @@ async function build(): Promise<Services> {
       simulatedPayPal,
       simulatedWebhookFor: (orderId) => webhookOfOrder.get(orderId),
       settle,
-      evidence: simulatedEvidence,
+      evidence: withSamplePhotos(simulatedEvidence),
       simulatedEvidence,
       documents,
       incidentModel: createSimulatedIncidentModel(),
@@ -220,7 +238,7 @@ async function build(): Promise<Services> {
     renterLinkKey: await loadKey(config.renterLinkKey, config.region),
     identity: createCognitoIdentity({ region: config.region, ...config.cognito }),
     demoSessions: config.demoSessions
-      ? { accounts: createDemoSessionAccounts({ region: config.region, ...config.cognito }), open: (input) => openDemoSession(database, input), paypal: demoPayPalFrom(paypalCredentials) }
+      ? { accounts: createDemoSessionAccounts({ region: config.region, ...config.cognito }), open: (input) => openDemoSession(database, input), paypal: demoPayPalFrom(paypalCredentials, paypalFor, config.publicUrl) }
       : undefined,
     database,
     // Through the SMTP account in Secrets Manager, read when the first email is sent.
@@ -231,7 +249,7 @@ async function build(): Promise<Services> {
     simulatedPayPal: undefined,
     simulatedWebhookFor: () => undefined,
     settle: { database, role: 'hold_app', send, now: () => new Date() },
-    evidence: config.photoBuckets === undefined ? undefined : createS3EvidenceStore({ evidenceBucket: config.photoBuckets.evidence, displayBucket: config.photoBuckets.display, region: config.region }),
+    evidence: config.photoBuckets === undefined ? undefined : withSamplePhotos(createS3EvidenceStore({ evidenceBucket: config.photoBuckets.evidence, displayBucket: config.photoBuckets.display, region: config.region })),
     simulatedEvidence: undefined,
     documents: config.photoBuckets === undefined ? undefined : createS3DocumentStore({ evidenceBucket: config.photoBuckets.evidence, region: config.region }),
     incidentModel: createBedrockIncidentModel({ awsRegion: config.region }),

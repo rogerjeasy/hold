@@ -26,4 +26,10 @@ describe('the PayPal page', () => {
     expect(screen.getByText(/shares one PayPal sandbox account with every other demo/)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Turn on notifications' })).not.toBeInTheDocument()
   })
+
+  it('says a demo shop hears PayPal through the shared app’s one address once it is subscribed', () => {
+    renderWithIntl(<PayPalScreen shopName="Ribeira Bikes" connectedAt={new Date('2026-10-14T09:00:00Z')} notifications="demo_on" isOwner gate={gate} />)
+    expect(screen.getByText(/PayPal sends that app’s events to one address/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Turn on notifications' })).not.toBeInTheDocument()
+  })
 })

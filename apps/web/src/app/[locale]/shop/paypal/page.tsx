@@ -23,7 +23,7 @@ export default async function Page() {
     <PayPalScreen
       shopName={context.shop.name}
       connectedAt={account?.createdAt}
-      notifications={account?.credentialReference === DEMO_PAYPAL_REFERENCE ? 'demo' : account?.webhookId != null ? 'on' : 'off'}
+      notifications={account?.credentialReference === DEMO_PAYPAL_REFERENCE ? (account.webhookId != null ? 'demo_on' : 'demo') : account?.webhookId != null ? 'on' : 'off'}
       isOwner={context.role === 'owner'}
       gate={{ needed: context.passkeyNeeded, hasPasskey: passkeys.ok && passkeys.value.length > 0, email: context.person.email }}
     />

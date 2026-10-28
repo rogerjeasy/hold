@@ -23,8 +23,9 @@ export type DemoSession = z.infer<typeof demoSessionSchema>
 export type DemoSessionServices = {
   readonly accounts: DemoSessionAccounts
   readonly open: (input: DemoSessionInput) => Promise<OpenedDemoSession>
-  // The demo's shared PayPal sandbox connection, or nothing while it has none.
-  readonly paypal: () => Promise<{ readonly credentialReference: string; readonly mode: PayPalMode } | undefined>
+  // The demo's shared PayPal sandbox connection, or nothing while it has none, with the shared app's webhook when
+  // PayPal could subscribe it.
+  readonly paypal: () => Promise<{ readonly credentialReference: string; readonly mode: PayPalMode; readonly webhookId?: string } | undefined>
 }
 
 export type DemoDependencies = Pick<FlowDependencies, 'identity' | 'allow'> & {

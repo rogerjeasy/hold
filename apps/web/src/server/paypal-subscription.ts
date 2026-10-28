@@ -7,7 +7,8 @@ import { DEMO_PAYPAL_REFERENCE, getServices } from './services'
 // Subscribes the shop's own webhook address in its PayPal account, and keeps the subscription's id, which every event
 // is verified against. PayPal takes only an HTTPS address, so on a developer's machine this says no and Hold works on
 // without events. A demo shop shares the demo's one sandbox app, which PayPal allows ten addresses and sends every one of
-// them each event, so it never subscribes its own (architecture.md section 20.3). True once subscribed.
+// them each event, so it never subscribes its own: the app's one demo address serves them all, routed by the rental
+// each event names (demo-webhook.ts, architecture.md section 20.3). True once subscribed.
 export async function subscribeToPayPal(transaction: Transaction, shopId: string): Promise<boolean> {
   const { config, paypalFor } = await getServices()
   const account = await findPayPalAccount(transaction, shopId, config.paypalMode)

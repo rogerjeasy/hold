@@ -10,10 +10,13 @@ type PayPalScreenProps = {
   connectedAt: Date | undefined
   // Whether PayPal sends this shop's events to Hold. `demo`: a demo shop, which shares the demo's sandbox app and so
   // never has notifications of its own (architecture.md section 20.3).
-  notifications: 'on' | 'off' | 'demo'
+  // demo: a demo shop with no shared webhook yet; demo_on: one whose events come through the shared app's address.
+  notifications: 'on' | 'off' | 'demo' | 'demo_on'
   isOwner: boolean
   gate: { needed: boolean; hasPasskey: boolean; email: string }
 }
+
+const NOTICES = { on: 'notificationsOn', off: 'notificationsOff', demo: 'notificationsDemo', demo_on: 'notificationsDemoOn' } as const
 
 export function PayPalScreen({ shopName, connectedAt, notifications, isOwner, gate }: PayPalScreenProps) {
   const t = useTranslations('shop.paypal')
@@ -33,7 +36,7 @@ export function PayPalScreen({ shopName, connectedAt, notifications, isOwner, ga
         )}
         {connectedAt === undefined ? null : (
           <div className="grid gap-3 border-l-2 border-border-strong pl-4">
-            <p>{t(notifications === 'on' ? 'notificationsOn' : notifications === 'off' ? 'notificationsOff' : 'notificationsDemo')}</p>
+            <p>{t(NOTICES[notifications])}</p>
             {isOwner && notifications === 'off' ? (
               <PasskeyGate {...gate} returnTo="/shop/paypal">
                 <TurnOnNotifications />

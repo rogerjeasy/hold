@@ -3,10 +3,11 @@ import { and, eq, sql } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { findPerson } from './accounts.ts'
 import { publicShops } from './assistant-repository.ts'
-import { openDemoSession } from './demo-session.ts'
+import { demoAccountForRental, openDemoSession } from './demo-session.ts'
 import { DEMO_SHOP } from './demo-shop.ts'
 import { addItems, saveItemType } from './item-repository.ts'
-import { auditLog, paypalAccounts, rentals, shops } from './schema/index.ts'
+import { bookableTypes } from './booking-repository.ts'
+import { auditLog, itemTypes, paypalAccounts, photoPlans, rentals, shops } from './schema/index.ts'
 import { inShop } from './scope.ts'
 import { createTestDatabase } from './testing/test-database.ts'
 import type { TestDatabase } from './testing/test-database.ts'
@@ -40,6 +41,21 @@ describe('a demo session', () => {
     ])
     const started = await database.select().from(auditLog).where(and(eq(auditLog.shopId, opened.shopId), eq(auditLog.action, 'demo.session_started')))
     expect(started).toHaveLength(1)
+  })
+
+  it('offers real bikes a judge can book at the counter, on the shop page or through an assistant, beside the samples', async () => {
+    const opened = await openDemoSession(database, { ...people('book01'), slug: 'ribeira-bikes-book01', paypal: PAYPAL, now: NOW })
+    const owner = await findPerson(database, 'owner-book01')
+    const scope = { role: 'hold_app' as const, shopId: opened.shopId, userId: owner?.userId ?? '' }
+    const tomorrow = { startsAt: new Date('2026-12-02T09:00:00Z'), endsAt: new Date('2026-12-05T09:00:00Z') }
+
+    const bookable = await inShop(database, scope, (transaction) => bookableTypes(transaction, tomorrow, NOW))
+
+    expect(bookable).toEqual([expect.objectContaining({ name: DEMO_SHOP.bookable.name, currency: 'EUR', available: DEMO_SHOP.bookable.count })])
+    const [type] = await database.select({ simulated: itemTypes.simulated, views: photoPlans.views }).from(itemTypes).innerJoin(photoPlans, eq(photoPlans.id, itemTypes.photoPlanId)).where(and(eq(itemTypes.shopId, opened.shopId), eq(itemTypes.name, DEMO_SHOP.bookable.name)))
+    expect(type?.simulated).toBe(false)
+    // One photograph a side of the frame is all a judge must take; the sample photograph is of that view.
+    expect(type?.views.filter((view: { readonly required: boolean }) => view.required)).toHaveLength(1)
   })
 
   it('opens without a PayPal connection when the demo has none', async () => {
@@ -78,5 +94,27 @@ describe('a demo session', () => {
     // The same shop, were it not a demo session, would be listed: the flag alone keeps it out.
     await database.update(shops).set({ demoSession: false }).where(eq(shops.id, opened.shopId))
     expect((await publicShops(database, { place: 'ribeira', kind: null, paypalMode: 'sandbox' })).map((shop) => shop.id)).toContain(opened.shopId)
+  })
+})
+
+// The demo's one sandbox app has one webhook address for every demo shop (architecture.md section 20.3). An event is
+// routed to the demo shop whose rental Hold named in the order's custom_id, and to no other shop.
+describe('events of the demo’s shared PayPal app', () => {
+  it('are verified against the shared webhook, which every demo shop keeps', async () => {
+    const opened = await openDemoSession(database, { ...people('hook01'), slug: 'ribeira-bikes-hook01', paypal: { ...PAYPAL, webhookId: 'WH-SHARED' }, now: NOW })
+    const [account] = await database.select({ webhookId: paypalAccounts.webhookId }).from(paypalAccounts).where(eq(paypalAccounts.shopId, opened.shopId))
+    expect(account?.webhookId).toBe('WH-SHARED')
+  })
+
+  it('reach the demo shop whose rental the order names, and never a shop that is not a demo', async () => {
+    const opened = await openDemoSession(database, { ...people('route1'), slug: 'ribeira-bikes-route1', paypal: { ...PAYPAL, webhookId: 'WH-SHARED' }, now: NOW })
+    const [rental] = await inShop(database, { role: 'hold_app', shopId: opened.shopId }, (transaction) => transaction.select({ id: rentals.id }).from(rentals).limit(1))
+    const [account] = await database.select({ id: paypalAccounts.id }).from(paypalAccounts).where(eq(paypalAccounts.shopId, opened.shopId))
+
+    expect(await demoAccountForRental(database, rental?.id ?? '', 'sandbox')).toBe(account?.id)
+    expect(await demoAccountForRental(database, rental?.id ?? '', 'live')).toBeUndefined()
+    expect(await demoAccountForRental(database, 'not-a-rental', 'sandbox')).toBeUndefined()
+    await database.update(shops).set({ demoSession: false }).where(eq(shops.id, opened.shopId))
+    expect(await demoAccountForRental(database, rental?.id ?? '', 'sandbox')).toBeUndefined()
   })
 })
