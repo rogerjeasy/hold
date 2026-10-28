@@ -2577,7 +2577,13 @@
         "get_claim": "Read the claim",
         "draft_claim_reply": "Drafted a reply to the claim",
         "submit_claim_reply": "Asked to answer the claim",
-        "get_record": "Read the evidence record"
+        "get_record": "Read the evidence record",
+        "get_negotiation": "Read the negotiation",
+        "get_claim_lines": "Read the claim's lines and findings",
+        "get_line_photos": "Looked at a line's photographs",
+        "get_price_list": "Read the agreed price list",
+        "get_known_marks": "Read the marks known before the rental",
+        "submit_offer": "Made a move as your advocate"
       }
     }
   },
@@ -2977,11 +2983,16 @@
       "comment": "Anything your advocate should know (optional)",
       "start": "Hand my contest to an advocate",
       "started": "Your advocate is arguing your contest.",
-      "code": "Verification code, for your advocate"
+      "code": "Verification code, for your advocate",
+      "who": "Who argues it for me",
+      "hold": "Hold's advocate",
+      "assistant": "My own assistant, {name}. The name is its own and is not verified.",
+      "assistantGuidance": "Your assistant reads the same evidence through Hold and makes each move through Hold's referee. It never sees the shop's limits and cannot agree to more than you write here. You still confirm any agreement with a code."
     },
     "renterTitle": "Your advocate",
     "link": "See what the advocates said",
     "yourLimit": "Your highest total: {amount}. Only you see this.",
+    "assistantArgues": "Your own assistant argues your contest. Hold's advocate does not move for you, and every move passes Hold's referee.",
     "simulated": "Simulated advocates: this is the test environment, and no AI model was asked.",
     "transcript": {
       "title": "What the advocates said",
@@ -2989,7 +3000,8 @@
       "move": "Move {number}",
       "side": {
         "shop": "The shop's advocate",
-        "renter": "The renter's advocate"
+        "renter": "The renter's advocate",
+        "renter_assistant": "The renter's own assistant"
       },
       "opening": "Opened with the claim as presented: {amount}",
       "offer": "Offered {amount}",
@@ -3088,7 +3100,8 @@
       "wrong_code": "That code is not right. Check it and try again.",
       "code_recently_sent": "A code was sent less than a minute ago. Check your email.",
       "email_unavailable": "The email could not be sent. Try again in a moment.",
-      "link_invalid": "This link cannot be used for this."
+      "link_invalid": "This link cannot be used for this.",
+      "assistant_not_connected": "No assistant is connected to this rental now. Choose Hold's advocate instead."
     }
   },
   "operations": {

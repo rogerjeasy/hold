@@ -9,6 +9,7 @@ const data: RenterNegotiation = {
   highestTotalCents: 30_00,
   awaitingRenter: true,
   stopped: false,
+  advocate: 'hold',
   transcript: {
     id: 'negotiation-1', kind: 'negotiation', state: 'agreed', endedReason: null, currency: 'EUR', claimTotalCents: 35_00, agreedCents: 17_50, deadline: at, roundLimit: 6, shopConfirmedAt: null, renterConfirmedAt: null, simulated: false, chainVerified: true,
     lines: [{ lineId: 'scratch', publishedCents: 35_00, description: 'Scratch' }], wearClauses: [],
@@ -30,6 +31,13 @@ describe('the renter’s advocate page', () => {
     renderWithIntl(<RenterNegotiationScreen token="token" shopName="Porto Bikes" data={{ ...data, awaitingRenter: false, transcript: { ...data.transcript, renterConfirmedAt: at } }} />)
     expect(screen.getByText('You confirmed. Waiting for the shop to confirm.')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Confirm and settle' })).not.toBeInTheDocument()
+  })
+
+  it('says when the renter’s own assistant argues for them, and names its moves as the assistant’s', () => {
+    const move = { sequence: 2, side: 'renter' as const, kind: 'offer' as const, lines: [{ lineId: 'scratch', cents: 17_50, ground: 'uncertain_evidence' as const, evidence: [] }], totalCents: 17_50, passReason: null, actor: 'renter_assistant', model: null, createdAt: at, fingerprint: 'b'.repeat(64) }
+    renderWithIntl(<RenterNegotiationScreen token="token" shopName="Porto Bikes" data={{ ...data, advocate: 'assistant', transcript: { ...data.transcript, moves: [...data.transcript.moves, move] } }} />)
+    expect(screen.getByText("Your own assistant argues your contest. Hold's advocate does not move for you, and every move passes Hold's referee.")).toBeInTheDocument()
+    expect(screen.getByText(/Move 2 · The renter's own assistant/)).toBeInTheDocument()
   })
 
   it('offers nothing to confirm or stop once it has ended, and says when the renter stopped it', () => {

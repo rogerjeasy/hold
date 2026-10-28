@@ -2577,7 +2577,13 @@
         "get_claim": "A consulté la réclamation",
         "draft_claim_reply": "A préparé une réponse à la réclamation",
         "submit_claim_reply": "A demandé à répondre à la réclamation",
-        "get_record": "A consulté le dossier de preuves"
+        "get_record": "A consulté le dossier de preuves",
+        "get_negotiation": "A consulté la négociation",
+        "get_claim_lines": "A consulté les lignes de la réclamation et leurs constats",
+        "get_line_photos": "A regardé les photos d'une ligne",
+        "get_price_list": "A consulté la liste de prix acceptée",
+        "get_known_marks": "A consulté les marques connues avant la location",
+        "submit_offer": "A joué un coup comme votre représentant"
       }
     }
   },
@@ -2977,11 +2983,16 @@
       "comment": "Ce que votre représentant doit savoir (facultatif)",
       "start": "Confier ma contestation à un représentant",
       "started": "Votre représentant défend votre contestation.",
-      "code": "Code de vérification, pour votre représentant"
+      "code": "Code de vérification, pour votre représentant",
+      "who": "Qui défend ma contestation",
+      "hold": "Le représentant de Hold",
+      "assistant": "Mon propre assistant, {name}. Ce nom est le sien et n'est pas vérifié.",
+      "assistantGuidance": "Votre assistant lit les mêmes preuves par Hold et fait chaque coup devant l'arbitre de Hold. Il ne voit jamais les limites de la boutique et ne peut pas accepter plus que ce que vous écrivez ici. Vous confirmez toujours un accord avec un code."
     },
     "renterTitle": "Votre représentant",
     "link": "Voir les échanges des représentants",
     "yourLimit": "Votre total maximum : {amount}. Vous seul le voyez.",
+    "assistantArgues": "Votre propre assistant défend votre contestation. Le représentant de Hold n'agit pas pour vous, et chaque coup passe par l'arbitre de Hold.",
     "simulated": "Représentants simulés : environnement de test, aucun modèle d'IA n'a été sollicité.",
     "transcript": {
       "title": "Les échanges des représentants",
@@ -2989,7 +3000,8 @@
       "move": "Coup {number}",
       "side": {
         "shop": "Le représentant de la boutique",
-        "renter": "Le représentant du locataire"
+        "renter": "Le représentant du locataire",
+        "renter_assistant": "Le propre assistant du locataire"
       },
       "opening": "Ouverture avec la réclamation telle que présentée : {amount}",
       "offer": "Offre de {amount}",
@@ -3088,7 +3100,8 @@
       "wrong_code": "Ce code n'est pas le bon. Vérifiez-le et réessayez.",
       "code_recently_sent": "Un code a été envoyé il y a moins d'une minute. Consultez vos courriels.",
       "email_unavailable": "Le courriel n'a pas pu être envoyé. Réessayez dans un instant.",
-      "link_invalid": "Ce lien ne permet pas cette action."
+      "link_invalid": "Ce lien ne permet pas cette action.",
+      "assistant_not_connected": "Aucun assistant n'est connecté à cette location pour l'instant. Choisissez le représentant de Hold."
     }
   },
   "operations": {

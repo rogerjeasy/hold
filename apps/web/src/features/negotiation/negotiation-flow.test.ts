@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { captureSession, claims, inShop, moneyEvents, priceEntries, recordPhoto, rentalDetail, sealSession, shopNegotiation, staffRoles, startCaptureSession, users } from '@hold/db'
+import { agentSessions, captureSession, claims, inShop, moneyEvents, priceEntries, recordPhoto, rentalDetail, renterNegotiation, sealSession, shopNegotiation, staffRoles, startCaptureSession, users } from '@hold/db'
 import { randomUUID } from 'node:crypto'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 process.env['HOLD_ENVIRONMENT'] = 'test'
@@ -103,6 +103,25 @@ describe('a contest argued by two advocates', () => {
     await signIn(jar, MANAGER, 'passkey')
     expect(await claimActions.decide(null, form({ claimId: rental.claimId, decision: 'uphold', reason: 'The scratch is fresh; the transcript changes nothing.', locale: 'en' }))).toMatchObject({ ok: true })
     expect(await captured(rental.rentalId)).toEqual([35_00])
+  })
+
+  it('hands the contest to the renter’s own connected assistant when they choose it, and Hold’s advocate never moves for them', async () => {
+    const rental = await presented()
+    const { database } = await getServices()
+    await database.insert(agentSessions).values({ shopId: shop.shopId, rentalId: rental.rentalId, bookingSecretFingerprint: `booking-${randomUUID()}`, tokenFingerprint: `token-${randomUUID()}`, scopes: ['rental', 'hold', 'condition', 'claim', 'record'], clientLabel: 'Trip planner', tokenIssuedAt: new Date(), expiresAt: new Date(Date.now() + 30 * 86_400_000) })
+    await claimRenter.sendClaimCode(null, form({ token: rental.claimToken, locale: 'en' }))
+    expect(await renter.startAdvocate(null, form({ token: rental.claimToken, code: TEST_SIGN_IN_CODE, highest: '30', advocate: 'assistant', locale: 'en' }))).toMatchObject({ ok: true })
+    expect(await claimState(rental.claimId)).toBe('negotiating')
+    const view = await scoped((transaction) => renterNegotiation(transaction, rental.rentalId))
+    expect(view).toMatchObject({ advocate: 'assistant', transcript: { state: 'open', moves: [{ actor: 'referee' }] } })
+  })
+
+  it('refuses the assistant as advocate when none is connected, and the claim stays unanswered', async () => {
+    const rental = await presented()
+    await claimRenter.sendClaimCode(null, form({ token: rental.claimToken, locale: 'en' }))
+    expect(await renter.startAdvocate(null, form({ token: rental.claimToken, code: TEST_SIGN_IN_CODE, highest: '30', advocate: 'assistant', locale: 'en' }))).toMatchObject({ ok: false, reason: 'assistant_not_connected' })
+    expect(await claimState(rental.claimId)).toBe('presented')
+    expect(await renter.startAdvocate(null, form({ token: rental.claimToken, code: TEST_SIGN_IN_CODE, highest: '30', advocate: 'robot', locale: 'en' }))).toMatchObject({ ok: false, failure: 'invalid' })
   })
 
   it('refuses a link without the scope, a renter amount in part cents, and staff who may not confirm', async () => {

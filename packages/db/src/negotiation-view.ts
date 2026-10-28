@@ -3,7 +3,7 @@ import type { LineFacts, Mandate, ProposedMove, RefereeContext, Table } from '@h
 import { and, asc, eq, inArray } from 'drizzle-orm'
 import { verifyTranscript } from './negotiation-fingerprint.ts'
 import type { ChainedMove } from './negotiation-fingerprint.ts'
-import { mandateFromRow } from './settlement-mandate-repository.ts'
+import { isAssistantAdvocate, mandateFromRow } from './settlement-mandate-repository.ts'
 import { captureSessions, claimLines, claimReplies, claims, comparisons, findings, mandates, marks, negotiationMoves, negotiations, priceEntries, rentalItems, rentals, wearPolicies } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
@@ -129,6 +129,8 @@ export async function renterNegotiation(transaction: Transaction, rentalId: stri
     highestTotalCents: own.ok ? own.value.highestTotalCents : 0,
     awaitingRenter: negotiation.state === 'agreed' && negotiation.renterConfirmedAt === null && asksForTap(renterMandate, 'settlement_renter'),
     stopped: renterMandate.revokedAt !== null,
+    // Who argues for the renter: Hold's advocate, or the renter's own assistant.
+    advocate: isAssistantAdvocate(renterMandate.grantedTo) ? 'assistant' as const : 'hold' as const,
   }
 }
 export type RenterNegotiation = NonNullable<Awaited<ReturnType<typeof renterNegotiation>>>

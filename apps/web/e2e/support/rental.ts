@@ -50,6 +50,13 @@ export async function feePaidAndHoldPlaced(page: Page, browser: Browser): Promis
   const link = (await page.getByTestId('renter-link').textContent()) ?? ''
   const renter = await renterBrowser(browser)
   await payFee(renter, link)
+  await placeHold(page, renter)
+  await renter.context().close()
+}
+
+// From a rental's page whose fee is paid: staff ask for the hold and the renter approves it in PayPal. Ends on the
+// rental's page, ready for handover.
+export async function placeHold(page: Page, renter: Page): Promise<void> {
   await page.reload()
   const hold = page.getByRole('region', { name: 'Hold at pickup' })
   await hold.getByRole('button', { name: 'Ask for the hold' }).click()
@@ -58,6 +65,5 @@ export async function feePaidAndHoldPlaced(page: Page, browser: Browser): Promis
   await renter.getByRole('button', { name: /^Approve .* with PayPal$/ }).click()
   await renter.getByRole('button', { name: 'Approve', exact: true }).click()
   await expect(renter.getByText('Hold placed. Nothing was charged.')).toBeVisible()
-  await renter.context().close()
   await expect(hold.getByText('Ready for handover.')).toBeVisible({ timeout: 15_000 })
 }

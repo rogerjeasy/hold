@@ -2577,7 +2577,13 @@
         "get_claim": "Consultó la reclamación",
         "draft_claim_reply": "Preparó una respuesta a la reclamación",
         "submit_claim_reply": "Pidió responder a la reclamación",
-        "get_record": "Consultó el expediente de pruebas"
+        "get_record": "Consultó el expediente de pruebas",
+        "get_negotiation": "Consultó la negociación",
+        "get_claim_lines": "Consultó las líneas de la reclamación y sus hallazgos",
+        "get_line_photos": "Miró las fotos de una línea",
+        "get_price_list": "Consultó la lista de precios acordada",
+        "get_known_marks": "Consultó las marcas conocidas antes del alquiler",
+        "submit_offer": "Hizo un movimiento como su representante"
       }
     }
   },
@@ -2977,11 +2983,16 @@
       "comment": "Lo que su representante debe saber (opcional)",
       "start": "Confiar mi impugnación a un representante",
       "started": "Su representante defiende su impugnación.",
-      "code": "Código de verificación, para su representante"
+      "code": "Código de verificación, para su representante",
+      "who": "Quién lo defiende por mí",
+      "hold": "El representante de Hold",
+      "assistant": "Mi propio asistente, {name}. El nombre es suyo y no está verificado.",
+      "assistantGuidance": "Su asistente lee las mismas pruebas a través de Hold y hace cada movimiento ante el árbitro de Hold. Nunca ve los límites de la tienda y no puede aceptar más de lo que usted escriba aquí. Usted sigue confirmando cualquier acuerdo con un código."
     },
     "renterTitle": "Su representante",
     "link": "Ver lo que dijeron los representantes",
     "yourLimit": "Su total máximo: {amount}. Solo usted lo ve.",
+    "assistantArgues": "Su propio asistente defiende su impugnación. El representante de Hold no actúa por usted, y cada movimiento pasa por el árbitro de Hold.",
     "simulated": "Representantes simulados: entorno de prueba, no se consultó ningún modelo de IA.",
     "transcript": {
       "title": "Lo que dijeron los representantes",
@@ -2989,7 +3000,8 @@
       "move": "Jugada {number}",
       "side": {
         "shop": "El representante de la tienda",
-        "renter": "El representante del arrendatario"
+        "renter": "El representante del arrendatario",
+        "renter_assistant": "El propio asistente del arrendatario"
       },
       "opening": "Abrió con la reclamación tal como se presentó: {amount}",
       "offer": "Ofreció {amount}",
@@ -3088,7 +3100,8 @@
       "wrong_code": "Ese código no es correcto. Revíselo e inténtelo de nuevo.",
       "code_recently_sent": "Se envió un código hace menos de un minuto. Revise su correo.",
       "email_unavailable": "No se pudo enviar el correo. Inténtelo en un momento.",
-      "link_invalid": "Este enlace no sirve para esto."
+      "link_invalid": "Este enlace no sirve para esto.",
+      "assistant_not_connected": "Ahora no hay ningún asistente conectado a este alquiler. Elija el representante de Hold."
     }
   },
   "operations": {

@@ -14,6 +14,8 @@ import { advocateInput } from './negotiation-input'
 
 // The renter's side of an advocate (extensions.md section 9.4). Handing the contest to an advocate is a money decision,
 // so it takes the same one-time code as accepting or contesting; confirming what the advocates agreed takes a fresh one.
+// The advocate is Hold's, or the renter's own assistant connected to this rental: then the code grants that assistant
+// alone the negotiation scope on this claim, and the shop's turn comes back to the worker after each of its moves.
 
 export const startAdvocate = renterAction({ name: 'renter.advocate_started', scope: 'contest', input: withToken(advocateInput) }, async (link, input, inLinkShop) => {
   const { config } = await getServices()
@@ -24,7 +26,7 @@ export const startAdvocate = renterAction({ name: 'renter.advocate_started', sco
     const rental = await renterView(transaction, link.rentalId, new Date())
     const highest = rental === undefined ? undefined : parseAmount(input.highest, rental.currency)
     if (highest === undefined) return { ok: false, reason: 'amount_invalid' } as const
-    return openAdvocate(transaction, { rentalId: link.rentalId, highestTotalCents: highest.cents, comment: input.comment ?? '', simulated: config.services === 'fake' }, new Date())
+    return openAdvocate(transaction, { rentalId: link.rentalId, highestTotalCents: highest.cents, comment: input.comment ?? '', simulated: config.services === 'fake', advocate: input.advocate ?? 'hold' }, new Date())
   })
   if (!result.ok) return new Refusal(result.reason)
   try { await sendNegotiation(link.shopId, link.rentalId, result.negotiationId, result.outboxId) } catch { /* The committed outbox retries delivery. */ }
