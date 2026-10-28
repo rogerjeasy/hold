@@ -42,6 +42,9 @@ describe('running one case of the evaluation set', () => {
     const model = recordedModel()
     const result = await runCase({ ...files(() => scratched), ...distinctShots, model, now: () => 0 }, pair({}), context)
     expect(result).toMatchObject({ id: 'case', group: 'damage', origin: 'synthetic', state: 'findings', inputTokens: 2000, outputTokens: 200 })
+    // The pair as the set names it, and how well it lined up, so the open scorecard can show it.
+    expect(result).toMatchObject({ view: 'frame-left', before: 'gate/before.jpg', after: 'gate/after.jpg' })
+    expect(result.alignment).toBeGreaterThan(0.5)
     expect(result.findings).toEqual([expect.objectContaining({ class: 'new_damage', secondLookConfirmed: true })])
     expect(model.requests.map((each) => each.kind)).toEqual(['first', 'second'])
   })
@@ -51,6 +54,7 @@ describe('running one case of the evaluation set', () => {
     const copied = { fingerprint: () => Promise.resolve({ sha256: 'same', perceptualHash: 'same' }) }
     const result = await runCase({ ...files(() => before), ...copied, model, now: () => 0 }, pair({ group: 'identity', labels: [], earlier: ['gate/earlier.jpg'] }), context)
     expect(result.state).toBe('deferred')
+    expect(result.alignment).toBeNull()
     expect(model.requests).toEqual([])
   })
 

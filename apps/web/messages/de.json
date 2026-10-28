@@ -2814,6 +2814,111 @@
     "findingAccuracy": "Konfidenz {level}. In Tests stimmten Befunde auf dieser Stufe {count} von {total} Mal.",
     "findingLevel": "Konfidenz {level}. Auf dieser Stufe noch nicht gemessen."
   },
+  "openScorecard": {
+    "title": "Jedes Paar, Fall für Fall",
+    "lead": "Jedes Paar der Prüfhälfte, aus dem die Zahlen oben gezählt sind: wie es hätte enden sollen, was der Vergleich tat und ob das richtig war. Wähle eines, um seine beiden Fotos zu sehen.",
+    "ownerLink": "Jedes Paar, Fall für Fall",
+    "filters": "Paare zeigen",
+    "groups": {
+      "all": "Alle",
+      "clean_easy": "Sauber, leicht",
+      "clean_hard": "Sauber, schwer",
+      "wear": "Normale Abnutzung",
+      "damage": "Schaden",
+      "known_mark": "Eine bekannte Spur",
+      "identity": "Falscher Artikel oder wiederverwendet"
+    },
+    "groupRight": "{pass} von {total} richtig",
+    "grid": "Paare der Prüfhälfte",
+    "list": "Paare",
+    "keys": "Mit den Pfeiltasten wechselst du zwischen Paaren. Enter öffnet eines neben der Liste.",
+    "columns": {
+      "pair": "Paar",
+      "expected": "Erwartet",
+      "actual": "Endete",
+      "model": "Behauptet",
+      "secondLook": "Zweiter Blick",
+      "alignment": "Ausgerichtet",
+      "verdict": "Ergebnis"
+    },
+    "outcomes": {
+      "clean": "Sauber",
+      "findings": "Befunde",
+      "deferred": "Ein Mensch"
+    },
+    "verdicts": {
+      "pass": "Richtig",
+      "fail": "Falsch",
+      "person": "An einen Menschen"
+    },
+    "classes": {
+      "new_damage": "Neuer Schaden",
+      "missing_part": "Ein fehlendes Teil",
+      "uncertain": "Unsicher",
+      "wear": "Abnutzung",
+      "known_mark": "Eine bekannte Spur",
+      "reported": "Vom Mieter gemeldet"
+    },
+    "claimed": "{class}, {level}",
+    "noClaim": "Keine Veränderung behauptet",
+    "secondLook": {
+      "confirmed": "Bestätigt",
+      "not_confirmed": "Nicht bestätigt",
+      "not_asked": "Nicht gefragt"
+    },
+    "alignment": "{percent} %",
+    "noAlignment": "Keine",
+    "synthetic": "Synthetisch",
+    "detail": {
+      "label": "Gewähltes Paar",
+      "none": "Wähle ein Paar, um seine Fotos zu sehen.",
+      "heading": "Paar {id}",
+      "handover": "Bei der Übergabe",
+      "return": "Bei der Rückgabe",
+      "altHandover": "Übergabefoto von Paar {id}",
+      "altReturn": "Rückgabefoto von Paar {id}",
+      "legend": "Grün: wo der Schaden laut Markierung wirklich ist. Orange: was der Vergleich fand, gestrichelt, wo der zweite Blick nicht zustimmte. Auf dem Übergabefoto markiert Orange eine schon bekannte Spur.",
+      "outcome": "Hätte enden sollen: {expected}. Endete: {actual}.",
+      "labels": "{count, plural, =0 {Kein Schaden markiert.} one {# Schadensbereich markiert.} other {# Schadensbereiche markiert.}}",
+      "findings": "Was der Vergleich fand",
+      "noFindings": "Nichts.",
+      "finding": "{class} mit {confidence} % Sicherheit",
+      "secondLook": "Zweiter Blick: {answer}",
+      "aligned": "Zu {percent} % am Übergabefoto ausgerichtet.",
+      "notAligned": "Nie ausgerichtet: Die Prüfung auf ein wiederverwendetes Foto hielt es vorher an.",
+      "cost": "{seconds} Sekunden und {tokens} Tokens."
+    },
+    "calibration": {
+      "title": "Hält die Sicherheit, was sie verspricht?",
+      "lead": "Jede vom Vergleich behauptete Veränderung nach ihrer Sicherheit, aus den Paaren oben gezählt. Ein Befund bei einer Rückgabe im Laden zeigt dieselbe Zahl für seine Stufe.",
+      "level": "Sicherheit",
+      "right": "Richtig",
+      "wrong": "Falsch",
+      "record": "Bilanz"
+    },
+    "matrix": {
+      "title": "Hätte enden sollen, gegen endete",
+      "lead": "Anzahl der Paare. Auf der Diagonale lag der Vergleich richtig; jede andere Zelle ist ein Fehler oder ein Paar, das an einen Menschen ging.",
+      "expected": "Hätte enden sollen",
+      "actual": "Endete",
+      "cell": "{count, plural, one {# Paar} other {# Paare}}",
+      "right": "richtig"
+    },
+    "trend": {
+      "title": "Lauf gegen Lauf",
+      "lead": "Jeder Lauf der Prüfhälfte, der älteste zuerst, mit den Linien seiner Prüfschranke. Ein Lauf, der eine Linie überschreitet, wird nicht freigegeben.",
+      "damage": "Gefundene Schäden",
+      "clean": "Saubere Rückgaben fälschlich markiert",
+      "limit": "Grenze {percent} %",
+      "floor": "Untergrenze {percent} %",
+      "noLine": "Keine Linie: Die Grenzen werden nach dem ersten Lauf gesetzt.",
+      "run": "{date} · Pipeline {pipeline}",
+      "accepted": "Angenommen",
+      "notAccepted": "Nicht angenommen",
+      "gateStopped": "Von der Prüfschranke gestoppt",
+      "crossed": "Linie überschritten"
+    }
+  },
   "trust": {
     "reason": "Ihre Reservierung beträgt {amount} statt {ordinary}, weil Sie in den letzten {months} Monaten {count, plural, one {# Miete} other {# Mieten}} einwandfrei zurückgegeben haben.",
     "staffReason": "Von {ordinary} gesenkt durch Vertrauensstufen Version {version}, Stufe {rung}: {count, plural, one {# einwandfreie Rückgabe} other {# einwandfreie Rückgaben}} in den letzten {months} Monaten.",

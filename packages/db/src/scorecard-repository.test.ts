@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { eq, sql } from 'drizzle-orm'
 import { authorizations, beginComparison, evalRuns, captureSession, claims, comparisons, completeComparison, draftClaim, findingOutcomes, holds, priceEntries, recordPhoto, rentals, sealSession, startCaptureSession } from './index.ts'
 import { closeSettledRental } from './settlement-repository.ts'
-import { acceptedEvalRun, fieldRecord, recordEvalRun, recordFindingOutcomes } from './scorecard-repository.ts'
+import { acceptedEvalRun, fieldRecord, gateRunHistory, recordEvalRun, recordFindingOutcomes } from './scorecard-repository.ts'
 import { measureEvaluation } from '@hold/domain'
 import { createTestDatabase } from './testing/test-database.ts'
 import type { TestDatabase } from './testing/test-database.ts'
@@ -80,6 +80,13 @@ describe('the scorecard\'s runs', () => {
     await recordEvalRun(database, run(false, new Date('2026-10-28T10:00:00Z')))
     const shown = await other.act((transaction) => acceptedEvalRun(transaction))
     expect(shown?.completedAt).toEqual(new Date('2026-10-27T10:00:00Z'))
+  })
+
+  it('lists the gate half’s runs oldest first, for run against run, and leaves out the tuning half and every pair', async () => {
+    await recordEvalRun(database, { ...run(false, new Date('2026-10-28T12:00:00Z')), half: 'tuning' })
+    const history = await other.act((transaction) => gateRunHistory(transaction))
+    expect(history.map((each) => [each.completedAt.toISOString(), each.accepted])).toEqual([['2026-10-27T10:00:00.000Z', true], ['2026-10-28T10:00:00.000Z', false]])
+    expect(history.every((each) => !('cases' in each))).toBe(true)
   })
 
   it('lets the evaluation login record and read runs, and change none', async () => {

@@ -1,5 +1,5 @@
 import { FINDING_VERDICTS } from '@hold/domain'
-import type { GateLimits, Measures } from '@hold/domain'
+import type { EvaluatedCase, GateLimits, Measures } from '@hold/domain'
 import { sql } from 'drizzle-orm'
 import { boolean, integer, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
 import { appRole, evalRole, shopIsolation, workerRole } from './access.ts'
@@ -30,6 +30,8 @@ export const evalRuns = pgTable(
     measures: jsonb().$type<Measures>().notNull(),
     // The same measures over the photographs taken as they are, without the synthetic pairs.
     realMeasures: jsonb().$type<Measures>().notNull(),
+    // Every pair of the run as the pipeline left it, for the open scorecard to show case by case (section 5.5).
+    cases: jsonb().$type<readonly EvaluatedCase[]>().notNull().default([]),
     gateLimits: jsonb().$type<GateLimits | null>(),
     gatePassed: boolean().notNull(),
     gateReasons: jsonb().$type<readonly string[]>().notNull().default([]),

@@ -40,3 +40,6 @@ infra/cdk.out/
 
 # Bryntum's browser build, copied from node_modules before each build (apps/web/scripts/vendor-bryntum.ts)
 apps/web/public/vendor/
+
+# The gate half's display copies, made from eval/set before each build (apps/web/scripts/copy-eval-photos.ts)
+apps/web/public/eval/

@@ -2814,6 +2814,111 @@
     "findingAccuracy": "Confianza {level}. En las pruebas, los hallazgos de este nivel fueron correctos {count} de {total}.",
     "findingLevel": "Confianza {level}. Aún sin medir en este nivel."
   },
+  "openScorecard": {
+    "title": "Cada par, caso por caso",
+    "lead": "Cada par de la mitad de control de la que salen las cifras de arriba: cómo debía terminar, qué hizo la comparación y si acertó. Elige uno para ver sus dos fotos.",
+    "ownerLink": "Cada par, caso por caso",
+    "filters": "Mostrar pares",
+    "groups": {
+      "all": "Todos",
+      "clean_easy": "Limpio, fácil",
+      "clean_hard": "Limpio, difícil",
+      "wear": "Desgaste normal",
+      "damage": "Daño",
+      "known_mark": "Una marca conocida",
+      "identity": "Artículo equivocado o foto reutilizada"
+    },
+    "groupRight": "{pass} de {total} acertados",
+    "grid": "Pares de la mitad de control",
+    "list": "Pares",
+    "keys": "Las flechas pasan de un par a otro. Intro abre uno junto a la lista.",
+    "columns": {
+      "pair": "Par",
+      "expected": "Esperado",
+      "actual": "Terminó",
+      "model": "Señaló",
+      "secondLook": "Segunda mirada",
+      "alignment": "Alineado",
+      "verdict": "Resultado"
+    },
+    "outcomes": {
+      "clean": "Limpio",
+      "findings": "Hallazgos",
+      "deferred": "Una persona"
+    },
+    "verdicts": {
+      "pass": "Acierto",
+      "fail": "Error",
+      "person": "Enviado a una persona"
+    },
+    "classes": {
+      "new_damage": "Daño nuevo",
+      "missing_part": "Una pieza que falta",
+      "uncertain": "Dudoso",
+      "wear": "Desgaste",
+      "known_mark": "Una marca conocida",
+      "reported": "Avisado por el cliente"
+    },
+    "claimed": "{class}, {level}",
+    "noClaim": "Ningún cambio señalado",
+    "secondLook": {
+      "confirmed": "Coincidió",
+      "not_confirmed": "No coincidió",
+      "not_asked": "No consultada"
+    },
+    "alignment": "{percent} %",
+    "noAlignment": "Ninguna",
+    "synthetic": "Sintético",
+    "detail": {
+      "label": "Par elegido",
+      "none": "Elige un par para ver sus fotos.",
+      "heading": "Par {id}",
+      "handover": "En la entrega",
+      "return": "En la devolución",
+      "altHandover": "Foto de entrega del par {id}",
+      "altReturn": "Foto de devolución del par {id}",
+      "legend": "Verde: dónde está de verdad el daño, según la etiqueta. Naranja: lo que encontró la comparación, discontinuo donde la segunda mirada no coincidió. En la foto de entrega, el naranja señala una marca ya conocida.",
+      "outcome": "Debía terminar: {expected}. Terminó: {actual}.",
+      "labels": "{count, plural, =0 {Ningún daño etiquetado.} one {# zona de daño etiquetada.} other {# zonas de daño etiquetadas.}}",
+      "findings": "Lo que encontró la comparación",
+      "noFindings": "Nada.",
+      "finding": "{class} con un {confidence} % de confianza",
+      "secondLook": "Segunda mirada: {answer}",
+      "aligned": "Alineado al {percent} % con la foto de entrega.",
+      "notAligned": "Nunca se alineó: la comprobación de foto reutilizada lo detuvo antes.",
+      "cost": "{seconds} segundos y {tokens} tokens."
+    },
+    "calibration": {
+      "title": "¿Se sostiene la confianza?",
+      "lead": "Cada cambio que señaló la comparación, por su confianza, contado a partir de los pares de arriba. Un hallazgo en una devolución en la tienda muestra la misma cifra para su nivel.",
+      "level": "Confianza",
+      "right": "Acierto",
+      "wrong": "Error",
+      "record": "Balance"
+    },
+    "matrix": {
+      "title": "Debía terminar, frente a terminó",
+      "lead": "Número de pares. En la diagonal la comparación acertó; cualquier otra celda es un error o un par enviado a una persona.",
+      "expected": "Debía terminar",
+      "actual": "Terminó",
+      "cell": "{count, plural, one {# par} other {# pares}}",
+      "right": "acierto"
+    },
+    "trend": {
+      "title": "Ejecución frente a ejecución",
+      "lead": "Cada ejecución de la mitad de control, la más antigua primero, con las líneas de su control. Una ejecución que cruza una línea no se publica.",
+      "damage": "Daños encontrados",
+      "clean": "Devoluciones limpias marcadas por error",
+      "limit": "Límite {percent} %",
+      "floor": "Mínimo {percent} %",
+      "noLine": "Sin línea: los límites se fijan tras la primera ejecución.",
+      "run": "{date} · pipeline {pipeline}",
+      "accepted": "Aceptada",
+      "notAccepted": "No aceptada",
+      "gateStopped": "Detenida por el control",
+      "crossed": "Cruzó la línea"
+    }
+  },
   "trust": {
     "reason": "Tu retención es de {amount}, no de {ordinary}, porque has devuelto {count, plural, one {# alquiler} other {# alquileres}} en buen estado en los últimos {months} meses.",
     "staffReason": "Rebajada de {ordinary} por la escalera de confianza versión {version}, peldaño {rung}: {count, plural, one {# devolución sin reclamación} other {# devoluciones sin reclamación}} en los últimos {months} meses.",

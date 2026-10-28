@@ -25,6 +25,12 @@ export type EvaluatedCase = {
   readonly group: EvaluationGroup
   // Whether the photographs were taken as they are, or changed by the augmentation tool. Reported, never hidden.
   readonly origin: 'real' | 'synthetic'
+  // The view photographed, and the two photographs as the set names them, so the scorecard can show the pair.
+  readonly view: string
+  readonly before: string
+  readonly after: string
+  // How well the return photograph lined up with the handover's, from 0 to 1; none when the pair never reached it.
+  readonly alignment: number | null
   readonly labels: readonly { readonly kind: 'damage' | 'missing'; readonly region: Region }[]
   readonly knownMarks: readonly Region[]
   readonly state: 'clean' | 'findings' | 'deferred'
@@ -49,8 +55,8 @@ export type Measures = {
   readonly tokens: Spread
 }
 
-const isDamage = (finding: EvaluatedFinding) => finding.class === 'new_damage' || finding.class === 'missing_part'
-const overlaps = (first: Region, second: Region) => regionOverlap(first, second) >= EVALUATION_OVERLAP
+export const isDamage = (finding: EvaluatedFinding) => finding.class === 'new_damage' || finding.class === 'missing_part'
+export const overlaps = (first: Region, second: Region) => regionOverlap(first, second) >= EVALUATION_OVERLAP
 function share<Item>(items: readonly Item[], counted: (each: Item) => boolean): Share {
   return { count: items.filter(counted).length, total: items.length }
 }

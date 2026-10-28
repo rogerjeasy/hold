@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node scripts/vendor-bryntum.ts && next dev",
-    "build": "node scripts/vendor-bryntum.ts && next build",
+    "dev": "node scripts/vendor-bryntum.ts && node scripts/copy-eval-photos.ts && next dev",
+    "build": "node scripts/vendor-bryntum.ts && node scripts/copy-eval-photos.ts && next build",
     "start": "next start",
     "typegen": "next typegen",
     "typecheck": "next typegen && tsc --noEmit",

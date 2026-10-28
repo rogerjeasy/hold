@@ -8,7 +8,10 @@ import { RegionBox } from './region-box'
 type PhotoWithMarksProps = {
   src: string
   alt: string
-  marks: readonly { readonly id: string; readonly region: Region; readonly confirmed?: boolean }[]
+  // A finding is drawn in the accent, dashed while unconfirmed; the truth, where a labelled damage really is, as a
+  // thicker outline of its own colour just outside its region, so both show when a finding lands exactly on it, and a
+  // page can say which is which in words beside it.
+  marks: readonly { readonly id: string; readonly region: Region; readonly confirmed?: boolean; readonly tone?: 'finding' | 'truth' }[]
   // Drawn over the photograph too, such as a box being placed.
   children?: ReactNode
 }
@@ -37,7 +40,7 @@ export function PhotoWithMarks({ src, alt, marks, children }: PhotoWithMarksProp
       {/* A plain image: the source is a short-lived signed link, which the image optimiser must not cache. */}
       <img ref={image} src={src} alt={alt} className="absolute inset-0 size-full" />
       {marks.map((mark) => (
-        <RegionBox key={mark.id} data-mark={mark.id} region={mark.region} className={mark.confirmed === false ? 'border-dashed border-amber-500' : 'border-primary'} aria-hidden="true" />
+        <RegionBox key={mark.id} data-mark={mark.id} data-tone={mark.tone ?? 'finding'} region={mark.region} className={mark.tone === 'truth' ? 'border-0 outline-3 outline-offset-3 outline-success' : mark.confirmed === false ? 'border-dashed border-amber-500' : 'border-primary'} aria-hidden="true" />
       ))}
       {children}
     </div>

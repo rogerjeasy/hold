@@ -76,7 +76,7 @@ export async function runEvaluation(options: EvaluationOptions, dependencies: Ev
   const runId = dependencies.database === undefined ? undefined : await recordEvalRun(dependencies.database, {
     half: options.half, dataSetVersion: loaded.dataSetVersion, pipelineVersion: dependencies.pipelineVersion, model: record.model, promptVersion: PROMPT_VERSION,
     thresholds: { minConfidence: INSPECTION_LIMITS.minConfidence, knownMarkOverlap: INSPECTION_LIMITS.knownMarkOverlap },
-    caseCount: evaluated.length, syntheticCount: evaluated.filter((each) => each.origin === 'synthetic').length, measures, realMeasures,
+    caseCount: evaluated.length, syntheticCount: evaluated.filter((each) => each.origin === 'synthetic').length, measures, realMeasures, cases: evaluated,
     gateLimits: options.limits, gatePassed: gate.pass, gateReasons: [...gate.reasons],
     accepted: options.accept && gate.pass && options.half === 'gate', resultsKey: resultsPath, startedAt: started, completedAt,
   })

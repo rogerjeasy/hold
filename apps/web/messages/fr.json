@@ -2814,6 +2814,111 @@
     "findingAccuracy": "Confiance {level}. Lors des tests, les constats à ce niveau étaient justes {count} fois sur {total}.",
     "findingLevel": "Confiance {level}. Pas encore mesuré à ce niveau."
   },
+  "openScorecard": {
+    "title": "Chaque paire, cas par cas",
+    "lead": "Chaque paire de la moitié de contrôle d’où viennent les chiffres ci-dessus : comment elle aurait dû finir, ce qu’a fait la comparaison et si c’était juste. Choisissez-en une pour voir ses deux photos.",
+    "ownerLink": "Chaque paire, cas par cas",
+    "filters": "Afficher les paires",
+    "groups": {
+      "all": "Toutes",
+      "clean_easy": "Propre, facile",
+      "clean_hard": "Propre, difficile",
+      "wear": "Usure normale",
+      "damage": "Dommage",
+      "known_mark": "Une marque connue",
+      "identity": "Mauvais article ou photo réutilisée"
+    },
+    "groupRight": "{pass} sur {total} justes",
+    "grid": "Paires de la moitié de contrôle",
+    "list": "Paires",
+    "keys": "Les flèches passent d’une paire à l’autre. Entrée en ouvre une à côté de la liste.",
+    "columns": {
+      "pair": "Paire",
+      "expected": "Attendu",
+      "actual": "A fini",
+      "model": "Signalé",
+      "secondLook": "Second regard",
+      "alignment": "Alignée",
+      "verdict": "Résultat"
+    },
+    "outcomes": {
+      "clean": "Propre",
+      "findings": "Constats",
+      "deferred": "Une personne"
+    },
+    "verdicts": {
+      "pass": "Juste",
+      "fail": "Faux",
+      "person": "Envoyée à une personne"
+    },
+    "classes": {
+      "new_damage": "Nouveau dommage",
+      "missing_part": "Une pièce manquante",
+      "uncertain": "Incertain",
+      "wear": "Usure",
+      "known_mark": "Une marque connue",
+      "reported": "Signalé par le locataire"
+    },
+    "claimed": "{class}, {level}",
+    "noClaim": "Aucun changement signalé",
+    "secondLook": {
+      "confirmed": "D’accord",
+      "not_confirmed": "Pas d’accord",
+      "not_asked": "Non consulté"
+    },
+    "alignment": "{percent} %",
+    "noAlignment": "Aucune",
+    "synthetic": "Synthétique",
+    "detail": {
+      "label": "Paire choisie",
+      "none": "Choisissez une paire pour voir ses photos.",
+      "heading": "Paire {id}",
+      "handover": "À la remise",
+      "return": "Au retour",
+      "altHandover": "Photo de remise de la paire {id}",
+      "altReturn": "Photo de retour de la paire {id}",
+      "legend": "Vert : là où se trouve vraiment le dommage, selon l’étiquette. Orange : ce qu’a trouvé la comparaison, en pointillé là où le second regard n’était pas d’accord. Sur la photo de remise, l’orange marque une trace déjà connue.",
+      "outcome": "Devait finir : {expected}. A fini : {actual}.",
+      "labels": "{count, plural, =0 {Aucun dommage étiqueté.} one {# zone de dommage étiquetée.} other {# zones de dommage étiquetées.}}",
+      "findings": "Ce qu’a trouvé la comparaison",
+      "noFindings": "Rien.",
+      "finding": "{class} avec {confidence} % de confiance",
+      "secondLook": "Second regard : {answer}",
+      "aligned": "Alignée à {percent} % sur la photo de remise.",
+      "notAligned": "Jamais alignée : la vérification de photo réutilisée l’a arrêtée avant.",
+      "cost": "{seconds} secondes et {tokens} jetons."
+    },
+    "calibration": {
+      "title": "La confiance tient-elle ?",
+      "lead": "Chaque changement signalé par la comparaison, selon sa confiance, compté à partir des paires ci-dessus. Un constat sur un retour en boutique affiche le même chiffre pour son niveau.",
+      "level": "Confiance",
+      "right": "Juste",
+      "wrong": "Faux",
+      "record": "Bilan"
+    },
+    "matrix": {
+      "title": "Devait finir, face à a fini",
+      "lead": "Nombre de paires. Sur la diagonale, la comparaison avait raison ; toute autre case est une erreur ou une paire envoyée à une personne.",
+      "expected": "Devait finir",
+      "actual": "A fini",
+      "cell": "{count, plural, one {# paire} other {# paires}}",
+      "right": "juste"
+    },
+    "trend": {
+      "title": "Passe contre passe",
+      "lead": "Chaque passe sur la moitié de contrôle, la plus ancienne d’abord, avec les lignes de son contrôle. Une passe qui franchit une ligne n’est pas publiée.",
+      "damage": "Dommages trouvés",
+      "clean": "Retours propres signalés à tort",
+      "limit": "Limite {percent} %",
+      "floor": "Plancher {percent} %",
+      "noLine": "Pas de ligne : les limites sont fixées après la première passe.",
+      "run": "{date} · pipeline {pipeline}",
+      "accepted": "Acceptée",
+      "notAccepted": "Non acceptée",
+      "gateStopped": "Arrêtée par le contrôle",
+      "crossed": "Ligne franchie"
+    }
+  },
   "trust": {
     "reason": "Votre empreinte est de {amount}, et non de {ordinary}, car vous avez rendu {count, plural, one {# location} other {# locations}} en bon état au cours des {months} derniers mois.",
     "staffReason": "Abaissée de {ordinary} par l'échelle de confiance version {version}, échelon {rung} : {count, plural, one {# retour sans réclamation} other {# retours sans réclamation}} au cours des {months} derniers mois.",

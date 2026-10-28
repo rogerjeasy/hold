@@ -70,7 +70,8 @@ theft and accidents. The full description is in [`docs/project-description.md`](
 ## How reliable is the comparison
 
 Measured on the gate half of the evaluation set, which is never used for tuning. Every figure is a count. The same
-figures are on the reliability page of the deployed app.
+figures are on the reliability page of the deployed app, with every pair behind them, case by case: its two
+photographs, what the comparison found, and whether it was right.
 
 <!-- scorecard:start -->
 Not measured yet: no run over the evaluation set has been accepted. Until one is, Hold claims no accuracy for the

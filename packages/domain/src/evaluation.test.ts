@@ -5,7 +5,7 @@ import type { EvaluatedCase, Measures } from './evaluation.ts'
 
 const box = (x: number, y: number, size = 0.1) => ({ x, y, width: size, height: size })
 const damage = (region = box(0.4, 0.4)) => ({ region, class: 'new_damage' as const, confidence: 0.95, secondLookConfirmed: true })
-const pair = (overrides: Partial<EvaluatedCase>): EvaluatedCase => ({ id: 'case', group: 'clean_easy', origin: 'real', labels: [], knownMarks: [], state: 'clean', findings: [], milliseconds: 1000, inputTokens: 100, outputTokens: 10, ...overrides })
+const pair = (overrides: Partial<EvaluatedCase>): EvaluatedCase => ({ id: 'case', group: 'clean_easy', origin: 'real', view: 'frame', before: 'gate/b.jpg', after: 'gate/a.jpg', alignment: 0.9, labels: [], knownMarks: [], state: 'clean', findings: [], milliseconds: 1000, inputTokens: 100, outputTokens: 10, ...overrides })
 
 describe('measuring the comparison against the evaluation set', () => {
   it('counts labelled damage as found only when a damage finding overlaps its region', () => {

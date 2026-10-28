@@ -17,6 +17,11 @@ describe('how reliable the comparison is, for the owner', () => {
     expect(screen.getByText(/145 pairs, 25 taken as they are and 120 changed by our augmentation tool/)).toBeInTheDocument()
   })
 
+  it('leads to every pair of the run, case by case, on the public page', () => {
+    renderWithIntl(<ScorecardScreen shopName="Ribeira Bikes" run={run} months={[]} />)
+    expect(screen.getByRole('link', { name: 'Every pair, case by case' })).toHaveAttribute('href', '/reliability')
+  })
+
   it('claims no accuracy before a run is accepted', () => {
     renderWithIntl(<ScorecardScreen shopName="Ribeira Bikes" run={undefined} months={[]} />)
     expect(screen.getByText('Not measured yet')).toBeInTheDocument()

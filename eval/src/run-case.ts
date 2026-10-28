@@ -19,14 +19,16 @@ export async function runCase(dependencies: CaseDependencies, evaluation: Evalua
   const started = dependencies.now()
   const [before, after, ...earlier] = await Promise.all([evaluation.before, evaluation.after, ...evaluation.earlier].map((path) => dependencies.read(path)))
   if (before === undefined || after === undefined) throw new Error(`Case ${evaluation.id} has no pair.`)
-  const outcome = (state: EvaluatedCase['state'], findings: EvaluatedCase['findings'], inputTokens: number, outputTokens: number): EvaluatedCase => ({
-    id: evaluation.id, group: evaluation.group, origin: evaluation.origin, labels: evaluation.labels, knownMarks: evaluation.knownMarks,
-    state, findings, milliseconds: dependencies.now() - started, inputTokens, outputTokens,
+  const outcome = (state: EvaluatedCase['state'], findings: EvaluatedCase['findings'], alignment: number | null, inputTokens: number, outputTokens: number): EvaluatedCase => ({
+    id: evaluation.id, group: evaluation.group, origin: evaluation.origin, view: evaluation.view, before: evaluation.before, after: evaluation.after, alignment,
+    labels: evaluation.labels, knownMarks: evaluation.knownMarks, state, findings, milliseconds: dependencies.now() - started, inputTokens, outputTokens,
   })
   const [returned, ...previous] = await Promise.all([after, before, ...earlier].map((photo) => dependencies.fingerprint(photo)))
-  if (returned === undefined || photoReused(returned, previous)) return outcome('deferred', [], 0, 0)
+  if (returned === undefined || photoReused(returned, previous)) return outcome('deferred', [], null, 0, 0)
   const marks = evaluation.knownMarks.map((region, index) => ({ id: `known-${String(index)}`, view: evaluation.view, region }))
   const result = await compareInspection({ views: [{ view: evaluation.view, pair: await inspectPair(before, after) }], marks, wearPolicy: context.wearPolicy, itemType: context.itemType, priceCodes: context.priceCodes }, dependencies.model)
   const findings = result.findings.map((finding) => ({ region: finding.region, class: finding.class, confidence: finding.confidence, secondLookConfirmed: finding.secondLookConfirmed }))
-  return outcome(result.state, findings, result.alignment.inputTokens, result.alignment.outputTokens)
+  // How well the view lined up, as the pipeline measured it; a view it never reached has none.
+  const lined: unknown = (result.alignment as Readonly<Record<string, unknown>>)[evaluation.view]
+  return outcome(result.state, findings, typeof lined === 'number' ? lined : null, result.alignment.inputTokens, result.alignment.outputTokens)
 }

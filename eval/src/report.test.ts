@@ -3,7 +3,7 @@ import type { EvaluatedCase } from '@hold/domain'
 import { describe, expect, it } from 'vitest'
 import { readmeTable, renderReport, shareText } from './report.ts'
 
-const pair = (overrides: Partial<EvaluatedCase>): EvaluatedCase => ({ id: 'case', group: 'clean_easy', origin: 'real', labels: [], knownMarks: [], state: 'clean', findings: [], milliseconds: 2000, inputTokens: 900, outputTokens: 100, ...overrides })
+const pair = (overrides: Partial<EvaluatedCase>): EvaluatedCase => ({ id: 'case', group: 'clean_easy', origin: 'real', view: 'frame', before: 'gate/b.jpg', after: 'gate/a.jpg', alignment: 0.9, labels: [], knownMarks: [], state: 'clean', findings: [], milliseconds: 2000, inputTokens: 900, outputTokens: 100, ...overrides })
 const run = { half: 'gate' as const, dataSetVersion: 'a'.repeat(64), pipelineVersion: 'inspection-1+abc123', model: 'anthropic.claude-opus-5-5', completedAt: new Date('2026-10-28T10:00:00Z'), gate: { pass: true, reasons: ['first_run'] } }
 
 describe('the run report', () => {

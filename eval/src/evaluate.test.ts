@@ -37,6 +37,8 @@ describe('one command over one half of the set', () => {
     const [row] = await database.select().from(evalRuns)
     expect(row).toMatchObject({ half: 'gate', caseCount: 2, syntheticCount: 0, accepted: true, gatePassed: true, pipelineVersion: 'inspection-1+test', model: 'recorded-model' })
     expect(row?.measures.cleanWronglyFlagged).toEqual({ count: 0, total: 2 })
+    // Every pair is kept with the run, for the open scorecard to show case by case.
+    expect(row?.cases.map((each) => [each.id, each.before, each.state])).toEqual([['c1', 'gate/c1-before.jpg', 'clean'], ['c2', 'gate/c2-before.jpg', 'clean']])
   })
 
   it('does not accept a run that fails the gate against the accepted one', async () => {

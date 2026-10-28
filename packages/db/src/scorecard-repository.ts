@@ -1,5 +1,5 @@
 import { verdictForFinding } from '@hold/domain'
-import { and, desc, eq, inArray, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm'
 import { approvals, captureSessions, claimLines, claimReplies, claims, comparisons, evalRuns, findingOutcomes, findings, priceEntries, rentalItems } from './schema/index.ts'
 import type { Database, Transaction } from './scope.ts'
 
@@ -43,6 +43,16 @@ export async function fieldRecord(transaction: Transaction): Promise<readonly Fi
 export async function acceptedEvalRun(transaction: Transaction) {
   const [run] = await transaction.select().from(evalRuns).where(and(eq(evalRuns.half, 'gate'), eq(evalRuns.accepted, true))).orderBy(desc(evalRuns.completedAt)).limit(1)
   return run
+}
+
+// Every run of the gate half, oldest first, as run against run shows them with the lines their gate drew. Their pairs
+// stay behind: only the accepted run's are shown.
+export async function gateRunHistory(transaction: Transaction) {
+  return transaction
+    .select({ id: evalRuns.id, completedAt: evalRuns.completedAt, accepted: evalRuns.accepted, gatePassed: evalRuns.gatePassed, pipelineVersion: evalRuns.pipelineVersion, measures: evalRuns.measures, gateLimits: evalRuns.gateLimits })
+    .from(evalRuns)
+    .where(eq(evalRuns.half, 'gate'))
+    .orderBy(asc(evalRuns.completedAt))
 }
 
 export type EvalRunRecord = typeof evalRuns.$inferInsert

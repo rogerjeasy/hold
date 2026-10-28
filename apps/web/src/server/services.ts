@@ -168,6 +168,11 @@ async function build(): Promise<Services> {
       return created
     }
     const database = await createTestDatabase()
+    // The open scorecard's end-to-end tests read a made-up accepted run; nothing outside this environment records one.
+    if (config.evalFixture) {
+      const { recordFixtureEvalRuns } = await import('@hold/db/testing/eval-fixture')
+      await recordFixtureEvalRuns(database, new Date())
+    }
     // Photographs go to a store in memory, through the app's own simulated storage route.
     const simulatedEvidence = createMemoryEvidenceStore({ baseUrl: `${config.publicUrl}/api/simulated-storage` })
     const documents = createMemoryDocumentStore()

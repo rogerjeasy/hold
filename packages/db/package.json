@@ -21,7 +21,8 @@
     "./data-api": "./src/data-api.ts",
     "./testing/ready-rental": "./src/testing/ready-rental.ts",
     "./testing/presented-claim": "./src/testing/presented-claim.ts",
-    "./testing/assistant-session": "./src/testing/assistant-session.ts"
+    "./testing/assistant-session": "./src/testing/assistant-session.ts",
+    "./testing/eval-fixture": "./src/testing/eval-fixture.ts"
   },
   "scripts": {
     "migrations:generate": "drizzle-kit generate",

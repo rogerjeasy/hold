@@ -1,0 +1,36 @@
+import type { EvaluatedCase, TrendRun } from '@hold/domain'
+import { useTranslations } from 'next-intl'
+import { useId } from 'react'
+import type { ReactNode } from 'react'
+import { CalibrationTable } from './calibration-table'
+import { CaseExplorer } from './case-explorer'
+import { caseRows } from './case-rows'
+import { OutcomeMatrix } from './outcome-matrix'
+import { RunTrend } from './run-trend'
+
+function Part({ title, children }: { title: string; children: ReactNode }) {
+  const id = useId()
+  return (
+    <section aria-labelledby={id} className="grid min-w-0 gap-4">
+      <h2 id={id} className="text-title text-balance">{title}</h2>
+      {children}
+    </section>
+  )
+}
+
+// The open scorecard (extensions.md section 5.5): the accepted run read case by case, then how confidence held up,
+// what each pair should have ended in against what it did, and every run against the lines its gate drew.
+export function OpenScorecard({ cases, history }: { cases: readonly EvaluatedCase[]; history: readonly TrendRun[] }) {
+  const t = useTranslations('openScorecard')
+  return (
+    <div className="grid min-w-0 gap-14">
+      <Part title={t('title')}>
+        <p className="max-w-prose text-muted-foreground">{t('lead')}</p>
+        <CaseExplorer rows={caseRows(cases)} />
+      </Part>
+      <Part title={t('calibration.title')}><CalibrationTable cases={cases} /></Part>
+      <Part title={t('matrix.title')}><OutcomeMatrix cases={cases} /></Part>
+      {history.length === 0 ? null : <Part title={t('trend.title')}><RunTrend history={history} /></Part>}
+    </div>
+  )
+}

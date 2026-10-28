@@ -86,6 +86,12 @@ describe('loadWebConfig', () => {
     expect(() => loadWebConfig({ HOLD_ENVIRONMENT: 'production', HOLD_COOKIE_KEY: KEY })).toThrow(/HOLD_COGNITO_USER_POOL_ID/)
   })
 
+  it('records the open scorecard’s fixture run only in the test environment, and only when asked', () => {
+    expect(loadWebConfig({ HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: KEY })).toMatchObject({ evalFixture: false })
+    expect(loadWebConfig({ HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: KEY, HOLD_EVAL_FIXTURE: 'on' })).toMatchObject({ evalFixture: true })
+    expect(() => loadWebConfig({ HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: KEY, HOLD_EVAL_FIXTURE: 'yes' })).toThrow()
+  })
+
   it('signs renter links with a key of their own, read from its secret, which the worker reads too', () => {
     const LINK_SECRET = 'arn:aws:secretsmanager:us-east-1:1:secret:hold/web/renter-link-key'
     expect(loadWebConfig({ ...AWS, HOLD_RENTER_LINK_KEY_SECRET_ARN: LINK_SECRET }).renterLinkKey).toEqual({ kind: 'secret', secretArn: LINK_SECRET })

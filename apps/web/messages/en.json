@@ -2814,6 +2814,111 @@
     "findingAccuracy": "Confidence {level}. In testing, findings at this level were correct {count} of {total}.",
     "findingLevel": "Confidence {level}. Not measured at this level yet."
   },
+  "openScorecard": {
+    "title": "Every pair, case by case",
+    "lead": "Each pair of the gate half the figures above were counted from: what it should have ended in, what the comparison did, and whether that was right. Choose one to see its two photographs.",
+    "ownerLink": "Every pair, case by case",
+    "filters": "Show pairs",
+    "groups": {
+      "all": "All",
+      "clean_easy": "Clean, easy",
+      "clean_hard": "Clean, hard",
+      "wear": "Ordinary wear",
+      "damage": "Damage",
+      "known_mark": "A known mark",
+      "identity": "Wrong item or reused"
+    },
+    "groupRight": "{pass} of {total} right",
+    "grid": "Pairs of the gate half",
+    "list": "Pairs",
+    "keys": "Arrow keys move between pairs. Enter opens one beside the list.",
+    "columns": {
+      "pair": "Pair",
+      "expected": "Expected",
+      "actual": "Ended",
+      "model": "Claimed",
+      "secondLook": "Second look",
+      "alignment": "Lined up",
+      "verdict": "Result"
+    },
+    "outcomes": {
+      "clean": "Clean",
+      "findings": "Findings",
+      "deferred": "A person"
+    },
+    "verdicts": {
+      "pass": "Right",
+      "fail": "Wrong",
+      "person": "Sent to a person"
+    },
+    "classes": {
+      "new_damage": "New damage",
+      "missing_part": "A missing part",
+      "uncertain": "Unsure",
+      "wear": "Wear",
+      "known_mark": "A known mark",
+      "reported": "Reported by the renter"
+    },
+    "claimed": "{class}, {level}",
+    "noClaim": "No change claimed",
+    "secondLook": {
+      "confirmed": "Agreed",
+      "not_confirmed": "Did not agree",
+      "not_asked": "Not asked"
+    },
+    "alignment": "{percent}%",
+    "noAlignment": "None",
+    "synthetic": "Synthetic",
+    "detail": {
+      "label": "Chosen pair",
+      "none": "Choose a pair to see its photographs.",
+      "heading": "Pair {id}",
+      "handover": "At handover",
+      "return": "At return",
+      "altHandover": "Handover photograph of pair {id}",
+      "altReturn": "Return photograph of pair {id}",
+      "legend": "Green: where the damage truly is, as labelled. Orange: what the comparison found, dashed where the second look did not agree. On the handover photograph, orange marks a mark already known.",
+      "outcome": "Should have ended: {expected}. Ended: {actual}.",
+      "labels": "{count, plural, =0 {No damage labelled.} one {# region of damage labelled.} other {# regions of damage labelled.}}",
+      "findings": "What the comparison found",
+      "noFindings": "Nothing.",
+      "finding": "{class} at {confidence}% confidence",
+      "secondLook": "Second look: {answer}",
+      "aligned": "Lined up {percent}% with the handover photograph.",
+      "notAligned": "Never lined up: the check for a reused photograph stopped it first.",
+      "cost": "{seconds} seconds and {tokens} tokens."
+    },
+    "calibration": {
+      "title": "Does confidence hold up?",
+      "lead": "Every change the comparison claimed, by its confidence, counted from the pairs above. A finding on a return in a shop shows the same count for its level.",
+      "level": "Confidence",
+      "right": "Right",
+      "wrong": "Wrong",
+      "record": "Record"
+    },
+    "matrix": {
+      "title": "Should have ended, against ended",
+      "lead": "Counts of pairs. Along the diagonal the comparison was right; every other cell is a mistake or a pair sent to a person.",
+      "expected": "Should have ended",
+      "actual": "Ended",
+      "cell": "{count, plural, one {# pair} other {# pairs}}",
+      "right": "right"
+    },
+    "trend": {
+      "title": "Run against run",
+      "lead": "Every run of the gate half, oldest first, with the lines its gate drew. A run that crosses a line is not released.",
+      "damage": "Damage found",
+      "clean": "Clean returns wrongly flagged",
+      "limit": "Limit {percent}%",
+      "floor": "Floor {percent}%",
+      "noLine": "No line: the limits are set after the first run.",
+      "run": "{date} · pipeline {pipeline}",
+      "accepted": "Accepted",
+      "notAccepted": "Not accepted",
+      "gateStopped": "Stopped by the gate",
+      "crossed": "Crossed the line"
+    }
+  },
   "trust": {
     "reason": "Your hold is {amount}, not {ordinary}, because you have returned {count, plural, one {# rental} other {# rentals}} in good condition in the last {months} months.",
     "staffReason": "Lowered from {ordinary} by trust ladder version {version}, rung {rung}: {count, plural, one {# clean return} other {# clean returns}} in the last {months} months.",

@@ -34,5 +34,14 @@ describe('a photograph with its marks', () => {
       }
     }
   })
-})
 
+  it('draws where the damage truly is apart from what the comparison found, so the two can be told apart', () => {
+    render(<PhotoWithMarks src="/photo.jpg" alt="Return" marks={[{ id: 'truth', region: { x: 0.1, y: 0.1, width: 0.1, height: 0.1 }, tone: 'truth' }, { id: 'found', region: { x: 0.5, y: 0.5, width: 0.1, height: 0.1 } }]} />)
+    const frame = screen.getByRole('img', { name: 'Return' }).parentElement
+    const truth = frame?.querySelector('[data-mark="truth"]')
+    const found = frame?.querySelector('[data-mark="found"]')
+    expect(truth?.getAttribute('data-tone')).toBe('truth')
+    expect(found?.getAttribute('data-tone')).toBe('finding')
+    expect(truth?.className).not.toBe(found?.className)
+  })
+})

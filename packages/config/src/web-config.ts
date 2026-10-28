@@ -111,6 +111,8 @@ const fakeServices = z.object({
   HOLD_ENVIRONMENT: z.literal('test'),
   HOLD_COOKIE_KEY: cookieKey,
   HOLD_PUBLIC_URL: z.url().default('http://localhost:3211'),
+  // The end-to-end tests of the open scorecard start a server that records a fixture run of made-up pairs.
+  HOLD_EVAL_FIXTURE: z.literal('on').optional(),
 })
 
 export type WebConfig =
@@ -141,13 +143,14 @@ export type WebConfig =
       readonly credentialKey: CredentialKeySource
       readonly publicUrl: string
       readonly paypalMode: 'sandbox'
+      readonly evalFixture: boolean
     }
 
 export function loadWebConfig(environment: Readonly<Record<string, string | undefined>>): WebConfig {
   if (environment['HOLD_ENVIRONMENT'] === 'test') {
     const parsed = fakeServices.parse(environment)
     const key = { kind: 'value', key: parsed.HOLD_COOKIE_KEY } as const
-    return { environment: 'test', services: 'fake', cookieKey: key, renterLinkKey: key, trustKey: key, credentialKey: { kind: 'local' }, publicUrl: parsed.HOLD_PUBLIC_URL, paypalMode: 'sandbox' }
+    return { environment: 'test', services: 'fake', cookieKey: key, renterLinkKey: key, trustKey: key, credentialKey: { kind: 'local' }, publicUrl: parsed.HOLD_PUBLIC_URL, paypalMode: 'sandbox', evalFixture: parsed.HOLD_EVAL_FIXTURE === 'on' }
   }
   const parsed = awsServices.safeParse(environment)
   if (!parsed.success) {
