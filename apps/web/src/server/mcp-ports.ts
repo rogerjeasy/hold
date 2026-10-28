@@ -6,6 +6,7 @@ import { readLocale } from '@/features/auth/locale-input'
 import { Refusal } from './action'
 import { startFeePayment } from './fee-payment'
 import { startHoldApproval } from './hold-approval'
+import { sendNegotiation } from './negotiation-queue'
 import { paypalForShop } from './paypal-for-shop'
 import { qrPng } from './qr'
 import type { InLinkShop } from './renter-access'
@@ -66,6 +67,8 @@ export async function mcpPorts(): Promise<McpPorts> {
       return started instanceof Refusal ? { status: 'unavailable' } : { status: 'awaiting_approval', approvalUrl: started.approvalUrl }
     },
     photoLink: async (key) => (evidence === undefined ? null : evidence.displayLink(key)),
+    // The renter's assistant moved and the shop's advocate is next: the same queue Hold's advocates run from.
+    sendNegotiation: ({ shopId, rentalId, negotiationId, outboxId }) => sendNegotiation(shopId, rentalId, negotiationId, outboxId),
     qrCode: qrPng,
     // One structured line, with no token, secret or argument text.
     log: (line) => {

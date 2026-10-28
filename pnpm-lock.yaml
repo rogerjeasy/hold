@@ -341,6 +341,9 @@ importers:
       '@aws-crypto/client-node':
         specifier: ^5.0.2
         version: 5.0.2
+      '@aws-sdk/client-s3':
+        specifier: 3.1151.0
+        version: 3.1151.0
       '@hold/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -505,6 +508,9 @@ importers:
       drizzle-kit:
         specifier: 0.31.11
         version: 0.31.11
+      fast-check:
+        specifier: ^4.10.2
+        version: 4.10.2
 
   packages/domain:
     devDependencies:

@@ -26,6 +26,7 @@ export function RenterNegotiationScreen({ token, shopName, data, canAct = true }
       </header>
       <Link href={linkRoutes.claim(token)} referrerPolicy="no-referrer" className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{claim('renterTitle')}</Link>
       <p>{t('yourLimit', { amount: amount(data.highestTotalCents) })}</p>
+      {data.advocate === 'assistant' ? <p>{t('assistantArgues')}</p> : null}
       <TranscriptView transcript={data.transcript} />
       {data.transcript.state === 'agreed' && data.transcript.renterConfirmedAt !== null ? <p role="status">{t('confirm.waitingShop')}</p> : null}
       {canAct && data.awaitingRenter ? <SettlementConfirmForm token={token} agreed={amount(data.transcript.agreedCents ?? 0)} /> : null}

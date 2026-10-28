@@ -6,12 +6,13 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { RenterMessage } from '@/features/renter/renter-message'
+import { AdvocateChoice } from './advocate-choice'
 import { useResultWording } from './use-result-wording'
 import { startAdvocate } from './renter-actions'
 
 // The third choice on the renter's claim screen (extensions.md section 9.4): hand the contest to an advocate, with the
 // most they will pay, after the same one-time code as accepting or contesting. The final tap stays on.
-export function AdvocateForm({ token, currency }: { token: string; currency: string }) {
+export function AdvocateForm({ token, currency, assistantName = null }: { token: string; currency: string; assistantName?: string | null }) {
   const t = useTranslations('negotiation.advocate')
   const locale = useLocale()
   const wording = useResultWording()
@@ -22,6 +23,7 @@ export function AdvocateForm({ token, currency }: { token: string; currency: str
       <input type="hidden" name="token" value={token} />
       <input type="hidden" name="locale" value={locale} />
       <p className="text-muted-foreground">{t('guidance')}</p>
+      {assistantName === null ? null : <AdvocateChoice assistantName={assistantName} />}
       <Label htmlFor="advocate-code">{t('code')}</Label>
       <Input id="advocate-code" name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{8}" required minLength={8} maxLength={8} />
       <Label htmlFor="advocate-highest">{t('highest', { currency })}</Label>

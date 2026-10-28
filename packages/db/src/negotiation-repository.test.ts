@@ -1,15 +1,19 @@
+import { randomUUID } from 'node:crypto'
 import { and, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { revokeAssistant } from './assistant-repository.ts'
 import { decideClaim } from './claim-decision-repository.ts'
 import { evidenceSnapshot } from './evidence-snapshot.ts'
 import { verifyTranscript } from './negotiation-fingerprint.ts'
+import { assistantGrant, submitAssistantMove } from './negotiation-assistant.ts'
 import { applyNegotiationMove, openAdvocate, stopRenterAdvocate } from './negotiation-repository.ts'
 import { confirmAgreement, issueSettlementCode } from './negotiation-settlement.ts'
 import { negotiationRecords, negotiationTranscript, renterNegotiation, shopNegotiation } from './negotiation-view.ts'
-import { grantShopSettlement, liveShopSettlement, revokeShopSettlement } from './settlement-mandate-repository.ts'
+import { assistantAdvocate, grantShopSettlement, liveShopSettlement, RENTER_ADVOCATE, revokeShopSettlement, SHOP_ADVOCATE } from './settlement-mandate-repository.ts'
 import { approvals, auditLog, claims, executions, mandates, negotiationMoves, negotiations, outbox, renterLinks, rentals, staffRoles, users } from './schema/index.ts'
 import { inShop } from './scope.ts'
 import type { Transaction } from './scope.ts'
+import { connectedAssistant } from './testing/assistant-session.ts'
 import { presentedClaim, twoLinePrices } from './testing/presented-claim.ts'
 import { readyRentalShop } from './testing/ready-rental.ts'
 import type { ReadyRentalShop } from './testing/ready-rental.ts'
@@ -53,8 +57,9 @@ async function negotiating() {
   if (!opened.ok) throw new Error(opened.reason)
   return { ...claim, negotiationId: opened.negotiationId, renter: await renterAgent(claim.rentalId), lines: await lineIds(claim.claimId) }
 }
-const move = (negotiationId: string, actor: Parameters<typeof applyNegotiationMove>[1]['actor'], tool: 'offer' | 'accept' | 'pass', args: unknown, at: Date) =>
-  asWorker((transaction) => applyNegotiationMove(transaction, { negotiationId, actor, tool, arguments: args, model: 'simulated', promptVersion: 'test-1' }, at))
+// Hold's own advocates, unless another agent is named: the agent each side's mandate names.
+const move = (negotiationId: string, actor: Parameters<typeof applyNegotiationMove>[1]['actor'], tool: 'offer' | 'accept' | 'pass', args: unknown, at: Date, agent = actor.kind === 'shop_agent' ? SHOP_ADVOCATE : RENTER_ADVOCATE) =>
+  asWorker((transaction) => applyNegotiationMove(transaction, { negotiationId, actor, agent, tool, arguments: args, model: 'simulated', promptVersion: 'test-1' }, at))
 
 beforeAll(async () => {
   database = await createTestDatabase()
@@ -240,6 +245,89 @@ describe('when only the renter has an advocate (section 9.10)', () => {
     expect(await move(opened.negotiationId, await renterAgent(claim.rentalId), 'offer', offer(ids, [10_00, 0]), later(1))).toMatchObject({ outcome: 'accepted', state: 'replied' })
     expect(await shop.act((transaction) => negotiationTranscript(transaction, claim.rentalId))).toMatchObject({ kind: 'reply', state: 'replied', moves: [{ side: 'renter', totalCents: 10_00, lines: [{ ground: 'ordinary_wear', evidence: ['wear-1'] }, { ground: 'ordinary_wear', evidence: ['wear-1'] }] }] })
     expect(await shop.act((transaction) => decideClaim(transaction, claim.claimId, ownerId(), 'uphold', 'Both scratches are fresh.', later(2)))).toMatchObject({ ok: true })
+    await shop.act((transaction) => grantShopSettlement(transaction, ownerId(), shopLimits, 30, NOW))
+  })
+})
+
+describe('the renter’s own assistant as their advocate (X4.9)', () => {
+  // A presented claim on a rental whose renter connected their own assistant, handed to that assistant.
+  async function withAssistant(options: { readonly days?: number } = {}) {
+    const claim = await presented()
+    const session = await connectedAssistant(shop, claim.rentalId, NOW, options)
+    const opened = await shop.act((transaction) => openAdvocate(transaction, { rentalId: claim.rentalId, highestTotalCents: 50_00, comment: '', simulated: true, advocate: 'assistant' }, NOW))
+    if (!opened.ok) throw new Error(opened.reason)
+    const renter = await renterAgent(claim.rentalId)
+    return { ...claim, ...session, negotiationId: opened.negotiationId, renter: { ...renter, rentalId: claim.rentalId }, lines: await lineIds(claim.claimId) }
+  }
+  const submit = (sessionId: string, actor: Parameters<typeof submitAssistantMove>[1]['actor'], tool: 'offer' | 'accept' | 'pass', args: unknown, at: Date) =>
+    shop.act((transaction) => submitAssistantMove(transaction, { sessionId, actor, tool, arguments: args }, at))
+
+  it('is chosen only when an assistant is connected to the rental, and changes nothing otherwise', async () => {
+    const claim = await presented()
+    const assistant = { rentalId: claim.rentalId, highestTotalCents: 50_00, comment: '', simulated: true, advocate: 'assistant' as const }
+    expect(await shop.act((transaction) => openAdvocate(transaction, assistant, NOW))).toEqual({ ok: false, reason: 'assistant_not_connected' })
+    await connectedAssistant(shop, claim.rentalId, NOW, { days: -1 })
+    expect(await shop.act((transaction) => openAdvocate(transaction, assistant, NOW))).toEqual({ ok: false, reason: 'assistant_not_connected' })
+    expect((await shop.act((transaction) => transaction.select().from(claims).where(eq(claims.id, claim.claimId))))[0]?.state).toBe('presented')
+    expect(await shop.act((transaction) => transaction.select().from(negotiations).where(eq(negotiations.claimId, claim.claimId)))).toEqual([])
+  })
+
+  it('names that one assistant in the renter’s mandate, for this claim only, ending no later than its token, and audits the grant', async () => {
+    const claim = await withAssistant({ days: 2 })
+    const records = await asWorker((transaction) => negotiationRecords(transaction, claim.negotiationId))
+    expect(records?.renterMandate).toMatchObject({ grantedTo: assistantAdvocate(claim.sessionId), limits: { highestTotalCents: 50_00 } })
+    expect(records?.renterMandate.validUntil.getTime()).toBeLessThanOrEqual(NOW.getTime() + 2 * 86_400_000)
+    const [mandate] = await shop.act((transaction) => transaction.select().from(mandates).where(eq(mandates.id, records?.renterMandate.id ?? '')))
+    expect(mandate).toMatchObject({ rentalId: claim.rentalId, grantedHow: 'one_time_code' })
+    const audit = await shop.act((transaction) => transaction.select({ action: auditLog.action, detail: auditLog.detail }).from(auditLog).where(and(eq(auditLog.subjectId, claim.negotiationId), eq(auditLog.action, 'negotiation.assistant_granted'))))
+    expect(audit).toEqual([{ action: 'negotiation.assistant_granted', detail: { sessionId: claim.sessionId } }])
+    expect(await shop.act((transaction) => assistantGrant(transaction, claim.sessionId, NOW))).toMatchObject({ negotiationId: claim.negotiationId, rentalId: claim.rentalId, mandate: { id: records?.renterMandate.id } })
+  })
+
+  it('lets only that assistant move for the renter: Hold’s own advocate and another assistant are refused', async () => {
+    const claim = await withAssistant()
+    expect(await move(claim.negotiationId, claim.renter, 'offer', offer(claim.lines, [20_00, 0]), later(1))).toEqual({ outcome: 'gateway_refused', reason: 'actor' })
+    expect(await move(claim.negotiationId, claim.renter, 'offer', offer(claim.lines, [20_00, 0]), later(1), assistantAdvocate(randomUUID()))).toEqual({ outcome: 'gateway_refused', reason: 'actor' })
+    // An assistant bound to another rental is refused by the gateway.
+    expect(await submit(claim.sessionId, { ...claim.renter, rentalId: randomUUID() }, 'offer', offer(claim.lines, [20_00, 0]), later(1))).toMatchObject({ ok: true, result: { outcome: 'gateway_refused', reason: 'rental' } })
+    expect((await asWorker((transaction) => negotiationRecords(transaction, claim.negotiationId)))?.moves).toHaveLength(1)
+  })
+
+  it('moves through the gateway and the referee, then hands the shop’s turn to the worker', async () => {
+    const claim = await withAssistant()
+    const moved = await submit(claim.sessionId, claim.renter, 'offer', offer(claim.lines, [20_00, 0]), later(1))
+    expect(moved).toMatchObject({ ok: true, result: { outcome: 'accepted', state: 'open' }, negotiationId: claim.negotiationId })
+    const outboxId = moved.ok ? moved.outboxId : null
+    const queued = await shop.act((transaction) => transaction.select().from(outbox).where(eq(outbox.id, outboxId ?? randomUUID())))
+    expect(queued.map((row) => [row.queue, row.messageGroup, row.payload])).toEqual([['negotiations', claim.rentalId, { negotiationId: claim.negotiationId }]])
+    const transcript = await shop.act((transaction) => negotiationTranscript(transaction, claim.rentalId))
+    expect(transcript?.moves.at(-1)).toMatchObject({ side: 'renter', kind: 'offer', totalCents: 20_00, actor: 'renter_assistant', model: null })
+    // Out of turn, or beyond the renter's own limit, it is refused like any advocate, and nothing is queued.
+    expect(await submit(claim.sessionId, claim.renter, 'accept', {}, later(2))).toMatchObject({ ok: true, result: { outcome: 'refused', reason: 'not_your_turn' }, outboxId: null })
+    await move(claim.negotiationId, shopAgent(), 'offer', offer(claim.lines, [35_00, 30_00]), later(3))
+    expect(await submit(claim.sessionId, claim.renter, 'offer', offer(claim.lines, [35_00, 20_00]), later(4))).toMatchObject({ ok: true, result: { outcome: 'refused', reason: 'above_highest_total' }, outboxId: null })
+  })
+
+  it('is refused once the renter stops it, and its grant is gone', async () => {
+    const claim = await withAssistant()
+    expect(await shop.act((transaction) => stopRenterAdvocate(transaction, claim.rentalId, later(1)))).toEqual({ ok: true })
+    expect(await shop.act((transaction) => assistantGrant(transaction, claim.sessionId, later(2)))).toBeUndefined()
+    expect(await submit(claim.sessionId, claim.renter, 'offer', offer(claim.lines, [20_00, 0]), later(2))).toEqual({ ok: false, reason: 'not_granted' })
+  })
+
+  it('ends the negotiation when the renter disconnects the assistant: the owner decides and nothing is captured', async () => {
+    const claim = await withAssistant()
+    expect(await shop.act((transaction) => revokeAssistant(transaction, claim.rentalId, later(1)))).toBe(true)
+    expect((await asWorker((transaction) => negotiationRecords(transaction, claim.negotiationId)))?.negotiation).toMatchObject({ state: 'escalated', endedReason: 'mandate_ended' })
+    expect((await shop.act((transaction) => transaction.select().from(claims).where(eq(claims.id, claim.claimId))))[0]?.state).toBe('escalated')
+    expect(await shop.act((transaction) => assistantGrant(transaction, claim.sessionId, later(2)))).toBeUndefined()
+    expect((await shop.act((transaction) => transaction.select().from(executions).where(eq(executions.rentalId, claim.rentalId)))).filter((row) => row.action === 'capture')).toEqual([])
+  })
+
+  it('writes the renter’s reply when the shop has no advocate, and queues nothing', async () => {
+    await shop.act((transaction) => revokeShopSettlement(transaction, ownerId(), NOW))
+    const claim = await withAssistant()
+    expect(await submit(claim.sessionId, claim.renter, 'offer', offer(claim.lines, [10_00, 0]), later(1))).toMatchObject({ ok: true, result: { outcome: 'accepted', state: 'replied' }, outboxId: null })
     await shop.act((transaction) => grantShopSettlement(transaction, ownerId(), shopLimits, 30, NOW))
   })
 })

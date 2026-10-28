@@ -3,7 +3,7 @@ import type { LineFacts, Mandate, ProposedMove, RefereeContext, Table } from '@h
 import { and, asc, eq, inArray } from 'drizzle-orm'
 import { verifyTranscript } from './negotiation-fingerprint.ts'
 import type { ChainedMove } from './negotiation-fingerprint.ts'
-import { mandateFromRow } from './settlement-mandate-repository.ts'
+import { isAssistantAdvocate, mandateFromRow } from './settlement-mandate-repository.ts'
 import { captureSessions, claimLines, claimReplies, claims, comparisons, findings, mandates, marks, negotiationMoves, negotiations, priceEntries, rentalItems, rentals, wearPolicies } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
@@ -17,6 +17,19 @@ export function proposedMove(move: StoredMove): ProposedMove {
   return move.kind === 'accept' ? { side: move.side, kind: 'accept' } : { side: move.side, kind: 'pass', reason: move.passReason ?? 'chose' }
 }
 
+// The negotiations of the shop in scope that are still exchanging offers.
+export async function openNegotiations(transaction: Transaction): Promise<readonly { readonly id: string }[]> {
+  return transaction.select({ id: negotiations.id }).from(negotiations).where(eq(negotiations.state, 'open'))
+}
+
+// The marks on an item, each with whether it was seen before this rental: at its handover, or during an earlier
+// rental, and not reported by this renter.
+export async function itemMarks(transaction: Transaction, itemId: string, rentalId: string) {
+  const rows = await transaction.select({ id: marks.id, view: marks.view, region: marks.region, description: marks.description, status: marks.status, incidentId: marks.incidentId, sessionKind: captureSessions.kind, sessionRentalId: rentalItems.rentalId })
+    .from(marks).innerJoin(captureSessions, eq(captureSessions.id, marks.firstSeenSessionId)).innerJoin(rentalItems, eq(rentalItems.id, captureSessions.rentalItemId)).where(eq(marks.itemId, itemId))
+  return rows.map((mark) => ({ id: mark.id, view: mark.view, region: mark.region, description: mark.description, seenBeforeRental: mark.status === 'open' && mark.incidentId === null && (mark.sessionKind === 'handover' || mark.sessionRentalId !== rentalId) }))
+}
+
 // The facts code reads for each claim line (extensions.md section 9.6): the finding, how well its photographs aligned,
 // and the marks on its item that were there before this rental. A line a person added has no finding.
 async function claimLineFacts(transaction: Transaction, claimId: string, rentalId: string, wearRules: string) {
@@ -24,10 +37,7 @@ async function claimLineFacts(transaction: Transaction, claimId: string, rentalI
   return Promise.all(rows.map(async (line) => {
     const [finding] = line.findingId === null ? [] : await transaction.select({ view: findings.view, region: findings.region, confidence: findings.confidence, secondLookConfirmed: findings.secondLookConfirmed, description: findings.description, alignment: comparisons.alignment, itemId: rentalItems.itemId })
       .from(findings).innerJoin(comparisons, eq(comparisons.id, findings.comparisonId)).innerJoin(captureSessions, eq(captureSessions.id, comparisons.returnSessionId)).innerJoin(rentalItems, eq(rentalItems.id, captureSessions.rentalItemId)).where(eq(findings.id, line.findingId))
-    const itemMarks = finding === undefined ? [] : await transaction.select({ id: marks.id, view: marks.view, region: marks.region, status: marks.status, incidentId: marks.incidentId, sessionKind: captureSessions.kind, sessionRentalId: rentalItems.rentalId })
-      .from(marks).innerJoin(captureSessions, eq(captureSessions.id, marks.firstSeenSessionId)).innerJoin(rentalItems, eq(rentalItems.id, captureSessions.rentalItemId)).where(eq(marks.itemId, finding.itemId))
-    // Seen before this rental: at its handover, or during an earlier rental, and not reported by this renter.
-    const before = itemMarks.map((mark) => ({ id: mark.id, view: mark.view, region: mark.region, seenBeforeRental: mark.status === 'open' && mark.incidentId === null && (mark.sessionKind === 'handover' || mark.sessionRentalId !== rentalId) }))
+    const before = finding === undefined ? [] : await itemMarks(transaction, finding.itemId, rentalId)
     const facts = lineFacts({ lineId: line.id, publishedCents: line.amountCents, finding: finding === undefined ? null : { ...finding, alignment: finding.alignment?.[finding.view] ?? null }, marks: before, wearRules })
     return { facts, description: line.description, reason: line.reason ?? finding?.description ?? '' }
   }))
@@ -119,6 +129,8 @@ export async function renterNegotiation(transaction: Transaction, rentalId: stri
     highestTotalCents: own.ok ? own.value.highestTotalCents : 0,
     awaitingRenter: negotiation.state === 'agreed' && negotiation.renterConfirmedAt === null && asksForTap(renterMandate, 'settlement_renter'),
     stopped: renterMandate.revokedAt !== null,
+    // Who argues for the renter: Hold's advocate, or the renter's own assistant.
+    advocate: isAssistantAdvocate(renterMandate.grantedTo) ? 'assistant' as const : 'hold' as const,
   }
 }
 export type RenterNegotiation = NonNullable<Awaited<ReturnType<typeof renterNegotiation>>>

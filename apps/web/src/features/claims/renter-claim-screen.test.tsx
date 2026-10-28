@@ -20,6 +20,22 @@ it('offers a third choice before the claim is answered: an advocate, with the mo
   expect(screen.getByRole('button', { name: 'Hand my contest to an advocate' })).toBeInTheDocument()
 })
 
+it('lets the renter choose their own connected assistant as the advocate, named as it named itself and not verified', () => {
+  renderWithIntl(<RenterClaimScreen token="token" data={{ shopName: 'Ribeira Bikes', currency: 'EUR', state: 'presented', totalCents: 3500, captureCents: 3500, releaseCents: 26500, invoiceCents: 0, replyDueAt: new Date('2026-10-22'), holdState: 'placed', lines: [], canReply: true, canAdvocate: true, assistantName: 'Trip planner' }} />)
+  const choice = screen.getByRole('group', { name: 'Who argues it for me' })
+  expect(choice).toBeInTheDocument()
+  expect(screen.getByRole('radio', { name: "Hold's advocate" })).toBeChecked()
+  const own = screen.getByRole('radio', { name: /My own assistant, Trip planner/ })
+  expect(own).not.toBeChecked()
+  expect(own).toHaveAttribute('value', 'assistant')
+  expect(screen.getByText(/It never sees the shop's limits and cannot agree to more than you write here/)).toBeInTheDocument()
+})
+
+it('offers no choice of assistant when none is connected', () => {
+  renderWithIntl(<RenterClaimScreen token="token" data={{ shopName: 'Ribeira Bikes', currency: 'EUR', state: 'presented', totalCents: 3500, captureCents: 3500, releaseCents: 26500, invoiceCents: 0, replyDueAt: new Date('2026-10-22'), holdState: 'placed', lines: [], canReply: true, canAdvocate: true }} />)
+  expect(screen.queryByRole('group', { name: 'Who argues it for me' })).not.toBeInTheDocument()
+})
+
 it('links to the advocate once the renter has one', () => {
   renderWithIntl(<RenterClaimScreen token="token" data={{ shopName: 'Ribeira Bikes', currency: 'EUR', state: 'agreed', totalCents: 3500, captureCents: 3500, releaseCents: 26500, invoiceCents: 0, replyDueAt: new Date('2026-10-22'), holdState: 'placed', lines: [], canReply: false, negotiation: true }} />)
   expect(screen.getByRole('link', { name: 'See what the advocates said' })).toHaveAttribute('href', '/r/token/negotiation')

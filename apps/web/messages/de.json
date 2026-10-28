@@ -2585,7 +2585,13 @@
         "get_claim": "Hat die Forderung gelesen",
         "draft_claim_reply": "Hat eine Antwort auf die Forderung entworfen",
         "submit_claim_reply": "Wollte die Forderung beantworten",
-        "get_record": "Hat die Beweisakte gelesen"
+        "get_record": "Hat die Beweisakte gelesen",
+        "get_negotiation": "Hat die Verhandlung gelesen",
+        "get_claim_lines": "Hat die Positionen der Forderung und ihre Befunde gelesen",
+        "get_line_photos": "Hat die Fotos einer Position angesehen",
+        "get_price_list": "Hat die vereinbarte Preisliste gelesen",
+        "get_known_marks": "Hat die vor der Miete bekannten Markierungen gelesen",
+        "submit_offer": "Hat als Ihr Vertreter einen Zug gemacht"
       }
     },
     "walkIn": {
@@ -2993,11 +2999,16 @@
       "comment": "Was Ihr Vertreter wissen sollte (freiwillig)",
       "start": "Meinen Widerspruch einem Vertreter übergeben",
       "started": "Ihr Vertreter vertritt Ihren Widerspruch.",
-      "code": "Bestätigungscode, für Ihren Vertreter"
+      "code": "Bestätigungscode, für Ihren Vertreter",
+      "who": "Wer für mich verhandelt",
+      "hold": "Der Vertreter von Hold",
+      "assistant": "Mein eigener Assistent, {name}. Der Name ist sein eigener und nicht geprüft.",
+      "assistantGuidance": "Ihr Assistent liest über Hold dieselben Beweise und macht jeden Zug über den Schiedsrichter von Hold. Er sieht nie die Grenzen des Geschäfts und kann keinem höheren Betrag zustimmen, als Sie hier schreiben. Jede Einigung bestätigen weiterhin Sie mit einem Code."
     },
     "renterTitle": "Ihr Vertreter",
     "link": "Sehen, was die Vertreter gesagt haben",
     "yourLimit": "Ihr Höchstbetrag: {amount}. Nur Sie sehen ihn.",
+    "assistantArgues": "Ihr eigener Assistent vertritt Ihren Widerspruch. Der Vertreter von Hold handelt nicht für Sie, und jeder Zug geht über den Schiedsrichter von Hold.",
     "simulated": "Simulierte Vertreter: Testumgebung, kein KI-Modell wurde gefragt.",
     "transcript": {
       "title": "Was die Vertreter gesagt haben",
@@ -3005,7 +3016,8 @@
       "move": "Zug {number}",
       "side": {
         "shop": "Der Vertreter des Geschäfts",
-        "renter": "Der Vertreter des Mieters"
+        "renter": "Der Vertreter des Mieters",
+        "renter_assistant": "Der eigene Assistent des Mieters"
       },
       "opening": "Eröffnet mit der Forderung wie vorgelegt: {amount}",
       "offer": "Bot {amount}",
@@ -3104,7 +3116,8 @@
       "wrong_code": "Dieser Code stimmt nicht. Prüfen Sie ihn und versuchen Sie es erneut.",
       "code_recently_sent": "Vor weniger als einer Minute wurde ein Code gesendet. Prüfen Sie Ihre E-Mails.",
       "email_unavailable": "Die E-Mail konnte nicht gesendet werden. Versuchen Sie es gleich noch einmal.",
-      "link_invalid": "Dieser Link kann dafür nicht verwendet werden."
+      "link_invalid": "Dieser Link kann dafür nicht verwendet werden.",
+      "assistant_not_connected": "Mit dieser Miete ist gerade kein Assistent verbunden. Wählen Sie den Vertreter von Hold."
     }
   },
   "operations": {

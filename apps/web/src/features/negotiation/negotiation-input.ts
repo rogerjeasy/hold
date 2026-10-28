@@ -18,4 +18,6 @@ export const advocateInput = {
   code: z.string().regex(/^[0-9]{8}$/),
   highest: amountText,
   comment: z.string().trim().max(1000).optional(),
+  // Who argues it: Hold's advocate, or the renter's own assistant connected to this rental (extensions.md 9.11).
+  advocate: z.enum(['hold', 'assistant']).optional(),
 }

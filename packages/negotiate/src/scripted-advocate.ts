@@ -1,11 +1,12 @@
+import type { AdvocateBrief, RenterLimits, ShopLimits } from '@hold/db'
 import type { Ground, NegotiationSide } from '@hold/domain'
-import type { AdvocateModel, AdvocateReply } from './advocate-model.ts'
-import type { AdvocateBrief, RenterLimits, ShopLimits } from './brief.ts'
+import type { AdvocateMessage, AdvocateModel, AdvocateReply } from './advocate-model.ts'
 
 // The test environment's stand-in for Claude (extensions.md section 3, rule 9: simulated things say so). It never calls
-// Bedrock and records its model as "simulated" on every move. It reads only the brief its side was sent, as the model
-// does, and plays a plain strategy: concede the lines the evidence does not support, meet the other side halfway, and
-// accept an offer inside its own limit.
+// Bedrock and records its model as "simulated" on every move. It investigates as the model does, through the same
+// read-only tools: it reads the negotiation and the claim's lines first, then moves on what its own side was told. Its
+// strategy is plain: concede the lines the evidence does not support, meet the other side halfway, and accept an offer
+// inside its own limit.
 
 export const SIMULATED_MODEL = 'simulated'
 
@@ -56,12 +57,26 @@ function choose(brief: AdvocateBrief): { readonly tool: 'offer' | 'accept' | 'pa
   return offer.totalCents < yours.totalCents ? { tool: 'offer', input: { lines: offer.lines } } : pass
 }
 
+// The brief from the latest get_negotiation result in the conversation, if it has read one.
+function latestBrief(messages: readonly AdvocateMessage[]): AdvocateBrief | undefined {
+  const names = new Map(messages.flatMap((message) => (message.role === 'assistant' ? message.calls.map((call) => [call.id, call.name] as const) : [])))
+  const results = messages.flatMap((message) => (message.role === 'tool_results' ? message.results : []))
+  const text = results.filter((result) => names.get(result.callId) === 'get_negotiation' && !result.isError).at(-1)?.parts[0]
+  if (text?.type !== 'text') return undefined
+  return JSON.parse(text.text.slice(text.text.indexOf('<data>') + '<data>'.length, text.text.lastIndexOf('</data>'))) as AdvocateBrief
+}
+
 export function createScriptedAdvocate(): AdvocateModel {
+  let calls = 0
   return {
-    move(request) {
-      const quoted = request.message.slice(request.message.indexOf('<negotiation>') + '<negotiation>'.length, request.message.indexOf('</negotiation>'))
-      const chosen = choose(JSON.parse(quoted) as AdvocateBrief)
-      const reply: AdvocateReply = { kind: 'move', ...chosen, model: SIMULATED_MODEL, inputTokens: 0, outputTokens: 0 }
+    next(request) {
+      calls += 1
+      const brief = latestBrief(request.messages)
+      const chosen = brief === undefined ? undefined : choose(brief)
+      const toolCalls = chosen === undefined
+        ? [{ id: `read-${String(calls)}-a`, name: 'get_negotiation', input: {} }, { id: `read-${String(calls)}-b`, name: 'get_claim_lines', input: {} }]
+        : [{ id: `move-${String(calls)}`, name: chosen.tool, input: chosen.input }]
+      const reply: AdvocateReply = { kind: 'calls', calls: toolCalls, raw: null, model: SIMULATED_MODEL, inputTokens: 0, outputTokens: 0 }
       return Promise.resolve(reply)
     },
   }

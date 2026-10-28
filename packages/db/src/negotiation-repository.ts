@@ -1,4 +1,4 @@
-import { checkReply, checkSettlementLimits, CLAIM_TRANSITIONS, gatewayDecision, judgeMove, negotiationDeadline, openingOffer, transition } from '@hold/domain'
+import { agentSessionLive, checkReply, checkSettlementLimits, CLAIM_TRANSITIONS, gatewayDecision, judgeMove, negotiationDeadline, openingOffer, transition } from '@hold/domain'
 import type { AgentActor, GatewayDecision, NegotiationSide, PassReason, ProposedMove, RefusalReason, Table } from '@hold/domain'
 import { and, count, eq, gt, isNull, like } from 'drizzle-orm'
 import { replyToClaim } from './claim-reply-repository.ts'
@@ -10,29 +10,41 @@ import { NEGOTIATION_TOOLS, offerArguments } from './negotiation-tools.ts'
 import type { NegotiationTool } from './negotiation-tools.ts'
 import { negotiationRecords } from './negotiation-view.ts'
 import type { NegotiationRecords } from './negotiation-view.ts'
-import { liveShopSettlement, RENTER_ADVOCATE } from './settlement-mandate-repository.ts'
-import { auditLog, authorizations, claims, holds, mandates, negotiationMoves, negotiations, outbox, rentals } from './schema/index.ts'
+import { assistantAdvocate, isAssistantAdvocate, liveShopSettlement, RENTER_ADVOCATE } from './settlement-mandate-repository.ts'
+import { agentSessions, auditLog, authorizations, claims, holds, mandates, negotiationMoves, negotiations, outbox, rentals } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
 export const NEGOTIATIONS_QUEUE = 'negotiations'
 // Tool calls one side may make on one negotiation in a minute.
 const MOVES_PER_MINUTE = 12
 
+// The assistant connected to a rental, when its token is live: the one a renter may choose as their advocate.
+async function liveAssistant(transaction: Transaction, rentalId: string, now: Date) {
+  const [session] = await transaction.select({ id: agentSessions.id, expiresAt: agentSessions.expiresAt, revokedAt: agentSessions.revokedAt }).from(agentSessions).where(eq(agentSessions.rentalId, rentalId))
+  return session !== undefined && session.expiresAt !== null && agentSessionLive(session, now) ? { id: session.id, expiresAt: session.expiresAt } : undefined
+}
+
 // A renter who contests with an advocate (extensions.md section 9.4), once their one-time code was checked: their
 // contest is recorded, their mandate granted, and either a negotiation opens, when the shop has a live mandate that
 // covers this claim and there is time before the deadline, or the renter's advocate writes their reply (section 9.10).
-export async function openAdvocate(transaction: Transaction, input: { readonly rentalId: string; readonly highestTotalCents: number; readonly comment: string; readonly simulated: boolean }, now: Date) {
+// The renter's advocate is Hold's, or the renter's own assistant connected to this rental (section 9.11): then the
+// mandate names that one session, ends no later than its token, and no Hold model moves for the renter.
+export async function openAdvocate(transaction: Transaction, input: { readonly rentalId: string; readonly highestTotalCents: number; readonly comment: string; readonly simulated: boolean; readonly advocate?: 'hold' | 'assistant' }, now: Date) {
   const [claim] = await transaction.select().from(claims).where(eq(claims.rentalId, input.rentalId)).for('update')
   if (claim === undefined) return { ok: false, reason: 'not_found' } as const
   if (claim.state !== 'presented' || claim.replyDueAt === null) return { ok: false, reason: 'already_replied' } as const
   const renterLimits = checkSettlementLimits('settlement_renter', { currency: claim.currency, highestTotalCents: input.highestTotalCents, finalTap: true })
   if (!renterLimits.ok) return { ok: false, reason: 'invalid_limits' } as const
+  const assistant = input.advocate === 'assistant' ? await liveAssistant(transaction, input.rentalId, now) : undefined
+  if (input.advocate === 'assistant' && assistant === undefined) return { ok: false, reason: 'assistant_not_connected' } as const
   const replied = await replyToClaim(transaction, input.rentalId, 'contest', input.comment, now, false)
   if (!replied.ok) return replied
   const [rental] = await transaction.select({ renterId: rentals.renterId }).from(rentals).where(eq(rentals.id, input.rentalId))
   const [hold] = await transaction.select({ authorizationId: holds.currentAuthorizationId }).from(holds).where(eq(holds.rentalId, input.rentalId))
   const [authorization] = hold?.authorizationId == null ? [] : await transaction.select({ validUntil: authorizations.validUntil }).from(authorizations).where(eq(authorizations.id, hold.authorizationId))
-  const [renterMandate] = await transaction.insert(mandates).values({ shopId: claim.shopId, kind: 'settlement_renter', grantedByRenterId: rental?.renterId ?? null, rentalId: input.rentalId, agent: RENTER_ADVOCATE, limits: renterLimits.value, validFrom: now, validUntil: claim.replyDueAt, grantedHow: 'one_time_code', createdAt: now }).returning({ id: mandates.id })
+  const agent = assistant === undefined ? RENTER_ADVOCATE : assistantAdvocate(assistant.id)
+  const validUntil = assistant === undefined || assistant.expiresAt >= claim.replyDueAt ? claim.replyDueAt : assistant.expiresAt
+  const [renterMandate] = await transaction.insert(mandates).values({ shopId: claim.shopId, kind: 'settlement_renter', grantedByRenterId: rental?.renterId ?? null, rentalId: input.rentalId, agent, limits: renterLimits.value, validFrom: now, validUntil, grantedHow: 'one_time_code', createdAt: now }).returning({ id: mandates.id })
   if (renterMandate === undefined) throw new Error('The renter’s mandate was not recorded.')
   const shopMandate = await liveShopSettlement(transaction, now)
   const shopLimits = shopMandate === undefined ? undefined : checkSettlementLimits('settlement_shop', shopMandate.limits)
@@ -55,10 +67,18 @@ export async function openAdvocate(transaction: Transaction, input: { readonly r
     if (judged.outcome !== 'accepted') throw new Error('The claim as presented must be a move the referee accepts.')
     await recordMove(transaction, records, opening, judged.table, { actor: 'referee', model: null, promptVersion: null }, now)
   }
-  const [queued] = await transaction.insert(outbox).values({ shopId: claim.shopId, queue: NEGOTIATIONS_QUEUE, messageGroup: input.rentalId, payload: { negotiationId: negotiation.id }, createdAt: now }).returning({ id: outbox.id })
-  if (queued === undefined) throw new Error('The negotiation was not queued.')
+  if (assistant !== undefined) await transaction.insert(auditLog).values({ shopId: claim.shopId, actorKind: 'renter', actorId: rental?.renterId ?? null, action: 'negotiation.assistant_granted', subjectKind: 'negotiation', subjectId: negotiation.id, detail: { sessionId: assistant.id }, at: now })
+  const outboxId = await queueNegotiation(transaction, { shopId: claim.shopId, rentalId: input.rentalId, negotiationId: negotiation.id }, now)
   await reserveEvidencePack(transaction, input.rentalId, now)
-  return { ok: true, negotiationId: negotiation.id, kind: negotiate ? 'negotiation' as const : 'reply' as const, rentalId: input.rentalId, outboxId: queued.id } as const
+  return { ok: true, negotiationId: negotiation.id, kind: negotiate ? 'negotiation' as const : 'reply' as const, rentalId: input.rentalId, outboxId } as const
+}
+
+// Hands a negotiation to the advocates' worker, in order per rental. The request that wrote it sends it at once; the
+// outbox relay sends it if that fails.
+export async function queueNegotiation(transaction: Transaction, negotiation: { readonly shopId: string; readonly rentalId: string; readonly negotiationId: string }, now: Date): Promise<string> {
+  const [queued] = await transaction.insert(outbox).values({ shopId: negotiation.shopId, queue: NEGOTIATIONS_QUEUE, messageGroup: negotiation.rentalId, payload: { negotiationId: negotiation.negotiationId }, createdAt: now }).returning({ id: outbox.id })
+  if (queued === undefined) throw new Error('The negotiation was not queued.')
+  return queued.id
 }
 
 async function loadRecords(transaction: Transaction, negotiationId: string): Promise<NegotiationRecords> {
@@ -85,6 +105,10 @@ export type MoveInput = {
   // The shop's advocate is a shop agent; the renter's advocate, or a renter's own assistant, a renter agent. The side
   // an agent moves for comes from what it is, never from what it says.
   readonly actor: AgentActor
+  // Which agent is moving: Hold's advocate for its side, or a renter's own assistant by its session. It must be the
+  // agent the side's mandate names, so Hold never moves for a renter who chose their own assistant, and no other
+  // assistant moves for them.
+  readonly agent: string
   readonly tool: NegotiationTool
   readonly arguments: unknown
   // Why a pass was made, when the runner passes for an advocate that could not move.
@@ -111,9 +135,8 @@ async function audit(transaction: Transaction, negotiation: { readonly id: strin
   await transaction.insert(auditLog).values({ shopId: negotiation.shopId, actorKind: actor.kind, actorId: actor.actsFor, action, subjectKind: 'negotiation', subjectId: negotiation.id, detail, at: now })
 }
 
-// Every move from every agent, whoever runs it (Hold's advocates now, a renter's own assistant through the MCP server
-// later): the one gateway, then the referee, then the record. No move carries words (negotiation-tools.ts). The seam
-// for X4.9.
+// Every move from every agent, whoever runs it (Hold's advocates in the worker, a renter's own assistant through the
+// MCP server): the one gateway, then the referee, then the record. No move carries words (negotiation-tools.ts).
 export async function applyNegotiationMove(transaction: Transaction, input: MoveInput, now: Date): Promise<MoveResult> {
   const [locked] = await transaction.select().from(negotiations).where(eq(negotiations.id, input.negotiationId)).for('update')
   if (locked === undefined) return { outcome: 'refused', reason: 'not_found' }
@@ -123,8 +146,10 @@ export async function applyNegotiationMove(transaction: Transaction, input: Move
   const parsed = readMove(input, side ?? 'renter')
   const [calls] = await transaction.select({ count: count() }).from(auditLog).where(and(eq(auditLog.subjectId, locked.id), eq(auditLog.actorKind, input.actor.kind), like(auditLog.action, 'negotiation.%'), gt(auditLog.at, new Date(now.getTime() - 60_000))))
   const grantor = await grantorOf(transaction, mandate?.id)
-  const actor = grantor === null || input.actor.actsFor === grantor ? input.actor : { ...input.actor, actsFor: '' }
-  const gate = gatewayDecision({ actor, tool: { name: `negotiation_${input.tool}`, tier: 'act_under_mandate' }, subjectShopId: locked.shopId, mandate, now, callsInWindow: calls?.count ?? 0, rateLimit: MOVES_PER_MINUTE, argumentsValid: parsed !== undefined })
+  // An agent that is not the one the mandate names, or acts for someone other than its grantor, acts for nobody.
+  const named = mandate === null || mandate.grantedTo === input.agent
+  const actor = named && (grantor === null || input.actor.actsFor === grantor) ? input.actor : { ...input.actor, actsFor: '' }
+  const gate = gatewayDecision({ actor, tool: { name: `negotiation_${input.tool}`, tier: 'act_under_mandate' }, subjectShopId: locked.shopId, subjectRentalId: locked.rentalId, mandate, now, callsInWindow: calls?.count ?? 0, rateLimit: MOVES_PER_MINUTE, argumentsValid: parsed !== undefined })
   if (!gate.ok || side === null || parsed === undefined) {
     const reason = gate.ok ? 'tier' : gate.reason
     await audit(transaction, locked, input.actor, 'negotiation.gateway_refused', { reason }, now)
@@ -170,7 +195,7 @@ async function applyToNegotiation(transaction: Transaction, records: Negotiation
     }
     return countRefusal(transaction, records, actor, judged.table, judged.reason, now)
   }
-  await recordMove(transaction, records, proposed, judged.table, { actor: actorLabel(actor), model: input.model, promptVersion: input.promptVersion }, now)
+  await recordMove(transaction, records, proposed, judged.table, { actor: actorLabel(actor, input.agent), model: input.model, promptVersion: input.promptVersion }, now)
   await audit(transaction, negotiation, actor, `negotiation.${proposed.kind}`, { sequence: records.moves.length + 1 }, now)
   if (judged.table.status === 'escalated') {
     await escalateNegotiation(transaction, negotiation.id, 'pass', now)
@@ -189,7 +214,8 @@ async function applyToNegotiation(transaction: Transaction, records: Negotiation
   return { outcome: 'accepted', state: 'open' }
 }
 
-const actorLabel = (actor: AgentActor) => actor.kind === 'shop_agent' ? 'shop_advocate' : 'renter_advocate'
+// Who made a move, as the transcript names it: Hold's advocate for a side, or the renter's own assistant.
+const actorLabel = (actor: AgentActor, agent: string) => actor.kind === 'shop_agent' ? 'shop_advocate' : isAssistantAdvocate(agent) ? 'renter_assistant' : 'renter_advocate'
 
 // When only the renter has an advocate, its one offer is the renter's contest: lines, grounds and evidence, inside the
 // renter's highest total. The claim stays contested and the owner decides as in the spine.
@@ -207,7 +233,7 @@ async function applyReply(transaction: Transaction, records: NegotiationRecords,
     const refusals = { shop: 0, renter: negotiation.renterRefusals + 1 }
     return countRefusal(transaction, records, actor, { ...records.table, refusals, status: refusals.renter >= 2 ? 'escalated' : 'open' }, checked, now)
   }
-  await recordMove(transaction, records, proposed, records.table, { actor: actorLabel(actor), model: input.model, promptVersion: input.promptVersion }, now)
+  await recordMove(transaction, records, proposed, records.table, { actor: actorLabel(actor, input.agent), model: input.model, promptVersion: input.promptVersion }, now)
   await transaction.update(negotiations).set({ state: 'replied', endedAt: now, updatedAt: now }).where(eq(negotiations.id, negotiation.id))
   await audit(transaction, negotiation, actor, 'negotiation.offer', { sequence: 1 }, now)
   await reserveEvidencePack(transaction, negotiation.rentalId, now)

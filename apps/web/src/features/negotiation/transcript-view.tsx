@@ -34,7 +34,7 @@ function MoveItem({ move, transcript, amount }: { move: Move; transcript: Negoti
   const summary = move.kind === 'offer' ? (move.actor === 'referee' ? t('transcript.opening', { amount: amount(move.totalCents ?? 0) }) : t('transcript.offer', { amount: amount(move.totalCents ?? 0) })) : move.kind === 'accept' ? t('transcript.accept') : t('transcript.pass')
   return (
     <li className="grid min-w-0 gap-2 border-b pb-3">
-      <p className="text-sm text-muted-foreground">{t('transcript.move', { number: move.sequence })} · {t(`transcript.side.${move.side}`)}</p>
+      <p className="text-sm text-muted-foreground">{t('transcript.move', { number: move.sequence })} · {move.actor === 'renter_assistant' ? t('transcript.side.renter_assistant') : t(`transcript.side.${move.side}`)}</p>
       <p className="font-semibold">{summary}</p>
       {move.kind === 'pass' && move.passReason !== null ? <p>{t(`transcript.passReasons.${move.passReason}`)}</p> : null}
       {move.lines.length === 0 ? null : (
