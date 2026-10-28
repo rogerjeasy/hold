@@ -10,7 +10,7 @@ export { amountText, decimalsOf, isShopCurrency, parseAmount, SHOP_CURRENCIES } 
 export type { ShopCurrency } from './currency.ts'
 export { addDays, HOLD_ASSURED_DAYS, HOLD_VALIDITY_DAYS } from './hold-clocks.ts'
 export { holdDay, holdStanding } from './hold-standing.ts'
-export { authorizationClocks, checkPlacedAuthorization, mayAskForHold, needsReplacement } from './hold-placement.ts'
+export { authorizationClocks, checkPlacedAuthorization, keepsOriginalEnd, mayAskForHold, needsReplacement } from './hold-placement.ts'
 export type { PlacedAuthorizationStatus, PlacementProblem } from './hold-placement.ts'
 export type { HoldStanding } from './hold-standing.ts'
 export { mayCapture, mayCloseRental, mayHandOver } from './lifecycle-links.ts'

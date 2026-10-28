@@ -1,7 +1,7 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
 import { addDays, HOLD_ASSURED_DAYS, HOLD_VALIDITY_DAYS } from './hold-clocks.ts'
-import { authorizationClocks, checkPlacedAuthorization, mayAskForHold, needsReplacement } from './hold-placement.ts'
+import { authorizationClocks, checkPlacedAuthorization, keepsOriginalEnd, mayAskForHold, needsReplacement } from './hold-placement.ts'
 import { money } from './money.ts'
 import { RENTAL_STATES } from './rental.ts'
 
@@ -56,5 +56,19 @@ describe('checking what PayPal placed', () => {
 describe('replacing a hold near its end', () => {
   it('is needed while the rental may still need its hold: before handover, out, and until it is settled', () => {
     expect(RENTAL_STATES.filter(needsReplacement)).toEqual(['ready', 'out', 'overdue', 'returned', 'inspecting', 'settling'])
+  })
+})
+
+describe('a renewal’s end of validity', () => {
+  const original = new Date('2026-11-12T02:54:28Z')
+
+  // PayPal's sandbox, 28 October 2026: a hold placed on 14 October was renewed to end at 02:54:29, one second later.
+  it('keeps the original’s end, allowing for the second PayPal adds', () => {
+    expect(keepsOriginalEnd(original, new Date('2026-11-12T02:54:29Z'))).toBe(true)
+    expect(keepsOriginalEnd(original, original)).toBe(true)
+  })
+
+  it('refuses a renewal that would hold the renter’s money past the original 29 days', () => {
+    expect(keepsOriginalEnd(original, new Date('2026-11-12T02:56:00Z'))).toBe(false)
   })
 })

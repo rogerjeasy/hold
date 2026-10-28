@@ -1,4 +1,4 @@
-import { authorizationClocks, HOLD_TRANSITIONS, transition } from '@hold/domain'
+import { authorizationClocks, HOLD_TRANSITIONS, keepsOriginalEnd, transition } from '@hold/domain'
 import { eq } from 'drizzle-orm'
 import { EXECUTIONS_QUEUE, markExecutionSent } from './fee-repository.ts'
 import { settlementWork } from './settlement-repository.ts'
@@ -25,7 +25,7 @@ export async function confirmSettlementRenewal(transaction: Transaction, executi
   if (work === undefined || work.execution.action !== 'renew') return false
   if (work.execution.state === 'confirmed') return true
   const captureId = work.execution.paypalResourceIds['captureExecution']
-  if (captureId === undefined || read.status !== 'created' || read.amount.cents !== work.authorization.amountCents || read.amount.currency !== work.authorization.currency || read.authorizationId === work.authorization.paypalAuthorizationId || read.expiresAt > work.authorization.validUntil || read.expiresAt <= now || !transition(HOLD_TRANSITIONS, work.hold.state, 'placed').ok) return false
+  if (captureId === undefined || read.status !== 'created' || read.amount.cents !== work.authorization.amountCents || read.amount.currency !== work.authorization.currency || read.authorizationId === work.authorization.paypalAuthorizationId || !keepsOriginalEnd(work.authorization.validUntil, read.expiresAt) || read.expiresAt <= now || !transition(HOLD_TRANSITIONS, work.hold.state, 'placed').ok) return false
   const clocks = authorizationClocks(read, true)
   await transaction.insert(authorizations).values({ shopId: work.hold.shopId, holdId: work.hold.id, paypalAuthorizationId: read.authorizationId, currency: read.amount.currency, amountCents: read.amount.cents, createdAt: read.createdAt, assuredUntil: clocks.assuredUntil, validUntil: clocks.validUntil, renewedFromId: work.authorization.id }).onConflictDoNothing()
   const [renewed] = await transaction.select().from(authorizations).where(eq(authorizations.paypalAuthorizationId, read.authorizationId))

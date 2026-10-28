@@ -20,6 +20,15 @@ export function authorizationClocks(authorization: { readonly createdAt: Date; r
   return { assuredUntil: assured < authorization.expiresAt ? assured : authorization.expiresAt, validUntil: authorization.expiresAt, isRenewal }
 }
 
+// PayPal reported a renewal ending one second after the original in the sandbox on 28 October 2026. A minute allows
+// for that rounding and nothing a renter would notice.
+const RENEWAL_END_ALLOWANCE_MS = 60_000
+
+// A renewal never holds the renter's money past the original authorization's 29 days.
+export function keepsOriginalEnd(originalEnd: Date, renewedEnd: Date): boolean {
+  return renewedEnd.getTime() <= originalEnd.getTime() + RENEWAL_END_ALLOWANCE_MS
+}
+
 export type PlacedAuthorizationStatus = 'pending' | 'created' | 'partially_captured' | 'captured' | 'voided' | 'denied' | 'expired'
 
 export type PlacementProblem = 'pending' | 'amount_mismatch' | 'not_placed'
