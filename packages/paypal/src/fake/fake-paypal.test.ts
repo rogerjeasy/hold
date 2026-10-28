@@ -148,15 +148,45 @@ describe('renewing a hold', () => {
   })
 
   // PayPal's sandbox, 28 October 2026: a capture on the old identifier was accepted after the renewal. Hold always
-  // captures on the current one. A release on the old identifier was not tried, and the fake refuses it.
-  it('still captures on the old identifier, as the sandbox did, and refuses a release on it', async () => {
+  // captures on the current one.
+  it('still captures on the old identifier, as the sandbox did', async () => {
     const hold = await placeHold()
     onDay(5)
     const renewed = valueOf(await paypal.renewHold({ authorizationId: hold.authorizationId, idempotencyKey: key() }))
 
-    expect(await kindOf(paypal.releaseHold({ authorizationId: hold.authorizationId, idempotencyKey: key() }))).toBe('rejected')
     expect(await kindOf(capture(hold.authorizationId, 1_00, false))).toBe('ok')
     expect(await kindOf(capture(renewed.authorizationId, 40_00, true))).toBe('ok')
+  })
+
+  // PayPal's sandbox, 28 October 2026 (trial:renewal void-after-renewal): an original and its renewal share one life.
+  it('voids the renewal with its original, as the sandbox did', async () => {
+    const hold = await placeHold()
+    onDay(5)
+    const renewed = valueOf(await paypal.renewHold({ authorizationId: hold.authorizationId, idempotencyKey: key() }))
+
+    expect(valueOf(await paypal.releaseHold({ authorizationId: hold.authorizationId, idempotencyKey: key() })).status).toBe('voided')
+    expect(valueOf(await paypal.readAuthorization(renewed.authorizationId)).status).toBe('voided')
+    expect(await kindOf(capture(renewed.authorizationId, 40_00, true))).toBe('hold_voided')
+  })
+
+  it('leaves the original captured once the renewal is captured in full, as the sandbox did', async () => {
+    const hold = await placeHold()
+    onDay(5)
+    const renewed = valueOf(await paypal.renewHold({ authorizationId: hold.authorizationId, idempotencyKey: key() }))
+    await capture(renewed.authorizationId, 40_00, true)
+
+    expect(valueOf(await paypal.readAuthorization(hold.authorizationId)).status).toBe('captured')
+  })
+
+  // PayPal's sandbox, 28 October 2026: a walk-in hold whose fee was captured renewed for the 150.00 still held.
+  it('renews a hold part of which was captured for what is still held, and no more', async () => {
+    const hold = await placeHold({ cents: 195_00, currency: 'EUR' })
+    await capture(hold.authorizationId, 45_00, false)
+    onDay(5)
+
+    expect(await kindOf(paypal.renewHold({ authorizationId: hold.authorizationId, amount: { cents: 150_01, currency: 'EUR' }, idempotencyKey: key() }))).toBe('rejected')
+    const renewed = valueOf(await paypal.renewHold({ authorizationId: hold.authorizationId, amount: { cents: 150_00, currency: 'EUR' }, idempotencyKey: key() }))
+    expect(renewed).toMatchObject({ status: 'created', amount: { cents: 150_00, currency: 'EUR' } })
   })
 
   // PayPal's sandbox, 28 October 2026: AUTHORIZATION_AMOUNT_EXCEEDED, for a renewal sent with no amount.

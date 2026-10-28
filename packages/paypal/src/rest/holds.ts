@@ -248,6 +248,7 @@ export function createRestPayPalHolds(client: PayPalClient): PayPalHolds {
         method: 'POST',
         path: authorizationPath(input.authorizationId, 'reauthorize'),
         idempotencyKey: input.idempotencyKey,
+        ...(input.amount === undefined ? {} : { body: { amount: toPayPalAmount(input.amount) } }),
       })
       const renewed = read(authorizationReferenceSchema, reply)
       return renewed.ok ? readAuthorization(renewed.value.id) : renewed

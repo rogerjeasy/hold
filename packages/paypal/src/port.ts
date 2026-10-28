@@ -89,6 +89,9 @@ export type PlaceHoldInput = {
 
 export type RenewHoldInput = {
   readonly authorizationId: string
+  // What is still held, for a hold part of which was captured, such as a walk-in's fee. Without it PayPal renews the
+  // original amount, which it refuses once anything was captured.
+  readonly amount?: Money
   readonly idempotencyKey: string
 }
 

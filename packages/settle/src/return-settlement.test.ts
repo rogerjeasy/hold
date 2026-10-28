@@ -1,5 +1,5 @@
 import { approveClaim, confirmCleanReturn, draftClaim, inShop, presentClaim, replyToClaim, rentalDetail } from '@hold/db'
-import { executions, holds, moneyEvents, claimWorkspace, publishPriceList, receiptDeliveriesFor, rentals, staffRoles } from '@hold/db'
+import { authorizations, executions, holds, moneyEvents, claimWorkspace, publishPriceList, receiptDeliveriesFor, rentals, staffRoles } from '@hold/db'
 import { eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { createMemoryScheduler, requestHoldPlacement, runExecution } from './index.ts'
@@ -65,7 +65,8 @@ describe('settling a returned rental', () => {
 })
 
 
-it('renews through its own execution at charge time after the assured period', async () => {
+// A claim accepted on day 4, after the hold's assured period, so charging it renews the hold first.
+async function acceptedAfterAssuredPeriod() {
   const rentalId = await returned()
   const price = (await act((transaction) => claimWorkspace(transaction, rentalId)))?.prices[0]?.id ?? ''
   const drafted = await act((transaction) => draftClaim(transaction, rentalId, userId, [{ priceEntryId: price, reason: 'Confirmed scratch.' }], NOW))
@@ -75,9 +76,28 @@ it('renews through its own execution at charge time after the assured period', a
   await act((transaction) => presentClaim(transaction, drafted.claimId, userId, now))
   const accepted = await act((transaction) => replyToClaim(transaction, rentalId, 'accept', '', now))
   if (!accepted.ok || accepted.executionId === null) throw new Error('No capture')
-  expect(await runExecution(dependencies(), { shopId: fixture.shopId, executionId: accepted.executionId })).toBe('confirmed')
+  return { rentalId, captureExecutionId: accepted.executionId }
+}
+
+it('renews through its own execution at charge time after the assured period', async () => {
+  const { rentalId, captureExecutionId } = await acceptedAfterAssuredPeriod()
+  expect(await runExecution(dependencies(), { shopId: fixture.shopId, executionId: captureExecutionId })).toBe('confirmed')
   expect((await act((transaction) => transaction.select().from(executions).where(eq(executions.rentalId, rentalId)))).filter((row) => row.action === 'renew').map((row) => row.state)).toEqual(['confirmed'])
   expect((await act((transaction) => transaction.select().from(moneyEvents).where(eq(moneyEvents.rentalId, rentalId)))).filter((row) => row.kind === 'hold_renewed')).toHaveLength(1)
+})
+
+// PayPal's sandbox, 28 October 2026 (tech-stack.md section 16, item 3): an original and its renewal share one life.
+// Voiding the original voided the renewal too, and a final capture on the renewal left the original captured. So the
+// renter's money is reserved once, and Hold must never void an original while its renewal is to be charged.
+it('never voids the original authorization of a renewed hold, which would void the renewal with it', async () => {
+  const { rentalId, captureExecutionId } = await acceptedAfterAssuredPeriod()
+  expect(await runExecution(dependencies(), { shopId: fixture.shopId, executionId: captureExecutionId })).toBe('confirmed')
+  const [hold] = await act((transaction) => transaction.select().from(holds).where(eq(holds.rentalId, rentalId)))
+  const held = await act((transaction) => transaction.select().from(authorizations).where(eq(authorizations.holdId, hold?.id ?? '')))
+  const original = held.find((row) => row.id === held.find((each) => each.renewedFromId !== null)?.renewedFromId)
+  if (original === undefined) throw new Error('No original authorization')
+  const queued = await act((transaction) => transaction.select().from(executions).where(eq(executions.rentalId, rentalId)))
+  expect(queued.filter((row) => row.action === 'release' && row.paypalResourceIds['authorization'] === original.paypalAuthorizationId)).toEqual([])
 })
 
 it('falls back to a verified invoice on a refused capture and releases the authorization', async () => {

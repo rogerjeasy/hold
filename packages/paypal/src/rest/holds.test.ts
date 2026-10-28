@@ -152,6 +152,21 @@ describe('renewHold', () => {
   })
 })
 
+describe('renewHold with an amount', () => {
+  // PayPal's sandbox, 28 October 2026: a renewal sent with no amount asks for the original amount, which PayPal refuses
+  // once part of the hold was captured, as a walk-in's fee is (tech-stack.md section 16, item 3).
+  it('asks PayPal to renew only what is still held, when an amount is given', async () => {
+    const { holds, server } = holdsAgainst([
+      { status: 201, body: { id: 'AUTH-2', status: 'CREATED' } },
+      { status: 200, body: { ...AUTHORIZATION, id: 'AUTH-2' } },
+    ])
+
+    await holds.renewHold({ authorizationId: 'AUTH-1', amount: { cents: 150_00, currency: 'EUR' }, idempotencyKey: 'execution-4' })
+
+    expect(server.apiCalls()[0]).toMatchObject({ method: 'POST', path: '/v2/payments/authorizations/AUTH-1/reauthorize', body: { amount: { currency_code: 'EUR', value: '150.00' } } })
+  })
+})
+
 describe('readAuthorization', () => {
   it('reads an authorization PayPal let expire as expired, not as an answer it cannot read', async () => {
     const { holds } = holdsAgainst([{ status: 200, body: { ...AUTHORIZATION, status: 'EXPIRED' } }])

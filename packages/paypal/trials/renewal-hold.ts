@@ -10,6 +10,8 @@ import { describe, must, startTrial } from './support.ts'
 //   place-unrenewed     today: places a plain hold (G) that will never be renewed
 //   capture-unrenewed   after day 3: captures G as it is, outside its assured period. Hold falls back to this when a
 //                       renewal fails or is spent (architecture.md section 7.4)
+//   void-after-renewal  after renew: voids E's renewed original, which still took a capture after its renewal, and
+//                       renews F for what is still held, then voids F's original and captures on its renewal
 
 const FEE_CENTS = 45_00
 const DEPOSIT_CENTS = 150_00
@@ -20,7 +22,7 @@ const STATE_FILE = join(import.meta.dirname, 'recordings', 'renewal-state.json')
 type Saved = { readonly authorizationId: string; readonly createdAt: string; readonly expiresAt: string }
 type State = { readonly plain: Saved; readonly walkIn: Saved; readonly unrenewed?: Saved }
 
-const STEPS = ['place', 'renew', 'place-unrenewed', 'capture-unrenewed'] as const
+const STEPS = ['place', 'renew', 'place-unrenewed', 'capture-unrenewed', 'void-after-renewal'] as const
 const step = STEPS.find((name) => name === process.argv[2])
 if (step === undefined) throw new Error(`Say which step: ${STEPS.join(', ')}.`)
 
@@ -57,6 +59,29 @@ if (step === 'place') {
   await writeFile(STATE_FILE, JSON.stringify(state, null, 2))
   const ready = addDays(new Date(state.walkIn.createdAt), HOLD_ASSURED_DAYS)
   console.log(`\nSaved. Run the renew step after ${ready.toISOString()}:\n  pnpm --filter @hold/paypal trial:renewal renew`)
+} else if (step === 'void-after-renewal') {
+  const state = JSON.parse(await readFile(STATE_FILE, 'utf8')) as State
+  const statusOf = async (authorizationId: string) => describe(await holds.readAuthorization(authorizationId), (authorization) => `status ${authorization.status}`)
+
+  console.log("\nE. The renewed hold's original identifier")
+  console.log(`  before: ${await statusOf(state.plain.authorizationId)}`)
+  const voidedE = await holds.releaseHold({ authorizationId: state.plain.authorizationId, idempotencyKey: trial.key() })
+  trial.check("The renewed hold's original can be voided", voidedE.ok && voidedE.value.status === 'voided', describe(voidedE, (authorization) => `status ${authorization.status}`))
+  console.log(`  after: ${await statusOf(state.plain.authorizationId)}`)
+
+  console.log('\nF. The walk-in hold, its fee captured, renewed for what is still held')
+  console.log(`  before: ${await statusOf(state.walkIn.authorizationId)}`)
+  const renewedF = await holds.renewHold({ authorizationId: state.walkIn.authorizationId, amount: trial.money(DEPOSIT_CENTS), idempotencyKey: trial.key() })
+  trial.check('A part-captured hold renews when asked for what is still held', renewedF.ok && renewedF.value.authorizationId !== state.walkIn.authorizationId, describe(renewedF, (authorization) => `${authorization.authorizationId}, ${String(authorization.amount.cents)} cents, status ${authorization.status}`))
+  if (renewedF.ok) {
+    trial.check('The renewal is for what is still held', renewedF.value.amount.cents === DEPOSIT_CENTS, `${String(renewedF.value.amount.cents)} cents`)
+    const voidedF = await holds.releaseHold({ authorizationId: state.walkIn.authorizationId, idempotencyKey: trial.key() })
+    trial.check("Its original can then be voided", voidedF.ok && voidedF.value.status === 'voided', describe(voidedF, (authorization) => `status ${authorization.status}`))
+    const damage = await holds.captureFromHold({ authorizationId: renewedF.value.authorizationId, amount: trial.money(DAMAGE_CENTS), finalCapture: true, idempotencyKey: trial.key() })
+    trial.check('Damage is then captured on the renewal as the final capture', damage.ok && damage.value.status === 'completed', describe(damage, (capture) => `status ${capture.status}, ${String(capture.amount.cents)} cents`))
+    console.log(`  original after: ${await statusOf(state.walkIn.authorizationId)}`)
+    console.log(`  renewal after: ${await statusOf(renewedF.value.authorizationId)}`)
+  }
 } else if (step === 'place-unrenewed') {
   const state = JSON.parse(await readFile(STATE_FILE, 'utf8')) as State
   const [unrenewed] = await trial.placeApprovedHolds([

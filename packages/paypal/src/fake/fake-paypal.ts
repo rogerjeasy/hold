@@ -65,6 +65,9 @@ type FakeAuthorization = {
   readonly isRenewal: boolean
   // Set once a renewal has replaced this authorization.
   renewedBy: string | undefined
+  // The original, on a renewal. PayPal's sandbox, 28 October 2026: the two share one life. Voiding the original voided
+  // the renewal, and a final capture on the renewal left the original captured.
+  readonly renewedFrom: string | undefined
 }
 
 const FAKE_PAYER = { payerId: 'FAKEPAYER0001', email: 'renter@fake-paypal.test', name: 'Fake Renter' }
@@ -128,12 +131,12 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
   // Finds an authorization that can still be acted on, or says why it cannot. PayPal's sandbox still captured on a
   // renewed authorization's old identifier on 28 October 2026; voiding or renewing it again was not tried, and is
   // refused here.
-  function usable(authorizationId: string, action: 'capture' | 'other' = 'other'): PayPalResult<FakeAuthorization> {
+  function usable(authorizationId: string, action: 'capture' | 'void' | 'other' = 'other'): PayPalResult<FakeAuthorization> {
     const authorization = authorizations.get(authorizationId)
     if (authorization === undefined) return failure('not_found', 'No such authorization.')
     if (authorization.status === 'voided') return failure('hold_voided', 'The authorization was voided.')
     if (authorization.status === 'captured') return failure('hold_already_captured', 'The authorization was captured in full.')
-    if (authorization.renewedBy !== undefined && action !== 'capture') {
+    if (authorization.renewedBy !== undefined && action === 'other') {
       return failure('rejected', `The authorization was renewed. Use ${authorization.renewedBy}.`, 'FAKE_AUTHORIZATION_RENEWED')
     }
     if (options.now() >= authorization.expiresAt) return failure('hold_expired', 'The authorization has expired.')
@@ -243,6 +246,7 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
           capturedCents: 0,
           isRenewal: false,
           renewedBy: undefined,
+          renewedFrom: undefined,
         }
         open(authorization)
         order.status = 'completed'
@@ -270,11 +274,14 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
           return failure('renewal_too_soon', 'A renewal is allowed once the assured period has passed.')
         }
         // PayPal's sandbox, 28 October 2026 (tech-stack.md section 16, item 3): a renewal with no amount asks for the
-        // original amount, which PayPal refuses once part of the hold was captured.
-        if (current.value.capturedCents > 0) return failure('rejected', 'The renewal asks for more than is still reserved.', 'AUTHORIZATION_AMOUNT_EXCEEDED')
+        // original amount, which PayPal refuses once part of the hold was captured. One asking for what is still held
+        // renews.
+        const asked = input.amount ?? current.value.amount
+        const stillHeld = current.value.amount.cents - current.value.capturedCents
+        if (asked.currency !== current.value.amount.currency || asked.cents <= 0 || asked.cents > stillHeld) return failure('rejected', 'The renewal asks for more than is still reserved.', 'AUTHORIZATION_AMOUNT_EXCEEDED')
         const renewed: FakeAuthorization = {
           authorizationId: nextId('FAKE-AUTH'),
-          amount: current.value.amount,
+          amount: asked,
           createdAt: now,
           // A renewal starts a new assured period. Its end of validity stays where the original's was, give or take
           // the second PayPal reported it one second later in the sandbox on 28 October 2026.
@@ -283,6 +290,7 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
           capturedCents: 0,
           isRenewal: true,
           renewedBy: undefined,
+          renewedFrom: current.value.authorizationId,
         }
         open(renewed)
         current.value.renewedBy = renewed.authorizationId
@@ -293,9 +301,13 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
 
     releaseHold(input) {
       const result = once('void', input.idempotencyKey, (): PayPalResult<FakeAuthorization> => {
-        // A partly captured authorization can be voided, which releases what is left. Confirmed in the sandbox.
-        const current = usable(input.authorizationId)
-        if (current.ok) current.value.status = 'voided'
+        // A partly captured authorization can be voided, which releases what is left. Confirmed in the sandbox. Voiding
+        // an original voids its renewal too.
+        const current = usable(input.authorizationId, 'void')
+        if (!current.ok) return current
+        current.value.status = 'voided'
+        const renewal = current.value.renewedBy === undefined ? undefined : authorizations.get(current.value.renewedBy)
+        if (renewal !== undefined && renewal.status !== 'captured') renewal.status = 'voided'
         return current
       })
       return Promise.resolve(result.ok ? ok(toAuthorization(result.value)) : result)
@@ -340,6 +352,8 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
         authorization.capturedCents += input.amount.cents
         const finalCapture = input.finalCapture || authorization.capturedCents === authorization.amount.cents
         authorization.status = finalCapture ? 'captured' : 'partially_captured'
+        const original = authorization.renewedFrom === undefined ? undefined : authorizations.get(authorization.renewedFrom)
+        if (finalCapture && original !== undefined) original.status = 'captured'
         const capture: Capture = {
           captureId: nextId('FAKE-CAPTURE'),
           status: 'completed',
