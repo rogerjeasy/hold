@@ -98,6 +98,15 @@ it('says a sample claim is a sample, and shows its two photographs with the new 
   expect(screen.getAllByRole('img').map((image) => image.getAttribute('src'))).toEqual(expect.arrayContaining([expect.stringContaining('sample-handover.jpg'), expect.stringContaining('sample-return-damage.jpg')]))
 })
 
+// A finding's region is in the return photograph's frame. The handover photograph may be turned or zoomed against it,
+// so the same box drawn there would outline the wrong place.
+it('outlines the finding on the return photograph only', () => {
+  const line = { id: 'line', amountCents: 3500, description: 'Scratch', reason: null, actorName: null, findingId: 'finding', findingDescription: 'New scratch', incidentDescription: null, source: 'finding' as const, incidentId: null, region: { x: 0.36, y: 0.5, width: 0.08, height: 0.16 }, beforeKey: 'before', afterKey: 'after' }
+  const { container } = renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={{ ...workspace, claim: { id: 'claim', state: 'awaiting_approval', totalCents: 3500, raisedByUserId: 'staff', replyDueAt: null }, lines: [line] }} canAct={false} photoUrls={{ before: '/before.jpg', after: '/after.jpg' }} />)
+  const outlined = [...container.querySelectorAll('figure')].filter((figure) => figure.querySelector('[data-mark="line"]') !== null)
+  expect(outlined.map((figure) => figure.querySelector('img')?.getAttribute('src'))).toEqual(['/after.jpg'])
+})
+
 describe('a line the renter agreed during the rental (X5.3)', () => {
   const agreed = { ...workspace, agreedIncidents: [{ id: 'incident', description: 'A scratch on the left side', agreedCents: 3500, priceDescription: 'Scratch', itemLabel: 'City e-bike 1' }] }
   const lines = (container: HTMLElement) => JSON.parse(container.querySelector<HTMLInputElement>('input[name="lines"]')?.value ?? '[]') as unknown
