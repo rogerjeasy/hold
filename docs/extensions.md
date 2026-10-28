@@ -679,10 +679,11 @@ Hold exposes an MCP server. A traveller's own AI assistant can find a shop, read
 | `draft_claim_reply` | Saves a reply for the person to review | No |
 | `submit_claim_reply` | Accepts or contests a claim | Yes, or a mandate |
 | `report_incident` | Opens an incident. See Extension 5. | No |
-| `get_negotiation`, `submit_offer` | Take the renter's side in Extension 4 | A mandate |
+| `get_negotiation`, `get_claim_lines`, `get_line_photos`, `get_price_list`, `get_known_marks` | Read a contested claim as the renter's advocate in Extension 4: the negotiation for the renter's side, each line's finding, links to its photographs, the agreed price list and wear policy, the known marks | The renter chose this assistant as their advocate, with their code |
+| `submit_offer` | Offer, accept or pass as the renter's advocate, through the referee | The same choice; an agreement waits for the person's code |
 | `get_record` | The evidence pack | No |
 
-**No tool takes an amount.** A quote is priced by Hold and referred to by its ID. A booking is made from a quote. An assistant cannot propose a fee or a hold.
+**No tool takes an amount.** A quote is priced by Hold and referred to by its ID. A booking is made from a quote. An assistant cannot propose a fee or a hold. The one exception is the advocate's offer in Extension 4: `submit_offer` names each claim line's amount in cents, and the referee holds it to the line's published price, the claim the shop approved and the renter's own limit, so it can only lower a charge a person already approved.
 
 **When the person is needed.** A tool that needs the person returns `human_confirmation_required` with a link. The person confirms there, with the one-time code the spine already uses.
 
@@ -785,7 +786,7 @@ This is listed so the mapping is known. It is built only if everything else in t
 
 - **Contract.** Every tool's input and output shape, checked against its schema.
 - **Boundaries.** A token for one rental used on another must fail. A booking secret used before payment must return no token.
-- **Money.** A test lists every tool and fails if any leads to a capture of a hold, or accepts an amount as input.
+- **Money.** A test lists every tool and fails if any leads to a capture of a hold, or accepts an amount as input other than the advocate's offer lines.
 - **Limits.** The unpaid booking cap and the rate limits.
 - **Two clients.** The flow is run with the hosted assistant and with one outside MCP client.
 
@@ -815,7 +816,7 @@ This is listed so the mapping is known. It is built only if everything else in t
 | X3.8 | Passes | `route.test.ts`, `assistant-screen.test.tsx`, `assistant.spec.ts` |
 | X3.9 | Passes against the simulated PayPal, for a booking an assistant made, from `CHECKOUT.ORDER.APPROVED` alone. The live sandbox with the redirect blocked not yet run. | `route.test.ts`, `paypal-webhook.test.ts` |
 
-Also built: the contract test of every tool's input and output schema, the test that lists every tool and fails on an amount input or a capture, the unpaid-booking caps and rate limits, and the hosted assistant's ceilings, refusal and outage handling (`catalogue.test.ts`, `server.test.ts`, `runner.test.ts`, `bedrock-model.test.ts`, `hosted-flow.test.ts`). Not offered yet, and listed with the reason in `NOT_OFFERED`: `request_extension` (Hold has no extension flow; a rental's end date and fee cannot change after booking), `report_incident` (an incident needs photographs taken through the renter's link), and `get_negotiation` and `submit_offer` (Extension 4). The cut-line items, the mandated hold of 8.7 and the Cart API contract of 8.9, are not built; the `agent_hold` mandate kind remains the seam for the first. The hosted assistant has not yet been run against Claude on Bedrock.
+Also built: the contract test of every tool's input and output schema, the test that lists every tool and fails on an amount input or a capture, the unpaid-booking caps and rate limits, and the hosted assistant's ceilings, refusal and outage handling (`catalogue.test.ts`, `server.test.ts`, `runner.test.ts`, `bedrock-model.test.ts`, `hosted-flow.test.ts`). Not offered yet, and listed with the reason in `NOT_OFFERED`: `request_extension` (Hold has no extension flow; a rental's end date and fee cannot change after booking), and `report_incident` (an incident needs photographs taken through the renter's link). The renter's advocate's tools of Extension 4 are built: see section 9.11 and X4.9. The cut-line items, the mandated hold of 8.7 and the Cart API contract of 8.9, are not built; the `agent_hold` mandate kind remains the seam for the first. The hosted assistant has not yet been run against Claude on Bedrock.
 
 ### 8.13 In the video
 
@@ -966,7 +967,7 @@ sequenceDiagram
 In the hackathon build Hold runs both advocates, and Hold's customer is the shop. That is a real tension, and the design answers it openly.
 
 - **The rules are code, and public.** The referee is in the open repository, with its tests.
-- **The renter's advocate can be replaced.** Through Extension 3, a renter's own assistant can take the renter's side with `get_negotiation` and `submit_offer`. It meets the same referee.
+- **The renter's advocate can be replaced.** Through Extension 3, a renter's own assistant can take the renter's side. When an assistant is connected to the rental, the claim screen asks who argues the contest: Hold's advocate, or that assistant, named as it named itself and marked not verified. Choosing it takes the same one-time code and highest total. The renter's mandate then names that one assistant's session, for this rental's one claim, ending no later than its token; that mandate is the assistant's negotiation scope, which no agent token carries. Over MCP it gets the same read-only evidence as Hold's advocate (`get_negotiation`, `get_claim_lines`, `get_line_photos`, `get_price_list`, `get_known_marks`) and one move tool, `submit_offer`, through the one gateway and the same referee, held to the renter's written limit; it never sees the shop's limits. Hold's own advocate then never moves for the renter. Stopping the advocate, or disconnecting the assistant, ends the grant and sends the claim to the owner. Nothing it can call captures, refunds or moves money, and an agreement still needs the renter's code.
 - **Its instructions are published.** The prompt for the renter's advocate is in the repository.
 - **The renter's own limit binds it.** No result can exceed what the renter wrote.
 - **By default the renter confirms.** The advocate's agreement is a recommendation until then.
@@ -991,7 +992,7 @@ In the hackathon build Hold runs both advocates, and Hold's customer is the shop
 
 **No words cross.** As first designed, an advocate wrote a short argument for each move, kept only if every amount in it was a line amount of the move. A security review showed a limit could still cross in words, other scripts' digits, Roman numerals or a share. As built, a move carries no text: only its line amounts, grounds and the ids of the records they cite, and Hold words them from fixed templates on every screen and in the evidence pack. A move with a free-text field is refused by the gateway. An advocate cannot write its limit into the transcript.
 
-**Text from the other side is data.** Each advocate receives the other's arguments as quoted text. Its only tools are the three moves.
+**Text from the other side is data.** An advocate investigates before it moves. Hold's advocate reads through six read-only tools (the negotiation for its side, each line's finding, a line's handover and return photographs as images, the agreed price list and wear policy, the known marks, the condition report), over a few turns, then makes exactly one move: offer, accept or pass. Every record comes back as quoted data: the renter's comments, the shop's descriptions, the finding descriptions and the other side's moves. No read tool changes anything or takes an amount, and the moves cannot exceed the advocate's mandate. Each move has ceilings on model calls, reads, tokens and time; reaching one, a refusal or an outage is a pass.
 
 ### 9.14 What it changes
 
@@ -1036,12 +1037,12 @@ In the hackathon build Hold runs both advocates, and Hold's customer is the shop
 | X4.1 | Passes in the test environment with the simulated advocates and the simulated PayPal: the renter hands over the contest with a code, the advocates agree, both people confirm, the agreed total is captured as the final capture and the rest released. Not yet run against the PayPal sandbox or Claude on Bedrock. The seeded contested claim belongs to a sample rental whose PayPal references are simulated, so it cannot reach a sandbox capture. For a real one, a judge returns a sandbox rental with the contested-claim sample photograph, claims the scratch and contests it from the renter's link (`architecture.md` section 20.3). | `negotiation-flow.test.ts`, `negotiation.spec.ts`, `negotiation-repository.test.ts`, `runner.test.ts` |
 | X4.2 | Passes | `referee.property.test.ts` |
 | X4.3 | Passes | `runner.test.ts`, `negotiation-flow.test.ts`, `claim-screen.test.tsx` |
-| X4.4 | Passes: every message sent to each advocate is searched for the other side's limits, and the briefs are tested over any limits | `runner.test.ts`, `brief.test.ts`, `negotiation-repository.test.ts` |
+| X4.4 | Passes: every request sent to each advocate's model, its tool results included, is searched for the other side's limits; the briefs are tested over any limits; the evidence holds none; and every advocate tool over MCP is searched for the shop's | `runner.test.ts`, `negotiation-brief.test.ts`, `negotiation-evidence.test.ts`, `advocate.test.ts`, `negotiation-repository.test.ts` |
 | X4.5 | Passes | `referee.test.ts`, `negotiation-repository.test.ts` |
 | X4.6 | Passes for the renter stopping the advocate and the owner ending the shop's limits | `negotiation-repository.test.ts`, `referee.test.ts` |
 | X4.7 | Passes | `state-machines.test.ts`, `negotiation-repository.test.ts` |
 | X4.8 | Passes | `negotiation-repository.test.ts`, `evidence-renderer.test.ts`, `negotiation-fingerprint.test.ts` |
-| X4.9 | Not built (first on the cut line). The seam is `applyNegotiationMove` in `packages/db`: a `renter_agent` acting for the renter who granted the mandate passes the same gateway and referee, so `get_negotiation` and `submit_offer` can call it. | `negotiation-repository.test.ts` (the gateway's refusals) |
+| X4.9 | Passes in the test environment, with an outside MCP client (the end-to-end test speaks JSON-RPC to the app's `/mcp`) against the simulated shop advocate and the simulated PayPal: the assistant books, the renter chooses it on the claim screen with their code, it reads the negotiation and the evidence, an offer above the renter's limit is refused, its offer is accepted by the shop's advocate, and both people confirm. A forged, expired, other-rental or ungranted token, a stopped advocate and a disconnected assistant are refused on every advocate tool. Not yet run with a real outside assistant against the deployed address. | `advocate.test.ts`, `negotiation-repository.test.ts`, `negotiation-flow.test.ts`, `runner.test.ts`, `negotiation.spec.ts` |
 
 **Decisions made while building.**
 
@@ -1053,7 +1054,11 @@ In the hackathon build Hold runs both advocates, and Hold's customer is the shop
 - An agreement on nothing to pay goes to the owner to waive, since the claim machine has no move from `agreed` to `waived`.
 - Revoking either mandate, or a decline, ends the negotiation at once, even after agreement; nothing is captured.
 - The agreed total becomes the claim's total, which may only fall once approved. Lines keep their published amounts; the agreed lines are in the approval and the transcript.
-- One queue message runs a negotiation to its end in one worker call, rather than one message per turn: simpler, and a retry resumes from the stored transcript.
+- One queue message runs a negotiation as far as Hold's advocates can take it in one worker call, rather than one message per turn: simpler, and a retry resumes from the stored transcript. When the renter's side is their own assistant, the run stops at its turn, and each move it makes through the MCP server queues the shop's turn again.
+- An advocate's move is a bounded tool loop (`packages/negotiate/src/advocate-turn.ts`): five model calls, ten reads, 150,000 tokens and three minutes a move, inside the run's 60 calls, 600,000 tokens and eight minutes. Reads past their ceiling are answered with a refusal rather than run. A turn that calls two moves is a pass. Prompt version `advocate-2`; each move stores its model and prompt version, and an assistant's moves store none, since Hold ran no model for them.
+- The renter's own assistant's negotiation scope is not on its agent token, which never changes once issued (a database trigger guards it): it is the renter's live settlement mandate whose agent is `assistant:{session id}`, on the rental the token is bound to. No migration was needed.
+- Over MCP, `get_line_photos` returns short-lived links, as `get_claim` does; Hold's advocate receives the display copies as images. The negotiation role may read the display bucket only.
+- An outside assistant has the same ten minutes a move as Hold's advocates. A sweep every five minutes (`negotiation-sweep-lambda.ts`, shops with a PayPal sandbox account) sends a negotiation nobody moved in time to the owner.
 
 ### 9.17 In the video
 
