@@ -23,6 +23,13 @@ describe('a rental', () => {
     renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ state: 'out' })} hold={undefined} handovers={[]} returns={[{ itemId: 'bike', label: 'City e-bike', sessionId: null, sealed: false, comparisonId: null }]} canAct />)
     expect(screen.getByRole('button', { name: 'Start return for City e-bike' })).toBeInTheDocument()
   })
+  it('leads from a sample rental to its comparison, and offers nothing to photograph', () => {
+    const returns = [{ itemId: 'bike', label: 'Hybrid bike 3', sessionId: 'session', sealed: true, comparisonId: 'comparison' }]
+    renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ state: 'settling', simulated: true })} hold={undefined} handovers={[]} returns={returns} canAct />)
+    expect(screen.getByRole('link', { name: 'Review comparison' })).toHaveAttribute('href', `/shop/rentals/${detail().id}/comparison/comparison`)
+    expect(screen.queryByRole('button', { name: /Start return/ })).not.toBeInTheDocument()
+  })
+
   it('shows its terms: when, what, the fee and the hold, and the price list agreed to', () => {
     renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail()} hold={undefined} handovers={[]} canAct />)
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Priya Natarajan')

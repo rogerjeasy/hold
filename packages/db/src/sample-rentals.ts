@@ -1,18 +1,23 @@
 import { addDays, HOLD_ASSURED_DAYS, HOLD_VALIDITY_DAYS, shopDay, suggestedPhotoPlan, viewKeys } from '@hold/domain'
-import type { ClaimState, HoldState, ItemCategory, RentalState } from '@hold/domain'
+import type { ClaimState, HoldState, ItemCategory, PriceCategory, Region, RentalState } from '@hold/domain'
 import { and, asc, desc, eq, isNotNull, sql } from 'drizzle-orm'
 import {
   approvals,
   auditLog,
   authorizations,
+  captureSessions,
   claimLines,
   claimReplies,
   claims,
+  comparisons,
+  findings,
   holds,
   items,
   itemTypes,
+  marks,
   moneyEvents,
   photoPlans,
+  photos,
   priceEntries,
   priceLists,
   rentalItems,
@@ -51,6 +56,17 @@ function samplePlan(category: ItemCategory) {
   return views.map((view, index) => ({ ...view, key: keys[index] ?? view.label }))
 }
 
+// The sample photographs, one frame taken at the handover and again at the return with a chip in the paint. Their
+// display keys are reserved: the web app serves them from its own sample images, so no shop's bucket holds them.
+export const SAMPLE_PHOTOS = { handover: 'sample/sample-handover.jpg', damage: 'sample/sample-return-damage.jpg' } as const
+const SAMPLE_SHA256 = {
+  handover: '7ac39badb505d60e5c4c92018f9ae4410ffb80912d2c7fbbc9cd9202990e8080',
+  damage: '74072fc7d4f92e0398252661a83c83eb2427a99039f8ffcac9cc62a66a41cd39',
+} as const
+// Where each mark is on those photographs, as fractions of the frame.
+const SCUFF: Region = { x: 0.285, y: 0.77, width: 0.04, height: 0.07 }
+const CHIP: Region = { x: 0.36, y: 0.505, width: 0.075, height: 0.16 }
+
 // A moment as days, hours and minutes from the start of the shop's day, or as minutes from now. Today's handovers
 // and returns are set from now, so the day reads the same whenever the samples are added: one done, the rest to come.
 type Moment = readonly [days: number, hours: number, minutes: number] | { readonly fromNow: number }
@@ -62,7 +78,10 @@ type SampleRental = {
   readonly ends: Moment
   readonly state: RentalState
   readonly hold: Extract<HoldState, 'requested' | 'placed' | 'released' | 'captured'>
-  readonly claim?: { readonly state: Extract<ClaimState, 'awaiting_approval' | 'contested' | 'charged'>; readonly entry: number; readonly reply?: string }
+  // The first published price of this kind is the one claimed.
+  readonly claim?: { readonly state: Extract<ClaimState, 'awaiting_approval' | 'contested' | 'charged'>; readonly kind: PriceCategory; readonly reply?: string }
+  // Photographed at the handover and the return, and compared: the claim rests on the finding.
+  readonly photographed?: true
 }
 
 const SAMPLES: readonly SampleRental[] = [
@@ -74,7 +93,7 @@ const SAMPLES: readonly SampleRental[] = [
   { renter: 'Ahmed Khan', items: ['hybrid', 'seat'], starts: [-1, 16, 30], ends: { fromNow: 300 }, state: 'out', hold: 'placed' },
   { renter: 'Lea Fischer', items: ['emtb'], starts: [-4, 10, 0], ends: [-1, 18, 0], state: 'overdue', hold: 'placed' },
   { renter: 'Marco Rossi', items: ['ebike'], starts: [-26, 10, 0], ends: [-1, 17, 0], state: 'returned', hold: 'placed' },
-  { renter: 'Priya Natarajan', items: ['hybrid'], starts: [-6, 10, 0], ends: [-1, 17, 30], state: 'settling', hold: 'placed', claim: { state: 'awaiting_approval', entry: 0 } },
+  { renter: 'Priya Natarajan', items: ['hybrid'], starts: [-6, 10, 0], ends: [-1, 17, 30], state: 'settling', hold: 'placed', claim: { state: 'awaiting_approval', kind: 'damage' }, photographed: true },
   {
     renter: 'Tom Becker',
     items: ['gravel'],
@@ -82,10 +101,10 @@ const SAMPLES: readonly SampleRental[] = [
     ends: [-2, 12, 0],
     state: 'settling',
     hold: 'placed',
-    claim: { state: 'contested', entry: 1, reply: 'The lock was in the bag when I handed it back.' },
+    claim: { state: 'contested', kind: 'loss', reply: 'The lock was in the bag when I handed it back.' },
   },
   { renter: 'Julia Novak', items: ['ebike'], starts: [-9, 10, 0], ends: [-7, 17, 0], state: 'closed', hold: 'released' },
-  { renter: 'Daniel Ortiz', items: ['hybrid'], starts: [-8, 9, 0], ends: [-6, 18, 0], state: 'closed', hold: 'captured', claim: { state: 'charged', entry: 0 } },
+  { renter: 'Daniel Ortiz', items: ['hybrid'], starts: [-8, 9, 0], ends: [-6, 18, 0], state: 'closed', hold: 'captured', claim: { state: 'charged', kind: 'damage' } },
 ]
 
 const MINUTE = 60 * 1000
@@ -106,7 +125,7 @@ async function publishedTerms(transaction: Transaction) {
   const [wear] = await transaction.select({ id: wearPolicies.id }).from(wearPolicies).where(and(eq(wearPolicies.version, list.version), isNotNull(wearPolicies.publishedAt)))
   if (wear === undefined) return undefined
   const entries = await transaction
-    .select({ id: priceEntries.id, amountCents: priceEntries.amountCents })
+    .select({ id: priceEntries.id, amountCents: priceEntries.amountCents, category: priceEntries.category })
     .from(priceEntries)
     .where(eq(priceEntries.priceListId, list.id))
     .orderBy(asc(priceEntries.position))
@@ -135,6 +154,7 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
   const { currency } = terms
 
   const typeIds = new Map<SampleItem, string>()
+  const planIds = new Map<SampleItem, string>()
   const typeOf = (key: SampleItem) => {
     const typeId = typeIds.get(key)
     if (typeId === undefined) throw new Error(`No sample item type for ${key}.`)
@@ -163,6 +183,7 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
       .returning({ id: itemTypes.id })
     if (type === undefined) throw new Error('A sample item type was not created.')
     typeIds.set(key, type.id)
+    planIds.set(key, plan.id)
   }
   const numbered = new Map<SampleItem, number>()
 
@@ -186,6 +207,7 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
     const audit = (action: string, at: Date, actorKind = 'person') =>
       transaction.insert(auditLog).values({ shopId, actorKind, actorId: actorKind === 'person' ? userId : null, action, subjectKind: 'rental', subjectId: rental.id, detail: SIMULATED, at })
 
+    const rentalItemIds: { readonly key: SampleItem; readonly itemId: string; readonly rentalItemId: string }[] = []
     for (const key of sample.items) {
       const number = (numbered.get(key) ?? 0) + 1
       numbered.set(key, number)
@@ -194,7 +216,12 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
         .values({ shopId, itemTypeId: typeOf(key), label: `${CATALOG[key].name} ${String(number)}`, simulated: true, createdAt: now })
         .returning({ id: items.id })
       if (item === undefined) throw new Error('A sample item was not created.')
-      await transaction.insert(rentalItems).values({ shopId, rentalId: rental.id, itemId: item.id, dayRateCents: CATALOG[key].dayRateCents, holdCents: CATALOG[key].holdCents })
+      const [rentalItem] = await transaction
+        .insert(rentalItems)
+        .values({ shopId, rentalId: rental.id, itemId: item.id, dayRateCents: CATALOG[key].dayRateCents, holdCents: CATALOG[key].holdCents })
+        .returning({ id: rentalItems.id })
+      if (rentalItem === undefined) throw new Error('A sample rental item was not created.')
+      rentalItemIds.push({ key, itemId: item.id, rentalItemId: rentalItem.id })
     }
     await transaction.insert(moneyEvents).values({ shopId, rentalId: rental.id, kind: 'fee_captured', currency, amountCents: feeCents, paypalReference: reference('fee'), occurredAt: inMonth(startsAt) })
 
@@ -227,7 +254,8 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
 
     let capturedCents = 0
     if (sample.claim !== undefined) {
-      const entry = terms.entries[sample.claim.entry % terms.entries.length]
+      const kind = sample.claim.kind
+      const entry = terms.entries.find((each) => each.category === kind) ?? terms.entries[0]
       if (entry === undefined) throw new Error('The price list has no entries.')
       const raisedAt = inMonth(new Date(endsAt.getTime() + 60 * MINUTE))
       const presented = sample.claim.state !== 'awaiting_approval'
@@ -236,15 +264,22 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
         .values({ shopId, rentalId: rental.id, currency, totalCents: entry.amountCents, state: sample.claim.state, raisedByUserId: userId, presentedAt: presented ? raisedAt : null, createdAt: raisedAt })
         .returning({ id: claims.id })
       if (claim === undefined) throw new Error('A sample claim was not created.')
+      const [photographed] = rentalItemIds
+      const findingId =
+        sample.photographed === true && photographed !== undefined
+          ? await photographSample(transaction, { shopId, userId, item: photographed, planId: planIds.get(photographed.key) ?? '', view: samplePlan(CATALOG[photographed.key].category)[0]?.key ?? 'frame', startsAt, endsAt, priceEntryId: entry.id })
+          : undefined
       await transaction.insert(claimLines).values({
         shopId,
         claimId: claim.id,
         priceEntryId: entry.id,
         currency,
         amountCents: entry.amountCents,
-        source: 'person',
+        source: findingId === undefined ? 'person' : 'finding',
+        findingId: findingId ?? null,
         addedByUserId: userId,
-        reason: 'Sample data, added to show how a claim looks.',
+        // A line on a finding speaks through the finding; any other says it is a sample.
+        reason: findingId === undefined ? 'Sample data, added to show how a claim looks.' : null,
         createdAt: raisedAt,
       })
       await audit('claim.raised', raisedAt)
@@ -274,4 +309,78 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
   // A shop that had not yet chosen a currency takes the price list's, as publishing it would have done.
   await transaction.update(shops).set({ currency }).where(and(eq(shops.id, shopId), sql`${shops.currency} is null`))
   return { ok: true, rentals: SAMPLES.length }
+}
+
+type PhotographedSample = {
+  readonly shopId: string
+  readonly userId: string
+  readonly item: { readonly itemId: string; readonly rentalItemId: string }
+  readonly planId: string
+  readonly view: string
+  readonly startsAt: Date
+  readonly endsAt: Date
+  readonly priceEntryId: string
+}
+
+// One view photographed at the handover and again at the return, the faint scuff on record from the handover, and the
+// comparison that found the chip and set the scuff aside. Marked simulated: no model ran, and the photographs are the
+// demonstration's samples. Returns the finding the claim rests on.
+async function photographSample(transaction: Transaction, sample: PhotographedSample): Promise<string> {
+  const { shopId, userId, item, view } = sample
+  const session = async (kind: 'handover' | 'return', at: Date, photo: keyof typeof SAMPLE_PHOTOS) => {
+    const [row] = await transaction
+      .insert(captureSessions)
+      .values({ shopId, rentalItemId: item.rentalItemId, kind, photoPlanId: sample.planId, actorUserId: userId, startedAt: at, sealedAt: at })
+      .returning({ id: captureSessions.id })
+    if (row === undefined) throw new Error('A sample capture session was not created.')
+    await transaction.insert(photos).values({
+      shopId,
+      sessionId: row.id,
+      view,
+      evidenceKey: `sample/${shopId}/${row.id}/${view}.jpg`,
+      displayKey: SAMPLE_PHOTOS[photo],
+      sha256: SAMPLE_SHA256[photo],
+      receivedAt: at,
+      quality: { simulated: 1 },
+    })
+    return row.id
+  }
+  const handover = await session('handover', sample.startsAt, 'handover')
+  const returned = await session('return', sample.endsAt, 'damage')
+  const [scuff] = await transaction
+    .insert(marks)
+    .values({ shopId, itemId: item.itemId, view, region: SCUFF, description: 'A faint scuff on the down tube.', firstSeenSessionId: handover })
+    .returning({ id: marks.id })
+  if (scuff === undefined) throw new Error('A sample mark was not created.')
+  const [comparison] = await transaction
+    .insert(comparisons)
+    .values({ shopId, handoverSessionId: handover, returnSessionId: returned, state: 'findings', simulated: true, createdAt: sample.endsAt, completedAt: sample.endsAt })
+    .returning({ id: comparisons.id })
+  if (comparison === undefined) throw new Error('A sample comparison was not created.')
+  await transaction.insert(findings).values({
+    shopId,
+    comparisonId: comparison.id,
+    view,
+    region: SCUFF,
+    class: 'known_mark',
+    confidence: 0.9,
+    description: 'The faint scuff on the down tube, recorded at the handover. It is not charged again.',
+    matchedMarkId: scuff.id,
+  })
+  const [chip] = await transaction
+    .insert(findings)
+    .values({
+      shopId,
+      comparisonId: comparison.id,
+      view,
+      region: CHIP,
+      class: 'new_damage',
+      confidence: 0.93,
+      description: 'A chip in the paint on the down tube, through to the bare metal. It was not there at the handover.',
+      secondLookConfirmed: true,
+      suggestedPriceEntryId: sample.priceEntryId,
+    })
+    .returning({ id: findings.id })
+  if (chip === undefined) throw new Error('A sample finding was not created.')
+  return chip.id
 }

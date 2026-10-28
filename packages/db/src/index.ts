@@ -3,7 +3,7 @@ export type { NewOwner, Person, PersonShop, RegisteredOwner } from './accounts.t
 export { currentPriceList, publishPriceList } from './price-list-repository.ts'
 export type { PublishedPriceList, PublishResult } from './price-list-repository.ts'
 export { takeRateToken } from './rate-limit.ts'
-export { addSampleRentals } from './sample-rentals.ts'
+export { addSampleRentals, SAMPLE_PHOTOS } from './sample-rentals.ts'
 export { shopCalendar } from './calendar-repository.ts'
 export type { CalendarBooking, CalendarItem, ShopCalendar } from './calendar-repository.ts'
 export { DEMO_SHOP } from './demo-shop.ts'

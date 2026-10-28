@@ -48,6 +48,8 @@ export function RentalScreen({ shopName, clock, rental, hold, handovers, returns
           {/* At the counter on a phone, what staff act on comes before the terms. */}
           <div className="grid min-w-0 gap-6 max-lg:order-first">
             {live && ['out', 'overdue', 'returned', 'inspecting', 'settling'].includes(rental.state) ? <ReturnPanel rentalId={rental.id} returns={returns} canAct={canAct} /> : null}
+            {/* A sample rental photographs nothing, but one that was compared leads to its comparison. */}
+            {rental.simulated && returns.some((item) => item.comparisonId !== null) ? <ReturnPanel rentalId={rental.id} returns={returns} canAct={false} /> : null}
             {handingOver ? <HandoverPanel rentalId={rental.id} handovers={handovers} /> : null}
             {asking || hold?.state === 'placed' ? <HoldPanel rentalId={rental.id} state={rental.state} holdCents={rental.holdCents} hold={hold} clock={clock} /> : null}
             {canAct && live ? <LinkPanel rentalId={rental.id} contactEmail={rental.contactEmail} paid={!waiting} /> : null}
