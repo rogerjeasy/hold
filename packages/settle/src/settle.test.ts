@@ -113,8 +113,27 @@ describe('an event from PayPal', () => {
   })
 
   it('is kept and ignored when it is about nothing Hold acts on yet', async () => {
-    const eventId = await delivered('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-1' })
+    const eventId = await delivered('BILLING.SUBSCRIPTION.CREATED', { id: 'I-1' })
     expect(await applyPayPalEvent(dependencies(), { shopId: fixture.shopId, eventId })).toBe('ignored')
+  })
+
+  // A dispute is answered from the operations agent's queue, where a person approves the answer. The event brings it to
+  // the owner now instead of the next night, once PayPal's own list shows it open.
+  const disputeChecks = async () => (await fixture.inShop((transaction) => transaction.select().from(outbox))).filter((row) => row.queue === 'ops-agent' && (row.payload as { trigger?: string }).trigger === 'dispute_opened')
+
+  it('asks the operations agent to look now when PayPal reports a dispute it then shows open', async () => {
+    const before = (await disputeChecks()).length
+    fixture.fake.openDispute({ id: 'PP-D-2', open: true, amount: { cents: 35_00, currency: 'EUR' }, responseDueAt: new Date('2026-10-30T09:00:00Z'), captureIds: ['CAPTURE-1'] })
+    const eventId = await delivered('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-2' })
+    expect(await applyPayPalEvent(dependencies(), { shopId: fixture.shopId, eventId })).toBe('applied')
+    expect(await disputeChecks()).toHaveLength(before + 1)
+  })
+
+  it('believes PayPal’s list, not the event: a dispute PayPal does not show open asks for nothing', async () => {
+    const before = (await disputeChecks()).length
+    const eventId = await delivered('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-NOT-OPEN' })
+    expect(await applyPayPalEvent(dependencies(), { shopId: fixture.shopId, eventId })).toBe('ignored')
+    expect(await disputeChecks()).toHaveLength(before)
   })
 })
 

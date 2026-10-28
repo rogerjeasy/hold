@@ -192,10 +192,11 @@ export async function recentDecisions(transaction: Transaction, now: Date) {
 }
 
 // Asks for a run now, as the nightly schedule does: through the outbox, ordered per shop. The relay adds the shop.
-export async function queueOperationsCheck(transaction: Transaction, now: Date): Promise<string> {
+// trigger: why the run is asked for, as the ops agent's message names it: a person's check, or a dispute PayPal opened.
+export async function queueOperationsCheck(transaction: Transaction, now: Date, trigger: 'manual' | 'dispute_opened' = 'manual'): Promise<string> {
   const [shop] = await transaction.select({ id: shops.id }).from(shops).limit(1)
   if (shop === undefined) throw new Error('No shop in scope.')
-  const [row] = await transaction.insert(outbox).values({ shopId: shop.id, queue: OPS_AGENT_QUEUE, messageGroup: shop.id, payload: { trigger: 'manual' }, createdAt: now }).returning({ id: outbox.id })
+  const [row] = await transaction.insert(outbox).values({ shopId: shop.id, queue: OPS_AGENT_QUEUE, messageGroup: shop.id, payload: { trigger }, createdAt: now }).returning({ id: outbox.id })
   if (row === undefined) throw new Error('The check was not queued.')
   return row.id
 }

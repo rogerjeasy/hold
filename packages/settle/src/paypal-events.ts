@@ -1,4 +1,4 @@
-import { settlementExecutionForResource, feeRentalByOrder, holdRentalByOrder, inShop, markPayPalEvent, payPalEvent, paypalAccounts } from '@hold/db'
+import { settlementExecutionForResource, feeRentalByOrder, holdRentalByOrder, inShop, markPayPalEvent, payPalEvent, paypalAccounts, queueOperationsCheck } from '@hold/db'
 import type { Transaction } from '@hold/db'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
@@ -74,6 +74,20 @@ export async function applyPayPalEvent(dependencies: SettleDependencies, message
       await mark('verified', result === 'failed' ? 'failed' : 'applied', settlement.rentalId)
       return 'applied'
     }
+  }
+  // A dispute is answered from the operations agent's queue, where a person approves the answer. Nothing in the event
+  // is believed: PayPal's own list must show it open, and then the agent is asked to look now, not the next night.
+  if (body?.event_type === 'CUSTOMER.DISPUTE.CREATED' && body.resource?.id !== undefined) {
+    const disputeId = body.resource.id
+    const open = await paypal.listOpenDisputes()
+    if (!open.ok) throw new PayPalUnavailable(open.error.kind)
+    if (!open.value.some((dispute) => dispute.id === disputeId && dispute.open)) {
+      await mark('verified', 'ignored')
+      return 'ignored'
+    }
+    await inScope((transaction) => queueOperationsCheck(transaction, dependencies.now(), 'dispute_opened'))
+    await mark('verified', 'applied')
+    return 'applied'
   }
   // An order's own event names it; a capture or an authorization names the order it was made on.
   const orderId = body?.event_type === 'CHECKOUT.ORDER.APPROVED' ? body.resource?.id : body?.resource?.supplementary_data?.related_ids?.order_id

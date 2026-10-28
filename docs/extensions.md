@@ -460,7 +460,7 @@ PayPal's write tools, such as `create_invoice`, `create_refund` and `accept_disp
 | Data | `exceptions`, `proposals`, `ops_runs`, `mandates` |
 | Code | `packages/ops`. Detectors, proposals and mandates in `packages/domain`. The gateway gains tiers. |
 | Queues | `ops-agent`, ordered per shop |
-| Schedules | One run per shop after reconciliation. Extra runs when a dispute opens, a hold becomes at risk or a capture fails. |
+| Schedules | One run per shop after reconciliation. Extra runs when a dispute opens, a hold becomes at risk or a capture fails. Since 28 October 2026 a verified `CUSTOMER.DISPUTE.CREATED` event, once PayPal's own list of open disputes shows the dispute, queues a run with the trigger `dispute_opened`, so the answer reaches the owner the same day (`paypal-events.ts` in `packages/settle`); an event naming no open dispute asks for nothing. |
 | Screens | The morning queue, a list grouped by kind. The rules list in shop settings. |
 | Assistant | The owner's assistant from the spine uses the same proposals. `propose_release` and `propose_extension` now write proposal records. |
 
