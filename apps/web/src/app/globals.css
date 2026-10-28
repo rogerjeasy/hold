@@ -276,3 +276,12 @@
     }
   }
 }
+
+/*
+ * The decision board's grid (features/decisions): the decision shown beside the grid is marked in its row with the
+ * accent, as a bar and a tint, while AG Grid's own ring stays on the focused cell. Its cell says so to screen readers.
+ */
+.decision-grid .ag-row:has([data-chosen]) {
+  background-color: color-mix(in oklab, var(--primary) 7%, var(--card));
+  box-shadow: inset 3px 0 0 var(--primary);
+}

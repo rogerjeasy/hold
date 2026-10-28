@@ -1229,6 +1229,7 @@
     "nav": {
       "label": "Pages de la boutique",
       "home": "Aujourd’hui",
+      "decisions": "Décisions",
       "rentals": "Locations",
       "calendar": "Calendrier",
       "items": "Articles",
@@ -2153,7 +2154,8 @@
       "contested": {
         "title": "{renter} a contesté une réclamation de {amount}",
         "quote": "Le client a écrit"
-      }
+      },
+      "openBoard": "Ouvrir toutes les décisions"
     },
     "counter": {
       "title": "Aujourd’hui au comptoir",
@@ -3282,6 +3284,118 @@
       "revoke": "Désactiver",
       "revoked": "Règle permanente désactivée.",
       "ownerOnly": "Seul le propriétaire l’active ou la désactive."
+    }
+  },
+  "decisions": {
+    "title": "Décisions",
+    "brief": "{decisions, plural, one {# décision attend} other {# décisions attendent}}, {yours, plural, =0 {aucune ne vous revient} one {# vous revient} other {# vous reviennent}}. {dueToday, plural, =0 {Rien n’arrive à échéance aujourd’hui.} one {# arrive à échéance aujourd’hui.} other {# arrivent à échéance aujourd’hui.}}",
+    "lead": "Les réclamations, les propositions de l’agent, les signalements des locataires et ce qui attend au comptoir, dans l’ordre de leur échéance. Rien ici ne débite qui que ce soit : un débit ne part que d’une réclamation qu’une personne a approuvée.",
+    "passkeyBody": "Approuver les libérations et les demandes d’argent de l’agent demande votre clé d’accès. Rien d’autre sur cette page.",
+    "empty": "Rien n’attend une personne.",
+    "emptyBody": "Les réclamations à approuver, les propositions de l’agent, les signalements des locataires, les blocages proches de leur fin et les retours en retard apparaissent ici.",
+    "noMatch": "Rien ne correspond. Effacez la recherche ou affichez tous les groupes.",
+    "toolbar": "Filtrer les décisions",
+    "groups": {
+      "all": "Toutes",
+      "claims": "Réclamations",
+      "agent": "De l’agent",
+      "incidents": "Incidents",
+      "counter": "Blocages et retours"
+    },
+    "search": "Rechercher des décisions",
+    "searchHint": "Locataire, article ou référence PayPal",
+    "mineOnly": "Seulement les miennes",
+    "keys": "Les flèches passent d’une décision à l’autre. Entrée en ouvre une à côté de la liste. Espace choisit une libération.",
+    "grid": "Décisions qui attendent une personne",
+    "columns": {
+      "decision": "Décision",
+      "due": "Échéance",
+      "amount": "Montant",
+      "choose": "Choisir"
+    },
+    "titles": {
+      "claim": "Approuver une réclamation",
+      "contested": "Trancher une réclamation contestée",
+      "escalated": "Trancher une réclamation que les représentants n’ont pas réglée",
+      "incident": "{kind} sur {item}",
+      "hold_ending": "Le blocage de {renter} prend fin {when}",
+      "late": "{renter} est en retard"
+    },
+    "headings": {
+      "claim": "Approuver une réclamation de {amount}",
+      "contested": "Trancher une réclamation contestée de {amount}",
+      "escalated": "Trancher une réclamation de {amount} que les représentants n’ont pas réglée"
+    },
+    "incidentKinds": {
+      "small_damage": "Un petit dommage",
+      "mechanical_fault": "Une panne",
+      "theft_or_loss": "Vol ou perte",
+      "unsafe_or_unclear": "Quelque chose de dangereux ou d’incertain",
+      "unsorted": "Un signalement"
+    },
+    "renter": "un locataire",
+    "holdLine": "Jour {day} sur {max} · {amount} bloqués",
+    "lateLine": "Retour prévu {when}",
+    "due": {
+      "none": "Sans date",
+      "overdue": "En retard depuis {when}",
+      "by": "Avant {when}",
+      "overdueWord": "En retard"
+    },
+    "deciders": {
+      "you": "Vous",
+      "senior": "Propriétaire ou responsable",
+      "another_senior": "Un autre propriétaire ou responsable",
+      "staff": "Le personnel"
+    },
+    "deciderLine": {
+      "you": "Vous décidez.",
+      "senior": "Un propriétaire ou un responsable décide.",
+      "another_senior": "Un autre propriétaire ou responsable décide : vous l’avez émise.",
+      "staff": "Le personnel décide. Vous pouvez la lire."
+    },
+    "list": "Décisions",
+    "open": "Preuves et actions",
+    "choose": "Choisir la libération de {amount}",
+    "detail": {
+      "label": "Décision choisie",
+      "none": "Choisissez une décision pour voir ses preuves et ce qui peut être fait.",
+      "due": "Échéance",
+      "amount": "Montant",
+      "decider": "Qui décide",
+      "waiting": "En attente depuis {when}",
+      "lines": "Lignes de la réclamation",
+      "source": {
+        "finding": "De la comparaison des photos",
+        "person": "Motif écrit par une personne",
+        "agreed_in_rental": "Acceptée par le locataire pendant la location"
+      },
+      "atHandover": "À la remise : {line}",
+      "atReturn": "Au retour : {line}",
+      "split": "Si elle reste telle quelle",
+      "capture": "Prélevé sur le blocage",
+      "release": "Libéré au locataire",
+      "invoice": "Facturé à part",
+      "renterWrote": "Le locataire a écrit",
+      "openClaim": "Examiner et approuver sur la page de la réclamation",
+      "openDecision": "Trancher sur la page de la réclamation",
+      "claimNote": "L’approuver montre la réclamation au locataire. Rien n’est prélevé avant qu’il l’accepte ou que son délai de réponse prenne fin.",
+      "safety": "Le locataire a parlé de sécurité. Vérifiez l’article avant qu’il ne ressorte.",
+      "suggested": "De la liste de prix : {line}",
+      "openIncidents": "La traiter dans Incidents",
+      "holdBody": "Libérez-le ou émettez une réclamation avant que PayPal le laisse expirer.",
+      "lateBody": "Retour prévu {when}.",
+      "openRental": "Ouvrir la location",
+      "handover": "À la remise",
+      "return": "Au retour",
+      "item": "Article"
+    },
+    "together": {
+      "label": "Libérations choisies",
+      "summary": "{count, plural, one {# libération choisie} other {# libérations choisies}} : {amount} reviennent aux locataires.",
+      "approve": "Approuver ces libérations",
+      "passkey": "Confirmez avec votre clé d’accès pour approuver les libérations.",
+      "clear": "Effacer le choix"
     }
   }
 }

@@ -1,4 +1,4 @@
-import { BadgeCheck, Bike, CalendarDays, CalendarRange, Gauge, Handshake, LayoutDashboard, ListChecks, ShieldCheck, Siren, Tag, Users, Wallet } from 'lucide-react'
+import { BadgeCheck, Bike, CalendarDays, CalendarRange, Gauge, Handshake, Inbox, LayoutDashboard, ListChecks, ShieldCheck, Siren, Tag, Users, Wallet } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { shopRoutes } from '@/lib/routes'
 
@@ -16,6 +16,7 @@ export const shopNavGroups: readonly ShopNavGroup[] = [
     label: null,
     items: [
       { key: 'home', icon: LayoutDashboard },
+      { key: 'decisions', icon: Inbox },
       { key: 'queue', icon: ListChecks },
       { key: 'rentals', icon: CalendarRange },
       { key: 'calendar', icon: CalendarDays },

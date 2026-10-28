@@ -155,6 +155,7 @@ The rules every change follows are in [`AGENTS.md`](AGENTS.md), and the threats 
 | AI | Claude Opus 4.6 on Amazon Bedrock for judging (designed for Opus 5.5, which the account has no quota for yet), OpenCV.js on the phone for photo quality |
 | Web | Next.js, React, Tailwind CSS and shadcn/ui, in English, German, Spanish and French |
 | Scheduling | Bryntum Scheduler (trial package) for the shop's calendar: items as rows, rentals as bars marked by their PayPal hold |
+| Decisions | AG Grid Community for the decision board: every claim, agent proposal, renter's report, ending hold and late return waiting on a person, in the order it falls due, keyboard first |
 | Data | Aurora PostgreSQL Serverless v2 through the RDS Data API, Drizzle ORM |
 | Work | SQS queues and Lambda workers, EventBridge Scheduler for hold upkeep |
 | Identity | Amazon Cognito with emailed codes and passkeys |

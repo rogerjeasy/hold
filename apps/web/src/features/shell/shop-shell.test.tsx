@@ -49,13 +49,15 @@ describe('the shop shell', () => {
     expect(within(menu).getByRole('link', { name: 'Incidents' })).toHaveAttribute('href', '/shop/incidents')
   })
 
-  it('lists the morning queue right after the day', () => {
+  it('lists the decision board right after the day, then the morning queue', () => {
     navigation.pathname = '/shop'
     shell()
     const menu = screen.getAllByRole('navigation', { name: 'Shop pages' })[0]
     if (menu === undefined) throw new Error('No shop menu.')
     const links = within(menu).getAllByRole('link').map((link) => link.textContent)
-    expect(links.indexOf('Morning queue')).toBe(links.indexOf('Today') + 1)
+    expect(links.indexOf('Decisions')).toBe(links.indexOf('Today') + 1)
+    expect(links.indexOf('Morning queue')).toBe(links.indexOf('Decisions') + 1)
+    expect(within(menu).getByRole('link', { name: 'Decisions' })).toHaveAttribute('href', '/shop/decisions')
     expect(within(menu).getByRole('link', { name: 'Morning queue' })).toHaveAttribute('href', '/shop/queue')
   })
 

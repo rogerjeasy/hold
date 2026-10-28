@@ -1229,6 +1229,7 @@
     "nav": {
       "label": "Páginas de la tienda",
       "home": "Hoy",
+      "decisions": "Decisiones",
       "rentals": "Alquileres",
       "calendar": "Calendario",
       "items": "Artículos",
@@ -2153,7 +2154,8 @@
       "contested": {
         "title": "{renter} impugnó una reclamación de {amount}",
         "quote": "El cliente escribió"
-      }
+      },
+      "openBoard": "Abrir todas las decisiones"
     },
     "counter": {
       "title": "Hoy en el mostrador",
@@ -3282,6 +3284,118 @@
       "revoke": "Desactivar",
       "revoked": "Regla permanente desactivada.",
       "ownerOnly": "Solo el propietario la activa o la desactiva."
+    }
+  },
+  "decisions": {
+    "title": "Decisiones",
+    "brief": "{decisions, plural, one {# decisión espera} other {# decisiones esperan}}, {yours, plural, =0 {ninguna es tuya} one {# es tuya} other {# son tuyas}}. {dueToday, plural, =0 {Nada vence hoy.} one {# vence hoy.} other {# vencen hoy.}}",
+    "lead": "Reclamaciones, propuestas del agente, avisos de los clientes y lo pendiente en el mostrador, en el orden en que vencen. Aquí no se cobra a nadie: un cobro solo empieza con una reclamación que una persona aprobó.",
+    "passkeyBody": "Aprobar las liberaciones y las peticiones de dinero del agente requiere tu llave de acceso. Nada más en esta página la requiere.",
+    "empty": "Nada espera a una persona.",
+    "emptyBody": "Aquí aparecen las reclamaciones por aprobar, las propuestas del agente, los avisos de los clientes, las retenciones a punto de vencer y las devoluciones con retraso.",
+    "noMatch": "Nada coincide. Borra la búsqueda o muestra todos los grupos.",
+    "toolbar": "Filtrar las decisiones",
+    "groups": {
+      "all": "Todas",
+      "claims": "Reclamaciones",
+      "agent": "Del agente",
+      "incidents": "Incidencias",
+      "counter": "Retenciones y devoluciones"
+    },
+    "search": "Buscar decisiones",
+    "searchHint": "Cliente, artículo o referencia de PayPal",
+    "mineOnly": "Solo las mías",
+    "keys": "Las flechas pasan de una decisión a otra. Intro abre una junto a la lista. La barra espaciadora elige una liberación.",
+    "grid": "Decisiones que esperan a una persona",
+    "columns": {
+      "decision": "Decisión",
+      "due": "Vence",
+      "amount": "Importe",
+      "choose": "Elegir"
+    },
+    "titles": {
+      "claim": "Aprobar una reclamación",
+      "contested": "Decidir una reclamación impugnada",
+      "escalated": "Decidir una reclamación que los representantes no resolvieron",
+      "incident": "{kind} en {item}",
+      "hold_ending": "La retención de {renter} vence {when}",
+      "late": "{renter} se retrasa"
+    },
+    "headings": {
+      "claim": "Aprobar una reclamación de {amount}",
+      "contested": "Decidir una reclamación impugnada de {amount}",
+      "escalated": "Decidir una reclamación de {amount} que los representantes no resolvieron"
+    },
+    "incidentKinds": {
+      "small_damage": "Un daño pequeño",
+      "mechanical_fault": "Una avería",
+      "theft_or_loss": "Robo o pérdida",
+      "unsafe_or_unclear": "Algo inseguro o poco claro",
+      "unsorted": "Un aviso"
+    },
+    "renter": "un cliente",
+    "holdLine": "Día {day} de {max} · {amount} retenidos",
+    "lateLine": "Debía volver {when}",
+    "due": {
+      "none": "Sin fecha",
+      "overdue": "Vencida desde {when}",
+      "by": "Antes de {when}",
+      "overdueWord": "Vencida"
+    },
+    "deciders": {
+      "you": "Tú",
+      "senior": "Propietario o encargado",
+      "another_senior": "Otro propietario o encargado",
+      "staff": "El personal"
+    },
+    "deciderLine": {
+      "you": "Decides tú.",
+      "senior": "Decide un propietario o encargado.",
+      "another_senior": "Decide otro propietario o encargado: la presentaste tú.",
+      "staff": "Decide el personal. Tú puedes leerla."
+    },
+    "list": "Decisiones",
+    "open": "Pruebas y acciones",
+    "choose": "Elegir la liberación de {amount}",
+    "detail": {
+      "label": "Decisión elegida",
+      "none": "Elige una decisión para ver sus pruebas y lo que se puede hacer.",
+      "due": "Vence",
+      "amount": "Importe",
+      "decider": "Quién decide",
+      "waiting": "Espera desde {when}",
+      "lines": "Partidas de la reclamación",
+      "source": {
+        "finding": "De la comparación de fotos",
+        "person": "Motivo escrito por una persona",
+        "agreed_in_rental": "Aceptada por el cliente durante el alquiler"
+      },
+      "atHandover": "En la entrega: {line}",
+      "atReturn": "En la devolución: {line}",
+      "split": "Si se queda como está",
+      "capture": "Cobrado de la retención",
+      "release": "Liberado al cliente",
+      "invoice": "Facturado aparte",
+      "renterWrote": "El cliente escribió",
+      "openClaim": "Revisar y aprobar en la página de la reclamación",
+      "openDecision": "Decidir en la página de la reclamación",
+      "claimNote": "Aprobarla muestra la reclamación al cliente. No se cobra nada hasta que la acepte o termine su plazo para responder.",
+      "safety": "El cliente mencionó la seguridad. Revisa el artículo antes de que vuelva a salir.",
+      "suggested": "De la lista de precios: {line}",
+      "openIncidents": "Atenderla en Incidencias",
+      "holdBody": "Libérala o presenta una reclamación antes de que PayPal la deje vencer.",
+      "lateBody": "Debía volver {when}.",
+      "openRental": "Abrir el alquiler",
+      "handover": "En la entrega",
+      "return": "En la devolución",
+      "item": "Artículo"
+    },
+    "together": {
+      "label": "Liberaciones elegidas",
+      "summary": "{count, plural, one {# liberación elegida} other {# liberaciones elegidas}}: {amount} vuelven a los clientes.",
+      "approve": "Aprobar estas liberaciones",
+      "passkey": "Confirma con tu llave de acceso para aprobar liberaciones.",
+      "clear": "Quitar la selección"
     }
   }
 }

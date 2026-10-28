@@ -1331,7 +1331,7 @@ Never cut: the spine, the scorecard, the morning queue.
 
 ### 12.5 After the six: the sponsor surfaces
 
-Two screens built for the sponsor prizes in `tech-stack.md` section 15. They follow every rule in section 3 and change no money rule. They come after the six extensions and are the first thing cut.
+Screens built for the sponsor prizes in `tech-stack.md` section 15. They follow every rule in section 3 and change no money rule. They come after the six extensions and are the first thing cut.
 
 **The rental calendar, on Bryntum Scheduler**
 
@@ -1348,6 +1348,29 @@ Page `/shop/calendar`. Items down the side, grouped by item type, and time acros
 - **Why a move never touches money.** `move_booking` keeps the period and the item type, so the fee and the hold amount stay as they are. A change of period goes through the existing `propose_extension`. A booking that is out, or a move to another item type, is refused by the server.
 - **Moving by hand.** Staff may drag a booking that has not started to another item of the same type. The same server rule applies. The drag sends a request through `/api/rentals`; the calendar is not the check.
 - **Small screens.** The scheduler scrolls inside its own container. Below `md` the page becomes a list of the day's bookings by item.
+
+**The decision board, on AG Grid**
+
+Page `/shop/decisions`, right after Today in the menu. Every record that waits on a person, in one grid, so an owner clears the morning from one screen instead of four.
+
+- **What it holds.** Claims awaiting approval, contested claims, claims the advocates escalated, the operations agent's pending proposals (section 6), renters' reports waiting for staff (section 10), holds near their end and late returns. One row each. A hold the agent already proposes to release or replace shows once, as that proposal.
+- **The order.** What falls due first comes first: a missed return, a proposal's deadline, the end of a hold's validity, which is also the date a claim must be decided by. Rows with no date follow, oldest first. The amount and due columns sort, with missing values last either way.
+- **Who decides, for the viewer.** Each row says it from where the viewer stands, through the domain's `mayConfirm`: counter staff decide a claim within their approval limit and see a larger one waiting for an owner or manager; the owner who raised a contested claim sees that another owner or manager decides it, unless the shop has nobody else; the agent's proposals are an owner's or manager's; a read-only member decides nothing. "Only mine" narrows the board to the viewer's own.
+- **The evidence beside the grid.** The chosen decision opens beside the grid from `xl` and below it from `md`: for a claim, its lines and where each came from, the handover and return photographs with the mark outlined on the return, and how the hold would split; for a proposal, its reason, PayPal references, marks and draft, with approve, postpone and reject; for a report, the renter's words quoted as data and any safety note.
+- **Keyboard first.** Arrow keys move between decisions and the evidence follows. Enter puts the focus on the chosen decision's heading. Space chooses a release.
+- **Releases together.** Only the agent's `release_hold` proposals the viewer may approve can be chosen, and the chosen ones are approved in one tap through the morning queue's own `approveProposals`, which checks the kinds and the passkey again on the server.
+- **What it never does.** No row charges anyone. A claim is approved or decided on its own page, with its passkey and limits. Every amount comes from the records.
+- **On AG Grid Community.** It needs no licence key, so judges see no trial watermark and a real shop pays nothing for it. The grid is themed from Hold's own tokens, follows the light and dark themes, registers only the modules it uses, and draws each cell as a React component that reads the chosen decision from context, so moving the choice never redraws a row or loses the keyboard's place. Below `md` the board is a list of cards holding the same rows, filtered by the same function.
+
+**Done when**
+
+- **D1** Every waiting claim, proposal, report, hold near its end and late return of a seeded shop appears once, and a second shop's records never do.
+- **D2** The rows come in the order they fall due, and each says who decides it for the viewer as `mayConfirm` does.
+- **D3** Only releases the viewer may approve can be chosen, and they are approved together through `approveProposals`.
+- **D4** Arrow keys move between decisions, Enter opens one beside the grid, and the evidence of a claim shows its photographs and the split of the hold.
+- **D5** The board fits every width in `AGENTS.md` section 9 with no sideways scroll, becomes a list of cards below `md`, and passes the accessibility checks in both themes.
+
+**Status, 28 October 2026.** Built: `features/decisions` in the web app and `decisionRecords` in `packages/db`. D1 to D5 pass in tests (`decision-records.test.ts`, `board.test.ts`, `decisions-screen.test.tsx`, `e2e/decisions.spec.ts`). The operations agent reads no sample rental, so a shop's samples bring two sample proposals of their own (`addSampleRentals`): a replacement hold for the hold near its end and an answer to a sample PayPal dispute, each with its detector's fixed reason and marked `simulated: 'yes'`. Approving one records the decision and carries nothing out (`decideProposal`), so no PayPal call is made with a sample's references. A demo raises its sample claims as the counter staff member, so the owner may decide the contested one.
 
 **The insights dashboard, on AG Studio**
 

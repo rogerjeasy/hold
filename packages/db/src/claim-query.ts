@@ -44,7 +44,7 @@ export async function claimWorkspace(transaction: Transaction, rentalId: string)
 export type ClaimWorkspace = NonNullable<Awaited<ReturnType<typeof claimWorkspace>>>
 
 // The renter's words, their mark and the two photographs of its view: the handover's and the one they took.
-async function incidentEvidence(transaction: Transaction, incidentId: string) {
+export async function incidentEvidence(transaction: Transaction, incidentId: string) {
   const [row] = await transaction.select({ description: incidents.description, sessionId: incidents.sessionId, rentalItemId: incidents.rentalItemId, view: marks.view, region: marks.region }).from(incidents)
     .leftJoin(marks, eq(marks.incidentId, incidents.id)).where(eq(incidents.id, incidentId))
   if (row === undefined) return undefined

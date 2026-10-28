@@ -107,6 +107,12 @@ describe('the Today page', () => {
     expect(region.getByRole('link', { name: 'Tom Becker contested a claim of €45.00' })).toHaveAttribute('href', '/shop/rentals/r4/claim')
   })
 
+  it('leads to the decision board, where everything waiting on a person is in one place', () => {
+    show(busy)
+    const region = within(screen.getByRole('region', { name: 'Needs a decision' }))
+    expect(region.getByRole('link', { name: 'Open the decision board' })).toHaveAttribute('href', '/shop/decisions')
+  })
+
   it('shows the counter in the shop’s time, with what is done and what each hold is doing', () => {
     show(busy)
     const counter = within(screen.getByRole('region', { name: 'Today at the counter' }))

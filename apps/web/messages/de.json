@@ -1229,6 +1229,7 @@
     "nav": {
       "label": "Seiten des Verleihs",
       "home": "Heute",
+      "decisions": "Entscheidungen",
       "rentals": "Mieten",
       "calendar": "Kalender",
       "items": "Artikel",
@@ -2153,7 +2154,8 @@
       "contested": {
         "title": "{renter} hat eine Forderung über {amount} bestritten",
         "quote": "Der Kunde schrieb"
-      }
+      },
+      "openBoard": "Alle Entscheidungen öffnen"
     },
     "counter": {
       "title": "Heute an der Theke",
@@ -3282,6 +3284,118 @@
       "revoke": "Ausschalten",
       "revoked": "Dauerregel aus.",
       "ownerOnly": "Nur die Inhaberin oder der Inhaber schaltet sie ein oder aus."
+    }
+  },
+  "decisions": {
+    "title": "Entscheidungen",
+    "brief": "{decisions, plural, one {# Entscheidung wartet} other {# Entscheidungen warten}}, {yours, plural, =0 {keine davon bei dir} other {# davon bei dir}}. {dueToday, plural, =0 {Heute ist nichts fällig.} one {# ist heute fällig.} other {# sind heute fällig.}}",
+    "lead": "Forderungen, Vorschläge des Agenten, Meldungen von Mietern und was am Tresen ansteht, in der Reihenfolge ihrer Fälligkeit. Hier wird niemandem etwas belastet: Eine Belastung beginnt nur mit einer Forderung, die ein Mensch freigegeben hat.",
+    "passkeyBody": "Freigaben und Geldanfragen des Agenten zu genehmigen, braucht deinen Passkey. Sonst nichts auf dieser Seite.",
+    "empty": "Nichts wartet auf einen Menschen.",
+    "emptyBody": "Freizugebende Forderungen, Vorschläge des Agenten, Meldungen von Mietern, Reservierungen kurz vor dem Ablauf und verspätete Rückgaben erscheinen hier.",
+    "noMatch": "Nichts passt. Leere die Suche oder zeige alle Gruppen.",
+    "toolbar": "Entscheidungen filtern",
+    "groups": {
+      "all": "Alle",
+      "claims": "Forderungen",
+      "agent": "Vom Agenten",
+      "incidents": "Vorfälle",
+      "counter": "Reservierungen und Rückgaben"
+    },
+    "search": "Entscheidungen durchsuchen",
+    "searchHint": "Mieter, Artikel oder PayPal-Referenz",
+    "mineOnly": "Nur meine",
+    "keys": "Mit den Pfeiltasten wechselst du zwischen Entscheidungen. Enter öffnet eine neben der Liste. Die Leertaste wählt eine Freigabe.",
+    "grid": "Entscheidungen, die auf einen Menschen warten",
+    "columns": {
+      "decision": "Entscheidung",
+      "due": "Fällig",
+      "amount": "Betrag",
+      "choose": "Wählen"
+    },
+    "titles": {
+      "claim": "Eine Forderung freigeben",
+      "contested": "Über eine bestrittene Forderung entscheiden",
+      "escalated": "Über eine Forderung entscheiden, die die Vertreter nicht beigelegt haben",
+      "incident": "{kind} an {item}",
+      "hold_ending": "Die Reservierung für {renter} endet {when}",
+      "late": "{renter} ist verspätet"
+    },
+    "headings": {
+      "claim": "Eine Forderung über {amount} freigeben",
+      "contested": "Über eine bestrittene Forderung über {amount} entscheiden",
+      "escalated": "Über eine Forderung über {amount} entscheiden, die die Vertreter nicht beigelegt haben"
+    },
+    "incidentKinds": {
+      "small_damage": "Kleiner Schaden",
+      "mechanical_fault": "Ein Defekt",
+      "theft_or_loss": "Diebstahl oder Verlust",
+      "unsafe_or_unclear": "Etwas Unsicheres oder Unklares",
+      "unsorted": "Eine Meldung"
+    },
+    "renter": "ein Mieter",
+    "holdLine": "Tag {day} von {max} · {amount} reserviert",
+    "lateLine": "Rückgabe fällig {when}",
+    "due": {
+      "none": "Kein Datum",
+      "overdue": "Überfällig seit {when}",
+      "by": "Bis {when}",
+      "overdueWord": "Überfällig"
+    },
+    "deciders": {
+      "you": "Du",
+      "senior": "Inhaber oder Leitung",
+      "another_senior": "Andere Inhaber oder Leitung",
+      "staff": "Personal"
+    },
+    "deciderLine": {
+      "you": "Du entscheidest.",
+      "senior": "Inhaber oder Leitung entscheiden.",
+      "another_senior": "Andere Inhaber oder Leitung entscheiden: Du hast sie erhoben.",
+      "staff": "Das Personal entscheidet. Du kannst sie lesen."
+    },
+    "list": "Entscheidungen",
+    "open": "Belege und Aktionen",
+    "choose": "Die Freigabe über {amount} wählen",
+    "detail": {
+      "label": "Gewählte Entscheidung",
+      "none": "Wähle eine Entscheidung, um ihre Belege und die möglichen Schritte zu sehen.",
+      "due": "Fällig",
+      "amount": "Betrag",
+      "decider": "Wer entscheidet",
+      "waiting": "Wartet seit {when}",
+      "lines": "Positionen der Forderung",
+      "source": {
+        "finding": "Aus dem Fotovergleich",
+        "person": "Schriftliche Begründung einer Person",
+        "agreed_in_rental": "Vom Mieter während der Miete akzeptiert"
+      },
+      "atHandover": "Bei der Übergabe: {line}",
+      "atReturn": "Bei der Rückgabe: {line}",
+      "split": "Wenn sie so bleibt",
+      "capture": "Von der Reservierung eingezogen",
+      "release": "An den Mieter freigegeben",
+      "invoice": "Separat in Rechnung gestellt",
+      "renterWrote": "Der Mieter schrieb",
+      "openClaim": "Auf der Seite der Forderung prüfen und freigeben",
+      "openDecision": "Auf der Seite der Forderung entscheiden",
+      "claimNote": "Die Freigabe zeigt dem Mieter die Forderung. Eingezogen wird erst, wenn er sie annimmt oder seine Antwortfrist endet.",
+      "safety": "Der Mieter erwähnte die Sicherheit. Prüfe den Artikel, bevor er wieder hinausgeht.",
+      "suggested": "Aus der Preisliste: {line}",
+      "openIncidents": "Unter Vorfälle bearbeiten",
+      "holdBody": "Gib sie frei oder erhebe eine Forderung, bevor PayPal sie verfallen lässt.",
+      "lateBody": "Rückgabe fällig {when}.",
+      "openRental": "Die Miete öffnen",
+      "handover": "Bei der Übergabe",
+      "return": "Bei der Rückgabe",
+      "item": "Artikel"
+    },
+    "together": {
+      "label": "Gewählte Freigaben",
+      "summary": "{count, plural, one {# Freigabe gewählt} other {# Freigaben gewählt}}: {amount} gehen an die Mieter zurück.",
+      "approve": "Diese Freigaben genehmigen",
+      "passkey": "Bestätige mit deinem Passkey, um Freigaben zu genehmigen.",
+      "clear": "Auswahl aufheben"
     }
   }
 }

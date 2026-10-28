@@ -1,0 +1,30 @@
+import { themeQuartz } from 'ag-grid-community'
+
+// AG Grid in Hold's own design tokens, so the grid reads as part of the ledger, in the light theme and the dark one
+// alike: the tokens change with the theme and the grid follows them. Square corners, the shop's type, one orange
+// accent for focus and choice, and headers set like Hold's labels.
+export const decisionGridTheme = themeQuartz.withParams({
+  backgroundColor: 'var(--card)',
+  foregroundColor: 'var(--card-foreground)',
+  textColor: 'var(--card-foreground)',
+  subtleTextColor: 'var(--muted-foreground)',
+  accentColor: 'var(--primary)',
+  borderColor: 'var(--border)',
+  chromeBackgroundColor: 'var(--card)',
+  headerBackgroundColor: 'var(--card)',
+  headerTextColor: 'var(--muted-foreground)',
+  headerFontFamily: 'var(--font-mono)',
+  headerFontSize: 12,
+  headerFontWeight: 500,
+  fontFamily: 'var(--font-sans)',
+  fontSize: 15,
+  rowHoverColor: 'color-mix(in oklab, var(--muted) 60%, transparent)',
+  selectedRowBackgroundColor: 'color-mix(in oklab, var(--primary) 10%, transparent)',
+  borderRadius: 0,
+  wrapperBorderRadius: 0,
+  rowHeight: 76,
+  headerHeight: 48,
+  cellHorizontalPaddingScale: 1.1,
+  focusShadow: { spread: 2, color: 'var(--ring)' },
+  rowBorder: { color: 'var(--border)' },
+})

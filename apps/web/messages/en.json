@@ -1229,6 +1229,7 @@
     "nav": {
       "label": "Shop pages",
       "home": "Today",
+      "decisions": "Decisions",
       "rentals": "Rentals",
       "calendar": "Calendar",
       "items": "Items",
@@ -2153,7 +2154,8 @@
       "contested": {
         "title": "{renter} contested a claim of {amount}",
         "quote": "The renter wrote"
-      }
+      },
+      "openBoard": "Open the decision board"
     },
     "counter": {
       "title": "Today at the counter",
@@ -3282,6 +3284,118 @@
       "revoke": "Turn off",
       "revoked": "Standing rule off.",
       "ownerOnly": "Only the owner turns it on or off."
+    }
+  },
+  "decisions": {
+    "title": "Decisions",
+    "brief": "{decisions, plural, one {# decision waits} other {# decisions wait}}, {yours, plural, =0 {none of them yours} other {# of them yours}}. {dueToday, plural, =0 {Nothing falls due today.} one {# falls due today.} other {# fall due today.}}",
+    "lead": "Claims, the agent's proposals, renters' reports and the counter's own, in the order they fall due. Nothing here charges anyone: a charge still begins only from a claim a person approved.",
+    "passkeyBody": "Approving the agent's releases and requests for money needs your passkey. Nothing else on this board does.",
+    "empty": "Nothing waits on a person.",
+    "emptyBody": "Claims to approve, the agent's proposals, renters' reports, holds near their end and late returns appear here.",
+    "noMatch": "Nothing matches. Clear the search or show every group.",
+    "toolbar": "Filter the decisions",
+    "groups": {
+      "all": "All",
+      "claims": "Claims",
+      "agent": "From the agent",
+      "incidents": "Incidents",
+      "counter": "Holds and returns"
+    },
+    "search": "Search decisions",
+    "searchHint": "Renter, item or PayPal reference",
+    "mineOnly": "Only mine",
+    "keys": "Arrow keys move between decisions. Enter opens one beside the list. Space chooses a release.",
+    "grid": "Decisions waiting on a person",
+    "columns": {
+      "decision": "Decision",
+      "due": "Due",
+      "amount": "Amount",
+      "choose": "Choose"
+    },
+    "titles": {
+      "claim": "Approve a claim",
+      "contested": "Decide a contested claim",
+      "escalated": "Decide a claim the advocates did not settle",
+      "incident": "{kind} on {item}",
+      "hold_ending": "The hold for {renter} ends {when}",
+      "late": "{renter} is late"
+    },
+    "headings": {
+      "claim": "Approve a claim of {amount}",
+      "contested": "Decide a contested claim of {amount}",
+      "escalated": "Decide a claim of {amount} the advocates did not settle"
+    },
+    "incidentKinds": {
+      "small_damage": "Small damage",
+      "mechanical_fault": "A fault",
+      "theft_or_loss": "Theft or loss",
+      "unsafe_or_unclear": "Something unsafe or unclear",
+      "unsorted": "A report"
+    },
+    "renter": "a renter",
+    "holdLine": "Day {day} of {max} · {amount} held",
+    "lateLine": "Due back {when}",
+    "due": {
+      "none": "No date",
+      "overdue": "Overdue since {when}",
+      "by": "By {when}",
+      "overdueWord": "Overdue"
+    },
+    "deciders": {
+      "you": "You",
+      "senior": "An owner or manager",
+      "another_senior": "Another owner or manager",
+      "staff": "Staff"
+    },
+    "deciderLine": {
+      "you": "You decide.",
+      "senior": "An owner or manager decides.",
+      "another_senior": "Another owner or manager decides: you raised it.",
+      "staff": "Staff decide. You can read it."
+    },
+    "list": "Decisions",
+    "open": "Evidence and actions",
+    "choose": "Choose the release of {amount}",
+    "detail": {
+      "label": "Chosen decision",
+      "none": "Choose a decision to see its evidence and what can be done.",
+      "due": "Due",
+      "amount": "Amount",
+      "decider": "Who decides",
+      "waiting": "Waiting since {when}",
+      "lines": "Claim lines",
+      "source": {
+        "finding": "From the photo comparison",
+        "person": "A person's written reason",
+        "agreed_in_rental": "Agreed by the renter during the rental"
+      },
+      "atHandover": "At handover: {line}",
+      "atReturn": "At return: {line}",
+      "split": "If it stands as it is",
+      "capture": "Taken from the hold",
+      "release": "Released to the renter",
+      "invoice": "Invoiced separately",
+      "renterWrote": "The renter wrote",
+      "openClaim": "Review and approve on the claim page",
+      "openDecision": "Decide on the claim page",
+      "claimNote": "Approving shares the claim with the renter. Nothing is taken until they accept it or their time to reply ends.",
+      "safety": "The renter mentioned safety. Check the item before it goes out again.",
+      "suggested": "From the price list: {line}",
+      "openIncidents": "Act on it in Incidents",
+      "holdBody": "Release it or raise a claim before PayPal lets it lapse.",
+      "lateBody": "Due back {when}.",
+      "openRental": "Open the rental",
+      "handover": "At handover",
+      "return": "At return",
+      "item": "Item"
+    },
+    "together": {
+      "label": "Releases chosen",
+      "summary": "{count, plural, one {# release chosen} other {# releases chosen}}: {amount} back to renters.",
+      "approve": "Approve these releases",
+      "passkey": "Confirm with your passkey to approve releases.",
+      "clear": "Clear the choice"
     }
   }
 }

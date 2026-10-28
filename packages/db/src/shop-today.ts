@@ -111,7 +111,8 @@ async function outFigures(transaction: Transaction, window: TodayWindow) {
   return { rentalsOut: out?.rentals ?? 0, dueBackToday: dueBack?.rentals ?? 0, itemsOut: itemsOut?.items ?? 0 }
 }
 
-async function activeHolds(transaction: Transaction): Promise<ActiveHold[]> {
+// Every hold still reserved, the one nearest its end first. The decision board reads it too.
+export async function activeHolds(transaction: Transaction): Promise<ActiveHold[]> {
   return transaction
     .select({
       rentalId: holds.rentalId,
@@ -163,12 +164,13 @@ async function claimsWaiting(transaction: Transaction): Promise<ClaimWaiting[]> 
   return rows.map((row) => ({ ...row, state: row.state === 'contested' ? 'contested' : 'awaiting_approval' }))
 }
 
-async function lateRentals(transaction: Transaction, window: TodayWindow): Promise<LateRental[]> {
+// Rentals past their return time and not back. The decision board reads it too.
+export async function lateRentals(transaction: Transaction, now: Date): Promise<LateRental[]> {
   return transaction
     .select({ rentalId: rentals.id, renterName: renters.name, endsAt: rentals.endsAt, simulated: rentals.simulated })
     .from(rentals)
     .leftJoin(renters, eq(renters.id, rentals.renterId))
-    .where(or(eq(rentals.state, 'overdue'), and(eq(rentals.state, 'out'), lt(rentals.endsAt, window.now))))
+    .where(or(eq(rentals.state, 'overdue'), and(eq(rentals.state, 'out'), lt(rentals.endsAt, now))))
     .orderBy(asc(rentals.endsAt))
 }
 
@@ -273,7 +275,7 @@ export async function shopToday(transaction: Transaction, window: TodayWindow): 
     ...(await outFigures(transaction, window)),
     activeHolds: await activeHolds(transaction),
     claimsWaiting: await claimsWaiting(transaction),
-    late: await lateRentals(transaction, window),
+    late: await lateRentals(transaction, window.now),
     counter: await counter(transaction, window),
     month: await month(transaction, window),
     routine: await routine(transaction, window),

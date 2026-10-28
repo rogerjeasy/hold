@@ -6,7 +6,7 @@ const baseURL = `http://localhost:${String(PORT)}`
 
 // CI runs the key set: the flows that sign people in, move money or guard access, without the width-by-width layout
 // checks. The full suite, every page at every width, runs locally with `pnpm test:e2e` (AGENTS.md section 2).
-const KEY_FLOWS = ['sign-in', 'demo', 'shop-setup', 'rentals', 'handover', 'returns', 'claims', 'queue', 'assistant', 'evidence']
+const KEY_FLOWS = ['sign-in', 'demo', 'shop-setup', 'rentals', 'handover', 'returns', 'claims', 'queue', 'decisions', 'assistant', 'evidence']
 const keyFlowsOnly = process.env['HOLD_E2E_SCOPE'] === 'key'
 
 // The tests run against a production build, so they see what a visitor sees and no development overlay.
