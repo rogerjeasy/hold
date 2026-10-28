@@ -48,7 +48,7 @@ export function CalendarScreen({ shopName, clock, window, calendar }: CalendarSc
             </div>
             {model.events.length === 0 ? <p>{t('empty')}</p> : null}
             <div className="hidden min-w-0 md:block">
-              <RentalScheduler resources={model.resources} events={model.events} window={window} itemColumn={t('item')} standingText={standingText} loading={t('loading')} />
+              <RentalScheduler resources={model.resources} events={model.events} window={window} itemColumn={t('item')} standingText={standingText} loading={t('loading')} failed={t('loadFailed')} />
             </div>
             <ul aria-label={t('list')} className="grid gap-5 md:hidden">
               {model.resources.map((item) => {

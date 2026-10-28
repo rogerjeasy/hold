@@ -1,6 +1,6 @@
 'use client'
 
-import dynamic from 'next/dynamic'
+import { BryntumRentals } from './bryntum-rentals'
 import type { CalendarEvent, CalendarResource, Standing } from './calendar-model'
 
 export type RentalSchedulerProps = {
@@ -10,11 +10,10 @@ export type RentalSchedulerProps = {
   itemColumn: string
   standingText: Readonly<Record<Standing, string>>
   loading: string
+  failed: string
 }
 
-// Bryntum Scheduler draws in the browser only, and its bundle is large, so it loads once the page is in the browser.
-const BryntumRentals = dynamic(() => import('./bryntum-rentals').then((module) => module.BryntumRentals), { ssr: false })
-
+// Bryntum Scheduler draws in the browser only, from its own build, which loads once the page is in the browser.
 export function RentalScheduler(props: RentalSchedulerProps) {
   return (
     <div className="h-[32rem] min-h-80 overflow-hidden border border-border-strong bg-card" aria-label={props.itemColumn}>

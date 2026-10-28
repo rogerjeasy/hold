@@ -4,7 +4,7 @@ import tseslint from 'typescript-eslint'
 
 export default defineConfig(
   {
-    ignores: ['**/.next/**', '**/cdk.out/**', '**/next-env.d.ts', '**/playwright-report/**', '**/test-results/**', '.superpowers/**', '.claude/**'],
+    ignores: ['**/.next/**', 'apps/web/public/vendor/**', '**/cdk.out/**', '**/next-env.d.ts', '**/playwright-report/**', '**/test-results/**', '.superpowers/**', '.claude/**'],
   },
   eslint.configs.recommended,
   tseslint.configs.strictTypeChecked,

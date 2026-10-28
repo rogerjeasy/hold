@@ -37,3 +37,6 @@ eval/results/
 
 # CDK synth output
 infra/cdk.out/
+
+# Bryntum's browser build, copied from node_modules before each build (apps/web/scripts/vendor-bryntum.ts)
+apps/web/public/vendor/

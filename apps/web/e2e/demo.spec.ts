@@ -100,6 +100,16 @@ test('as Jonas, a judge takes a damaged return to a PayPal capture without addin
   await expect(page.getByRole('region', { name: 'Settlement amounts' })).toContainText('€35.00')
 })
 
+test('on a wide screen the calendar draws each rental as a bar, and a bar opens its rental', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 })
+  await startDemo(page, 'Tomás, the owner')
+  await page.getByRole('navigation', { name: 'Shop pages' }).getByRole('link', { name: 'Calendar' }).click()
+  const bar = page.locator('.b-sch-event').first()
+  await expect(bar).toBeVisible()
+  await bar.click()
+  await expect(page).toHaveURL(/\/shop\/rentals\/[0-9a-f-]{36}$/)
+})
+
 test('a judge adds a passkey to their own demo, then confirms with it', async ({ page }) => {
   await addVirtualAuthenticator(page)
   await startDemo(page, 'Tomás, the owner')

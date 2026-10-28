@@ -2058,7 +2058,8 @@
       "noItemsBody": "Le calendrier montre chaque article que vous louez.",
       "noItemsAction": "Aller aux articles",
       "unknownRenter": "Client pas encore connu",
-      "loading": "Chargement du calendrier…"
+      "loading": "Chargement du calendrier…",
+      "loadFailed": "Le calendrier n’a pas pu se charger. Rechargez la page, ou retrouvez chaque location dans Locations."
     }
   },
   "emails": {

@@ -14,7 +14,7 @@ COPY infra/package.json infra/
 COPY packages packages
 RUN pnpm install --frozen-lockfile
 COPY . .
-RUN HOLD_STANDALONE=1 pnpm --filter @hold/web exec next build
+RUN HOLD_STANDALONE=1 pnpm --filter @hold/web run build
 
 FROM node:24-slim AS web
 WORKDIR /app

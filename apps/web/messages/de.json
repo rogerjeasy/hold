@@ -2058,7 +2058,8 @@
       "noItemsBody": "Der Kalender zeigt jeden Artikel, den Sie vermieten.",
       "noItemsAction": "Zu den Artikeln",
       "unknownRenter": "Kundschaft noch unbekannt",
-      "loading": "Kalender wird geladen…"
+      "loading": "Kalender wird geladen…",
+      "loadFailed": "Der Kalender konnte nicht geladen werden. Laden Sie die Seite neu oder finden Sie jede Miete unter Mieten."
     }
   },
   "emails": {

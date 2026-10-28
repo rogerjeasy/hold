@@ -400,7 +400,7 @@ A project can win one sponsor prize. Using more than one tool means being consid
 
 | Tool | Use in Hold | Verdict |
 |---|---|---|
-| **Bryntum** | The shop's calendar on Bryntum Scheduler: each item a row, each rental a bar marked by where its PayPal hold stands, read only, a bar opening its rental (`apps/web/src/features/calendar`) | Built, on the trial package (`@bryntum/scheduler@npm:@bryntum/scheduler-trial@7.3.7`). Moves proposed by the operations agent are not built. Three winners. |
+| **Bryntum** | The shop's calendar on Bryntum Scheduler: each item a row, each rental a bar marked by where its PayPal hold stands, read only, a bar opening its rental (`apps/web/src/features/calendar`) | Built, on the trial package (`@bryntum/scheduler@npm:@bryntum/scheduler-trial@7.3.7`), whose own browser build is served from `/vendor/bryntum` rather than bundled. Moves proposed by the operations agent are not built. Three winners. |
 | **AG Grid** | The owner's insights dashboard on AG Studio, with custom widgets and an insights agent on the Studio Agent Framework | Not built. A project wins one sponsor prize, and Bryntum fits Hold's calendar. |
 | **Postman** | Sandbox testing of the hold lifecycle, and a published collection for judges | Not built. No prize. |
 | **APIMatic** | Context plugins while coding the PayPal integration | Not chosen for now |

@@ -2058,7 +2058,8 @@
       "noItemsBody": "El calendario muestra cada artículo que alquilas.",
       "noItemsAction": "Ir a los artículos",
       "unknownRenter": "Cliente aún desconocido",
-      "loading": "Cargando el calendario…"
+      "loading": "Cargando el calendario…",
+      "loadFailed": "No se pudo cargar el calendario. Vuelva a cargar la página o busque cada alquiler en Alquileres."
     }
   },
   "emails": {

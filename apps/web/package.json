@@ -4,19 +4,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "node scripts/vendor-bryntum.ts && next dev",
+    "build": "node scripts/vendor-bryntum.ts && next build",
     "start": "next start",
     "typegen": "next typegen",
     "typecheck": "next typegen && tsc --noEmit",
-    "test:e2e": "next build && playwright test",
-    "test:e2e:key": "next build && HOLD_E2E_SCOPE=key playwright test",
+    "test:e2e": "pnpm run build && playwright test",
+    "test:e2e:key": "pnpm run build && HOLD_E2E_SCOPE=key playwright test",
     "demo:paypal": "node scripts/demo-paypal.ts"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "3.1151.0",
     "@bryntum/scheduler": "npm:@bryntum/scheduler-trial@7.3.7",
-    "@bryntum/scheduler-react": "7.3.7",
     "@hold/auth": "workspace:*",
     "@hold/compare": "workspace:*",
     "@hold/config": "workspace:*",

@@ -2058,7 +2058,8 @@
       "noItemsBody": "The calendar shows each item you rent.",
       "noItemsAction": "Go to items",
       "unknownRenter": "Renter not known yet",
-      "loading": "Loading the calendar…"
+      "loading": "Loading the calendar…",
+      "loadFailed": "The calendar could not load. Reload the page, or find each rental under Rentals."
     }
   },
   "emails": {
