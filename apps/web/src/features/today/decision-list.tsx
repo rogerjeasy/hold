@@ -8,26 +8,41 @@ import { Panel } from '@/components/ui/panel'
 import { SampleTag } from '@/components/ui/sample-tag'
 import type { ShopClock } from '@/hooks/use-shop-format'
 import { useShopFormat } from '@/hooks/use-shop-format'
+import { Link } from '@/i18n/navigation'
+import { rentalRoutes } from '@/lib/routes'
 
 const icons: Record<Decision['kind'], LucideIcon> = { claim: Scale, hold_ending: Lock, late: Clock, contested: MessageSquareQuote }
 
+// A claim is decided on its claim page; a hold near its end or a late rental, on the rental's own page. The whole row
+// is the link, named by its title, so it is a large target on a phone.
+const placeOf = (decision: Decision) => (decision.kind === 'claim' || decision.kind === 'contested' ? rentalRoutes.claim(decision.rentalId) : rentalRoutes.rental(decision.rentalId))
+
 function Row({ decision, title, children }: { decision: Decision; title: string; children: ReactNode }) {
   const Icon = icons[decision.kind]
+  const titleId = `decision-${decision.key}`
   return (
-    <li className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3.5 border-b px-4 py-4 last:border-b-0 md:px-5">
-      <span
-        aria-hidden="true"
-        className={decision.kind === 'claim' ? 'grid size-9 place-items-center border border-primary text-primary' : 'grid size-9 place-items-center border border-border-strong'}
+    <li className="border-b last:border-b-0">
+      <Link
+        href={placeOf(decision)}
+        aria-labelledby={titleId}
+        className="group grid grid-cols-[auto_minmax(0,1fr)] gap-x-3.5 px-4 py-4 hover:bg-muted/50 focus-visible:bg-muted/50 md:px-5"
       >
-        <Icon className="size-4.5" />
-      </span>
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <h3 className="font-bold leading-snug wrap-long-words">{title}</h3>
-          {decision.simulated ? <SampleTag /> : null}
+        <span
+          aria-hidden="true"
+          className={decision.kind === 'claim' ? 'grid size-9 place-items-center border border-primary text-primary' : 'grid size-9 place-items-center border border-border-strong'}
+        >
+          <Icon className="size-4.5" />
+        </span>
+        <div className="grid min-w-0">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <h3 id={titleId} className="font-bold leading-snug underline-offset-4 wrap-long-words group-hover:underline group-focus-visible:underline">
+              {title}
+            </h3>
+            {decision.simulated ? <SampleTag /> : null}
+          </div>
+          <div className="mt-1 text-[0.9375rem] text-muted-foreground">{children}</div>
         </div>
-        <div className="mt-1 text-[0.9375rem] text-muted-foreground">{children}</div>
-      </div>
+      </Link>
     </li>
   )
 }

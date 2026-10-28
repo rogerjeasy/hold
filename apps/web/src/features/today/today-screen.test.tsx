@@ -96,6 +96,15 @@ describe('the Today page', () => {
     expect(screen.getByText('“The lock was in the bag.”')).toBeInTheDocument()
   })
 
+  it('leads from each decision to the page where it is made', () => {
+    show(busy)
+    const region = within(screen.getByRole('region', { name: 'Needs a decision' }))
+    expect(region.getByRole('link', { name: 'Claim of €35.00 for Priya Natarajan' })).toHaveAttribute('href', '/shop/rentals/r3/claim')
+    expect(region.getByRole('link', { name: /^The hold for Marco Rossi ends / })).toHaveAttribute('href', '/shop/rentals/r2')
+    expect(region.getByRole('link', { name: 'Lea Fischer is late' })).toHaveAttribute('href', '/shop/rentals/r5')
+    expect(region.getByRole('link', { name: 'Tom Becker contested a claim of €45.00' })).toHaveAttribute('href', '/shop/rentals/r4/claim')
+  })
+
   it('shows the counter in the shop’s time, with what is done and what each hold is doing', () => {
     show(busy)
     const counter = within(screen.getByRole('region', { name: 'Today at the counter' }))

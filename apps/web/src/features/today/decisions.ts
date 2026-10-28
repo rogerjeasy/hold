@@ -4,7 +4,7 @@ import type { ActiveHold, ShopToday } from '@hold/db'
 // What needs a person today, most urgent first: a claim waits on them, a hold will lapse, a rental is late, and a
 // renter has answered a claim. The standing of each hold comes from the domain.
 
-type Common = { readonly key: string; readonly renterName: string | null; readonly simulated: boolean }
+type Common = { readonly key: string; readonly rentalId: string; readonly renterName: string | null; readonly simulated: boolean }
 
 export type Decision =
   | (Common & { readonly kind: 'claim'; readonly totalCents: number; readonly firstLine: string | null })
@@ -17,22 +17,23 @@ export function decisionsFor(today: Pick<ShopToday, 'claimsWaiting' | 'activeHol
   return [
     ...claims
       .filter((claim) => claim.state === 'awaiting_approval')
-      .map((claim): Decision => ({ kind: 'claim', key: claim.claimId, renterName: claim.renterName, simulated: claim.simulated, totalCents: claim.totalCents, firstLine: claim.firstLine })),
+      .map((claim): Decision => ({ kind: 'claim', key: claim.claimId, rentalId: claim.rentalId, renterName: claim.renterName, simulated: claim.simulated, totalCents: claim.totalCents, firstLine: claim.firstLine })),
     ...today.activeHolds
       .filter((hold) => holdStanding(hold, now) === 'ending')
       .map((hold): Decision => ({
         kind: 'hold_ending',
         key: hold.rentalId,
+        rentalId: hold.rentalId,
         renterName: hold.renterName,
         simulated: hold.simulated,
         reservedCents: hold.reservedCents,
         day: holdDay(hold, now),
         validUntil: hold.validUntil,
       })),
-    ...today.late.map((rental): Decision => ({ kind: 'late', key: rental.rentalId, renterName: rental.renterName, simulated: rental.simulated, endsAt: rental.endsAt })),
+    ...today.late.map((rental): Decision => ({ kind: 'late', key: rental.rentalId, rentalId: rental.rentalId, renterName: rental.renterName, simulated: rental.simulated, endsAt: rental.endsAt })),
     ...claims
       .filter((claim) => claim.state === 'contested')
-      .map((claim): Decision => ({ kind: 'contested', key: claim.claimId, renterName: claim.renterName, simulated: claim.simulated, totalCents: claim.totalCents, renterComment: claim.renterComment })),
+      .map((claim): Decision => ({ kind: 'contested', key: claim.claimId, rentalId: claim.rentalId, renterName: claim.renterName, simulated: claim.simulated, totalCents: claim.totalCents, renterComment: claim.renterComment })),
   ]
 }
 
