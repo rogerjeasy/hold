@@ -5,6 +5,7 @@ import { useLocale } from 'next-intl'
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from '@/i18n/navigation'
 import { rentalRoutes } from '@/lib/routes'
+import { openingDate } from './calendar-model'
 import type { Standing } from './calendar-model'
 import { loadBryntum } from './bryntum-loader'
 import type { RentalSchedulerProps } from './rental-scheduler'
@@ -36,8 +37,8 @@ export function BryntumRentals({ resources, events, window: shown, itemColumn, s
           events: [...events],
           startDate: shown.from,
           endDate: shown.to,
-          // It opens on today, a line marking now, with the week behind it a scroll away.
-          visibleDate: { date: new Date(), block: 'start' },
+          // It opens where the earliest rental still out began, a line marking now, with the rest a scroll away.
+          visibleDate: { date: openingDate(events, new Date(), shown.from), block: 'start' },
           viewPreset: 'weekAndDay',
           rowHeight: 48,
           barMargin: 8,

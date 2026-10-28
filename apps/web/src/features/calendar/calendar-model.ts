@@ -59,3 +59,11 @@ export function calendarModel(calendar: ShopCalendar, unknownRenter: string): { 
     }),
   }
 }
+
+// Where the scheduler opens: where the earliest rental still under way began, so each item out today shows its whole
+// bar, or now when nothing is under way. Never before the calendar's first day.
+export function openingDate(events: readonly Pick<CalendarEvent, 'startDate' | 'endDate'>[], now: Date, windowFrom: Date): Date {
+  const underWay = events.map((event) => ({ start: new Date(event.startDate), end: new Date(event.endDate) })).filter(({ start, end }) => start <= now && end > now)
+  const earliest = underWay.reduce((first, { start }) => (start < first ? start : first), now)
+  return earliest < windowFrom ? windowFrom : earliest
+}
