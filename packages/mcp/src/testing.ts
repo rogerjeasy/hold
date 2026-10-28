@@ -4,7 +4,7 @@ import { inShop, saveFeeOrder } from '@hold/db'
 import type { Database } from '@hold/db'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
-import type { McpPorts } from './ports.ts'
+import type { McpPorts, NegotiationHandOff } from './ports.ts'
 import { handleMcpRequest } from './server.ts'
 
 // For the package's tests: ports over a real database whose PayPal only makes approval links, and an MCP SDK client
@@ -12,7 +12,7 @@ import { handleMcpRequest } from './server.ts'
 
 export const TEST_SECRET = Buffer.alloc(32, 3)
 
-export function testPorts(database: Database, logged: Readonly<Record<string, unknown>>[] = []): McpPorts {
+export function testPorts(database: Database, logged: Readonly<Record<string, unknown>>[] = [], handedOff: NegotiationHandOff[] = []): McpPorts {
   let orders = 0
   return {
     database,
@@ -30,6 +30,7 @@ export function testPorts(database: Database, logged: Readonly<Record<string, un
     },
     holdApproval: () => Promise.resolve({ status: 'not_requested' }),
     photoLink: (key) => Promise.resolve(`https://photos.example/${key}`),
+    sendNegotiation: (handOff) => { handedOff.push(handOff); return Promise.resolve() },
     qrCode: () => Promise.resolve('iVBORw0KGgo='),
     log: (line) => void logged.push(line),
   }

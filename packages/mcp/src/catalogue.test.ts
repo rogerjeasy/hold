@@ -1,7 +1,7 @@
-import { TOOL_TIERS } from '@hold/domain'
+import { AGENT_SCOPES, TOOL_TIERS } from '@hold/domain'
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
-import { NOT_OFFERED, TOOL_NAMES, TOOLS } from './catalogue.ts'
+import { NEGOTIATION_SCOPE, NOT_OFFERED, TOOL_NAMES, TOOLS } from './catalogue.ts'
 
 type JsonSchema = { readonly type?: string; readonly properties?: Readonly<Record<string, JsonSchema>>; readonly items?: JsonSchema; readonly additionalProperties?: unknown; readonly anyOf?: readonly JsonSchema[] }
 
@@ -18,9 +18,15 @@ const json = (schema: z.ZodType) => z.toJSONSchema(schema, { io: 'input' }) as J
 describe('the tools section 8.3 lists', () => {
   it('are offered, apart from those this server leaves out and says why', () => {
     expect(TOOL_NAMES.sort()).toEqual(
-      ['find_shops', 'get_shop', 'check_availability', 'get_damage_prices', 'quote_rental', 'create_booking', 'get_booking', 'get_rental', 'get_hold', 'get_hold_approval_link', 'get_condition_report', 'get_claim', 'draft_claim_reply', 'submit_claim_reply', 'get_record'].sort(),
+      ['find_shops', 'get_shop', 'check_availability', 'get_damage_prices', 'quote_rental', 'create_booking', 'get_booking', 'get_rental', 'get_hold', 'get_hold_approval_link', 'get_condition_report', 'get_claim', 'draft_claim_reply', 'submit_claim_reply', 'get_record', 'get_negotiation', 'get_claim_lines', 'get_line_photos', 'get_price_list', 'get_known_marks', 'submit_offer'].sort(),
     )
-    expect(Object.keys(NOT_OFFERED).sort()).toEqual(['get_negotiation', 'report_incident', 'request_extension', 'submit_offer'])
+    expect(Object.keys(NOT_OFFERED).sort()).toEqual(['report_incident', 'request_extension'])
+  })
+
+  it('gives the advocate’s tools a scope no agent token is issued with: the renter grants it for one claim', () => {
+    const advocate = TOOL_NAMES.filter((name) => TOOLS[name].scope === NEGOTIATION_SCOPE)
+    expect(advocate.sort()).toEqual(['get_claim_lines', 'get_known_marks', 'get_line_photos', 'get_negotiation', 'get_price_list', 'submit_offer'])
+    expect(AGENT_SCOPES as readonly string[]).not.toContain(NEGOTIATION_SCOPE)
   })
 })
 
@@ -47,16 +53,27 @@ describe('each tool’s contract', () => {
 })
 
 describe('money', () => {
-  it.each(TOOL_NAMES)('%s accepts no amount, price, fee or hold, and no number but a count', (name) => {
+  // The one amount any tool takes: the advocate's offer lines (AGENTS.md section 6), which the referee holds to each
+  // line's published price, the claim the shop approved and the renter's own limit.
+  const OFFER_CENTS = 'submit_offer:.lines[].cents'
+  it.each(TOOL_NAMES)('%s accepts no amount, price, fee or hold, and no number but a count, except an offer line', (name) => {
     for (const property of properties(json(TOOLS[name].input))) {
+      if (`${name}:${property.path}` === OFFER_CENTS) continue
       expect(property.name, property.path).not.toMatch(/amount|cents|price|fee|hold|total|money|cost|rate/i)
       if (property.schema.type === 'number' || property.schema.type === 'integer') expect(property.name, property.path).toBe('count')
     }
   })
 
-  it('has no tool that captures a hold: none sits above the tiers the gateway knows, and only one acts under a mandate', () => {
+  it('takes an offer line’s cents as a whole number of zero or more, and nothing else that names money', () => {
+    const offer = properties(json(TOOLS.submit_offer.input)).find((property) => property.path === '.lines[].cents')
+    expect(offer?.schema).toMatchObject({ type: 'integer', minimum: 0 })
+    expect(TOOLS.submit_offer.input.safeParse({ rental_id: '0b6d4c2e-0000-4000-8000-000000000001', agent_token: 'hat_x', move: 'offer', lines: [{ line_id: 'l', cents: 1.5, ground: null, evidence: [] }] }).success).toBe(false)
+    expect(TOOLS.submit_offer.input.safeParse({ rental_id: '0b6d4c2e-0000-4000-8000-000000000001', agent_token: 'hat_x', move: 'accept', total: { cents: 1, currency: 'EUR' } }).success).toBe(false)
+  })
+
+  it('has no tool that captures a hold: none sits above the tiers the gateway knows, and only the claim reply and the advocate’s move act under a mandate', () => {
     const acting = TOOL_NAMES.filter((name) => TOOLS[name].tier === 'act_under_mandate')
-    expect(acting).toEqual(['submit_claim_reply'])
+    expect(acting).toEqual(['submit_claim_reply', 'submit_offer'])
     // Listed by name so a new tool that sounds like money is a deliberate change to this test.
     expect(TOOL_NAMES.filter((name) => /capture|charge|pay_|refund|release|authori[sz]e/.test(name))).toEqual([])
   })

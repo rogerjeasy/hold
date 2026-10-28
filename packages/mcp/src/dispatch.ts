@@ -1,8 +1,10 @@
 import { agentSessionLive, ASSISTANT_LIMITS, gatewayDecision } from '@hold/domain'
 import type { AgentActor, GatewayDecision } from '@hold/domain'
-import { auditLog, quoteShop, rentals, sessionByBookingSecret, sessionByToken, shopBySlug, takeRateToken, touchAgentSession } from '@hold/db'
+import { assistantGrant, auditLog, quoteShop, rentals, sessionByBookingSecret, sessionByToken, shopBySlug, takeRateToken, touchAgentSession } from '@hold/db'
+import type { AssistantGrant } from '@hold/db'
 import { eq } from 'drizzle-orm'
-import { TOOLS } from './catalogue.ts'
+import { getClaimLines, getKnownMarks, getLinePhotos, getNegotiation, getPriceList, submitOffer } from './advocate-tools.ts'
+import { NEGOTIATION_SCOPE, TOOLS } from './catalogue.ts'
 import type { ToolName } from './catalogue.ts'
 import { inShopOf } from './ports.ts'
 import { checkAvailability, createBooking, findShops, getBooking, getDamagePrices, getShop, quoteRental } from './public-tools.ts'
@@ -26,8 +28,9 @@ const NOT_AUTHORIZED = 'not_authorized'
 
 type Resolved =
   | { readonly kind: 'public'; readonly actor: AgentActor; readonly shop: ShopSubject | undefined; readonly session: { readonly sessionId: string; readonly shopId: string; readonly rentalId: string } | undefined; readonly quoteShopId: string | undefined }
-  // The rental the call names, and the one the token is bound to: the gateway refuses the call when they differ.
-  | { readonly kind: 'rental'; readonly actor: AgentActor; readonly subject: RentalSubject; readonly boundRentalId: string; readonly live: boolean }
+  // The rental the call names, and the one the token is bound to: the gateway refuses the call when they differ. An
+  // advocate's tool also carries the renter's grant, whose mandate the gateway checks.
+  | { readonly kind: 'rental'; readonly actor: AgentActor; readonly subject: RentalSubject; readonly boundRentalId: string; readonly live: boolean; readonly grant?: AssistantGrant }
   | { readonly kind: 'unresolved'; readonly reason: string; readonly shopId?: string; readonly sessionId?: string }
 
 const text = (value: unknown) => (typeof value === 'string' ? value : '')
@@ -50,9 +53,12 @@ async function resolve(caller: Caller, name: ToolName, args: Readonly<Record<str
   const fingerprint = readSecret(ports.secret, 'agent_token', text(args['agent_token']))
   const session = fingerprint === undefined ? undefined : await sessionByToken(ports.database, fingerprint)
   if (session === undefined) return { kind: 'unresolved', reason: 'token_unknown' }
-  // The audience check above leaves only rental tools here, each of which names its scope.
+  // The audience check above leaves only rental tools here, each of which names its scope. The advocate's scope is
+  // on no token: it is the renter's live mandate naming this session, on the rental the token is bound to.
   const { scope } = TOOLS[name]
-  if (!session.scopes.includes(scope)) return { kind: 'unresolved', reason: 'scope', shopId: session.shopId, sessionId: session.id }
+  const grant = scope === NEGOTIATION_SCOPE ? await inShopOf(ports, session.shopId, (transaction) => assistantGrant(transaction, session.id, ports.now())) : undefined
+  const scoped = scope === NEGOTIATION_SCOPE ? grant?.rentalId === session.rentalId : session.scopes.includes(scope)
+  if (!scoped) return { kind: 'unresolved', reason: 'scope', shopId: session.shopId, sessionId: session.id }
   // The person the assistant acts for: the PayPal payer who paid the fee.
   const [rental] = await inShopOf(ports, session.shopId, (transaction) => transaction.select({ renterId: rentals.renterId }).from(rentals).where(eq(rentals.id, session.rentalId)))
   return {
@@ -61,6 +67,7 @@ async function resolve(caller: Caller, name: ToolName, args: Readonly<Record<str
     subject: { shopId: session.shopId, rentalId: text(args['rental_id']), sessionId: session.id },
     boundRentalId: session.rentalId,
     live: agentSessionLive(session, ports.now()),
+    ...(grant === undefined ? {} : { grant }),
   }
 }
 
@@ -73,7 +80,26 @@ function subjectShop(resolved: Resolved): string | undefined {
 
 async function handle(caller: Caller, name: ToolName, input: Readonly<Record<string, unknown>>, resolved: Resolved): Promise<Handled<Readonly<Record<string, unknown>>>> {
   if (resolved.kind === 'rental') {
-    const { subject } = resolved
+    const { subject, grant } = resolved
+    if (grant !== undefined) {
+      const scoped = { ...subject, grant }
+      switch (name) {
+        case 'get_negotiation':
+          return getNegotiation(caller, scoped)
+        case 'get_claim_lines':
+          return getClaimLines(caller, scoped)
+        case 'get_line_photos':
+          return getLinePhotos(caller, scoped, TOOLS.get_line_photos.input.parse(input))
+        case 'get_price_list':
+          return getPriceList(caller, scoped)
+        case 'get_known_marks':
+          return getKnownMarks(caller, scoped)
+        case 'submit_offer':
+          return submitOffer(caller, scoped, resolved.actor, TOOLS.submit_offer.input.parse(input))
+        default:
+          return { ok: false, reason: 'unknown_tool' }
+      }
+    }
     switch (name) {
       case 'get_rental':
         return getRental(caller, subject)
@@ -132,8 +158,9 @@ export async function callTool(caller: Caller, name: string, rawArguments: unkno
       tool: { name, tier: definition.tier },
       subjectShopId: resolved.kind === 'rental' ? resolved.subject.shopId : (shopId ?? null),
       subjectRentalId: resolved.kind === 'rental' ? resolved.subject.rentalId : null,
-      // No mandate lets an assistant answer a claim in this build: the renter's advocate (section 9) brings the first.
-      mandate: null,
+      // No mandate lets an assistant answer a claim in this build. The one mandate an assistant acts under is the
+      // renter's settlement mandate naming it, on the advocate's tools; the referee holds its moves to that mandate.
+      mandate: resolved.kind === 'rental' ? resolved.grant?.mandate ?? null : null,
       now: started,
       callsInWindow: withinRate ? 0 : limit.max,
       rateLimit: limit.max,

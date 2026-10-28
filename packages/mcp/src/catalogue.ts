@@ -1,4 +1,4 @@
-import { AGENT_SCOPES, CONDITION_REPLIES, HOLD_STATES, ITEM_CATEGORIES, PRICE_CATEGORIES, RENTAL_STATES } from '@hold/domain'
+import { AGENT_SCOPES, CONDITION_REPLIES, GROUNDS, HOLD_STATES, ITEM_CATEGORIES, MOVE_KINDS, NEGOTIATION_KINDS, NEGOTIATION_LIMITS, NEGOTIATION_STATES, PRICE_CATEGORIES, RENTAL_STATES } from '@hold/domain'
 import type { AgentScope, ToolTier } from '@hold/domain'
 import { z } from 'zod'
 
@@ -42,11 +42,25 @@ const holdTerms = z.strictObject({ placed: z.literal(HOLD_TERMS.placed), how: z.
 
 export type ToolAudience = 'public' | 'rental'
 
+// The scope of the advocate's tools (extensions.md section 9.11). No agent token carries it: it is the renter's live
+// settlement mandate naming this assistant, granted with the renter's one-time code for this rental's one claim, and it
+// ends when the renter stops the advocate or disconnects the assistant, or when the mandate's time is up.
+export const NEGOTIATION_SCOPE = 'negotiation'
+export type ToolScope = AgentScope | typeof NEGOTIATION_SCOPE
+
+// A claim line, an offer line and an offer, as the advocate's tools name them. An offer line's cents is the one
+// amount any tool takes: the referee holds it to the line's published price and the renter's own limit.
+const lineId = z.string().min(1).max(64).describe('A claim line id, as get_negotiation names it.')
+const offerLine = z.strictObject({ line_id: z.string(), cents: z.number().int(), ground: z.enum(GROUNDS).nullable(), evidence: z.array(z.string()) })
+const offered = z.strictObject({ total: amount, lines: z.array(offerLine) })
+const region = z.strictObject({ x: z.number(), y: z.number(), width: z.number(), height: z.number() })
+const NEXT_STEPS = ['your_move', 'wait_for_the_shop', 'the_person_confirms_on_their_rental_link', 'the_owner_decides', 'nothing'] as const
+
 export type ToolDefinition = {
   readonly tier: ToolTier
   // Public tools need no identity; rental tools need the agent token for the rental they name.
   readonly audience: ToolAudience
-  readonly scope: AgentScope | null
+  readonly scope: ToolScope | null
   readonly description: string
   readonly input: z.ZodObject
   readonly output: z.ZodObject
@@ -226,6 +240,78 @@ export const TOOLS = {
     input: z.strictObject(rental),
     output: z.strictObject({ rental_id: z.uuid(), versions: z.array(z.strictObject({ version: z.number().int(), state: z.string(), created_at: instant, pdf_sha256: z.string().nullable(), manifest_sha256: z.string().nullable() })) }),
   }),
+  get_negotiation: tool({
+    tier: 'read',
+    audience: 'rental',
+    scope: NEGOTIATION_SCOPE,
+    description:
+      'For an assistant the renter chose as their advocate on a contested claim: the negotiation as the renter’s side sees it. Whose move it is, the claim’s lines with what Hold’s code checked about each, the most the renter will pay, the offers each side has left, the last offers and the transcript. Never the shop’s limits.',
+    input: z.strictObject(rental),
+    output: z.strictObject({
+      rental_id: z.uuid(),
+      kind: z.enum(NEGOTIATION_KINDS),
+      state: z.enum(NEGOTIATION_STATES),
+      your_turn: z.boolean(),
+      deadline: instant,
+      claim_total: amount,
+      your_limit: z.strictObject({ highest_total: amount }),
+      offers_left: z.strictObject({ you: z.number().int(), other_side: z.number().int() }),
+      lines: z.array(z.strictObject({ line_id: z.string(), description: merchantWords, reason: merchantWords, published: amount, evidence: z.strictObject({ known_mark_ids: z.array(z.string()), in_doubt: z.boolean(), both_looks_confirmed: z.boolean() }) })),
+      wear_policy_clauses: z.array(z.strictObject({ id: z.string(), text: merchantWords })),
+      renter_photo_ids: z.array(z.string()),
+      last_offers: z.strictObject({ yours: offered.nullable(), theirs: offered.nullable() }),
+      transcript: z.array(z.strictObject({ sequence: z.number().int(), by: z.enum(['you', 'other_side']), kind: z.enum(MOVE_KINDS), total: amount.nullable(), lines: z.array(offerLine) })),
+      renter_comments: z.array(z.string()).describe('The renter’s own words when they contested.'),
+    }),
+  }),
+  get_claim_lines: tool({
+    tier: 'read',
+    audience: 'rental',
+    scope: NEGOTIATION_SCOPE,
+    description: 'For the renter’s advocate: each claim line with its finding, what the photo comparison saw, its class and confidence, how well the photographs aligned, and whether the independent second look confirmed it. A line a person added has no finding.',
+    input: z.strictObject(rental),
+    output: z.strictObject({
+      rental_id: z.uuid(),
+      lines: z.array(z.strictObject({ line_id: z.string(), description: merchantWords, reason: merchantWords, published: amount, finding: z.strictObject({ view: z.string(), class: z.string(), confidence: z.number(), description: merchantWords, second_look_confirmed: z.boolean().nullable(), region, alignment: z.number().nullable() }).nullable() })),
+    }),
+  }),
+  get_line_photos: tool({
+    tier: 'read',
+    audience: 'rental',
+    scope: NEGOTIATION_SCOPE,
+    description: 'For the renter’s advocate: links, which work for a few minutes, to the handover and return photographs of one claim line’s view.',
+    input: z.strictObject({ ...rental, line_id: lineId }),
+    output: z.strictObject({ rental_id: z.uuid(), line_id: z.string(), view: z.string().nullable(), handover_photo_url: z.url().nullable(), return_photo_url: z.url().nullable() }),
+  }),
+  get_price_list: tool({
+    tier: 'read',
+    audience: 'rental',
+    scope: NEGOTIATION_SCOPE,
+    description: 'For the renter’s advocate: the damage price list and wear policy this renter agreed to at booking, with their versions. The wear clause ids are what the ground ordinary_wear cites.',
+    input: z.strictObject(rental),
+    output: z.strictObject({ rental_id: z.uuid(), price_list_version: z.number().int(), wear_policy_version: z.number().int(), prices: z.array(z.strictObject({ code: z.string(), category: z.enum(PRICE_CATEGORIES), description: merchantWords, amount })), wear_policy_clauses: z.array(z.strictObject({ id: z.string(), text: merchantWords })) }),
+  }),
+  get_known_marks: tool({
+    tier: 'read',
+    audience: 'rental',
+    scope: NEGOTIATION_SCOPE,
+    description: 'For the renter’s advocate: the marks on the rented items that were seen before this rental. Their ids are what the ground known_mark cites.',
+    input: z.strictObject(rental),
+    output: z.strictObject({ rental_id: z.uuid(), marks: z.array(z.strictObject({ mark_id: z.string(), view: z.string(), description: merchantWords, region })) }),
+  }),
+  submit_offer: tool({
+    tier: 'act_under_mandate',
+    audience: 'rental',
+    scope: NEGOTIATION_SCOPE,
+    description:
+      'For the renter’s advocate: one move, offer, accept or pass, checked by Hold’s referee, plain code. An offer lists every claim line with an amount in cents between zero and its published price, and for each lowered line one ground and the ids of the records it cites; it can only lower the claim, and never above the most the renter will pay. A move carries no words. Nothing here charges anyone: an agreement waits for the renter to confirm on their rental link with the code Hold emails them.',
+    input: z.strictObject({
+      ...rental,
+      move: z.enum(MOVE_KINDS),
+      lines: z.array(z.strictObject({ line_id: lineId, cents: z.number().int().min(0), ground: z.enum(GROUNDS).nullable(), evidence: z.array(z.string().min(1).max(64)).max(NEGOTIATION_LIMITS.evidencePerLine) })).max(50).optional().describe('Every claim line, for an offer. Left out for accept and pass.'),
+    }),
+    output: z.strictObject({ rental_id: z.uuid(), outcome: z.enum(['accepted', 'refused', 'ended']), reason: z.string().nullable(), state: z.enum(NEGOTIATION_STATES).nullable(), next: z.enum(NEXT_STEPS) }),
+  }),
 } as const satisfies Record<string, ToolDefinition>
 
 export type ToolName = keyof typeof TOOLS
@@ -237,6 +323,4 @@ export type ToolOutput<Name extends ToolName> = z.infer<(typeof TOOLS)[Name]['ou
 export const NOT_OFFERED = {
   request_extension: 'Hold has no extension flow yet: a rental’s end date and fee cannot change after booking.',
   report_incident: 'An incident report needs photographs taken on the renter’s phone through their rental link.',
-  get_negotiation: 'The advocates of extensions.md section 9 are built separately.',
-  submit_offer: 'The advocates of extensions.md section 9 are built separately.',
 } as const

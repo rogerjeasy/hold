@@ -7,6 +7,10 @@ import type { Database, PayPalMode, Transaction } from '@hold/db'
 export type FeePayment = { readonly ok: true; readonly approvalUrl: string } | { readonly ok: false; readonly reason: string }
 export type HoldApproval = { readonly status: 'awaiting_approval'; readonly approvalUrl: string } | { readonly status: 'not_requested' | 'placed' | 'unavailable' }
 
+// A negotiation whose next move is the shop advocate's, after the renter's assistant moved. Its outbox row is
+// committed with the move, so a failed send only waits for the relay.
+export type NegotiationHandOff = { readonly shopId: string; readonly rentalId: string; readonly negotiationId: string; readonly outboxId: string }
+
 export type McpPorts = {
   readonly database: Database
   readonly now: () => Date
@@ -23,6 +27,8 @@ export type McpPorts = {
   readonly holdApproval: (rental: { readonly shopId: string; readonly rentalId: string }) => Promise<HoldApproval>
   // A short-lived link to a photograph's display copy, or nothing where photographs cannot be shown.
   readonly photoLink: (displayKey: string) => Promise<string | null>
+  // Hands the shop's turn to the advocates' worker. It moves no money: the worker only runs the shop's advocate.
+  readonly sendNegotiation: (handOff: NegotiationHandOff) => Promise<void>
   // A QR code of a link, as a PNG in base64.
   readonly qrCode: (url: string) => Promise<string>
   // A structured line for the application log, for a call that names no shop and so has no audit log to go to.
