@@ -27,10 +27,18 @@ export function ClaimScreen({ shopName, data, canAct, photoUrls = {}, passkey, n
   const pending = ['releasing', 'renewing', 'capturing'].includes(data.holdState) || data.claim?.state === 'charging' || (data.execution !== null && ['pending', 'submitted'].includes(data.execution.state))
   useLookAgain(pending, { forMs: 180000 })
   // Releasing, approving and deciding need a passkey where the person's role asks for one. Preparing a claim does not.
-  const decision = (form: ReactNode) => passkey?.needed === true ? <PasskeyGate {...passkey} returnTo={rentalRoutes.claim(data.rentalId)}>{form}</PasskeyGate> : form
+  // The forms that decide money sit behind one prompt, however many of them apply.
+  const decision = (forms: ReactNode) => passkey?.needed === true ? <PasskeyGate {...passkey} returnTo={rentalRoutes.claim(data.rentalId)} body={t('passkeyBody')}>{forms}</PasskeyGate> : forms
+  const claim = data.claim
+  const claimForms = claim === null || !canAct ? [] : [
+    ['awaiting_approval', 'approved', 'presented'].includes(claim.state) ? <ApproveClaimForm key="approve" claimId={claim.id} /> : null,
+    ['awaiting_approval', 'contested', 'escalated'].includes(claim.state) || (['charging', 'charged', 'charge_failed'].includes(claim.state) && data.protectedReply && data.replies.some((reply) => reply.decision === 'contest')) ? <DecideClaimForm key="decide" claim={claim} /> : null,
+    negotiation?.awaitingShop === true ? <ShopConfirmForm key="confirm" negotiationId={negotiation.transcript.id} agreed={amount(negotiation.transcript.agreedCents ?? 0)} /> : null,
+  ].filter((form) => form !== null)
   return <ShopFrame shopName={shopName} title={t('title')}><div className="grid gap-6">
     <Link href={rentalRoutes.rental(data.rentalId)} className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{t('back')}</Link>
     <Link href={rentalRoutes.record(data.rentalId)} className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{records('title')}</Link>
+    {data.simulated ? <Notice title={t('sampleTitle')} body={t('sampleBody')} /> : null}
     <Notice title={t('humanDecision')} body={t('boundary')} />
     {data.rentalState === 'closed' ? <Notice title={t('settled')} body={t('settledBody')} /> : null}
     {pending ? <p role="status">{t('pending')}</p> : null}
@@ -39,11 +47,9 @@ export function ClaimScreen({ shopName, data, canAct, photoUrls = {}, passkey, n
     {data.claim === null ? canAct && !data.simulated && ['returned', 'inspecting'].includes(data.rentalState) ? <><Panel title={t('cleanTitle')}><div className="p-4 md:p-5">{decision(<CleanReleaseForm rentalId={data.rentalId} />)}</div></Panel><Panel title={t('draftTitle')}><div className="p-4 md:p-5"><ClaimDraftForm data={data} /></div></Panel></> : <p>{t('noClaim')}</p> : <>
       <Panel title={t(`states.${data.claim.state}`)}><div className="grid gap-4 p-4 md:p-5"><ul className="grid gap-4">{data.lines.map((line) => <li key={line.id} className="grid min-w-0 gap-1 border-b pb-3"><p className="font-semibold wrap-long-words">{line.description} · {amount(line.amountCents)}</p>{line.source === 'agreed_in_rental' ? <p className="text-sm font-semibold">{t('agreed.drafted')}</p> : null}<p className="whitespace-pre-wrap wrap-long-words">{line.reason ?? line.findingDescription ?? line.incidentDescription}</p><p className="text-sm text-muted-foreground">{t('namedBy', { name: line.actorName ?? t('staff') })}</p><div className="grid gap-4 sm:grid-cols-2">{(['beforeKey', 'afterKey'] as const).map((side) => { const key = line[side]; const url = key === null ? undefined : photoUrls[key]; const label = t(side === 'beforeKey' ? 'beforeUrl' : 'afterUrl'); return url === undefined ? null : <figure key={side}><figcaption className="mb-2 font-semibold">{label}</figcaption><PhotoWithMarks src={url} alt={label} marks={line.region === null ? [] : [{ id: line.id, region: line.region }]} /></figure> })}</div></li>)}</ul>
         {data.decisions.map((decision, index) => <p key={index}>{t('decisionBy', { name: decision.name ?? t('staff') })}</p>)}
-        {canAct && ['awaiting_approval', 'approved', 'presented'].includes(data.claim.state) ? decision(<ApproveClaimForm claimId={data.claim.id} />) : null}
         {data.replies.map((reply, index) => <blockquote key={index} className="min-w-0 whitespace-pre-wrap border-l-2 pl-3 wrap-long-words">{reply.comment}</blockquote>)}
-        {canAct && (['awaiting_approval', 'contested', 'escalated'].includes(data.claim.state) || (['charging', 'charged', 'charge_failed'].includes(data.claim.state) && data.protectedReply && data.replies.some((reply) => reply.decision === 'contest'))) ? decision(<DecideClaimForm claim={data.claim} />) : null}
         {negotiation?.transcript.state === 'agreed' && negotiation.transcript.shopConfirmedAt !== null ? <p role="status">{advocates('confirm.waiting')}</p> : null}
-        {canAct && negotiation?.awaitingShop === true ? decision(<ShopConfirmForm negotiationId={negotiation.transcript.id} agreed={amount(negotiation.transcript.agreedCents ?? 0)} />) : null}
+        {claimForms.length === 0 ? null : decision(<div className="grid gap-4">{claimForms}</div>)}
       </div></Panel>
       {negotiation === undefined ? null : <TranscriptView transcript={negotiation.transcript} />}
     </>}

@@ -813,7 +813,7 @@
           },
           "charge": {
             "name": "Cobrar",
-            "body": "Ese nivel no existe. Ninguna herramienta acepta un importe y ningún agente puede iniciar un cargo."
+            "body": "No existe ese nivel, y ningún agente puede iniciar un cobro. Ninguna herramienta de un asistente acepta un importe. La oferta de un defensor solo puede rebajar una reclamación que una persona aprobó, dentro de sus precios publicados y de los límites de ambas partes."
           }
         }
       }
@@ -1230,6 +1230,7 @@
       "label": "Páginas de la tienda",
       "home": "Hoy",
       "rentals": "Alquileres",
+      "calendar": "Calendario",
       "items": "Artículos",
       "security": "Seguridad",
       "staff": "Equipo",
@@ -1274,8 +1275,8 @@
     },
     "passkeyGate": {
       "title": "Confirma que eres tú.",
-      "confirmBody": "Para cambiar precios, equipo o PayPal hace falta tu llave de acceso, no solo un código por correo.",
-      "addBody": "Para cambiar precios, equipo o PayPal hace falta una llave de acceso. Añade una en este dispositivo primero.",
+      "body": "Para cambiar precios, equipo o PayPal hace falta tu llave de acceso, no solo un código por correo.",
+      "addFirst": "Todavía no hay ninguna en este dispositivo. Añade una primero.",
       "confirm": "Confirmar con mi llave de acceso",
       "add": "Añadir una llave de acceso",
       "addHere": "¿No hay llave de acceso en este dispositivo? Añade una"
@@ -1822,6 +1823,7 @@
       "notificationsOn": "PayPal avisa a Hold de lo que pasa con cada pago, así que quien paga y cierra la página queda reservado igualmente.",
       "notificationsOff": "PayPal aún no avisa a Hold de lo que pasa con cada pago. Quien paga y vuelve queda reservado; quien cierra la página, no.",
       "notificationsDemo": "Esta demostración comparte una cuenta del entorno de pruebas de PayPal con todas las demás, así que PayPal envía sus eventos a otro sitio. Hold vuelve a leer cada paso en PayPal: un cliente que paga y vuelve queda reservado; uno que cierra la página, no.",
+      "notificationsDemoOn": "Esta demostración comparte una app del entorno de pruebas de PayPal con todas las demás. PayPal envía los eventos de esa app a una dirección, y Hold pasa cada uno a la tienda de demostración cuyo alquiler nombra, después de comprobarlo con PayPal y volver a leer lo que nombra.",
       "turnOn": "Activar avisos",
       "turningOn": "Activando…",
       "turnedOn": "Los avisos están activados."
@@ -2036,6 +2038,27 @@
         "withdrawn": "Retirado"
       },
       "sortedBySimulated": "Clasificado por un sustituto del entorno de prueba, comprobado por el código."
+    },
+    "calendar": {
+      "title": "Calendario",
+      "lead": "Cada artículo que alquilas como una fila y cada alquiler como una barra, marcada según cómo está su retención de PayPal. Selecciona un alquiler para abrirlo.",
+      "range": "Del {from} al {to}",
+      "legend": "Qué significa cada marca",
+      "standings": {
+        "held": "Retenido en PayPal",
+        "awaiting": "Esperando al cliente en PayPal",
+        "late": "Con retraso",
+        "settling": "En liquidación",
+        "done": "Terminado"
+      },
+      "item": "Artículo",
+      "list": "Alquileres por artículo",
+      "empty": "No hay nada reservado en estas semanas.",
+      "noItemsTitle": "Añade primero tus artículos",
+      "noItemsBody": "El calendario muestra cada artículo que alquilas.",
+      "noItemsAction": "Ir a los artículos",
+      "unknownRenter": "Cliente aún desconocido",
+      "loading": "Cargando el calendario…"
     }
   },
   "emails": {
@@ -2276,6 +2299,7 @@
     "pay": "Pagar {amount} con PayPal",
     "paying": "Abriendo PayPal…",
     "agree": "Al pagar, aceptas la retención y los precios de arriba.",
+    "paypalCancelled": "Cerraste PayPal sin aprobar. No se ha cobrado nada.",
     "status": {
       "pending_payment": "Esperando tu pago",
       "booked": "Reservado. Ya has pagado el precio.",
@@ -2588,6 +2612,9 @@
     "back": "Volver al alquiler",
     "humanDecision": "Una persona aprueba cada cargo",
     "boundary": "Revise las pruebas y los precios acordados. Aprobar presenta la reclamación al cliente sin cobrarle.",
+    "passkeyBody": "Para aprobar una reclamación o liberar una retención hace falta tu llave de acceso, no solo un código por correo.",
+    "sampleTitle": "Un alquiler de muestra",
+    "sampleBody": "Sus fotos y su comparación son de la demostración, y aquí no se mueve dinero de PayPal. Reserva una de las bicis de ciudad de la tienda para probar una retención real en el sandbox de PayPal.",
     "summary": "Importes de liquidación",
     "reserved": "Importe reservado",
     "capture": "Cargo de la reserva",

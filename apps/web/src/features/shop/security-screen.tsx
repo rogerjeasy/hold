@@ -50,7 +50,7 @@ export function SecurityScreen({ shopName, passkeys, required, emailCodeSession,
           hasPasskey
           email={email}
           returnTo="/shop/security"
-          confirmBody={t('confirmToAdd')}
+          body={t('confirmToAdd')}
         >
           <AddPasskey />
         </PasskeyGate>

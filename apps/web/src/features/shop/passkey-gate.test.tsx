@@ -22,4 +22,13 @@ describe('PasskeyGate', () => {
     renderWithIntl(<PasskeyGate {...gate} needed hasPasskey={false}>Approve</PasskeyGate>)
     expect(screen.getByRole('link', { name: 'Add a passkey' })).toHaveAttribute('href', '/shop/security')
   })
+
+  it('says what the passkey is for, whether or not this device has one', () => {
+    const { unmount } = renderWithIntl(<PasskeyGate {...gate} needed hasPasskey={false} body="Approving needs your passkey.">Approve</PasskeyGate>)
+    expect(screen.getByText('Approving needs your passkey.')).toBeInTheDocument()
+    expect(screen.getByText('There is none on this device yet. Add one first.')).toBeInTheDocument()
+    unmount()
+    renderWithIntl(<PasskeyGate {...gate} needed hasPasskey body="Approving needs your passkey.">Approve</PasskeyGate>)
+    expect(screen.getByText('Approving needs your passkey.')).toBeInTheDocument()
+  })
 })

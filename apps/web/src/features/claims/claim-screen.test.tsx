@@ -81,6 +81,23 @@ it('asks a person whose session an emailed code proved to confirm with a passkey
   expect(screen.getByRole('button', { name: 'Prepare claim for review' })).toBeInTheDocument()
 })
 
+// Found on 28 October 2026: a claim awaiting approval showed two identical passkey prompts, both about prices and staff.
+it('asks once, and for the claim, when a person with no passkey yet opens a claim awaiting approval', () => {
+  const awaiting = { ...workspace, claim: { id: 'claim', state: 'awaiting_approval' as const, totalCents: 3500, raisedByUserId: 'staff', replyDueAt: null } }
+  renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={awaiting} canAct passkey={{ needed: true, hasPasskey: false, email: 'tomas@ribeirabikes.example' }} />)
+  expect(screen.getAllByRole('heading', { name: 'Confirm it is you.' })).toHaveLength(1)
+  expect(screen.getByText(/Approving a claim or releasing a hold needs your passkey/)).toBeInTheDocument()
+  expect(screen.queryByText(/prices, staff or PayPal/)).not.toBeInTheDocument()
+})
+
+it('says a sample claim is a sample, and shows its two photographs with the new mark outlined', () => {
+  const sample = { ...workspace, simulated: true, rentalState: 'settling' as const, claim: { id: 'claim', state: 'awaiting_approval' as const, totalCents: 3500, raisedByUserId: 'staff', replyDueAt: null }, lines: [{ id: 'line', amountCents: 3500, description: 'Scratch on the frame, through the paint', reason: null, actorName: 'Tomás', findingId: 'finding', source: 'finding' as const, incidentId: null, findingDescription: 'A chip in the paint on the down tube.', incidentDescription: null, region: { x: 0.36, y: 0.5, width: 0.08, height: 0.16 }, beforeKey: 'sample/sample-handover.jpg', afterKey: 'sample/sample-return-damage.jpg' }] }
+  renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={sample} canAct={false} photoUrls={{ 'sample/sample-handover.jpg': '/images/sample-handover.jpg', 'sample/sample-return-damage.jpg': '/images/sample-return-damage.jpg' }} />)
+  expect(screen.getByText('A sample rental')).toBeInTheDocument()
+  expect(screen.getByText('A chip in the paint on the down tube.')).toBeInTheDocument()
+  expect(screen.getAllByRole('img').map((image) => image.getAttribute('src'))).toEqual(expect.arrayContaining([expect.stringContaining('sample-handover.jpg'), expect.stringContaining('sample-return-damage.jpg')]))
+})
+
 describe('a line the renter agreed during the rental (X5.3)', () => {
   const agreed = { ...workspace, agreedIncidents: [{ id: 'incident', description: 'A scratch on the left side', agreedCents: 3500, priceDescription: 'Scratch', itemLabel: 'City e-bike 1' }] }
   const lines = (container: HTMLElement) => JSON.parse(container.querySelector<HTMLInputElement>('input[name="lines"]')?.value ?? '[]') as unknown

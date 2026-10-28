@@ -813,7 +813,7 @@
           },
           "charge": {
             "name": "Charge",
-            "body": "There is no such tier. No tool takes an amount, and no agent can start a charge."
+            "body": "There is no such tier, and no agent can start a charge. No assistant's tool takes an amount. An advocate's offer may only lower a claim a person approved, within its published prices and both sides' limits."
           }
         }
       }
@@ -1230,6 +1230,7 @@
       "label": "Shop pages",
       "home": "Today",
       "rentals": "Rentals",
+      "calendar": "Calendar",
       "items": "Items",
       "security": "Security",
       "staff": "Staff",
@@ -1274,8 +1275,8 @@
     },
     "passkeyGate": {
       "title": "Confirm it is you.",
-      "confirmBody": "Changing prices, staff or PayPal needs your passkey, not only an emailed code.",
-      "addBody": "Changing prices, staff or PayPal needs a passkey. Add one on this device first.",
+      "body": "Changing prices, staff or PayPal needs your passkey, not only an emailed code.",
+      "addFirst": "There is none on this device yet. Add one first.",
       "confirm": "Confirm with my passkey",
       "add": "Add a passkey",
       "addHere": "No passkey on this device? Add one"
@@ -1822,6 +1823,7 @@
       "notificationsOn": "PayPal tells Hold what happens to each payment, so a renter who pays and closes the page is still booked.",
       "notificationsOff": "PayPal does not tell Hold yet what happens to each payment. Renters who pay and come back are booked; one who closes the page is not.",
       "notificationsDemo": "This demo shares one PayPal sandbox account with every other demo, so PayPal sends its events elsewhere. Hold reads each step back from PayPal instead: a renter who pays and comes back is booked; one who closes the page is not.",
+      "notificationsDemoOn": "This demo shares one PayPal sandbox app with every other demo. PayPal sends that app’s events to one address, and Hold passes each one to the demo shop whose rental it names, after checking it with PayPal and reading back what it names.",
       "turnOn": "Turn on notifications",
       "turningOn": "Turning on…",
       "turnedOn": "Notifications are on."
@@ -2036,6 +2038,27 @@
         "withdrawn": "Withdrawn"
       },
       "sortedBySimulated": "Sorted by a stand-in for the test environment, checked by code."
+    },
+    "calendar": {
+      "title": "Calendar",
+      "lead": "Every item you rent as a row and every rental as a bar, marked by where its PayPal hold stands. Select a rental to open it.",
+      "range": "{from} to {to}",
+      "legend": "What each mark means",
+      "standings": {
+        "held": "Held on PayPal",
+        "awaiting": "Waiting for the renter in PayPal",
+        "late": "Late",
+        "settling": "Being settled",
+        "done": "Done"
+      },
+      "item": "Item",
+      "list": "Rentals by item",
+      "empty": "Nothing is booked in these weeks.",
+      "noItemsTitle": "Add your items first",
+      "noItemsBody": "The calendar shows each item you rent.",
+      "noItemsAction": "Go to items",
+      "unknownRenter": "Renter not known yet",
+      "loading": "Loading the calendar…"
     }
   },
   "emails": {
@@ -2276,6 +2299,7 @@
     "pay": "Pay {amount} with PayPal",
     "paying": "Opening PayPal…",
     "agree": "By paying, you agree to the hold and the prices above.",
+    "paypalCancelled": "You closed PayPal before approving. Nothing was charged.",
     "status": {
       "pending_payment": "Waiting for your payment",
       "booked": "Booked. Your fee is paid.",
@@ -2588,6 +2612,9 @@
     "back": "Back to the rental",
     "humanDecision": "A person approves every charge",
     "boundary": "Review the evidence and agreed prices. Approval shares the claim with the renter; it does not charge them.",
+    "passkeyBody": "Approving a claim or releasing a hold needs your passkey, not only an emailed code.",
+    "sampleTitle": "A sample rental",
+    "sampleBody": "Its photographs and its comparison are the demonstration’s own, and nothing here moves PayPal money. Book one of the shop’s city bikes to try a real hold in the PayPal sandbox.",
     "summary": "Settlement amounts",
     "reserved": "Reserved hold",
     "capture": "Charge from hold",

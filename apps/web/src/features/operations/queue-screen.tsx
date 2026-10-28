@@ -46,7 +46,7 @@ export function QueueScreen({ shopName, clock, endOfDay, entries, recent, rules,
           {canDecide ? <CheckNowForm /> : <p className="text-muted-foreground">{t('readOnly')}</p>}
         </div>
         {canDecide && moneyWaits && gate.needed ? (
-          <PasskeyGate {...gate} returnTo={shopRoutes.queue} confirmBody={t('passkeyBody')}>
+          <PasskeyGate {...gate} returnTo={shopRoutes.queue} body={t('passkeyBody')}>
             {null}
           </PasskeyGate>
         ) : null}

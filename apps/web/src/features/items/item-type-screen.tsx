@@ -27,7 +27,7 @@ export function ItemTypeScreen({ shopName, currency, values, canManage, returnTo
           {t('back')}
         </Link>
         {canManage ? (
-          <PasskeyGate {...gate} returnTo={returnTo} confirmBody={t('passkeyBody')}>
+          <PasskeyGate {...gate} returnTo={returnTo} body={t('passkeyBody')}>
             <ItemTypeForm currency={currency} values={values} />
           </PasskeyGate>
         ) : (

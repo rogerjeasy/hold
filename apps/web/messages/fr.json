@@ -813,7 +813,7 @@
           },
           "charge": {
             "name": "Débiter",
-            "body": "Ce niveau n'existe pas. Aucun outil ne prend de montant, et aucun agent ne peut lancer un débit."
+            "body": "Ce niveau n’existe pas, et aucun agent ne peut lancer un débit. Aucun outil d’un assistant n’accepte de montant. L’offre d’un défenseur ne peut que réduire une réclamation qu’une personne a approuvée, dans ses prix publiés et les limites des deux parties."
           }
         }
       }
@@ -1230,6 +1230,7 @@
       "label": "Pages de la boutique",
       "home": "Aujourd’hui",
       "rentals": "Locations",
+      "calendar": "Calendrier",
       "items": "Articles",
       "security": "Sécurité",
       "staff": "Équipe",
@@ -1274,8 +1275,8 @@
     },
     "passkeyGate": {
       "title": "Confirmez que c'est bien vous.",
-      "confirmBody": "Pour modifier les prix, l'équipe ou PayPal, il faut votre clé d'accès, pas seulement un code reçu par e-mail.",
-      "addBody": "Pour modifier les prix, l'équipe ou PayPal, il faut une clé d'accès. Ajoutez-en d'abord une sur cet appareil.",
+      "body": "Pour modifier les prix, l'équipe ou PayPal, il faut votre clé d'accès, pas seulement un code reçu par e-mail.",
+      "addFirst": "Il n'y en a pas encore sur cet appareil. Ajoutez-en d'abord une.",
       "confirm": "Confirmer avec ma clé d'accès",
       "add": "Ajouter une clé d'accès",
       "addHere": "Pas de clé d’accès sur cet appareil ? En ajouter une"
@@ -1822,6 +1823,7 @@
       "notificationsOn": "PayPal informe Hold de ce qui arrive à chaque paiement : un client qui paie puis ferme la page est tout de même réservé.",
       "notificationsOff": "PayPal n'informe pas encore Hold de ce qui arrive à chaque paiement. Un client qui paie et revient est réservé ; un client qui ferme la page ne l'est pas.",
       "notificationsDemo": "Cette démonstration partage un compte du bac à sable PayPal avec toutes les autres, donc PayPal envoie ses événements ailleurs. Hold relit chaque étape auprès de PayPal : un client qui paie et revient est réservé ; celui qui ferme la page ne l'est pas.",
+      "notificationsDemoOn": "Cette démonstration partage une app du bac à sable PayPal avec toutes les autres. PayPal envoie les événements de cette app à une seule adresse, et Hold transmet chacun à la boutique de démonstration dont il nomme la location, après l’avoir vérifié auprès de PayPal et relu ce qu’il nomme.",
       "turnOn": "Activer les notifications",
       "turningOn": "Activation…",
       "turnedOn": "Les notifications sont activées."
@@ -2036,6 +2038,27 @@
         "withdrawn": "Retiré"
       },
       "sortedBySimulated": "Classé par un substitut de l’environnement de test, vérifié par le code."
+    },
+    "calendar": {
+      "title": "Calendrier",
+      "lead": "Chaque article que vous louez en ligne et chaque location en barre, marquée selon l’état de sa réservation PayPal. Sélectionnez une location pour l’ouvrir.",
+      "range": "Du {from} au {to}",
+      "legend": "Ce que signifie chaque marque",
+      "standings": {
+        "held": "Réservé sur PayPal",
+        "awaiting": "En attente du client sur PayPal",
+        "late": "En retard",
+        "settling": "En cours de règlement",
+        "done": "Terminé"
+      },
+      "item": "Article",
+      "list": "Locations par article",
+      "empty": "Rien n’est réservé ces semaines-ci.",
+      "noItemsTitle": "Ajoutez d’abord vos articles",
+      "noItemsBody": "Le calendrier montre chaque article que vous louez.",
+      "noItemsAction": "Aller aux articles",
+      "unknownRenter": "Client pas encore connu",
+      "loading": "Chargement du calendrier…"
     }
   },
   "emails": {
@@ -2276,6 +2299,7 @@
     "pay": "Régler {amount} avec PayPal",
     "paying": "Ouverture de PayPal…",
     "agree": "En réglant, vous acceptez l'empreinte et les prix ci-dessus.",
+    "paypalCancelled": "Vous avez fermé PayPal sans approuver. Rien n’a été débité.",
     "status": {
       "pending_payment": "En attente de votre règlement",
       "booked": "Réservée. Votre prix est réglé.",
@@ -2588,6 +2612,9 @@
     "back": "Retour à la location",
     "humanDecision": "Une personne approuve chaque débit",
     "boundary": "Vérifiez les preuves et les prix convenus. L’approbation présente la réclamation au locataire sans le débiter.",
+    "passkeyBody": "Pour approuver une réclamation ou libérer une réservation, il faut votre clé d'accès, pas seulement un code reçu par e-mail.",
+    "sampleTitle": "Une location d’exemple",
+    "sampleBody": "Ses photos et sa comparaison sont celles de la démonstration, et rien ici ne déplace d’argent PayPal. Réservez l’un des vélos de ville de la boutique pour essayer une vraie réservation dans le sandbox PayPal.",
     "summary": "Montants du règlement",
     "reserved": "Montant réservé",
     "capture": "Débit sur la réserve",

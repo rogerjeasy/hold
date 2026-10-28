@@ -204,7 +204,7 @@ describe('AiScreen pipeline', () => {
 
   it('lists no tier that charges', () => {
     renderWithIntl(<AiScreen />)
-    expect(screen.getByText('There is no such tier. No tool takes an amount, and no agent can start a charge.')).toBeInTheDocument()
+    expect(screen.getByText(/^There is no such tier, and no agent can start a charge. No assistant's tool takes an amount./)).toBeInTheDocument()
   })
 
   it('sends the reader to the published scorecard, with its counts', () => {
