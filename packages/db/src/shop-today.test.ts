@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { holdStanding, money, shopDay } from '@hold/domain'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { registerOwner } from './accounts.ts'
@@ -5,7 +6,9 @@ import { publishPriceList } from './price-list-repository.ts'
 import { addSampleRentals } from './sample-rentals.ts'
 import { inShop } from './scope.ts'
 import type { Scope } from './scope.ts'
+import { recordPhoto, sealSession, startCaptureSession } from './capture-repository.ts'
 import { shopToday } from './shop-today.ts'
+import { readyRentalShop, VIEWS } from './testing/ready-rental.ts'
 import { createTestDatabase } from './testing/test-database.ts'
 import type { TestDatabase } from './testing/test-database.ts'
 
@@ -54,6 +57,7 @@ describe('a shop with no rentals', () => {
       late: [],
       counter: [],
       month: { feesCents: 0, releasedCents: 0, claimedCents: 0, recoveredCents: 0 },
+      routine: { handover: { medianSeconds: null, count: 0 }, return: { medianSeconds: null, count: 0 } },
       // Signing up is the shop's first line.
       activity: [expect.objectContaining({ action: 'shop.created', actorName: 'Douro Kayaks', simulated: false })],
       rentals: { total: 0, simulated: 0 },
@@ -148,5 +152,29 @@ describe('sample rentals added late in the day', () => {
     expect(today.counter.every((visit) => visit.at >= day.start && visit.at < day.end)).toBe(true)
     expect(today.late.map((rental) => rental.renterName)).toEqual(['Lea Fischer'])
     expect(today.dueBackToday).toBe(3)
+  })
+})
+
+// project-description.md section 13: the handover and the return are timed from the shop's own sessions, never from
+// the demonstration's sample photographs, and every time comes with its count.
+describe('the counter routine', () => {
+  it('is not measured from sample rentals, whose photographs are the demonstration’s', async () => {
+    const { routine } = await inShop(database, shopA, (transaction) => shopToday(transaction, window))
+    expect(routine).toEqual({ handover: { medianSeconds: null, count: 0 }, return: { medianSeconds: null, count: 0 } })
+  })
+
+  it('times a sealed handover from its opening to its seal', async () => {
+    const shop = await readyRentalShop(database, 'routine', new Date(NOW.getTime() - 86_400_000))
+    const rental = await shop.readyRental()
+    const started = await shop.act((transaction) => startCaptureSession(transaction, { rentalId: rental.rentalId, rentalItemId: rental.rentalItemIds[0] ?? '', kind: 'handover', actorUserId: shop.scope.userId ?? null }, new Date(NOW.getTime() - 48_000)))
+    if (!started.ok) throw new Error(started.reason)
+    for (const view of VIEWS) {
+      const recorded = await shop.act((transaction) => recordPhoto(transaction, started.sessionId, { view, evidenceKey: `evidence/routine-${view}.jpg`, sha256: createHash('sha256').update(view).digest('hex'), quality: { sharpness: 120, shadows: 20, highlights: 220, filled: 0.6 } }, new Date(NOW.getTime() - 30_000)))
+      if (!recorded.ok) throw new Error(recorded.reason)
+    }
+    const sealed = await shop.act((transaction) => sealSession(transaction, started.sessionId, NOW))
+    if (!sealed.ok) throw new Error(sealed.reason)
+    const { routine } = await shop.act((transaction) => shopToday(transaction, window))
+    expect(routine.handover).toEqual({ medianSeconds: 48, count: 1 })
   })
 })

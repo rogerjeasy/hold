@@ -417,7 +417,7 @@ These are proposals to be tested with real shops.
 | Share of claims accepted without contest | Shows that the evidence is convincing |
 | Disputes per thousand rentals | Shows that disagreements are being settled early |
 | Damage cost recovered against damage cost incurred | Shows that shops are being made whole |
-| Time taken for handover and return | Shows that the routine fits a busy counter |
+| Time taken for handover and return | Shows that the routine fits a busy counter. Measured since 28 October 2026: the owner's Today page gives the month's median from opening each handover or return to sealing it, with the number of sessions, leaving out sample rentals and sample photographs |
 | Cases where the AI deferred to a person, and how they ended | Shows the system knows its limits |
 | Clean returns the comparison wrongly flagged in testing, as a count | The error that harms renters, published |
 | Average hold for a returning renter against a new one | Shows that care is rewarded |

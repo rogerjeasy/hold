@@ -1,13 +1,16 @@
-import type { ClaimState, HoldState, RentalState } from '@hold/domain'
-import { and, asc, desc, eq, gte, inArray, lt, notInArray, or, sql } from 'drizzle-orm'
+import { counterRoutine } from '@hold/domain'
+import type { ClaimState, HoldState, RentalState, RoutineTime } from '@hold/domain'
+import { and, asc, desc, eq, gte, inArray, lt, lte, notInArray, or, sql } from 'drizzle-orm'
 import {
   auditLog,
   authorizations,
+  captureSessions,
   claimLines,
   claimReplies,
   claims,
   holds,
   items,
+  photos,
   moneyEvents,
   priceEntries,
   rentalItems,
@@ -77,6 +80,8 @@ export type ShopToday = {
   readonly late: readonly LateRental[]
   readonly counter: readonly CounterVisit[]
   readonly month: { readonly feesCents: number; readonly releasedCents: number; readonly claimedCents: number; readonly recoveredCents: number }
+  // The month's handovers and returns, timed from opening to seal, each with its count (counterRoutine).
+  readonly routine: { readonly handover: RoutineTime; readonly return: RoutineTime }
   readonly activity: readonly ActivityLine[]
   readonly rentals: { readonly total: number; readonly simulated: number }
 }
@@ -227,6 +232,23 @@ async function month(transaction: Transaction, window: TodayWindow) {
   }
 }
 
+// The month's sealed sessions. One of a sample rental, or holding a sample photograph, is the demonstration's, and
+// counterRoutine leaves it out.
+async function routine(transaction: Transaction, window: TodayWindow) {
+  const sessions = await transaction
+    .select({
+      kind: captureSessions.kind,
+      startedAt: captureSessions.startedAt,
+      sealedAt: captureSessions.sealedAt,
+      simulated: sql<boolean>`(${rentals.simulated} or exists (select 1 from ${photos} where ${photos.sessionId} = ${captureSessions.id} and (${photos.quality} ->> 'simulated') = '1'))`,
+    })
+    .from(captureSessions)
+    .innerJoin(rentalItems, eq(rentalItems.id, captureSessions.rentalItemId))
+    .innerJoin(rentals, eq(rentals.id, rentalItems.rentalId))
+    .where(and(gte(captureSessions.sealedAt, window.day.monthStart), lte(captureSessions.sealedAt, window.now), inArray(captureSessions.kind, ['handover', 'return'])))
+  return counterRoutine(sessions)
+}
+
 async function activity(transaction: Transaction): Promise<ActivityLine[]> {
   const rows = await transaction
     .select({
@@ -254,6 +276,7 @@ export async function shopToday(transaction: Transaction, window: TodayWindow): 
     late: await lateRentals(transaction, window),
     counter: await counter(transaction, window),
     month: await month(transaction, window),
+    routine: await routine(transaction, window),
     activity: await activity(transaction),
     rentals: { total: rentalCount?.total ?? 0, simulated: rentalCount?.simulated ?? 0 },
   }

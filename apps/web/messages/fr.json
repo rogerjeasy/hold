@@ -2190,7 +2190,12 @@
       "fees": "Frais de location",
       "released": "Rendu aux clients",
       "claimed": "Dommages réclamés",
-      "recovered": "Récupéré"
+      "recovered": "Récupéré",
+      "routineHandover": "Remise : {time}, la médiane de {count, plural, one {# session} other {# sessions}}",
+      "routineReturn": "Retour : {time}, la médiane de {count, plural, one {# session} other {# sessions}}",
+      "routineNone": "Remise et retour : pas encore mesurés ce mois-ci",
+      "routineHandoverNone": "Remise : pas encore mesurée ce mois-ci",
+      "routineReturnNone": "Retour : pas encore mesuré ce mois-ci"
     },
     "activity": {
       "title": "Activité",

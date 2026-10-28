@@ -6,8 +6,11 @@ import { useShopFormat } from '@/hooks/use-shop-format'
 
 const figures = ['fees', 'released', 'claimed', 'recovered'] as const
 
-// The month so far, from the money log and the claims.
-export function MonthPanel({ month, now, clock }: { month: ShopToday['month']; now: Date; clock: ShopClock }) {
+// Minutes and seconds, as a counter reads a stopwatch.
+const clockTime = (seconds: number) => `${String(Math.floor(seconds / 60))}:${String(seconds % 60).padStart(2, '0')}`
+
+// The month so far, from the money log and the claims, and how long the counter takes, each time with its count.
+export function MonthPanel({ month, routine, now, clock }: { month: ShopToday['month']; routine: ShopToday['routine']; now: Date; clock: ShopClock }) {
   const t = useTranslations('today.month')
   const format = useShopFormat(clock)
   const cents = { fees: month.feesCents, released: month.releasedCents, claimed: month.claimedCents, recovered: month.recoveredCents }
@@ -23,6 +26,16 @@ export function MonthPanel({ month, now, clock }: { month: ShopToday['month']; n
           </div>
         ))}
       </dl>
+      <ul className="grid gap-1 border-t px-4 py-3.5 text-[0.9375rem] md:px-5">
+        {routine.handover.medianSeconds === null && routine.return.medianSeconds === null ? (
+          <li className="text-muted-foreground">{t('routineNone')}</li>
+        ) : (
+          <>
+            <li>{routine.handover.medianSeconds === null ? t('routineHandoverNone') : t('routineHandover', { time: clockTime(routine.handover.medianSeconds), count: routine.handover.count })}</li>
+            <li>{routine.return.medianSeconds === null ? t('routineReturnNone') : t('routineReturn', { time: clockTime(routine.return.medianSeconds), count: routine.return.count })}</li>
+          </>
+        )}
+      </ul>
     </Panel>
   )
 }

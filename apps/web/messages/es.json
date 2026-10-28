@@ -2190,7 +2190,12 @@
       "fees": "Tarifas de alquiler",
       "released": "Liberado a clientes",
       "claimed": "Daños reclamados",
-      "recovered": "Recuperado"
+      "recovered": "Recuperado",
+      "routineHandover": "Entrega: {time}, la mediana de {count, plural, one {# sesión} other {# sesiones}}",
+      "routineReturn": "Devolución: {time}, la mediana de {count, plural, one {# sesión} other {# sesiones}}",
+      "routineNone": "Entrega y devolución: sin medir aún este mes",
+      "routineHandoverNone": "Entrega: sin medir aún este mes",
+      "routineReturnNone": "Devolución: sin medir aún este mes"
     },
     "activity": {
       "title": "Actividad",

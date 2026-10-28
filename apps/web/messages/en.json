@@ -2190,7 +2190,12 @@
       "fees": "Rental fees",
       "released": "Released to renters",
       "claimed": "Damage claimed",
-      "recovered": "Recovered"
+      "recovered": "Recovered",
+      "routineHandover": "Handover: {time}, the median of {count, plural, one {# session} other {# sessions}}",
+      "routineReturn": "Return: {time}, the median of {count, plural, one {# session} other {# sessions}}",
+      "routineNone": "Handover and return: not timed yet this month",
+      "routineHandoverNone": "Handover: not timed yet this month",
+      "routineReturnNone": "Return: not timed yet this month"
     },
     "activity": {
       "title": "Activity",

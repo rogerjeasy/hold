@@ -18,6 +18,7 @@ const empty: ShopToday = {
   late: [],
   counter: [],
   month: { feesCents: 0, releasedCents: 0, claimedCents: 0, recoveredCents: 0 },
+  routine: { handover: { medianSeconds: null, count: 0 }, return: { medianSeconds: null, count: 0 } },
   activity: [{ at: at('2026-10-14T08:00:00Z'), action: 'shop.created', actorName: 'Tomás', renterName: null, simulated: false }],
   rentals: { total: 0, simulated: 0 },
 }
@@ -46,6 +47,7 @@ const busy: ShopToday = {
     { rentalId: 'r7', kind: 'handover', at: at('2026-10-14T13:00:00Z'), renterName: 'Hannah Svensson', items: ['Gravel bike 1'], done: false, hold: { reservedCents: 300_00, state: 'requested', assuredUntil: null }, simulated: true },
   ],
   month: { feesCents: 488_00, releasedCents: 515_00, claimedCents: 115_00, recoveredCents: 35_00 },
+  routine: { handover: { medianSeconds: 48, count: 12 }, return: { medianSeconds: 65, count: 10 } },
   activity: [{ at: at('2026-10-14T07:30:00Z'), action: 'handover.done', actorName: 'Tomás', renterName: 'Lukas Weber', simulated: true }],
   rentals: { total: 11, simulated: 11 },
 }
@@ -129,6 +131,17 @@ describe('the Today page', () => {
     const month = within(screen.getByRole('region', { name: 'October so far' }))
     expect(month.getByText('€515.00')).toBeInTheDocument()
     expect(month.getByText('€35.00')).toBeInTheDocument()
+  })
+
+  // project-description.md section 13: the counter routine is measured, each time with its count, never claimed.
+  it('times the month’s handovers and returns, each with its count, and says so when none is timed', () => {
+    const { unmount } = show(busy)
+    const month = within(screen.getByRole('region', { name: 'October so far' }))
+    expect(month.getByText('Handover: 0:48, the median of 12 sessions')).toBeInTheDocument()
+    expect(month.getByText('Return: 1:05, the median of 10 sessions')).toBeInTheDocument()
+    unmount()
+    show(empty)
+    expect(within(screen.getByRole('region', { name: 'October so far' })).getByText('Handover and return: not timed yet this month')).toBeInTheDocument()
   })
 
   it('says plainly that sample rentals are simulated, and marks each one', () => {

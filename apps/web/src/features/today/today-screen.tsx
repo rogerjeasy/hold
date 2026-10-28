@@ -49,7 +49,7 @@ export function TodayScreen({ firstName, shop, now, part, setup, today, samples 
         </div>
         <div className="grid min-w-0 gap-6 md:grid-cols-2 md:gap-7 xl:grid-cols-1">
           <HoldsPanel holds={holds} clock={clock} />
-          <MonthPanel month={today.month} now={now} clock={clock} />
+          <MonthPanel month={today.month} routine={today.routine} now={now} clock={clock} />
           <div className="md:col-span-2 xl:col-span-1">
             <ActivityList lines={today.activity} day={day} clock={clock} />
           </div>

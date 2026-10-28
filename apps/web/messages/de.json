@@ -2190,7 +2190,12 @@
       "fees": "Mietgebühren",
       "released": "An Kunden freigegeben",
       "claimed": "Geforderte Schäden",
-      "recovered": "Eingenommen"
+      "recovered": "Eingenommen",
+      "routineHandover": "Übergabe: {time}, der Median aus {count, plural, one {# Vorgang} other {# Vorgängen}}",
+      "routineReturn": "Rückgabe: {time}, der Median aus {count, plural, one {# Vorgang} other {# Vorgängen}}",
+      "routineNone": "Übergabe und Rückgabe: diesen Monat noch nicht gemessen",
+      "routineHandoverNone": "Übergabe: diesen Monat noch nicht gemessen",
+      "routineReturnNone": "Rückgabe: diesen Monat noch nicht gemessen"
     },
     "activity": {
       "title": "Aktivität",
