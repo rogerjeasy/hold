@@ -1,4 +1,5 @@
 import type { Browser, Page } from '@playwright/test'
+import { acceptClaim } from './support/claim'
 import { expectFitsEveryWidth } from './support/responsive'
 import { readyForHandover, renterBrowser } from './support/rental'
 import { TEST_CODE } from './support/sign-in'
@@ -100,11 +101,7 @@ test('a scratch reported during the rental is priced by staff, agreed with a cod
   const claimLink = (await page.getByTestId('renter-link').textContent()) ?? ''
   const payer = await renterBrowser(browser)
   await payer.goto(claimLink)
-  await payer.getByRole('button', { name: 'I have reviewed this claim' }).click()
-  await payer.getByRole('button', { name: 'Email me a verification code' }).click()
-  await payer.getByLabel('Verification code', { exact: true }).fill(TEST_CODE)
-  await payer.getByRole('button', { name: 'Accept claim and settle', exact: true }).click()
-  await expect(payer.getByText('PayPal confirmed settlement. This rental is closed.')).toBeVisible()
+  await acceptClaim(payer)
   await payer.context().close()
   await page.reload()
   await expect(page.getByText('Settlement confirmed', { exact: true })).toBeVisible()

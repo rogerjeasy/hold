@@ -1,5 +1,7 @@
 import type { Page } from '@playwright/test'
+import { acceptClaim, handedOverAndReturned } from './support/claim'
 import { addVirtualAuthenticator } from './support/passkey'
+import { bookAtTheCounter, feePaidAndHoldPlaced, renterBrowser } from './support/rental'
 import { expectInShop } from './support/sign-in'
 import { expect, test } from './support/test'
 
@@ -74,6 +76,28 @@ test('starting a fresh demo opens a new shop with new accounts', async ({ page, 
   expect((await page.goto(first))?.status()).toBe(404)
   // The 404 is the point: the first demo's rental is not this demo's.
   browserErrors.length = 0
+})
+
+// The README's judge path. Jonas's limit is below the shop's owner threshold, so nothing he does here asks for a
+// passkey, and no authenticator is attached: a passkey prompt anywhere would stop the test.
+test('as Jonas, a judge takes a damaged return to a PayPal capture without adding a passkey', async ({ page, browser }) => {
+  test.setTimeout(240000)
+  await startDemo(page, 'Jonas, at the counter')
+  await bookAtTheCounter(page, 'City bike')
+  await feePaidAndHoldPlaced(page, browser)
+  await handedOverAndReturned(page, 'Use the sample with damage')
+  await page.getByLabel('Agreed price').selectOption({ label: 'Scratch on the frame, through the paint · €35.00' })
+  await page.getByLabel('What did you find, and why does this price apply?').fill('A chip in the paint on the down tube, new since the handover.')
+  await page.getByRole('button', { name: 'Prepare claim for review', exact: true }).click()
+  await page.getByRole('button', { name: 'Approve and show renter link', exact: true }).click()
+  const link = (await page.getByTestId('renter-link').textContent()) ?? ''
+  const renter = await renterBrowser(browser)
+  await renter.goto(link)
+  await acceptClaim(renter)
+  await renter.context().close()
+  await page.reload()
+  await expect(page.getByText('Settlement confirmed', { exact: true })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Settlement amounts' })).toContainText('€35.00')
 })
 
 test('a judge adds a passkey to their own demo, then confirms with it', async ({ page }) => {

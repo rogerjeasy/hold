@@ -1,7 +1,6 @@
 import { expectFitsEveryWidth } from './support/responsive'
-import { inspectedReturn } from './support/claim'
+import { acceptClaim, inspectedReturn } from './support/claim'
 import { renterBrowser } from './support/rental'
-import { TEST_CODE } from './support/sign-in'
 import { expect, test } from './support/test'
 
 test('a staff-approved claim is accepted by the verified renter and settled once', async ({ page, browser }) => {
@@ -19,12 +18,7 @@ test('a staff-approved claim is accepted by the verified renter and settled once
   await renter.goto(link)
   await expect(renter.getByRole('heading', { level: 1 })).toHaveText('Your damage claim')
   await expectFitsEveryWidth(renter)
-  await renter.getByRole('button', { name: 'I have reviewed this claim' }).click()
-  await renter.getByRole('button', { name: 'Email me a verification code' }).click()
-  await expect(renter.getByText('Verification code sent. It expires in ten minutes.')).toBeVisible()
-  await renter.getByLabel('Verification code', { exact: true }).fill(TEST_CODE)
-  await renter.getByRole('button', { name: 'Accept claim and settle', exact: true }).click()
-  await expect(renter.getByText('PayPal confirmed settlement. This rental is closed.')).toBeVisible()
+  await acceptClaim(renter)
   await expectFitsEveryWidth(renter)
   await page.reload()
   await expect(page.getByText('Settlement confirmed', { exact: true })).toBeVisible()

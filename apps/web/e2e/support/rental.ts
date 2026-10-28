@@ -10,11 +10,11 @@ export async function renterBrowser(browser: Browser): Promise<Page> {
   return (await browser.newContext()).newPage()
 }
 
-export async function bookAtTheCounter(page: Page): Promise<void> {
+export async function bookAtTheCounter(page: Page, itemType = 'City e-bike'): Promise<void> {
   await page.getByRole('navigation', { name: 'Shop pages' }).getByRole('link', { name: 'Rentals' }).click()
   await page.getByRole('link', { name: 'New rental' }).first().click()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('New rental')
-  await page.getByRole('button', { name: 'One more City e-bike' }).click()
+  await page.getByRole('button', { name: `One more ${itemType}` }).click()
   await page.getByLabel('Name').fill('Priya Natarajan')
   await page.getByLabel('Email').fill('priya@renter.example')
   await page.getByRole('button', { name: 'Book', exact: true }).click()
@@ -41,6 +41,11 @@ export async function payFee(renter: Page, link: string, approval = 'Approve'): 
 export async function readyForHandover(page: Page, browser: Browser, shopName: string): Promise<void> {
   await shopReadyToBook(page, shopName)
   await bookAtTheCounter(page)
+  await feePaidAndHoldPlaced(page, browser)
+}
+
+// From a booked rental's page: the renter pays the fee, then approves the hold. Ends on the rental's page.
+export async function feePaidAndHoldPlaced(page: Page, browser: Browser): Promise<void> {
   await page.getByRole('button', { name: 'Show the link' }).click()
   const link = (await page.getByTestId('renter-link').textContent()) ?? ''
   const renter = await renterBrowser(browser)
