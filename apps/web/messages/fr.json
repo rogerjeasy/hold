@@ -1881,7 +1881,11 @@
           "too_bright": "elle est trop claire",
           "badly_framed": "l'article ne remplit pas le cadre"
         },
-        "guide": "Guide de départ : {view}"
+        "guide": "Guide de départ : {view}",
+        "ghostShown": "Afficher la photo de la remise sur l’appareil photo",
+        "ghostStrength": "Intensité de la photo de la remise",
+        "ghostPercent": "{percent} %",
+        "guideNoCamera": "La photo de la remise pour cette vue. Prenez la photo du retour sous le même angle."
       },
       "back": "Retour à la location",
       "preparing": "Préparation de la photo…",
