@@ -9,7 +9,8 @@
   "scripts": {
     "trial:baseline": "node --env-file-if-exists=../../.env trials/baseline-hold.ts",
     "trial:combined": "node --env-file-if-exists=../../.env trials/combined-hold.ts",
-    "trial:renewal": "node --env-file-if-exists=../../.env trials/renewal-hold.ts"
+    "trial:renewal": "node --env-file-if-exists=../../.env trials/renewal-hold.ts",
+    "trial:settlement": "node --env-file-if-exists=../../.env trials/settlement-paths.ts"
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "3.1151.0",

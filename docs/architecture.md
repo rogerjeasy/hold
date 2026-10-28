@@ -699,7 +699,7 @@ Each shop is paid into its own PayPal business account. Hold does not hold funds
 
 **In the hackathon,** each demo shop maps to a sandbox business account. Its API credentials are stored in Secrets Manager and referenced from `paypal_accounts`.
 
-**In production,** Hold would act for shops through PayPal's partner model, with each shop's consent and without holding its credentials. The code reaches the account through a credential provider interface, so that change is confined to one adapter.
+**In production,** Hold would act for shops through PayPal's partner model, with each shop's consent and without holding its credentials. The code reaches the account through a credential provider interface, so that change is confined to one adapter. The sandbox refused Partner Referrals to an app without partner permissions on 28 October 2026, and an order naming the shop by email alone could be captured but not voided, so the change waits on PayPal granting those permissions (tech-stack.md section 16, item 15).
 
 ### 8.2 Placing the hold: three strategies
 
