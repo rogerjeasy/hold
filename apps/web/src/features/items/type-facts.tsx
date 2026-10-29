@@ -3,9 +3,9 @@ import { useTranslations } from 'next-intl'
 import type { ShopClock } from '@/hooks/use-shop-format'
 import { useShopFormat } from '@/hooks/use-shop-format'
 
-function Fact({ label, value }: { label: string; value: string }) {
+function Fact({ label, value, className = '' }: { label: string; value: string; className?: string }) {
   return (
-    <div className="min-w-0">
+    <div className={`min-w-0 ${className}`}>
       <dt className="text-[0.8125rem] text-muted-foreground">{label}</dt>
       <dd className="mt-0.5 font-semibold wrap-long-words">{value}</dd>
     </div>
@@ -23,9 +23,7 @@ export function TypeFacts({ type, clock }: { type: CatalogType; clock: ShopClock
       <Fact label={t('dayRate')} value={format.money(type.dayRateCents)} />
       <Fact label={t('value')} value={format.money(type.valueCents)} />
       <Fact label={t('photoPlan')} value={t('views', { count: type.views.length })} />
-      <div className="col-span-2 sm:col-span-4 lg:col-span-1">
-        <Fact label={t('kit')} value={kit} />
-      </div>
+      <Fact label={t('kit')} value={kit} className="col-span-2 sm:col-span-4 lg:col-span-1" />
     </dl>
   )
 }

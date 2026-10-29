@@ -1,6 +1,9 @@
-import { inShop, itemCatalog } from '@hold/db'
+import { fleetRecords, inShop, itemCatalog } from '@hold/db'
+import { shopYear } from '@hold/domain'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
+import { GridLicence } from '@/components/grid/grid-licence'
+import { fleetRows } from '@/features/items/fleet-rows'
 import { ItemsScreen } from '@/features/items/items-screen'
 import { readFilter } from '@/features/items/standing'
 import { getServices } from '@/server/services'
@@ -13,16 +16,21 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ show?: string | string[] }> }) {
   const context = await requireShop()
-  const { database } = await getServices()
+  const { config, database } = await getServices()
   const scope = { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId } as const
-  const catalog = await inShop(database, scope, itemCatalog)
+  const [catalog, records] = await Promise.all([inShop(database, scope, itemCatalog), inShop(database, scope, fleetRecords)])
+  const show = readFilter((await searchParams).show)
   return (
-    <ItemsScreen
-      shopName={context.shop.name}
-      clock={{ timeZone: context.shop.timeZone, currency: context.shop.currency }}
-      catalog={catalog}
-      show={readFilter((await searchParams).show)}
-      canManage={context.role === 'owner' || context.role === 'manager'}
-    />
+    <>
+      <GridLicence licenceKey={config.gridLicenceKey} />
+      <ItemsScreen
+        shopName={context.shop.name}
+        clock={{ timeZone: context.shop.timeZone, currency: context.shop.currency }}
+        catalog={catalog}
+        fleet={fleetRows(catalog, records, shopYear(context.shop.timeZone, new Date()), show)}
+        show={show}
+        canManage={context.role === 'owner' || context.role === 'manager'}
+      />
+    </>
   )
 }

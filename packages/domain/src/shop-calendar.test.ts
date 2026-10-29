@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { atShopTime, shopDay, shopTimeText } from './shop-calendar.ts'
+import { atShopTime, shopDay, shopTimeText, shopYear } from './shop-calendar.ts'
 
 describe('the shop’s day', () => {
   it('runs from midnight to midnight in the shop’s time zone', () => {
@@ -44,5 +44,13 @@ describe('a time on the shop’s clock', () => {
 
   it('is read back as the shop’s clock shows it', () => {
     expect(shopTimeText('Europe/Lisbon', new Date('2026-10-16T09:00:00Z'))).toBe('2026-10-16T10:00')
+  })
+})
+
+describe('the shop’s year', () => {
+  it('runs from midnight on the first of January to the next, on the shop’s clock', () => {
+    expect(shopYear('Europe/Lisbon', new Date('2026-10-14T09:12:00Z'))).toEqual({ start: new Date('2026-01-01T00:00:00Z'), end: new Date('2027-01-01T00:00:00Z') })
+    expect(shopYear('Asia/Tokyo', new Date('2026-12-31T16:00:00Z'))).toEqual({ start: new Date('2026-12-31T15:00:00Z'), end: new Date('2027-12-31T15:00:00Z') })
+    expect(shopYear('America/Los_Angeles', new Date('2026-07-01T12:00:00Z'))).toEqual({ start: new Date('2026-01-01T08:00:00Z'), end: new Date('2027-01-01T08:00:00Z') })
   })
 })

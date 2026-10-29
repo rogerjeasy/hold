@@ -1428,6 +1428,27 @@ Page `/shop/money`, "Money" in the menu after the calendar. The owner and the ac
 **Status, 29 October 2026.** Built: `money-ledger.ts` in `packages/domain`, `moneyLedgerRecords` in `packages/db`, `features/money` in the web app. M1 to M5 pass in tests (`money-ledger.test.ts`, `money-ledger-records.test.ts`, `ledger-rows.test.ts`, `e2e/money.spec.ts`). No migration: a line's PayPal event and execution are found by the resource its reference names. The sparkline of held money per month is not built; it would need AG Charts.
 
 **The insights dashboard, on AG Studio**
+**The fleet passport, on AG Grid**
+
+On `/shop/items`, from `md`. An owner deciding which bike to repair, retire or insure needs each item's record set side by side with the rest of its type.
+
+- **Each type above its items.** AG Grid's tree data: a type's row gives how many of its items are shown and its items' totals, which the grid adds up; below it, each item. The items page's filters by standing apply. Each type's panel below the grid keeps its terms, kit and photo plan, a link to change the type, and the form to add items. A phone keeps each type's list of items in its panel.
+- **What each item's rentals say.** Read by the domain's `itemWear` from the rentals that went out: how many, the days out this year on the shop's clock (`shopYear`, a part day counted whole), the damage the comparison found at each of the last twelve returns as a line of bars, and what was recovered of the damage priced. The damage priced is the claim lines priced from the item's findings on a claim a person decided, or every line of such a claim when the item went out alone; what was recovered is the item's share of what PayPal collected on the claim, never more than its lines (`recoveredCents`). Open marks are counted from the item's record.
+- **Wearing fastest.** The domain's `wearingFastest`: within each type, the items with the most damage found per rental, when that is more than nothing and more than another item of the type shows. Retired items are not compared. It shows beside the item's name, in words with a sign.
+- **Row actions, each through the page that already does it.** Enter on an item opens its passport. The right-click menu opens the passport, its status panel to send it to repair or retire it, and, for an owner or manager and a type that is not a sample, the type's hold, where it is changed with a passkey. A type's row opens the type. Nothing in the grid changes a record itself.
+- **For the shop's records.** The fleet downloads for a spreadsheet, the damage priced and recovered in columns of their own.
+- **On AG Grid Enterprise.** Tree data, aggregation, sparklines with AG Charts, the context menu and the Excel export, registered by this grid alone; every column is drawn, so one scrolled out of sight is still read by a screen reader.
+
+**Done when**
+
+- **F1** Each type shows above its items with its items' totals, and the filters by standing apply as on the rest of the page.
+- **F2** An item's rentals, days out, damage line, damage priced and recovered, and open marks are those `itemWear` reads from its records, and another shop's records never show.
+- **F3** `wearingFastest` names the item with the most damage per rental in its type, and never one in a type with no damage, a lone item, or items never rented.
+- **F4** The menu reaches an item's passport, its status and, for those who may and a type that is not a sample, its type's hold; the fleet downloads for a spreadsheet.
+- **F5** The page fits every width in `AGENTS.md` section 9 and passes the accessibility checks in both themes.
+
+**Status, 29 October 2026.** Built: `fleet.ts` and `shopYear` in `packages/domain`, `fleetRecords` in `packages/db`, the fleet grid in `features/items`. F1 to F5 pass in tests (`fleet.test.ts`, `shop-calendar.test.ts`, `fleet-records.test.ts`, `fleet-rows.test.ts`, `e2e/fleet.spec.ts`, `e2e/items.spec.ts`). The accessibility check found the type facts' definition list holding a term one level too deep; fixed. A passport report for resale or insurance is not built. The insights dashboard on AG Studio waits for an AG Studio Pro with AI licence key.
+
 
 Page `/shop/insights`, for the owner and managers. Its data comes from one server route under `/api/reports`, which returns rows for the caller's shop only, shaped for their role.
 

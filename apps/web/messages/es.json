@@ -1804,6 +1804,34 @@
         "with_renter": "Un cliente tiene este artículo. Envíalo a reparar cuando vuelva.",
         "rental_under_way": "Un alquiler aún necesita este artículo. Retíralo cuando ese alquiler termine.",
         "role_may_not_retire": "Solo el propietario o un encargado pueden retirar un artículo."
+      },
+      "fleet": {
+        "keys": "Los días fuera cuentan este año. Daños muestra lo que la comparación encontró en cada uno de los últimos alquileres de un artículo. Las flechas pasan de una fila a otra; Intro abre el pasaporte de un artículo; clic derecho en una fila para su pasaporte, su estado o la retención de su tipo.",
+        "grid": "Flota",
+        "download": "Descargar la flota para una hoja de cálculo",
+        "sheet": "Flota",
+        "items": "{count, plural, one {# artículo} other {# artículos}}",
+        "fastest": "Se desgasta más rápido",
+        "columns": {
+          "type": "Tipo",
+          "item": "Artículo",
+          "standing": "Dónde está",
+          "rentals": "Alquileres",
+          "daysOut": "Días fuera",
+          "findings": "Daños",
+          "damage": "Daños encontrados",
+          "incurred": "Daños con precio",
+          "recovered": "Recuperado",
+          "marks": "Marcas abiertas",
+          "signal": "Señal"
+        },
+        "menu": {
+          "passport": "Abrir el pasaporte",
+          "status": "Enviar a reparar o retirar",
+          "hold": "Cambiar la retención de {name}",
+          "type": "Abrir el tipo"
+        },
+        "recoveredOf": "{recovered} de {priced}"
       }
     },
     "paypal": {

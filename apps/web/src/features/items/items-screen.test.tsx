@@ -7,8 +7,9 @@ import type { ItemsScreenProps } from './items-screen'
 
 const clock = { timeZone: 'Europe/Lisbon', currency: 'EUR' }
 
+// The fleet grid needs a browser's layout and is checked end to end, so it is given no rows here.
 function show(props: Partial<ItemsScreenProps> = {}) {
-  return renderWithIntl(<ItemsScreen shopName="Ribeira Bikes" clock={clock} catalog={catalog} show="all" canManage {...props} />)
+  return renderWithIntl(<ItemsScreen shopName="Ribeira Bikes" clock={clock} catalog={catalog} fleet={[]} show="all" canManage {...props} />)
 }
 
 describe('the items page', () => {

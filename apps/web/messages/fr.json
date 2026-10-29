@@ -1804,6 +1804,34 @@
         "with_renter": "Un client a cet article. Envoyez-le en réparation une fois rentré.",
         "rental_under_way": "Une location a encore besoin de cet article. Retirez-le quand cette location sera terminée.",
         "role_may_not_retire": "Seuls le propriétaire ou un responsable peuvent retirer un article."
+      },
+      "fleet": {
+        "keys": "Les jours dehors comptent cette année. Dommages montre ce que la comparaison a trouvé à chacune des dernières locations d’un article. Les flèches passent d’une ligne à l’autre ; Entrée ouvre le passeport d’un article ; clic droit sur une ligne pour son passeport, son état ou le blocage de son type.",
+        "grid": "Flotte",
+        "download": "Télécharger la flotte pour un tableur",
+        "sheet": "Flotte",
+        "items": "{count, plural, one {# article} other {# articles}}",
+        "fastest": "S’use le plus vite",
+        "columns": {
+          "type": "Type",
+          "item": "Article",
+          "standing": "Où il est",
+          "rentals": "Locations",
+          "daysOut": "Jours dehors",
+          "findings": "Dommages",
+          "damage": "Dommages trouvés",
+          "incurred": "Dommages chiffrés",
+          "recovered": "Récupéré",
+          "marks": "Marques ouvertes",
+          "signal": "Signal"
+        },
+        "menu": {
+          "passport": "Ouvrir le passeport",
+          "status": "Envoyer en réparation ou retirer",
+          "hold": "Modifier le blocage de {name}",
+          "type": "Ouvrir le type"
+        },
+        "recoveredOf": "{recovered} sur {priced}"
       }
     },
     "paypal": {

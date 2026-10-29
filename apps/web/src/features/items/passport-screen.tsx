@@ -42,7 +42,9 @@ export function PassportScreen({ shopName, clock, passport, role }: PassportScre
           </div>
           {/* At the counter the status comes first; from lg it sits beside the record. */}
           <div className="grid min-w-0 gap-6 max-lg:order-first">
-            <StatusPanel item={item} role={role} clock={clock} />
+            <div id="status" className="scroll-mt-6">
+              <StatusPanel item={item} role={role} clock={clock} />
+            </div>
             <Panel title={t('passport.details')}>
               {mayEdit ? (
                 <EditItemForm itemId={item.id} label={item.label} size={item.size} serial={item.serial} />

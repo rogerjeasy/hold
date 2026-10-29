@@ -199,7 +199,7 @@ Priya sees the same two photographs, the outlined mark and the price. She accept
 
 - **A condition history for every item.** Each rental adds a dated set of photographs.
 - **Old damage stays old.** Because every mark has a first-seen date, no renter is charged for a previous renter's damage.
-- **Maintenance signals.** Hold shows which items are wearing fastest and which are due for repair or retirement. *Planned, not in this build.*
+- **Maintenance signals.** Hold shows which item in each type is wearing fastest, counted by plain code from the damage the comparison found rental by rental, beside each item's rentals, days out and what was recovered of its damage. Which items are due for repair or retirement is planned.
 - **Resale and insurance.** A documented history supports a better resale price and a stronger insurance claim. The history is built; the reports for resale and insurance are planned.
 
 ### 6.9 The owner's view

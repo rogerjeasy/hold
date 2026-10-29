@@ -59,6 +59,13 @@ export function shopDay(timeZone: string, now: Date): ShopDay {
   }
 }
 
+// The year now is in on the shop's clock, from midnight on the first of January to the next: the season an item's days
+// out are counted in.
+export function shopYear(timeZone: string, now: Date): { readonly start: Date; readonly end: Date } {
+  const { year } = wallClock(timeZone, now)
+  return { start: midnight(timeZone, year, 1, 1), end: midnight(timeZone, year + 1, 1, 1) }
+}
+
 // A date and time as a form sends it, read on the shop's clock: "2026-10-16T10:00" in Lisbon is 09:00 UTC in summer.
 // Nothing for text that is not a real date and time.
 export function atShopTime(timeZone: string, local: string): Date | undefined {

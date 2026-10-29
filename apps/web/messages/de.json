@@ -1804,6 +1804,34 @@
         "with_renter": "Eine mietende Person hat diesen Artikel. Geben Sie ihn in die Reparatur, sobald er zurück ist.",
         "rental_under_way": "Eine Miete braucht diesen Artikel noch. Mustern Sie ihn aus, sobald diese Miete vorbei ist.",
         "role_may_not_retire": "Nur Inhaber oder Leitung können einen Artikel ausmustern."
+      },
+      "fleet": {
+        "keys": "Tage unterwegs zählen dieses Jahr. Schäden zeigt, was der Vergleich bei jeder der letzten Mieten eines Artikels fand. Pfeiltasten wechseln zwischen Zeilen; Enter öffnet den Pass eines Artikels; Rechtsklick auf eine Zeile für Pass, Status oder die Reservierung der Art.",
+        "grid": "Flotte",
+        "download": "Die Flotte für eine Tabelle herunterladen",
+        "sheet": "Flotte",
+        "items": "{count, plural, one {# Artikel} other {# Artikel}}",
+        "fastest": "Nutzt sich am schnellsten ab",
+        "columns": {
+          "type": "Art",
+          "item": "Artikel",
+          "standing": "Wo er ist",
+          "rentals": "Mieten",
+          "daysOut": "Tage unterwegs",
+          "findings": "Schäden",
+          "damage": "Gefundene Schäden",
+          "incurred": "Bepreiste Schäden",
+          "recovered": "Eingenommen",
+          "marks": "Offene Spuren",
+          "signal": "Signal"
+        },
+        "menu": {
+          "passport": "Pass öffnen",
+          "status": "In Reparatur geben oder ausmustern",
+          "hold": "Reservierung für {name} ändern",
+          "type": "Art öffnen"
+        },
+        "recoveredOf": "{recovered} von {priced}"
       }
     },
     "paypal": {

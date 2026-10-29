@@ -1804,6 +1804,34 @@
         "with_renter": "A renter has this item. Send it to repair once it is back.",
         "rental_under_way": "A rental still needs this item. Retire it once that rental is over.",
         "role_may_not_retire": "Only the owner or a manager can retire an item."
+      },
+      "fleet": {
+        "keys": "Days out count this year. Damage shows what the comparison found on each of an item’s last rentals. Arrow keys move between rows; Enter opens an item’s passport; right-click a row for its passport, its status or its type’s hold.",
+        "grid": "Fleet",
+        "download": "Download the fleet for a spreadsheet",
+        "sheet": "Fleet",
+        "items": "{count, plural, one {# item} other {# items}}",
+        "fastest": "Wearing fastest",
+        "columns": {
+          "type": "Type",
+          "item": "Item",
+          "standing": "Where it is",
+          "rentals": "Rentals",
+          "daysOut": "Days out",
+          "findings": "Damage",
+          "damage": "Damage found",
+          "incurred": "Damage priced",
+          "recovered": "Recovered",
+          "marks": "Open marks",
+          "signal": "Signal"
+        },
+        "menu": {
+          "passport": "Open the passport",
+          "status": "Send to repair or retire",
+          "hold": "Change the hold for {name}",
+          "type": "Open the type"
+        },
+        "recoveredOf": "{recovered} of {priced}"
       }
     },
     "paypal": {

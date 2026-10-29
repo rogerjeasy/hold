@@ -14,9 +14,11 @@ test('an owner adds an item type and its items, then sends one to repair and bac
   await expect(type.getByText('1 × Charger')).toBeVisible()
 
   await addItems(page, 'City e-bike', '3', 'M')
-  await expect(type.getByRole('link', { name: 'City e-bike 3' })).toBeVisible()
+  // From md the fleet grid lists the items; the type's panel keeps its terms and the form to add more.
+  const fleet = page.getByRole('region', { name: 'Fleet' })
+  await expect(fleet.getByRole('link', { name: 'City e-bike 3' })).toBeVisible()
 
-  await type.getByRole('link', { name: 'City e-bike 2' }).click()
+  await fleet.getByRole('link', { name: 'City e-bike 2' }).click()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('City e-bike 2')
   await expect(page.getByText('Not rented yet.')).toBeVisible()
   await page.getByLabel('What needs repair').fill('Brake pads worn')
@@ -45,7 +47,7 @@ test('editing a type’s views keeps the type and its items', async ({ page }) =
   await expect(page).toHaveURL(/\/shop\/items$/)
   const type = page.getByRole('region', { name: 'Gravel bike' })
   await expect(type.getByText('5 views')).toBeVisible()
-  await expect(type.getByRole('link', { name: 'Gravel bike 1' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Fleet' }).getByRole('link', { name: 'Gravel bike 1' })).toBeVisible()
 })
 
 test('the items pages fit every width, with long names', async ({ page }) => {

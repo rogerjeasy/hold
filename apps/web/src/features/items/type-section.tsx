@@ -38,8 +38,9 @@ export function TypeSection({ type, items, clock, canManage }: TypeSectionProps)
     <Panel title={type.name} aside={aside}>
       <TypeFacts type={type} clock={clock} />
       {type.simulated ? <p className="border-b px-4 py-2.5 text-[0.8125rem] text-muted-foreground md:px-5">{t('type.sampleNote')}</p> : null}
-      {items.length === 0 ? <p className="px-4 py-5 text-muted-foreground md:px-5">{t('type.noItems')}</p> : <ItemList items={items} clock={clock} />}
-      {changeable ? <AddItemsForm itemTypeId={type.id} typeName={type.name} /> : null}
+      {/* From md the fleet grid above lists the items; a phone lists them here. */}
+      {items.length === 0 ? <p className="px-4 py-5 text-muted-foreground md:px-5">{t('type.noItems')}</p> : <div className="md:hidden"><ItemList items={items} clock={clock} /></div>}
+      {changeable ? <div id={`add-items-${type.id}`} className="scroll-mt-6"><AddItemsForm itemTypeId={type.id} typeName={type.name} /></div> : null}
     </Panel>
   )
 }
