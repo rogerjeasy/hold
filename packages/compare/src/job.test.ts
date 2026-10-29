@@ -1,3 +1,4 @@
+import { SAMPLE_PHOTO_SHA256 } from '@hold/domain'
 import { createHash } from 'node:crypto'
 import { beginComparison, captureSession, comparisonReport, comparisons, completeComparison, findings, holds, inShop, recordPhoto, rentals, sealSession, startCaptureSession } from '@hold/db'
 import { createTestDatabase } from '@hold/db/testing'
@@ -24,7 +25,7 @@ async function queued(before: Buffer, after: Buffer, subject: string, samples = 
       const key = `${shop.scope.shopId}/${started.sessionId}/${view}.jpg`
       const link = await evidence.uploadLink({ key, sha256: sha(body), bytes: body.length })
       evidence.receive(key, body, link.headers['x-amz-checksum-sha256'] ?? '')
-      await shop.act((transaction) => recordPhoto(transaction, started.sessionId, { view, evidenceKey: key, sha256: sha(body), quality, simulated: samples }, NOW))
+      await shop.act((transaction) => recordPhoto(transaction, started.sessionId, { view, evidenceKey: key, sha256: samples ? SAMPLE_PHOTO_SHA256.handover : sha(body), quality }, NOW))
     }
     await shop.act((transaction) => sealSession(transaction, started.sessionId, NOW))
   }

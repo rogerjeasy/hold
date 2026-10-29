@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { manifestText } from '@hold/domain'
+import { manifestText, SAMPLE_PHOTO_SHA256 } from '@hold/domain'
 import { eq } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { rentalDetail } from './booking-repository.ts'
@@ -87,6 +87,14 @@ describe('photographing a view', () => {
     expect(session?.missing).toEqual(['right-side'])
     const queued = (await database.select().from(outbox)).filter((row) => row.queue === 'media' && row.payload['photoId'] === recorded.photoId)
     expect(queued).toHaveLength(1)
+  })
+
+  it('marks a photograph a sample only when it is one of the demonstration’s own sample files, whatever the phone says', async () => {
+    const { sessionId } = await handover()
+    await shop.act((transaction) => recordPhoto(transaction, sessionId, { ...photo('left-side'), sha256: SAMPLE_PHOTO_SHA256.handover }, NOW))
+    await shop.act((transaction) => recordPhoto(transaction, sessionId, { ...photo('right-side'), simulated: true } as Parameters<typeof recordPhoto>[2], NOW))
+    const rows = await database.select().from(photos).where(eq(photos.sessionId, sessionId))
+    expect(rows.map((row) => [row.view, row.quality?.['simulated'] === 1]).sort()).toEqual([['left-side', true], ['right-side', false]])
   })
 
   it('takes a retake as the view’s photograph, and keeps the earlier one on record', async () => {

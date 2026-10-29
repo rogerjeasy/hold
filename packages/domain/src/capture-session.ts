@@ -76,6 +76,19 @@ export function manifestText(session: SealedSession): string {
   return JSON.stringify({ session: session.sessionId, item: session.itemId, kind: session.kind, sealedAt: session.sealedAt.toISOString(), previous: session.previousManifestFingerprint, photos })
 }
 
+// The demonstration's own sample photographs, by fingerprint (architecture.md section 20.3). Only the server decides a
+// photograph is a sample, from this list: whatever a phone says, any other photograph is evidence, and is checked as such.
+export const SAMPLE_PHOTO_SHA256 = {
+  handover: '7ac39badb505d60e5c4c92018f9ae4410ffb80912d2c7fbbc9cd9202990e8080',
+  damage: '74072fc7d4f92e0398252661a83c83eb2427a99039f8ffcac9cc62a66a41cd39',
+  contested: 'abce9d89fa86d8ec3e90d169c55f1ee7a045319caee508e5920d66b33aaa0995',
+  dropPoint: '7a12eaa48257d6988674aa9c18ba8c6dc6f8a8bc80a205fd37a622ff503a6869',
+} as const
+
+export function isSamplePhoto(sha256: string): boolean {
+  return (Object.values(SAMPLE_PHOTO_SHA256) as readonly string[]).includes(sha256)
+}
+
 // The renter has this long after the handover is sealed to confirm the condition report or add what was missed.
 export const CONDITION_REPLY_HOURS = 24
 

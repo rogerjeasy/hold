@@ -22,9 +22,9 @@ export const confirmSelfReturnUpload = renterAction(
   {
     name: 'renter.self_return_photo_recorded',
     scope: 'return_item',
-    input: withToken({ ...photo, key: z.string().min(1).max(300), sharpness: z.coerce.number().min(0).max(1_000_000), shadows: z.coerce.number().min(0).max(255), highlights: z.coerce.number().min(0).max(255), filled: z.coerce.number().min(0).max(1), simulated: z.literal('true').optional() }),
+    input: withToken({ ...photo, key: z.string().min(1).max(300), sharpness: z.coerce.number().min(0).max(1_000_000), shadows: z.coerce.number().min(0).max(255), highlights: z.coerce.number().min(0).max(255), filled: z.coerce.number().min(0).max(1) }),
   },
-  (link, input, inLinkShop) => confirmReturnPhoto(link, inLinkShop, { sessionId: input.sessionId, view: input.view, key: input.key, simulated: input.simulated === 'true', measures: { sharpness: input.sharpness, shadows: input.shadows, highlights: input.highlights, filled: input.filled } }),
+  (link, input, inLinkShop) => confirmReturnPhoto(link, inLinkShop, { sessionId: input.sessionId, view: input.view, key: input.key, measures: { sharpness: input.sharpness, shadows: input.shadows, highlights: input.highlights, filled: input.filled } }),
 )
 
 export const sendSelfReturn = renterAction({ name: 'renter.self_return_sent', scope: 'return_item', input: withToken({}) }, (link, _input, inLinkShop) => sendRenterReturn(link, inLinkShop))

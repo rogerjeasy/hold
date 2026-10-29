@@ -28,7 +28,7 @@ const RETURN_SAMPLES = [
 ] as const
 
 // Puts a checked photograph where it belongs: staff's handover, or what a renter adds to the condition report.
-export type UploadTaken = (blob: Blob, measures: PhotoMeasures, onProgress: (share: number) => void, simulated?: boolean) => Promise<{ readonly ok: true } | { readonly ok: false; readonly reason: string }>
+export type UploadTaken = (blob: Blob, measures: PhotoMeasures, onProgress: (share: number) => void) => Promise<{ readonly ok: true } | { readonly ok: false; readonly reason: string }>
 
 // Takes one view's photograph (architecture.md section 9.1): the camera with the view's outline, a file when there is no
 // camera, or a sample. The phone checks it at once and asks for a retake before anything uploads. At a return, guide is
@@ -44,7 +44,7 @@ export function PhotoTaker({ view, upload, onTaken, guide, returnSamples = false
   const [ghostStrength, setGhostStrength] = useState<number>(GHOST_STRENGTH.initial)
   const noCamera = camera.state === 'unavailable'
 
-  const take = async (read: () => Promise<ReadImage>, simulated = false) => {
+  const take = async (read: () => Promise<ReadImage>) => {
     setStep({ kind: 'checking' })
     const image = await read()
     const measures = await check(image.pixels)
@@ -56,13 +56,14 @@ export function PhotoTaker({ view, upload, onTaken, guide, returnSamples = false
     setStep({ kind: 'uploading', share: 0 })
     const uploaded = await upload(image.blob, measures ?? UNMEASURED, (share) => {
       setStep({ kind: 'uploading', share })
-    }, simulated)
+    })
     if (uploaded.ok) {
       setStep({ kind: 'ready' })
       onTaken()
     } else setStep({ kind: 'failed', reason: uploaded.reason })
   }
-  const takeSample = (source: string) => { void take(async () => readImage(await (await fetch(source)).blob()), true) }
+  // A sample uploads byte for byte, so the server knows it by its fingerprint and marks it as one.
+  const takeSample = (source: string) => { void take(async () => readImage(await (await fetch(source)).blob())) }
   const busy = step.kind === 'checking' || step.kind === 'uploading'
 
   return (

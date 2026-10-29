@@ -1,3 +1,4 @@
+import { SAMPLE_PHOTO_SHA256 } from '@hold/domain'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { captureSession, recordPhoto, sealSession, startCaptureSession } from './capture-repository.ts'
@@ -32,7 +33,7 @@ async function returnedFromSamples(shop: ReadyRentalShop) {
     const opened = await shop.act((transaction) => startCaptureSession(transaction, { rentalId: rental.rentalId, rentalItemId: rental.rentalItemIds[0] ?? '', kind, actorUserId: shop.scope.userId ?? null }, now))
     if (!opened.ok) throw new Error(opened.reason)
     const session = await shop.act((transaction) => captureSession(transaction, opened.sessionId))
-    for (const view of session?.plan.filter((each) => each.required) ?? []) await shop.act((transaction) => recordPhoto(transaction, opened.sessionId, { view: view.key, evidenceKey: `${opened.sessionId}/${view.key}`, sha256: (kind === 'handover' ? 'a' : 'b').repeat(64), quality: { sharpness: 120, shadows: 20, highlights: 220, filled: 0.6 }, simulated: true }, now))
+    for (const view of session?.plan.filter((each) => each.required) ?? []) await shop.act((transaction) => recordPhoto(transaction, opened.sessionId, { view: view.key, evidenceKey: `${opened.sessionId}/${view.key}`, sha256: kind === 'handover' ? SAMPLE_PHOTO_SHA256.handover : SAMPLE_PHOTO_SHA256.damage, quality: { sharpness: 120, shadows: 20, highlights: 220, filled: 0.6 } }, now))
     await shop.act((transaction) => sealSession(transaction, opened.sessionId, now))
   }
   const [comparison] = await shop.act((transaction) => transaction.select().from(comparisons).where(eq(comparisons.state, 'pending')))

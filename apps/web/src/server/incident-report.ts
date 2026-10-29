@@ -36,7 +36,7 @@ export async function requestIncidentPhoto(link: RenterLink, inLinkShop: InLinkS
 }
 
 // Records the photograph that reached the locked bucket, with the fingerprint the store computed and the server's time.
-export async function confirmIncidentPhoto(link: RenterLink, inLinkShop: InLinkShop, input: { readonly incidentId: string; readonly view: string; readonly key: string; readonly measures: PhotoMeasures; readonly simulated: boolean }) {
+export async function confirmIncidentPhoto(link: RenterLink, inLinkShop: InLinkShop, input: { readonly incidentId: string; readonly view: string; readonly key: string; readonly measures: PhotoMeasures }) {
   const { evidence } = await getServices()
   if (evidence === undefined) return new Refusal('storage_unavailable')
   const sessionId = await openSession(link, inLinkShop, input.incidentId)
@@ -44,7 +44,7 @@ export async function confirmIncidentPhoto(link: RenterLink, inLinkShop: InLinkS
   if (!input.key.startsWith(`${link.shopId}/${sessionId}/${input.view}/`)) return new Refusal('key_mismatch')
   const stored = await evidence.stored(input.key)
   if (stored === undefined) return new Refusal('not_uploaded')
-  const recorded = await inLinkShop((transaction) => recordPhoto(transaction, sessionId, { view: input.view, evidenceKey: input.key, sha256: stored.sha256, quality: input.measures, simulated: input.simulated }, new Date()))
+  const recorded = await inLinkShop((transaction) => recordPhoto(transaction, sessionId, { view: input.view, evidenceKey: input.key, sha256: stored.sha256, quality: input.measures }, new Date()))
   if (!recorded.ok) return new Refusal(recorded.reason)
   try {
     await sendMediaMessage(link.shopId, sessionId, recorded.photoId)

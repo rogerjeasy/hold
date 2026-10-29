@@ -25,7 +25,7 @@ export function staffPhotoActions(kind: 'handover' | 'return') {
       const link = await evidence.uploadLink({ key, sha256: input.sha256, bytes: input.bytes })
       return { key, url: link.url, headers: link.headers }
     })
-  const confirm = shopAction({ name: `${kind}.photo_recorded`, roles: CAPTURE_STAFF, needsPasskey: false, input: withLocale({ ...photoFields, key: z.string().min(1).max(300), sharpness: z.coerce.number().min(0).max(1_000_000), shadows: z.coerce.number().min(0).max(255), highlights: z.coerce.number().min(0).max(255), filled: z.coerce.number().min(0).max(1), simulated: z.literal('true').optional() }) },
+  const confirm = shopAction({ name: `${kind}.photo_recorded`, roles: CAPTURE_STAFF, needsPasskey: false, input: withLocale({ ...photoFields, key: z.string().min(1).max(300), sharpness: z.coerce.number().min(0).max(1_000_000), shadows: z.coerce.number().min(0).max(255), highlights: z.coerce.number().min(0).max(255), filled: z.coerce.number().min(0).max(1) }) },
     async (context, input, transaction) => {
       const session = await captureSession(transaction, input.sessionId)
       if (session?.kind !== kind) return new Refusal('not_found')
@@ -36,7 +36,7 @@ export function staffPhotoActions(kind: 'handover' | 'return') {
       const stored = await evidence.stored(input.key)
       if (stored === undefined) return new Refusal('not_uploaded')
       if (stored.bytes > MAX_PHOTO_BYTES) return new Refusal('too_large')
-      const recorded = await recordPhoto(transaction, input.sessionId, { view: input.view, evidenceKey: input.key, sha256: stored.sha256, simulated: input.simulated === 'true', quality: { sharpness: input.sharpness, shadows: input.shadows, highlights: input.highlights, filled: input.filled } }, new Date())
+      const recorded = await recordPhoto(transaction, input.sessionId, { view: input.view, evidenceKey: input.key, sha256: stored.sha256, quality: { sharpness: input.sharpness, shadows: input.shadows, highlights: input.highlights, filled: input.filled } }, new Date())
       return recorded.ok ? { photoId: recorded.photoId, sessionId: input.sessionId } : new Refusal(recorded.reason)
     }, (context, output) => sendMediaMessage(context.shop.id, output.sessionId, output.photoId))
   return { request, confirm }

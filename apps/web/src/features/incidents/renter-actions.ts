@@ -36,9 +36,9 @@ export const confirmIncidentUpload = renterAction(
   {
     name: 'renter.incident_photo_recorded',
     scope: 'report_incident',
-    input: withToken({ ...view, key: z.string().min(1).max(300), sharpness: z.coerce.number().min(0).max(1_000_000), shadows: z.coerce.number().min(0).max(255), highlights: z.coerce.number().min(0).max(255), filled: fraction, simulated: z.literal('true').optional() }),
+    input: withToken({ ...view, key: z.string().min(1).max(300), sharpness: z.coerce.number().min(0).max(1_000_000), shadows: z.coerce.number().min(0).max(255), highlights: z.coerce.number().min(0).max(255), filled: fraction }),
   },
-  (link, input, inLinkShop) => confirmIncidentPhoto(link, inLinkShop, { incidentId: input.incidentId, view: input.view, key: input.key, simulated: input.simulated === 'true', measures: { sharpness: input.sharpness, shadows: input.shadows, highlights: input.highlights, filled: input.filled } }),
+  (link, input, inLinkShop) => confirmIncidentPhoto(link, inLinkShop, { incidentId: input.incidentId, view: input.view, key: input.key, measures: { sharpness: input.sharpness, shadows: input.shadows, highlights: input.highlights, filled: input.filled } }),
 )
 
 // The box is optional: a theft has nothing to box. When given, all of it is given.

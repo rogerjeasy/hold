@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 import { acceptInvitation, auditLog, captureSession, comparisonReport, createInvitation, inShop, listStaff, photos, rentalDetail, rentalReturns } from '@hold/db'
 import sharp from 'sharp'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -24,11 +25,12 @@ let shop: Awaited<ReturnType<typeof handoverShop>>
 async function photographed(sessionId: string, kind: 'handover' | 'return') {
   const actions = kind === 'handover' ? handover : returns
   for (const view of ['left-side', 'right-side']) {
-    const body = await sharp({ create: { width: 640, height: 480, channels: 3, background: 'grey' } }).jpeg().toBuffer()
+    // The return uses the demonstration's sample with damage, which the server knows as a sample by its fingerprint.
+    const body = kind === 'return' ? readFileSync(new URL('../../../public/images/sample-return-damage.jpg', import.meta.url)) : await sharp({ create: { width: 640, height: 480, channels: 3, background: 'grey' } }).jpeg().toBuffer()
     const link = await actions.requestPhotoUpload(null, form({ sessionId, view, sha256: createHash('sha256').update(body).digest('hex'), bytes: String(body.length), locale: 'en' }))
     if (!link.ok) throw new Error(JSON.stringify(link))
     ;(await getServices()).simulatedEvidence?.receive(link.value.key, body, link.value.headers['x-amz-checksum-sha256'] ?? '')
-    expect(await actions.confirmPhotoUpload(null, form({ sessionId, view, key: link.value.key, ...QUALITY, locale: 'en', ...(kind === 'return' ? { simulated: 'true' } : {}) }))).toMatchObject({ ok: true })
+    expect(await actions.confirmPhotoUpload(null, form({ sessionId, view, key: link.value.key, ...QUALITY, locale: 'en' }))).toMatchObject({ ok: true })
   }
 }
 

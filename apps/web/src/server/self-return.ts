@@ -2,6 +2,7 @@ import 'server-only'
 import { randomUUID } from 'node:crypto'
 import { captureSession, photoRepeatsEvidence, recordPhoto, rentalReturns, sendSelfReturn, startSelfReturn } from '@hold/db'
 import type { RenterLink, Transaction } from '@hold/db'
+import { isSamplePhoto } from '@hold/domain'
 import type { PhotoMeasures } from '@hold/domain'
 import { MAX_PHOTO_BYTES } from '@hold/evidence'
 import { Refusal } from './action'
@@ -37,9 +38,10 @@ export async function requestReturnPhoto(link: RenterLink, inLinkShop: InLinkSho
 }
 
 // Records the photograph that reached the locked bucket, with the fingerprint the store computed and the server's time.
-// One that repeats this item's evidence is refused while the renter can still take another. A sample is said to be one
-// on screen and in the record, and proves nothing either way, so it is not checked.
-export async function confirmReturnPhoto(link: RenterLink, inLinkShop: InLinkShop, input: { readonly sessionId: string; readonly view: string; readonly key: string; readonly measures: PhotoMeasures; readonly simulated: boolean }) {
+// One that repeats this item's evidence is refused while the renter can still take another. One of the demonstration's
+// own sample files, known by its fingerprint and never by what the phone says, proves nothing either way: it is marked
+// as a sample on screen and in the record, and not checked.
+export async function confirmReturnPhoto(link: RenterLink, inLinkShop: InLinkShop, input: { readonly sessionId: string; readonly view: string; readonly key: string; readonly measures: PhotoMeasures }) {
   const { evidence } = await getServices()
   if (evidence === undefined) return new Refusal('storage_unavailable')
   if (!input.key.startsWith(`${link.shopId}/${input.sessionId}/${input.view}/`)) return new Refusal('key_mismatch')
@@ -49,8 +51,8 @@ export async function confirmReturnPhoto(link: RenterLink, inLinkShop: InLinkSho
   const recorded = await inLinkShop(async (transaction) => {
     const refused = await openSession(transaction, link, input.sessionId)
     if (refused !== undefined) return refused
-    if (!input.simulated && await photoRepeatsEvidence(transaction, input.sessionId, stored.sha256)) return new Refusal('photo_reused')
-    const photo = await recordPhoto(transaction, input.sessionId, { view: input.view, evidenceKey: input.key, sha256: stored.sha256, quality: input.measures, simulated: input.simulated }, new Date())
+    if (!isSamplePhoto(stored.sha256) && await photoRepeatsEvidence(transaction, input.sessionId, stored.sha256)) return new Refusal('photo_reused')
+    const photo = await recordPhoto(transaction, input.sessionId, { view: input.view, evidenceKey: input.key, sha256: stored.sha256, quality: input.measures }, new Date())
     return photo.ok ? photo : new Refusal(photo.reason)
   })
   if (recorded instanceof Refusal) return recorded

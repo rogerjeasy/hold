@@ -1,4 +1,4 @@
-import { addDays, DROP_POINT_VIEW, HOLD_ASSURED_DAYS, HOLD_VALIDITY_DAYS, shopDay, suggestedPhotoPlan, viewKeys } from '@hold/domain'
+import { addDays, DROP_POINT_VIEW, SAMPLE_PHOTO_SHA256, HOLD_ASSURED_DAYS, HOLD_VALIDITY_DAYS, shopDay, suggestedPhotoPlan, viewKeys } from '@hold/domain'
 import type { ClaimState, HoldState, ItemCategory, PriceCategory, Region, RentalState } from '@hold/domain'
 import { and, asc, desc, eq, isNotNull, sql } from 'drizzle-orm'
 import {
@@ -62,11 +62,7 @@ function samplePlan(category: ItemCategory) {
 // e-bike left at a drop point. Their display keys are reserved: the web app serves them from its own sample images, so
 // no shop's bucket holds them.
 export const SAMPLE_PHOTOS = { handover: 'sample/sample-handover.jpg', damage: 'sample/sample-return-damage.jpg', dropPoint: 'sample/sample-drop-point.jpg' } as const
-const SAMPLE_SHA256 = {
-  handover: '7ac39badb505d60e5c4c92018f9ae4410ffb80912d2c7fbbc9cd9202990e8080',
-  damage: '74072fc7d4f92e0398252661a83c83eb2427a99039f8ffcac9cc62a66a41cd39',
-  dropPoint: '7a12eaa48257d6988674aa9c18ba8c6dc6f8a8bc80a205fd37a622ff503a6869',
-} as const
+const SAMPLE_SHA256 = SAMPLE_PHOTO_SHA256
 // Where each mark is on those photographs, as fractions of the frame.
 const SCUFF: Region = { x: 0.285, y: 0.77, width: 0.04, height: 0.07 }
 const CHIP: Region = { x: 0.36, y: 0.505, width: 0.075, height: 0.16 }
