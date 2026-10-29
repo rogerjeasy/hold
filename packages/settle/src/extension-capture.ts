@@ -1,4 +1,4 @@
-import { beginExtensionCapture, confirmExtensionCapture, failExtensionCapture } from '@hold/db'
+import { beginExtensionCapture, confirmExtensionCapture, failExtensionCapture, flagExtensionCapture } from '@hold/db'
 import type { StoredExecution } from '@hold/db'
 import type { PayPalHolds } from '@hold/paypal'
 import { PayPalUnavailable, TRANSIENT } from './dependencies.ts'
@@ -32,5 +32,13 @@ export async function captureExtension(dependencies: SettleDependencies, shopId:
     return refused(captured.error.kind)
   }
   const confirmed = await inWorkerShop(dependencies, shopId, (transaction) => confirmExtensionCapture(transaction, execution.id, captured.value, now))
-  return confirmed.ok ? 'confirmed' : refused(confirmed.reason)
+  if (confirmed.ok) return 'confirmed'
+  // PayPal has not finished: the new end and the capturing state stay, and the queue reads it again.
+  if (confirmed.reason === 'not_completed') return 'waiting'
+  // Money moved, but not the quoted amount: never undone quietly. A person is asked to look.
+  if (confirmed.reason === 'amount_mismatch') {
+    await inWorkerShop(dependencies, shopId, (transaction) => flagExtensionCapture(transaction, execution.id, { captured: captured.value.amount, captureId: captured.value.captureId }, now))
+    return 'failed'
+  }
+  return refused(confirmed.reason)
 }

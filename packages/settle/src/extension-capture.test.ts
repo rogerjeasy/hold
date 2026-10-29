@@ -1,4 +1,4 @@
-import { moneyEvents, quoteExtension, rentalDetail, rentalExtensionsOf, rentals, saveExtensionOrder } from '@hold/db'
+import { auditLog, moneyEvents, quoteExtension, rentalDetail, rentalExtensionsOf, rentals, saveExtensionOrder } from '@hold/db'
 import { fail } from '@hold/domain'
 import type { PayPalHolds } from '@hold/paypal'
 import { eq } from 'drizzle-orm'
@@ -75,6 +75,29 @@ describe('capturing more days', () => {
     await expect(runExecution(dependencies(), { shopId: fixture.shopId, executionId: requested.executionId })).rejects.toThrow(/unavailable/)
     paypal = fixture.fake
     expect(await runExecution(dependencies(), { shopId: fixture.shopId, executionId: requested.executionId })).toBe('confirmed')
+  })
+
+  it('waits on a capture PayPal reports as pending, keeping the new end, and never undoes one that took another amount', async () => {
+    const pending = await approvedExtension()
+    const first = await requestExtensionCapture(dependencies(), fixture.shopId, pending.rentalId, pending.orderId)
+    if (!first.ok) throw new Error(first.reason)
+    const captured = await fixture.fake.captureFeeOrder({ orderId: pending.orderId, idempotencyKey: 'peek' })
+    if (!captured.ok) throw new Error(captured.error.kind)
+    paypal = { ...fixture.fake, captureFeeOrder: () => Promise.resolve({ ok: true, value: { ...captured.value, status: 'pending' } }) }
+    expect(await runExecution(dependencies(), { shopId: fixture.shopId, executionId: first.executionId })).toBe('waiting')
+    expect(await endOf(pending.rentalId)).toEqual(new Date(pending.endsAt.getTime() + 86_400_000))
+    expect((await fixture.inShop((transaction) => rentalExtensionsOf(transaction, pending.rentalId)))[0]?.state).toBe('capturing')
+
+    paypal = fixture.fake
+    const other = await approvedExtension()
+    const second = await requestExtensionCapture(dependencies(), fixture.shopId, other.rentalId, other.orderId)
+    if (!second.ok) throw new Error(second.reason)
+    paypal = { ...fixture.fake, captureFeeOrder: () => Promise.resolve({ ok: true, value: { ...captured.value, orderId: other.orderId, amount: eur(1) } }) }
+    expect(await runExecution(dependencies(), { shopId: fixture.shopId, executionId: second.executionId })).toBe('failed')
+    expect(await endOf(other.rentalId)).toEqual(new Date(other.endsAt.getTime() + 86_400_000))
+    expect((await fixture.inShop((transaction) => rentalExtensionsOf(transaction, other.rentalId)))[0]?.state).toBe('capturing')
+    const flagged = (await fixture.database.select().from(auditLog).where(eq(auditLog.subjectId, other.rentalId))).map((line) => line.action)
+    expect(flagged).toContain('extension.capture_mismatch')
   })
 
   it('puts the old end back and takes nothing when PayPal refuses', async () => {

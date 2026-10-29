@@ -103,6 +103,18 @@ describe('quoting more days', () => {
   })
 })
 
+describe('the hold an extension relies on', () => {
+  it('must still be placed, on an authorization PayPal still holds', async () => {
+    const atRisk = await out()
+    await database.update(holds).set({ state: 'at_risk' }).where(eq(holds.rentalId, atRisk.rentalId))
+    expect(await shop.act((transaction) => quoteExtension(transaction, atRisk.rentalId, hours(atRisk.endsAt, 24), 'link', NOW))).toEqual({ ok: false, problem: { kind: 'no_hold' } })
+    const voided = await out()
+    const [hold] = await database.select({ authorizationId: holds.currentAuthorizationId }).from(holds).where(eq(holds.rentalId, voided.rentalId))
+    await database.update(authorizations).set({ state: 'voided' }).where(eq(authorizations.id, hold?.authorizationId ?? ''))
+    expect(await shop.act((transaction) => quoteExtension(transaction, voided.rentalId, hours(voided.endsAt, 24), 'link', NOW))).toEqual({ ok: false, problem: { kind: 'no_hold' } })
+  })
+})
+
 describe('paying for more days', () => {
   it('moves the end once PayPal shows the order approved, and queues one capture of the quoted fee', async () => {
     const rental = await out()

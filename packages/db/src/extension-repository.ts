@@ -23,9 +23,12 @@ export async function saveExtensionMaxDays(transaction: Transaction, shopId: str
 
 type Refused = { readonly ok: false; readonly problem: ExtensionProblem | { readonly kind: 'not_found' } }
 
+const LIVE_HOLDS: ReadonlySet<string> = new Set(['placed', 'renewing'])
+const LIVE_AUTHORIZATIONS: ReadonlySet<string> = new Set(['created', 'renewed'])
+
 // The rental's own facts and everything that could stand in the way of a new end, priced and checked by checkExtension.
 async function checked(transaction: Transaction, rentalId: string, newEndsAt: Date, now: Date, lock = false) {
-  const query = transaction.select({ id: rentals.id, shopId: rentals.shopId, state: rentals.state, startsAt: rentals.startsAt, endsAt: rentals.endsAt, currency: rentals.currency, maxDays: shops.extensionMaxDays, validUntil: authorizations.validUntil })
+  const query = transaction.select({ id: rentals.id, shopId: rentals.shopId, state: rentals.state, startsAt: rentals.startsAt, endsAt: rentals.endsAt, currency: rentals.currency, maxDays: shops.extensionMaxDays, validUntil: authorizations.validUntil, holdState: holds.state, authorizationState: authorizations.state })
     .from(rentals).innerJoin(shops, eq(shops.id, rentals.shopId)).leftJoin(holds, eq(holds.rentalId, rentals.id)).leftJoin(authorizations, eq(authorizations.id, holds.currentAuthorizationId))
     .where(eq(rentals.id, rentalId))
   const [rental] = lock ? await query.for('update', { of: rentals }) : await query
@@ -43,7 +46,9 @@ async function checked(transaction: Transaction, rentalId: string, newEndsAt: Da
     newEndsAt,
     now,
     maxDays: rental.maxDays,
-    holdValidUntil: rental.validUntil,
+    // Only a hold still placed, on an authorization PayPal still holds, covers more days: one at risk, being settled,
+    // released or expired covers none, whatever its end date says.
+    holdValidUntil: rental.holdState !== null && LIVE_HOLDS.has(rental.holdState) && rental.authorizationState !== null && LIVE_AUTHORIZATIONS.has(rental.authorizationState) ? rental.validUntil : null,
     lines: lines.map((line) => ({ dayRateCents: line.dayRateCents, count: 1 })),
     currency: rental.currency,
     nextBookingStartsAt: blocking.length === 0 ? null : new Date(Math.max(Math.min(...blocking), rental.endsAt.getTime())),
@@ -153,6 +158,16 @@ export async function confirmExtensionCapture(transaction: Transaction, executio
 
 // PayPal refused the capture for good. Nothing was taken, so the rental's end goes back to where it was, unless
 // something else moved it since, and the renter is told on their page.
+// PayPal captured an amount that is not the quoted fee. Money moved, so nothing is undone: the new end stays, the
+// extension stays capturing, and a person is asked to look, through the audit trail and the execution's error.
+export async function flagExtensionCapture(transaction: Transaction, executionId: string, detail: Readonly<Record<string, unknown>>, now: Date): Promise<void> {
+  const found = await extensionOf(transaction, executionId)
+  if (found === undefined || found.execution.state === 'confirmed') return
+  await transaction.update(executions).set({ state: 'failed', lastError: 'amount_mismatch', attempts: found.execution.attempts + 1, updatedAt: now }).where(eq(executions.id, executionId))
+  await transaction.insert(auditLog).values({ shopId: found.extension.shopId, actorKind: 'system', action: 'extension.capture_mismatch', subjectKind: 'rental', subjectId: found.extension.rentalId, detail: { ...detail }, at: now })
+  await markExecutionSent(transaction, executionId, now)
+}
+
 export async function failExtensionCapture(transaction: Transaction, executionId: string, reason: string, now: Date): Promise<void> {
   const found = await extensionOf(transaction, executionId)
   if (found === undefined || found.execution.state === 'confirmed' || found.extension.state !== 'capturing') return
