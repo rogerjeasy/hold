@@ -1,6 +1,5 @@
 // @vitest-environment node
-import { captureSession, contestSummaries, inShop, moneyEvents, priceEntries, recordPhoto, rentalDetail, sealSession, startCaptureSession } from '@hold/db'
-import { randomUUID } from 'node:crypto'
+import { contestSummaries, inShop, moneyEvents, priceEntries } from '@hold/db'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 process.env['HOLD_ENVIRONMENT'] = 'test'
 process.env['HOLD_COOKIE_KEY'] = Buffer.alloc(32, 11).toString('base64')
@@ -13,6 +12,7 @@ const renter = await import('./renter-actions')
 const { getServices, TEST_SIGN_IN_CODE } = await import('@/server/services')
 const { form, signIn } = await import('@/test/shop-session')
 const { handoverShop } = await import('@/test/ready-rental')
+const { inspectedRental, presentedClaim } = await import('@/test/presented-claim')
 const OWNER = 'owner@claim-flow.example'
 let shop: Awaited<ReturnType<typeof handoverShop>>
 let priceId: string
@@ -22,33 +22,8 @@ beforeAll(async () => {
   priceId = (await inShop(database, { role: 'hold_app', shopId: shop.shopId }, (transaction) => transaction.select().from(priceEntries)))[0]?.id ?? ''
 })
 beforeEach(() => { jar.clear() })
-async function inspected() {
-  const rental = await shop.readyRental()
-  const { database } = await getServices()
-  const scoped = <Result>(work: Parameters<typeof inShop<Result>>[2]) => inShop(database, { role: 'hold_app', shopId: shop.shopId }, work)
-  const item = (await scoped((transaction) => rentalDetail(transaction, rental.rentalId, new Date())))?.items[0]?.id ?? ''
-  const { rentalItemFor } = await import('@hold/db')
-  const rentalItemId = await scoped((transaction) => rentalItemFor(transaction, rental.rentalId, item))
-  for (const kind of ['handover', 'return'] as const) {
-    const session = await scoped((transaction) => startCaptureSession(transaction, { rentalId: rental.rentalId, rentalItemId: rentalItemId ?? '', kind, actorUserId: null }, new Date()))
-    if (!session.ok) throw new Error(session.reason)
-    const capture = await scoped((transaction) => captureSession(transaction, session.sessionId))
-    for (const view of capture?.plan.filter((view) => view.required) ?? []) await scoped((transaction) => recordPhoto(transaction, session.sessionId, { view: view.key, evidenceKey: randomUUID(), sha256: 'a'.repeat(64), quality: { sharpness: 120, shadows: 20, highlights: 220, filled: .6 } }, new Date()))
-    await scoped((transaction) => sealSession(transaction, session.sessionId, new Date()))
-  }
-  await signIn(jar, OWNER, 'passkey')
-  return rental
-}
-async function presented() {
-  const rental = await inspected()
-  const created = await actions.prepareClaim(null, form({ rentalId: rental.rentalId, lines: JSON.stringify([{ priceEntryId: priceId, reason: 'Inspected the returned frame in person: fresh scratch.' }]), locale: 'en' }))
-  if (!created.ok) throw new Error(JSON.stringify(created))
-  const approved = await actions.approveAndPresent(null, form({ claimId: created.value.claimId, locale: 'en' }))
-  if (!approved.ok) throw new Error(JSON.stringify(approved))
-  const claimToken = approved.value.url.split('/r/')[1]?.split('/')[0] ?? ''
-  expect(await renter.acknowledgeClaim(null, form({ token: claimToken, locale: 'en' }))).toMatchObject({ ok: true })
-  return { ...rental, claimId: created.value.claimId, claimToken }
-}
+const inspected = () => inspectedRental(jar, shop)
+const presented = () => presentedClaim(jar, shop, priceId)
 describe('a neutral summary when the renter contests (architecture.md section 6.15)', () => {
   const summaries = async (claimId: string) => (await inShop((await getServices()).database, { role: 'hold_app', shopId: shop.shopId }, (transaction) => transaction.select().from(contestSummaries))).filter((row) => row.claimId === claimId)
 
