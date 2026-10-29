@@ -1403,6 +1403,30 @@ Page `/shop/prices`. The first thing a real shop asks is how its existing list g
 
 **Status, 29 October 2026.** Built: `features/prices` in the web app, `price-draft.ts` in `packages/domain`, `priceListVersions` in `packages/db`. P1 to P5 pass in tests (`price-draft.test.ts`, `paste.test.ts`, `history.test.ts`, `editor-model.test.ts`, `prices-screen.test.tsx`, `price-versions.test.ts`, `e2e/prices.spec.ts`). Moved to AG Grid Enterprise the same day: cells chosen, copied and pasted like a spreadsheet (`pasteAt`, `insertRow` in `editor-model.ts`), a kind from a searchable list, the right-click menu and the download, checked in `editor-model.test.ts` and `e2e/prices.spec.ts`.
 
+**The money ledger, on AG Grid**
+
+Page `/shop/money`, "Money" in the menu after the calendar. The owner and the accountant ask how much is held, what came in and what went back, without opening PayPal. The money log already holds the answer; this page reads it back line by line and shows that Hold's money rules held.
+
+- **What it holds.** Every line of the money log (`money_events`), each with the rental it belongs to. Above the grid, three figures: held on renters' accounts now, to the shop, and back to renters.
+- **Grouped by rental or by month.** A rental's lines together, its heading giving the renter, the period, what went to the shop and back to the renter as the grid adds them up, what is held now, and what its checks found; or a month's, with the month's totals. Lines keep the order money moved in: a hold before its capture, a capture before the release of what was left.
+- **What each line did.** Read by the domain's `lineFlows`: a fee, a capture or a paid invoice went to the shop; a release or a refund went back to the renter; a hold was placed or renewed; an invoice was sent. A replacement voids the authorization before it after the new one is placed, so only the release that settled the hold is money back, and the others are called what they were: a release as a new hold took its place.
+- **Checked per rental.** By the domain's `rentalMoney`, against the hold as it stands, the claim's total once a person approved it, and the operations agent's findings: more captured than the hold; more captured than the approved claim, or a capture with no approved claim; captured and released together above the hold; more refunded than taken; and PayPal's record of the hold differing from Hold's, an unresolved `reconciliation_difference`. Each says so in words with a sign; a rental with none says it agrees with its hold, its claim and PayPal.
+- **Where the money is now.** Filters by rental: held now, taken by the shop, back with the renter, invoiced and unpaid, and needs a look, each with its count. A rental is always shown whole.
+- **What confirms a line.** A line opens in place into when PayPal says it happened and when Hold wrote it after reading it back, its PayPal reference, the PayPal event about the same resource once its signature was verified (its type, identifier and time, never its body), the execution that asked PayPal for it with its idempotency key and attempts, and the rental's audit trail.
+- **For the accountant.** The lines shown download for a spreadsheet, every cell in words as the grid shows it, with each line's month and renter.
+- **Who reads it.** Every staff member, inside the shop alone. Nothing on it moves money, and no amount on it comes from anywhere but the money log and the records it is checked against.
+- **On AG Grid Enterprise.** Row grouping with aggregation, master-detail and the Excel export, registered by this grid alone. Below `md`, a card per rental with its figures, its checks and its lines.
+
+**Done when**
+
+- **M1** Every line of the shop's money log appears once with its rental, in the order money moved, and a second shop's lines never do.
+- **M2** Grouped by rental or by month, the grid's totals equal the sums of the lines, and a rental's held-now amount is its hold while PayPal holds it.
+- **M3** Each check is found by `rentalMoney` in tests, a replaced hold is never taken for money back, and any settlement within its hold and claim is never flagged.
+- **M4** A line opens into its read-back, any verified PayPal event about the same resource, its execution and the rental's audit trail; the lines download for a spreadsheet.
+- **M5** The page fits every width in `AGENTS.md` section 9, becomes a card per rental below `md`, and passes the accessibility checks in both themes.
+
+**Status, 29 October 2026.** Built: `money-ledger.ts` in `packages/domain`, `moneyLedgerRecords` in `packages/db`, `features/money` in the web app. M1 to M5 pass in tests (`money-ledger.test.ts`, `money-ledger-records.test.ts`, `ledger-rows.test.ts`, `e2e/money.spec.ts`). No migration: a line's PayPal event and execution are found by the resource its reference names. The sparkline of held money per month is not built; it would need AG Charts.
+
 **The insights dashboard, on AG Studio**
 
 Page `/shop/insights`, for the owner and managers. Its data comes from one server route under `/api/reports`, which returns rows for the caller's shop only, shaped for their role.

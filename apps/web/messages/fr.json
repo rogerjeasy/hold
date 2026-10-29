@@ -1242,7 +1242,8 @@
       "incidents": "Incidents",
       "trust": "Échelle de confiance",
       "settlement": "Représentant de règlement",
-      "queue": "File du matin"
+      "queue": "File du matin",
+      "money": "Argent"
     },
     "setup": {
       "title": "Préparez votre boutique",
@@ -3598,6 +3599,116 @@
       "close": "Fermer la décision",
       "claim": "Ouvrir la page de la réclamation",
       "rental": "Ouvrir la location"
+    }
+  },
+  "money": {
+    "title": "Argent",
+    "lead": "Chaque mouvement de l’argent de la boutique, tel que PayPal l’a enregistré et que Hold l’a relu : blocages posés et libérés, ce qui est allé à la boutique et ce qui est revenu aux clients. Chaque location est vérifiée face à son blocage, la réclamation approuvée par une personne, et PayPal. Rien ici ne déplace d’argent.",
+    "empty": "Aucun argent n’a encore bougé. Les frais, blocages, encaissements et libérations apparaissent ici dès que PayPal les enregistre.",
+    "figures": {
+      "held": "Bloqué sur les comptes des clients",
+      "toShop": "À la boutique",
+      "back": "Rendu aux clients"
+    },
+    "filters": "Afficher les locations selon où est leur argent",
+    "filter": {
+      "all": "Toutes",
+      "held": "Bloqué en ce moment",
+      "taken": "Encaissé par la boutique",
+      "returned": "Revenu au client",
+      "invoiced": "Facturé, impayé",
+      "check": "À vérifier"
+    },
+    "grouping": "Regrouper le journal de l’argent",
+    "groupBy": {
+      "rental": "Par location",
+      "month": "Par mois"
+    },
+    "noMatch": "L’argent d’aucune location n’est là en ce moment. Affichez toutes les locations.",
+    "noCheck": "Aucune location n’est à vérifier : chacune concorde avec son blocage, sa réclamation et PayPal.",
+    "keys": "Les flèches passent d’une ligne à l’autre. Entrée en ouvre une avec ce qui la confirme, et la referme.",
+    "grid": "Journal de l’argent",
+    "cards": "Les locations et leur argent",
+    "download": "Télécharger pour un tableur",
+    "sheet": "Journal de l’argent",
+    "openLine": "Ouvrir {line}",
+    "closeLine": "Fermer {line}",
+    "lineName": "{what}, {amount}",
+    "renter": "Un client",
+    "period": "{from} – {to}",
+    "columns": {
+      "open": "Ouvrir",
+      "month": "Mois",
+      "renter": "Client",
+      "when": "Quand",
+      "what": "Ce qui s’est passé",
+      "amount": "Montant",
+      "toShop": "À la boutique",
+      "back": "Rendu au client",
+      "reference": "Référence PayPal"
+    },
+    "group": {
+      "toShop": "À la boutique",
+      "backToRenter": "Rendu au client",
+      "backToRenters": "Rendu aux clients",
+      "heldNow": "Bloqué en ce moment",
+      "lines": "{count, plural, one {# ligne} other {# lignes}}"
+    },
+    "kinds": {
+      "fee_captured": "Frais de location encaissés",
+      "hold_placed": "Blocage posé",
+      "hold_renewed": "Blocage renouvelé",
+      "hold_released": "Libéré au client",
+      "replaced": "Libéré, un nouveau blocage ayant pris sa place",
+      "hold_captured": "Encaissé sur le blocage",
+      "refunded": "Remboursé au client",
+      "invoice_sent": "Facturé au client",
+      "invoice_paid": "Facture payée"
+    },
+    "flows": {
+      "to_shop": "À la boutique",
+      "to_renter": "Rendu au client",
+      "held": "Bloqué sur le compte du client",
+      "renewed": "Bloqué à nouveau, par un renouvellement",
+      "replaced": "A laissé place à un nouveau blocage",
+      "invoiced": "Demandé au client"
+    },
+    "checks": {
+      "agrees": "Concorde avec son blocage, sa réclamation et PayPal",
+      "captured_above_hold": "On a encaissé plus que le blocage.",
+      "captured_above_claim": "On a encaissé plus que la réclamation approuvée par une personne.",
+      "settled_above_hold": "Encaissé et libéré ensemble dépassent le blocage.",
+      "refunded_above_taken": "On a remboursé plus qu’encaissé.",
+      "paypal_differs": "L’enregistrement PayPal du blocage diffère de celui de Hold."
+    },
+    "actors": {
+      "person": "Une personne",
+      "staff": "Le personnel",
+      "renter": "Le client",
+      "system": "Hold",
+      "worker": "Le service de Hold",
+      "shop_agent": "L’agent de la boutique",
+      "renter_agent": "L’agent du client",
+      "public_agent": "Un assistant externe",
+      "public": "Le public",
+      "referee": "L’arbitre"
+    },
+    "detail": {
+      "rental": "Location",
+      "occurred": "Selon PayPal, survenu",
+      "flow": "Où est allé l’argent",
+      "paypalFee": "Frais PayPal",
+      "net": "Net pour la boutique",
+      "confirmed": "Ce qui le confirme",
+      "readBack": "Relu chez PayPal et inscrit {when}.",
+      "event": "Événement PayPal {type} ({id}), reçu {when}, sa signature vérifiée.",
+      "simulatedEvent": "Événement PayPal simulé {type} ({id}), reçu {when}.",
+      "noEvent": "Aucun événement PayPal à ce sujet n’est arrivé ; la relecture le confirme.",
+      "execution": "Demandé à PayPal comme {action}, avec la clé {key}, en {attempts, plural, one {# tentative} other {# tentatives}}.",
+      "noExecution": "Inscrit sans demande propre de Hold.",
+      "audit": "Journal d’audit",
+      "noAudit": "Rien n’est encore inscrit pour cette location.",
+      "openRental": "Ouvrir la location"
     }
   }
 }

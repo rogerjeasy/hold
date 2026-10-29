@@ -1242,7 +1242,8 @@
       "incidents": "Vorfälle",
       "trust": "Vertrauensstufen",
       "settlement": "Vergleichsvertreter",
-      "queue": "Morgenliste"
+      "queue": "Morgenliste",
+      "money": "Geld"
     },
     "setup": {
       "title": "Richten Sie Ihren Verleih ein",
@@ -3598,6 +3599,116 @@
       "close": "Entscheidung schließen",
       "claim": "Forderungsseite öffnen",
       "rental": "Miete öffnen"
+    }
+  },
+  "money": {
+    "title": "Geld",
+    "lead": "Jede Bewegung des Geldes deines Geschäfts, wie PayPal sie verbucht und Hold sie zurückgelesen hat: Reservierungen, die gesetzt und freigegeben wurden, was an das Geschäft ging und was an Mieter zurück. Jede Miete wird mit ihrer Reservierung, der von einer Person genehmigten Forderung und PayPal abgeglichen. Hier wird kein Geld bewegt.",
+    "empty": "Noch hat sich kein Geld bewegt. Mietgebühren, Reservierungen, Einzüge und Freigaben erscheinen hier, sobald PayPal sie verbucht.",
+    "figures": {
+      "held": "Jetzt auf Mieterkonten reserviert",
+      "toShop": "An das Geschäft",
+      "back": "Zurück an Mieter"
+    },
+    "filters": "Mieten danach zeigen, wo ihr Geld ist",
+    "filter": {
+      "all": "Alle",
+      "held": "Jetzt reserviert",
+      "taken": "Vom Geschäft eingezogen",
+      "returned": "Zurück beim Mieter",
+      "invoiced": "In Rechnung, unbezahlt",
+      "check": "Zu prüfen"
+    },
+    "grouping": "Das Geldprotokoll gruppieren",
+    "groupBy": {
+      "rental": "Nach Miete",
+      "month": "Nach Monat"
+    },
+    "noMatch": "Bei keiner Miete steht das Geld gerade dort. Zeig alle Mieten.",
+    "noCheck": "Keine Miete ist zu prüfen: Jede stimmt mit ihrer Reservierung, ihrer Forderung und PayPal überein.",
+    "keys": "Mit den Pfeiltasten wechselst du zwischen Zeilen. Enter öffnet eine mit dem, was sie bestätigt, und schließt sie wieder.",
+    "grid": "Geldprotokoll",
+    "cards": "Mieten und ihr Geld",
+    "download": "Für eine Tabelle herunterladen",
+    "sheet": "Geldprotokoll",
+    "openLine": "{line} öffnen",
+    "closeLine": "{line} schließen",
+    "lineName": "{what}, {amount}",
+    "renter": "Ein Mieter",
+    "period": "{from} – {to}",
+    "columns": {
+      "open": "Öffnen",
+      "month": "Monat",
+      "renter": "Mieter",
+      "when": "Wann",
+      "what": "Was geschah",
+      "amount": "Betrag",
+      "toShop": "An das Geschäft",
+      "back": "Zurück an den Mieter",
+      "reference": "PayPal-Referenz"
+    },
+    "group": {
+      "toShop": "An das Geschäft",
+      "backToRenter": "Zurück an den Mieter",
+      "backToRenters": "Zurück an Mieter",
+      "heldNow": "Jetzt reserviert",
+      "lines": "{count, plural, one {# Zeile} other {# Zeilen}}"
+    },
+    "kinds": {
+      "fee_captured": "Mietgebühr eingezogen",
+      "hold_placed": "Reservierung gesetzt",
+      "hold_renewed": "Reservierung erneuert",
+      "hold_released": "An den Mieter freigegeben",
+      "replaced": "Freigegeben, weil eine neue Reservierung an ihre Stelle trat",
+      "hold_captured": "Aus der Reservierung eingezogen",
+      "refunded": "An den Mieter erstattet",
+      "invoice_sent": "Dem Mieter in Rechnung gestellt",
+      "invoice_paid": "Rechnung bezahlt"
+    },
+    "flows": {
+      "to_shop": "An das Geschäft",
+      "to_renter": "Zurück an den Mieter",
+      "held": "Auf dem Konto des Mieters reserviert",
+      "renewed": "Durch eine Erneuerung erneut reserviert",
+      "replaced": "Machte einer neuen Reservierung Platz",
+      "invoiced": "Vom Mieter verlangt"
+    },
+    "checks": {
+      "agrees": "Stimmt mit Reservierung, Forderung und PayPal überein",
+      "captured_above_hold": "Es wurde mehr eingezogen als reserviert.",
+      "captured_above_claim": "Es wurde mehr eingezogen als die von einer Person genehmigte Forderung.",
+      "settled_above_hold": "Eingezogen und freigegeben zusammen ist mehr als die Reservierung.",
+      "refunded_above_taken": "Es wurde mehr erstattet als eingezogen.",
+      "paypal_differs": "PayPals Eintrag zur Reservierung weicht von Holds ab."
+    },
+    "actors": {
+      "person": "Eine Person",
+      "staff": "Personal",
+      "renter": "Der Mieter",
+      "system": "Hold",
+      "worker": "Holds Hintergrunddienst",
+      "shop_agent": "Der Agent des Geschäfts",
+      "renter_agent": "Der Agent des Mieters",
+      "public_agent": "Ein externer Assistent",
+      "public": "Die Öffentlichkeit",
+      "referee": "Der Schiedsrichter"
+    },
+    "detail": {
+      "rental": "Miete",
+      "occurred": "Laut PayPal geschehen",
+      "flow": "Wohin das Geld ging",
+      "paypalFee": "PayPals Gebühr",
+      "net": "Netto für das Geschäft",
+      "confirmed": "Was es bestätigt",
+      "readBack": "Von PayPal zurückgelesen und eingetragen {when}.",
+      "event": "PayPal-Ereignis {type} ({id}), eingegangen {when}, Signatur geprüft.",
+      "simulatedEvent": "Simuliertes PayPal-Ereignis {type} ({id}), eingegangen {when}.",
+      "noEvent": "Kein PayPal-Ereignis dazu ist eingegangen; das Zurücklesen bestätigt es.",
+      "execution": "Bei PayPal angefragt als {action}, mit dem Schlüssel {key}, in {attempts, plural, one {# Versuch} other {# Versuchen}}.",
+      "noExecution": "Ohne eigene Anfrage von Hold eingetragen.",
+      "audit": "Prüfprotokoll",
+      "noAudit": "Zu dieser Miete ist noch nichts eingetragen.",
+      "openRental": "Miete öffnen"
     }
   }
 }

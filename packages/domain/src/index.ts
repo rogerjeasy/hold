@@ -94,6 +94,8 @@ export { checkLadder, holdFor, LADDER_LIMITS, rentalHoldFor, TRUST_HISTORIES } f
 export type { ItemHold, LadderHold, LadderProblem, RentalLadderHold, TrustHistory, TrustLadder, TrustRung } from './trust-ladder.ts'
 export { simulateLadder } from './ladder-simulation.ts'
 export type { LadderSimulation, PastRental } from './ladder-simulation.ts'
+export { lineFlows, MONEY_CHECKS, MONEY_EVENT_KINDS, rentalMoney } from './money-ledger.ts'
+export type { LedgerLine, LineFlow, MoneyCheck, MoneyEventKind, MoneyWhere, RentalMoney, RentalMoneyFacts } from './money-ledger.ts'
 export { neverTaken } from './never-taken.ts'
 export type { MoneyLogLine, NeverTaken } from './never-taken.ts'
 

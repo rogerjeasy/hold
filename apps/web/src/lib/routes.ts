@@ -27,6 +27,8 @@ export const shopRoutes = {
   // The operations agent's morning queue: what waits for an owner's or a manager's decision (extensions.md section 6).
   queue: '/shop/queue',
   rentals: '/shop/rentals',
+  // Every line of the money log, checked against its hold, its claim and PayPal, on AG Grid (extensions.md section 12.5).
+  money: '/shop/money',
   // Every item as a row and every rental as a bar, on Bryntum Scheduler (extensions.md section 12.5).
   calendar: '/shop/calendar',
   items: '/shop/items',

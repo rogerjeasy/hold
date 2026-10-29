@@ -1242,7 +1242,8 @@
       "incidents": "Incidentes",
       "trust": "Escalera de confianza",
       "settlement": "Representante de acuerdos",
-      "queue": "Cola de la mañana"
+      "queue": "Cola de la mañana",
+      "money": "Dinero"
     },
     "setup": {
       "title": "Prepara tu tienda",
@@ -3598,6 +3599,116 @@
       "close": "Cerrar la decisión",
       "claim": "Abrir la página de la reclamación",
       "rental": "Abrir el alquiler"
+    }
+  },
+  "money": {
+    "title": "Dinero",
+    "lead": "Cada movimiento del dinero de la tienda, tal como PayPal lo registró y Hold lo volvió a leer: retenciones puestas y liberadas, lo que fue a la tienda y lo que volvió a los clientes. Cada alquiler se comprueba con su retención, la reclamación que aprobó una persona y PayPal. Aquí no se mueve dinero.",
+    "empty": "Todavía no se ha movido dinero. Las tarifas, retenciones, cobros y liberaciones aparecen aquí cuando PayPal los registra.",
+    "figures": {
+      "held": "Retenido ahora en cuentas de clientes",
+      "toShop": "Para la tienda",
+      "back": "Devuelto a clientes"
+    },
+    "filters": "Mostrar alquileres según dónde está su dinero",
+    "filter": {
+      "all": "Todos",
+      "held": "Retenido ahora",
+      "taken": "Cobrado por la tienda",
+      "returned": "De vuelta con el cliente",
+      "invoiced": "Facturado, sin pagar",
+      "check": "Hay que revisar"
+    },
+    "grouping": "Agrupar el registro de dinero",
+    "groupBy": {
+      "rental": "Por alquiler",
+      "month": "Por mes"
+    },
+    "noMatch": "El dinero de ningún alquiler está ahí ahora. Muestra todos los alquileres.",
+    "noCheck": "Ningún alquiler hay que revisar: todos cuadran con su retención, su reclamación y PayPal.",
+    "keys": "Las flechas pasan de una línea a otra. Intro abre una con lo que la confirma y la vuelve a cerrar.",
+    "grid": "Registro de dinero",
+    "cards": "Alquileres y su dinero",
+    "download": "Descargar para una hoja de cálculo",
+    "sheet": "Registro de dinero",
+    "openLine": "Abrir {line}",
+    "closeLine": "Cerrar {line}",
+    "lineName": "{what}, {amount}",
+    "renter": "Un cliente",
+    "period": "{from} – {to}",
+    "columns": {
+      "open": "Abrir",
+      "month": "Mes",
+      "renter": "Cliente",
+      "when": "Cuándo",
+      "what": "Qué pasó",
+      "amount": "Importe",
+      "toShop": "Para la tienda",
+      "back": "Devuelto al cliente",
+      "reference": "Referencia de PayPal"
+    },
+    "group": {
+      "toShop": "Para la tienda",
+      "backToRenter": "Devuelto al cliente",
+      "backToRenters": "Devuelto a clientes",
+      "heldNow": "Retenido ahora",
+      "lines": "{count, plural, one {# línea} other {# líneas}}"
+    },
+    "kinds": {
+      "fee_captured": "Tarifa de alquiler cobrada",
+      "hold_placed": "Retención puesta",
+      "hold_renewed": "Retención renovada",
+      "hold_released": "Liberada al cliente",
+      "replaced": "Liberada, porque una nueva retención ocupó su lugar",
+      "hold_captured": "Cobrado de la retención",
+      "refunded": "Reembolsado al cliente",
+      "invoice_sent": "Facturado al cliente",
+      "invoice_paid": "Factura pagada"
+    },
+    "flows": {
+      "to_shop": "Para la tienda",
+      "to_renter": "Devuelto al cliente",
+      "held": "Retenido en la cuenta del cliente",
+      "renewed": "Retenido de nuevo, por una renovación",
+      "replaced": "Dejó paso a una nueva retención",
+      "invoiced": "Pedido al cliente"
+    },
+    "checks": {
+      "agrees": "Cuadra con su retención, su reclamación y PayPal",
+      "captured_above_hold": "Se cobró más que la retención.",
+      "captured_above_claim": "Se cobró más que la reclamación que aprobó una persona.",
+      "settled_above_hold": "Lo cobrado y lo liberado juntos superan la retención.",
+      "refunded_above_taken": "Se reembolsó más de lo cobrado.",
+      "paypal_differs": "El registro de PayPal de la retención difiere del de Hold."
+    },
+    "actors": {
+      "person": "Una persona",
+      "staff": "Personal",
+      "renter": "El cliente",
+      "system": "Hold",
+      "worker": "El servicio de Hold",
+      "shop_agent": "El agente de la tienda",
+      "renter_agent": "El agente del cliente",
+      "public_agent": "Un asistente externo",
+      "public": "El público",
+      "referee": "El árbitro"
+    },
+    "detail": {
+      "rental": "Alquiler",
+      "occurred": "Según PayPal, ocurrió",
+      "flow": "Adónde fue el dinero",
+      "paypalFee": "Comisión de PayPal",
+      "net": "Neto para la tienda",
+      "confirmed": "Qué lo confirma",
+      "readBack": "Leído de nuevo en PayPal y anotado {when}.",
+      "event": "Evento de PayPal {type} ({id}), recibido {when}, con su firma verificada.",
+      "simulatedEvent": "Evento de PayPal simulado {type} ({id}), recibido {when}.",
+      "noEvent": "No ha llegado ningún evento de PayPal sobre esto; la lectura lo confirma.",
+      "execution": "Pedido a PayPal como {action}, con la clave {key}, en {attempts, plural, one {# intento} other {# intentos}}.",
+      "noExecution": "Anotado sin una petición propia de Hold.",
+      "audit": "Registro de auditoría",
+      "noAudit": "Aún no hay nada anotado sobre este alquiler.",
+      "openRental": "Abrir el alquiler"
     }
   }
 }

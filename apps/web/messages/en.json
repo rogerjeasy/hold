@@ -1242,7 +1242,8 @@
       "incidents": "Incidents",
       "trust": "Trust ladder",
       "settlement": "Settlement advocate",
-      "queue": "Morning queue"
+      "queue": "Morning queue",
+      "money": "Money"
     },
     "setup": {
       "title": "Set up your shop",
@@ -3598,6 +3599,116 @@
       "close": "Close the decision",
       "claim": "Open the claim page",
       "rental": "Open the rental"
+    }
+  },
+  "money": {
+    "title": "Money",
+    "lead": "Every movement of the shop's money, as PayPal recorded it and Hold read it back: holds placed and released, what went to the shop and what went back to renters. Each rental is checked against its hold, the claim a person approved, and PayPal. Nothing here moves money.",
+    "empty": "No money has moved yet. Rental fees, holds, captures and releases appear here as PayPal records them.",
+    "figures": {
+      "held": "Held on renters' accounts now",
+      "toShop": "To the shop",
+      "back": "Back to renters"
+    },
+    "filters": "Show rentals by where their money is",
+    "filter": {
+      "all": "All",
+      "held": "Held now",
+      "taken": "Taken by the shop",
+      "returned": "Back with the renter",
+      "invoiced": "Invoiced, unpaid",
+      "check": "Needs a look"
+    },
+    "grouping": "Group the money log",
+    "groupBy": {
+      "rental": "By rental",
+      "month": "By month"
+    },
+    "noMatch": "No rental's money stands there now. Show every rental.",
+    "noCheck": "No rental needs a look: every one agrees with its hold, its claim and PayPal.",
+    "keys": "Arrow keys move between lines. Enter opens one into what confirmed it, and closes it again.",
+    "grid": "Money log",
+    "cards": "Rentals and their money",
+    "download": "Download for a spreadsheet",
+    "sheet": "Money log",
+    "openLine": "Open {line}",
+    "closeLine": "Close {line}",
+    "lineName": "{what}, {amount}",
+    "renter": "A renter",
+    "period": "{from} – {to}",
+    "columns": {
+      "open": "Open",
+      "month": "Month",
+      "renter": "Renter",
+      "when": "When",
+      "what": "What happened",
+      "amount": "Amount",
+      "toShop": "To the shop",
+      "back": "Back to the renter",
+      "reference": "PayPal reference"
+    },
+    "group": {
+      "toShop": "To the shop",
+      "backToRenter": "Back to the renter",
+      "backToRenters": "Back to renters",
+      "heldNow": "Held now",
+      "lines": "{count, plural, one {# line} other {# lines}}"
+    },
+    "kinds": {
+      "fee_captured": "Rental fee taken",
+      "hold_placed": "Hold placed",
+      "hold_renewed": "Hold renewed",
+      "hold_released": "Released to the renter",
+      "replaced": "Released, as a new hold took its place",
+      "hold_captured": "Taken from the hold",
+      "refunded": "Refunded to the renter",
+      "invoice_sent": "Invoiced to the renter",
+      "invoice_paid": "Invoice paid"
+    },
+    "flows": {
+      "to_shop": "To the shop",
+      "to_renter": "Back to the renter",
+      "held": "Held on the renter's account",
+      "renewed": "Held again, by a renewal",
+      "replaced": "Made way for a new hold",
+      "invoiced": "Asked of the renter"
+    },
+    "checks": {
+      "agrees": "Agrees with its hold, its claim and PayPal",
+      "captured_above_hold": "More was captured than the hold.",
+      "captured_above_claim": "More was captured than the claim a person approved.",
+      "settled_above_hold": "What was captured and released together is more than the hold.",
+      "refunded_above_taken": "More was refunded than was taken.",
+      "paypal_differs": "PayPal's record of the hold differs from Hold's."
+    },
+    "actors": {
+      "person": "A person",
+      "staff": "Staff",
+      "renter": "The renter",
+      "system": "Hold",
+      "worker": "Hold's worker",
+      "shop_agent": "The shop's agent",
+      "renter_agent": "The renter's agent",
+      "public_agent": "An outside assistant",
+      "public": "The public",
+      "referee": "The referee"
+    },
+    "detail": {
+      "rental": "Rental",
+      "occurred": "PayPal says it happened",
+      "flow": "Where the money went",
+      "paypalFee": "PayPal's fee",
+      "net": "The shop's net",
+      "confirmed": "What confirms it",
+      "readBack": "Read back from PayPal and written {when}.",
+      "event": "PayPal event {type} ({id}), received {when}, its signature verified.",
+      "simulatedEvent": "Simulated PayPal event {type} ({id}), received {when}.",
+      "noEvent": "No PayPal event about it has arrived; the read-back confirms it.",
+      "execution": "Asked of PayPal as {action}, with the key {key}, in {attempts, plural, one {# attempt} other {# attempts}}.",
+      "noExecution": "Recorded without a request of Hold's own.",
+      "audit": "Audit trail",
+      "noAudit": "Nothing recorded about this rental yet.",
+      "openRental": "Open the rental"
     }
   }
 }

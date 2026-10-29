@@ -1,4 +1,4 @@
-import { CAPTURE_SESSION_KINDS, CLAIM_STATES, CONDITION_REPLIES, DETECTOR_KINDS, ESCALATION_REASONS, FINDING_VERDICTS, HOLD_STATES, INCIDENT_HINTS, INCIDENT_KINDS, INCIDENT_STATES, ITEM_CATEGORIES, ITEM_STATUSES, MANDATE_KINDS, MOVE_KINDS, NEGOTIATION_KINDS, NEGOTIATION_SIDES, NEGOTIATION_STATES, PASS_REASONS, PRICE_CATEGORIES, PROPOSAL_KINDS, PROPOSAL_STATES, REMINDER_KINDS, RENTAL_STATES, STAFF_ROLES, STORED_OUTCOMES, TRUST_HISTORIES } from '@hold/domain'
+import { CAPTURE_SESSION_KINDS, CLAIM_STATES, CONDITION_REPLIES, DETECTOR_KINDS, ESCALATION_REASONS, FINDING_VERDICTS, HOLD_STATES, INCIDENT_HINTS, INCIDENT_KINDS, INCIDENT_STATES, ITEM_CATEGORIES, ITEM_STATUSES, MANDATE_KINDS, MONEY_EVENT_KINDS, MOVE_KINDS, NEGOTIATION_KINDS, NEGOTIATION_SIDES, NEGOTIATION_STATES, PASS_REASONS, PRICE_CATEGORIES, PROPOSAL_KINDS, PROPOSAL_STATES, REMINDER_KINDS, RENTAL_STATES, STAFF_ROLES, STORED_OUTCOMES, TRUST_HISTORIES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
 import { check, text } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
@@ -45,7 +45,6 @@ export type BookingChannel = (typeof BOOKING_CHANNELS)[number]
 export const EXECUTION_STATES = ['pending', 'submitted', 'confirmed', 'failed'] as const
 export const VERIFICATION_STATES = ['pending', 'verified', 'rejected', 'simulated'] as const
 export const PROCESSING_STATES = ['pending', 'applied', 'ignored', 'failed'] as const
-export const MONEY_EVENT_KINDS = ['fee_captured', 'hold_placed', 'hold_renewed', 'hold_released', 'hold_captured', 'refunded', 'invoice_sent', 'invoice_paid'] as const
 export const INVOICE_STATES = ['draft', 'sent', 'paid', 'cancelled'] as const
 export const OUTBOX_STATES = ['pending', 'sent'] as const
 // What came of asking the model to sort an incident. Anything but answered leaves the sorting to code and a person.
