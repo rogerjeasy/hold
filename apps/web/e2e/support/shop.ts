@@ -5,6 +5,20 @@ import { expect } from './test'
 
 // Setting a shop up through its real pages, for the tests that need one ready.
 
+// Publishes a price list from the prices page through the editor's paste, the way a shop brings its list from a
+// spreadsheet: one price per line, tab-separated. The currency is chosen when it is not fixed yet.
+export async function publishPrices(page: Page, currency: string, pasted: string, wearPolicy = 'Light scuffs on the tyres are ordinary wear.'): Promise<void> {
+  // Opening the paste panel answers only once the page is live, so the currency chosen after it stays chosen.
+  await page.getByRole('button', { name: 'Paste from a spreadsheet' }).click()
+  await page.getByRole('textbox', { name: 'Paste your price list here' }).fill(pasted)
+  await page.getByRole('button', { name: 'Add these prices' }).click()
+  const choose = page.getByRole('combobox', { name: 'Currency' })
+  if (await choose.count() > 0) await choose.selectOption(currency)
+  await page.getByRole('textbox', { name: 'What counts as ordinary wear' }).fill(wearPolicy)
+  await page.getByRole('button', { name: 'Publish this price list' }).click()
+  await expect(page.getByText('Price list published.')).toBeVisible()
+}
+
 // An owner with a passkey and a published price list, on the items page.
 export async function ownerWithPrices(page: Page, shopName?: string): Promise<void> {
   await addVirtualAuthenticator(page)
@@ -16,12 +30,7 @@ export async function ownerWithPrices(page: Page, shopName?: string): Promise<vo
   await menu.getByRole('link', { name: 'Prices' }).click()
   await expect(page).toHaveURL(/\/shop\/prices$/)
   await page.getByRole('button', { name: 'Confirm with my passkey' }).click()
-  await page.getByLabel('Currency').selectOption('EUR')
-  await page.getByLabel('Price 1: what it is for').fill('Deep scratch on the frame')
-  await page.getByLabel('Amount, in EUR').fill('35')
-  await page.getByLabel('What counts as ordinary wear').fill('Light scuffs on the tyres are ordinary wear.')
-  await page.getByRole('button', { name: 'Publish this price list' }).click()
-  await expect(page.getByText('Price list published.')).toBeVisible()
+  await publishPrices(page, 'EUR', 'Deep scratch on the frame\t35')
   await menu.getByRole('link', { name: 'Items' }).click()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Items')
 }

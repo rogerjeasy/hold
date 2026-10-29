@@ -285,3 +285,12 @@
   background-color: color-mix(in oklab, var(--primary) 7%, var(--card));
   box-shadow: inset 3px 0 0 var(--primary);
 }
+
+/*
+ * The price list editor's grid (features/prices): a cell publishing would refuse is underlined in the warning colour,
+ * while the row's last column says what is wrong in words.
+ */
+.hold-grid .price-cell-problem {
+  box-shadow: inset 0 -2px 0 var(--destructive);
+  background-color: color-mix(in oklab, var(--destructive) 7%, transparent);
+}

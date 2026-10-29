@@ -2068,6 +2068,80 @@
       "unknownRenter": "Cliente aún desconocido",
       "loading": "Cargando el calendario…",
       "loadFailed": "No se pudo cargar el calendario. Vuelva a cargar la página o busque cada alquiler en Alquileres."
+    },
+    "priceEditor": {
+      "draftOf": "Borrador de la versión {version}",
+      "noChanges": "Aún no hay cambios respecto a la versión {version}.",
+      "problems": "{count, plural, =0 {Listo para publicar.} one {# celda por corregir antes de publicar.} other {# celdas por corregir antes de publicar.}}",
+      "undo": "Deshacer",
+      "redo": "Rehacer",
+      "discard": "Descartar el borrador",
+      "restored": "Se recuperó de este navegador tu borrador sin guardar.",
+      "paste": {
+        "open": "Pegar desde una hoja de cálculo",
+        "label": "Pega aquí tu lista de precios",
+        "help": "Copia las filas de una hoja de cálculo, un documento o un correo y pégalas aquí, un precio por línea: para qué es, su tipo si lo tienes, y su precio.",
+        "add": "Añadir estos precios",
+        "added": "{count, plural, one {# precio añadido} other {# precios añadidos}}{skipped, plural, =0 {.} other {, sin la línea de cabecera.}}",
+        "none": "No se encontraron precios en lo pegado.",
+        "gridHint": "También puedes pegar directamente en la tabla."
+      },
+      "grid": {
+        "label": "Precios de este borrador",
+        "keys": "Intro edita una celda y Tab pasa a la siguiente. Arrastra una fila por su asa para cambiar el orden que leen los clientes. Ctrl o ⌘ con Z deshace el último cambio."
+      },
+      "columns": {
+        "order": "Orden",
+        "description": "Para qué es",
+        "kind": "Tipo",
+        "amount": "Importe, {currency}",
+        "remove": "Quitar"
+      },
+      "remove": "Quitar {description}",
+      "removeUnnamed": "Quitar el precio {number}",
+      "problemsText": {
+        "description_missing": "Di para qué es",
+        "description_too_long": "Demasiado largo para una línea",
+        "description_repeated": "Igual que otro precio",
+        "amount_invalid": "No es un importe en {currency}",
+        "amount_zero": "Cero"
+      },
+      "preview": {
+        "title": "Lo que lee un cliente",
+        "lead": "Este borrador tal como lo ve un cliente antes de reservar. Tus descripciones quedan con tus palabras; el resto, en el idioma del cliente.",
+        "language": "Idioma del cliente",
+        "empty": "Los precios aparecen aquí a medida que los añades."
+      },
+      "versions": {
+        "title": "Versiones",
+        "lead": "Cada versión publicada se queda como estaba. Un cliente queda sujeto a la versión que aceptó al reservar, nunca a una posterior.",
+        "version": "Versión {version}",
+        "published": "Publicada el {date}",
+        "prices": "{count, plural, one {# precio} other {# precios}}",
+        "live": "{count, plural, =0 {Ningún alquiler abierto la aceptó} one {# alquiler abierto la aceptó} other {# alquileres abiertos la aceptaron}}",
+        "inForce": "En vigor",
+        "none": "Aún no hay nada publicado. Tu primera versión aparecerá aquí."
+      },
+      "diff": {
+        "title": "Qué cambió",
+        "from": "De",
+        "to": "A",
+        "draft": "Este borrador",
+        "added": "Añadidos",
+        "removed": "Quitados",
+        "changed": "Cambiados",
+        "change": "de {from} a {to}",
+        "wearChanged": "La política de desgaste cambió.",
+        "wearSame": "La política de desgaste es la misma.",
+        "nothing": "Ningún precio cambió.",
+        "unchanged": "{count, plural, =0 {} one {# precio sigue igual.} other {# precios siguen igual.}}"
+      },
+      "languages": {
+        "en": "English",
+        "de": "Deutsch",
+        "es": "Español",
+        "fr": "Français"
+      }
     }
   },
   "emails": {

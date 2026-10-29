@@ -29,18 +29,26 @@ export type PriceListProblem =
   | { readonly kind: 'wear_policy_missing' }
   | { readonly kind: 'wear_policy_too_long' }
 
+export type DescriptionProblem = 'description_missing' | 'description_too_long' | 'description_repeated'
+
+// The one rule for a price's description, for publishing and for the editor alike. `seen` holds the descriptions
+// read so far, in lower case; this one is added to it.
+export function descriptionProblem(text: string, seen: Set<string>): DescriptionProblem | undefined {
+  const description = text.trim()
+  const key = description.toLowerCase()
+  const problem = description === '' ? 'description_missing' : description.length > PRICE_LIST_LIMITS.description ? 'description_too_long' : seen.has(key) ? 'description_repeated' : undefined
+  seen.add(key)
+  return problem
+}
+
 export function checkPriceList(draft: PriceListDraft): readonly PriceListProblem[] {
   const problems: PriceListProblem[] = []
   if (draft.entries.length === 0) problems.push({ kind: 'no_entries' })
   if (draft.entries.length > PRICE_LIST_LIMITS.entries) problems.push({ kind: 'too_many_entries' })
   const seen = new Set<string>()
   draft.entries.forEach((entry, index) => {
-    const description = entry.description.trim()
-    const key = description.toLowerCase()
-    if (description === '') problems.push({ kind: 'description_missing', entry: index })
-    else if (description.length > PRICE_LIST_LIMITS.description) problems.push({ kind: 'description_too_long', entry: index })
-    else if (seen.has(key)) problems.push({ kind: 'description_repeated', entry: index })
-    seen.add(key)
+    const problem = descriptionProblem(entry.description, seen)
+    if (problem !== undefined) problems.push({ kind: problem, entry: index })
     if (entry.amount.cents === 0) problems.push({ kind: 'amount_zero', entry: index })
     if (entry.amount.currency !== draft.currency) problems.push({ kind: 'wrong_currency', entry: index })
   })

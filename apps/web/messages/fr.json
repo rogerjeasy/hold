@@ -2068,6 +2068,80 @@
       "unknownRenter": "Client pas encore connu",
       "loading": "Chargement du calendrier…",
       "loadFailed": "Le calendrier n’a pas pu se charger. Rechargez la page, ou retrouvez chaque location dans Locations."
+    },
+    "priceEditor": {
+      "draftOf": "Brouillon de la version {version}",
+      "noChanges": "Aucun changement depuis la version {version} pour l’instant.",
+      "problems": "{count, plural, =0 {Prêt à publier.} one {# case à corriger avant de publier.} other {# cases à corriger avant de publier.}}",
+      "undo": "Annuler",
+      "redo": "Rétablir",
+      "discard": "Abandonner le brouillon",
+      "restored": "Votre brouillon non enregistré a été restauré depuis ce navigateur.",
+      "paste": {
+        "open": "Coller depuis un tableur",
+        "label": "Collez votre liste de prix ici",
+        "help": "Copiez les lignes d’un tableur, d’un document ou d’un e-mail et collez-les ici, un prix par ligne : à quoi il correspond, son type si vous en avez un, et son prix.",
+        "add": "Ajouter ces prix",
+        "added": "{count, plural, one {# prix ajouté} other {# prix ajoutés}}{skipped, plural, =0 {.} other {, la ligne d’en-tête laissée de côté.}}",
+        "none": "Aucun prix n’a été trouvé dans ce qui a été collé.",
+        "gridHint": "Vous pouvez aussi coller directement dans le tableau."
+      },
+      "grid": {
+        "label": "Prix de ce brouillon",
+        "keys": "Entrée modifie une case et Tab passe à la suivante. Faites glisser une ligne par sa poignée pour changer l’ordre lu par les locataires. Ctrl ou ⌘ avec Z annule le dernier changement."
+      },
+      "columns": {
+        "order": "Ordre",
+        "description": "À quoi il correspond",
+        "kind": "Type",
+        "amount": "Montant, {currency}",
+        "remove": "Retirer"
+      },
+      "remove": "Retirer {description}",
+      "removeUnnamed": "Retirer le prix {number}",
+      "problemsText": {
+        "description_missing": "Dites à quoi il correspond",
+        "description_too_long": "Trop long pour une ligne",
+        "description_repeated": "Identique à un autre prix",
+        "amount_invalid": "Pas un montant en {currency}",
+        "amount_zero": "Zéro"
+      },
+      "preview": {
+        "title": "Ce que lit un locataire",
+        "lead": "Ce brouillon tel qu’un locataire le voit avant de réserver. Vos descriptions restent dans vos mots ; le reste est dans la langue du locataire.",
+        "language": "Langue du locataire",
+        "empty": "Les prix apparaissent ici à mesure que vous les ajoutez."
+      },
+      "versions": {
+        "title": "Versions",
+        "lead": "Chaque version publiée reste telle quelle. Un locataire est tenu par la version acceptée à la réservation, jamais par une plus récente.",
+        "version": "Version {version}",
+        "published": "Publiée le {date}",
+        "prices": "{count, plural, one {# prix} other {# prix}}",
+        "live": "{count, plural, =0 {Aucune location en cours ne l’a acceptée} one {# location en cours l’a acceptée} other {# locations en cours l’ont acceptée}}",
+        "inForce": "En vigueur",
+        "none": "Rien n’est encore publié. Votre première version apparaîtra ici."
+      },
+      "diff": {
+        "title": "Ce qui a changé",
+        "from": "De",
+        "to": "À",
+        "draft": "Ce brouillon",
+        "added": "Ajoutés",
+        "removed": "Retirés",
+        "changed": "Modifiés",
+        "change": "de {from} à {to}",
+        "wearChanged": "La règle d’usure a changé.",
+        "wearSame": "La règle d’usure est la même.",
+        "nothing": "Aucun prix n’a changé.",
+        "unchanged": "{count, plural, =0 {} one {# prix reste tel quel.} other {# prix restent tels quels.}}"
+      },
+      "languages": {
+        "en": "English",
+        "de": "Deutsch",
+        "es": "Español",
+        "fr": "Français"
+      }
     }
   },
   "emails": {

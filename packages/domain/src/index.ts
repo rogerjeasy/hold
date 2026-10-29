@@ -23,6 +23,8 @@ export { PENDING_PAYMENT_MINUTES, RENTAL_STATES, RENTAL_TRANSITIONS } from './re
 export type { RentalState } from './rental.ts'
 export { checkPriceList, PRICE_CATEGORIES, PRICE_LIST_LIMITS, priceCode, publishedText } from './price-list.ts'
 export type { PriceCategory, PriceEntryDraft, PriceListDraft, PriceListProblem } from './price-list.ts'
+export { checkPriceRows, diffPriceLists, draftCodes } from './price-draft.ts'
+export type { PriceCellProblems, PriceListDiff } from './price-draft.ts'
 export { fail, ok } from './result.ts'
 export { slugOf } from './slug.ts'
 export { atShopTime, shopDay, shopTimeText } from './shop-calendar.ts'

@@ -1,5 +1,6 @@
 import { addVirtualAuthenticator } from './support/passkey'
 import { expectNoClippedText, expectNoSidewaysScroll, expectNothingOutsideViewport, expectTouchTargets, viewports } from './support/responsive'
+import { publishPrices } from './support/shop'
 import { expectInShop, newEmail, signUpAs } from './support/sign-in'
 import { expect, test } from './support/test'
 
@@ -23,12 +24,7 @@ test('an owner adds a passkey, confirms with it, then sets up prices, staff and 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Prices')
   await page.getByRole('button', { name: 'Confirm with my passkey' }).click()
   await expect(page).toHaveURL(/\/shop\/prices$/)
-  await page.getByLabel('Currency').selectOption('CHF')
-  await page.getByLabel('Price 1: what it is for').fill('Deep scratch on the frame')
-  await page.getByLabel('Amount, in CHF').fill('35.50')
-  await page.getByLabel('What counts as ordinary wear').fill('Light scuffs on the tyres are ordinary wear.')
-  await page.getByRole('button', { name: 'Publish this price list' }).click()
-  await expect(page.getByText('Price list published.')).toBeVisible()
+  await publishPrices(page, 'CHF', 'Deep scratch on the frame\t35.50')
 
   await menu.getByRole('link', { name: 'Staff' }).click()
   await page.getByLabel('Their work email').fill('counter@shop.example')
@@ -84,12 +80,7 @@ test('an owner fills an empty shop with sample rentals, each marked as a sample'
   await expect(page.getByRole('listitem').filter({ hasText: 'Passkey 1' })).toBeVisible()
   await page.goto('/shop/prices')
   await page.getByRole('button', { name: 'Confirm with my passkey' }).click()
-  await page.getByLabel('Currency').selectOption('EUR')
-  await page.getByLabel('Price 1: what it is for').fill('Deep scratch on the frame')
-  await page.getByLabel('Amount, in EUR').fill('35')
-  await page.getByLabel('What counts as ordinary wear').fill('Light scuffs on the tyres are ordinary wear.')
-  await page.getByRole('button', { name: 'Publish this price list' }).click()
-  await expect(page.getByText('Price list published.')).toBeVisible()
+  await publishPrices(page, 'EUR', 'Deep scratch on the frame\t35')
 
   await page.goto('/shop')
   await page.getByRole('button', { name: 'Add sample rentals' }).click()

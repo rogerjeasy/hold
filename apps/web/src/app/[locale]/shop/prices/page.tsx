@@ -1,9 +1,12 @@
 import { amountText, money } from '@hold/domain'
-import { currentPriceList, inShop } from '@hold/db'
+import { currentPriceList, inShop, priceListVersions } from '@hold/db'
 import type { Metadata } from 'next'
-import { getTranslations } from 'next-intl/server'
+import { getMessages, getTranslations } from 'next-intl/server'
 import { readAccessToken } from '@/features/auth/session-cookies'
-import { PricesScreen } from '@/features/shop/prices-screen'
+import { PricesScreen } from '@/features/prices/prices-screen'
+import type { TermsMessages } from '@/features/prices/terms-preview'
+import { routing } from '@/i18n/routing'
+import type { Locale } from '@/i18n/routing'
 import { getServices } from '@/server/services'
 import { requireShop } from '@/server/shop-page'
 
@@ -12,29 +15,36 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('title'), robots: { index: false, follow: false } }
 }
 
+// The words a renter reads around the prices, in each language, for the editor's preview. Only these leave the server.
+async function previewTerms(): Promise<Record<Locale, TermsMessages>> {
+  const entries = await Promise.all(routing.locales.map(async (locale) => {
+    const { renter } = await getMessages({ locale })
+    return [locale, { prices: renter.prices, pricesLead: renter.pricesLead, wear: renter.wear, wearLead: renter.wearLead }] as const
+  }))
+  return Object.fromEntries(entries) as Record<Locale, TermsMessages>
+}
+
 export default async function Page() {
   const context = await requireShop()
   const { database, identity } = await getServices()
   const scope = { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId } as const
-  const [current, passkeys] = await Promise.all([inShop(database, scope, currentPriceList), identity.listPasskeys((await readAccessToken()) ?? '')])
+  const [loaded, passkeys, terms] = await Promise.all([
+    inShop(database, scope, async (transaction) => ({ current: await currentPriceList(transaction), versions: await priceListVersions(transaction) })),
+    identity.listPasskeys((await readAccessToken()) ?? ''),
+    previewTerms(),
+  ])
   const { currency, ownerApprovalThresholdCents } = context.shop
-  const editor = {
-    fixedCurrency: currency,
-    threshold: currency === null || ownerApprovalThresholdCents === null ? '' : amountText(money(ownerApprovalThresholdCents, currency)),
-    wearPolicy: current?.wearPolicy ?? '',
-    rows: (current?.entries ?? []).map((entry) => ({
-      description: entry.description,
-      category: entry.category,
-      amount: amountText(money(entry.amountCents, current?.currency ?? 'EUR')),
-    })),
-  }
   return (
     <PricesScreen
       shopName={context.shop.name}
-      current={current}
-      editor={editor}
+      shopId={context.shop.id}
+      current={loaded.current}
+      versions={loaded.versions}
+      fixedCurrency={currency}
+      threshold={currency === null || ownerApprovalThresholdCents === null ? '' : amountText(money(ownerApprovalThresholdCents, currency))}
       canPublish={context.role === 'owner' || context.role === 'manager'}
       gate={{ needed: context.passkeyNeeded, hasPasskey: passkeys.ok && passkeys.value.length > 0, email: context.person.email }}
+      previewTerms={terms}
     />
   )
 }

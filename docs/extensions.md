@@ -1376,6 +1376,28 @@ Page `/shop/decisions`, right after Today in the menu. Every record that waits o
 
 **Status, 28 October 2026.** Built: `features/decisions` in the web app and `decisionRecords` in `packages/db`. D1 to D5 pass in tests (`decision-records.test.ts`, `board.test.ts`, `decisions-screen.test.tsx`, `e2e/decisions.spec.ts`). The operations agent reads no sample rental, so a shop's samples bring two sample proposals of their own (`addSampleRentals`): a replacement hold for the hold near its end and an answer to a sample PayPal dispute, each with its detector's fixed reason and marked `simulated: 'yes'`. Approving one records the decision and carries nothing out (`decideProposal`), so no PayPal call is made with a sample's references. A demo raises its sample claims as the counter staff member, so the owner may decide the contested one.
 
+**The price list editor, on AG Grid**
+
+Page `/shop/prices`. The first thing a real shop asks is how its existing list gets in, and the rule that prices are published before a rental needs a face.
+
+- **A draft of version N plus one.** The version in force opens as a draft: an editable grid, a price a row, in the order renters read, dragged into order by a handle. Below `md`, a card per price.
+- **Pasted from a spreadsheet.** A list copied from a spreadsheet, a document or an email is read row by row: a header line left out, the amount found in any column and cleaned of signs, codes and thousands separators, the kind read from its name in English or the shop's language. A price it cannot read stays as written, marked, for the shop to fix.
+- **Every cell checked.** By publishing's own rules (`checkPriceRows` beside `checkPriceList` in `packages/domain`): a description missing, too long or repeated, an amount that is not money in the shop's currency or is zero. The problem shows under the cell in words. Publishing waits until none is left, and the server checks again.
+- **Undo.** Every change, a paste of forty rows as much as one cell, is a step that can be taken back and taken back again, by button or Ctrl or ⌘ with Z. The draft stays in the browser until it is published or discarded.
+- **What a renter reads.** The draft as the renter's own pages draw it, in the language chosen, beside the grid on a wide screen.
+- **Versions and what changed.** Every published version with how many open rentals were agreed to it, and what changed between any two of them or against the draft, entry by entry by code. A renter is held to the version they agreed to, never a later one.
+- **On AG Grid Community.** Its clipboard and undo for pasted rows are Enterprise features, so the paste and the history are Hold's own, plain functions with their own tests.
+
+**Done when**
+
+- **P1** A list pasted from a spreadsheet becomes rows of the draft, its header left out, each cell checked by the rules publishing applies.
+- **P2** Every change can be undone and redone, and publishing waits until no cell has a problem.
+- **P3** Publishing makes version N plus one, the versions list shows it in force, and the open rentals agreed to each version are counted.
+- **P4** The diff names what was added, removed and changed between two versions or against the draft.
+- **P5** The preview shows the draft in the renter's language, and the page fits every width and passes the accessibility checks in both themes.
+
+**Status, 29 October 2026.** Built: `features/prices` in the web app, `price-draft.ts` in `packages/domain`, `priceListVersions` in `packages/db`. P1 to P5 pass in tests (`price-draft.test.ts`, `paste.test.ts`, `history.test.ts`, `editor-model.test.ts`, `prices-screen.test.tsx`, `price-versions.test.ts`, `e2e/prices.spec.ts`).
+
 **The insights dashboard, on AG Studio**
 
 Page `/shop/insights`, for the owner and managers. Its data comes from one server route under `/api/reports`, which returns rows for the caller's shop only, shaped for their role.

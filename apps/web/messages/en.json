@@ -2068,6 +2068,80 @@
       "unknownRenter": "Renter not known yet",
       "loading": "Loading the calendar…",
       "loadFailed": "The calendar could not load. Reload the page, or find each rental under Rentals."
+    },
+    "priceEditor": {
+      "draftOf": "Draft of version {version}",
+      "noChanges": "No change from version {version} yet.",
+      "problems": "{count, plural, =0 {Ready to publish.} one {# cell to fix before publishing.} other {# cells to fix before publishing.}}",
+      "undo": "Undo",
+      "redo": "Redo",
+      "discard": "Discard the draft",
+      "restored": "Your unsaved draft was restored from this browser.",
+      "paste": {
+        "open": "Paste from a spreadsheet",
+        "label": "Paste your price list here",
+        "help": "Copy the rows from a spreadsheet, a document or an email and paste them here, one price per line: what it is for, its kind if you have one, and its price.",
+        "add": "Add these prices",
+        "added": "{count, plural, one {# price added} other {# prices added}}{skipped, plural, =0 {.} other {, the header line left out.}}",
+        "none": "No prices were found in what was pasted.",
+        "gridHint": "You can also paste straight onto the grid."
+      },
+      "grid": {
+        "label": "Prices in this draft",
+        "keys": "Enter edits a cell and Tab moves on. Drag a row by its handle to change the order renters read. Ctrl or ⌘ with Z takes back the last change."
+      },
+      "columns": {
+        "order": "Order",
+        "description": "What it is for",
+        "kind": "Kind",
+        "amount": "Amount, {currency}",
+        "remove": "Remove"
+      },
+      "remove": "Remove {description}",
+      "removeUnnamed": "Remove price {number}",
+      "problemsText": {
+        "description_missing": "Say what it is for",
+        "description_too_long": "Too long for one line",
+        "description_repeated": "Same as another price",
+        "amount_invalid": "Not an amount in {currency}",
+        "amount_zero": "Zero"
+      },
+      "preview": {
+        "title": "What a renter reads",
+        "lead": "This draft as a renter sees it before booking. Your descriptions stay in your words; the rest is in the renter’s language.",
+        "language": "Renter’s language",
+        "empty": "Prices appear here as you add them."
+      },
+      "versions": {
+        "title": "Versions",
+        "lead": "Each published version stays as it was. A renter is held to the version they agreed to at booking, never a later one.",
+        "version": "Version {version}",
+        "published": "Published {date}",
+        "prices": "{count, plural, one {# price} other {# prices}}",
+        "live": "{count, plural, =0 {No open rental agreed to it} one {# open rental agreed to it} other {# open rentals agreed to it}}",
+        "inForce": "In force",
+        "none": "Nothing is published yet. Your first version will appear here."
+      },
+      "diff": {
+        "title": "What changed",
+        "from": "From",
+        "to": "To",
+        "draft": "This draft",
+        "added": "Added",
+        "removed": "Removed",
+        "changed": "Changed",
+        "change": "from {from} to {to}",
+        "wearChanged": "The wear policy changed.",
+        "wearSame": "The wear policy is the same.",
+        "nothing": "No price changed.",
+        "unchanged": "{count, plural, =0 {} one {# price stays as it was.} other {# prices stay as they were.}}"
+      },
+      "languages": {
+        "en": "English",
+        "de": "Deutsch",
+        "es": "Español",
+        "fr": "Français"
+      }
     }
   },
   "emails": {

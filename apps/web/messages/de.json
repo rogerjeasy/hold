@@ -2068,6 +2068,80 @@
       "unknownRenter": "Kundschaft noch unbekannt",
       "loading": "Kalender wird geladen…",
       "loadFailed": "Der Kalender konnte nicht geladen werden. Laden Sie die Seite neu oder finden Sie jede Miete unter Mieten."
+    },
+    "priceEditor": {
+      "draftOf": "Entwurf von Version {version}",
+      "noChanges": "Noch keine Änderung gegenüber Version {version}.",
+      "problems": "{count, plural, =0 {Bereit zum Veröffentlichen.} one {# Zelle vor dem Veröffentlichen korrigieren.} other {# Zellen vor dem Veröffentlichen korrigieren.}}",
+      "undo": "Rückgängig",
+      "redo": "Wiederholen",
+      "discard": "Entwurf verwerfen",
+      "restored": "Dein ungespeicherter Entwurf wurde aus diesem Browser wiederhergestellt.",
+      "paste": {
+        "open": "Aus einer Tabelle einfügen",
+        "label": "Füge deine Preisliste hier ein",
+        "help": "Kopiere die Zeilen aus einer Tabelle, einem Dokument oder einer E-Mail und füge sie hier ein, ein Preis pro Zeile: wofür er gilt, seine Art, falls du eine hast, und sein Preis.",
+        "add": "Diese Preise hinzufügen",
+        "added": "{count, plural, one {# Preis hinzugefügt} other {# Preise hinzugefügt}}{skipped, plural, =0 {.} other {, die Kopfzeile ausgelassen.}}",
+        "none": "Im Eingefügten wurden keine Preise gefunden.",
+        "gridHint": "Du kannst auch direkt in die Tabelle einfügen."
+      },
+      "grid": {
+        "label": "Preise in diesem Entwurf",
+        "keys": "Enter bearbeitet eine Zelle, Tab geht weiter. Zieh eine Zeile am Griff, um die Reihenfolge für Mieter zu ändern. Strg oder ⌘ mit Z nimmt die letzte Änderung zurück."
+      },
+      "columns": {
+        "order": "Reihenfolge",
+        "description": "Wofür",
+        "kind": "Art",
+        "amount": "Betrag, {currency}",
+        "remove": "Entfernen"
+      },
+      "remove": "{description} entfernen",
+      "removeUnnamed": "Preis {number} entfernen",
+      "problemsText": {
+        "description_missing": "Sag, wofür er gilt",
+        "description_too_long": "Zu lang für eine Zeile",
+        "description_repeated": "Wie ein anderer Preis",
+        "amount_invalid": "Kein Betrag in {currency}",
+        "amount_zero": "Null"
+      },
+      "preview": {
+        "title": "Was ein Mieter liest",
+        "lead": "Dieser Entwurf so, wie ein Mieter ihn vor der Buchung sieht. Deine Beschreibungen bleiben in deinen Worten, der Rest in der Sprache des Mieters.",
+        "language": "Sprache des Mieters",
+        "empty": "Preise erscheinen hier, sobald du sie hinzufügst."
+      },
+      "versions": {
+        "title": "Versionen",
+        "lead": "Jede veröffentlichte Version bleibt, wie sie war. Ein Mieter ist an die Version gebunden, der er bei der Buchung zugestimmt hat, nie an eine spätere.",
+        "version": "Version {version}",
+        "published": "Veröffentlicht am {date}",
+        "prices": "{count, plural, one {# Preis} other {# Preise}}",
+        "live": "{count, plural, =0 {Keine offene Miete hat ihr zugestimmt} one {# offene Miete hat ihr zugestimmt} other {# offene Mieten haben ihr zugestimmt}}",
+        "inForce": "Gültig",
+        "none": "Noch nichts veröffentlicht. Deine erste Version erscheint hier."
+      },
+      "diff": {
+        "title": "Was sich geändert hat",
+        "from": "Von",
+        "to": "Zu",
+        "draft": "Dieser Entwurf",
+        "added": "Hinzugefügt",
+        "removed": "Entfernt",
+        "changed": "Geändert",
+        "change": "von {from} auf {to}",
+        "wearChanged": "Die Abnutzungsregel hat sich geändert.",
+        "wearSame": "Die Abnutzungsregel ist gleich.",
+        "nothing": "Kein Preis hat sich geändert.",
+        "unchanged": "{count, plural, =0 {} one {# Preis bleibt, wie er war.} other {# Preise bleiben, wie sie waren.}}"
+      },
+      "languages": {
+        "en": "English",
+        "de": "Deutsch",
+        "es": "Español",
+        "fr": "Français"
+      }
     }
   },
   "emails": {
