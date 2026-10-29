@@ -55,7 +55,7 @@ function queueOf(props: WebStackProps, queueName: string): sqs.IQueue {
 
 // What the running app may do, and no more: query the database as hold_app, read its secrets, keep each shop's PayPal
 // credentials and put a new owner in the owner group. Email goes out through the SMTP account, not SES.
-function instanceRole(stack: Stack, props: WebStackProps, gridLicence: secretsmanager.ISecret): iam.Role {
+function instanceRole(stack: Stack, props: WebStackProps, licences: readonly secretsmanager.ISecret[]): iam.Role {
   const role = new iam.Role(stack, 'InstanceRole', {
     roleName: name('web'),
     description: 'The Hold web app, as it runs on App Runner',
@@ -73,7 +73,7 @@ function instanceRole(stack: Stack, props: WebStackProps, gridLicence: secretsma
   role.addToPolicy(
     new iam.PolicyStatement({
       actions: ['secretsmanager:GetSecretValue'],
-      resources: [props.appUserSecret.secretArn, props.cookieKey.secretArn, props.renterLinkKey.secretArn, props.trustKey.secretArn, paypalCredentials, smtpLogin, gridLicence.secretArn],
+      resources: [props.appUserSecret.secretArn, props.cookieKey.secretArn, props.renterLinkKey.secretArn, props.trustKey.secretArn, paypalCredentials, smtpLogin, ...licences.map((licence) => licence.secretArn)],
     }),
   )
   role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:CreateSecret', 'secretsmanager:PutSecretValue', 'secretsmanager:TagResource'], resources: [paypalCredentials] }))
@@ -147,6 +147,12 @@ export function createWebStack(app: App, props: WebStackProps): WebResources {
     description: 'Hold: the AG Grid Enterprise licence key',
     removalPolicy: RemovalPolicy.RETAIN,
   })
+  // The AG Studio licence key, for the insights dashboard: a licence of its own, filled in the same way.
+  const studioLicence = new secretsmanager.Secret(stack, 'StudioLicence', {
+    secretName: secretName('web', 'ag-studio-licence'),
+    description: 'Hold: the AG Studio licence key',
+    removalPolicy: RemovalPolicy.RETAIN,
+  })
 
   const scaling = new apprunner.CfnAutoScalingConfiguration(stack, 'Scaling', {
     autoScalingConfigurationName: name('web'),
@@ -162,11 +168,11 @@ export function createWebStack(app: App, props: WebStackProps): WebResources {
       imageRepository: {
         imageRepositoryType: 'ECR',
         imageIdentifier: `${props.repository.repositoryUri}:${props.imageTag}`,
-        // The AG Grid licence key is read from its secret as the service starts, so it is in no file or setting.
-        imageConfiguration: { port: String(PORT), runtimeEnvironmentVariables: settings(props), runtimeEnvironmentSecrets: [{ name: 'HOLD_AG_GRID_LICENCE_KEY', value: gridLicence.secretArn }] },
+        // The AG Grid and AG Studio licence keys are read from their secrets as the service starts, so they are in no file or setting.
+        imageConfiguration: { port: String(PORT), runtimeEnvironmentVariables: settings(props), runtimeEnvironmentSecrets: [{ name: 'HOLD_AG_GRID_LICENCE_KEY', value: gridLicence.secretArn }, { name: 'HOLD_AG_STUDIO_LICENCE_KEY', value: studioLicence.secretArn }] },
       },
     },
-    instanceConfiguration: { cpu: '1 vCPU', memory: '2 GB', instanceRoleArn: instanceRole(stack, props, gridLicence).roleArn },
+    instanceConfiguration: { cpu: '1 vCPU', memory: '2 GB', instanceRoleArn: instanceRole(stack, props, [gridLicence, studioLicence]).roleArn },
     autoScalingConfigurationArn: scaling.attrAutoScalingConfigurationArn,
     healthCheckConfiguration: { protocol: 'TCP' },
   })

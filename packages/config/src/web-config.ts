@@ -10,6 +10,8 @@ const KEY_BYTES = 32
 // secret in the browser; it is kept out of the repository all the same, set locally in apps/web/.env.local and
 // deployed from Secrets Manager. Without it the grids still work, with AG Grid's watermark off localhost.
 const gridLicenceKey = z.string().min(1).max(1000).optional()
+// The AG Studio licence key, for the insights dashboard: a licence of its own, which the grids' key does not cover.
+const studioLicenceKey = z.string().min(1).max(1000).optional()
 
 const cookieKey = z
   .string()
@@ -68,6 +70,7 @@ const awsServices = z
     HOLD_EVIDENCE_BUCKET: z.string().min(3).optional(),
     HOLD_DISPLAY_BUCKET: z.string().min(3).optional(),
     HOLD_AG_GRID_LICENCE_KEY: gridLicenceKey,
+    HOLD_AG_STUDIO_LICENCE_KEY: studioLicenceKey,
   })
   .refine((value) => value.HOLD_ENVIRONMENT !== 'production' || value.HOLD_EXECUTIONS_QUEUE_URL !== undefined, {
     path: ['HOLD_EXECUTIONS_QUEUE_URL'],
@@ -120,6 +123,7 @@ const fakeServices = z.object({
   // The end-to-end tests of the open scorecard start a server that records a fixture run of made-up pairs.
   HOLD_EVAL_FIXTURE: z.literal('on').optional(),
   HOLD_AG_GRID_LICENCE_KEY: gridLicenceKey,
+  HOLD_AG_STUDIO_LICENCE_KEY: studioLicenceKey,
 })
 
 export type WebConfig =
@@ -141,6 +145,7 @@ export type WebConfig =
       readonly queues: Readonly<Record<'executions' | 'paypal-events', string> & Partial<Record<'media' | 'comparisons' | 'evidence' | 'negotiations', string>>> | undefined
       readonly photoBuckets: { readonly evidence: string; readonly display: string } | undefined
       readonly gridLicenceKey: string | undefined
+      readonly studioLicenceKey: string | undefined
     }
   | {
       readonly environment: 'test'
@@ -153,13 +158,14 @@ export type WebConfig =
       readonly paypalMode: 'sandbox'
       readonly evalFixture: boolean
       readonly gridLicenceKey: string | undefined
+      readonly studioLicenceKey: string | undefined
     }
 
 export function loadWebConfig(environment: Readonly<Record<string, string | undefined>>): WebConfig {
   if (environment['HOLD_ENVIRONMENT'] === 'test') {
     const parsed = fakeServices.parse(environment)
     const key = { kind: 'value', key: parsed.HOLD_COOKIE_KEY } as const
-    return { environment: 'test', services: 'fake', cookieKey: key, renterLinkKey: key, trustKey: key, credentialKey: { kind: 'local' }, publicUrl: parsed.HOLD_PUBLIC_URL, paypalMode: 'sandbox', evalFixture: parsed.HOLD_EVAL_FIXTURE === 'on', gridLicenceKey: parsed.HOLD_AG_GRID_LICENCE_KEY }
+    return { environment: 'test', services: 'fake', cookieKey: key, renterLinkKey: key, trustKey: key, credentialKey: { kind: 'local' }, publicUrl: parsed.HOLD_PUBLIC_URL, paypalMode: 'sandbox', evalFixture: parsed.HOLD_EVAL_FIXTURE === 'on', gridLicenceKey: parsed.HOLD_AG_GRID_LICENCE_KEY, studioLicenceKey: parsed.HOLD_AG_STUDIO_LICENCE_KEY }
   }
   const parsed = awsServices.safeParse(environment)
   if (!parsed.success) {
@@ -207,5 +213,6 @@ export function loadWebConfig(environment: Readonly<Record<string, string | unde
           },
     photoBuckets: value.HOLD_EVIDENCE_BUCKET === undefined || value.HOLD_DISPLAY_BUCKET === undefined ? undefined : { evidence: value.HOLD_EVIDENCE_BUCKET, display: value.HOLD_DISPLAY_BUCKET },
     gridLicenceKey: value.HOLD_AG_GRID_LICENCE_KEY,
+    studioLicenceKey: value.HOLD_AG_STUDIO_LICENCE_KEY,
   }
 }

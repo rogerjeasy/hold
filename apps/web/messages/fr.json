@@ -1243,7 +1243,8 @@
       "trust": "Échelle de confiance",
       "settlement": "Représentant de règlement",
       "queue": "File du matin",
-      "money": "Argent"
+      "money": "Argent",
+      "insights": "Analyses"
     },
     "setup": {
       "title": "Préparez votre boutique",
@@ -3738,5 +3739,117 @@
       "noAudit": "Rien n’est encore inscrit pour cette location.",
       "openRental": "Ouvrir la location"
     }
+  },
+  "insights": {
+    "title": "Analyses",
+    "lead": "Où est l’argent de la boutique, ce que chaque type d’article coûte en dommages et ce qui est revenu, à partir des propres enregistrements de Hold. Demandez à l’agent d’analyse d’ajouter ou de modifier un graphique : il lit ces tables et arrange le tableau de bord, et ne modifie aucun enregistrement.",
+    "onlyDeciders": "Seul le propriétaire ou un responsable ouvre le tableau de bord d’analyse.",
+    "empty": "Rien à montrer pour l’instant. Le tableau de bord se remplit à mesure que les locations encaissent des frais, posent des blocages et se règlent.",
+    "narrow": "Le tableau de bord demande un écran plus large. Voici les chiffres avec lesquels il s’ouvre.",
+    "loading": "Chargement du tableau de bord…",
+    "loadFailed": "Le tableau de bord n’a pas pu se charger. Rechargez la page pour réessayer.",
+    "region": "Tableau de bord d’analyse",
+    "starters": {
+      "cost": "Quel type d’article a coûté le plus en dommages cette année ?",
+      "monthly": "Montre en courbe ce qui est allé à la boutique chaque mois.",
+      "fastest": "Quels articles s’usent le plus vite, et combien de fois sont-ils sortis ?"
+    },
+    "starterLabels": {
+      "cost": "Dommages par type",
+      "monthly": "Argent par mois",
+      "fastest": "Usure la plus rapide"
+    },
+    "report": {
+      "description": "Les propres enregistrements d’un loueur dans Hold. La table de l’argent a une ligne par mouvement d’argent tel que PayPal l’a enregistré : frais et encaissements pour la boutique, libérations et remboursements aux clients, blocages posés et renouvelés. Chaque ligne d’argent appartient à une location ; la table des locations dit où est maintenant l’argent de chaque location et si ses vérifications concordent. La table des articles a une ligne par article avec ses locations, ses jours dehors cette année, les dommages trouvés, chiffrés et récupérés, et s’il s’use le plus vite de son type. Les montants sont dans la devise de la boutique. Aucun client n’est nommé.",
+      "calendar": "Calendrier",
+      "tables": {
+        "money": "Argent",
+        "rentals": "Locations",
+        "items": "Articles",
+        "holds": "Blocages",
+        "lives": "Blocages en cours"
+      },
+      "fields": {
+        "line_id": "Ligne",
+        "rental_id": "Location",
+        "occurred_at": "Date",
+        "kind": "Ce qui s’est passé",
+        "flow": "Où est allé l’argent",
+        "amount": "Montant",
+        "to_shop": "À la boutique",
+        "back": "Rendu au client",
+        "starts_at": "Début de la location",
+        "where": "Où est l’argent",
+        "held_now": "Bloqué en ce moment",
+        "check": "Vérifications",
+        "sample": "Exemple",
+        "item_id": "ID de l’article",
+        "item_type": "Type d’article",
+        "item": "Article",
+        "rentals": "Locations",
+        "days_out": "Jours dehors",
+        "damage_found": "Dommages trouvés",
+        "priced": "Dommages chiffrés",
+        "recovered": "Récupéré",
+        "open_marks": "Marques ouvertes",
+        "wearing_fastest": "S’use le plus vite",
+        "reserved": "Bloqué",
+        "captured": "Encaissé",
+        "released": "Libéré",
+        "trust_rung": "Palier de confiance",
+        "ordinary": "Blocage habituel",
+        "lowered": "Réduit de",
+        "day": "Jour",
+        "days": "Jours",
+        "assured_days": "Jours assurés",
+        "standing": "État",
+        "valid_until": "Valable jusqu’au"
+      },
+      "measures": {
+        "heldNow": "Bloqué en ce moment",
+        "toShop": "À la boutique",
+        "backToRenters": "Rendu aux clients",
+        "damagePriced": "Dommages chiffrés",
+        "recovered": "Récupéré",
+        "holdReserved": "Blocage donné",
+        "holdOrdinary": "Blocage habituel"
+      },
+      "widgets": {
+        "heldNow": "Bloqué sur les comptes des clients",
+        "toShop": "À la boutique",
+        "back": "Rendu aux clients",
+        "byMonth": "Argent par mois",
+        "byType": "Dommages chiffrés et récupérés, par type d’article",
+        "items": "Tous les articles",
+        "trust": "Blocages par palier de confiance",
+        "life": "Chaque blocage sur ses 29 jours",
+        "waterfall": "Bloqué, encaissé, libéré"
+      }
+    },
+    "whereNone": "Pas encore d’argent",
+    "yes": "Oui",
+    "no": "Non",
+    "custom": {
+      "rung": "Palier {rung}",
+      "noRung": "Aucun palier",
+      "standing": {
+        "assured": "Assuré",
+        "valid": "Valable",
+        "ending": "Bientôt fini"
+      },
+      "lifeLine": "Jour {day} sur {days} · {standing} · {amount} bloqués",
+      "steps": {
+        "reserved": "Bloqué",
+        "captured": "Encaissé",
+        "released": "Libéré aux clients",
+        "held": "Encore bloqué"
+      },
+      "withinHold": "Encaissé et libéré restent dans ce qui a été bloqué.",
+      "beyondHold": "Encaissé et libéré dépassent ce qui a été bloqué."
+    },
+    "saving": "Enregistrement de votre tableau de bord…",
+    "saved": "Votre tableau de bord est enregistré pour votre prochaine visite.",
+    "saveFailed": "Votre tableau de bord n’a pas pu être enregistré. Vos changements restent sur cette page.",
+    "reset": "Revenir au premier tableau de bord"
   }
 }

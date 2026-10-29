@@ -74,7 +74,7 @@ export type ShopActionResult<Output> =
   | { readonly ok: false; readonly failure: ShopActionFailure; readonly fields?: readonly string[] }
   | { readonly ok: false; readonly failure: 'refused'; readonly reason: string }
 
-export type ShopActionSpec<Input> = {
+export type ShopActionSpec<Input, Output = unknown> = {
   // Named in the audit line.
   readonly name: string
   readonly roles: readonly StaffRole[]
@@ -83,6 +83,8 @@ export type ShopActionSpec<Input> = {
   readonly input: z.ZodType<Input>
   // A limit on how often a shop may ask, for work that is costly to repeat, counted before the transaction opens.
   readonly rateLimit?: RateLimit
+  // What the audit line says about the outcome beyond its name, such as the model an agent's turn asked.
+  readonly auditDetail?: (output: Output) => Record<string, unknown>
 }
 
 // Work handed on once the change is committed, such as a message to the worker. Its outbox row is written with the
@@ -97,7 +99,7 @@ export function isShopAction(value: unknown): boolean {
 }
 
 export function shopAction<Input, Output>(
-  spec: ShopActionSpec<Input>,
+  spec: ShopActionSpec<Input, Output>,
   act: (context: ShopContext, input: Input, transaction: Transaction) => Promise<Output | Refusal>,
   afterCommit?: AfterCommit<Output>,
 ): (previous: unknown, data: FormData) => Promise<ShopActionResult<Output>> {
@@ -115,7 +117,7 @@ export function shopAction<Input, Output>(
     const result = await actInScope(
       scope,
       (transaction) => act(context, parsed.data, transaction),
-      () => ({ actorKind: 'person', actorId: context.person.userId, action: spec.name, detail: { factor: context.factor } }),
+      (output) => ({ actorKind: 'person', actorId: context.person.userId, action: spec.name, detail: { factor: context.factor, ...spec.auditDetail?.(output) } }),
     )
     if (result.ok && afterCommit !== undefined) {
       try {

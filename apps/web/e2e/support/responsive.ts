@@ -52,6 +52,8 @@ export async function expectNoClippedText(page: Page): Promise<void> {
         const box = element.getBoundingClientRect()
         // Text kept for screen readers only is squeezed into one pixel on purpose.
         if (style.display === 'inline' || box.width <= 1 || box.height <= 1) return false
+        // An element with no text has none to clip, such as a spinning icon whose corners turn past its box.
+        if (element.textContent.trim() === '') return false
         // Text cut short with an ellipsis is truncated on purpose (AGENTS.md section 9), such as a long shop name in
         // the shop's menu, whose whole name the menu's label and list give.
         if (style.textOverflow === 'ellipsis' && style.overflowX === 'hidden') return false

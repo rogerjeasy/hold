@@ -218,6 +218,13 @@
       "when": 1793213422374,
       "tag": "0030_eval_cases",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1793266539080,
+      "tag": "0031_insights_dashboards",
+      "breakpoints": true
     }
   ]
 }

@@ -7,7 +7,7 @@ import { filterCounts, ledgerRows, visibleRows } from './ledger-rows'
 
 const rental = (id: string, overrides: Partial<LedgerRental> = {}): LedgerRental => ({
   rentalId: id, renterName: `Renter ${id}`, startsAt: new Date('2026-09-30T08:00:00Z'), endsAt: new Date('2026-10-02T18:00:00Z'), simulated: false, currency: 'EUR',
-  reservedCents: 250_00, holdState: 'captured', claimCents: 35_00, paypalDiffers: false, audit: [], ...overrides,
+  reservedCents: 250_00, holdState: 'captured', trustRung: null, ordinaryCents: null, claimCents: 35_00, paypalDiffers: false, audit: [], ...overrides,
 })
 const line = (id: string, rentalId: string, kind: LedgerRecord['kind'], amountCents: number, occurredAt: string): LedgerRecord => ({
   id, rentalId, kind, currency: 'EUR', amountCents, paypalFeeCents: null, netCents: null, paypalReference: `REF-${id}`, occurredAt: new Date(occurredAt), recordedAt: new Date(occurredAt), event: null, execution: null,

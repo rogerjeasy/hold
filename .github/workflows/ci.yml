@@ -49,9 +49,10 @@ jobs:
       # The flows that sign people in, move money or guard access. The full suite, with every page at every width,
       # runs locally with pnpm test:e2e (AGENTS.md section 2).
       - run: pnpm test:e2e:key
-        # Without the key AG Grid writes its licence notice to the console, which fails every test of a grid.
+        # Without their keys AG Grid and AG Studio write a licence notice to the console, which fails every test of them.
         env:
           HOLD_AG_GRID_LICENCE_KEY: ${{ secrets.AG_GRID_LICENCE_KEY }}
+          HOLD_AG_STUDIO_LICENCE_KEY: ${{ secrets.AG_STUDIO_LICENCE_KEY }}
       - name: Keep the report of a failed run
         if: failure()
         uses: actions/upload-artifact@v4

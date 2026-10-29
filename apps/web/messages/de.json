@@ -1243,7 +1243,8 @@
       "trust": "Vertrauensstufen",
       "settlement": "Vergleichsvertreter",
       "queue": "Morgenliste",
-      "money": "Geld"
+      "money": "Geld",
+      "insights": "Einblicke"
     },
     "setup": {
       "title": "Richten Sie Ihren Verleih ein",
@@ -3738,5 +3739,117 @@
       "noAudit": "Zu dieser Miete ist noch nichts eingetragen.",
       "openRental": "Miete öffnen"
     }
+  },
+  "insights": {
+    "title": "Einblicke",
+    "lead": "Wo das Geld des Geschäfts ist, was jede Art Artikel an Schäden kostet und was zurückkam, aus Holds eigenen Aufzeichnungen. Bitte den Einblick-Agenten, ein Diagramm hinzuzufügen oder zu ändern: Er liest diese Tabellen und ordnet das Dashboard, und er ändert keine Aufzeichnung.",
+    "onlyDeciders": "Nur der Inhaber oder eine Leitung öffnet das Einblick-Dashboard.",
+    "empty": "Noch nichts zu zeigen. Das Dashboard füllt sich, sobald Mieten Gebühren einnehmen, Reservierungen setzen und abrechnen.",
+    "narrow": "Das Dashboard braucht einen breiteren Bildschirm. Das sind die Zahlen, mit denen es öffnet.",
+    "loading": "Das Dashboard wird geladen…",
+    "loadFailed": "Das Dashboard konnte nicht geladen werden. Lade die Seite neu, um es noch einmal zu versuchen.",
+    "region": "Einblick-Dashboard",
+    "starters": {
+      "cost": "Welche Artikelart hat dieses Jahr die meisten Schäden gekostet?",
+      "monthly": "Zeig als Liniendiagramm, was jeden Monat an das Geschäft ging.",
+      "fastest": "Welche Artikel nutzen sich am schnellsten ab, und wie oft waren sie unterwegs?"
+    },
+    "starterLabels": {
+      "cost": "Schäden je Art",
+      "monthly": "Geld je Monat",
+      "fastest": "Schnellste Abnutzung"
+    },
+    "report": {
+      "description": "Die eigenen Aufzeichnungen eines Verleihs aus Hold. Die Geldtabelle hat eine Zeile je Geldbewegung, wie PayPal sie verbucht hat: Mietgebühren und Einzüge an das Geschäft, Freigaben und Erstattungen an Mieter, gesetzte und erneuerte Reservierungen. Jede Geldzeile gehört zu einer Miete; die Mietentabelle sagt, wo das Geld jeder Miete jetzt ist und ob ihre Prüfungen übereinstimmen. Die Artikeltabelle hat eine Zeile je Artikel mit Mieten, Tagen unterwegs dieses Jahr, gefundenen, bepreisten und eingenommenen Schäden und ob er sich in seiner Art am schnellsten abnutzt. Beträge sind in der Währung des Geschäfts. Kein Mieter wird genannt.",
+      "calendar": "Kalender",
+      "tables": {
+        "money": "Geld",
+        "rentals": "Mieten",
+        "items": "Artikel",
+        "holds": "Reservierungen",
+        "lives": "Laufende Reservierungen"
+      },
+      "fields": {
+        "line_id": "Zeile",
+        "rental_id": "Miete",
+        "occurred_at": "Datum",
+        "kind": "Was geschah",
+        "flow": "Wohin das Geld ging",
+        "amount": "Betrag",
+        "to_shop": "An das Geschäft",
+        "back": "Zurück an den Mieter",
+        "starts_at": "Mietbeginn",
+        "where": "Wo das Geld ist",
+        "held_now": "Jetzt reserviert",
+        "check": "Prüfungen",
+        "sample": "Beispiel",
+        "item_id": "Artikel-ID",
+        "item_type": "Artikelart",
+        "item": "Artikel",
+        "rentals": "Mieten",
+        "days_out": "Tage unterwegs",
+        "damage_found": "Gefundene Schäden",
+        "priced": "Bepreiste Schäden",
+        "recovered": "Eingenommen",
+        "open_marks": "Offene Spuren",
+        "wearing_fastest": "Nutzt sich am schnellsten ab",
+        "reserved": "Reserviert",
+        "captured": "Eingezogen",
+        "released": "Freigegeben",
+        "trust_rung": "Vertrauensstufe",
+        "ordinary": "Übliche Reservierung",
+        "lowered": "Gesenkt um",
+        "day": "Tag",
+        "days": "Tage",
+        "assured_days": "Gesicherte Tage",
+        "standing": "Stand",
+        "valid_until": "Gültig bis"
+      },
+      "measures": {
+        "heldNow": "Jetzt reserviert",
+        "toShop": "An das Geschäft",
+        "backToRenters": "Zurück an Mieter",
+        "damagePriced": "Bepreiste Schäden",
+        "recovered": "Eingenommen",
+        "holdReserved": "Gegebene Reservierung",
+        "holdOrdinary": "Übliche Reservierung"
+      },
+      "widgets": {
+        "heldNow": "Jetzt auf Mieterkonten reserviert",
+        "toShop": "An das Geschäft",
+        "back": "Zurück an Mieter",
+        "byMonth": "Geld je Monat",
+        "byType": "Bepreiste und eingenommene Schäden je Artikelart",
+        "items": "Alle Artikel",
+        "trust": "Reservierungen je Vertrauensstufe",
+        "life": "Jede Reservierung auf ihren 29 Tagen",
+        "waterfall": "Reserviert, eingezogen, freigegeben"
+      }
+    },
+    "whereNone": "Noch kein Geld",
+    "yes": "Ja",
+    "no": "Nein",
+    "custom": {
+      "rung": "Stufe {rung}",
+      "noRung": "Keine Stufe",
+      "standing": {
+        "assured": "Gesichert",
+        "valid": "Gültig",
+        "ending": "Endet bald"
+      },
+      "lifeLine": "Tag {day} von {days} · {standing} · {amount} reserviert",
+      "steps": {
+        "reserved": "Reserviert",
+        "captured": "Eingezogen",
+        "released": "An Mieter freigegeben",
+        "held": "Noch reserviert"
+      },
+      "withinHold": "Eingezogen und freigegeben bleiben innerhalb des Reservierten.",
+      "beyondHold": "Eingezogen und freigegeben gehen über das Reservierte hinaus."
+    },
+    "saving": "Dein Dashboard wird gespeichert…",
+    "saved": "Dein Dashboard ist für deinen nächsten Besuch gespeichert.",
+    "saveFailed": "Dein Dashboard konnte nicht gespeichert werden. Deine Änderungen bleiben auf dieser Seite.",
+    "reset": "Zurück zum ersten Dashboard"
   }
 }

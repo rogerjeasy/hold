@@ -93,6 +93,13 @@ describe('loadWebConfig', () => {
     expect(loadWebConfig(AWS)).toMatchObject({ gridLicenceKey: undefined })
     expect(() => loadWebConfig({ ...AWS, HOLD_AG_GRID_LICENCE_KEY: '' })).toThrow()
   })
+  it('hands the AG Studio licence key to the insights dashboard in every environment, apart from the grids’ key', () => {
+    const licence = '[TRIAL]_this_{AG_Studio_Pro}_key_[03C]_MTc5NzEyMDAwMDAwMA==0123456789abcdef'
+    expect(loadWebConfig({ ...AWS, HOLD_AG_STUDIO_LICENCE_KEY: licence })).toMatchObject({ studioLicenceKey: licence, gridLicenceKey: undefined })
+    expect(loadWebConfig({ HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: KEY, HOLD_AG_STUDIO_LICENCE_KEY: licence })).toMatchObject({ studioLicenceKey: licence })
+    expect(loadWebConfig(AWS)).toMatchObject({ studioLicenceKey: undefined })
+    expect(() => loadWebConfig({ ...AWS, HOLD_AG_STUDIO_LICENCE_KEY: '' })).toThrow()
+  })
   it('records the open scorecard’s fixture run only in the test environment, and only when asked', () => {
     expect(loadWebConfig({ HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: KEY })).toMatchObject({ evalFixture: false })
     expect(loadWebConfig({ HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: KEY, HOLD_EVAL_FIXTURE: 'on' })).toMatchObject({ evalFixture: true })

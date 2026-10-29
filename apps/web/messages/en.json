@@ -1243,7 +1243,8 @@
       "trust": "Trust ladder",
       "settlement": "Settlement advocate",
       "queue": "Morning queue",
-      "money": "Money"
+      "money": "Money",
+      "insights": "Insights"
     },
     "setup": {
       "title": "Set up your shop",
@@ -3738,5 +3739,117 @@
       "noAudit": "Nothing recorded about this rental yet.",
       "openRental": "Open the rental"
     }
+  },
+  "insights": {
+    "title": "Insights",
+    "lead": "Where the shop’s money is, what each kind of item costs in damage, and what came back, built from Hold’s own records. Ask the insights agent to add or change a chart: it reads these tables and arranges the dashboard, and it changes no record.",
+    "onlyDeciders": "Only the owner or a manager opens the insights dashboard.",
+    "empty": "Nothing to show yet. The dashboard fills as rentals take fees, place holds and settle.",
+    "narrow": "The dashboard needs a wider screen. These are the figures it opens with.",
+    "loading": "Loading the dashboard…",
+    "loadFailed": "The dashboard could not be loaded. Reload the page to try again.",
+    "region": "Insights dashboard",
+    "starters": {
+      "cost": "Which item type cost the most in damage this year?",
+      "monthly": "Show what went to the shop each month as a line chart.",
+      "fastest": "Which items are wearing fastest, and how often were they out?"
+    },
+    "starterLabels": {
+      "cost": "Damage by type",
+      "monthly": "Money by month",
+      "fastest": "Wearing fastest"
+    },
+    "report": {
+      "description": "A rental shop’s own records from Hold. The money table has one row per movement of money as PayPal recorded it: rental fees and captures to the shop, releases and refunds back to renters, holds placed and renewed. Each money row belongs to a rental; the rentals table says where each rental’s money is now and whether its checks agree. The items table has one row per item with its rentals, days out this year, damage found, damage priced and recovered, and whether it is wearing fastest in its type. Amounts are in the shop’s currency. No renter is named.",
+      "calendar": "Calendar",
+      "tables": {
+        "money": "Money",
+        "rentals": "Rentals",
+        "items": "Items",
+        "holds": "Holds",
+        "lives": "Holds now"
+      },
+      "fields": {
+        "line_id": "Line",
+        "rental_id": "Rental",
+        "occurred_at": "Date",
+        "kind": "What happened",
+        "flow": "Where the money went",
+        "amount": "Amount",
+        "to_shop": "To the shop",
+        "back": "Back to the renter",
+        "starts_at": "Rental starts",
+        "where": "Where the money is",
+        "held_now": "Held now",
+        "check": "Checks",
+        "sample": "Sample",
+        "item_id": "Item ID",
+        "item_type": "Item type",
+        "item": "Item",
+        "rentals": "Rentals",
+        "days_out": "Days out",
+        "damage_found": "Damage found",
+        "priced": "Damage priced",
+        "recovered": "Recovered",
+        "open_marks": "Open marks",
+        "wearing_fastest": "Wearing fastest",
+        "reserved": "Reserved",
+        "captured": "Captured",
+        "released": "Released",
+        "trust_rung": "Trust rung",
+        "ordinary": "Ordinary hold",
+        "lowered": "Lowered by",
+        "day": "Day",
+        "days": "Days",
+        "assured_days": "Assured days",
+        "standing": "Standing",
+        "valid_until": "Valid until"
+      },
+      "measures": {
+        "heldNow": "Held now",
+        "toShop": "To the shop",
+        "backToRenters": "Back to renters",
+        "damagePriced": "Damage priced",
+        "recovered": "Recovered",
+        "holdReserved": "Hold given",
+        "holdOrdinary": "Ordinary hold"
+      },
+      "widgets": {
+        "heldNow": "Held on renters’ accounts now",
+        "toShop": "To the shop",
+        "back": "Back to renters",
+        "byMonth": "Money by month",
+        "byType": "Damage priced and recovered, by item type",
+        "items": "Every item",
+        "trust": "Holds by trust rung",
+        "life": "Each hold on its 29 days",
+        "waterfall": "Reserved, captured, released"
+      }
+    },
+    "whereNone": "No money yet",
+    "yes": "Yes",
+    "no": "No",
+    "custom": {
+      "rung": "Rung {rung}",
+      "noRung": "No rung",
+      "standing": {
+        "assured": "Assured",
+        "valid": "Valid",
+        "ending": "Ending"
+      },
+      "lifeLine": "Day {day} of {days} · {standing} · {amount} held",
+      "steps": {
+        "reserved": "Reserved",
+        "captured": "Captured",
+        "released": "Released to renters",
+        "held": "Still held"
+      },
+      "withinHold": "Captured and released stay within what was reserved.",
+      "beyondHold": "Captured and released go beyond what was reserved."
+    },
+    "saving": "Saving your dashboard…",
+    "saved": "Your dashboard is saved for your next visit.",
+    "saveFailed": "Your dashboard could not be saved. Your changes stay on this page.",
+    "reset": "Back to the first dashboard"
   }
 }

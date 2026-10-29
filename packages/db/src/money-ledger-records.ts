@@ -39,6 +39,9 @@ export type LedgerRental = {
   readonly currency: string
   readonly reservedCents: number | null
   readonly holdState: HoldState | null
+  // The rung of the shop's trust ladder that lowered the hold, and the hold the renter agreed to before it did.
+  readonly trustRung: number | null
+  readonly ordinaryCents: number | null
   // The claim's total once a person approved it.
   readonly claimCents: number | null
   readonly paypalDiffers: boolean
@@ -103,7 +106,7 @@ export async function moneyLedgerRecords(transaction: Transaction): Promise<Mone
   for (const execution of sent) for (const id of Object.values(execution.resources)) executionOf.set(id, { action: execution.action, idempotencyKey: execution.idempotencyKey, attempts: execution.attempts })
 
   const rentalRows = await transaction
-    .select({ rentalId: rentals.id, renterName: renters.name, startsAt: rentals.startsAt, endsAt: rentals.endsAt, simulated: rentals.simulated, currency: rentals.currency, holdId: holds.id, reservedCents: holds.reservedCents, holdState: holds.state, claimId: claims.id, claimState: claims.state, claimCents: claims.totalCents })
+    .select({ rentalId: rentals.id, renterName: renters.name, startsAt: rentals.startsAt, endsAt: rentals.endsAt, simulated: rentals.simulated, currency: rentals.currency, holdId: holds.id, reservedCents: holds.reservedCents, holdState: holds.state, trustRung: holds.trustRung, ordinaryCents: holds.ordinaryCents, claimId: claims.id, claimState: claims.state, claimCents: claims.totalCents })
     .from(rentals)
     .leftJoin(renters, eq(renters.id, rentals.renterId))
     .leftJoin(holds, eq(holds.rentalId, rentals.id))
@@ -135,6 +138,8 @@ export async function moneyLedgerRecords(transaction: Transaction): Promise<Mone
         currency: rental.currency,
         reservedCents: rental.reservedCents,
         holdState: rental.holdState,
+        trustRung: rental.trustRung,
+        ordinaryCents: rental.ordinaryCents,
         claimCents: rental.claimState === null || UNAPPROVED.includes(rental.claimState) ? null : rental.claimCents,
         paypalDiffers: differs.has(rental.rentalId),
         audit: audit.filter((line) => line.subjectId !== null && subjects.includes(line.subjectId)).map(({ action, actorKind, at }) => ({ action, actorKind, at })),

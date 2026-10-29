@@ -471,6 +471,14 @@ describe('the web app', () => {
     expect(instancePolicy()).toContain('GridLicence')
   })
 
+  it('takes the AG Studio licence key from a secret of its own when it starts, never as a plain setting', () => {
+    const secrets = (service()['SourceConfiguration'] as { ImageRepository: { ImageConfiguration: { RuntimeEnvironmentSecrets: Variable[] } } }).ImageRepository.ImageConfiguration.RuntimeEnvironmentSecrets
+    web.hasResourceProperties('AWS::SecretsManager::Secret', { Name: 'hold/web/ag-studio-licence' })
+    expect(JSON.stringify(secrets.find((secret) => secret.Name === 'HOLD_AG_STUDIO_LICENCE_KEY')?.Value)).toContain('StudioLicence')
+    expect(variables().map((variable) => variable.Name)).not.toContain('HOLD_AG_STUDIO_LICENCE_KEY')
+    expect(instancePolicy()).toContain('StudioLicence')
+  })
+
   // Each judge's demo gets accounts of its own (architecture.md section 20.3). The app may create a user, never set a
   // password with administrator rights, so it cannot change an existing person's.
   it('turns demo sessions on, lets the app create a demo’s users in Hold’s pool, and never set a password', () => {

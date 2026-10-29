@@ -5,7 +5,8 @@ import { moneyLedgerRecords } from './money-ledger-records.ts'
 import type { MoneyLedgerRecords } from './money-ledger-records.ts'
 import { publishPriceList } from './price-list-repository.ts'
 import { addSampleRentals } from './sample-rentals.ts'
-import { executions, paypalAccounts, paypalEvents, shopExceptions } from './schema/index.ts'
+import { eq } from 'drizzle-orm'
+import { executions, holds, paypalAccounts, paypalEvents, shopExceptions } from './schema/index.ts'
 import { inShop } from './scope.ts'
 import type { Scope } from './scope.ts'
 import { createTestDatabase } from './testing/test-database.ts'
@@ -98,6 +99,15 @@ describe('the records the money ledger reads', () => {
     expect((await read(shop)).rentals.find((each) => each.rentalId === rental.rentalId)?.paypalDiffers).toBe(true)
     await database.insert(shopExceptions).values({ shopId: shop.shopId, kind: 'reconciliation_difference', subjectKind: 'hold', subjectId: 'other', rentalId: capturedRental(records), fingerprint: 'difference:resolved', detectedAt: NOW, resolvedAt: NOW })
     expect((await read(shop)).rentals.find((each) => each.rentalId === capturedRental(records))?.paypalDiffers).toBe(false)
+  })
+
+  it('gives each rental the trust rung its hold was lowered by, and the hold the renter would otherwise have given', async () => {
+    const records = await read(shop)
+    const rental = records.rentals.find((each) => each.holdState === 'placed')
+    if (rental === undefined) throw new Error('No placed hold.')
+    expect(rental).toMatchObject({ trustRung: null, ordinaryCents: null })
+    await database.update(holds).set({ trustRung: 2, ordinaryCents: (rental.reservedCents ?? 0) + 50_00 }).where(eq(holds.rentalId, rental.rentalId))
+    expect((await read(shop)).rentals.find((each) => each.rentalId === rental.rentalId)).toMatchObject({ trustRung: 2, ordinaryCents: (rental.reservedCents ?? 0) + 50_00 })
   })
 
   it('gives each rental its audit trail, oldest first', async () => {

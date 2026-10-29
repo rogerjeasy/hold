@@ -196,6 +196,9 @@ importers:
       '@bryntum/scheduler':
         specifier: npm:@bryntum/scheduler-trial@7.3.7
         version: '@bryntum/scheduler-trial@7.3.7'
+      '@hold/agent':
+        specifier: workspace:*
+        version: link:../../packages/agent
       '@hold/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -244,6 +247,9 @@ importers:
       '@techstark/opencv-js':
         specifier: 4.12.0-release.1
         version: 4.12.0-release.1
+      ag-charts-community:
+        specifier: 14.2.0
+        version: 14.2.0
       ag-grid-community:
         specifier: 36.2.0
         version: 36.2.0
@@ -253,6 +259,9 @@ importers:
       ag-grid-react:
         specifier: 36.2.0
         version: 36.2.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      ag-studio:
+        specifier: 3.0.0
+        version: 3.0.0
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -440,7 +449,20 @@ importers:
         specifier: ^2.1145.0
         version: 2.1145.0
 
-  packages/agent: {}
+  packages/agent:
+    dependencies:
+      '@anthropic-ai/bedrock-sdk':
+        specifier: ^0.34.4
+        version: 0.34.4(zod@4.6.7)
+      '@anthropic-ai/sdk':
+        specifier: ^0.133.0
+        version: 0.133.0(zod@4.6.7)
+      '@hold/domain':
+        specifier: workspace:*
+        version: link:../domain
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
 
   packages/auth:
     dependencies:
@@ -3520,6 +3542,9 @@ packages:
 
   ag-stack@36.2.0:
     resolution: {integrity: sha512-f3XT2htFs9dUPcHni2z9ak69QNta5ODEpooHuuNvbjN98JkokpEqRQ9YLQHQJFdCcgi9Ybs/j3zkkvmNRamIPg==}
+
+  ag-studio@3.0.0:
+    resolution: {integrity: sha512-/kXv0vsy3TIY0mjdQzLEVvfbQmf8hlrTW+9ju7tET5bGNE8qCA4t5ay9TYUciMixkypsqAochTx1Ip5wy8Q7Nw==}
 
   ajv-formats@2.1.1:
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
@@ -8637,21 +8662,17 @@ snapshots:
       ag-charts-core: 14.2.0
       ag-charts-locale: 14.2.0
       ag-charts-types: 14.2.0
-    optional: true
 
   ag-charts-core@14.2.0:
     dependencies:
       ag-charts-types: 14.2.0
-    optional: true
 
   ag-charts-enterprise@14.2.0:
     dependencies:
       ag-charts-community: 14.2.0
       ag-charts-core: 14.2.0
-    optional: true
 
-  ag-charts-locale@14.2.0:
-    optional: true
+  ag-charts-locale@14.2.0: {}
 
   ag-charts-types@14.2.0: {}
 
@@ -8676,6 +8697,13 @@ snapshots:
       react-dom: 19.3.0(react@19.3.0)
 
   ag-stack@36.2.0: {}
+
+  ag-studio@3.0.0:
+    dependencies:
+      ag-charts-enterprise: 14.2.0
+      ag-grid-enterprise: 36.2.0
+      ag-stack: 36.2.0
+      tslib: 2.8.1
 
   ajv-formats@2.1.1(ajv@8.20.0):
     optionalDependencies:

@@ -1243,7 +1243,8 @@
       "trust": "Escalera de confianza",
       "settlement": "Representante de acuerdos",
       "queue": "Cola de la mañana",
-      "money": "Dinero"
+      "money": "Dinero",
+      "insights": "Análisis"
     },
     "setup": {
       "title": "Prepara tu tienda",
@@ -3738,5 +3739,117 @@
       "noAudit": "Aún no hay nada anotado sobre este alquiler.",
       "openRental": "Abrir el alquiler"
     }
+  },
+  "insights": {
+    "title": "Análisis",
+    "lead": "Dónde está el dinero de la tienda, cuánto cuesta en daños cada tipo de artículo y qué volvió, a partir de los propios registros de Hold. Pide al agente de análisis que añada o cambie un gráfico: lee estas tablas y ordena el panel, y no cambia ningún registro.",
+    "onlyDeciders": "Solo el propietario o un gerente abre el panel de análisis.",
+    "empty": "Todavía no hay nada que mostrar. El panel se llena cuando los alquileres cobran tarifas, ponen retenciones y se liquidan.",
+    "narrow": "El panel necesita una pantalla más ancha. Estas son las cifras con las que se abre.",
+    "loading": "Cargando el panel…",
+    "loadFailed": "No se pudo cargar el panel. Recarga la página para intentarlo de nuevo.",
+    "region": "Panel de análisis",
+    "starters": {
+      "cost": "¿Qué tipo de artículo costó más en daños este año?",
+      "monthly": "Muestra como gráfico de líneas lo que fue a la tienda cada mes.",
+      "fastest": "¿Qué artículos se desgastan más rápido y cuántas veces salieron?"
+    },
+    "starterLabels": {
+      "cost": "Daños por tipo",
+      "monthly": "Dinero por mes",
+      "fastest": "Desgaste más rápido"
+    },
+    "report": {
+      "description": "Los propios registros de una tienda de alquiler en Hold. La tabla de dinero tiene una fila por cada movimiento de dinero tal como lo registró PayPal: tarifas y cobros para la tienda, liberaciones y reembolsos a los clientes, retenciones puestas y renovadas. Cada fila de dinero pertenece a un alquiler; la tabla de alquileres dice dónde está ahora el dinero de cada alquiler y si sus comprobaciones cuadran. La tabla de artículos tiene una fila por artículo con sus alquileres, días fuera este año, daños encontrados, con precio y recuperados, y si es el que más rápido se desgasta de su tipo. Los importes están en la moneda de la tienda. No se nombra a ningún cliente.",
+      "calendar": "Calendario",
+      "tables": {
+        "money": "Dinero",
+        "rentals": "Alquileres",
+        "items": "Artículos",
+        "holds": "Retenciones",
+        "lives": "Retenciones en curso"
+      },
+      "fields": {
+        "line_id": "Línea",
+        "rental_id": "Alquiler",
+        "occurred_at": "Fecha",
+        "kind": "Qué pasó",
+        "flow": "Adónde fue el dinero",
+        "amount": "Importe",
+        "to_shop": "Para la tienda",
+        "back": "Devuelto al cliente",
+        "starts_at": "Inicio del alquiler",
+        "where": "Dónde está el dinero",
+        "held_now": "Retenido ahora",
+        "check": "Comprobaciones",
+        "sample": "Ejemplo",
+        "item_id": "ID del artículo",
+        "item_type": "Tipo de artículo",
+        "item": "Artículo",
+        "rentals": "Alquileres",
+        "days_out": "Días fuera",
+        "damage_found": "Daños encontrados",
+        "priced": "Daños con precio",
+        "recovered": "Recuperado",
+        "open_marks": "Marcas abiertas",
+        "wearing_fastest": "Se desgasta más rápido",
+        "reserved": "Retenido",
+        "captured": "Cobrado",
+        "released": "Liberado",
+        "trust_rung": "Nivel de confianza",
+        "ordinary": "Retención habitual",
+        "lowered": "Rebajado en",
+        "day": "Día",
+        "days": "Días",
+        "assured_days": "Días asegurados",
+        "standing": "Estado",
+        "valid_until": "Válido hasta"
+      },
+      "measures": {
+        "heldNow": "Retenido ahora",
+        "toShop": "Para la tienda",
+        "backToRenters": "Devuelto a clientes",
+        "damagePriced": "Daños con precio",
+        "recovered": "Recuperado",
+        "holdReserved": "Retención dada",
+        "holdOrdinary": "Retención habitual"
+      },
+      "widgets": {
+        "heldNow": "Retenido ahora en cuentas de clientes",
+        "toShop": "Para la tienda",
+        "back": "Devuelto a clientes",
+        "byMonth": "Dinero por mes",
+        "byType": "Daños con precio y recuperados, por tipo de artículo",
+        "items": "Todos los artículos",
+        "trust": "Retenciones por nivel de confianza",
+        "life": "Cada retención en sus 29 días",
+        "waterfall": "Retenido, cobrado, liberado"
+      }
+    },
+    "whereNone": "Todavía sin dinero",
+    "yes": "Sí",
+    "no": "No",
+    "custom": {
+      "rung": "Nivel {rung}",
+      "noRung": "Sin nivel",
+      "standing": {
+        "assured": "Asegurada",
+        "valid": "Válida",
+        "ending": "A punto de acabar"
+      },
+      "lifeLine": "Día {day} de {days} · {standing} · {amount} retenidos",
+      "steps": {
+        "reserved": "Retenido",
+        "captured": "Cobrado",
+        "released": "Liberado a clientes",
+        "held": "Aún retenido"
+      },
+      "withinHold": "Lo cobrado y lo liberado no superan lo retenido.",
+      "beyondHold": "Lo cobrado y lo liberado superan lo retenido."
+    },
+    "saving": "Guardando tu panel…",
+    "saved": "Tu panel está guardado para tu próxima visita.",
+    "saveFailed": "No se pudo guardar tu panel. Tus cambios siguen en esta página.",
+    "reset": "Volver al primer panel"
   }
 }

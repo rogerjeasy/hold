@@ -294,3 +294,10 @@
   box-shadow: inset 0 -2px 0 var(--destructive);
   background-color: color-mix(in oklab, var(--destructive) 7%, transparent);
 }
+
+/* AG Studio's controls that its theme gives no size for, made room for a finger like every control in Hold
+ * (AGENTS.md section 9): the insights agent's prompt starters, thread and send buttons, and the filter pickers on the
+ * canvas. Height only: widths come from their words, and Studio lays its toolbars out by its own sizes. */
+.hold-studio :is(.ag-studio-ai-prompt-starter, .ag-studio-ai-thread-button, .ag-studio-ai-thread-new-button, .ag-studio-ai-assistant-send-button, .ag-studio-layout-widget-skeleton-drop-target) {
+  min-height: 2.75rem;
+}
