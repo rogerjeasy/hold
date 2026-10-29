@@ -20,8 +20,8 @@ const record: ContestRecord = {
 const version = (overview: string) => ({
   overview,
   lines: [
-    { lineId: 'line-scratch', disputed: true, shopSays: 'The comparison found it and a second look confirmed it.', renterSays: 'She says it was there at pickup.', renterQuote: 'The scratch on the frame was already there when I picked it up.' },
-    { lineId: 'line-light', disputed: false, shopSays: 'Added by staff with a written reason.', renterSays: null, renterQuote: null },
+    { lineId: 'line-scratch', disputed: true, renterSays: 'She says it was there at pickup.', renterQuote: 'The scratch on the frame was already there when I picked it up.' },
+    { lineId: 'line-light', disputed: false, renterSays: null, renterQuote: null },
   ],
 })
 const answering = (data: unknown): ContestModel & { asked: string[] } => {
@@ -44,6 +44,10 @@ describe('writing a neutral summary of a contest', () => {
   it('keeps nothing from an answer that names a number, has the wrong shape, or never came', async () => {
     expect(await summarizeContest(record, answering({ forShop: version('The renter disputes the €35 scratch.'), forRenter: version('You dispute the scratch.') }))).toMatchObject({ outcome: 'dropped', summary: null })
     expect(await summarizeContest(record, answering({ forShop: 'nothing' }))).toMatchObject({ outcome: 'invalid', summary: null })
+    // The shop's side is shown from the record, so an answer that writes it for the shop is not kept.
+    const speaksForShop = version('A renter disputes the scratch.')
+    const withShopSide = { ...speaksForShop, lines: speaksForShop.lines.map((line) => ({ ...line, shopSays: 'The shop accepts it was there before.' })) }
+    expect(await summarizeContest(record, answering({ forShop: withShopSide, forRenter: version('You dispute the scratch.') }))).toMatchObject({ outcome: 'invalid', summary: null })
     expect(await summarizeContest(record, { summarize: () => Promise.resolve({ kind: 'refused', model: 'claude' }) })).toMatchObject({ outcome: 'refused', summary: null })
     expect(await summarizeContest(record, { summarize: () => Promise.reject(new Error('down')) })).toMatchObject({ outcome: 'unavailable', summary: null, model: 'not_answered' })
     const slow: ContestModel = { summarize: (_request, signal) => new Promise((_resolve, reject) => { signal.addEventListener('abort', () => { reject(new Error('aborted')) }) }) }

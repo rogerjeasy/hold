@@ -59,8 +59,8 @@ describe('a neutral summary when the renter contests (architecture.md section 6.
     expect(await renter.contestClaim(null, form({ token: rental.claimToken, code: TEST_SIGN_IN_CODE, comment: 'The scratch on the frame was there when I picked it up.', locale: 'en' }))).toMatchObject({ ok: true })
     const written = await summaries(rental.claimId)
     expect(written).toHaveLength(1)
-    expect(written[0]).toMatchObject({ outcome: 'answered', simulated: true, promptVersion: 'contest-1' })
-    const words = [written[0]?.summary?.forShop, written[0]?.summary?.forRenter].flatMap((version) => [version?.overview ?? '', ...(version?.lines ?? []).flatMap((line) => [line.shopSays, line.renterSays ?? ''])])
+    expect(written[0]).toMatchObject({ outcome: 'answered', simulated: true, promptVersion: 'contest-2' })
+    const words = [written[0]?.summary?.forShop, written[0]?.summary?.forRenter].flatMap((version) => [version?.overview ?? '', ...(version?.lines ?? []).map((line) => line.renterSays ?? '')])
     expect(words.join(' ')).not.toMatch(/\d/)
   })
 

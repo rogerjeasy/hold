@@ -6,8 +6,8 @@ const lineIds = ['line-scratch', 'line-light']
 const version = (overrides: Record<string, unknown> = {}) => ({
   overview: 'The renter disputes the scratch on the frame and says it was there at pickup. The lost front light is not disputed.',
   lines: [
-    { lineId: 'line-scratch', disputed: true, shopSays: 'The comparison found a new scratch and a second look confirmed it.', renterSays: 'She says the damage was there before her rental.', renterQuote: 'It was already there when I picked it up.' },
-    { lineId: 'line-light', disputed: false, shopSays: 'Added by staff with a written reason.', renterSays: null, renterQuote: null },
+    { lineId: 'line-scratch', disputed: true, renterSays: 'She says the damage was there before her rental.', renterQuote: 'It was already there when I picked it up.' },
+    { lineId: 'line-light', disputed: false, renterSays: null, renterQuote: null },
   ],
   ...overrides,
 })

@@ -13,8 +13,8 @@ const lines: ContestView['lines'] = [
 const shopVersion = {
   overview: 'The renter disputes the scratch on the frame and says it was there at pickup. The lost front light is not disputed.',
   lines: [
-    { lineId: 'scratch', disputed: true, shopSays: 'The comparison found a new scratch, and a second look confirmed it.', renterSays: 'She says the damage was there before her rental.', renterQuote: 'It was already there when I picked it up.' },
-    { lineId: 'light', disputed: false, shopSays: 'Added by staff with a written reason. The reply does not mention it.', renterSays: null, renterQuote: null },
+    { lineId: 'scratch', disputed: true, renterSays: 'She says the damage was there before her rental.', renterQuote: 'It was already there when I picked it up.' },
+    { lineId: 'light', disputed: false, renterSays: null, renterQuote: null },
   ],
 }
 const view: ContestView = {
@@ -43,7 +43,8 @@ describe('the neutral summary of a contest', () => {
     const scratch = screen.getByRole('heading', { name: 'Scratch on the frame, through the paint' }).closest('li')
     if (scratch === null) throw new Error('No line.')
     expect(within(scratch).getByText('Disputed')).toBeInTheDocument()
-    expect(within(scratch).getByText('The shop says')).toBeInTheDocument()
+    // The shop's side is the record's own words, never a model's, so a renter's reply cannot speak for the shop.
+    expect(within(scratch).getByText('The shop says').nextElementSibling).toHaveTextContent('A chip in the paint.')
     expect(within(scratch).getByText('“It was already there when I picked it up.”')).toBeInTheDocument()
     expect(within(scratch).getByText('A mark recorded before this rental is near the same spot.')).toBeInTheDocument()
     expect(within(scratch).getByText('Found by the comparison, and confirmed by an independent second look.')).toBeInTheDocument()
@@ -52,6 +53,7 @@ describe('the neutral summary of a contest', () => {
     const light = screen.getByRole('heading', { name: 'Lost front light' }).closest('li')
     if (light === null) throw new Error('No line.')
     expect(within(light).getByText('Not disputed')).toBeInTheDocument()
+    expect(within(light).getByText('The light was missing at the return.')).toBeInTheDocument()
   })
 
   it('speaks to the renter as you, with the same facts', () => {

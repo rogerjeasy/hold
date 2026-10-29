@@ -3,13 +3,15 @@ import { fail, ok } from './result.ts'
 import type { Result } from './result.ts'
 
 // A neutral summary when a renter contests a claim (architecture.md section 6.15). Plain code finds the facts and lays
-// out the claim line by line; one model call only puts each side into plain words. These rules decide whether its
+// out the claim line by line, the shop's side of each line in the record's own words; one model call only puts what the
+// renter says into plain words, beside an overview. These rules decide whether its
 // answer counts: it covers every line once, both versions agree on which lines are disputed, it names no number at all,
 // and a quote of the renter is kept only when it is their own words.
 
 export const CONTEST_SUMMARY_LIMITS = { overviewLength: 500, textLength: 300, maxTokens: 2_048, maxMilliseconds: 30_000 } as const
 
-export type ContestSummaryLine = { readonly lineId: string; readonly disputed: boolean; readonly shopSays: string; readonly renterSays: string | null; readonly renterQuote: string | null }
+// No line carries the shop's side: a model reading the renter's words never speaks for the shop.
+export type ContestSummaryLine = { readonly lineId: string; readonly disputed: boolean; readonly renterSays: string | null; readonly renterQuote: string | null }
 export type ContestSummaryVersion = { readonly overview: string; readonly lines: readonly ContestSummaryLine[] }
 // The same summary for the person deciding, in the shop's language, and for the renter, in theirs. Neither side is
 // told something the other is not. Its shape is checked against a strict schema before it reaches these rules.
@@ -27,7 +29,7 @@ export function checkContestSummary(summary: ContestSummary, record: { readonly 
   }
   const disputed = (version: ContestSummaryVersion) => version.lines.filter((line) => line.disputed).map((line) => line.lineId).sort().join(',')
   if (disputed(forShop) !== disputed(forRenter)) return fail('invalid')
-  const words = [forShop, forRenter].flatMap((version) => [version.overview, ...version.lines.flatMap((line) => [line.shopSays, line.renterSays ?? ''])])
+  const words = [forShop, forRenter].flatMap((version) => [version.overview, ...version.lines.map((line) => line.renterSays ?? '')])
   if (words.some((each) => each !== '' && guardNumbers(each, []) === null)) return fail('dropped')
   const renterWords = plain(record.comment)
   const quoted = (version: ContestSummaryVersion): ContestSummaryVersion => ({

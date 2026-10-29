@@ -20,6 +20,13 @@ export type ContestView = {
 
 export type LinePhotos = Readonly<Record<string, { readonly before: string | null; readonly after: string | null; readonly region: Region | null }>>
 
+// The shop's side of a line, in the record's own words: what the comparison found, or the reason a person wrote. Never
+// the model's, which reads the renter's words and so must not speak for the shop.
+function useShopSide() {
+  const t = useTranslations('contest.facts')
+  return (line: ContestLine) => (line.source === 'agreed_in_rental' ? t('agreedDuringRental') : line.reason !== '' ? line.reason : line.description)
+}
+
 // What the records show about a disputed line, found by code and worded by templates: never the model's words.
 function useFacts(view: ContestView, timeZone: string) {
   const t = useTranslations('contest.facts')
@@ -41,6 +48,7 @@ function useFacts(view: ContestView, timeZone: string) {
 export function ContestSummaryPanel({ view, audience, timeZone, photos = {}, rentalId, canRewrite = false }: { view: ContestView; audience: 'shop' | 'renter'; timeZone: string; photos?: LinePhotos; rentalId?: string; canRewrite?: boolean }) {
   const t = useTranslations('contest')
   const factsOf = useFacts(view, timeZone)
+  const shopSide = useShopSide()
   const summary = view.version
   const said = (lineId: string) => summary?.lines.find((line) => line.lineId === lineId)
   const disputed = summary === null ? null : summary.lines.filter((line) => line.disputed).length
@@ -82,13 +90,13 @@ export function ContestSummaryPanel({ view, audience, timeZone, photos = {}, ren
                 <h3 className="min-w-0 font-extrabold tracking-tight wrap-long-words">{line.description}</h3>
                 {words === undefined ? null : <span className={isDisputed ? 'label bg-primary/10 px-1.5 py-0.5 text-[0.6875rem] text-primary' : 'label bg-success/10 px-1.5 py-0.5 text-[0.6875rem] text-success'}>{isDisputed ? t('disputed') : t('notDisputed')}</span>}
               </div>
-              {words !== undefined && !isDisputed ? <p className="text-[0.9375rem] text-muted-foreground">{words.shopSays}</p> : (
+              {words !== undefined && !isDisputed ? <p className="text-[0.9375rem] text-muted-foreground wrap-long-words">{shopSide(line)}</p> : (
                 <>
                   {words === undefined ? null : (
                     <div className="grid gap-2.5 @xl:grid-cols-2">
                       <div className="grid content-start gap-1 border px-3 py-2.5">
                         <p className="label text-[0.6875rem] text-muted-foreground">{t('shopSays')}</p>
-                        <p className="text-pretty">{words.shopSays}</p>
+                        <p className="text-pretty wrap-long-words">{shopSide(line)}</p>
                       </div>
                       <div className="grid content-start gap-1 border px-3 py-2.5">
                         <p className="label text-[0.6875rem] text-muted-foreground">{t(audience === 'shop' ? 'renterSays' : 'youSaid')}</p>
@@ -108,7 +116,6 @@ export function ContestSummaryPanel({ view, audience, timeZone, photos = {}, ren
                       <p className="mb-1.5 text-sm font-bold">{t('records')}</p>
                       <ul className="grid gap-1.5 text-[0.9375rem]">
                         {factsOf(line).map((fact) => <li key={fact} className="grid grid-cols-[0.5rem_minmax(0,1fr)] gap-2"><span aria-hidden="true" className="mt-2 size-1.5 rounded-full bg-foreground" />{fact}</li>)}
-                        {line.source === 'person' && line.reason !== '' ? <li className="grid grid-cols-[0.5rem_minmax(0,1fr)] gap-2"><span aria-hidden="true" className="mt-2 size-1.5 rounded-full bg-foreground" /><span className="wrap-long-words">{t('staffReason')} <q className="italic">{line.reason}</q></span></li> : null}
                       </ul>
                     </div>
                   </div>

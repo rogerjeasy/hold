@@ -40,11 +40,11 @@ const SIMULATED = 'simulated'
 export function createSimulatedContestModel(): ContestModel {
   return {
     summarize(request) {
-      const record = JSON.parse(request.quoted) as { readonly claimLines: readonly { readonly lineId: string; readonly what: string; readonly basis: string }[]; readonly renterWords: string }
+      const record = JSON.parse(request.quoted) as { readonly claimLines: readonly { readonly lineId: string; readonly what: string }[]; readonly renterWords: string }
       const said = record.renterWords.toLowerCase()
       const lines = record.claimLines.map((line) => {
         const disputed = line.what.toLowerCase().split(/\W+/).some((word) => word.length > 3 && said.includes(word))
-        return { lineId: line.lineId, disputed, shopSays: line.basis === 'finding' ? 'The comparison of the photographs found this.' : 'A person at the shop added this with a written reason.', renterSays: disputed ? 'The renter disputes this line.' : null, renterQuote: null }
+        return { lineId: line.lineId, disputed, renterSays: disputed ? 'The renter disputes this line.' : null, renterQuote: null }
       })
       const version = (overview: string) => ({ overview, lines })
       return Promise.resolve({ kind: 'result', data: { forShop: version('The renter disputes the lines marked below, in the words quoted.'), forRenter: version('You dispute the lines marked below, in your words.') }, model: SIMULATED })

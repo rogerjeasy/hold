@@ -67,7 +67,7 @@ const dropOff: WaitingDropOff = {
 const contest = {
   outcome: 'answered' as const,
   simulated: true,
-  version: { overview: 'The renter says the lock was handed back in the bag.', lines: [{ lineId: 'line-2', disputed: true, shopSays: 'Staff found no lock in the bag at the return.', renterSays: 'They say it was in the bag.', renterQuote: 'The lock was in the bag when I handed it back.' }] },
+  version: { overview: 'The renter says the lock was handed back in the bag.', lines: [{ lineId: 'line-2', disputed: true, renterSays: 'They say it was in the bag.', renterQuote: 'The lock was in the bag when I handed it back.' }] },
   comment: 'The lock was in the bag when I handed it back.',
   lines: [{ id: 'line-2', description: 'Lost lock', source: 'person' as const, findingDescription: null, bothLooksConfirmed: false, knownMarkNearby: false, addedBy: 'Jonas', reason: 'No lock in the bag at the return.' }],
   rental: { conditionReply: 'confirmed' as const, conditionRepliedAt: at('2026-10-10T09:00:00Z'), renterPhotos: 0, incidentsReported: 0 },
