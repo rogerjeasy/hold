@@ -50,6 +50,13 @@ const show = () => renderWithIntl(<OpenScorecard cases={cases} history={history}
 const panel = () => screen.getByRole('region', { name: 'Opened pair' })
 
 describe('the open scorecard', () => {
+  it('credits the photographers and the licence of the photographs it shows', () => {
+    show()
+    expect(screen.getByRole('link', { name: 'Writtenby' })).toHaveAttribute('href', expect.stringContaining('commons.wikimedia.org/wiki/File:Urwahn'))
+    expect(screen.getByRole('link', { name: 'Sänger' })).toHaveAttribute('href', expect.stringContaining('commons.wikimedia.org/wiki/File:Riese_und_M'))
+    expect(screen.getByRole('link', { name: 'CC BY-SA 4.0' })).toHaveAttribute('href', 'https://creativecommons.org/licenses/by-sa/4.0/')
+  })
+
   it('shows each group with how many of its pairs the comparison got right, and filters the pairs by group', async () => {
     const user = userEvent.setup()
     show()

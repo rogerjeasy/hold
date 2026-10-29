@@ -45,6 +45,9 @@ export type Share = { readonly count: number; readonly total: number }
 export type Spread = { readonly median: number; readonly slowestTenth: number }
 export type Measures = {
   readonly damageFound: Share
+  // Labelled damage whose pair the comparison called clean: the miss nobody would look at again. A pair sent to a person
+  // is not counted here, since a person decides it. Runs recorded before 29 October 2026 did not measure it.
+  readonly damagePassedAsClean?: Share
   readonly cleanWronglyFlagged: Share
   readonly sentToPerson: Share
   readonly knownMarksRespected: Share
@@ -72,7 +75,7 @@ function spread(values: readonly number[]): Spread {
 
 // Every measure in extensions.md section 5.4, from the pipeline's results and the set's labels. Plain arithmetic.
 export function measureEvaluation(cases: readonly EvaluatedCase[]): Measures {
-  const labels = cases.flatMap((each) => each.labels.map((label) => ({ label, findings: each.findings })))
+  const labels = cases.flatMap((each) => each.labels.map((label) => ({ label, findings: each.findings, state: each.state })))
   const claimsOfChange = cases.flatMap((each) => each.findings.filter((finding) => isDamage(finding) || finding.class === 'uncertain').map((finding) => ({ finding, correct: each.labels.some((label) => overlaps(finding.region, label.region)) })))
   const firstLookDamage = cases.flatMap((each) => each.findings.filter((finding) => finding.secondLookConfirmed !== null))
   const confidence = Object.fromEntries(CONFIDENCE_LEVELS.map((level) => {
@@ -81,6 +84,7 @@ export function measureEvaluation(cases: readonly EvaluatedCase[]): Measures {
   })) as Record<ConfidenceLevel, Share>
   return {
     damageFound: share(labels, (each) => each.findings.some((finding) => isDamage(finding) && overlaps(finding.region, each.label.region))),
+    damagePassedAsClean: share(labels, (each) => each.state === 'clean'),
     cleanWronglyFlagged: share(cases.filter((each) => CLEAN_GROUPS.includes(each.group)), (each) => each.state === 'findings'),
     sentToPerson: share(cases, (each) => each.state === 'deferred'),
     knownMarksRespected: share(cases.filter((each) => each.group === 'known_mark'), (each) => !each.findings.some((finding) => isDamage(finding) && each.knownMarks.some((mark) => overlaps(finding.region, mark)))),

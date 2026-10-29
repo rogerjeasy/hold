@@ -2863,6 +2863,7 @@
     },
     "share": "{count} of {total} ({percent}%)",
     "notMeasured": "{count} of {total}, not measured",
+    "notRecorded": "Not recorded in this run",
     "zeroBound": "{count} of {total}: below about {bound}% at 95% confidence, not “never”",
     "spread": "median {median} s, slowest tenth {slowest} s",
     "tokens": "median {median}, slowest tenth {slowest}",
@@ -2870,6 +2871,10 @@
       "damageFound": {
         "name": "Damage found",
         "help": "Labelled damage the comparison found in the right place."
+      },
+      "damagePassedAsClean": {
+        "name": "Damage passed as clean",
+        "help": "Labelled damage the comparison called clean, so no person would look at it again. A pair sent to a person is not counted: a person decides it."
       },
       "cleanWronglyFlagged": {
         "name": "Clean returns wrongly flagged",
@@ -2929,6 +2934,7 @@
   "openScorecard": {
     "title": "Every pair, case by case",
     "lead": "Each pair of the gate half the figures above were counted from: what it should have ended in, what the comparison did, and whether that was right. Choose one to see its two photographs.",
+    "credit": "Photographs: an Urwahn e-bike by <urwahn>Writtenby</urwahn> and a Riese und Müller e-bike by <rm>Sänger</rm>, from Wikimedia Commons, under <licence>CC BY-SA 4.0</licence>. Pairs marked synthetic have damage, mud or marks drawn on them by Hold's test tools.",
     "ownerLink": "Every pair, case by case",
     "filters": "Show pairs",
     "groups": {

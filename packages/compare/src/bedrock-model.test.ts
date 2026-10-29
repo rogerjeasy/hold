@@ -29,6 +29,13 @@ describe('the comparison model adapter', () => {
     expect(sent).toMatchObject({ thinking: { type: 'adaptive' }, output_config: { effort: 'high', format: { type: 'json_schema' } }, max_tokens: 4096 })
     expect(sent).not.toHaveProperty('tools')
   })
+  // Bedrock refuses with 429 once the account's daily tokens are spent (29 October 2026). That is not a property of the
+  // photographs, so it is told apart from a look that failed: an evaluation must stop rather than count it as deferral.
+  it('reports a look Bedrock refused for capacity as throttled, apart from any other failure', async () => {
+    const answering = (status: number) => createBedrockComparisonModel({ awsRegion: 'us-east-1', skipAuth: true, fetch: () => Promise.resolve(new Response(JSON.stringify({ message: 'Too many tokens per day, please wait before trying again.' }), { status, headers: { 'content-type': 'application/json' } })) })
+    expect(await answering(429).look({ kind: 'first', context: '{}', images: [] }, new AbortController().signal)).toMatchObject({ kind: 'throttled' })
+    expect(await answering(500).look({ kind: 'first', context: '{}', images: [] }, new AbortController().signal)).toMatchObject({ kind: 'unavailable' })
+  })
   it('handles a refusal without treating it as a clean inspection', async () => {
     const model = createBedrockComparisonModel({ awsRegion: 'us-east-1', skipAuth: true, fetch: () => Promise.resolve(new Response(JSON.stringify({ id: 'msg_refused', type: 'message', role: 'assistant', model: 'claude-opus-4-6', content: [], stop_reason: 'refusal', stop_sequence: null, usage: { input_tokens: 100, output_tokens: 1 } }), { headers: { 'content-type': 'application/json' } })) })
     expect(await model.look({ kind: 'second', context: '', images: [] }, new AbortController().signal)).toMatchObject({ kind: 'refused' })

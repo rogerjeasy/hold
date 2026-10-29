@@ -17,6 +17,17 @@ describe('measuring the comparison against the evaluation set', () => {
     expect(measures.damageFound).toEqual({ count: 1, total: 3 })
   })
 
+  // Found counts only damage the comparison confirmed. A pair sent to a person is not a miss: a person decides it.
+  // The miss that matters is damage the comparison called clean, which nobody would look at again.
+  it('counts labelled damage as passed as clean only when its pair ended clean', () => {
+    const measures = measureEvaluation([
+      pair({ id: 'found', group: 'damage', state: 'findings', labels: [{ kind: 'damage', region: box(0.4, 0.4) }], findings: [damage(box(0.42, 0.42))] }),
+      pair({ id: 'to a person', group: 'damage', state: 'deferred', labels: [{ kind: 'damage', region: box(0.4, 0.4) }] }),
+      pair({ id: 'missed', group: 'damage', state: 'clean', labels: [{ kind: 'damage', region: box(0.5, 0.5) }] }),
+    ])
+    expect(measures.damagePassedAsClean).toEqual({ count: 1, total: 3 })
+  })
+
   it('counts a clean pair that ended in findings as wrongly flagged, and ordinary wear as clean', () => {
     const measures = measureEvaluation([
       pair({ group: 'clean_easy', state: 'clean' }),

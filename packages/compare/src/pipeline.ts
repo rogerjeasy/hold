@@ -61,7 +61,7 @@ export async function compareInspection(input: Input, model: ComparisonModel) {
       if (finding.class === 'new_damage' || finding.class === 'missing_part') {
         const second = await look({ kind: 'second', context: '', images: await pairedCrops(pair, finding.region, SECOND_LOOK_MARGIN) }, signal)
         const checked = second.kind === 'result' ? lookSchema.safeParse(second.data) : null
-        secondLookConfirmed = checked?.success === true && checked.data.sameItem && checked.data.sameView && checked.data.findings.length > 0 && checked.data.findings.every((each) => each.class === finding.class && each.confidence >= INSPECTION_LIMITS.minConfidence && checkRegion(each.region))
+        secondLookConfirmed = checked?.success === true && checked.data.sameItem && checked.data.sameView && checked.data.findings.length > 0 && checked.data.findings.every((each) => each.class === finding.class && each.confidence >= INSPECTION_LIMITS.secondLookMinConfidence && checkRegion(each.region))
       }
       findings.push({ ...finding, view, priceCode: finding.priceCode !== null && input.priceCodes.includes(finding.priceCode) ? finding.priceCode : null, secondLookConfirmed })
     }

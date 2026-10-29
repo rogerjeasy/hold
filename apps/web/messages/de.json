@@ -2863,6 +2863,7 @@
     },
     "share": "{count} von {total} ({percent} %)",
     "notMeasured": "{count} von {total}, nicht gemessen",
+    "notRecorded": "In diesem Lauf nicht erfasst",
     "zeroBound": "{count} von {total}: unter etwa {bound} % bei 95 % Konfidenz, nicht „nie“",
     "spread": "Median {median} s, langsamstes Zehntel {slowest} s",
     "tokens": "Median {median}, langsamstes Zehntel {slowest}",
@@ -2870,6 +2871,10 @@
       "damageFound": {
         "name": "Gefundene Schäden",
         "help": "Gekennzeichnete Schäden, die der Vergleich an der richtigen Stelle fand."
+      },
+      "damagePassedAsClean": {
+        "name": "Schaden als sauber durchgelassen",
+        "help": "Markierte Schäden, die der Vergleich als sauber einstufte, sodass niemand sie noch einmal ansehen würde. Ein Paar, das an eine Person ging, zählt nicht: Eine Person entscheidet darüber."
       },
       "cleanWronglyFlagged": {
         "name": "Saubere Rückgaben fälschlich gemeldet",
@@ -2929,6 +2934,7 @@
   "openScorecard": {
     "title": "Jedes Paar, Fall für Fall",
     "lead": "Jedes Paar der Prüfhälfte, aus dem die Zahlen oben gezählt sind: wie es hätte enden sollen, was der Vergleich tat und ob das richtig war. Wähle eines, um seine beiden Fotos zu sehen.",
+    "credit": "Fotos: ein Urwahn-E-Bike von <urwahn>Writtenby</urwahn> und ein Riese-und-Müller-E-Bike von <rm>Sänger</rm>, aus Wikimedia Commons, unter <licence>CC BY-SA 4.0</licence>. Bei Paaren, die als synthetisch markiert sind, wurden Schäden, Schmutz oder Spuren von Holds Testwerkzeugen eingezeichnet.",
     "ownerLink": "Jedes Paar, Fall für Fall",
     "filters": "Paare zeigen",
     "groups": {

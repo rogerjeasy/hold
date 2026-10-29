@@ -30,6 +30,7 @@ const seconds = (milliseconds: number) => `${(milliseconds / 1000).toFixed(1)} s
 function rows(measures: Measures): readonly (readonly [string, string])[] {
   return [
     ['Damage found', shareText(measures.damageFound)],
+    ['Damage passed as clean', measures.damagePassedAsClean === undefined ? 'not recorded in this run' : shareText(measures.damagePassedAsClean, { zeroIsGood: true })],
     ['Clean returns wrongly flagged', shareText(measures.cleanWronglyFlagged, { zeroIsGood: true })],
     ['Sent to a person', shareText(measures.sentToPerson)],
     ['Known marks respected', shareText(measures.knownMarksRespected)],

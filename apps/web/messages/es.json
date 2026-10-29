@@ -2863,6 +2863,7 @@
     },
     "share": "{count} de {total} ({percent} %)",
     "notMeasured": "{count} de {total}, sin medir",
+    "notRecorded": "No registrado en esta ejecución",
     "zeroBound": "{count} de {total}: menos de aproximadamente {bound} % con un 95 % de confianza, no «nunca»",
     "spread": "mediana {median} s, décimo más lento {slowest} s",
     "tokens": "mediana {median}, décimo más lento {slowest}",
@@ -2870,6 +2871,10 @@
       "damageFound": {
         "name": "Daños encontrados",
         "help": "Daños etiquetados que la comparación encontró en el lugar correcto."
+      },
+      "damagePassedAsClean": {
+        "name": "Daño dado por limpio",
+        "help": "Daños etiquetados que la comparación dio por limpios, así que nadie volvería a mirarlos. Un par enviado a una persona no cuenta: lo decide una persona."
       },
       "cleanWronglyFlagged": {
         "name": "Devoluciones limpias señaladas por error",
@@ -2929,6 +2934,7 @@
   "openScorecard": {
     "title": "Cada par, caso por caso",
     "lead": "Cada par de la mitad de control de la que salen las cifras de arriba: cómo debía terminar, qué hizo la comparación y si acertó. Elige uno para ver sus dos fotos.",
+    "credit": "Fotografías: una bicicleta eléctrica Urwahn de <urwahn>Writtenby</urwahn> y una Riese und Müller de <rm>Sänger</rm>, de Wikimedia Commons, con licencia <licence>CC BY-SA 4.0</licence>. En los pares marcados como sintéticos, las herramientas de prueba de Hold dibujaron daños, barro o marcas.",
     "ownerLink": "Cada par, caso por caso",
     "filters": "Mostrar pares",
     "groups": {

@@ -2863,6 +2863,7 @@
     },
     "share": "{count} sur {total} ({percent} %)",
     "notMeasured": "{count} sur {total}, non mesuré",
+    "notRecorded": "Non enregistré dans cette exécution",
     "zeroBound": "{count} sur {total} : moins d’environ {bound} % avec 95 % de confiance, pas « jamais »",
     "spread": "médiane {median} s, dixième le plus lent {slowest} s",
     "tokens": "médiane {median}, dixième le plus lent {slowest}",
@@ -2870,6 +2871,10 @@
       "damageFound": {
         "name": "Dégâts trouvés",
         "help": "Dégâts étiquetés que la comparaison a trouvés au bon endroit."
+      },
+      "damagePassedAsClean": {
+        "name": "Dégâts jugés propres",
+        "help": "Dégâts étiquetés que la comparaison a jugés propres, si bien que personne ne les reverrait. Une paire envoyée à une personne n’est pas comptée : une personne en décide."
       },
       "cleanWronglyFlagged": {
         "name": "Retours propres signalés à tort",
@@ -2929,6 +2934,7 @@
   "openScorecard": {
     "title": "Chaque paire, cas par cas",
     "lead": "Chaque paire de la moitié de contrôle d’où viennent les chiffres ci-dessus : comment elle aurait dû finir, ce qu’a fait la comparaison et si c’était juste. Choisissez-en une pour voir ses deux photos.",
+    "credit": "Photographies : un vélo électrique Urwahn de <urwahn>Writtenby</urwahn> et un Riese und Müller de <rm>Sänger</rm>, issues de Wikimedia Commons, sous licence <licence>CC BY-SA 4.0</licence>. Sur les paires marquées synthétiques, les outils de test de Hold ont dessiné les dégâts, la boue ou les marques.",
     "ownerLink": "Chaque paire, cas par cas",
     "filters": "Afficher les paires",
     "groups": {

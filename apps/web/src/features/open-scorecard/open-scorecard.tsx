@@ -5,8 +5,14 @@ import type { ReactNode } from 'react'
 import { CalibrationTable } from './calibration-table'
 import { CaseExplorer } from './case-explorer'
 import { caseRows } from './case-rows'
+import { EVAL_PHOTO_CREDITS } from './eval-photos'
 import { OutcomeMatrix } from './outcome-matrix'
 import { RunTrend } from './run-trend'
+
+// Inline in a sentence: the padding gives a 44-pixel touch target without spacing the lines apart.
+function CreditLink({ href, children }: { href: string; children: ReactNode }) {
+  return <a href={href} className="py-4 font-semibold underline underline-offset-4" rel="noreferrer" target="_blank">{children}</a>
+}
 
 function Part({ title, children }: { title: string; children: ReactNode }) {
   const id = useId()
@@ -26,6 +32,13 @@ export function OpenScorecard({ cases, history }: { cases: readonly EvaluatedCas
     <div className="grid min-w-0 gap-14">
       <Part title={t('title')}>
         <p className="max-w-prose text-muted-foreground">{t('lead')}</p>
+        <p className="max-w-prose text-sm leading-relaxed text-muted-foreground wrap-long-words">
+          {t.rich('credit', {
+            urwahn: (chunks) => <CreditLink href={EVAL_PHOTO_CREDITS.urwahn}>{chunks}</CreditLink>,
+            rm: (chunks) => <CreditLink href={EVAL_PHOTO_CREDITS.rm}>{chunks}</CreditLink>,
+            licence: (chunks) => <CreditLink href={EVAL_PHOTO_CREDITS.licence}>{chunks}</CreditLink>,
+          })}
+        </p>
         <CaseExplorer rows={caseRows(cases)} />
       </Part>
       <Part title={t('calibration.title')}><CalibrationTable cases={cases} /></Part>

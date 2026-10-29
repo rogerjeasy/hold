@@ -4,7 +4,10 @@ import type { Region } from './capture-session.ts'
 // reportedOverlap: how far a finding and a mark reported during the rental must cover each other (intersection over
 // union) to be the same damage. maxReportedArea: the largest share of a view a renter's box may cover, so a report can
 // never be drawn around more than the damage it shows.
-export const INSPECTION_LIMITS = { minConfidence: 0.9, knownMarkOverlap: 0.5, reportedOverlap: 0.5, maxReportedArea: 0.1, maxFindings: 8, maxCalls: 10, maxTokensPerCall: 4096, maxMillisecondsPerCall: 60_000, maxMilliseconds: 120_000 } as const
+// secondLookMinConfidence: the independent second look confirms the first look's damage by naming the same class at
+// this confidence or more. Shown only two close crops, it agreed at 0.6 to 0.65 on the evaluation set's tuning half
+// (29 October 2026), never at the 0.9 a first look needs. A person still approves every charge.
+export const INSPECTION_LIMITS = { minConfidence: 0.9, secondLookMinConfidence: 0.6, knownMarkOverlap: 0.5, reportedOverlap: 0.5, maxReportedArea: 0.1, maxFindings: 8, maxCalls: 10, maxTokensPerCall: 4096, maxMillisecondsPerCall: 60_000, maxMilliseconds: 120_000 } as const
 export type InspectionClass = 'new_damage' | 'missing_part' | 'wear' | 'uncertain' | 'known_mark' | 'reported'
 export type InspectionFinding = { readonly view: string; readonly region: Region; readonly class: InspectionClass; readonly confidence: number; readonly secondLookConfirmed: boolean | null }
 

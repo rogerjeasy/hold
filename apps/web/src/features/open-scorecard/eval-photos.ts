@@ -4,6 +4,14 @@ import { z } from 'zod'
 // build time from eval/set; they are not committed.
 export const EVAL_PHOTO_PATH = 'eval'
 
+// Where the evaluation set's photographs come from (eval/raw/SOURCES.md). They are CC BY-SA 4.0, so every page that
+// shows them credits their authors and the licence.
+export const EVAL_PHOTO_CREDITS = {
+  urwahn: 'https://commons.wikimedia.org/wiki/File:Urwahn_E-Bike_%E2%80%9EPlatzhirsch%E2%80%9C.jpg',
+  rm: 'https://commons.wikimedia.org/wiki/File:Riese_und_M%C3%BCller_New_Charger_S-Pedelec_rechts.jpg',
+  licence: 'https://creativecommons.org/licenses/by-sa/4.0/',
+} as const
+
 // Only what this needs of the evaluation set's manifest (eval/src/manifest.ts holds the whole format). A path must stay
 // inside its half's own folder, so the copy can never reach outside the set.
 const manifestSchema = z.object({

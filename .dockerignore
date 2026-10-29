@@ -16,3 +16,6 @@ eval/results
 .claude
 .superpowers
 CLAUDE.local.md
+
+# the raw photographs the evaluation set is built from; the build copies eval/set, never these
+eval/raw

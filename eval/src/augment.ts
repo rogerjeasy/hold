@@ -1,8 +1,9 @@
 import { EVALUATION_GROUPS } from '@hold/domain'
-import type { EvaluationGroup, Region } from '@hold/domain'
+import type { EvaluationGroup } from '@hold/domain'
 import { mapPoint } from '@hold/vision/homography'
 import { inspectPair } from '@hold/vision/inspect-pair'
 import sharp from 'sharp'
+import { DAMAGE_KINDS, drawDamage } from './damage.ts'
 import type { EvaluationCase, Half } from './manifest.ts'
 
 // Turns real photographs of one bike into labelled pairs (extensions.md section 5.3, the hybrid set agreed on
@@ -10,16 +11,18 @@ import type { EvaluationCase, Half } from './manifest.ts'
 // copy the reuse check would catch. Damage is drawn only on the return shot, and its region is exact. Every
 // synthetic pair says so in its note, and its origin is "synthetic" in the manifest, the report and the scorecard.
 
-export type RawPhoto = { readonly bike: 'A' | 'B'; readonly session: number; readonly view: string; readonly file: string }
+// A re-shot made from another photograph, rather than taken, is named A-s2-frame-left.generated.jpg: every pair built
+// on it is synthetic.
+export type RawPhoto = { readonly bike: 'A' | 'B'; readonly session: number; readonly view: string; readonly file: string; readonly generated: boolean }
 
-const RAW_NAME = /^(A|B)-s(\d)-([a-z0-9-]+)\.jpe?g$/i
+const RAW_NAME = /^(A|B)-s(\d)-([a-z0-9-]+)(\.generated)?\.jpe?g$/i
 
 export function rawCatalog(files: readonly string[]): RawPhoto[] {
   return files.flatMap((file) => {
     const match = RAW_NAME.exec(file)
     if (match === null) return []
-    const [, bike, session, view] = match
-    return [{ bike: bike === 'B' ? 'B' as const : 'A' as const, session: Number(session), view: (view ?? '').toLowerCase(), file }]
+    const [, bike, session, view, generated] = match
+    return [{ bike: bike === 'B' ? 'B' as const : 'A' as const, session: Number(session), view: (view ?? '').toLowerCase(), file, generated: generated !== undefined }]
   })
 }
 
@@ -36,85 +39,6 @@ export function seededRandom(seed: number): () => number {
 }
 
 const between = (random: () => number, low: number, high: number) => low + random() * (high - low)
-
-export type DamageKind = 'scratch' | 'dent' | 'crack' | 'chip' | 'missing'
-export const DAMAGE_KINDS: readonly DamageKind[] = ['scratch', 'dent', 'crack', 'chip', 'missing']
-type DamageSpec = { readonly kind: DamageKind; readonly size: 'small' | 'large' }
-type Drawn = { readonly image: Buffer; readonly region: Region; readonly center: { readonly x: number; readonly y: number } }
-
-// Where the photograph has most detail: damage belongs on the item, not on the wall behind it.
-async function busiestPlace(photo: Buffer, random: () => number): Promise<{ x: number; y: number }> {
-  const { data, info } = await sharp(photo).greyscale().resize({ width: 96 }).raw().toBuffer({ resolveWithObject: true })
-  let best = { x: 0.5, y: 0.5, score: -1 }
-  for (let attempt = 0; attempt < 24; attempt += 1) {
-    const x = between(random, 0.2, 0.8)
-    const y = between(random, 0.2, 0.8)
-    const cx = Math.round(x * info.width)
-    const cy = Math.round(y * info.height)
-    let sum = 0; let squares = 0; let count = 0
-    for (let dy = -4; dy <= 4; dy += 1) for (let dx = -4; dx <= 4; dx += 1) {
-      const value = data[(cy + dy) * info.width + (cx + dx)] ?? 0
-      sum += value; squares += value * value; count += 1
-    }
-    const variance = squares / count - (sum / count) ** 2
-    if (variance > best.score) best = { x, y, score: variance }
-  }
-  return { x: best.x, y: best.y }
-}
-
-const pointList = (points: readonly (readonly [number, number])[]) => points.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(' ')
-
-// Draws one kind of damage at a place with detail, or at the given centre, and returns its exact region.
-export async function drawDamage(photo: Buffer, spec: DamageSpec, random: () => number, at?: { readonly x: number; readonly y: number }): Promise<Drawn> {
-  const { width, height } = await sharp(photo).metadata()
-  const center = at ?? await busiestPlace(photo, random)
-  const extent = width * (spec.size === 'small' ? between(random, 0.04, 0.07) : between(random, 0.1, 0.16))
-  const cx = center.x * width
-  const cy = center.y * height
-  const angle = between(random, 0, Math.PI)
-  const line = (count: number, length: number, jitter: number) => Array.from({ length: count }, (_, index) => {
-    const along = (index / (count - 1) - 0.5) * length
-    return [cx + Math.cos(angle) * along + between(random, -jitter, jitter), cy + Math.sin(angle) * along + between(random, -jitter, jitter)] as const
-  })
-  let shapes: string
-  let points: (readonly [number, number])[]
-  if (spec.kind === 'scratch') {
-    points = line(7, extent, extent * 0.03)
-    shapes = `<polyline points="${pointList(points)}" fill="none" stroke="#e6e6e6" stroke-width="${String(Math.max(2, extent * 0.04))}" stroke-linecap="round"/><polyline points="${pointList(points.map(([x, y]) => [x + 1.5, y + 1.5]))}" fill="none" stroke="#1a1a1a" stroke-width="1.2"/>`
-  } else if (spec.kind === 'crack') {
-    points = line(8, extent, extent * 0.06)
-    const branch = points.slice(3, 4).flatMap(([x, y]) => [[x, y], [x + extent * 0.25, y + extent * 0.2]] as const)
-    shapes = `<polyline points="${pointList(points)}" fill="none" stroke="#050505" stroke-width="${String(Math.max(2, extent * 0.03))}"/><polyline points="${pointList(branch)}" fill="none" stroke="#050505" stroke-width="1.6"/>`
-    points = [...points, ...branch]
-  } else if (spec.kind === 'chip') {
-    points = Array.from({ length: 7 }, (_, index) => {
-      const turn = (index / 7) * Math.PI * 2
-      const radius = extent * between(random, 0.25, 0.5)
-      return [cx + Math.cos(turn) * radius, cy + Math.sin(turn) * radius] as const
-    })
-    shapes = `<polygon points="${pointList(points)}" fill="#a7a9ab" stroke="#2a2a2a" stroke-width="1.5"/>`
-  } else if (spec.kind === 'dent') {
-    const rx = extent * 0.5
-    const ry = extent * 0.32
-    points = [[cx - rx, cy - ry], [cx + rx, cy + ry]]
-    shapes = `<defs><radialGradient id="dent"><stop offset="0" stop-color="#000" stop-opacity="0.75"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs><ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" fill="url(#dent)" transform="rotate(${String((angle * 180) / Math.PI)} ${cx.toFixed(1)} ${cy.toFixed(1)})"/><ellipse cx="${(cx - rx * 0.3).toFixed(1)}" cy="${(cy - ry * 0.3).toFixed(1)}" rx="${(rx * 0.25).toFixed(1)}" ry="${(ry * 0.2).toFixed(1)}" fill="#fff" fill-opacity="0.45"/>`
-  } else {
-    // A part gone: the place where it was, filled with the flat colour behind it.
-    const half = extent * 0.4
-    points = [[cx - half, cy - half], [cx + half, cy + half]]
-    shapes = `<rect x="${(cx - half).toFixed(1)}" y="${(cy - half).toFixed(1)}" width="${(half * 2).toFixed(1)}" height="${(half * 2).toFixed(1)}" rx="${(half * 0.3).toFixed(1)}" fill="#3b3d40"/><rect x="${(cx - half * 0.15).toFixed(1)}" y="${(cy - half * 0.15).toFixed(1)}" width="${(half * 0.3).toFixed(1)}" height="${(half * 0.3).toFixed(1)}" fill="#151515"/>`
-  }
-  const svg = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${String(width)}" height="${String(height)}">${shapes}</svg>`)
-  const image = await sharp(photo).composite([{ input: svg }]).jpeg({ quality: 92 }).toBuffer()
-  const pad = 6
-  const xs = points.map(([x]) => x)
-  const ys = points.map(([, y]) => y)
-  const left = Math.max(0, Math.min(...xs) - pad)
-  const top = Math.max(0, Math.min(...ys) - pad)
-  const right = Math.min(width, Math.max(...xs) + pad)
-  const bottom = Math.min(height, Math.max(...ys) + pad)
-  return { image, center, region: { x: left / width, y: top / height, width: (right - left) / width, height: (bottom - top) / height } }
-}
 
 // Photometric changes that leave the item as it was: light, colour, shadow, a slight tilt, sensor noise.
 async function relight(photo: Buffer, random: () => number, strength: 'slight' | 'hard'): Promise<{ image: Buffer; description: string }> {
@@ -154,6 +78,8 @@ export type BuiltSet = {
 type BuildInput = {
   readonly raw: readonly RawPhoto[]
   readonly read: (file: string) => Promise<Buffer>
+  // The mask of a raw photograph, where it has one: white where the item is. Damage and known marks go only there.
+  readonly readMask?: (file: string) => Promise<Buffer | undefined>
   readonly seed: number
   // Synthetic pairs per view and group: one number for every group, or one per group.
   readonly perGroup: number | Readonly<Partial<Record<EvaluationGroup, number>>>
@@ -179,8 +105,11 @@ export async function buildSet(input: BuildInput): Promise<BuiltSet> {
     const pair = (group: EvaluationGroup, number: number, after: string, extra: Partial<EvaluationCase> & { note: string }): void => {
       cases.push({ id: `${half}-${view}-${group.replaceAll('_', '-')}-${String(number)}`, half, group, origin: extra.note.startsWith('synthetic') ? 'synthetic' : 'real', view, before, after, earlier: [], labels: [], knownMarks: [], ...extra })
     }
-    // Real pairs, as they were taken.
-    for (const [number, photo] of later.slice(0, 2).entries()) pair(number === 0 ? 'clean_easy' : 'clean_hard', 0, put(`real-${label(photo)}`, await input.read(photo.file), label(photo)), { note: `real: ${label(handover)} then ${label(photo)}` })
+    // Pairs as they were taken, or as generated re-shots.
+    for (const [number, photo] of later.slice(0, 2).entries()) {
+      const origin = photo.generated ? 'synthetic' : 'real'
+      pair(number === 0 ? 'clean_easy' : 'clean_hard', 0, put(`${origin}-${label(photo)}`, await input.read(photo.file), label(photo)), { note: `${origin}: ${label(handover)} then ${label(photo)}${photo.generated ? ', a re-shot generated from another photograph' : ''}` })
+    }
     const wrong = shot('B', 1)
     if (wrong !== undefined) pair('identity', 0, put(`real-${label(wrong)}`, await input.read(wrong.file), label(wrong)), { note: `real: another bike, ${label(wrong)}` })
     pair('identity', 1, put('copy-of-handover', await input.read(handover.file), label(handover)), { note: 'real: the handover photograph sent again as the return' })
@@ -202,17 +131,17 @@ export async function buildSet(input: BuildInput): Promise<BuiltSet> {
       const { photo, bytes } = await base()
       const kind = DAMAGE_KINDS[(number - 1) % DAMAGE_KINDS.length] ?? 'scratch'
       const size = number % 2 === 0 ? 'large' as const : 'small' as const
-      const drawn = await drawDamage(bytes, { kind, size }, random)
+      const drawn = await drawDamage(bytes, { kind, size }, random, undefined, await input.readMask?.(photo.file))
       const poorLight = number % 3 === 0
       const image = poorLight ? (await relight(drawn.image, random, 'hard')).image : drawn.image
-      pair('damage', number, put(`damage-${String(number)}`, image, label(photo)), { labels: [{ kind: kind === 'missing' ? 'missing' : 'damage', region: drawn.region }], note: `synthetic: ${label(photo)}, ${size} ${kind}${poorLight ? ', poor light' : ''}` })
+      pair('damage', number, put(`damage-${String(number)}`, image, label(photo)), { labels: [{ kind: 'damage', region: drawn.region }], note: `synthetic: ${label(photo)}, ${size} ${kind}${poorLight ? ', poor light' : ''}` })
     }
     for (let number = 1; number <= count('known_mark'); number += 1) {
       const { photo, bytes } = await base()
       // The same mark at the same place on the item in both shots, found through the pair's own alignment.
       const shape = Math.floor(random() * 1e9)
       const original = await input.read(handover.file)
-      const marked = await drawDamage(original, { kind: 'scratch', size: 'small' }, seededRandom(shape))
+      const marked = await drawDamage(original, { kind: 'scratch', size: 'small' }, seededRandom(shape), undefined, await input.readMask?.(handover.file))
       const measured = await inspectPair(original, bytes)
       const returned = await drawDamage(bytes, { kind: 'scratch', size: 'small' }, seededRandom(shape), measured.ok ? mapPoint(measured.homography, marked.center) : marked.center)
       const markedBefore = put(`known-${String(number)}-handover`, marked.image, label(handover))
@@ -227,3 +156,5 @@ export async function buildSet(input: BuildInput): Promise<BuiltSet> {
 }
 
 export { EVALUATION_GROUPS }
+export { DAMAGE_KINDS, drawDamage } from './damage.ts'
+export type { DamageKind } from './damage.ts'

@@ -1,4 +1,4 @@
-import { copyFile, mkdir, mkdtemp, readFile, writeFile } from 'node:fs/promises'
+import { copyFile, mkdir, mkdtemp, readdir, readFile, writeFile } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { ComparisonModel } from '@hold/compare'
@@ -28,6 +28,16 @@ let shot = 0
 const fingerprint = () => { shot += 1; return Promise.resolve({ sha256: String(shot), perceptualHash: String(shot) }) }
 
 describe('one command over one half of the set', () => {
+  // A throttled run measures the account's quota, not the comparison: every pair would read as sent to a person.
+  it('stops, writing nothing, when the model is throttled', async () => {
+    const throttled: ComparisonModel = { look: () => Promise.resolve({ kind: 'throttled', model: 'recorded-model' }) }
+    const resultsDir = await mkdtemp(join(tmpdir(), 'hold-throttled-'))
+    const before = (await database.select().from(evalRuns)).length
+    await expect(runEvaluation({ root, half: 'gate', resultsDir, accept: true, limits: null }, { model: throttled, fingerprint, database, now: () => new Date('2026-10-29T16:00:00Z'), pipelineVersion: 'inspection-3+throttled' })).rejects.toThrow('throttled')
+    expect(await readdir(resultsDir)).toEqual([])
+    expect(await database.select().from(evalRuns)).toHaveLength(before)
+  })
+
   it('runs every pair, writes the report and records the run', async () => {
     const resultsDir = await mkdtemp(join(tmpdir(), 'hold-results-'))
     const outcome = await runEvaluation({ root, half: 'gate', resultsDir, accept: true, limits: null }, { model: quietModel, fingerprint, database, now: () => new Date('2026-10-28T10:00:00Z'), pipelineVersion: 'inspection-1+test' })
@@ -36,6 +46,7 @@ describe('one command over one half of the set', () => {
     expect(report).toContain('| Clean returns wrongly flagged | 0 of 2 (below about 84% at 95% confidence, not "never")')
     const [row] = await database.select().from(evalRuns)
     expect(row).toMatchObject({ half: 'gate', caseCount: 2, syntheticCount: 0, accepted: true, gatePassed: true, pipelineVersion: 'inspection-1+test', model: 'recorded-model' })
+    expect(row?.thresholds).toEqual({ minConfidence: 0.9, secondLookMinConfidence: 0.6, knownMarkOverlap: 0.5 })
     expect(row?.measures.cleanWronglyFlagged).toEqual({ count: 0, total: 2 })
     // Every pair is kept with the run, for the open scorecard to show case by case.
     expect(row?.cases.map((each) => [each.id, each.before, each.state])).toEqual([['c1', 'gate/c1-before.jpg', 'clean'], ['c2', 'gate/c2-before.jpg', 'clean']])

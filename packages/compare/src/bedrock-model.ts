@@ -32,6 +32,9 @@ export function createBedrockComparisonModel(options: Pick<ClientOptions, 'awsRe
         try { data = JSON.parse(text) as unknown } catch { return { kind: 'unavailable', model: response.model } }
         return { kind: 'result', data, model: response.model, inputTokens: response.usage.input_tokens, outputTokens: response.usage.output_tokens }
       } catch (error) {
+        // Throttled: Bedrock refused for capacity (429), such as the account's daily tokens being spent. The pipeline defers
+        // it like any failed look; an evaluation stops on it, since it says nothing about the photographs.
+        if (error instanceof APIError && error.status === 429) return { kind: 'throttled', model: COMPARISON_MODEL }
         if (error instanceof APIError || error instanceof APIConnectionError || error instanceof APIUserAbortError) return { kind: 'unavailable', model: COMPARISON_MODEL }
         throw error
       }

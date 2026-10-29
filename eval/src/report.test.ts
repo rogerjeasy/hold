@@ -19,9 +19,15 @@ describe('the run report', () => {
   it('lists every measure with its counts, for all pairs and for the photographs taken as they are', () => {
     const cases = [pair({ id: 'r1' }), pair({ id: 's1', origin: 'synthetic', state: 'findings' })]
     const report = renderReport({ ...run, cases, measures: measureEvaluation(cases), realMeasures: measureEvaluation(cases.filter((each) => each.origin === 'real')) })
-    for (const heading of ['Damage found', 'Clean returns wrongly flagged', 'Sent to a person', 'Known marks respected', 'Agreement between the two looks', 'Wrong item or reused photograph caught', 'Confidence holds up', 'Time for one comparison', 'Tokens for one comparison']) expect(report).toContain(heading)
+    for (const heading of ['Damage found', 'Damage passed as clean', 'Clean returns wrongly flagged', 'Sent to a person', 'Known marks respected', 'Agreement between the two looks', 'Wrong item or reused photograph caught', 'Confidence holds up', 'Time for one comparison', 'Tokens for one comparison']) expect(report).toContain(heading)
     expect(report).toContain('| Clean returns wrongly flagged | 1 of 2 (50%) | 0 of 1 (below about 98% at 95% confidence, not "never") |')
     expect(report).toContain('1 synthetic')
+  })
+
+  it('says a run recorded before damage passed as clean was measured did not record it', () => {
+    const cases = [pair({ id: 'r1' })]
+    const older = Object.fromEntries(Object.entries(measureEvaluation(cases)).filter(([key]) => key !== 'damagePassedAsClean')) as ReturnType<typeof measureEvaluation>
+    expect(renderReport({ ...run, cases, measures: older, realMeasures: older })).toContain('| Damage passed as clean | not recorded in this run | not recorded in this run |')
   })
 
   it('renders the same figures for the README table', () => {

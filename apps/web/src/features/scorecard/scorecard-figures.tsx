@@ -33,8 +33,12 @@ export function ScorecardFigures({ run }: { run: ScorecardRun }) {
   const format = useFormatter()
   const spread = (value: Spread, kind: 'spread' | 'tokens') => t(kind, kind === 'spread' ? { median: seconds(value.median), slowest: seconds(value.slowestTenth) } : { median: value.median, slowest: value.slowestTenth })
   const rows: readonly Row[] = [
-    ...(['damageFound', 'cleanWronglyFlagged', 'sentToPerson', 'knownMarksRespected', 'looksAgree', 'identityCaught'] as const).map((key) => ({
-      key, name: t(`measures.${key}.name`), help: t(`measures.${key}.help`), figure: (measures: Measures) => <ShareFigure share={measures[key]} zeroIsGood={key === 'cleanWronglyFlagged'} />,
+    ...(['damageFound', 'damagePassedAsClean', 'cleanWronglyFlagged', 'sentToPerson', 'knownMarksRespected', 'looksAgree', 'identityCaught'] as const).map((key) => ({
+      key, name: t(`measures.${key}.name`), help: t(`measures.${key}.help`), figure: (measures: Measures) => {
+        const share = measures[key]
+        // A run recorded before a measure existed says so, rather than showing a count it never took.
+        return share === undefined ? t('notRecorded') : <ShareFigure share={share} zeroIsGood={key === 'cleanWronglyFlagged' || key === 'damagePassedAsClean'} />
+      },
     })),
     ...CONFIDENCE_LEVELS.map((level) => ({ key: `confidence-${level}`, name: t('measures.confidence.name', { level: t(`levels.${level}`) }), help: t('measures.confidence.help'), figure: (measures: Measures) => <ShareFigure share={measures.confidence[level]} /> })),
     { key: 'time', name: t('measures.time.name'), help: t('measures.time.help'), figure: (measures: Measures) => spread(measures.milliseconds, 'spread') },

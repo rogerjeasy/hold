@@ -57,7 +57,14 @@ export async function runEvaluation(options: EvaluationOptions, dependencies: Ev
   const loaded = await loadHalf(options.root, options.half)
   const cases = options.limit === undefined ? loaded.cases : loaded.cases.slice(0, options.limit)
   const answering = new Set<string>()
-  const model: ComparisonModel = { look: async (request, signal) => { const reply = await dependencies.model.look(request, signal); if (reply.kind === 'result') answering.add(reply.model); return reply } }
+  // A throttled look measures the account's quota, not the comparison: the pair would read as sent to a person. The run
+  // stops before it writes a report or records anything, so it can never be accepted.
+  const model: ComparisonModel = { look: async (request, signal) => {
+    const reply = await dependencies.model.look(request, signal)
+    if (reply.kind === 'throttled') throw new Error('Bedrock throttled the model: its quota is spent. The run stopped; no report was written and nothing was recorded. Run it again once the quota resets.')
+    if (reply.kind === 'result') answering.add(reply.model)
+    return reply
+  } }
   const clock = () => Date.now()
   const evaluated: EvaluatedCase[] = await inTurn(cases, (each) => runCase({ read: (path) => readFile(join(options.root, path)), fingerprint: dependencies.fingerprint, model, now: clock }, each, loaded))
   const measures = measureEvaluation(evaluated)
@@ -75,7 +82,7 @@ export async function runEvaluation(options: EvaluationOptions, dependencies: Ev
   await writeFile(resultsPath, `${JSON.stringify(record, null, 2)}\n`)
   const runId = dependencies.database === undefined ? undefined : await recordEvalRun(dependencies.database, {
     half: options.half, dataSetVersion: loaded.dataSetVersion, pipelineVersion: dependencies.pipelineVersion, model: record.model, promptVersion: PROMPT_VERSION,
-    thresholds: { minConfidence: INSPECTION_LIMITS.minConfidence, knownMarkOverlap: INSPECTION_LIMITS.knownMarkOverlap },
+    thresholds: { minConfidence: INSPECTION_LIMITS.minConfidence, secondLookMinConfidence: INSPECTION_LIMITS.secondLookMinConfidence, knownMarkOverlap: INSPECTION_LIMITS.knownMarkOverlap },
     caseCount: evaluated.length, syntheticCount: evaluated.filter((each) => each.origin === 'synthetic').length, measures, realMeasures, cases: evaluated,
     gateLimits: options.limits, gatePassed: gate.pass, gateReasons: [...gate.reasons],
     accepted: options.accept && gate.pass && options.half === 'gate', resultsKey: resultsPath, startedAt: started, completedAt,

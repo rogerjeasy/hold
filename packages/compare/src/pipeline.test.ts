@@ -69,7 +69,24 @@ describe('the return comparison pipeline', () => {
     let calls = 0
     expect(await compareInspection(await input(), { look: () => Promise.resolve(reply(result(calls++ === 0 ? [damage] : []))) })).toMatchObject({ state: 'deferred' })
     expect(await compareInspection(await input(), { look: () => Promise.resolve({ kind: 'refused', model: 'recorded-model' }) })).toMatchObject({ state: 'deferred' })
+    expect(await compareInspection(await input(), { look: () => Promise.resolve({ kind: 'throttled', model: 'recorded-model' }) })).toMatchObject({ state: 'deferred' })
     expect(await compareInspection(await input(), { look: () => Promise.resolve(reply(result([{ ...damage, amount: 999 }]))) })).toMatchObject({ state: 'deferred' })
+  })
+  // Measured on the evaluation set's tuning half on 29 October 2026: shown only two close crops, the second look named
+  // the same damage the first look found, but at a confidence of 0.6 to 0.65, never the 0.9 a first look needs. It
+  // confirms; it need not be as sure as the look that found the damage. A person still approves every charge.
+  it('confirms damage when the second look names the same damage at 0.6 or more, and not below', async () => {
+    let calls = 0
+    const confirmed = await compareInspection(await input(), { look: () => Promise.resolve(reply(result(calls++ === 0 ? [damage] : [{ ...damage, confidence: 0.6 }]))) })
+    expect(confirmed).toMatchObject({ state: 'findings', findings: [{ class: 'new_damage', confidence: 0.96, secondLookConfirmed: true }] })
+    calls = 0
+    const unsure = await compareInspection(await input(), { look: () => Promise.resolve(reply(result(calls++ === 0 ? [damage] : [{ ...damage, confidence: 0.55 }]))) })
+    expect(unsure).toMatchObject({ state: 'deferred', findings: [{ secondLookConfirmed: false }] })
+  })
+  it('still needs a first look of 0.9 or more, however sure the second look is', async () => {
+    let calls = 0
+    const compared = await compareInspection(await input(), { look: () => Promise.resolve(reply(result(calls++ === 0 ? [{ ...damage, confidence: 0.85 }] : [damage]))) })
+    expect(compared).toMatchObject({ state: 'deferred', findings: [{ class: 'uncertain' }] })
   })
   it('defers a second look that contains uncertainty alongside confident damage', async () => {
     let calls = 0

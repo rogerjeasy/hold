@@ -3,5 +3,4956 @@
   "itemType": "City e-bike",
   "wearPolicy": "Scuffs on tyres, dust and mud, light scratches on the kickstand and pedals, and worn grip tape are ordinary wear.",
   "priceCodes": [],
-  "cases": []
+  "cases": [
+    {
+      "id": "tuning-cockpit-clean-easy-0",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/synthetic-A-s2-cockpit.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s1-cockpit then A-s2-cockpit, a re-shot generated from another photograph"
+    },
+    {
+      "id": "tuning-cockpit-clean-hard-0",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/synthetic-A-s3-cockpit.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s1-cockpit then A-s3-cockpit, a re-shot generated from another photograph"
+    },
+    {
+      "id": "tuning-cockpit-identity-0",
+      "half": "tuning",
+      "group": "identity",
+      "origin": "real",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/real-B-s1-cockpit.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "real: another bike, B-s1-cockpit"
+    },
+    {
+      "id": "tuning-cockpit-identity-1",
+      "half": "tuning",
+      "group": "identity",
+      "origin": "real",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/copy-of-handover.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "real: the handover photograph sent again as the return"
+    },
+    {
+      "id": "tuning-cockpit-clean-easy-1",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/easy-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-cockpit, brightness 0.98"
+    },
+    {
+      "id": "tuning-cockpit-clean-easy-2",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/easy-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-cockpit, brightness 1.00"
+    },
+    {
+      "id": "tuning-cockpit-clean-easy-3",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/easy-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-cockpit, brightness 1.02"
+    },
+    {
+      "id": "tuning-cockpit-clean-easy-4",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/easy-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-cockpit, brightness 0.98"
+    },
+    {
+      "id": "tuning-cockpit-clean-easy-5",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/easy-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-cockpit, brightness 0.95"
+    },
+    {
+      "id": "tuning-cockpit-clean-easy-6",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/easy-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-cockpit, brightness 0.96"
+    },
+    {
+      "id": "tuning-cockpit-clean-easy-7",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/easy-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-cockpit, brightness 1.04"
+    },
+    {
+      "id": "tuning-cockpit-clean-easy-8",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/easy-8.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-cockpit, brightness 0.96"
+    },
+    {
+      "id": "tuning-cockpit-clean-easy-9",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/easy-9.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-cockpit, brightness 0.98"
+    },
+    {
+      "id": "tuning-cockpit-clean-hard-1",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/hard-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-cockpit, brightness 0.72, colour warmer, shadow band, tilted -1.8°"
+    },
+    {
+      "id": "tuning-cockpit-clean-hard-2",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/hard-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-cockpit, brightness 0.70, colour warmer, shadow band, tilted -0.2°"
+    },
+    {
+      "id": "tuning-cockpit-clean-hard-3",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/hard-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-cockpit, brightness 0.82, colour cooler, shadow band, tilted -0.6°"
+    },
+    {
+      "id": "tuning-cockpit-clean-hard-4",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/hard-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-cockpit, brightness 0.75, colour cooler, shadow band, tilted 1.8°"
+    },
+    {
+      "id": "tuning-cockpit-clean-hard-5",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/hard-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-cockpit, brightness 1.19, colour cooler, shadow band, tilted 1.9°"
+    },
+    {
+      "id": "tuning-cockpit-clean-hard-6",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/hard-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-cockpit, brightness 1.04, colour cooler, shadow band, tilted 1.1°"
+    },
+    {
+      "id": "tuning-cockpit-clean-hard-7",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/hard-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-cockpit, brightness 0.92, colour warmer, shadow band, tilted -1.7°"
+    },
+    {
+      "id": "tuning-cockpit-clean-hard-8",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/hard-8.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-cockpit, brightness 1.12, colour warmer, shadow band, tilted 0.1°"
+    },
+    {
+      "id": "tuning-cockpit-clean-hard-9",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/hard-9.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-cockpit, brightness 1.12, colour warmer, shadow band, tilted -0.7°"
+    },
+    {
+      "id": "tuning-cockpit-wear-1",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/wear-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-cockpit, mud and dust"
+    },
+    {
+      "id": "tuning-cockpit-wear-2",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/wear-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-cockpit, mud and dust"
+    },
+    {
+      "id": "tuning-cockpit-wear-3",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/wear-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-cockpit, mud and dust"
+    },
+    {
+      "id": "tuning-cockpit-wear-4",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/wear-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-cockpit, mud and dust"
+    },
+    {
+      "id": "tuning-cockpit-wear-5",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/wear-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-cockpit, mud and dust"
+    },
+    {
+      "id": "tuning-cockpit-wear-6",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/wear-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-cockpit, mud and dust"
+    },
+    {
+      "id": "tuning-cockpit-wear-7",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/wear-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-cockpit, mud and dust"
+    },
+    {
+      "id": "tuning-cockpit-damage-1",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/damage-1.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.4410480349344978,
+            "y": 0.5539358600583091,
+            "width": 0.025109170305676855,
+            "height": 0.08309037900874636
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-cockpit, small scratch"
+    },
+    {
+      "id": "tuning-cockpit-damage-2",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/damage-2.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.39082969432314413,
+            "y": 0.5408163265306123,
+            "width": 0.1146288209606987,
+            "height": 0.08163265306122448
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-cockpit, large dent"
+    },
+    {
+      "id": "tuning-cockpit-damage-3",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/damage-3.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.4148471615720524,
+            "y": 0.5539358600583091,
+            "width": 0.03056768558951965,
+            "height": 0.07142857142857142
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-cockpit, small crack, poor light"
+    },
+    {
+      "id": "tuning-cockpit-damage-4",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/damage-4.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.4650655021834061,
+            "y": 0.5743440233236151,
+            "width": 0.056768558951965066,
+            "height": 0.1282798833819242
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-cockpit, large chip"
+    },
+    {
+      "id": "tuning-cockpit-damage-5",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/damage-5.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.31986899563318777,
+            "y": 0.9110787172011662,
+            "width": 0.06768558951965066,
+            "height": 0.05830903790087463
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-cockpit, small scuff"
+    },
+    {
+      "id": "tuning-cockpit-damage-6",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/damage-6.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.36790393013100436,
+            "y": 0.5481049562682215,
+            "width": 0.14410480349344978,
+            "height": 0.09475218658892129
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-cockpit, large scratch, poor light"
+    },
+    {
+      "id": "tuning-cockpit-damage-7",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/damage-7.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.3962882096069869,
+            "y": 0.892128279883382,
+            "width": 0.07205240174672489,
+            "height": 0.09037900874635568
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-cockpit, small dent"
+    },
+    {
+      "id": "tuning-cockpit-damage-8",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/damage-8.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.35262008733624456,
+            "y": 0.5451895043731778,
+            "width": 0.11899563318777293,
+            "height": 0.06705539358600583
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-cockpit, large crack"
+    },
+    {
+      "id": "tuning-cockpit-damage-9",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/damage-9.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.37445414847161573,
+            "y": 0.9125364431486881,
+            "width": 0.04694323144104803,
+            "height": 0.0597667638483965
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-cockpit, small chip, poor light"
+    },
+    {
+      "id": "tuning-cockpit-damage-10",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/damage-10.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.35917030567685587,
+            "y": 0.5408163265306123,
+            "width": 0.12663755458515283,
+            "height": 0.21574344023323616
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-cockpit, large scuff"
+    },
+    {
+      "id": "tuning-cockpit-damage-11",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/damage-11.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.5152838427947598,
+            "y": 0.8892128279883382,
+            "width": 0.02074235807860262,
+            "height": 0.09620991253644315
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-cockpit, small scratch"
+    },
+    {
+      "id": "tuning-cockpit-damage-12",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/damage-12.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.38973799126637554,
+            "y": 0.8192419825072886,
+            "width": 0.16812227074235808,
+            "height": 0.18075801749271136
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-cockpit, large dent, poor light"
+    },
+    {
+      "id": "tuning-cockpit-damage-13",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/damage-13.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.35262008733624456,
+            "y": 0.9183673469387755,
+            "width": 0.055676855895196505,
+            "height": 0.03498542274052478
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-cockpit, small crack"
+    },
+    {
+      "id": "tuning-cockpit-damage-14",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/damage-14.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.3941048034934498,
+            "y": 0.8892128279883382,
+            "width": 0.08951965065502183,
+            "height": 0.10641399416909621
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-cockpit, large chip"
+    },
+    {
+      "id": "tuning-cockpit-known-mark-1",
+      "half": "tuning",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/known-1-handover.jpg",
+      "after": "tuning/cockpit/known-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.47707423580786024,
+          "y": 0.9154518950437318,
+          "width": 0.09934497816593886,
+          "height": 0.04081632653061224
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-cockpit)"
+    },
+    {
+      "id": "tuning-cockpit-known-mark-2",
+      "half": "tuning",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/known-2-handover.jpg",
+      "after": "tuning/cockpit/known-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.5185589519650655,
+          "y": 0.6953352769679301,
+          "width": 0.014192139737991267,
+          "height": 0.1239067055393586
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-cockpit)"
+    },
+    {
+      "id": "tuning-cockpit-known-mark-3",
+      "half": "tuning",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/known-3-handover.jpg",
+      "after": "tuning/cockpit/known-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.5262008733624454,
+          "y": 0.8935860058309038,
+          "width": 0.04039301310043668,
+          "height": 0.08746355685131195
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-cockpit)"
+    },
+    {
+      "id": "tuning-cockpit-known-mark-4",
+      "half": "tuning",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/known-4-handover.jpg",
+      "after": "tuning/cockpit/known-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.37445414847161573,
+          "y": 0.8833819241982507,
+          "width": 0.03275109170305677,
+          "height": 0.10787172011661808
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-cockpit)"
+    },
+    {
+      "id": "tuning-cockpit-known-mark-5",
+      "half": "tuning",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/known-5-handover.jpg",
+      "after": "tuning/cockpit/known-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.4585152838427948,
+          "y": 0.9256559766763849,
+          "width": 0.0927947598253275,
+          "height": 0.023323615160349854
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-cockpit)"
+    },
+    {
+      "id": "tuning-cockpit-identity-2",
+      "half": "tuning",
+      "group": "identity",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/near-copy-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: the handover photograph, resized and saved again, sent as the return"
+    },
+    {
+      "id": "tuning-cockpit-identity-3",
+      "half": "tuning",
+      "group": "identity",
+      "origin": "synthetic",
+      "view": "cockpit",
+      "before": "tuning/cockpit/handover.jpg",
+      "after": "tuning/cockpit/near-copy-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: the handover photograph, resized and saved again, sent as the return"
+    },
+    {
+      "id": "gate-drivetrain-clean-easy-0",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/synthetic-A-s2-drivetrain.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s1-drivetrain then A-s2-drivetrain, a re-shot generated from another photograph"
+    },
+    {
+      "id": "gate-drivetrain-clean-hard-0",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/synthetic-A-s3-drivetrain.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s1-drivetrain then A-s3-drivetrain, a re-shot generated from another photograph"
+    },
+    {
+      "id": "gate-drivetrain-identity-0",
+      "half": "gate",
+      "group": "identity",
+      "origin": "real",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/real-B-s1-drivetrain.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "real: another bike, B-s1-drivetrain"
+    },
+    {
+      "id": "gate-drivetrain-identity-1",
+      "half": "gate",
+      "group": "identity",
+      "origin": "real",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/copy-of-handover.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "real: the handover photograph sent again as the return"
+    },
+    {
+      "id": "gate-drivetrain-clean-easy-1",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/easy-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-drivetrain, brightness 1.04"
+    },
+    {
+      "id": "gate-drivetrain-clean-easy-2",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/easy-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-drivetrain, brightness 1.04"
+    },
+    {
+      "id": "gate-drivetrain-clean-easy-3",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/easy-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-drivetrain, brightness 1.03"
+    },
+    {
+      "id": "gate-drivetrain-clean-easy-4",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/easy-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-drivetrain, brightness 0.97"
+    },
+    {
+      "id": "gate-drivetrain-clean-easy-5",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/easy-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-drivetrain, brightness 1.02"
+    },
+    {
+      "id": "gate-drivetrain-clean-easy-6",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/easy-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-drivetrain, brightness 1.03"
+    },
+    {
+      "id": "gate-drivetrain-clean-easy-7",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/easy-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-drivetrain, brightness 0.98"
+    },
+    {
+      "id": "gate-drivetrain-clean-easy-8",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/easy-8.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-drivetrain, brightness 1.06"
+    },
+    {
+      "id": "gate-drivetrain-clean-easy-9",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/easy-9.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-drivetrain, brightness 1.05"
+    },
+    {
+      "id": "gate-drivetrain-clean-hard-1",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/hard-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-drivetrain, brightness 0.88, colour warmer, shadow band, tilted -0.0°"
+    },
+    {
+      "id": "gate-drivetrain-clean-hard-2",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/hard-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-drivetrain, brightness 1.07, colour cooler, shadow band, tilted -1.3°"
+    },
+    {
+      "id": "gate-drivetrain-clean-hard-3",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/hard-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-drivetrain, brightness 0.92, colour warmer, shadow band, tilted 1.0°"
+    },
+    {
+      "id": "gate-drivetrain-clean-hard-4",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/hard-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-drivetrain, brightness 0.97, colour warmer, shadow band, tilted 0.4°"
+    },
+    {
+      "id": "gate-drivetrain-clean-hard-5",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/hard-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-drivetrain, brightness 1.18, colour warmer, shadow band, tilted -0.1°"
+    },
+    {
+      "id": "gate-drivetrain-clean-hard-6",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/hard-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-drivetrain, brightness 1.03, colour cooler, shadow band, tilted -0.9°"
+    },
+    {
+      "id": "gate-drivetrain-clean-hard-7",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/hard-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-drivetrain, brightness 0.78, colour cooler, shadow band, tilted -0.8°"
+    },
+    {
+      "id": "gate-drivetrain-clean-hard-8",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/hard-8.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-drivetrain, brightness 0.92, colour warmer, shadow band, tilted 1.3°"
+    },
+    {
+      "id": "gate-drivetrain-clean-hard-9",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/hard-9.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-drivetrain, brightness 0.99, colour warmer, shadow band, tilted 1.0°"
+    },
+    {
+      "id": "gate-drivetrain-wear-1",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/wear-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-drivetrain, mud and dust"
+    },
+    {
+      "id": "gate-drivetrain-wear-2",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/wear-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-drivetrain, mud and dust"
+    },
+    {
+      "id": "gate-drivetrain-wear-3",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/wear-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-drivetrain, mud and dust"
+    },
+    {
+      "id": "gate-drivetrain-wear-4",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/wear-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-drivetrain, mud and dust"
+    },
+    {
+      "id": "gate-drivetrain-wear-5",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/wear-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-drivetrain, mud and dust"
+    },
+    {
+      "id": "gate-drivetrain-wear-6",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/wear-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-drivetrain, mud and dust"
+    },
+    {
+      "id": "gate-drivetrain-wear-7",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/wear-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-drivetrain, mud and dust"
+    },
+    {
+      "id": "gate-drivetrain-damage-1",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/damage-1.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.31072961373390556,
+            "y": 0.4839816933638444,
+            "width": 0.055793991416309016,
+            "height": 0.04233409610983982
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-drivetrain, small scratch"
+    },
+    {
+      "id": "gate-drivetrain-damage-2",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/damage-2.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.3296137339055794,
+            "y": 0.41990846681922195,
+            "width": 0.11931330472103004,
+            "height": 0.10869565217391304
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-drivetrain, large dent"
+    },
+    {
+      "id": "gate-drivetrain-damage-3",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/damage-3.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.3579399141630901,
+            "y": 0.4759725400457666,
+            "width": 0.04463519313304721,
+            "height": 0.05034324942791762
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-drivetrain, small crack, poor light"
+    },
+    {
+      "id": "gate-drivetrain-damage-4",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/damage-4.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.35107296137339056,
+            "y": 0.43592677345537756,
+            "width": 0.09785407725321889,
+            "height": 0.09267734553775744
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-drivetrain, large chip"
+    },
+    {
+      "id": "gate-drivetrain-damage-5",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/damage-5.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.32274678111587984,
+            "y": 0.4588100686498856,
+            "width": 0.06781115879828326,
+            "height": 0.06750572082379863
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-drivetrain, small scuff"
+    },
+    {
+      "id": "gate-drivetrain-damage-6",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/damage-6.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.34678111587982835,
+            "y": 0.41647597254004576,
+            "width": 0.06523605150214593,
+            "height": 0.11212814645308924
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-drivetrain, large scratch, poor light"
+    },
+    {
+      "id": "gate-drivetrain-damage-7",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/damage-7.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.2849785407725322,
+            "y": 0.47139588100686497,
+            "width": 0.04463519313304721,
+            "height": 0.04691075514874142
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-drivetrain, small dent"
+    },
+    {
+      "id": "gate-drivetrain-damage-8",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/damage-8.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.30643776824034336,
+            "y": 0.511441647597254,
+            "width": 0.12446351931330472,
+            "height": 0.017162471395881007
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-drivetrain, large crack"
+    },
+    {
+      "id": "gate-drivetrain-damage-9",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/damage-9.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.32532188841201715,
+            "y": 0.494279176201373,
+            "width": 0.06437768240343347,
+            "height": 0.032036613272311214
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-drivetrain, small chip, poor light"
+    },
+    {
+      "id": "gate-drivetrain-damage-10",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/damage-10.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.34763948497854075,
+            "y": 0.4691075514874142,
+            "width": 0.11330472103004292,
+            "height": 0.06521739130434782
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-drivetrain, large scuff"
+    },
+    {
+      "id": "gate-drivetrain-damage-11",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/damage-11.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.3802575107296137,
+            "y": 0.4610983981693364,
+            "width": 0.041201716738197426,
+            "height": 0.06521739130434782
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-drivetrain, small scratch"
+    },
+    {
+      "id": "gate-drivetrain-damage-12",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/damage-12.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.35450643776824037,
+            "y": 0.41647597254004576,
+            "width": 0.09871244635193133,
+            "height": 0.11212814645308924
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-drivetrain, large dent, poor light"
+    },
+    {
+      "id": "gate-drivetrain-damage-13",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/damage-13.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.31072961373390556,
+            "y": 0.4862700228832952,
+            "width": 0.07467811158798283,
+            "height": 0.036613272311212815
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-drivetrain, small crack"
+    },
+    {
+      "id": "gate-drivetrain-damage-14",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/damage-14.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.351931330472103,
+            "y": 0.43135011441647597,
+            "width": 0.09699570815450644,
+            "height": 0.09725400457665904
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-drivetrain, large chip"
+    },
+    {
+      "id": "gate-drivetrain-known-mark-1",
+      "half": "gate",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/known-1-handover.jpg",
+      "after": "gate/drivetrain/known-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.04206008583690987,
+          "y": 0.4302059496567506,
+          "width": 0.010300429184549357,
+          "height": 0.05034324942791762
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-drivetrain)"
+    },
+    {
+      "id": "gate-drivetrain-known-mark-2",
+      "half": "gate",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/known-2-handover.jpg",
+      "after": "gate/drivetrain/known-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.40858369098712444,
+          "y": 0.4633867276887872,
+          "width": 0.048068669527897,
+          "height": 0.05835240274599542
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-drivetrain)"
+    },
+    {
+      "id": "gate-drivetrain-known-mark-3",
+      "half": "gate",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/known-3-handover.jpg",
+      "after": "gate/drivetrain/known-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.23862660944206007,
+          "y": 0.4691075514874142,
+          "width": 0.03347639484978541,
+          "height": 0.04691075514874142
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-drivetrain)"
+    },
+    {
+      "id": "gate-drivetrain-known-mark-4",
+      "half": "gate",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/known-4-handover.jpg",
+      "after": "gate/drivetrain/known-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.4068669527896996,
+          "y": 0.43478260869565216,
+          "width": 0.04978540772532189,
+          "height": 0.07551487414187644
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-drivetrain)"
+    },
+    {
+      "id": "gate-drivetrain-known-mark-5",
+      "half": "gate",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/known-5-handover.jpg",
+      "after": "gate/drivetrain/known-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.38540772532188844,
+          "y": 0.4805491990846682,
+          "width": 0.07124463519313305,
+          "height": 0.04805491990846682
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-drivetrain)"
+    },
+    {
+      "id": "gate-drivetrain-identity-2",
+      "half": "gate",
+      "group": "identity",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/near-copy-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: the handover photograph, resized and saved again, sent as the return"
+    },
+    {
+      "id": "gate-drivetrain-identity-3",
+      "half": "gate",
+      "group": "identity",
+      "origin": "synthetic",
+      "view": "drivetrain",
+      "before": "gate/drivetrain/handover.jpg",
+      "after": "gate/drivetrain/near-copy-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: the handover photograph, resized and saved again, sent as the return"
+    },
+    {
+      "id": "tuning-frame-clean-easy-0",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/synthetic-A-s2-frame.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s1-frame then A-s2-frame, a re-shot generated from another photograph"
+    },
+    {
+      "id": "tuning-frame-clean-hard-0",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/synthetic-A-s3-frame.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s1-frame then A-s3-frame, a re-shot generated from another photograph"
+    },
+    {
+      "id": "tuning-frame-identity-0",
+      "half": "tuning",
+      "group": "identity",
+      "origin": "real",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/real-B-s1-frame.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "real: another bike, B-s1-frame"
+    },
+    {
+      "id": "tuning-frame-identity-1",
+      "half": "tuning",
+      "group": "identity",
+      "origin": "real",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/copy-of-handover.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "real: the handover photograph sent again as the return"
+    },
+    {
+      "id": "tuning-frame-clean-easy-1",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/easy-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-frame, brightness 1.03"
+    },
+    {
+      "id": "tuning-frame-clean-easy-2",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/easy-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-frame, brightness 0.96"
+    },
+    {
+      "id": "tuning-frame-clean-easy-3",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/easy-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-frame, brightness 0.98"
+    },
+    {
+      "id": "tuning-frame-clean-easy-4",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/easy-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-frame, brightness 0.97"
+    },
+    {
+      "id": "tuning-frame-clean-easy-5",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/easy-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-frame, brightness 0.96"
+    },
+    {
+      "id": "tuning-frame-clean-easy-6",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/easy-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-frame, brightness 1.05"
+    },
+    {
+      "id": "tuning-frame-clean-easy-7",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/easy-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-frame, brightness 1.06"
+    },
+    {
+      "id": "tuning-frame-clean-easy-8",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/easy-8.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-frame, brightness 0.95"
+    },
+    {
+      "id": "tuning-frame-clean-easy-9",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/easy-9.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-frame, brightness 1.04"
+    },
+    {
+      "id": "tuning-frame-clean-hard-1",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/hard-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-frame, brightness 0.85, colour cooler, shadow band, tilted 0.0°"
+    },
+    {
+      "id": "tuning-frame-clean-hard-2",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/hard-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-frame, brightness 0.74, colour warmer, shadow band, tilted -1.6°"
+    },
+    {
+      "id": "tuning-frame-clean-hard-3",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/hard-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-frame, brightness 1.19, colour cooler, shadow band, tilted -0.8°"
+    },
+    {
+      "id": "tuning-frame-clean-hard-4",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/hard-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-frame, brightness 0.76, colour warmer, shadow band, tilted 1.6°"
+    },
+    {
+      "id": "tuning-frame-clean-hard-5",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/hard-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-frame, brightness 0.76, colour cooler, shadow band, tilted -1.5°"
+    },
+    {
+      "id": "tuning-frame-clean-hard-6",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/hard-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-frame, brightness 1.01, colour warmer, shadow band, tilted -0.7°"
+    },
+    {
+      "id": "tuning-frame-clean-hard-7",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/hard-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-frame, brightness 1.06, colour warmer, shadow band, tilted -0.4°"
+    },
+    {
+      "id": "tuning-frame-clean-hard-8",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/hard-8.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-frame, brightness 0.87, colour cooler, shadow band, tilted 0.3°"
+    },
+    {
+      "id": "tuning-frame-clean-hard-9",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/hard-9.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-frame, brightness 1.01, colour warmer, shadow band, tilted -1.6°"
+    },
+    {
+      "id": "tuning-frame-wear-1",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/wear-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-frame, mud and dust"
+    },
+    {
+      "id": "tuning-frame-wear-2",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/wear-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-frame, mud and dust"
+    },
+    {
+      "id": "tuning-frame-wear-3",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/wear-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-frame, mud and dust"
+    },
+    {
+      "id": "tuning-frame-wear-4",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/wear-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-frame, mud and dust"
+    },
+    {
+      "id": "tuning-frame-wear-5",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/wear-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-frame, mud and dust"
+    },
+    {
+      "id": "tuning-frame-wear-6",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/wear-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-frame, mud and dust"
+    },
+    {
+      "id": "tuning-frame-wear-7",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/wear-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-frame, mud and dust"
+    },
+    {
+      "id": "tuning-frame-damage-1",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/damage-1.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.3062015503875969,
+            "y": 0.18510858324715615,
+            "width": 0.06511627906976744,
+            "height": 0.0703205791106515
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-frame, small scratch"
+    },
+    {
+      "id": "tuning-frame-damage-2",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/damage-2.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.4449612403100775,
+            "y": 0.8190279214064116,
+            "width": 0.14108527131782947,
+            "height": 0.1809720785935884
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-frame, large dent"
+    },
+    {
+      "id": "tuning-frame-damage-3",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/damage-3.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.19844961240310077,
+            "y": 0.20062047569803515,
+            "width": 0.050387596899224806,
+            "height": 0.04860392967942089
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-frame, small crack, poor light"
+    },
+    {
+      "id": "tuning-frame-damage-4",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/damage-4.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.4317829457364341,
+            "y": 0.8614270941054809,
+            "width": 0.10930232558139535,
+            "height": 0.13857290589451912
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-frame, large chip"
+    },
+    {
+      "id": "tuning-frame-damage-5",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/damage-5.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.47364341085271316,
+            "y": 0.8945191313340227,
+            "width": 0.07054263565891473,
+            "height": 0.09720785935884178
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-frame, small scuff"
+    },
+    {
+      "id": "tuning-frame-damage-6",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/damage-6.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.5031007751937985,
+            "y": 0.16132368148914167,
+            "width": 0.043410852713178294,
+            "height": 0.06514994829369183
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-frame, large scratch, poor light"
+    },
+    {
+      "id": "tuning-frame-damage-7",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/damage-7.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.22015503875968992,
+            "y": 0.20062047569803515,
+            "width": 0.04961240310077519,
+            "height": 0.038262668045501554
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-frame, small dent"
+    },
+    {
+      "id": "tuning-frame-damage-8",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/damage-8.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.17209302325581396,
+            "y": 0.20268872802481902,
+            "width": 0.04961240310077519,
+            "height": 0.06825232678386763
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-frame, large crack"
+    },
+    {
+      "id": "tuning-frame-damage-9",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/damage-9.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.4782945736434108,
+            "y": 0.9007238883143743,
+            "width": 0.03643410852713178,
+            "height": 0.06514994829369183
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-frame, small chip, poor light"
+    },
+    {
+      "id": "tuning-frame-damage-10",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/damage-10.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.044186046511627906,
+            "y": 0.18717683557394002,
+            "width": 0.19689922480620156,
+            "height": 0.16442605997931747
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-frame, large scuff"
+    },
+    {
+      "id": "tuning-frame-damage-11",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/damage-11.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.16434108527131783,
+            "y": 0.20579110651499483,
+            "width": 0.056589147286821705,
+            "height": 0.01861427094105481
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-frame, small scratch"
+    },
+    {
+      "id": "tuning-frame-damage-12",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/damage-12.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.07984496124031008,
+            "y": 0.18717683557394002,
+            "width": 0.1635658914728682,
+            "height": 0.13029989658738367
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-frame, large dent, poor light"
+    },
+    {
+      "id": "tuning-frame-damage-13",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/damage-13.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.1558139534883721,
+            "y": 0.2078593588417787,
+            "width": 0.05271317829457364,
+            "height": 0.04343329886246122
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-frame, small crack"
+    },
+    {
+      "id": "tuning-frame-damage-14",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/damage-14.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.23488372093023255,
+            "y": 0.18717683557394002,
+            "width": 0.10542635658914729,
+            "height": 0.0734229576008273
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-frame, large chip"
+    },
+    {
+      "id": "tuning-frame-known-mark-1",
+      "half": "tuning",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/known-1-handover.jpg",
+      "after": "tuning/frame/known-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.04961240310077519,
+          "y": 0.25232678386763185,
+          "width": 0.015503875968992248,
+          "height": 0.07859358841778696
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-frame)"
+    },
+    {
+      "id": "tuning-frame-known-mark-2",
+      "half": "tuning",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/known-2-handover.jpg",
+      "after": "tuning/frame/known-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.45891472868217054,
+          "y": 0.8862461220268872,
+          "width": 0.04961240310077519,
+          "height": 0.10134436401240951
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-frame)"
+    },
+    {
+      "id": "tuning-frame-known-mark-3",
+      "half": "tuning",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/known-3-handover.jpg",
+      "after": "tuning/frame/known-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.01627906976744186,
+          "y": 0.6328852119958635,
+          "width": 0.06124031007751938,
+          "height": 0.05170630816959669
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-frame)"
+    },
+    {
+      "id": "tuning-frame-known-mark-4",
+      "half": "tuning",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/known-4-handover.jpg",
+      "after": "tuning/frame/known-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.017829457364341085,
+          "y": 0.6080661840744571,
+          "width": 0.07829457364341086,
+          "height": 0.07755946225439504
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-frame)"
+    },
+    {
+      "id": "tuning-frame-known-mark-5",
+      "half": "tuning",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/known-5-handover.jpg",
+      "after": "tuning/frame/known-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.2565891472868217,
+          "y": 0.20268872802481902,
+          "width": 0.018604651162790697,
+          "height": 0.05997931747673216
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-frame)"
+    },
+    {
+      "id": "tuning-frame-identity-2",
+      "half": "tuning",
+      "group": "identity",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/near-copy-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: the handover photograph, resized and saved again, sent as the return"
+    },
+    {
+      "id": "tuning-frame-identity-3",
+      "half": "tuning",
+      "group": "identity",
+      "origin": "synthetic",
+      "view": "frame",
+      "before": "tuning/frame/handover.jpg",
+      "after": "tuning/frame/near-copy-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: the handover photograph, resized and saved again, sent as the return"
+    },
+    {
+      "id": "gate-front-wheel-clean-easy-0",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/synthetic-A-s2-front-wheel.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s1-front-wheel then A-s2-front-wheel, a re-shot generated from another photograph"
+    },
+    {
+      "id": "gate-front-wheel-clean-hard-0",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/synthetic-A-s3-front-wheel.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s1-front-wheel then A-s3-front-wheel, a re-shot generated from another photograph"
+    },
+    {
+      "id": "gate-front-wheel-identity-0",
+      "half": "gate",
+      "group": "identity",
+      "origin": "real",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/real-B-s1-front-wheel.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "real: another bike, B-s1-front-wheel"
+    },
+    {
+      "id": "gate-front-wheel-identity-1",
+      "half": "gate",
+      "group": "identity",
+      "origin": "real",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/copy-of-handover.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "real: the handover photograph sent again as the return"
+    },
+    {
+      "id": "gate-front-wheel-clean-easy-1",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/easy-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-front-wheel, brightness 0.98"
+    },
+    {
+      "id": "gate-front-wheel-clean-easy-2",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/easy-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-front-wheel, brightness 1.00"
+    },
+    {
+      "id": "gate-front-wheel-clean-easy-3",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/easy-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-front-wheel, brightness 0.96"
+    },
+    {
+      "id": "gate-front-wheel-clean-easy-4",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/easy-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-front-wheel, brightness 0.99"
+    },
+    {
+      "id": "gate-front-wheel-clean-easy-5",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/easy-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-front-wheel, brightness 1.03"
+    },
+    {
+      "id": "gate-front-wheel-clean-easy-6",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/easy-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-front-wheel, brightness 1.02"
+    },
+    {
+      "id": "gate-front-wheel-clean-easy-7",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/easy-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-front-wheel, brightness 0.96"
+    },
+    {
+      "id": "gate-front-wheel-clean-easy-8",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/easy-8.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-front-wheel, brightness 1.05"
+    },
+    {
+      "id": "gate-front-wheel-clean-easy-9",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/easy-9.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-front-wheel, brightness 1.05"
+    },
+    {
+      "id": "gate-front-wheel-clean-hard-1",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/hard-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-front-wheel, brightness 0.80, colour warmer, shadow band, tilted -1.0°"
+    },
+    {
+      "id": "gate-front-wheel-clean-hard-2",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/hard-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-front-wheel, brightness 0.85, colour warmer, shadow band, tilted 1.3°"
+    },
+    {
+      "id": "gate-front-wheel-clean-hard-3",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/hard-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-front-wheel, brightness 0.87, colour cooler, shadow band, tilted 0.0°"
+    },
+    {
+      "id": "gate-front-wheel-clean-hard-4",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/hard-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-front-wheel, brightness 0.92, colour warmer, shadow band, tilted -1.4°"
+    },
+    {
+      "id": "gate-front-wheel-clean-hard-5",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/hard-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-front-wheel, brightness 1.06, colour cooler, shadow band, tilted 1.2°"
+    },
+    {
+      "id": "gate-front-wheel-clean-hard-6",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/hard-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-front-wheel, brightness 1.11, colour warmer, shadow band, tilted -1.1°"
+    },
+    {
+      "id": "gate-front-wheel-clean-hard-7",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/hard-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-front-wheel, brightness 0.87, colour cooler, shadow band, tilted 1.9°"
+    },
+    {
+      "id": "gate-front-wheel-clean-hard-8",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/hard-8.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-front-wheel, brightness 0.72, colour warmer, shadow band, tilted 0.7°"
+    },
+    {
+      "id": "gate-front-wheel-clean-hard-9",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/hard-9.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-front-wheel, brightness 0.99, colour cooler, shadow band, tilted -1.8°"
+    },
+    {
+      "id": "gate-front-wheel-wear-1",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/wear-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-front-wheel, mud and dust"
+    },
+    {
+      "id": "gate-front-wheel-wear-2",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/wear-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-front-wheel, mud and dust"
+    },
+    {
+      "id": "gate-front-wheel-wear-3",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/wear-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-front-wheel, mud and dust"
+    },
+    {
+      "id": "gate-front-wheel-wear-4",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/wear-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-front-wheel, mud and dust"
+    },
+    {
+      "id": "gate-front-wheel-wear-5",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/wear-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-front-wheel, mud and dust"
+    },
+    {
+      "id": "gate-front-wheel-wear-6",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/wear-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-front-wheel, mud and dust"
+    },
+    {
+      "id": "gate-front-wheel-wear-7",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/wear-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-front-wheel, mud and dust"
+    },
+    {
+      "id": "gate-front-wheel-damage-1",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/damage-1.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.51,
+            "y": 0.484375,
+            "width": 0.0325,
+            "height": 0.036875
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-front-wheel, small scratch"
+    },
+    {
+      "id": "gate-front-wheel-damage-2",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/damage-2.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.273125,
+            "y": 0.005,
+            "width": 0.129375,
+            "height": 0.188125
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-front-wheel, large dent"
+    },
+    {
+      "id": "gate-front-wheel-damage-3",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/damage-3.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.348125,
+            "y": 0.0875,
+            "width": 0.023125,
+            "height": 0.045
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-front-wheel, small crack, poor light"
+    },
+    {
+      "id": "gate-front-wheel-damage-4",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/damage-4.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.34875,
+            "y": 0.09375,
+            "width": 0.07125,
+            "height": 0.11875
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-front-wheel, large chip"
+    },
+    {
+      "id": "gate-front-wheel-damage-5",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/damage-5.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.305,
+            "y": 0.0875,
+            "width": 0.070625,
+            "height": 0.06125
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-front-wheel, small scuff"
+    },
+    {
+      "id": "gate-front-wheel-damage-6",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/damage-6.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.36625,
+            "y": 0.07625,
+            "width": 0.046875,
+            "height": 0.175625
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-front-wheel, large scratch, poor light"
+    },
+    {
+      "id": "gate-front-wheel-damage-7",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/damage-7.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.336875,
+            "y": 0.081875,
+            "width": 0.051875,
+            "height": 0.055
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-front-wheel, small dent"
+    },
+    {
+      "id": "gate-front-wheel-damage-8",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/damage-8.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.313125,
+            "y": 0.0775,
+            "width": 0.06375,
+            "height": 0.061875
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-front-wheel, large crack"
+    },
+    {
+      "id": "gate-front-wheel-damage-9",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/damage-9.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.34125,
+            "y": 0.07875,
+            "width": 0.05125,
+            "height": 0.065625
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-front-wheel, small chip, poor light"
+    },
+    {
+      "id": "gate-front-wheel-damage-10",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/damage-10.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.20875,
+            "y": 0.01625,
+            "width": 0.195625,
+            "height": 0.20125
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-front-wheel, large scuff"
+    },
+    {
+      "id": "gate-front-wheel-damage-11",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/damage-11.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.33875,
+            "y": 0.099375,
+            "width": 0.04,
+            "height": 0.063125
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-front-wheel, small scratch"
+    },
+    {
+      "id": "gate-front-wheel-damage-12",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/damage-12.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.310625,
+            "y": 0.07625,
+            "width": 0.085625,
+            "height": 0.12875
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-front-wheel, large dent, poor light"
+    },
+    {
+      "id": "gate-front-wheel-damage-13",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/damage-13.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.32625,
+            "y": 0.10625,
+            "width": 0.026875,
+            "height": 0.05
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-front-wheel, small crack"
+    },
+    {
+      "id": "gate-front-wheel-damage-14",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/damage-14.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.30875,
+            "y": 0.10625,
+            "width": 0.088125,
+            "height": 0.08625
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-front-wheel, large chip"
+    },
+    {
+      "id": "gate-front-wheel-known-mark-1",
+      "half": "gate",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/known-1-handover.jpg",
+      "after": "gate/front-wheel/known-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.355,
+          "y": 0.073125,
+          "width": 0.029375,
+          "height": 0.071875
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-front-wheel)"
+    },
+    {
+      "id": "gate-front-wheel-known-mark-2",
+      "half": "gate",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/known-2-handover.jpg",
+      "after": "gate/front-wheel/known-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.34375,
+          "y": 0.105625,
+          "width": 0.04875,
+          "height": 0.049375
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-front-wheel)"
+    },
+    {
+      "id": "gate-front-wheel-known-mark-3",
+      "half": "gate",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/known-3-handover.jpg",
+      "after": "gate/front-wheel/known-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.3475,
+          "y": 0.100625,
+          "width": 0.046875,
+          "height": 0.05875
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-front-wheel)"
+    },
+    {
+      "id": "gate-front-wheel-known-mark-4",
+      "half": "gate",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/known-4-handover.jpg",
+      "after": "gate/front-wheel/known-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.453125,
+          "y": 0.38375,
+          "width": 0.025625,
+          "height": 0.055625
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-front-wheel)"
+    },
+    {
+      "id": "gate-front-wheel-known-mark-5",
+      "half": "gate",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/known-5-handover.jpg",
+      "after": "gate/front-wheel/known-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.31875,
+          "y": 0.11625,
+          "width": 0.04,
+          "height": 0.049375
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-front-wheel)"
+    },
+    {
+      "id": "gate-front-wheel-identity-2",
+      "half": "gate",
+      "group": "identity",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/near-copy-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: the handover photograph, resized and saved again, sent as the return"
+    },
+    {
+      "id": "gate-front-wheel-identity-3",
+      "half": "gate",
+      "group": "identity",
+      "origin": "synthetic",
+      "view": "front-wheel",
+      "before": "gate/front-wheel/handover.jpg",
+      "after": "gate/front-wheel/near-copy-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: the handover photograph, resized and saved again, sent as the return"
+    },
+    {
+      "id": "tuning-full-side-clean-easy-0",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/synthetic-A-s2-full-side.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s1-full-side then A-s2-full-side, a re-shot generated from another photograph"
+    },
+    {
+      "id": "tuning-full-side-clean-hard-0",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/synthetic-A-s3-full-side.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s1-full-side then A-s3-full-side, a re-shot generated from another photograph"
+    },
+    {
+      "id": "tuning-full-side-identity-0",
+      "half": "tuning",
+      "group": "identity",
+      "origin": "real",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/real-B-s1-full-side.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "real: another bike, B-s1-full-side"
+    },
+    {
+      "id": "tuning-full-side-identity-1",
+      "half": "tuning",
+      "group": "identity",
+      "origin": "real",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/copy-of-handover.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "real: the handover photograph sent again as the return"
+    },
+    {
+      "id": "tuning-full-side-clean-easy-1",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/easy-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-full-side, brightness 1.02"
+    },
+    {
+      "id": "tuning-full-side-clean-easy-2",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/easy-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-full-side, brightness 0.99"
+    },
+    {
+      "id": "tuning-full-side-clean-easy-3",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/easy-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-full-side, brightness 1.05"
+    },
+    {
+      "id": "tuning-full-side-clean-easy-4",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/easy-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-full-side, brightness 1.01"
+    },
+    {
+      "id": "tuning-full-side-clean-easy-5",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/easy-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-full-side, brightness 1.05"
+    },
+    {
+      "id": "tuning-full-side-clean-easy-6",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/easy-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-full-side, brightness 0.99"
+    },
+    {
+      "id": "tuning-full-side-clean-easy-7",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/easy-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-full-side, brightness 1.04"
+    },
+    {
+      "id": "tuning-full-side-clean-easy-8",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/easy-8.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-full-side, brightness 1.01"
+    },
+    {
+      "id": "tuning-full-side-clean-easy-9",
+      "half": "tuning",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/easy-9.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-full-side, brightness 1.03"
+    },
+    {
+      "id": "tuning-full-side-clean-hard-1",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/hard-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-full-side, brightness 1.13, colour warmer, shadow band, tilted -0.3°"
+    },
+    {
+      "id": "tuning-full-side-clean-hard-2",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/hard-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-full-side, brightness 0.94, colour warmer, shadow band, tilted -0.8°"
+    },
+    {
+      "id": "tuning-full-side-clean-hard-3",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/hard-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-full-side, brightness 0.74, colour warmer, shadow band, tilted -0.9°"
+    },
+    {
+      "id": "tuning-full-side-clean-hard-4",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/hard-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-full-side, brightness 1.04, colour cooler, shadow band, tilted -0.1°"
+    },
+    {
+      "id": "tuning-full-side-clean-hard-5",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/hard-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-full-side, brightness 1.18, colour cooler, shadow band, tilted 1.6°"
+    },
+    {
+      "id": "tuning-full-side-clean-hard-6",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/hard-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-full-side, brightness 0.89, colour cooler, shadow band, tilted 1.3°"
+    },
+    {
+      "id": "tuning-full-side-clean-hard-7",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/hard-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-full-side, brightness 1.03, colour warmer, shadow band, tilted 1.1°"
+    },
+    {
+      "id": "tuning-full-side-clean-hard-8",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/hard-8.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-full-side, brightness 0.75, colour cooler, shadow band, tilted 1.0°"
+    },
+    {
+      "id": "tuning-full-side-clean-hard-9",
+      "half": "tuning",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/hard-9.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-full-side, brightness 0.82, colour warmer, shadow band, tilted 1.7°"
+    },
+    {
+      "id": "tuning-full-side-wear-1",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/wear-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-full-side, mud and dust"
+    },
+    {
+      "id": "tuning-full-side-wear-2",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/wear-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-full-side, mud and dust"
+    },
+    {
+      "id": "tuning-full-side-wear-3",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/wear-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-full-side, mud and dust"
+    },
+    {
+      "id": "tuning-full-side-wear-4",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/wear-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-full-side, mud and dust"
+    },
+    {
+      "id": "tuning-full-side-wear-5",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/wear-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-full-side, mud and dust"
+    },
+    {
+      "id": "tuning-full-side-wear-6",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/wear-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-full-side, mud and dust"
+    },
+    {
+      "id": "tuning-full-side-wear-7",
+      "half": "tuning",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/wear-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-full-side, mud and dust"
+    },
+    {
+      "id": "tuning-full-side-damage-1",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/damage-1.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.705,
+            "y": 0.4676663542642924,
+            "width": 0.0175,
+            "height": 0.01874414245548266
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-full-side, small scratch"
+    },
+    {
+      "id": "tuning-full-side-damage-2",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/damage-2.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.635625,
+            "y": 0.3458294283036551,
+            "width": 0.09875,
+            "height": 0.19868791002811623
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-full-side, large dent"
+    },
+    {
+      "id": "tuning-full-side-damage-3",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/damage-3.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.68375,
+            "y": 0.42830365510777885,
+            "width": 0.025,
+            "height": 0.026241799437675725
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-full-side, small crack, poor light"
+    },
+    {
+      "id": "tuning-full-side-damage-4",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/damage-4.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.6075,
+            "y": 0.36363636363636365,
+            "width": 0.085,
+            "height": 0.13495782567947517
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-full-side, large chip"
+    },
+    {
+      "id": "tuning-full-side-damage-5",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/damage-5.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.685625,
+            "y": 0.42924086223055297,
+            "width": 0.045,
+            "height": 0.10121836925960637
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-full-side, small scuff"
+    },
+    {
+      "id": "tuning-full-side-damage-6",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/damage-6.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.618125,
+            "y": 0.37582005623242737,
+            "width": 0.10625,
+            "height": 0.1358950328022493
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-full-side, large scratch, poor light"
+    },
+    {
+      "id": "tuning-full-side-damage-7",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/damage-7.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.566875,
+            "y": 0.4554826616682287,
+            "width": 0.06375,
+            "height": 0.1049671977507029
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-full-side, small dent"
+    },
+    {
+      "id": "tuning-full-side-damage-8",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/damage-8.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.689375,
+            "y": 0.44704779756326146,
+            "width": 0.035,
+            "height": 0.06466729147141519
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-full-side, large crack"
+    },
+    {
+      "id": "tuning-full-side-damage-9",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/damage-9.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.695625,
+            "y": 0.4639175257731959,
+            "width": 0.03125,
+            "height": 0.05435801312089972
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-full-side, small chip, poor light"
+    },
+    {
+      "id": "tuning-full-side-damage-10",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/damage-10.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.645,
+            "y": 0.29615745079662603,
+            "width": 0.113125,
+            "height": 0.3486410496719775
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-full-side, large scuff"
+    },
+    {
+      "id": "tuning-full-side-damage-11",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/damage-11.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.70125,
+            "y": 0.48078725398313027,
+            "width": 0.02125,
+            "height": 0.023430178069353328
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-full-side, small scratch"
+    },
+    {
+      "id": "tuning-full-side-damage-12",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/damage-12.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.56125,
+            "y": 0.3701968134957826,
+            "width": 0.1175,
+            "height": 0.21274601686972822
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-full-side, large dent, poor light"
+    },
+    {
+      "id": "tuning-full-side-damage-13",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/damage-13.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.674375,
+            "y": 0.40112464854732893,
+            "width": 0.03125,
+            "height": 0.09090909090909091
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-full-side, small crack"
+    },
+    {
+      "id": "tuning-full-side-damage-14",
+      "half": "tuning",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/damage-14.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.6525,
+            "y": 0.37300843486410495,
+            "width": 0.071875,
+            "height": 0.14058106841611998
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-full-side, large chip"
+    },
+    {
+      "id": "tuning-full-side-known-mark-1",
+      "half": "tuning",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/known-1-handover.jpg",
+      "after": "tuning/full-side/known-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.653125,
+          "y": 0.41237113402061853,
+          "width": 0.06,
+          "height": 0.06466729147141519
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-full-side)"
+    },
+    {
+      "id": "tuning-full-side-known-mark-2",
+      "half": "tuning",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/known-2-handover.jpg",
+      "after": "tuning/full-side/known-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.69875,
+          "y": 0.41611996251171507,
+          "width": 0.00875,
+          "height": 0.08059981255857544
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-full-side)"
+    },
+    {
+      "id": "tuning-full-side-known-mark-3",
+      "half": "tuning",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/known-3-handover.jpg",
+      "after": "tuning/full-side/known-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.676875,
+          "y": 0.408622305529522,
+          "width": 0.038125,
+          "height": 0.07310215557638237
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-full-side)"
+    },
+    {
+      "id": "tuning-full-side-known-mark-4",
+      "half": "tuning",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/known-4-handover.jpg",
+      "after": "tuning/full-side/known-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.68375,
+          "y": 0.4301780693533271,
+          "width": 0.043125,
+          "height": 0.09184629803186505
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-full-side)"
+    },
+    {
+      "id": "tuning-full-side-known-mark-5",
+      "half": "tuning",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/known-5-handover.jpg",
+      "after": "tuning/full-side/known-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.65,
+          "y": 0.4311152764761012,
+          "width": 0.05875,
+          "height": 0.026241799437675725
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-full-side)"
+    },
+    {
+      "id": "tuning-full-side-identity-2",
+      "half": "tuning",
+      "group": "identity",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/near-copy-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: the handover photograph, resized and saved again, sent as the return"
+    },
+    {
+      "id": "tuning-full-side-identity-3",
+      "half": "tuning",
+      "group": "identity",
+      "origin": "synthetic",
+      "view": "full-side",
+      "before": "tuning/full-side/handover.jpg",
+      "after": "tuning/full-side/near-copy-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: the handover photograph, resized and saved again, sent as the return"
+    },
+    {
+      "id": "gate-rear-wheel-clean-easy-0",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/synthetic-A-s2-rear-wheel.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s1-rear-wheel then A-s2-rear-wheel, a re-shot generated from another photograph"
+    },
+    {
+      "id": "gate-rear-wheel-clean-hard-0",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/synthetic-A-s3-rear-wheel.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s1-rear-wheel then A-s3-rear-wheel, a re-shot generated from another photograph"
+    },
+    {
+      "id": "gate-rear-wheel-identity-0",
+      "half": "gate",
+      "group": "identity",
+      "origin": "real",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/real-B-s1-rear-wheel.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "real: another bike, B-s1-rear-wheel"
+    },
+    {
+      "id": "gate-rear-wheel-identity-1",
+      "half": "gate",
+      "group": "identity",
+      "origin": "real",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/copy-of-handover.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "real: the handover photograph sent again as the return"
+    },
+    {
+      "id": "gate-rear-wheel-clean-easy-1",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/easy-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-rear-wheel, brightness 0.97"
+    },
+    {
+      "id": "gate-rear-wheel-clean-easy-2",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/easy-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-rear-wheel, brightness 1.05"
+    },
+    {
+      "id": "gate-rear-wheel-clean-easy-3",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/easy-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-rear-wheel, brightness 1.03"
+    },
+    {
+      "id": "gate-rear-wheel-clean-easy-4",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/easy-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-rear-wheel, brightness 0.99"
+    },
+    {
+      "id": "gate-rear-wheel-clean-easy-5",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/easy-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-rear-wheel, brightness 1.02"
+    },
+    {
+      "id": "gate-rear-wheel-clean-easy-6",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/easy-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-rear-wheel, brightness 1.03"
+    },
+    {
+      "id": "gate-rear-wheel-clean-easy-7",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/easy-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-rear-wheel, brightness 0.99"
+    },
+    {
+      "id": "gate-rear-wheel-clean-easy-8",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/easy-8.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-rear-wheel, brightness 0.94"
+    },
+    {
+      "id": "gate-rear-wheel-clean-easy-9",
+      "half": "gate",
+      "group": "clean_easy",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/easy-9.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-rear-wheel, brightness 0.96"
+    },
+    {
+      "id": "gate-rear-wheel-clean-hard-1",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/hard-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-rear-wheel, brightness 0.95, colour warmer, shadow band, tilted -0.6°"
+    },
+    {
+      "id": "gate-rear-wheel-clean-hard-2",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/hard-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-rear-wheel, brightness 0.80, colour warmer, shadow band, tilted 0.1°"
+    },
+    {
+      "id": "gate-rear-wheel-clean-hard-3",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/hard-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-rear-wheel, brightness 1.18, colour cooler, shadow band, tilted 0.3°"
+    },
+    {
+      "id": "gate-rear-wheel-clean-hard-4",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/hard-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-rear-wheel, brightness 1.13, colour warmer, shadow band, tilted -0.8°"
+    },
+    {
+      "id": "gate-rear-wheel-clean-hard-5",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/hard-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-rear-wheel, brightness 1.06, colour cooler, shadow band, tilted 0.9°"
+    },
+    {
+      "id": "gate-rear-wheel-clean-hard-6",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/hard-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-rear-wheel, brightness 1.12, colour cooler, shadow band, tilted -0.1°"
+    },
+    {
+      "id": "gate-rear-wheel-clean-hard-7",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/hard-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-rear-wheel, brightness 1.02, colour cooler, shadow band, tilted -1.4°"
+    },
+    {
+      "id": "gate-rear-wheel-clean-hard-8",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/hard-8.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-rear-wheel, brightness 1.15, colour cooler, shadow band, tilted 1.7°"
+    },
+    {
+      "id": "gate-rear-wheel-clean-hard-9",
+      "half": "gate",
+      "group": "clean_hard",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/hard-9.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-rear-wheel, brightness 1.07, colour cooler, shadow band, tilted 1.3°"
+    },
+    {
+      "id": "gate-rear-wheel-wear-1",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/wear-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-rear-wheel, mud and dust"
+    },
+    {
+      "id": "gate-rear-wheel-wear-2",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/wear-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-rear-wheel, mud and dust"
+    },
+    {
+      "id": "gate-rear-wheel-wear-3",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/wear-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-rear-wheel, mud and dust"
+    },
+    {
+      "id": "gate-rear-wheel-wear-4",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/wear-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-rear-wheel, mud and dust"
+    },
+    {
+      "id": "gate-rear-wheel-wear-5",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/wear-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-rear-wheel, mud and dust"
+    },
+    {
+      "id": "gate-rear-wheel-wear-6",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/wear-6.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-rear-wheel, mud and dust"
+    },
+    {
+      "id": "gate-rear-wheel-wear-7",
+      "half": "gate",
+      "group": "wear",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/wear-7.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-rear-wheel, mud and dust"
+    },
+    {
+      "id": "gate-rear-wheel-damage-1",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/damage-1.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.5425,
+            "y": 0.43875,
+            "width": 0.029375,
+            "height": 0.070625
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-rear-wheel, small scratch"
+    },
+    {
+      "id": "gate-rear-wheel-damage-2",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/damage-2.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.738125,
+            "y": 0.129375,
+            "width": 0.146875,
+            "height": 0.1475
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-rear-wheel, large dent"
+    },
+    {
+      "id": "gate-rear-wheel-damage-3",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/damage-3.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.775,
+            "y": 0.213125,
+            "width": 0.021875,
+            "height": 0.0375
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-rear-wheel, small crack, poor light"
+    },
+    {
+      "id": "gate-rear-wheel-damage-4",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/damage-4.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.74,
+            "y": 0.1725,
+            "width": 0.109375,
+            "height": 0.094375
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-rear-wheel, large chip"
+    },
+    {
+      "id": "gate-rear-wheel-damage-5",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/damage-5.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.79375,
+            "y": 0.184375,
+            "width": 0.04875,
+            "height": 0.05375
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-rear-wheel, small scuff"
+    },
+    {
+      "id": "gate-rear-wheel-damage-6",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/damage-6.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.549375,
+            "y": 0.41625,
+            "width": 0.015,
+            "height": 0.126875
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-rear-wheel, large scratch, poor light"
+    },
+    {
+      "id": "gate-rear-wheel-damage-7",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/damage-7.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.805625,
+            "y": 0.171875,
+            "width": 0.045,
+            "height": 0.056875
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-rear-wheel, small dent"
+    },
+    {
+      "id": "gate-rear-wheel-damage-8",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/damage-8.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.76375,
+            "y": 0.178125,
+            "width": 0.091875,
+            "height": 0.065625
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-rear-wheel, large crack"
+    },
+    {
+      "id": "gate-rear-wheel-damage-9",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/damage-9.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.761875,
+            "y": 0.2,
+            "width": 0.064375,
+            "height": 0.044375
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-rear-wheel, small chip, poor light"
+    },
+    {
+      "id": "gate-rear-wheel-damage-10",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/damage-10.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.730625,
+            "y": 0.085,
+            "width": 0.15625,
+            "height": 0.21375
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-rear-wheel, large scuff"
+    },
+    {
+      "id": "gate-rear-wheel-damage-11",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/damage-11.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.54875,
+            "y": 0.481875,
+            "width": 0.01375,
+            "height": 0.02625
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-rear-wheel, small scratch"
+    },
+    {
+      "id": "gate-rear-wheel-damage-12",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/damage-12.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.75125,
+            "y": 0.120625,
+            "width": 0.133125,
+            "height": 0.155
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s3-rear-wheel, large dent, poor light"
+    },
+    {
+      "id": "gate-rear-wheel-damage-13",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/damage-13.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.795,
+            "y": 0.20125,
+            "width": 0.036875,
+            "height": 0.023125
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s4-rear-wheel, small crack"
+    },
+    {
+      "id": "gate-rear-wheel-damage-14",
+      "half": "gate",
+      "group": "damage",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/damage-14.jpg",
+      "earlier": [],
+      "labels": [
+        {
+          "kind": "damage",
+          "region": {
+            "x": 0.51125,
+            "y": 0.468125,
+            "width": 0.061875,
+            "height": 0.07875
+          }
+        }
+      ],
+      "knownMarks": [],
+      "note": "synthetic: A-s2-rear-wheel, large chip"
+    },
+    {
+      "id": "gate-rear-wheel-known-mark-1",
+      "half": "gate",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/known-1-handover.jpg",
+      "after": "gate/rear-wheel/known-1.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.769375,
+          "y": 0.22125,
+          "width": 0.05125,
+          "height": 0.025
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-rear-wheel)"
+    },
+    {
+      "id": "gate-rear-wheel-known-mark-2",
+      "half": "gate",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/known-2-handover.jpg",
+      "after": "gate/rear-wheel/known-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.560625,
+          "y": 0.510625,
+          "width": 0.0175,
+          "height": 0.01
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-rear-wheel)"
+    },
+    {
+      "id": "gate-rear-wheel-known-mark-3",
+      "half": "gate",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/known-3-handover.jpg",
+      "after": "gate/rear-wheel/known-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.55375,
+          "y": 0.458125,
+          "width": 0.0075,
+          "height": 0.05375
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-rear-wheel)"
+    },
+    {
+      "id": "gate-rear-wheel-known-mark-4",
+      "half": "gate",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/known-4-handover.jpg",
+      "after": "gate/rear-wheel/known-4.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.7725,
+          "y": 0.1975,
+          "width": 0.049375,
+          "height": 0.065
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-rear-wheel)"
+    },
+    {
+      "id": "gate-rear-wheel-known-mark-5",
+      "half": "gate",
+      "group": "known_mark",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/known-5-handover.jpg",
+      "after": "gate/rear-wheel/known-5.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [
+        {
+          "x": 0.783125,
+          "y": 0.21375,
+          "width": 0.045,
+          "height": 0.020625
+        }
+      ],
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-rear-wheel)"
+    },
+    {
+      "id": "gate-rear-wheel-identity-2",
+      "half": "gate",
+      "group": "identity",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/near-copy-2.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: the handover photograph, resized and saved again, sent as the return"
+    },
+    {
+      "id": "gate-rear-wheel-identity-3",
+      "half": "gate",
+      "group": "identity",
+      "origin": "synthetic",
+      "view": "rear-wheel",
+      "before": "gate/rear-wheel/handover.jpg",
+      "after": "gate/rear-wheel/near-copy-3.jpg",
+      "earlier": [],
+      "labels": [],
+      "knownMarks": [],
+      "note": "synthetic: the handover photograph, resized and saved again, sent as the return"
+    }
+  ]
 }

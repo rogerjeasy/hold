@@ -20,7 +20,7 @@ export const lookSchema = z.strictObject({
 })
 
 export type LookRequest = { readonly kind: 'first' | 'second'; readonly context: string; readonly images: readonly { readonly label: string; readonly body: Buffer }[] }
-export type LookReply = { readonly kind: 'result'; readonly data: unknown; readonly model: string; readonly inputTokens: number; readonly outputTokens: number } | { readonly kind: 'refused' | 'unavailable'; readonly model: string }
+export type LookReply = { readonly kind: 'result'; readonly data: unknown; readonly model: string; readonly inputTokens: number; readonly outputTokens: number } | { readonly kind: 'refused' | 'unavailable' | 'throttled'; readonly model: string }
 export type ComparisonModel = { look(request: LookRequest, signal: AbortSignal): Promise<LookReply> }
 export type ModelFinding = z.infer<typeof lookSchema>['findings'][number]
 

@@ -256,7 +256,7 @@ One case is one pair: a handover photograph and a return photograph of the same 
 | Wrong item or reused photograph | 10 | The identity and reuse checks |
 
 - **Each damage pair has its region labelled,** so a finding in the wrong place does not count as found.
-- **Labels live in a manifest beside the images** in `eval/`, with the photographs. All photographs are taken for this project and show no people.
+- **Labels live in a manifest beside the images** in `eval/`, with the photographs. The photographs are freely licensed photographs of real e-bikes from Wikimedia Commons, under CC BY-SA 4.0. They show no people, and are credited in `eval/raw/SOURCES.md` and on `/reliability`.
 - **Two halves.** A tuning half is used when adjusting prompts and thresholds. A gate half is never looked at while tuning and is the only half that is published. This keeps the published numbers honest.
 
 ### 5.4 The measures
@@ -264,6 +264,7 @@ One case is one pair: a handover photograph and a return photograph of the same 
 | Measure | Definition |
 |---|---|
 | **Damage found** | Labelled damage for which the pipeline produced a damage or missing finding that overlaps the labelled region, divided by all labelled damage |
+| **Damage passed as clean** | Labelled damage whose pair ended in the result "Clean", divided by all labelled damage. This is the miss nobody would look at again. A pair sent to a person is not counted, since a person decides it. Added 29 October 2026; earlier runs say "Not recorded in this run". |
 | **Clean returns wrongly flagged** | Clean pairs that ended in the result "Findings", divided by all clean pairs. This is the error that harms renters. |
 | **Sent to a person** | Pairs that ended in "Needs a person", divided by all pairs. Reported separately. Deferring is not counted as an error or as a success. |
 | **Known marks respected** | Pairs with a known mark where no claim line was drafted for it, divided by all such pairs |
@@ -322,6 +323,23 @@ Testing is not the same as a shop. Every real decision is also a label.
 
 **Status, 26 October 2026.** X0.2, X0.5 and X0.6 pass in tests (`eval/src/evaluate.test.ts`, `packages/db/src/scorecard-repository.test.ts`, `packages/domain/src/evaluation.test.ts`, the scorecard screens' tests). X0.3 holds by construction, every surface rendering one run's measures through `sharePercent`, and is checked when the first run is accepted. X0.1 waits for the photographs of the hybrid set (`architecture.md` section 10.8). **28 October 2026:** still waiting. The set needs real photographs, which only the team can take: one bike (A) photographed view by view on separate occasions, sessions 1 to 3 at least, and one other bike (B) once, named like `A-s1-frame-left.jpg` and `B-s1-frame-left.jpg`, at least four views so each half has two. `pnpm --filter @hold/eval augment --raw <folder>` then builds both halves, with synthetic pairs filling each group and labelled as synthetic. Meanwhile, on the demonstration's own sample pair, the second look was unsure of a featureless tube twice in five runs; with a wider crop (`SECOND_LOOK_MARGIN`, prompt version `inspection-2`) it confirmed the chip 8 of 8 times and still sent the contested sample to a person 3 of 3. That is a check on one pair, not a measurement, and no figure is published from it. X0.4 needs the `hold-github-eval` role and the `hold/database/eval` secret deployed, the repository variables `AWS_EVAL_ROLE_ARN` and `HOLD_DATABASE_EVAL_SECRET_ARN` set, and one deliberately weakened run.
 
+**29 October 2026.** X0.1 is met. The team had no bike to photograph, so the set starts from freely licensed photographs on Wikimedia Commons (`eval/raw/SOURCES.md`). Bike A is an Urwahn Platzhirsch e-bike, and bike B a Riese und Müller New Charger. Each photograph is cut into six views placed relative to the wheel hubs.
+
+A first run used real re-shots of bike A from two other places, and sent all 144 such pairs to a person without calling the model. Such shots never line up with the handover at the 92 percent the comparison requires. In a shop the return is framed at the same counter with the handover overlay, so the returns are now generated from the handover photograph instead. Each is a small camera move of up to 1.5 percent per corner, with mild light changes, and is marked synthetic. Only the wrong-item and reused-photograph pairs count as real.
+
+A mask beside each raw photograph marks the yellow frame, so drawn damage and known marks land on the bike, never on the wall behind it. Each half holds 30 clean easy, 30 clean hard, 21 wear, 42 damage, 15 known-mark and 12 identity pairs.
+
+The same first run found a real gap in the reuse check. A handover photograph resized and saved again moved its fingerprint by one to four bits, so the check, which wanted an exact match, missed all six. Claude then judged them clean. `photoReused` now treats fingerprints within four bits as the same picture (`REUSED_WITHIN_BITS`). The cost is that a very steady new photograph of the same view can also land within four bits and go to a person: about one in seven of the generated re-shots do.
+
+That first run was accepted by mistake, and it is the accepted run until the next accepted run replaces it.
+
+A full gate run on the rebuilt set found no damage: Claude described the drawn chips as "a gray polygonal patch… may be a digitally applied mask… or a sticker", and would not call flat drawn shapes damage. Damage is now drawn from the photograph's own pixels (`eval/src/damage.ts`). Bare metal keeps the light on the tube, a scratch lightens and a crack darkens the paint it cuts, chips show a primer ring, and nothing spills off the item's mask. The five kinds are now scratch, dent, crack, chip and scuff. A missing part cannot be drawn believably, so the set has no missing-part pairs.
+
+On a sample from the tuning half, the first look now calls scratches, scuffs and cracks new damage. The second look agrees with the class but, for small marks, at a confidence of 0.6 to 0.65, below the level a charge needs. Such pairs go to a person. Large clear damage is confirmed. Drawn chips are still sometimes read as a sticker.
+
+A gate run on that set still found no damage. The first look named 9 large chips and scuffs as new damage at 0.78 to 0.95, each in the right place, and the second look confirmed none, because it was held to the first look's 0.9. The second look now confirms at 0.6 (`INSPECTION_LIMITS.secondLookMinConfidence`, decided 29 October), and each run records it in `thresholds`.
+
+That change answered what the gate half showed, so the gate half was refreshed with new pairs (`augment --seed 2`) before the next accepted run, as section 5.5 requires.
 ### 5.10 In the video
 
 Four seconds on the scorecard while the damage comparison runs, with the real numbers on screen.
