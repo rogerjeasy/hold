@@ -2084,11 +2084,12 @@
         "add": "Ajouter ces prix",
         "added": "{count, plural, one {# prix ajouté} other {# prix ajoutés}}{skipped, plural, =0 {.} other {, la ligne d’en-tête laissée de côté.}}",
         "none": "Aucun prix n’a été trouvé dans ce qui a été collé.",
-        "gridHint": "Vous pouvez aussi coller directement dans le tableau."
+        "gridHint": "Vous pouvez aussi cliquer sur une cellule de la grille et coller à cet endroit.",
+        "pasted": "{count, plural, one {# ligne collée.} other {# lignes collées.}}"
       },
       "grid": {
         "label": "Prix de ce brouillon",
-        "keys": "Entrée modifie une case et Tab passe à la suivante. Faites glisser une ligne par sa poignée pour changer l’ordre lu par les locataires. Ctrl ou ⌘ avec Z annule le dernier changement."
+        "keys": "Entrée modifie une cellule et Tab passe à la suivante. Maj avec les flèches choisit des cellules ; Ctrl ou ⌘ avec C les copie, et avec V colle des cellules d’un tableur à la cellule choisie. Un clic droit sur une ligne ajoute ou retire un prix. Faites glisser une ligne par sa poignée pour changer l’ordre lu par les clients. Ctrl ou ⌘ avec Z annule la dernière modification."
       },
       "columns": {
         "order": "Ordre",
@@ -2141,7 +2142,14 @@
         "de": "Deutsch",
         "es": "Español",
         "fr": "Français"
-      }
+      },
+      "menu": {
+        "above": "Ajouter un prix au-dessus",
+        "below": "Ajouter un prix en dessous",
+        "remove": "Retirer ce prix"
+      },
+      "download": "Télécharger pour un tableur",
+      "sheet": "Prix"
     }
   },
   "emails": {
@@ -2905,7 +2913,7 @@
     "groupRight": "{pass} sur {total} justes",
     "grid": "Paires de la moitié de contrôle",
     "list": "Paires",
-    "keys": "Les flèches passent d’une paire à l’autre. Entrée en ouvre une à côté de la liste.",
+    "keys": "Les flèches passent d’une paire à l’autre. Entrée en ouvre une sous sa ligne, et la referme.",
     "columns": {
       "pair": "Paire",
       "expected": "Attendu",
@@ -2913,7 +2921,9 @@
       "model": "Signalé",
       "secondLook": "Second regard",
       "alignment": "Alignée",
-      "verdict": "Résultat"
+      "verdict": "Résultat",
+      "open": "Ouvrir",
+      "group": "Type"
     },
     "outcomes": {
       "clean": "Propre",
@@ -2991,7 +3001,11 @@
       "notAccepted": "Non acceptée",
       "gateStopped": "Arrêtée par le contrôle",
       "crossed": "Ligne franchie"
-    }
+    },
+    "openPair": "Ouvrir la paire {id}",
+    "closePair": "Fermer la paire {id}",
+    "download": "Télécharger ces paires pour un tableur",
+    "sheet": "Paires"
   },
   "trust": {
     "reason": "Votre empreinte est de {amount}, et non de {ordinary}, car vous avez rendu {count, plural, one {# location} other {# locations}} en bon état au cours des {months} derniers mois.",
@@ -3484,13 +3498,14 @@
     "search": "Rechercher des décisions",
     "searchHint": "Locataire, article ou référence PayPal",
     "mineOnly": "Seulement les miennes",
-    "keys": "Les flèches passent d’une décision à l’autre. Entrée en ouvre une à côté de la liste. Espace choisit une libération.",
+    "keys": "Les flèches passent d’une décision à l’autre. Entrée en ouvre une sous sa ligne, et la referme. Espace choisit une libération.",
     "grid": "Décisions qui attendent une personne",
     "columns": {
       "decision": "Décision",
       "due": "Échéance",
       "amount": "Montant",
-      "choose": "Choisir"
+      "choose": "Choisir",
+      "open": "Ouvrir"
     },
     "titles": {
       "claim": "Approuver une réclamation",
@@ -3537,8 +3552,6 @@
     "open": "Preuves et actions",
     "choose": "Choisir la libération de {amount}",
     "detail": {
-      "label": "Décision choisie",
-      "none": "Choisissez une décision pour voir ses preuves et ce qui peut être fait.",
       "due": "Échéance",
       "amount": "Montant",
       "decider": "Qui décide",
@@ -3575,6 +3588,16 @@
       "approve": "Approuver ces libérations",
       "passkey": "Confirmez avec votre clé d’accès pour approuver les libérations.",
       "clear": "Effacer le choix"
+    },
+    "openEvidence": "Ouvrir les preuves de {title}",
+    "closeEvidence": "Fermer les preuves de {title}",
+    "groupCount": "{count, plural, one {# décision} other {# décisions}}",
+    "groupTotal": "{amount} au total",
+    "menu": {
+      "open": "Ouvrir la décision",
+      "close": "Fermer la décision",
+      "claim": "Ouvrir la page de la réclamation",
+      "rental": "Ouvrir la location"
     }
   }
 }

@@ -2084,11 +2084,12 @@
         "add": "Add these prices",
         "added": "{count, plural, one {# price added} other {# prices added}}{skipped, plural, =0 {.} other {, the header line left out.}}",
         "none": "No prices were found in what was pasted.",
-        "gridHint": "You can also paste straight onto the grid."
+        "gridHint": "You can also click a cell on the grid and paste there.",
+        "pasted": "{count, plural, one {# row pasted.} other {# rows pasted.}}"
       },
       "grid": {
         "label": "Prices in this draft",
-        "keys": "Enter edits a cell and Tab moves on. Drag a row by its handle to change the order renters read. Ctrl or ⌘ with Z takes back the last change."
+        "keys": "Enter edits a cell and Tab moves on. Shift with the arrows chooses cells; Ctrl or ⌘ with C copies them, and with V pastes cells from a spreadsheet at the focused cell. Right-click a row to add or remove a price. Drag a row by its handle to change the order renters read. Ctrl or ⌘ with Z takes back the last change."
       },
       "columns": {
         "order": "Order",
@@ -2141,7 +2142,14 @@
         "de": "Deutsch",
         "es": "Español",
         "fr": "Français"
-      }
+      },
+      "menu": {
+        "above": "Add a price above",
+        "below": "Add a price below",
+        "remove": "Remove this price"
+      },
+      "download": "Download for a spreadsheet",
+      "sheet": "Prices"
     }
   },
   "emails": {
@@ -2905,7 +2913,7 @@
     "groupRight": "{pass} of {total} right",
     "grid": "Pairs of the gate half",
     "list": "Pairs",
-    "keys": "Arrow keys move between pairs. Enter opens one beside the list.",
+    "keys": "Arrow keys move between pairs. Enter opens one under its row, and closes it again.",
     "columns": {
       "pair": "Pair",
       "expected": "Expected",
@@ -2913,7 +2921,9 @@
       "model": "Claimed",
       "secondLook": "Second look",
       "alignment": "Lined up",
-      "verdict": "Result"
+      "verdict": "Result",
+      "open": "Open",
+      "group": "Kind"
     },
     "outcomes": {
       "clean": "Clean",
@@ -2991,7 +3001,11 @@
       "notAccepted": "Not accepted",
       "gateStopped": "Stopped by the gate",
       "crossed": "Crossed the line"
-    }
+    },
+    "openPair": "Open pair {id}",
+    "closePair": "Close pair {id}",
+    "download": "Download these pairs for a spreadsheet",
+    "sheet": "Pairs"
   },
   "trust": {
     "reason": "Your hold is {amount}, not {ordinary}, because you have returned {count, plural, one {# rental} other {# rentals}} in good condition in the last {months} months.",
@@ -3484,13 +3498,14 @@
     "search": "Search decisions",
     "searchHint": "Renter, item or PayPal reference",
     "mineOnly": "Only mine",
-    "keys": "Arrow keys move between decisions. Enter opens one beside the list. Space chooses a release.",
+    "keys": "Arrow keys move between decisions. Enter opens one under its row, and closes it again. Space chooses a release.",
     "grid": "Decisions waiting on a person",
     "columns": {
       "decision": "Decision",
       "due": "Due",
       "amount": "Amount",
-      "choose": "Choose"
+      "choose": "Choose",
+      "open": "Open"
     },
     "titles": {
       "claim": "Approve a claim",
@@ -3537,8 +3552,6 @@
     "open": "Evidence and actions",
     "choose": "Choose the release of {amount}",
     "detail": {
-      "label": "Chosen decision",
-      "none": "Choose a decision to see its evidence and what can be done.",
       "due": "Due",
       "amount": "Amount",
       "decider": "Who decides",
@@ -3575,6 +3588,16 @@
       "approve": "Approve these releases",
       "passkey": "Confirm with your passkey to approve releases.",
       "clear": "Clear the choice"
+    },
+    "openEvidence": "Open the evidence of {title}",
+    "closeEvidence": "Close the evidence of {title}",
+    "groupCount": "{count, plural, one {# decision} other {# decisions}}",
+    "groupTotal": "{amount} in all",
+    "menu": {
+      "open": "Open the decision",
+      "close": "Close the decision",
+      "claim": "Open the claim page",
+      "rental": "Open the rental"
     }
   }
 }

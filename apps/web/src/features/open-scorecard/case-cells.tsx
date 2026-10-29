@@ -4,25 +4,36 @@ import type { CustomCellRendererProps } from 'ag-grid-react'
 import { Check, UserRound, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { createContext, useContext } from 'react'
+import { EVALUATION_GROUPS } from '@hold/domain'
+import type { EvaluationGroup } from '@hold/domain'
 import { SampleTag } from '@/components/ui/sample-tag'
 import type { CaseRow } from './case-rows'
-
-// The pair chosen beside the grid, for the cells to mark. ag-grid-react draws each cell inside the grid's own React
-// tree, so a new choice reaches the cells without redrawing a row or losing the keyboard's place.
-export const ChosenCaseContext = createContext<string | null>(null)
+import { verdictCounts } from './case-rows'
 
 type CellProps = CustomCellRendererProps<CaseRow>
 
 const VERDICT_ICONS: Readonly<Record<CaseRow['verdict'], LucideIcon>> = { pass: Check, fail: X, person: UserRound }
 
+const isGroup = (key: unknown): key is EvaluationGroup => EVALUATION_GROUPS.some((group) => group === key)
+
+// A group's heading across the grid: the kind of pair and how many of its pairs the comparison got right.
+export function CaseGroupLabel({ node }: CellProps) {
+  const t = useTranslations('openScorecard')
+  if (!isGroup(node.key)) return null
+  const counts = verdictCounts(node.allLeafChildren?.flatMap((leaf) => (leaf.data === undefined ? [] : [leaf.data])) ?? [])
+  return (
+    <span className="flex min-w-0 flex-wrap items-baseline gap-x-3">
+      <span className="font-semibold">{t(`groups.${node.key}`)}</span>
+      <span className="figures text-sm text-muted-foreground">{t('groupRight', { pass: counts.pass, total: counts.total })}</span>
+    </span>
+  )
+}
+
 export function PairCell({ data }: CellProps) {
   const t = useTranslations('openScorecard')
-  const chosenId = useContext(ChosenCaseContext)
   if (data === undefined) return null
-  const chosen = data.id === chosenId
   return (
-    <div data-chosen={chosen ? 'true' : undefined} aria-current={chosen ? 'true' : undefined} className="grid h-full min-w-0 content-center gap-0.5 leading-snug">
+    <div className="grid h-full min-w-0 content-center gap-0.5 leading-snug">
       <span className="truncate font-mono text-sm font-semibold">{data.id}</span>
       <div className="flex min-w-0 items-center gap-2">
         <span className="truncate text-sm text-muted-foreground">{t(`groups.${data.group}`)}</span>

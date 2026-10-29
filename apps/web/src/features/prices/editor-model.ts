@@ -1,5 +1,6 @@
 import { checkPriceRows, parseAmount } from '@hold/domain'
 import type { PriceCategory } from '@hold/domain'
+import { readAmount, readKind, readPastedLines } from './paste'
 import type { PastedRow } from './paste'
 
 // The draft of the next version of a shop's terms, as plain values: every change makes a new draft, so the undo
@@ -28,6 +29,11 @@ export function updateRow(draft: Draft, key: number, change: Partial<Omit<Editor
   return { ...draft, rows: draft.rows.map((row) => (row.key === key ? { ...row, ...change } : row)) }
 }
 
+// A blank row at a place in the order, above or below another.
+export function insertRow(draft: Draft, atIndex: number): Draft {
+  return { ...draft, rows: [...draft.rows.slice(0, atIndex), blank(nextKey(draft.rows)), ...draft.rows.slice(atIndex)] }
+}
+
 // The last row removed leaves a blank one, so there is always somewhere to type.
 export function removeRow(draft: Draft, key: number): Draft {
   const rows = draft.rows.filter((row) => row.key !== key)
@@ -50,4 +56,29 @@ export function draftEntries(draft: Draft, currency: string): { description: str
     const fine = Object.keys(problems[index] ?? {}).length === 0
     return !fine || amount === undefined ? [] : [{ description: row.description.trim(), category: row.category, amountCents: amount.cents }]
   })
+}
+
+// Where a block of cells was pasted: the focused row, and the column of the focused cell.
+export type PasteTarget = { readonly rowIndex: number; readonly column: 'description' | 'kind' | 'amount' }
+
+// A block of cells pasted onto the grid, as one change: from the focused row down, writing over rows and adding any
+// past the last. Pasted at a description, each line is read as a price, as a pasted list is; pasted at an amount or a
+// kind, the first cell of each line goes into that column. A kind is written only where one is named.
+export function pasteAt(draft: Draft, target: PasteTarget, cells: readonly (readonly string[])[], currency: string, localKinds: Readonly<Record<string, PriceCategory>> = {}): { readonly draft: Draft; readonly count: number } {
+  const changes: Partial<Omit<EditorRow, 'key'>>[] =
+    target.column === 'description'
+      ? readPastedLines(cells.map((line) => line.join('\t')).join('\n'), currency, localKinds).rows.map(({ category, ...row }) => (category === undefined ? row : { ...row, category }))
+      : cells.map((line) => line[0] ?? '').map((cell): Partial<Omit<EditorRow, 'key'>> => {
+          if (target.column === 'amount') return { amount: readAmount(cell, currency) }
+          const category = readKind(cell, localKinds)
+          return category === undefined ? {} : { category }
+        })
+  if (changes.length === 0) return { draft, count: 0 }
+  const start = nextKey(draft.rows)
+  const rows = [...draft.rows]
+  changes.forEach((change, offset) => {
+    const at = target.rowIndex + offset
+    rows[at] = { ...(rows[at] ?? blank(start + at - draft.rows.length)), ...change }
+  })
+  return { draft: { ...draft, rows }, count: changes.length }
 }

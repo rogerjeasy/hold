@@ -2084,11 +2084,12 @@
         "add": "Diese Preise hinzufügen",
         "added": "{count, plural, one {# Preis hinzugefügt} other {# Preise hinzugefügt}}{skipped, plural, =0 {.} other {, die Kopfzeile ausgelassen.}}",
         "none": "Im Eingefügten wurden keine Preise gefunden.",
-        "gridHint": "Du kannst auch direkt in die Tabelle einfügen."
+        "gridHint": "Du kannst auch eine Zelle in der Tabelle anklicken und dort einfügen.",
+        "pasted": "{count, plural, one {# Zeile eingefügt.} other {# Zeilen eingefügt.}}"
       },
       "grid": {
         "label": "Preise in diesem Entwurf",
-        "keys": "Enter bearbeitet eine Zelle, Tab geht weiter. Zieh eine Zeile am Griff, um die Reihenfolge für Mieter zu ändern. Strg oder ⌘ mit Z nimmt die letzte Änderung zurück."
+        "keys": "Enter bearbeitet eine Zelle, Tab geht weiter. Umschalt mit den Pfeilen wählt Zellen; Strg oder ⌘ mit C kopiert sie, mit V fügst du Zellen aus einer Tabelle an der gewählten Zelle ein. Rechtsklick auf eine Zeile fügt einen Preis hinzu oder entfernt ihn. Zieh eine Zeile am Griff, um die Reihenfolge für Mieter zu ändern. Strg oder ⌘ mit Z nimmt die letzte Änderung zurück."
       },
       "columns": {
         "order": "Reihenfolge",
@@ -2141,7 +2142,14 @@
         "de": "Deutsch",
         "es": "Español",
         "fr": "Français"
-      }
+      },
+      "menu": {
+        "above": "Preis darüber hinzufügen",
+        "below": "Preis darunter hinzufügen",
+        "remove": "Diesen Preis entfernen"
+      },
+      "download": "Für eine Tabelle herunterladen",
+      "sheet": "Preise"
     }
   },
   "emails": {
@@ -2905,7 +2913,7 @@
     "groupRight": "{pass} von {total} richtig",
     "grid": "Paare der Prüfhälfte",
     "list": "Paare",
-    "keys": "Mit den Pfeiltasten wechselst du zwischen Paaren. Enter öffnet eines neben der Liste.",
+    "keys": "Mit den Pfeiltasten wechselst du zwischen Paaren. Enter öffnet eines unter seiner Zeile und schließt es wieder.",
     "columns": {
       "pair": "Paar",
       "expected": "Erwartet",
@@ -2913,7 +2921,9 @@
       "model": "Behauptet",
       "secondLook": "Zweiter Blick",
       "alignment": "Ausgerichtet",
-      "verdict": "Ergebnis"
+      "verdict": "Ergebnis",
+      "open": "Öffnen",
+      "group": "Art"
     },
     "outcomes": {
       "clean": "Sauber",
@@ -2991,7 +3001,11 @@
       "notAccepted": "Nicht angenommen",
       "gateStopped": "Von der Prüfschranke gestoppt",
       "crossed": "Linie überschritten"
-    }
+    },
+    "openPair": "Paar {id} öffnen",
+    "closePair": "Paar {id} schließen",
+    "download": "Diese Paare für eine Tabelle herunterladen",
+    "sheet": "Paare"
   },
   "trust": {
     "reason": "Ihre Reservierung beträgt {amount} statt {ordinary}, weil Sie in den letzten {months} Monaten {count, plural, one {# Miete} other {# Mieten}} einwandfrei zurückgegeben haben.",
@@ -3484,13 +3498,14 @@
     "search": "Entscheidungen durchsuchen",
     "searchHint": "Mieter, Artikel oder PayPal-Referenz",
     "mineOnly": "Nur meine",
-    "keys": "Mit den Pfeiltasten wechselst du zwischen Entscheidungen. Enter öffnet eine neben der Liste. Die Leertaste wählt eine Freigabe.",
+    "keys": "Mit den Pfeiltasten wechselst du zwischen Entscheidungen. Enter öffnet eine unter ihrer Zeile und schließt sie wieder. Die Leertaste wählt eine Freigabe.",
     "grid": "Entscheidungen, die auf einen Menschen warten",
     "columns": {
       "decision": "Entscheidung",
       "due": "Fällig",
       "amount": "Betrag",
-      "choose": "Wählen"
+      "choose": "Wählen",
+      "open": "Öffnen"
     },
     "titles": {
       "claim": "Eine Forderung freigeben",
@@ -3537,8 +3552,6 @@
     "open": "Belege und Aktionen",
     "choose": "Die Freigabe über {amount} wählen",
     "detail": {
-      "label": "Gewählte Entscheidung",
-      "none": "Wähle eine Entscheidung, um ihre Belege und die möglichen Schritte zu sehen.",
       "due": "Fällig",
       "amount": "Betrag",
       "decider": "Wer entscheidet",
@@ -3575,6 +3588,16 @@
       "approve": "Diese Freigaben genehmigen",
       "passkey": "Bestätige mit deinem Passkey, um Freigaben zu genehmigen.",
       "clear": "Auswahl aufheben"
+    },
+    "openEvidence": "Belege öffnen: {title}",
+    "closeEvidence": "Belege schließen: {title}",
+    "groupCount": "{count, plural, one {# Entscheidung} other {# Entscheidungen}}",
+    "groupTotal": "{amount} insgesamt",
+    "menu": {
+      "open": "Entscheidung öffnen",
+      "close": "Entscheidung schließen",
+      "claim": "Forderungsseite öffnen",
+      "rental": "Miete öffnen"
     }
   }
 }

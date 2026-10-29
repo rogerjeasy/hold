@@ -10,10 +10,10 @@ import type { RowText } from './use-row-text'
 
 // What every cell needs beyond its row. ag-grid-react draws each cell as a React component inside the grid's own
 // tree, so a change here reaches every cell without the grid redrawing a row or losing the keyboard's place.
-export type GridState = { readonly text: RowText; readonly chosenId: string | null; readonly selectedIds: ReadonlySet<string> }
+export type GridState = { readonly text: RowText; readonly selectedIds: ReadonlySet<string> }
 export const GridStateContext = createContext<GridState | null>(null)
 
-function useGridState(): GridState {
+export function useGridState(): GridState {
   const state = useContext(GridStateContext)
   if (state === null) throw new Error('A decision cell is drawn outside its grid.')
   return state
@@ -29,13 +29,12 @@ export function ChooseCell({ data, node }: CellProps) {
   return <CheckBox label={text.choose(data)} hideLabel checked={selectedIds.has(data.id)} onChange={(on) => { node.setSelected(on, false, 'checkboxSelected') }} />
 }
 
-// What is asked, about whom, and who decides. The chosen row is marked for screen readers and drawn with the accent.
+// What is asked, about whom, and who decides.
 export function DecisionCell({ data }: CellProps) {
-  const { text, chosenId } = useGridState()
+  const { text } = useGridState()
   if (data === undefined) return null
-  const chosen = data.id === chosenId
   return (
-    <div data-chosen={chosen ? 'true' : undefined} aria-current={chosen ? 'true' : undefined} className="grid h-full min-w-0 content-center gap-0.5 py-2 leading-snug">
+    <div className="grid h-full min-w-0 content-center gap-0.5 py-2 leading-snug">
       <div className="flex min-w-0 items-center gap-2">
         <span className="truncate font-semibold">{text.title(data)}</span>
         {data.simulated ? <SampleTag /> : null}

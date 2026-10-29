@@ -5,9 +5,9 @@ import { ownerWithPrices } from './support/shop'
 import { expectInShop } from './support/sign-in'
 import { expect, test } from './support/test'
 
-// The price list editor (extensions.md section 12.5): the next version as a draft on AG Grid, pasted from a
-// spreadsheet, every cell checked, every change undoable, read as a renter would in their language, compared with any
-// version, and published as version N plus one.
+// The price list editor (extensions.md section 12.5): the next version as a draft on AG Grid Enterprise, pasted from a
+// spreadsheet into the panel or straight onto the cells, every cell checked, every change undoable, read as a renter
+// would in their language, compared with any version, downloaded for a spreadsheet, and published as version N plus one.
 
 const grid = (page: Page) => page.getByRole('region', { name: 'Prices in this draft' })
 const dataRows = (page: Page) => grid(page).getByRole('row').filter({ has: page.getByRole('gridcell') })
@@ -65,6 +65,35 @@ test('an owner edits, pastes, undoes and publishes the next version, seeing what
   await expect(versions.first()).toContainText('Version 2')
   await expect(versions.first()).toContainText('In force')
   await expect(versions.first()).toContainText('3 prices')
+})
+
+test('an owner adds a row from the menu, pastes cells from a spreadsheet onto it as one change, and downloads the draft', async ({ page, context }) => {
+  test.setTimeout(120_000)
+  await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+  await ownerWithPrices(page)
+  await openPrices(page)
+  await dataRows(page).first().locator('[col-id="description"]').click({ button: 'right' })
+  const menu = page.locator('.ag-menu')
+  await expect(menu.getByRole('menuitem', { name: 'Add a price above' })).toBeVisible()
+  await expect(menu.getByRole('menuitem', { name: 'Remove this price' })).toBeVisible()
+  await menu.getByRole('menuitem', { name: 'Add a price below' }).click()
+  await expect(dataRows(page)).toHaveCount(2)
+
+  await page.evaluate(() => navigator.clipboard.writeText('Lost lock\t45\nBent wheel\tDamage\t€90'))
+  await dataRows(page).nth(1).locator('[col-id="description"]').click()
+  await page.keyboard.press('ControlOrMeta+v')
+  await expect(page.getByText('2 rows pasted.')).toBeVisible()
+  await expect(dataRows(page)).toHaveCount(3)
+  await expect(dataRows(page).nth(2)).toContainText('Bent wheel')
+  await expect(dataRows(page).nth(2)).toContainText('€90.00')
+  await page.getByRole('button', { name: 'Undo' }).click()
+  await expect(dataRows(page)).toHaveCount(2)
+  await page.getByRole('button', { name: 'Redo' }).click()
+  await expect(page.getByTestId('draft-status')).toHaveText('Ready to publish.')
+
+  const download = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Download for a spreadsheet' }).click()
+  expect((await download).suggestedFilename()).toBe('hold-price-list-draft.xlsx')
 })
 
 test('on a phone, each price of the draft is a card', async ({ page }) => {

@@ -8,14 +8,24 @@ import type { CaseGridProps } from './case-grid'
 import { OpenScorecard } from './open-scorecard'
 
 // The open scorecard as a renter or a judge reads it. The grid needs a browser's layout and is checked end to end;
-// here it is a stand-in that lists the pairs it was given and lets a test choose one.
-vi.mock('./case-grid', () => ({
-  CaseGrid: ({ rows, onChoose }: CaseGridProps) => (
-    <ul aria-label="Grid stand-in">
-      {rows.map((row) => <li key={row.id}><button type="button" onClick={() => { onChoose(row.id) }}>{`Choose ${row.id}`}</button></li>)}
-    </ul>
-  ),
-}))
+// here it is a stand-in that lists the pairs it was given and opens one in place, drawing what the page gives it.
+vi.mock('./case-grid', async () => {
+  const { useState } = await import('react')
+  return {
+    CaseGrid: function GridStandIn({ rows, renderDetail }: CaseGridProps) {
+      const [opened, setOpened] = useState<string | null>(null)
+      const row = rows.find((each) => each.id === opened)
+      return (
+        <>
+          <ul aria-label="Grid stand-in">
+            {rows.map((each) => <li key={each.id}><button type="button" onClick={() => { setOpened(each.id) }}>{`Open ${each.id}`}</button></li>)}
+          </ul>
+          {row === undefined ? null : <section aria-label="Opened pair">{renderDetail(row, { ref: null })}</section>}
+        </>
+      )
+    },
+  }
+})
 
 const box = (x: number) => ({ x, y: 0.4, width: 0.1, height: 0.1 })
 const pair = (overrides: Partial<EvaluatedCase>): EvaluatedCase => ({
@@ -37,7 +47,7 @@ const history: TrendRun[] = [
 ]
 
 const show = () => renderWithIntl(<OpenScorecard cases={cases} history={history} />)
-const panel = () => screen.getByRole('region', { name: 'Chosen pair' })
+const panel = () => screen.getByRole('region', { name: 'Opened pair' })
 
 describe('the open scorecard', () => {
   it('shows each group with how many of its pairs the comparison got right, and filters the pairs by group', async () => {
@@ -45,13 +55,13 @@ describe('the open scorecard', () => {
     show()
     expect(screen.getByRole('button', { name: /^Damage 1 of 2 right$/ })).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /^Damage/ }))
-    expect(within(screen.getByRole('list', { name: 'Grid stand-in' })).getAllByRole('button').map((each) => each.textContent)).toEqual(['Choose damage-1', 'Choose damage-2'])
+    expect(within(screen.getByRole('list', { name: 'Grid stand-in' })).getAllByRole('button').map((each) => each.textContent)).toEqual(['Open damage-1', 'Open damage-2'])
   })
 
-  it('opens a chosen pair with both photographs, what it should have ended in, what the comparison found, and the legend', async () => {
+  it('opens a pair in place with both photographs, what it should have ended in, what the comparison found, and the legend', async () => {
     const user = userEvent.setup()
     show()
-    await user.click(screen.getByRole('button', { name: 'Choose damage-1' }))
+    await user.click(screen.getByRole('button', { name: 'Open damage-1' }))
     const chosen = panel()
     expect(within(chosen).getByRole('heading', { name: 'Pair damage-1' })).toBeInTheDocument()
     expect(within(chosen).getByText('Synthetic')).toBeInTheDocument()
@@ -66,7 +76,7 @@ describe('the open scorecard', () => {
   it('says when a pair never lined up because the reuse check stopped it first', async () => {
     const user = userEvent.setup()
     show()
-    await user.click(screen.getByRole('button', { name: 'Choose reused-1' }))
+    await user.click(screen.getByRole('button', { name: 'Open reused-1' }))
     expect(within(panel()).getByText('Never lined up: the check for a reused photograph stopped it first.')).toBeInTheDocument()
   })
 

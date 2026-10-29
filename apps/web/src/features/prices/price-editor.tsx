@@ -14,8 +14,8 @@ import { Textarea } from '@/components/ui/textarea'
 import type { Locale } from '@/i18n/routing'
 import { ActionMessage } from '@/features/shop/action-message'
 import { publishPrices } from '@/features/shop/actions'
-import { addRow, appendRows, draftEntries, moveRow, removeRow, updateRow } from './editor-model'
-import type { Draft, EditorRow } from './editor-model'
+import { addRow, appendRows, draftEntries, insertRow, moveRow, pasteAt, removeRow, updateRow } from './editor-model'
+import type { Draft, EditorRow, PasteTarget } from './editor-model'
 import { parsePastedPrices } from './paste'
 import { PastePanel } from './paste-panel'
 import { PriceCards } from './price-cards'
@@ -67,6 +67,13 @@ export function PriceEditor({ shopId, baseVersion, published, fixedCurrency, thr
     change(appendRows(draft, pasted.rows))
     setPasteMessage(editor('paste.added', { count: pasted.rows.length, skipped: pasted.skipped }))
   }, [change, draft, currency, localKinds, editor])
+  const onInsert = useCallback((atIndex: number) => { change(insertRow(draft, atIndex)) }, [change, draft])
+  const onPasteCells = useCallback((target: PasteTarget, cells: readonly (readonly string[])[]) => {
+    const pasted = pasteAt(draft, target, cells, currency, localKinds)
+    if (pasted.count === 0) { setPasteMessage(editor('paste.none')); return }
+    change(pasted.draft)
+    setPasteMessage(editor('paste.pasted', { count: pasted.count }))
+  }, [change, draft, currency, localKinds, editor])
   useEffect(() => { if (result?.ok === true) discard() }, [result, discard])
 
   return (
@@ -116,7 +123,7 @@ export function PriceEditor({ shopId, baseVersion, published, fixedCurrency, thr
             </div>
             <PastePanel onPaste={onPaste} message={pasteMessage} />
             <div className="hidden min-w-0 gap-2 md:grid">
-              <PriceGrid rows={draft.rows} currency={currency} problems={problems} onChange={onChange} onRemove={onRemove} onMove={onMove} onPaste={onPaste} onUndo={undo} onRedo={redo} />
+              <PriceGrid rows={draft.rows} currency={currency} problems={problems} onChange={onChange} onRemove={onRemove} onMove={onMove} onInsert={onInsert} onPasteCells={onPasteCells} onUndo={undo} onRedo={redo} />
               <p className="text-sm text-muted-foreground">{editor('grid.keys')}</p>
             </div>
             <div className="md:hidden">

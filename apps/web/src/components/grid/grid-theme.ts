@@ -20,6 +20,9 @@ export const holdGridTheme = themeQuartz.withParams({
   fontSize: 15,
   rowHoverColor: 'color-mix(in oklab, var(--muted) 60%, transparent)',
   selectedRowBackgroundColor: 'color-mix(in oklab, var(--primary) 10%, transparent)',
+  // Cells chosen in the price list editor: a tint with the accent's edge, so their text stays readable.
+  rangeSelectionBackgroundColor: 'color-mix(in oklab, var(--primary) 14%, transparent)',
+  rangeSelectionBorderColor: 'var(--primary)',
   borderRadius: 0,
   wrapperBorderRadius: 0,
   rowHeight: 76,

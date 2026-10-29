@@ -2084,11 +2084,12 @@
         "add": "Añadir estos precios",
         "added": "{count, plural, one {# precio añadido} other {# precios añadidos}}{skipped, plural, =0 {.} other {, sin la línea de cabecera.}}",
         "none": "No se encontraron precios en lo pegado.",
-        "gridHint": "También puedes pegar directamente en la tabla."
+        "gridHint": "También puedes hacer clic en una celda de la tabla y pegar ahí.",
+        "pasted": "{count, plural, one {# fila pegada.} other {# filas pegadas.}}"
       },
       "grid": {
         "label": "Precios de este borrador",
-        "keys": "Intro edita una celda y Tab pasa a la siguiente. Arrastra una fila por su asa para cambiar el orden que leen los clientes. Ctrl o ⌘ con Z deshace el último cambio."
+        "keys": "Intro edita una celda y Tab pasa a la siguiente. Mayús con las flechas elige celdas; Ctrl o ⌘ con C las copia, y con V pega celdas de una hoja de cálculo en la celda elegida. Haz clic derecho en una fila para añadir o quitar un precio. Arrastra una fila por su asa para cambiar el orden que leen los clientes. Ctrl o ⌘ con Z deshace el último cambio."
       },
       "columns": {
         "order": "Orden",
@@ -2141,7 +2142,14 @@
         "de": "Deutsch",
         "es": "Español",
         "fr": "Français"
-      }
+      },
+      "menu": {
+        "above": "Añadir un precio encima",
+        "below": "Añadir un precio debajo",
+        "remove": "Quitar este precio"
+      },
+      "download": "Descargar para una hoja de cálculo",
+      "sheet": "Precios"
     }
   },
   "emails": {
@@ -2905,7 +2913,7 @@
     "groupRight": "{pass} de {total} acertados",
     "grid": "Pares de la mitad de control",
     "list": "Pares",
-    "keys": "Las flechas pasan de un par a otro. Intro abre uno junto a la lista.",
+    "keys": "Las flechas pasan de un par a otro. Intro abre uno bajo su fila y lo vuelve a cerrar.",
     "columns": {
       "pair": "Par",
       "expected": "Esperado",
@@ -2913,7 +2921,9 @@
       "model": "Señaló",
       "secondLook": "Segunda mirada",
       "alignment": "Alineado",
-      "verdict": "Resultado"
+      "verdict": "Resultado",
+      "open": "Abrir",
+      "group": "Tipo"
     },
     "outcomes": {
       "clean": "Limpio",
@@ -2991,7 +3001,11 @@
       "notAccepted": "No aceptada",
       "gateStopped": "Detenida por el control",
       "crossed": "Cruzó la línea"
-    }
+    },
+    "openPair": "Abrir el par {id}",
+    "closePair": "Cerrar el par {id}",
+    "download": "Descargar estos pares para una hoja de cálculo",
+    "sheet": "Pares"
   },
   "trust": {
     "reason": "Tu retención es de {amount}, no de {ordinary}, porque has devuelto {count, plural, one {# alquiler} other {# alquileres}} en buen estado en los últimos {months} meses.",
@@ -3484,13 +3498,14 @@
     "search": "Buscar decisiones",
     "searchHint": "Cliente, artículo o referencia de PayPal",
     "mineOnly": "Solo las mías",
-    "keys": "Las flechas pasan de una decisión a otra. Intro abre una junto a la lista. La barra espaciadora elige una liberación.",
+    "keys": "Las flechas pasan de una decisión a otra. Intro abre una bajo su fila y la vuelve a cerrar. La barra espaciadora elige una liberación.",
     "grid": "Decisiones que esperan a una persona",
     "columns": {
       "decision": "Decisión",
       "due": "Vence",
       "amount": "Importe",
-      "choose": "Elegir"
+      "choose": "Elegir",
+      "open": "Abrir"
     },
     "titles": {
       "claim": "Aprobar una reclamación",
@@ -3537,8 +3552,6 @@
     "open": "Pruebas y acciones",
     "choose": "Elegir la liberación de {amount}",
     "detail": {
-      "label": "Decisión elegida",
-      "none": "Elige una decisión para ver sus pruebas y lo que se puede hacer.",
       "due": "Vence",
       "amount": "Importe",
       "decider": "Quién decide",
@@ -3575,6 +3588,16 @@
       "approve": "Aprobar estas liberaciones",
       "passkey": "Confirma con tu llave de acceso para aprobar liberaciones.",
       "clear": "Quitar la selección"
+    },
+    "openEvidence": "Abrir las pruebas de {title}",
+    "closeEvidence": "Cerrar las pruebas de {title}",
+    "groupCount": "{count, plural, one {# decisión} other {# decisiones}}",
+    "groupTotal": "{amount} en total",
+    "menu": {
+      "open": "Abrir la decisión",
+      "close": "Cerrar la decisión",
+      "claim": "Abrir la página de la reclamación",
+      "rental": "Abrir el alquiler"
     }
   }
 }

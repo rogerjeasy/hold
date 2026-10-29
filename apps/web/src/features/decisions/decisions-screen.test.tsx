@@ -10,14 +10,25 @@ import { DecisionsScreen } from './decisions-screen'
 import type { DecisionsScreenProps } from './decisions-screen'
 
 // The decision board as a person uses it. The grid itself needs a browser's layout and is checked end to end; here it
-// is a stand-in that lists the rows it was given and lets a test choose one, as a click or Enter would.
-vi.mock('./decision-grid', () => ({
-  DecisionGrid: ({ rows, onChoose }: DecisionGridProps) => (
-    <ul aria-label="Grid stand-in">
-      {rows.map((row) => <li key={row.id}><button type="button" onClick={() => { onChoose(row.id) }}>{`Choose ${row.id}`}</button></li>)}
-    </ul>
-  ),
-}))
+// is a stand-in that lists the rows it was given and opens one in place, as a click or Enter would, drawing what the
+// board gives it for an opened decision.
+vi.mock('./decision-grid', async () => {
+  const { useState } = await import('react')
+  return {
+    DecisionGrid: function GridStandIn({ rows, renderDetail }: DecisionGridProps) {
+      const [opened, setOpened] = useState<string | null>(null)
+      const row = rows.find((each) => each.id === opened)
+      return (
+        <>
+          <ul aria-label="Grid stand-in">
+            {rows.map((each) => <li key={each.id}><button type="button" onClick={() => { setOpened(each.id) }}>{`Open ${each.id}`}</button></li>)}
+          </ul>
+          {row === undefined ? null : <section aria-label="Opened decision">{renderDetail(row, { ref: null })}</section>}
+        </>
+      )
+    },
+  }
+})
 vi.mock('@/features/operations/actions', () => ({ approveProposals: vi.fn(), rejectProposal: vi.fn(), postponeProposal: vi.fn() }))
 vi.mock('@/features/auth/passkey-button', () => ({ PasskeyButton: ({ label }: { label: string }) => <button type="button">{label}</button> }))
 
@@ -57,7 +68,7 @@ const props = (viewer: Viewer = owner, overrides: Partial<DecisionsScreenProps> 
 })
 
 const list = () => screen.getByRole('list', { name: 'Decisions' })
-const panel = () => screen.getByRole('region', { name: 'Chosen decision' })
+const panel = () => screen.getByRole('region', { name: 'Opened decision' })
 
 describe('the decision board', () => {
   it('opens with how many decisions wait, how many are the viewer’s, and how many fall due today', () => {
@@ -99,10 +110,10 @@ describe('the decision board', () => {
     expect(within(list()).getAllByRole('article').map((card) => card.getAttribute('data-row'))).toEqual(['late:00000000-0000-4000-8000-000000000005', 'claim:claim-1'])
   })
 
-  it('shows a claim’s evidence beside the list: its lines, both photographs, the split of the hold and where to approve it', async () => {
+  it('opens a claim’s evidence in place: its lines, both photographs, the split of the hold and where to approve it', async () => {
     const user = userEvent.setup()
     renderWithIntl(<DecisionsScreen {...props()} />)
-    await user.click(screen.getByRole('button', { name: 'Choose claim:claim-1' }))
+    await user.click(screen.getByRole('button', { name: 'Open claim:claim-1' }))
     const chosen = panel()
     expect(within(chosen).getByRole('heading', { name: 'Approve a claim of €35.00' })).toBeInTheDocument()
     expect(within(chosen).getByText('Scratch on the frame, through the paint')).toBeInTheDocument()
@@ -117,7 +128,7 @@ describe('the decision board', () => {
   it('quotes a contested claim’s renter as their own words and shows the reason a person wrote for a line', async () => {
     const user = userEvent.setup()
     renderWithIntl(<DecisionsScreen {...props()} />)
-    await user.click(screen.getByRole('button', { name: 'Choose claim:claim-2' }))
+    await user.click(screen.getByRole('button', { name: 'Open claim:claim-2' }))
     const chosen = panel()
     expect(within(chosen).getByRole('heading', { name: 'Decide a contested claim of €45.00' })).toBeInTheDocument()
     expect(within(chosen).getByRole('blockquote')).toHaveTextContent('The lock was in the bag when I handed it back.')
@@ -128,7 +139,7 @@ describe('the decision board', () => {
   it('lets an owner approve, postpone or reject the agent’s proposal where it stands, with its reason and PayPal reference', async () => {
     const user = userEvent.setup()
     renderWithIntl(<DecisionsScreen {...props()} />)
-    await user.click(screen.getByRole('button', { name: 'Choose proposal:00000000-0000-4000-8000-0000000000a1' }))
+    await user.click(screen.getByRole('button', { name: 'Open proposal:00000000-0000-4000-8000-0000000000a1' }))
     const chosen = panel()
     expect(within(chosen).getByRole('heading', { name: 'Release the hold to the renter' })).toBeInTheDocument()
     expect(within(chosen).getByText('The comparison was clean and nobody has confirmed the return.')).toBeInTheDocument()
@@ -141,7 +152,7 @@ describe('the decision board', () => {
   it('tells counter staff an owner or manager decides the agent’s proposal, and offers them no approval', async () => {
     const user = userEvent.setup()
     renderWithIntl(<DecisionsScreen {...props(counter)} />)
-    await user.click(screen.getByRole('button', { name: 'Choose proposal:00000000-0000-4000-8000-0000000000a1' }))
+    await user.click(screen.getByRole('button', { name: 'Open proposal:00000000-0000-4000-8000-0000000000a1' }))
     expect(within(panel()).getByText('An owner or manager decides.')).toBeInTheDocument()
     expect(within(panel()).queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument()
     expect(screen.queryByRole('checkbox', { name: /Choose the release/ })).not.toBeInTheDocument()

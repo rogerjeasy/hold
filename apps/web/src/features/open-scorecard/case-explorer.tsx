@@ -4,6 +4,7 @@ import { EVALUATION_GROUPS } from '@hold/domain'
 import type { EvaluationGroup } from '@hold/domain'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import type { DetailHeading } from '@/components/grid/master-detail'
 import { Verdict } from './case-cells'
 import { CaseDetail } from './case-detail'
 import { CaseGrid } from './case-grid'
@@ -12,8 +13,8 @@ import { verdictCounts } from './case-rows'
 
 type Filter = 'all' | EvaluationGroup
 
-// The pairs, filtered by group with each group's record, in a grid from md with the chosen pair beside it from xl and
-// below it before; on a phone a list of pairs, each opening the same panel.
+// The pairs, filtered by group with each group's record: in a grid from md, each pair opening in place under its row;
+// on a phone a list of pairs, the chosen one shown below it.
 export function CaseExplorer({ rows }: { rows: readonly CaseRow[] }) {
   const t = useTranslations('openScorecard')
   const [filter, setFilter] = useState<Filter>('all')
@@ -24,10 +25,12 @@ export function CaseExplorer({ rows }: { rows: readonly CaseRow[] }) {
   const visible = useMemo(() => (filter === 'all' ? rows : rows.filter((row) => row.group === filter)), [rows, filter])
   const chosen = visible.find((row) => row.id === chosenId) ?? visible[0]
 
-  const choose = useCallback((id: string, options?: { readonly open: boolean }) => {
+  // On a phone, the pair chosen from the list takes the focus below it.
+  const choose = useCallback((id: string) => {
     setChosenId(id)
-    if (options?.open === true) setFocusRequest((request) => request + 1)
+    setFocusRequest((request) => request + 1)
   }, [])
+  const renderDetail = useCallback((row: CaseRow, opened: DetailHeading) => <CaseDetail row={row} headingRef={opened.ref} />, [])
   useEffect(() => {
     if (focusRequest > 0) heading.current?.focus()
   }, [focusRequest])
@@ -55,15 +58,15 @@ export function CaseExplorer({ rows }: { rows: readonly CaseRow[] }) {
         {chip('all', rows)}
         {groups.map((group) => chip(group, rows.filter((row) => row.group === group)))}
       </div>
-      <div className="grid min-w-0 gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] xl:items-start">
-        <div className="hidden min-w-0 gap-2 md:grid">
-          <CaseGrid rows={visible} chosenId={chosen?.id ?? null} onChoose={choose} />
-          <p className="text-sm text-muted-foreground">{t('keys')}</p>
-        </div>
-        <ul aria-label={t('list')} className="grid gap-2 md:hidden">
+      <div className="hidden min-w-0 gap-2 md:grid">
+        <CaseGrid rows={visible} grouped={filter === 'all'} renderDetail={renderDetail} />
+        <p className="text-sm text-muted-foreground">{t('keys')}</p>
+      </div>
+      <div className="grid min-w-0 gap-6 md:hidden">
+        <ul aria-label={t('list')} className="grid gap-2">
           {visible.map((row) => (
             <li key={row.id}>
-              <button type="button" aria-current={row.id === chosen?.id ? 'true' : undefined} onClick={() => { choose(row.id, { open: true }) }} className="flex min-h-11 w-full items-center justify-between gap-3 border bg-card px-4 py-2.5 text-left aria-[current=true]:border-primary">
+              <button type="button" aria-current={row.id === chosen?.id ? 'true' : undefined} onClick={() => { choose(row.id) }} className="flex min-h-11 w-full items-center justify-between gap-3 border bg-card px-4 py-2.5 text-left aria-[current=true]:border-primary">
                 <span className="grid min-w-0">
                   <span className="truncate font-mono text-sm font-semibold">{row.id}</span>
                   <span className="truncate text-sm text-muted-foreground">{t(`groups.${row.group}`)}</span>
@@ -73,7 +76,7 @@ export function CaseExplorer({ rows }: { rows: readonly CaseRow[] }) {
             </li>
           ))}
         </ul>
-        <section aria-label={t('detail.label')} className="@container min-w-0 border bg-card p-5 text-card-foreground xl:sticky xl:top-6">
+        <section aria-label={t('detail.label')} className="@container min-w-0 border bg-card p-5 text-card-foreground">
           {chosen === undefined ? <p className="text-muted-foreground">{t('detail.none')}</p> : <CaseDetail key={chosen.id} row={chosen} headingRef={heading} />}
         </section>
       </div>
