@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkExtension, EXTENSION_LIMITS } from './extension.ts'
+import { checkExtension, EXTENSION_LIMITS, extensionPaymentDeadline } from './extension.ts'
 
 const hours = (from: Date, count: number) => new Date(from.getTime() + count * 3_600_000)
 const startsAt = new Date('2026-11-01T09:00:00Z')
@@ -47,5 +47,12 @@ describe('extending a rental from the renter’s phone', () => {
   it('refuses days another booking already has, naming when the item is needed', () => {
     const nextBookingStartsAt = hours(endsAt, 30)
     expect(checkExtension({ ...request, nextBookingStartsAt })).toEqual({ ok: false, error: { kind: 'not_free', neededFrom: nextBookingStartsAt } })
+  })
+})
+
+describe('how long a capture PayPal reports as pending is waited for', () => {
+  it('waits until the old end, and never less than a day after the capture began', () => {
+    expect(extensionPaymentDeadline(endsAt, now)).toEqual(hours(now, EXTENSION_LIMITS.pendingPaymentHours))
+    expect(extensionPaymentDeadline(hours(now, 72), now)).toEqual(hours(now, 72))
   })
 })

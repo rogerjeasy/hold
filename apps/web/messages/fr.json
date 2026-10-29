@@ -2770,7 +2770,13 @@
     "approve": "Approuver",
     "cancel": "Annuler et revenir",
     "unknown": "Cette commande est inconnue.",
-    "approveThenDispute": "Approuver, puis contester ce paiement"
+    "approveThenDispute": "Approuver, puis contester ce paiement",
+    "approveForReview": "Approuver, puis PayPal examine le paiement",
+    "approveOtherAmount": "Approuver, mais PayPal prélève un autre montant",
+    "reviewTitle": "PayPal examine ce paiement",
+    "reviewBody": "Le paiement est prélevé mais pas finalisé. Terminez l’examen comme PayPal le ferait, et la boutique est prévenue.",
+    "complete": "Finaliser le paiement",
+    "deny": "Refuser le paiement"
   },
   "claim": {
     "title": "Réclamation et règlement",
@@ -3545,7 +3551,7 @@
     "lead": "Les réclamations, les propositions de l’agent, les signalements des locataires et ce qui attend au comptoir, dans l’ordre de leur échéance. Rien ici ne débite qui que ce soit : un débit ne part que d’une réclamation qu’une personne a approuvée.",
     "passkeyBody": "Approuver les libérations et les demandes d’argent de l’agent demande votre clé d’accès. Rien d’autre sur cette page.",
     "empty": "Rien n’attend une personne.",
-    "emptyBody": "Les réclamations à approuver, les propositions de l’agent, les signalements des locataires, les articles déposés par les locataires, les blocages proches de leur fin et les retours en retard apparaissent ici.",
+    "emptyBody": "Les réclamations à approuver, les propositions de l’agent, les signalements des locataires, les articles déposés par les locataires, les paiements de jours supplémentaires à vérifier, les blocages proches de leur fin et les retours en retard apparaissent ici.",
     "noMatch": "Rien ne correspond. Effacez la recherche ou affichez tous les groupes.",
     "toolbar": "Filtrer les décisions",
     "groups": {
@@ -3574,7 +3580,8 @@
       "incident": "{kind} sur {item}",
       "hold_ending": "Le blocage de {renter} prend fin {when}",
       "late": "{renter} est en retard",
-      "dropped_off": "Vérifier ce que {renter} a déposé"
+      "dropped_off": "Vérifier ce que {renter} a déposé",
+      "extension_payment": "Vérifier un paiement de jours supplémentaires de {renter}"
     },
     "headings": {
       "claim": "Approuver une réclamation de {amount}",
@@ -3592,6 +3599,10 @@
     "holdLine": "Jour {day} sur {max} · {amount} bloqués",
     "lateLine": "Retour prévu {when}",
     "dropOffLine": "{items} · déposé {when}",
+    "extensionLine": {
+      "amount_mismatch": "PayPal a prélevé {captured} ; le prix de Hold était {quoted}",
+      "paid_after_expiry": "{captured} payé après que Hold a cessé d’attendre"
+    },
     "due": {
       "none": "Sans date",
       "overdue": "En retard depuis {when}",
@@ -3642,7 +3653,20 @@
       "openRental": "Ouvrir la location",
       "handover": "À la remise",
       "return": "Au retour",
-      "item": "Article"
+      "item": "Article",
+      "extensionPayment": {
+        "amount_mismatch": "PayPal a prélevé un autre montant que le prix de Hold pour ces jours supplémentaires. Rien n’a été annulé : la nouvelle fin reste. Vérifiez le paiement dans PayPal, remboursez ce qui n’aurait pas dû être prélevé, puis marquez-le comme vérifié.",
+        "paid_after_expiry": "PayPal a finalisé ce paiement après que Hold a cessé de l’attendre, donc l’ancienne fin de la location est revenue. Le locataire a payé des jours qu’il n’a pas eus. Remboursez-le dans PayPal ou prolongez de nouveau la location, puis marquez-le comme vérifié.",
+        "price": "Prix de Hold",
+        "took": "Prélevé par PayPal",
+        "capture": "Paiement PayPal",
+        "check": "Marquer comme vérifié",
+        "checked": "Vérifié. Il quitte le tableau.",
+        "results": {
+          "not_found": "Ce paiement n’appartient pas à cette boutique.",
+          "already_checked": "Quelqu’un l’a déjà vérifié."
+        }
+      }
     },
     "together": {
       "label": "Libérations choisies",
@@ -4080,7 +4104,8 @@
       "done": "Payé. Votre nouvelle heure de retour est enregistrée.",
       "retry": "Réessayer",
       "back": "Voir vos prolongations",
-      "again": "Choisir l’heure de nouveau"
+      "again": "Choisir l’heure de nouveau",
+      "reviewing": "PayPal examine votre paiement, ce qui peut prendre un jour ou plus. Votre nouvelle heure de retour vaut pour l’instant. Si PayPal refuse le paiement, ou n’a pas terminé avant votre heure de retour précédente, celle-ci s’applique de nouveau."
     },
     "settings": {
       "title": "Prolongations",

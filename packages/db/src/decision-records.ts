@@ -1,6 +1,8 @@
 import type { ClaimState, Region } from '@hold/domain'
 import { and, asc, count, desc, eq, inArray, isNull, sql } from 'drizzle-orm'
 import { incidentEvidence } from './claim-query.ts'
+import { extensionPaymentsToCheck } from './extension-repository.ts'
+import type { ExtensionPaymentToCheck } from './extension-repository.ts'
 import { incidentsWaitingForStaff } from './incident-repository.ts'
 import { dropOffsWaiting } from './self-return-repository.ts'
 import type { WaitingDropOff } from './self-return-repository.ts'
@@ -58,6 +60,8 @@ export type DecisionRecords = {
   readonly late: readonly LateRental[]
   // Items renters dropped off with nobody at the counter, which a person has not checked yet.
   readonly dropOffs: readonly WaitingDropOff[]
+  // Money PayPal moved for extra days that Hold did not apply as quoted, which an owner or manager checks.
+  readonly extensionPayments: readonly ExtensionPaymentToCheck[]
   // A shop of one has nobody else to decide a claim its owner raised (architecture.md section 7.3).
   readonly staffCount: number
 }
@@ -146,6 +150,7 @@ export async function decisionRecords(transaction: Transaction, now: Date): Prom
     holds: await activeHolds(transaction),
     late: await lateRentals(transaction, now),
     dropOffs: await dropOffsWaiting(transaction),
+    extensionPayments: await extensionPaymentsToCheck(transaction),
     staffCount: staff?.count ?? 0,
   }
 }

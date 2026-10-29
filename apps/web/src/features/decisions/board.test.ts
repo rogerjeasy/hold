@@ -1,4 +1,4 @@
-import type { DecisionClaim, DecisionRecords, QueueEntry, ShopIncident, WaitingDropOff } from '@hold/db'
+import type { DecisionClaim, DecisionRecords, ExtensionPaymentToCheck, QueueEntry, ShopIncident, WaitingDropOff } from '@hold/db'
 import { describe, expect, it } from 'vitest'
 import { boardBrief, boardRows, groupCounts, visibleRows } from './board'
 import type { Viewer } from './board'
@@ -74,7 +74,12 @@ const incident = (overrides: Partial<ShopIncident> = {}): ShopIncident => ({
   ...overrides,
 })
 
-const records = (overrides: Partial<DecisionRecords> = {}): DecisionRecords => ({ claims: [], proposals: [], incidents: [], holds: [], late: [], dropOffs: [], staffCount: 2, ...overrides })
+const records = (overrides: Partial<DecisionRecords> = {}): DecisionRecords => ({ claims: [], proposals: [], incidents: [], holds: [], late: [], dropOffs: [], extensionPayments: [], staffCount: 2, ...overrides })
+
+const extensionPayment: ExtensionPaymentToCheck = {
+  extensionId: 'extension-1', rentalId: 'rental-11', renterName: 'Sofia Lopes', attention: 'paid_after_expiry', attentionAt: at('2026-10-14T08:30:00Z'),
+  quotedCents: 45_00, capturedCents: 45_00, currency: 'EUR', paypalCaptureId: 'CAPTURE-9', extraDays: 1, simulated: false,
+}
 
 const dropOff = (overrides: Partial<WaitingDropOff> = {}): WaitingDropOff => ({
   rentalId: 'rental-10',
@@ -120,6 +125,13 @@ describe('the rows of the decision board', () => {
     expect(row).toMatchObject({ id: 'drop:rental-10', kind: 'dropped_off', rentalId: 'rental-10', renterName: 'Chloé Martin', due: null, overdue: false, waitingSince: at('2026-10-13T21:40:00Z'), amountCents: 250_00, decider: 'you', selectable: false, onTime: true })
     expect(row?.kind === 'dropped_off' ? row.items.map((item) => item.label) : []).toEqual(['E-bike 3'])
     expect(boardRows(records({ dropOffs: [dropOff()] }), reader, NOW)[0]?.decider).toBe('staff')
+  })
+
+  it('puts money PayPal moved for extra days that Hold did not apply before an owner or manager', () => {
+    const [row] = boardRows(records({ extensionPayments: [extensionPayment] }), owner, NOW)
+    expect(row).toMatchObject({ id: 'extension:extension-1', kind: 'extension_payment', group: 'counter', rentalId: 'rental-11', due: null, waitingSince: at('2026-10-14T08:30:00Z'), amountCents: 45_00, decider: 'you', attention: 'paid_after_expiry', quotedCents: 45_00, paypalCaptureId: 'CAPTURE-9' })
+    expect(boardRows(records({ extensionPayments: [extensionPayment] }), counter, NOW)[0]?.decider).toBe('senior')
+    expect(boardRows(records({ extensionPayments: [extensionPayment] }), reader, NOW)[0]?.decider).toBe('staff')
   })
 
   it('carries the neutral summary of a contested claim with its row, and nothing for a claim not contested', () => {

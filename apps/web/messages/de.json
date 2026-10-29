@@ -2770,7 +2770,13 @@
     "approve": "Genehmigen",
     "cancel": "Abbrechen und zurück",
     "unknown": "Diese Bestellung ist unbekannt.",
-    "approveThenDispute": "Genehmigen, dann diese Zahlung beanstanden"
+    "approveThenDispute": "Genehmigen, dann diese Zahlung beanstanden",
+    "approveForReview": "Genehmigen, dann prüft PayPal die Zahlung",
+    "approveOtherAmount": "Genehmigen, aber PayPal zieht einen anderen Betrag ein",
+    "reviewTitle": "PayPal prüft diese Zahlung",
+    "reviewBody": "Die Zahlung ist eingezogen, aber noch nicht abgeschlossen. Schließen Sie die Prüfung ab, wie PayPal es täte, und der Laden wird benachrichtigt.",
+    "complete": "Zahlung abschließen",
+    "deny": "Zahlung ablehnen"
   },
   "claim": {
     "title": "Schadenforderung und Abrechnung",
@@ -3545,7 +3551,7 @@
     "lead": "Forderungen, Vorschläge des Agenten, Meldungen von Mietern und was am Tresen ansteht, in der Reihenfolge ihrer Fälligkeit. Hier wird niemandem etwas belastet: Eine Belastung beginnt nur mit einer Forderung, die ein Mensch freigegeben hat.",
     "passkeyBody": "Freigaben und Geldanfragen des Agenten zu genehmigen, braucht deinen Passkey. Sonst nichts auf dieser Seite.",
     "empty": "Nichts wartet auf einen Menschen.",
-    "emptyBody": "Freizugebende Forderungen, Vorschläge des Agenten, Meldungen von Mietern, von Mietern abgegebene Artikel, Reservierungen kurz vor dem Ablauf und verspätete Rückgaben erscheinen hier.",
+    "emptyBody": "Freizugebende Forderungen, Vorschläge des Agenten, Meldungen von Mietern, von Mietern abgegebene Artikel, zu prüfende Zahlungen für zusätzliche Tage, Reservierungen kurz vor dem Ablauf und verspätete Rückgaben erscheinen hier.",
     "noMatch": "Nichts passt. Leere die Suche oder zeige alle Gruppen.",
     "toolbar": "Entscheidungen filtern",
     "groups": {
@@ -3574,7 +3580,8 @@
       "incident": "{kind} an {item}",
       "hold_ending": "Die Reservierung für {renter} endet {when}",
       "late": "{renter} ist verspätet",
-      "dropped_off": "Prüfen, was {renter} abgegeben hat"
+      "dropped_off": "Prüfen, was {renter} abgegeben hat",
+      "extension_payment": "Zahlung für zusätzliche Tage von {renter} prüfen"
     },
     "headings": {
       "claim": "Eine Forderung über {amount} freigeben",
@@ -3592,6 +3599,10 @@
     "holdLine": "Tag {day} von {max} · {amount} reserviert",
     "lateLine": "Rückgabe fällig {when}",
     "dropOffLine": "{items} · abgegeben {when}",
+    "extensionLine": {
+      "amount_mismatch": "PayPal hat {captured} eingezogen; der Preis von Hold war {quoted}",
+      "paid_after_expiry": "{captured} bezahlt, nachdem Hold nicht mehr gewartet hat"
+    },
     "due": {
       "none": "Kein Datum",
       "overdue": "Überfällig seit {when}",
@@ -3642,7 +3653,20 @@
       "openRental": "Die Miete öffnen",
       "handover": "Bei der Übergabe",
       "return": "Bei der Rückgabe",
-      "item": "Artikel"
+      "item": "Artikel",
+      "extensionPayment": {
+        "amount_mismatch": "PayPal hat für diese zusätzlichen Tage einen anderen Betrag als den Preis von Hold eingezogen. Nichts wurde rückgängig gemacht: Das neue Ende bleibt. Prüfen Sie die Zahlung in PayPal, erstatten Sie, was nicht hätte eingezogen werden sollen, und markieren Sie sie dann als geprüft.",
+        "paid_after_expiry": "PayPal hat diese Zahlung abgeschlossen, nachdem Hold nicht mehr darauf gewartet hat, daher gilt wieder das alte Ende der Miete. Der Mieter hat für Tage bezahlt, die er nicht bekommen hat. Erstatten Sie sie in PayPal oder verlängern Sie die Miete erneut, und markieren Sie sie dann als geprüft.",
+        "price": "Preis von Hold",
+        "took": "Von PayPal eingezogen",
+        "capture": "PayPal-Zahlung",
+        "check": "Als geprüft markieren",
+        "checked": "Geprüft. Sie verschwindet von der Übersicht.",
+        "results": {
+          "not_found": "Diese Zahlung gehört nicht zu diesem Laden.",
+          "already_checked": "Jemand hat sie bereits geprüft."
+        }
+      }
     },
     "together": {
       "label": "Gewählte Freigaben",
@@ -4080,7 +4104,8 @@
       "done": "Bezahlt. Ihre neue Rückgabezeit gilt.",
       "retry": "Erneut versuchen",
       "back": "Ihre Verlängerungen ansehen",
-      "again": "Zeit erneut wählen"
+      "again": "Zeit erneut wählen",
+      "reviewing": "PayPal prüft Ihre Zahlung, das kann einen Tag oder länger dauern. Ihre neue Rückgabezeit gilt vorerst. Lehnt PayPal die Zahlung ab oder ist bis zu Ihrer früheren Rückgabezeit nicht fertig, gilt wieder Ihre frühere Rückgabezeit."
     },
     "settings": {
       "title": "Verlängerungen",

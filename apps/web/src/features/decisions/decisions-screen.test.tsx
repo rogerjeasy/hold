@@ -1,4 +1,4 @@
-import type { DecisionClaim, DecisionRecords, QueueEntry, WaitingDropOff } from '@hold/db'
+import type { DecisionClaim, DecisionRecords, ExtensionPaymentToCheck, QueueEntry, WaitingDropOff } from '@hold/db'
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
@@ -30,6 +30,7 @@ vi.mock('./decision-grid', async () => {
   }
 })
 vi.mock('@/features/claims/actions', () => ({ rewriteContestSummary: vi.fn() }))
+vi.mock('@/features/extension/actions', () => ({ checkExtensionPayment: vi.fn() }))
 vi.mock('@/features/self-return/actions', () => ({ confirmDropOff: vi.fn(), reportDropOffMissing: vi.fn() }))
 vi.mock('@/features/operations/actions', () => ({ approveProposals: vi.fn(), rejectProposal: vi.fn(), postponeProposal: vi.fn() }))
 vi.mock('@/features/auth/passkey-button', () => ({ PasskeyButton: ({ label }: { label: string }) => <button type="button">{label}</button> }))
@@ -56,6 +57,7 @@ const records = (overrides: Partial<DecisionRecords> = {}): DecisionRecords => (
   holds: [],
   late: [{ rentalId: '00000000-0000-4000-8000-000000000005', renterName: 'Lea Fischer', endsAt: at('2026-10-13T17:00:00Z'), simulated: false }],
   dropOffs: [],
+  extensionPayments: [],
   staffCount: 2,
   ...overrides,
 })
@@ -63,6 +65,10 @@ const records = (overrides: Partial<DecisionRecords> = {}): DecisionRecords => (
 const dropOff: WaitingDropOff = {
   rentalId: '00000000-0000-4000-8000-000000000006', renterName: 'Chloé Martin', droppedOffAt: at('2026-10-13T21:40:00Z'), onTime: true, missingAt: null, missingBy: null, holdCents: 250_00, currency: 'EUR', simulated: false,
   items: [{ label: 'E-bike 3', views: 4, findings: 1, comparison: 'findings', comparisonId: 'comparison-1', dropPoint: { view: 'drop_point', displayKey: 'drop.jpg' }, viewLabel: 'Left side', before: { view: 'left', displayKey: 'before.jpg' }, after: { view: 'left', displayKey: 'after.jpg' }, region: { x: 0.3, y: 0.5, width: 0.1, height: 0.1 } }],
+}
+const latePayment: ExtensionPaymentToCheck = {
+  extensionId: '00000000-0000-4000-8000-0000000000e1', rentalId: '00000000-0000-4000-8000-000000000007', renterName: 'Sofia Lopes', attention: 'paid_after_expiry', attentionAt: at('2026-10-14T08:30:00Z'),
+  quotedCents: 45_00, capturedCents: 45_00, currency: 'EUR', paypalCaptureId: 'CAPTURE-9', extraDays: 1, simulated: false,
 }
 const contest = {
   outcome: 'answered' as const,
@@ -182,6 +188,26 @@ describe('the decision board', () => {
     expect(within(chosen).getByRole('img', { name: 'Where they left it' })).toHaveAttribute('src', '/drop.jpg')
     expect(within(chosen).getByRole('button', { name: 'It’s here, review the return' })).toBeInTheDocument()
     expect(within(chosen).getByRole('button', { name: 'It’s not here' })).toBeInTheDocument()
+  })
+
+  it('puts a payment PayPal completed after Hold stopped waiting before the owner, with what to do in PayPal', async () => {
+    const user = userEvent.setup()
+    renderWithIntl(<DecisionsScreen {...props(owner, { rows: boardRows(records({ extensionPayments: [latePayment] }), owner, NOW) })} />)
+    await user.click(screen.getByRole('button', { name: 'Open extension:00000000-0000-4000-8000-0000000000e1' }))
+    const chosen = panel()
+    expect(within(chosen).getByRole('heading', { name: 'Check an extra-days payment from Sofia Lopes' })).toBeInTheDocument()
+    expect(within(chosen).getByText(/PayPal completed this payment after Hold had stopped waiting for it/)).toBeInTheDocument()
+    expect(within(chosen).getByText('CAPTURE-9')).toBeInTheDocument()
+    expect(within(chosen).getByRole('button', { name: 'Mark as checked' })).toBeInTheDocument()
+  })
+
+  it('tells counter staff an owner or manager checks an extra-days payment, and offers them nothing to press', async () => {
+    const user = userEvent.setup()
+    renderWithIntl(<DecisionsScreen {...props(counter, { rows: boardRows(records({ extensionPayments: [{ ...latePayment, attention: 'amount_mismatch', capturedCents: 1 }] }), counter, NOW) })} />)
+    await user.click(screen.getByRole('button', { name: 'Open extension:00000000-0000-4000-8000-0000000000e1' }))
+    expect(within(panel()).getByText(/PayPal took another amount than Hold's price/)).toBeInTheDocument()
+    expect(within(panel()).getByText('An owner or manager decides.')).toBeInTheDocument()
+    expect(within(panel()).queryByRole('button', { name: 'Mark as checked' })).not.toBeInTheDocument()
   })
 
   it('lets an owner approve, postpone or reject the agent’s proposal where it stands, with its reason and PayPal reference', async () => {

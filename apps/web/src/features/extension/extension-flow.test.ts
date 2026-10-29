@@ -1,7 +1,8 @@
 // @vitest-environment node
 import { createHash, randomBytes } from 'node:crypto'
 import { shopTimeText } from '@hold/domain'
-import { inShop, rentalDetail, rentalExtensionsOf } from '@hold/db'
+import { acceptInvitation, createInvitation, inShop, rentalDetail, rentalExtensionsOf, staffRoles } from '@hold/db'
+import type { TestDatabase } from '@hold/db/testing'
 import sharp from 'sharp'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -90,6 +91,34 @@ describe('a renter keeping the item longer', () => {
     expect(await renter.askExtension(null, form({ token: 'not-a-real-token', endsAt: local(rental.endsAt), locale: 'en' }))).toEqual({ ok: false, failure: 'link_invalid' })
   })
 
+  it('tells the renter PayPal is reviewing the payment, while the new end holds', async () => {
+    const rental = await out()
+    const newEnd = new Date(rental.endsAt.getTime() + 24 * HOUR)
+    await renter.askExtension(null, form({ token: rental.token, endsAt: local(newEnd), locale: 'en' }))
+    const started = await renter.payExtension(null, form({ token: rental.token, locale: 'en' }))
+    if (!started.ok) throw new Error(JSON.stringify(started))
+    ;(await getServices()).simulatedPayPal?.approveOrder(orderOf(started.value.approvalUrl), { capture: 'review' })
+    expect(await renter.confirmExtension(null, form({ token: rental.token, orderId: orderOf(started.value.approvalUrl), locale: 'en' }))).toMatchObject({ ok: true, value: { state: 'reviewing' } })
+    expect((await detail(rental.rentalId))?.endsAt).toEqual(newEnd)
+    expect((await inTheShop((transaction) => rentalExtensionsOf(transaction, rental.rentalId)))[0]).toMatchObject({ state: 'capturing' })
+  })
+
+  it('says plainly when PayPal denied the payment, and the old end is back', async () => {
+    const { sendSimulatedEvent } = await import('@/server/simulated-paypal-event')
+    const rental = await out()
+    await renter.askExtension(null, form({ token: rental.token, endsAt: local(new Date(rental.endsAt.getTime() + 24 * HOUR)), locale: 'en' }))
+    const started = await renter.payExtension(null, form({ token: rental.token, locale: 'en' }))
+    if (!started.ok) throw new Error(JSON.stringify(started))
+    const orderId = orderOf(started.value.approvalUrl)
+    const { simulatedPayPal } = await getServices()
+    simulatedPayPal?.approveOrder(orderId, { capture: 'review' })
+    expect(await renter.confirmExtension(null, form({ token: rental.token, orderId, locale: 'en' }))).toMatchObject({ ok: true, value: { state: 'reviewing' } })
+    const captureId = simulatedPayPal?.finishReview(orderId, 'declined') ?? ''
+    await sendSimulatedEvent(orderId, `WH-TEST-DENIED-${captureId}`, 'PAYMENT.CAPTURE.DENIED', { id: captureId })
+    expect(await renter.confirmExtension(null, form({ token: rental.token, orderId, locale: 'en' }))).toMatchObject({ ok: false, failure: 'refused', reason: 'declined' })
+    expect((await detail(rental.rentalId))?.endsAt).toEqual(rental.endsAt)
+  })
+
   it('cannot pay one rental’s extension with another’s order', async () => {
     const first = await out()
     const second = await out()
@@ -98,5 +127,48 @@ describe('a renter keeping the item longer', () => {
     if (!started.ok) throw new Error(JSON.stringify(started))
     ;(await getServices()).simulatedPayPal?.approveOrder(orderOf(started.value.approvalUrl))
     expect(await renter.confirmExtension(null, form({ token: second.token, orderId: orderOf(started.value.approvalUrl), locale: 'en' }))).toMatchObject({ ok: false, reason: 'order_mismatch' })
+  })
+})
+
+describe('money PayPal moved for extra days that Hold did not apply', () => {
+  const COUNTER = 'counter@extension.example'
+  const OTHER_OWNER = 'owner@other-extension.example'
+
+  // An extension the worker put before a person: PayPal completed its capture after Hold had stopped waiting.
+  async function paidAfterExpiry() {
+    const rental = await out()
+    await renter.askExtension(null, form({ token: rental.token, endsAt: local(new Date(rental.endsAt.getTime() + 24 * HOUR)), locale: 'en' }))
+    const started = await renter.payExtension(null, form({ token: rental.token, locale: 'en' }))
+    if (!started.ok) throw new Error(JSON.stringify(started))
+    const [extension] = await inTheShop((transaction) => rentalExtensionsOf(transaction, rental.rentalId))
+    if (extension === undefined) throw new Error('No extension.')
+    const { database } = await getServices()
+    await (database as unknown as TestDatabase).$client.query("update rental_extensions set attention = 'paid_after_expiry', attention_at = now(), captured_cents = 4000, paypal_capture_id = 'CAPTURE-LATE' where id = $1", [extension.id])
+    return extension.id
+  }
+
+  async function joinAsCounter() {
+    const { database } = await getServices()
+    const ownerId = (await database.select().from(staffRoles)).find((row) => row.shopId === shop.shopId && row.role === 'owner')?.userId ?? ''
+    const { token } = await inShop(database, { role: 'hold_app', shopId: shop.shopId, userId: ownerId }, (transaction) =>
+      createInvitation(transaction, { shopId: shop.shopId, invitedByUserId: ownerId, email: COUNTER, role: 'counter_staff', approvalLimitCents: 0, language: 'en' }, new Date()),
+    )
+    const subject = await signIn(jar, COUNTER, 'passkey')
+    await acceptInvitation(database, { token, subject, email: COUNTER, name: 'Counter', language: 'en' }, new Date())
+  }
+
+  it('is marked checked by an owner or manager of the shop alone, once', async () => {
+    const extensionId = await paidAfterExpiry()
+    expect(await staff.checkExtensionPayment(null, form({ extensionId, locale: 'en' }))).toEqual({ ok: false, failure: 'signed_out' })
+    await joinAsCounter()
+    expect(await staff.checkExtensionPayment(null, form({ extensionId, locale: 'en' }))).toEqual({ ok: false, failure: 'role' })
+    jar.clear()
+    await handoverShop(jar, OTHER_OWNER, 'Other Extension Bikes')
+    expect(await staff.checkExtensionPayment(null, form({ extensionId, locale: 'en' }))).toMatchObject({ ok: false, reason: 'not_found' })
+    jar.clear()
+    await signIn(jar, OWNER, 'passkey')
+    expect(await staff.checkExtensionPayment(null, form({ extensionId, extra: 'x', locale: 'en' }))).toMatchObject({ ok: false, failure: 'invalid' })
+    expect(await staff.checkExtensionPayment(null, form({ extensionId, locale: 'en' }))).toMatchObject({ ok: true })
+    expect(await staff.checkExtensionPayment(null, form({ extensionId, locale: 'en' }))).toMatchObject({ ok: false, reason: 'already_checked' })
   })
 })

@@ -1,4 +1,4 @@
-import type { DecisionClaim, DecisionClaimLine, DecisionRecords, QueueEntry, ShopIncident, WaitingDropOff } from '@hold/db'
+import type { DecisionClaim, DecisionClaimLine, DecisionRecords, ExtensionAttention, ExtensionPaymentToCheck, QueueEntry, ShopIncident, WaitingDropOff } from '@hold/db'
 import { DETECTOR_KINDS, holdDay, holdStanding, mayConfirm, money, proposalMovesMoney, settle } from '@hold/domain'
 import type { ApprovalAction, DetectorKind, ProposalKind, StaffRole } from '@hold/domain'
 import type { ContestView } from '@/features/contest/contest-summary-panel'
@@ -87,7 +87,20 @@ export type DropOffRow = Common & {
   readonly items: WaitingDropOff['items']
 }
 
-export type BoardRow = ClaimRow | ProposalRow | IncidentRow | HoldEndingRow | LateRow | DropOffRow
+// Money PayPal moved for extra days that Hold did not apply as quoted (architecture.md section 6.14): the amount is
+// PayPal's. An owner or manager looks in PayPal and marks it checked.
+export type ExtensionPaymentRow = Common & {
+  readonly rentalId: string
+  readonly kind: 'extension_payment'
+  readonly group: 'counter'
+  readonly extensionId: string
+  readonly attention: ExtensionAttention
+  readonly quotedCents: number
+  readonly extraDays: number
+  readonly paypalCaptureId: string
+}
+
+export type BoardRow = ClaimRow | ProposalRow | IncidentRow | HoldEndingRow | LateRow | DropOffRow | ExtensionPaymentRow
 export type BoardKind = BoardRow['kind']
 
 const SENIOR: readonly StaffRole[] = ['owner', 'manager']
@@ -107,6 +120,8 @@ function claimDecider(viewer: Viewer, claim: DecisionClaim, staffCount: number):
 }
 
 const staffDecider = (viewer: Viewer): Decider => (viewer.role === 'read_only' ? 'staff' : 'you')
+// What only an owner or manager decides.
+const seniorDecider = (viewer: Viewer): Decider => (SENIOR.includes(viewer.role) ? 'you' : viewer.role === 'read_only' ? 'staff' : 'senior')
 
 const overdue = (due: Date | null, now: Date) => due !== null && due < now
 
@@ -134,7 +149,7 @@ function claimRow(claim: DecisionClaim, viewer: Viewer, staffCount: number, now:
 }
 
 function proposalRow(entry: QueueEntry, viewer: Viewer, now: Date): ProposalRow {
-  const decider: Decider = SENIOR.includes(viewer.role) ? 'you' : viewer.role === 'read_only' ? 'staff' : 'senior'
+  const decider = seniorDecider(viewer)
   const marks: ProposalMark[] = []
   if (entry.raisedByAgent) marks.push('raisedByAgent')
   if (entry.payload['investigated'] === 'no') marks.push('notInvestigated')
@@ -210,6 +225,28 @@ function dropOffRow(dropOff: WaitingDropOff, viewer: Viewer): DropOffRow {
   }
 }
 
+function extensionPaymentRow(payment: ExtensionPaymentToCheck, viewer: Viewer): ExtensionPaymentRow {
+  return {
+    id: `extension:${payment.extensionId}`,
+    kind: 'extension_payment',
+    group: 'counter',
+    rentalId: payment.rentalId,
+    renterName: payment.renterName,
+    due: null,
+    overdue: false,
+    waitingSince: payment.attentionAt,
+    amountCents: payment.capturedCents,
+    simulated: payment.simulated,
+    decider: seniorDecider(viewer),
+    selectable: false,
+    extensionId: payment.extensionId,
+    attention: payment.attention,
+    quotedCents: payment.quotedCents,
+    extraDays: payment.extraDays,
+    paypalCaptureId: payment.paypalCaptureId,
+  }
+}
+
 const time = (date: Date | null) => (date === null ? Number.POSITIVE_INFINITY : date.getTime())
 
 // What falls due first comes first, a return already missed before anything; then what has no date, the oldest first.
@@ -258,6 +295,7 @@ export function boardRows(records: DecisionRecords, viewer: Viewer, now: Date, c
       endsAt: rental.endsAt,
     })),
     ...records.dropOffs.map((dropOff) => dropOffRow(dropOff, viewer)),
+    ...records.extensionPayments.map((payment) => extensionPaymentRow(payment, viewer)),
   ]
   return rows.sort(byUrgency)
 }

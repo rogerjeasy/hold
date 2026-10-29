@@ -67,3 +67,23 @@ export async function placeHold(page: Page, renter: Page): Promise<void> {
   await expect(renter.getByText('Hold placed. Nothing was charged.')).toBeVisible()
   await expect(hold.getByText('Ready for handover.')).toBeVisible({ timeout: 15_000 })
 }
+
+// A rental handed over with the sample photographs, so it is out with the renter. Gives its page and the renter's link.
+export async function handedOver(page: Page, browser: Browser, shopName: string): Promise<{ readonly rental: string; readonly link: string }> {
+  await readyForHandover(page, browser, shopName)
+  const rental = page.url()
+  await page.getByRole('region', { name: 'Handover' }).getByRole('button', { name: /^Photograph / }).click()
+  await expect(page).toHaveURL(/\/handover\/[0-9a-f-]{36}$/)
+  const views = page.getByRole('list', { name: 'Views' })
+  await expect(views).toBeVisible()
+  const needed = await views.getByText('Needed').count()
+  for (let count = 1; count <= needed; count += 1) {
+    await page.getByRole('button', { name: 'Use the sample photograph' }).click()
+    await expect(views.getByText('Photographed')).toHaveCount(count, { timeout: 30_000 })
+  }
+  await page.getByRole('button', { name: 'Seal the photographs' }).click()
+  await expect(page.getByText('The rental is out.')).toBeVisible()
+  await page.goto(rental)
+  await page.getByRole('button', { name: 'Show the link' }).click()
+  return { rental, link: (await page.getByTestId('renter-link').textContent()) ?? '' }
+}

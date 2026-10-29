@@ -23,17 +23,23 @@ export const FAKE_SIGNATURE = 'fake-signature'
 
 export type FakePayPal = PayPalHolds & {
   // Stands in for the renter approving the order on PayPal's page. In the test environment the renter may approve a
-  // payment meaning to dispute it: once it is captured, a dispute on it opens, as a renter's dispute would.
-  approveOrder(orderId: string, options?: { readonly thenDispute?: boolean }): void
+  // payment meaning to dispute it: once it is captured, a dispute on it opens, as a renter's dispute would. A tester may
+  // also have PayPal hold the capture for review, or take another amount than the order's.
+  approveOrder(orderId: string, options?: { readonly thenDispute?: boolean; readonly capture?: FakeCapture }): void
+  // Stands in for PayPal finishing its review of a pending capture. Gives the capture, or nothing when none is pending.
+  finishReview(orderId: string, outcome: 'completed' | 'declined'): string | undefined
   // Stands in for the renter's funding source refusing the hold when it is authorized.
   declineFunding(orderId: string): void
   // Where an order sends the renter back, and what it is for: what a simulated approval page needs.
-  orderLinks(orderId: string): { readonly returnUrl: string; readonly cancelUrl: string; readonly amount: Money; readonly description: string } | undefined
+  orderLinks(orderId: string): { readonly returnUrl: string; readonly cancelUrl: string; readonly amount: Money; readonly description: string; readonly underReview: boolean } | undefined
   // Stands in for a renter opening a dispute with PayPal.
   openDispute(dispute: OpenDispute): void
   // The evidence the shop gave on each dispute, in order: its notes and the name of the document it attached.
   readonly disputeEvidence: { readonly disputeId: string; readonly notes: string; readonly fileName: string | null }[]
 }
+
+// How the fake captures an approved order: as PayPal normally does, held for review, or for another amount.
+export type FakeCapture = 'normal' | 'review' | 'other_amount'
 
 export type FakePayPalOptions = {
   readonly now: () => Date
@@ -52,6 +58,7 @@ type FakeOrder = {
   payment: FeePayment | undefined
   // The renter will dispute the payment once it is captured.
   thenDispute: boolean
+  capture: FakeCapture
 }
 
 type FakeAuthorization = {
@@ -149,6 +156,14 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
       if (order === undefined) throw new Error(`The fake PayPal has no order ${orderId}.`)
       if (order.status === 'awaiting_approval') order.status = 'approved'
       order.thenDispute = approval?.thenDispute === true
+      order.capture = approval?.capture ?? 'normal'
+    },
+
+    finishReview(orderId, outcome) {
+      const order = orders.get(orderId)
+      if (order?.payment?.status !== 'pending') return undefined
+      order.payment = { ...order.payment, status: outcome }
+      return order.payment.captureId
     },
 
     declineFunding(orderId) {
@@ -172,7 +187,7 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
 
     createHoldOrder(input) {
       const order = once('create', input.idempotencyKey, () => {
-        const created: FakeOrder = { orderId: nextId('FAKE-ORDER'), amount: input.amount, status: 'awaiting_approval', returnUrl: input.returnUrl, cancelUrl: input.cancelUrl, description: input.description, payment: undefined, thenDispute: false }
+        const created: FakeOrder = { orderId: nextId('FAKE-ORDER'), amount: input.amount, status: 'awaiting_approval', returnUrl: input.returnUrl, cancelUrl: input.cancelUrl, description: input.description, payment: undefined, thenDispute: false, capture: 'normal' }
         orders.set(created.orderId, created)
         return created
       })
@@ -192,12 +207,12 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
 
     orderLinks(orderId) {
       const order = orders.get(orderId)
-      return order === undefined ? undefined : { returnUrl: order.returnUrl, cancelUrl: order.cancelUrl, amount: order.amount, description: order.description }
+      return order === undefined ? undefined : { returnUrl: order.returnUrl, cancelUrl: order.cancelUrl, amount: order.amount, description: order.description, underReview: order.payment?.status === 'pending' }
     },
 
     createFeeOrder(input) {
       const order = once('create', input.idempotencyKey, () => {
-        const created: FakeOrder = { orderId: nextId('FAKE-ORDER'), amount: input.amount, status: 'awaiting_approval', returnUrl: input.returnUrl, cancelUrl: input.cancelUrl, description: input.description, payment: undefined, thenDispute: false }
+        const created: FakeOrder = { orderId: nextId('FAKE-ORDER'), amount: input.amount, status: 'awaiting_approval', returnUrl: input.returnUrl, cancelUrl: input.cancelUrl, description: input.description, payment: undefined, thenDispute: false, capture: 'normal' }
         orders.set(created.orderId, created)
         return created
       })
@@ -211,7 +226,8 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
         // A second capture of a captured order reads it instead, as the REST adapter does with ORDER_ALREADY_CAPTURED.
         if (order.payment !== undefined) return ok(order.payment)
         if (order.status !== 'approved') return failure('order_not_approved', 'The renter has not approved the order.')
-        order.payment = { orderId: order.orderId, captureId: nextId('FAKE-CAPTURE'), status: 'completed', amount: order.amount, payer: FAKE_PAYER }
+        const amount = order.capture === 'other_amount' ? { ...order.amount, cents: order.amount.cents + 1_00 } : order.amount
+        order.payment = { orderId: order.orderId, captureId: nextId('FAKE-CAPTURE'), status: order.capture === 'review' ? 'pending' : 'completed', amount, payer: FAKE_PAYER }
         order.status = 'completed'
         if (order.thenDispute) disputes.push({ id: nextId('FAKE-DISPUTE'), open: true, amount: order.amount, responseDueAt: addDays(options.now(), 10), captureIds: [order.payment.captureId] })
         return ok(order.payment)

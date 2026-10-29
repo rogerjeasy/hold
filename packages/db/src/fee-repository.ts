@@ -112,6 +112,8 @@ export type StoredExecution = {
   readonly orderId: string | undefined
   // The PayPal authorization a release voids, or a walk-in's fee is captured from.
   readonly authorizationId: string | undefined
+  // A capture PayPal already made, which is read back rather than made again.
+  readonly captureId: string | undefined
   // What the execution moves, when it moves an amount.
   readonly amount: { readonly cents: number; readonly currency: string } | undefined
 }
@@ -123,7 +125,7 @@ export async function findExecution(transaction: Transaction, executionId: strin
     .where(eq(executions.id, executionId))
   if (row === undefined) return undefined
   const { resources, amountCents, currency, ...execution } = row
-  return { ...execution, orderId: resources['order'], authorizationId: resources['authorization'], amount: amountCents === null || currency === null ? undefined : { cents: amountCents, currency } }
+  return { ...execution, orderId: resources['order'], authorizationId: resources['authorization'], captureId: resources['capture'], amount: amountCents === null || currency === null ? undefined : { cents: amountCents, currency } }
 }
 
 // The execution's outbox message reached its queue, or is no longer needed. Other messages of the rental wait on.

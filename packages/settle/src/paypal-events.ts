@@ -1,4 +1,4 @@
-import { settlementExecutionForResource, feeRentalByOrder, holdRentalByOrder, inShop, markPayPalEvent, payPalEvent, paypalAccounts, queueOperationsCheck } from '@hold/db'
+import { expiredExtensionForCapture, settlementExecutionForResource, feeRentalByOrder, holdRentalByOrder, inShop, markPayPalEvent, payPalEvent, paypalAccounts, queueOperationsCheck } from '@hold/db'
 import type { Transaction } from '@hold/db'
 import { eq } from 'drizzle-orm'
 import { z } from 'zod'
@@ -6,6 +6,7 @@ import { PayPalUnavailable } from './dependencies.ts'
 import type { SettleDependencies } from './dependencies.ts'
 import { runExecution } from './executions.ts'
 import { invoiceApprovedClaim } from './claim-invoice.ts'
+import { checkLateExtensionPayment } from './extension-capture.ts'
 import { applyFeeEvent } from './fee-capture.ts'
 import { applyHoldEvent } from './hold-placement.ts'
 
@@ -73,6 +74,13 @@ export async function applyPayPalEvent(dependencies: SettleDependencies, message
       const result = settlement.action === 'invoice' ? await invoiceApprovedClaim(dependencies, shopId, settlement.id, paypal) : await runExecution(dependencies, { shopId, executionId: settlement.id })
       await mark('verified', result === 'failed' ? 'failed' : 'applied', settlement.rentalId)
       return 'applied'
+    }
+    // A capture Hold stopped waiting for, which PayPal completed after all, goes to a person.
+    const late = body.event_type === 'PAYMENT.CAPTURE.COMPLETED' ? await inScope((transaction) => expiredExtensionForCapture(transaction, body.resource?.id ?? '')) : undefined
+    if (late !== undefined) {
+      const processing = await checkLateExtensionPayment(dependencies, shopId, late, paypal)
+      await mark('verified', processing, late.rentalId)
+      return processing
     }
   }
   // A dispute is answered from the operations agent's queue, where a person approves the answer. Nothing in the event

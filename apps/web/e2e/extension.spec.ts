@@ -1,5 +1,5 @@
 import { expectFitsEveryWidth } from './support/responsive'
-import { readyForHandover, renterBrowser } from './support/rental'
+import { handedOver, renterBrowser } from './support/rental'
 import { expect, test } from './support/test'
 
 // Keeping the item longer from the renter's phone (architecture.md section 6.14): priced by Hold, paid in PayPal, and
@@ -8,23 +8,7 @@ test.use({ launchOptions: { args: ['--use-fake-device-for-media-stream', '--use-
 
 test('a renter keeps the item two more days, pays in PayPal, and staff see the new end', async ({ page, browser }) => {
   test.setTimeout(240_000)
-  await readyForHandover(page, browser, 'Porto Longer Bikes')
-  const rental = page.url()
-  await page.getByRole('region', { name: 'Handover' }).getByRole('button', { name: /^Photograph / }).click()
-  await expect(page).toHaveURL(/\/handover\/[0-9a-f-]{36}$/)
-  const views = page.getByRole('list', { name: 'Views' })
-  await expect(views).toBeVisible()
-  const needed = await views.getByText('Needed').count()
-  for (let count = 1; count <= needed; count += 1) {
-    await page.getByRole('button', { name: 'Use the sample photograph' }).click()
-    await expect(views.getByText('Photographed')).toHaveCount(count, { timeout: 30_000 })
-  }
-  await page.getByRole('button', { name: 'Seal the photographs' }).click()
-  await expect(page.getByText('The rental is out.')).toBeVisible()
-
-  await page.goto(rental)
-  await page.getByRole('button', { name: 'Show the link' }).click()
-  const link = (await page.getByTestId('renter-link').textContent()) ?? ''
+  const { rental, link } = await handedOver(page, browser, 'Porto Longer Bikes')
   const renter = await renterBrowser(browser)
   await renter.goto(link)
   await renter.getByRole('link', { name: 'Keep it longer' }).click()

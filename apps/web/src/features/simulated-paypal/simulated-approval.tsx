@@ -35,6 +35,12 @@ export function SimulatedApproval({ orderId, amount, description, cancelPath }: 
         <Button type="submit" name="then" value="dispute" variant="outline" className="min-h-12 w-full whitespace-normal">
           {t('approveThenDispute')}
         </Button>
+        <Button type="submit" name="then" value="review" variant="outline" className="min-h-12 w-full whitespace-normal">
+          {t('approveForReview')}
+        </Button>
+        <Button type="submit" name="then" value="other_amount" variant="outline" className="min-h-12 w-full whitespace-normal">
+          {t('approveOtherAmount')}
+        </Button>
       </form>
       <a href={cancelPath} className="inline-flex min-h-11 items-center justify-center font-semibold underline underline-offset-4">
         {t('cancel')}

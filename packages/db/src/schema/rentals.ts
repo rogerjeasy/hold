@@ -103,8 +103,22 @@ export const rentalExtensions = pgTable(
     askedThrough: text().notNull(),
     createdAt: createdAt(),
     paidAt: at(),
+    // Money PayPal moved that Hold did not apply as the quote (section 6.14): a capture of another amount, or one PayPal
+    // completed after Hold stopped waiting. The amount and capture are PayPal's, kept for the person who checks it.
+    attention: text(),
+    attentionAt: at(),
+    capturedCents: cents(),
+    paypalCaptureId: text(),
+    checkedAt: at(),
+    checkedByUserId: reference().references(() => users.id),
   },
-  (table) => [allowed(table.state, EXTENSION_STATES), check('asked_through_allowed', sql`${table.askedThrough} in ('link', 'assistant')`), check('later_end', sql`${table.toEndsAt} > ${table.fromEndsAt}`), shopIsolation(table.shopId)],
+  (table) => [
+    allowed(table.state, EXTENSION_STATES),
+    check('asked_through_allowed', sql`${table.askedThrough} in ('link', 'assistant')`),
+    check('later_end', sql`${table.toEndsAt} > ${table.fromEndsAt}`),
+    check('attention_allowed', sql`${table.attention} is null or ${table.attention} in ('amount_mismatch', 'paid_after_expiry')`),
+    shopIsolation(table.shopId),
+  ],
 )
 
 export const rentalItems = pgTable(

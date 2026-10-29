@@ -2770,7 +2770,13 @@
     "approve": "Aprobar",
     "cancel": "Cancelar y volver",
     "unknown": "Este pedido no se conoce.",
-    "approveThenDispute": "Aprobar y luego disputar este pago"
+    "approveThenDispute": "Aprobar y luego disputar este pago",
+    "approveForReview": "Aprobar y que PayPal revise el pago",
+    "approveOtherAmount": "Aprobar, pero PayPal cobra otro importe",
+    "reviewTitle": "PayPal está revisando este pago",
+    "reviewBody": "El pago está cobrado pero no confirmado. Termina la revisión como lo haría PayPal y la tienda recibe el aviso.",
+    "complete": "Completar el pago",
+    "deny": "Rechazar el pago"
   },
   "claim": {
     "title": "Reclamación y liquidación",
@@ -3545,7 +3551,7 @@
     "lead": "Reclamaciones, propuestas del agente, avisos de los clientes y lo pendiente en el mostrador, en el orden en que vencen. Aquí no se cobra a nadie: un cobro solo empieza con una reclamación que una persona aprobó.",
     "passkeyBody": "Aprobar las liberaciones y las peticiones de dinero del agente requiere tu llave de acceso. Nada más en esta página la requiere.",
     "empty": "Nada espera a una persona.",
-    "emptyBody": "Aquí aparecen las reclamaciones por aprobar, las propuestas del agente, los avisos de los clientes, los artículos que dejaron los clientes, las retenciones a punto de vencer y las devoluciones con retraso.",
+    "emptyBody": "Aquí aparecen las reclamaciones por aprobar, las propuestas del agente, los avisos de los clientes, los artículos que dejaron los clientes, los pagos de días extra por revisar, las retenciones a punto de vencer y las devoluciones con retraso.",
     "noMatch": "Nada coincide. Borra la búsqueda o muestra todos los grupos.",
     "toolbar": "Filtrar las decisiones",
     "groups": {
@@ -3574,7 +3580,8 @@
       "incident": "{kind} en {item}",
       "hold_ending": "La retención de {renter} vence {when}",
       "late": "{renter} se retrasa",
-      "dropped_off": "Revisa lo que dejó {renter}"
+      "dropped_off": "Revisa lo que dejó {renter}",
+      "extension_payment": "Revisa un pago de días extra de {renter}"
     },
     "headings": {
       "claim": "Aprobar una reclamación de {amount}",
@@ -3592,6 +3599,10 @@
     "holdLine": "Día {day} de {max} · {amount} retenidos",
     "lateLine": "Debía volver {when}",
     "dropOffLine": "{items} · dejado {when}",
+    "extensionLine": {
+      "amount_mismatch": "PayPal cobró {captured}; el precio de Hold era {quoted}",
+      "paid_after_expiry": "{captured} pagado después de que Hold dejara de esperar"
+    },
     "due": {
       "none": "Sin fecha",
       "overdue": "Vencida desde {when}",
@@ -3642,7 +3653,20 @@
       "openRental": "Abrir el alquiler",
       "handover": "En la entrega",
       "return": "En la devolución",
-      "item": "Artículo"
+      "item": "Artículo",
+      "extensionPayment": {
+        "amount_mismatch": "PayPal cobró un importe distinto del precio de Hold por estos días extra. No se deshizo nada: el nuevo final se mantiene. Revisa el pago en PayPal, reembolsa lo que no debió cobrarse y márcalo como revisado.",
+        "paid_after_expiry": "PayPal completó este pago después de que Hold dejara de esperarlo, así que volvió el final anterior del alquiler. El cliente pagó por días que no tuvo. Reembólsalo en PayPal o amplía de nuevo el alquiler, y márcalo como revisado.",
+        "price": "Precio de Hold",
+        "took": "Cobrado por PayPal",
+        "capture": "Pago de PayPal",
+        "check": "Marcar como revisado",
+        "checked": "Revisado. Sale del tablero.",
+        "results": {
+          "not_found": "Este pago no es de esta tienda.",
+          "already_checked": "Alguien ya lo revisó."
+        }
+      }
     },
     "together": {
       "label": "Liberaciones elegidas",
@@ -4080,7 +4104,8 @@
       "done": "Pagado. Tu nueva hora de devolución está fijada.",
       "retry": "Reintentar",
       "back": "Ver tus ampliaciones",
-      "again": "Elegir la hora otra vez"
+      "again": "Elegir la hora otra vez",
+      "reviewing": "PayPal está revisando tu pago, lo que puede tardar un día o más. Tu nueva hora de devolución se mantiene por ahora. Si PayPal rechaza el pago, o no ha terminado antes de tu hora de devolución anterior, vuelve a aplicarse esa hora."
     },
     "settings": {
       "title": "Ampliaciones",

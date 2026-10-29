@@ -352,9 +352,33 @@ describe('a rental fee in the fake', () => {
     expect(valueOf(await paypal.listOpenDisputes())).toHaveLength(1)
   })
 
+  it('holds a payment for review when the tester asks, until it is completed or denied, and only then', async () => {
+    const created = valueOf(await order(paypal))
+    paypal.approveOrder(created.orderId, { capture: 'review' })
+    expect(paypal.finishReview(created.orderId, 'completed')).toBeUndefined()
+    const pending = valueOf(await paypal.captureFeeOrder({ orderId: created.orderId, idempotencyKey: key() }))
+    expect(pending).toMatchObject({ status: 'pending', amount: FEE })
+    expect(paypal.orderLinks(created.orderId)?.underReview).toBe(true)
+    expect(paypal.finishReview(created.orderId, 'completed')).toBe(pending.captureId)
+    expect(valueOf(await paypal.readFeePayment(created.orderId))).toMatchObject({ status: 'completed', captureId: pending.captureId })
+    expect(paypal.orderLinks(created.orderId)?.underReview).toBe(false)
+    expect(paypal.finishReview(created.orderId, 'declined')).toBeUndefined()
+    const denied = valueOf(await order(paypal))
+    paypal.approveOrder(denied.orderId, { capture: 'review' })
+    await paypal.captureFeeOrder({ orderId: denied.orderId, idempotencyKey: key() })
+    paypal.finishReview(denied.orderId, 'declined')
+    expect(valueOf(await paypal.readFeePayment(denied.orderId))).toMatchObject({ status: 'declined' })
+  })
+
+  it('takes another amount than the order’s when the tester asks, as no real PayPal should', async () => {
+    const created = valueOf(await order(paypal))
+    paypal.approveOrder(created.orderId, { capture: 'other_amount' })
+    expect(valueOf(await paypal.captureFeeOrder({ orderId: created.orderId, idempotencyKey: key() }))).toMatchObject({ status: 'completed', amount: { cents: FEE.cents + 1_00, currency: 'EUR' } })
+  })
+
   it('remembers where the order sends the renter back, and what it is for', async () => {
     const created = valueOf(await order(paypal))
-    expect(paypal.orderLinks(created.orderId)).toEqual({ returnUrl: 'https://hold.test/paid', cancelUrl: 'https://hold.test/r', amount: FEE, description: 'Rental fee' })
+    expect(paypal.orderLinks(created.orderId)).toEqual({ returnUrl: 'https://hold.test/paid', cancelUrl: 'https://hold.test/r', amount: FEE, description: 'Rental fee', underReview: false })
     expect(paypal.orderLinks('FAKE-ORDER-9999')).toBeUndefined()
   })
 

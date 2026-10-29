@@ -1,6 +1,6 @@
 'use client'
 
-import { CircleCheck, LoaderCircle } from 'lucide-react'
+import { CircleCheck, Clock, LoaderCircle } from 'lucide-react'
 import { useLocale } from 'next-intl'
 import { startTransition, useActionState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
@@ -27,11 +27,13 @@ type PayPalReturnProps<Output> = {
   afterRefusal?: { readonly href: string; readonly label: string; readonly reasons: readonly string[] }
   // Refusals this page words its own way.
   wording?: Readonly<Record<string, string>>
+  // PayPal holds what the renter approved for review, which may take days: said plainly, and not looked at again.
+  held?: { readonly when: (output: Output) => boolean; readonly text: string }
 }
 
 // Where PayPal sends the renter back. Arriving changes nothing: the page then asks, once, by a POST, for what the
 // renter approved to be carried out, and looks again while the worker does it.
-export function PayPalReturn<Output>({ token, orderId, shopName, done, confirm, stillWorking, texts, next, afterRefusal, wording }: PayPalReturnProps<Output>) {
+export function PayPalReturn<Output>({ token, orderId, shopName, done, confirm, stillWorking, texts, next, afterRefusal, wording, held }: PayPalReturnProps<Output>) {
   const locale = useLocale()
   const [result, send, pending] = useActionState(confirm, null)
   const asked = useRef(done)
@@ -51,7 +53,8 @@ export function PayPalReturn<Output>({ token, orderId, shopName, done, confirm, 
     ask()
   })
   useLookAgain(working)
-  const finished = done || (result?.ok === true && !stillWorking(result.value))
+  const reviewing = !done && result?.ok === true && held?.when(result.value) === true
+  const finished = !reviewing && (done || (result?.ok === true && !stillWorking(result.value)))
   const refusedFor = result?.ok === false && result.failure === 'refused' ? result.reason : undefined
   const elsewhere = afterRefusal !== undefined && refusedFor !== undefined && afterRefusal.reasons.includes(refusedFor) ? afterRefusal : undefined
 
@@ -59,7 +62,17 @@ export function PayPalReturn<Output>({ token, orderId, shopName, done, confirm, 
     <div className="mx-auto grid w-full max-w-xl gap-6 px-4 py-12 md:px-8">
       <p className="label text-xs text-muted-foreground">{shopName}</p>
       <h1 className="text-page-title text-balance">{texts.title}</h1>
-      {finished ? (
+      {reviewing ? (
+        <div className="grid gap-4">
+          <p role="status" className="flex gap-2 text-pretty">
+            <Clock aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+            {held.text}
+          </p>
+          <Link href={next.href} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
+            {next.label}
+          </Link>
+        </div>
+      ) : finished ? (
         <div className="grid gap-4">
           <p role="status" className="flex items-center gap-2 text-lg font-semibold">
             <CircleCheck aria-hidden="true" className="size-5 shrink-0 text-primary" />

@@ -2770,7 +2770,13 @@
     "approve": "Approve",
     "cancel": "Cancel and go back",
     "unknown": "This order is not known.",
-    "approveThenDispute": "Approve, then dispute this payment"
+    "approveThenDispute": "Approve, then dispute this payment",
+    "approveForReview": "Approve, then PayPal holds the payment for review",
+    "approveOtherAmount": "Approve, but PayPal takes another amount",
+    "reviewTitle": "PayPal is reviewing this payment",
+    "reviewBody": "The payment is captured but not settled. Finish the review as PayPal would, and the shop is told.",
+    "complete": "Complete the payment",
+    "deny": "Deny the payment"
   },
   "claim": {
     "title": "Claim and settlement",
@@ -3545,7 +3551,7 @@
     "lead": "Claims, the agent's proposals, renters' reports and the counter's own, in the order they fall due. Nothing here charges anyone: a charge still begins only from a claim a person approved.",
     "passkeyBody": "Approving the agent's releases and requests for money needs your passkey. Nothing else on this board does.",
     "empty": "Nothing waits on a person.",
-    "emptyBody": "Claims to approve, the agent's proposals, renters' reports, items renters dropped off, holds near their end and late returns appear here.",
+    "emptyBody": "Claims to approve, the agent's proposals, renters' reports, items renters dropped off, extra-days payments to check, holds near their end and late returns appear here.",
     "noMatch": "Nothing matches. Clear the search or show every group.",
     "toolbar": "Filter the decisions",
     "groups": {
@@ -3574,7 +3580,8 @@
       "incident": "{kind} on {item}",
       "hold_ending": "The hold for {renter} ends {when}",
       "late": "{renter} is late",
-      "dropped_off": "Check what {renter} dropped off"
+      "dropped_off": "Check what {renter} dropped off",
+      "extension_payment": "Check an extra-days payment from {renter}"
     },
     "headings": {
       "claim": "Approve a claim of {amount}",
@@ -3592,6 +3599,10 @@
     "holdLine": "Day {day} of {max} · {amount} held",
     "lateLine": "Due back {when}",
     "dropOffLine": "{items} · left {when}",
+    "extensionLine": {
+      "amount_mismatch": "PayPal took {captured}; Hold's price was {quoted}",
+      "paid_after_expiry": "Paid {captured} after Hold stopped waiting"
+    },
     "due": {
       "none": "No date",
       "overdue": "Overdue since {when}",
@@ -3642,7 +3653,20 @@
       "openRental": "Open the rental",
       "handover": "At handover",
       "return": "At return",
-      "item": "Item"
+      "item": "Item",
+      "extensionPayment": {
+        "amount_mismatch": "PayPal took another amount than Hold's price for these extra days. Nothing was undone: the new end stands. Look at the payment in PayPal, refund what should not have been taken, then mark it checked.",
+        "paid_after_expiry": "PayPal completed this payment after Hold had stopped waiting for it, so the rental's old end came back. The renter paid for days they were not given. Refund it in PayPal, or extend the rental again, then mark it checked.",
+        "price": "Hold's price",
+        "took": "PayPal took",
+        "capture": "PayPal capture",
+        "check": "Mark as checked",
+        "checked": "Checked. It leaves the board.",
+        "results": {
+          "not_found": "This payment is not one of this shop's.",
+          "already_checked": "Someone has already checked it."
+        }
+      }
     },
     "together": {
       "label": "Releases chosen",
@@ -4080,7 +4104,8 @@
       "done": "Paid. Your new return time is set.",
       "retry": "Try again",
       "back": "See your extensions",
-      "again": "Choose the time again"
+      "again": "Choose the time again",
+      "reviewing": "PayPal is reviewing your payment, which can take a day or more. Your new return time holds for now. If PayPal turns the payment down, or has not finished by your earlier return time, your earlier return time applies again."
     },
     "settings": {
       "title": "Extensions",

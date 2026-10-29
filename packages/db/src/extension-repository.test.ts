@@ -5,7 +5,7 @@ import { beforeAll, describe, expect, it } from 'vitest'
 import { createBooking, rentalDetail } from './booking-repository.ts'
 import { shopToday } from './shop-today.ts'
 import { recordPhoto, sealSession, startCaptureSession } from './capture-repository.ts'
-import { beginExtensionCapture, confirmExtensionCapture, extensionMaxDays, failExtensionCapture, quoteExtension, rentalExtensionsOf, saveExtensionMaxDays, saveExtensionOrder } from './extension-repository.ts'
+import { beginExtensionCapture, checkExtensionPayment, confirmExtensionCapture, extensionMaxDays, extensionPaymentsToCheck, failExtensionCapture, flagExtensionCapture, quoteExtension, rentalExtensionsOf, saveExtensionMaxDays, saveExtensionOrder } from './extension-repository.ts'
 import { authorizations, executions, holds, moneyEvents, outbox, rentals } from './schema/index.ts'
 import { inShop } from './scope.ts'
 import type { Transaction } from './scope.ts'
@@ -166,5 +166,23 @@ describe('paying for more days', () => {
     await asWorker((transaction) => failExtensionCapture(transaction, begun.execution.id, 'declined', NOW))
     expect((await database.select().from(rentals).where(eq(rentals.id, rental.rentalId)))[0]?.endsAt).toEqual(rental.endsAt)
     expect((await shop.act((transaction) => rentalExtensionsOf(transaction, rental.rentalId)))[0]?.state).toBe('failed')
+  })
+})
+
+describe('money PayPal moved that a person must check', () => {
+  it('lists a capture of another amount for the shop alone, until an owner or manager marks it checked', async () => {
+    const rental = await out()
+    const extension = await ordered(rental.rentalId, hours(rental.endsAt, 24))
+    const begun = await shop.act((transaction) => beginExtensionCapture(transaction, rental.rentalId, extension.orderId, NOW))
+    if (!begun.ok) throw new Error(begun.reason)
+    const payment = { orderId: extension.orderId, captureId: `CAPTURE-${randomUUID()}`, status: 'completed', amount: { cents: 1, currency: 'EUR' } }
+    await asWorker((transaction) => flagExtensionCapture(transaction, begun.execution.id, payment, NOW))
+    const waiting = await shop.act((transaction) => extensionPaymentsToCheck(transaction))
+    expect(waiting.filter((each) => each.rentalId === rental.rentalId)).toMatchObject([{ extensionId: extension.extensionId, attention: 'amount_mismatch', capturedCents: 1, paypalCaptureId: payment.captureId, extraDays: 1 }])
+    expect(await other.act((transaction) => extensionPaymentsToCheck(transaction))).toEqual([])
+    expect(await other.act((transaction) => checkExtensionPayment(transaction, extension.extensionId, other.scope.userId ?? '', NOW))).toEqual({ ok: false, reason: 'not_found' })
+    expect(await shop.act((transaction) => checkExtensionPayment(transaction, extension.extensionId, shop.scope.userId ?? '', NOW))).toEqual({ ok: true, rentalId: rental.rentalId })
+    expect((await shop.act((transaction) => extensionPaymentsToCheck(transaction))).map((each) => each.rentalId)).not.toContain(rental.rentalId)
+    expect(await shop.act((transaction) => checkExtensionPayment(transaction, extension.extensionId, shop.scope.userId ?? '', NOW))).toEqual({ ok: false, reason: 'already_checked' })
   })
 })

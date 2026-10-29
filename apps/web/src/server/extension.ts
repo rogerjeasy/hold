@@ -1,5 +1,5 @@
 import 'server-only'
-import { inShop, openExtension, quoteExtension, rentalExtensionsOf, renterView, saveExtensionOrder } from '@hold/db'
+import { extensionPaymentHeld, inShop, openExtension, quoteExtension, rentalExtensionsOf, renterView, saveExtensionOrder } from '@hold/db'
 import type { RenterLink } from '@hold/db'
 import { atShopTime } from '@hold/domain'
 import type { ExtensionProblem } from '@hold/domain'
@@ -75,11 +75,13 @@ export async function startExtensionPayment(link: RenterLink, inLinkShop: InLink
 
 // The renter is back from PayPal. Once PayPal shows the order approved, the capture is recorded, the new end applied,
 // and the capture handed to the worker.
-export async function confirmExtensionPayment(link: RenterLink, inLinkShop: InLinkShop, orderId: string): Promise<{ readonly state: 'paid' | 'capturing' } | Refusal> {
+export async function confirmExtensionPayment(link: RenterLink, inLinkShop: InLinkShop, orderId: string): Promise<{ readonly state: 'paid' | 'capturing' | 'reviewing' } | Refusal> {
   const ours = (await inLinkShop((transaction) => rentalExtensionsOf(transaction, link.rentalId))).find((each) => each.paypalOrderId === orderId)
   // Only an order this rental started: a renter cannot pay for one rental's days with another's order.
   if (ours === undefined) return new Refusal('order_mismatch')
   if (ours.state === 'paid') return { state: 'paid' }
+  // PayPal refused it, now or after a review: nothing was taken, and asking again would not change that.
+  if (ours.state === 'failed') return new Refusal('declined')
   const paypal = await inLinkShop((transaction) => paypalForShop(transaction, link.shopId))
   if (paypal === undefined) return new Refusal('paypal_not_connected')
   const order = await paypal.readHoldOrder(orderId)
@@ -92,6 +94,11 @@ export async function confirmExtensionPayment(link: RenterLink, inLinkShop: InLi
   } catch {
     // The execution and its outbox message are recorded; the relay hands it to the worker if sending failed.
   }
-  const after = (await inShop(database, { role: 'hold_app', shopId: link.shopId }, (transaction) => rentalExtensionsOf(transaction, link.rentalId))).find((each) => each.paypalOrderId === orderId)
-  return { state: after?.state === 'paid' ? 'paid' : 'capturing' }
+  const { after, held } = await inShop(database, { role: 'hold_app', shopId: link.shopId }, async (transaction) => ({
+    after: (await rentalExtensionsOf(transaction, link.rentalId)).find((each) => each.paypalOrderId === orderId),
+    held: await extensionPaymentHeld(transaction, orderId),
+  }))
+  // PayPal holding the payment for review may take days: the renter is told so, rather than kept watching.
+  if (after?.state === 'failed') return new Refusal('declined')
+  return { state: after?.state === 'paid' ? 'paid' : held ? 'reviewing' : 'capturing' }
 }

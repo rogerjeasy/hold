@@ -36,7 +36,16 @@ export const EXTENSION_LIMITS = {
   // The days a hold must still have after the new end: to check the return, draft and approve a claim, and charge it
   // the day before the hold would lapse (section 7.5).
   returnToCaptureDays: 2,
+  // A capture PayPal reports as pending is waited for at least this long, however near the old end.
+  pendingPaymentHours: 24,
 } as const
+
+// When Hold stops waiting on a capture PayPal reports as pending (architecture.md section 6.14). Until the old end the
+// renter keeps only days they already paid for, so waiting costs nothing; past it, the extra days are not given on
+// money PayPal has not settled. The old end comes back, and a payment PayPal completes later goes to a person.
+export function extensionPaymentDeadline(oldEndsAt: Date, captureBeganAt: Date): Date {
+  return new Date(Math.max(oldEndsAt.getTime(), captureBeganAt.getTime() + EXTENSION_LIMITS.pendingPaymentHours * 3_600_000))
+}
 
 export type ExtensionRequest = {
   readonly state: RentalState

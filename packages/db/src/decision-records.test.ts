@@ -85,6 +85,7 @@ describe('the records a decision board reads', () => {
     const records = await read(shop)
     expect(records.holds.map((hold) => hold.renterName)).toContain('Marco Rossi')
     expect(records.dropOffs.map((dropOff) => dropOff.renterName)).toEqual(['Chloé Martin'])
+    expect(records.extensionPayments).toEqual([])
     expect(records.late.map((rental) => rental.renterName)).toEqual(['Lea Fischer'])
     expect(records.incidents).toEqual([])
     expect(records.proposals.map((entry) => entry.kind).sort()).toEqual(['request_replacement_hold', 'respond_to_dispute'])
@@ -92,6 +93,6 @@ describe('the records a decision board reads', () => {
   })
 
   it('reads nothing of another shop', async () => {
-    expect(await read(other)).toEqual({ claims: [], proposals: [], incidents: [], holds: [], late: [], dropOffs: [], staffCount: 1 })
+    expect(await read(other)).toEqual({ claims: [], proposals: [], incidents: [], holds: [], late: [], dropOffs: [], extensionPayments: [], staffCount: 1 })
   })
 })
