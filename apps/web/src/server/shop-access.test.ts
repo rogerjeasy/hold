@@ -149,7 +149,7 @@ describe('adding sample rentals', () => {
     await signIn('sampler@douro.example', 'passkey')
     expect(await shopActions.publishPrices(null, form(prices))).toMatchObject({ ok: true })
     await signIn('sampler@douro.example', 'email_code')
-    expect(await shopActions.addSampleRentals(null, form(sample))).toEqual({ ok: true, value: { rentals: 11 } })
+    expect(await shopActions.addSampleRentals(null, form(sample))).toEqual({ ok: true, value: { rentals: 12 } })
     expect(await shopActions.addSampleRentals(null, form(sample))).toEqual({ ok: false, failure: 'refused', reason: 'has_rentals' })
 
     const { database } = await getServices()

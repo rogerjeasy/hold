@@ -7,17 +7,20 @@ import { lapseUnagreedOffers } from './incident-closing.ts'
 export const COMPARISONS_QUEUE = 'comparisons'
 
 // Called in the sealing transaction. A rental is returned only after all its items have sealed return evidence.
-// The comparison and its message are written together, so retries cannot lose or multiply the work.
+// The comparison and its message are written together, so retries cannot lose or multiply the work. A return the renter
+// photographed leaves the rental dropped off, from now, until a person has seen the item (architecture.md section 6.13).
 export async function queueReturnComparisons(transaction: Transaction, rentalId: string, now: Date): Promise<void> {
   const [rental] = await transaction.select().from(rentals).where(eq(rentals.id, rentalId)).for('update')
-  if (rental === undefined || !transition(RENTAL_TRANSITIONS, rental.state, 'returned').ok) return
+  if (rental === undefined) return
   const all = await transaction.select({ id: rentalItems.id }).from(rentalItems).where(eq(rentalItems.rentalId, rentalId))
   const sealed = await transaction
-    .select({ id: captureSessions.id, kind: captureSessions.kind, rentalItemId: captureSessions.rentalItemId })
+    .select({ id: captureSessions.id, kind: captureSessions.kind, rentalItemId: captureSessions.rentalItemId, byRenter: captureSessions.byRenter })
     .from(captureSessions).innerJoin(rentalItems, eq(rentalItems.id, captureSessions.rentalItemId))
     .where(and(eq(rentalItems.rentalId, rentalId), isNotNull(captureSessions.sealedAt)))
   const returned = sealed.filter((row) => row.kind === 'return')
   if (returned.length !== all.length) return
+  const target = returned.some((row) => row.byRenter) ? 'dropped_off' : 'returned'
+  if (!transition(RENTAL_TRANSITIONS, rental.state, target).ok) return
   for (const session of returned) {
     const handover = sealed.find((row) => row.kind === 'handover' && row.rentalItemId === session.rentalItemId)
     if (handover === undefined) throw new Error('A return has no sealed handover.')
@@ -26,7 +29,7 @@ export async function queueReturnComparisons(transaction: Transaction, rentalId:
       .onConflictDoNothing().returning({ id: comparisons.id })
     if (created !== undefined) await transaction.insert(outbox).values({ shopId: rental.shopId, queue: COMPARISONS_QUEUE, messageGroup: rentalId, payload: { comparisonId: created.id }, createdAt: now })
   }
-  await transaction.update(rentals).set({ state: 'returned' }).where(eq(rentals.id, rentalId))
+  await transaction.update(rentals).set(target === 'dropped_off' ? { state: target, droppedOffAt: now } : { state: target }).where(eq(rentals.id, rentalId))
   await lapseUnagreedOffers(transaction, rentalId)
 }
 

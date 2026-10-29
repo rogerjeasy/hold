@@ -26,6 +26,10 @@ describe('the detectors, which decide what needs attention', () => {
     expect(kinds({ ...snapshot, holds: [hold('r1', { validUntil: hours(80) })] })).toEqual([])
   })
 
+  it('keep watching the hold of an item the renter dropped off, which nobody has checked yet', () => {
+    expect(kinds({ ...empty, rentals: [rental('r1', 'dropped_off')], holds: [hold('r1', { validUntil: hours(48) })] })).toEqual(['hold_ending'])
+  })
+
   it('see a hold at risk for more than an hour, and offer an invoice or a message', () => {
     const snapshot = { ...empty, rentals: [rental('r1')], holds: [hold('r1', { state: 'at_risk', stateChangedAt: hours(-2) })] }
     expect(detectExceptions(snapshot)).toEqual([expect.objectContaining({ kind: 'hold_at_risk', allowed: ['send_invoice', 'send_message'] })])
@@ -36,6 +40,7 @@ describe('the detectors, which decide what needs attention', () => {
     const snapshot = { ...empty, rentals: [rental('r1', 'out', hours(-1))], holds: [hold('r1')] }
     expect(detectExceptions(snapshot)).toEqual([expect.objectContaining({ kind: 'return_overdue', allowed: [], reminder: 'return_due' })])
     expect(kinds({ ...snapshot, rentals: [rental('r1', 'returned', hours(-1))] })).toEqual([])
+    expect(kinds({ ...snapshot, rentals: [rental('r1', 'dropped_off', hours(-1))] })).toEqual([])
   })
 
   it('remind a renter whose reply to a claim is due within a day', () => {

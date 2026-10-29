@@ -1241,6 +1241,7 @@
       "scorecard": "Zuverlässigkeit",
       "incidents": "Vorfälle",
       "trust": "Vertrauensstufen",
+      "selfReturn": "Rückgabe nach Ladenschluss",
       "settlement": "Vergleichsvertreter",
       "queue": "Morgenliste",
       "money": "Geld",
@@ -1909,6 +1910,7 @@
         "uploading": "Wird hochgeladen… {percent} %",
         "retake": "Bitte erneut aufnehmen: {problems}.",
         "failed": "Das Foto wurde nicht hochgeladen. Prüfen Sie die Verbindung und versuchen Sie es erneut.",
+        "reused": "Dieses Foto wurde schon einmal verwendet. Machen Sie ein neues vom Artikel, wie er jetzt ist.",
         "problems": {
           "blurred": "es ist unscharf",
           "too_dark": "es ist zu dunkel",
@@ -2002,6 +2004,8 @@
       "after": "Rückgabe",
       "photo": "{side}: {view}",
       "preparing": "Das Anzeigefoto wird vorbereitet.",
+      "dropPoint": "Wo der Mieter ihn abgestellt hat",
+      "dropPointBody": "Vom Mieter am Abgabeort fotografiert. Es belegt den Ort und wird nicht verglichen.",
       "observations": "Beobachtungen",
       "classes": {
         "new_damage": "Möglicher neuer Schaden",
@@ -2195,6 +2199,10 @@
       "subject": "Ihre Miete bei {shop}: der Zustand bei der Übergabe",
       "body": "Ihre Miete bei {shop} ist jetzt bei Ihnen. Hier sind die Fotos, die bei der Übergabe gemacht wurden, und alle Spuren, die notiert wurden.\n\nÖffnen Sie diesen Link. Wenn alles stimmt, bestätigen Sie es. Wenn etwas übersehen wurde, fügen Sie jetzt, innerhalb von 24 Stunden, ein Foto davon hinzu, damit Ihnen dafür nie etwas berechnet wird:\n\n{link}"
     },
+    "dropOffMissing": {
+      "subject": "{shop} hat Ihre Rückgabe am Abgabeort nicht gefunden",
+      "body": "Sie haben Ihre Rückgabe an {shop} am {sent} gesendet. Als jemand vom Laden am {looked} am Abgabeort nachsah, war der Artikel nicht dort.\n\nBitte melden Sie sich beim Laden. Ihre Fotos vom {sent} bleiben im Nachweis Ihrer Miete, und solange geklärt wird, wird nichts abgebucht. Ihre Rückgabe, wie Sie sie gesendet haben:"
+    },
     "claimCode": {
       "subject": "Ihr Hold-Bestätigungscode",
       "body": "Ihr Bestätigungscode lautet {code}. Er gilt zehn Minuten. Geben Sie ihn nur auf Ihrer privaten Hold-Forderungsseite ein."
@@ -2249,6 +2257,10 @@
       "title": "Wartet auf Entscheidung",
       "empty": "Nichts wartet auf eine Entscheidung.",
       "emptyBody": "Hier erscheinen Forderungen zur Freigabe, Reservierungen kurz vor dem Ende und verspätete Rückgaben.",
+      "dropped_off": {
+        "title": "{renter} hat es {when} am Abgabeort zurückgegeben",
+        "body": "Prüfen Sie, ob es dort ist, und sehen Sie dann die Rückgabe durch. Die Reservierung bleibt, und nichts wird abgebucht, bis Sie das tun."
+      },
       "claim": {
         "title": "Forderung über {amount} an {renter}",
         "body": "{line}. Wartet auf Freigabe.",
@@ -2373,6 +2385,7 @@
     "ready": "Bereit zur Übergabe",
     "out": "Verliehen",
     "overdue": "Überfällig",
+    "dropped_off": "Abgestellt, zu prüfen",
     "returned": "Zurückgegeben",
     "inspecting": "Wird geprüft",
     "settling": "Wird abgerechnet",
@@ -2439,6 +2452,8 @@
       "approveHold": "Reservierung genehmigen",
       "ready": "Ihre Reservierung ist gesetzt. Sie können Ihre Artikel abholen.",
       "out": "Ihre Miete ist bei Ihnen.",
+      "dropped_off": "Sie haben es am Abgabeort zurückgegeben. Eine Person im Laden wird es prüfen.",
+      "returnReceipt": "Ihre Rückgabe ansehen",
       "condition": "Ansehen, wie sie übergeben wurde"
     },
     "paid": {
@@ -2488,7 +2503,12 @@
       "not_uploaded": "Das Foto ist nicht angekommen. Nehmen Sie es noch einmal auf.",
       "sealed": "Diese Meldung wurde gesendet, daher kann kein Foto hinzugefügt werden.",
       "unknown_view": "Diese Ansicht gehört nicht zu diesem Artikel.",
-      "not_connected": "Mit dieser Miete ist gerade kein Assistent verbunden."
+      "not_connected": "Mit dieser Miete ist gerade kein Assistent verbunden.",
+      "not_allowed": "Dieser Laden nimmt Rückgaben nur an der Theke an.",
+      "not_ready": "Diese Miete kann hier gerade nicht zurückgegeben werden.",
+      "staff_returning": "Das Personal nimmt diese Rückgabe bereits an der Theke an.",
+      "photo_reused": "Dieses Foto wurde schon einmal verwendet. Machen Sie ein neues vom Artikel, wie er jetzt ist.",
+      "views_missing": "Es fehlen noch Fotos."
     },
     "orderDescription": "{shop}: {items}, {days, plural, one {# Tag} other {# Tage}}",
     "holdPage": {
@@ -3857,5 +3877,148 @@
     "saved": "Dein Dashboard ist für deinen nächsten Besuch gespeichert.",
     "saveFailed": "Dein Dashboard konnte nicht gespeichert werden. Deine Änderungen bleiben auf dieser Seite.",
     "reset": "Zurück zum ersten Dashboard"
+  },
+  "selfReturn": {
+    "card": {
+      "closedTitle": "Der Laden ist geschlossen. Sie können trotzdem zurückgeben.",
+      "openTitle": "Selbst zurückgeben",
+      "body": "Fotografieren Sie den Artikel so, wie er bei der Abholung fotografiert wurde, lassen Sie ihn am Abgabeort, und fertig. Er gilt ab dem Moment des Sendens als zurückgegeben.",
+      "meta": "Etwa zwei Minuten",
+      "start": "Selbst zurückgeben"
+    },
+    "renter": {
+      "title": "Selbst zurückgeben",
+      "titles": {
+        "unavailable": "Selbst zurückgeben",
+        "intro": "Bevor Sie beginnen",
+        "capture": "Die Rückgabe fotografieren",
+        "sent": "Ihre Rückgabe"
+      },
+      "back": "Zurück zu Ihrer Miete",
+      "unavailable": {
+        "title": "Diese Rückgabe ist hier nicht möglich",
+        "body": "{shop} nimmt diese Rückgabe an der Theke an. Bringen Sie den Artikel während der Öffnungszeiten zurück."
+      },
+      "when": {
+        "open": "Eine Person bei {shop} prüft ihn heute, solange der Laden geöffnet ist.",
+        "later": "Eine Person bei {shop} prüft ihn, wenn der Laden öffnet, {when}.",
+        "unknown": "Eine Person bei {shop} prüft ihn, wenn der Laden das nächste Mal öffnet."
+      },
+      "intro": {
+        "dropPointLabel": "Hier abstellen",
+        "writtenBy": "In den Worten von {shop}",
+        "nextLabel": "Wie es weitergeht",
+        "nothingCharged": "Jetzt wird nichts abgebucht.",
+        "holdStays": "Ihre Reservierung über {amount} bleibt bei PayPal bestehen, bis die Person geprüft hat. Dann wird sie freigegeben, oder Sie erhalten eine Forderung mit Fotos, auf die Sie antworten können.",
+        "how": "Fotografieren Sie jede Ansicht so, wie sie bei der Abholung fotografiert wurde, dann den Abgabeort. Etwa zwei Minuten.",
+        "light": "Suchen Sie gutes Licht. Die Fotos von jetzt belegen, in welchem Zustand Sie den Artikel hinterlassen haben.",
+        "start": "Mit den Fotos beginnen",
+        "noScope": "Dieser Link zeigt die Miete, kann sie aber nicht zurückgeben. Verwenden Sie den Link, den der Laden mit Ihrer Buchung geschickt hat."
+      },
+      "capture": {
+        "guidance": "Das Foto von der Abholung erscheint schwach hinter der Kamera. Treffen Sie seinen Winkel, dann kommt die nächste Ansicht.",
+        "dropPointView": "Wo Sie ihn abgestellt haben",
+        "dropPointGuidance": "Treten Sie zurück, damit Artikel und Abgabeort beide auf dem Foto sind.",
+        "sampleTitle": "Beispielfotos",
+        "sampleBody": "Das sind Beispiele für die Vorführung, keine Fotos Ihrer Miete. Der Nachweis sagt das.",
+        "retake": "Noch einmal aufnehmen",
+        "preparing": "Das Foto wird vorbereitet…",
+        "photo": "Ihr Foto: {view}"
+      },
+      "send": {
+        "ready": "Alle Fotos sind gemacht. Mit dem Senden werden sie versiegelt, und Ihre Rückgabe zählt ab diesem Moment.",
+        "missing": "{count, plural, one {Noch # Foto} other {Noch # Fotos}}",
+        "button": "Rückgabe senden"
+      },
+      "receipt": {
+        "onTime": "Pünktlich zurückgegeben",
+        "late": "Nach Mietende zurückgegeben",
+        "received": "Erhalten",
+        "where": "{date}, am Abgabeort",
+        "missingTitle": "{shop} hat ihn am Abgabeort nicht gefunden",
+        "missingBody": "Geprüft {when}. Bitte melden Sie sich beim Laden. Ihre Fotos von {time} bleiben im Nachweis Ihrer Miete.",
+        "reserved": "Reserviert, nicht abgebucht",
+        "released": "Freigegeben, nichts abgebucht",
+        "charged": "Abgebucht, nachdem eine Person eine Forderung freigegeben hat",
+        "checkedPayPal": "Um {time} bei PayPal geprüft",
+        "fromRecord": "Aus den Unterlagen von Hold. PayPal war gerade nicht erreichbar.",
+        "sample": "Eine Beispielmiete: PayPal wird nicht gefragt.",
+        "dropPointPhoto": "Wo Sie ihn abgestellt haben",
+        "photos": "Ihre Fotos",
+        "photosBody": "Im Moment des Sendens im Nachweis Ihrer Miete versiegelt. Niemand kann sie ändern.",
+        "record": "Den ganzen Nachweis ansehen"
+      },
+      "steps": {
+        "title": "Wie es weitergeht",
+        "returned": "Sie haben ihn zurückgegeben",
+        "returnedDetail": "{count, plural, one {# Foto} other {# Fotos}}, versiegelt um {time}",
+        "check": "Eine Person prüft ihn",
+        "checked": "{shop} hat ihn geprüft",
+        "checkedDetail": "Eine Person hat ihn am Abgabeort gesehen.",
+        "notFound": "Am Abgabeort nicht gefunden",
+        "notFoundDetail": "Bitte melden Sie sich bei {shop}. Solange geklärt wird, wird nichts abgebucht.",
+        "settle": "Reservierung freigegeben, oder eine Forderung, auf die Sie antworten können",
+        "settleDetail": "Ohne Freigabe durch eine Person wird nichts abgebucht.",
+        "released": "Reservierung freigegeben",
+        "releasedDetail": "Es wurde nichts abgebucht.",
+        "charged": "Abgebucht, nachdem eine Person eine Forderung freigegeben hat",
+        "seeClaim": "Die Forderung ansehen"
+      }
+    },
+    "staff": {
+      "sectionTitle": "{count, plural, one {Von einem Mieter zurückgegeben} other {Von Mietern zurückgegeben}}",
+      "sectionLead": "Artikel, die Mieter ohne Personal an der Theke zurückgegeben haben. Schauen Sie zuerst am Abgabeort nach. Die Reservierung bleibt, und nichts wird abgebucht, bis eine Person den Artikel gesehen hat.",
+      "label": "Vom Mieter zurückgegeben",
+      "title": "{items} · {renter}",
+      "renterUnknown": "Ein Mieter",
+      "hold": "Reservierung {amount}",
+      "returnedOnTime": "Zurückgegeben {when}, pünktlich",
+      "returnedLate": "Zurückgegeben {when}, nach Mietende",
+      "views": "{count, plural, one {# Ansicht} other {# Ansichten}} und der Abgabeort",
+      "findings": "{count, plural, =0 {Keine Befunde} one {# Befund} other {# Befunde}}",
+      "comparing": "Wird noch verglichen",
+      "clean": "Keine Befunde",
+      "needsPerson": "Eine Person muss nachsehen",
+      "before": "Abholung · {view}",
+      "after": "Foto des Mieters · {view}",
+      "dropPoint": "Wo er abgestellt wurde",
+      "note": "Schauen Sie zuerst am Abgabeort nach. Befunde und eine Forderung bleiben bei Ihnen: Der Mieter sieht nichts, bis eine Person freigibt.",
+      "here": "Er ist da, Rückgabe durchsehen",
+      "hereNow": "Er ist jetzt da, Rückgabe durchsehen",
+      "notHere": "Er ist nicht da",
+      "notHereBody": "„Er ist nicht da“ hält fest, wer wann nachgesehen hat. Die Reservierung bleibt, und nichts wird abgebucht.",
+      "missing": "Am Abgabeort nicht gefunden {when}, von {name}",
+      "someone": "einer Person des Personals",
+      "readOnly": "Thekenpersonal, Leitung und Inhaber prüfen Rückgaben.",
+      "confirmed": "Als da markiert. Die Durchsicht öffnet sich…",
+      "recorded": "Festgehalten. Die Reservierung bleibt.",
+      "recordedTold": "Festgehalten, und der Mieter hat eine E-Mail erhalten. Die Reservierung bleibt.",
+      "results": {
+        "not_dropped_off": "Dieser Artikel wartet nicht mehr am Abgabeort.",
+        "already_reported": "Er ist bereits als nicht gefunden festgehalten."
+      }
+    },
+    "settings": {
+      "title": "Rückgabe nach Ladenschluss",
+      "lead": "Mieter geben Artikel zurück, auch wenn niemand an der Theke ist. Sie fotografieren jede Ansicht über ihren Link, wie bei der Abholung, und stellen den Artikel dort ab, wo Sie es sagen. Nichts wird abgebucht, und die Reservierung bleibt, bis eine Person ihn gesehen hat.",
+      "allowed": "Mieter dürfen Artikel selbst zurückgeben",
+      "dropPoint": "Wo Mieter Artikel abstellen",
+      "dropPointHint": "Mieter lesen genau diese Worte. Sagen Sie, wo und wie abgeschlossen wird.",
+      "hours": "Wann die Theke besetzt ist",
+      "hoursHint": "Mieter erfahren, wann eine Person ihre Rückgabe prüft. Lassen Sie beides leer, wenn Sie das nicht sagen möchten.",
+      "opens": "Öffnet",
+      "closes": "Schließt",
+      "save": "Speichern",
+      "saved": "Gespeichert.",
+      "readOnly": "Nur der Inhaber ändert diese Einstellungen. Das erfahren Mieter.",
+      "preview": "Was Mieter sehen",
+      "previewEmpty": "Schreiben Sie, wo Mieter Artikel abstellen, um ihre Karte hier zu sehen.",
+      "off": "Rückgaben nach Ladenschluss sind aus. Mieter geben Artikel an der Theke zurück.",
+      "results": {
+        "drop_point_needed": "Sagen Sie, wo Mieter Artikel abstellen, bevor Sie das einschalten.",
+        "drop_point_too_long": "Bleiben Sie unter 300 Zeichen.",
+        "hours_invalid": "Die Öffnung muss vor dem Schließen liegen, etwa 09:00 und 19:00."
+      }
+    }
   }
 }

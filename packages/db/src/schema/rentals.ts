@@ -7,7 +7,7 @@ import { appRole, shopIsolation, workerRole } from './access.ts'
 import { items, priceLists, wearPolicies } from './catalog.ts'
 import { at, cents, createdAt, currency, id, reference } from './columns.ts'
 import { allowed, AUTHORIZATION_STATES, authorizationState, BOOKING_CHANNELS, bookingChannel, CONDITION_REPLIES, conditionReply, holdState, PLACEMENT_STRATEGIES, placementStrategy, rentalState } from './enums.ts'
-import { shopReference } from './shops.ts'
+import { shopReference, users } from './shops.ts'
 import { trustLadders } from './trust.ts'
 
 // A renter is the PayPal payer who approved an order. Not tied to one shop, so it has no shop_id.
@@ -65,6 +65,11 @@ export const rentals = pgTable(
     // The renter's answer to the condition report sent at handover, and when they gave it (architecture.md 11.2).
     conditionReply: conditionReply(),
     conditionRepliedAt: at(),
+    // When the renter sent their own return and left the item at the drop point (architecture.md section 6.13). The
+    // return counts from then. A person who then could not find it says so, once, and when.
+    droppedOffAt: at(),
+    dropOffMissingAt: at(),
+    dropOffMissingByUserId: reference().references(() => users.id),
     // Sample data added for a demonstration. Its hold, claim and money rows are simulated too, and every screen says so.
     simulated: boolean().notNull().default(false),
     // The trust ladder version and rung its hold was placed under, as it keeps the price list version. Null when the

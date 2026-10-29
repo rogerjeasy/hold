@@ -102,6 +102,19 @@ describe('immutable evidence documents', () => {
     for (const text of pageText(pdf)) expect(text.length).toBeGreaterThan(100)
   })
 
+  it('shows where a renter left the item on its own, never as a pair missing its handover', async () => {
+    const fixture = await input()
+    const snapshot = evidenceRenderFixture({ returnedByRenter: true })
+    const photos = new Map(snapshot.items.flatMap((item) => item.sessions.flatMap((session) => session.photos.map((photo) => [photo.id, fixture.photos.values().next().value ?? Buffer.alloc(0)] as const))))
+    const text = textOf(await renderEvidencePdf({ ...fixture, snapshot, photos }))
+    const missing = (pdfText: string) => pdfText.split('Not yet recorded').length - 1
+    expect(text).toContain('Where the renter left the item')
+    // No more cells marked missing than a staff return of the same item has.
+    expect(missing(text)).toBe(missing(textOf(await renderEvidencePdf(fixture))))
+    // The fingerprint appendix keeps the manifest's own key; no handover and return pair is drawn for it.
+    expect(text).not.toContain('View: drop-pointHandover')
+  })
+
   it('identifies the item on the page containing its photograph pair', async () => {
     const pages = pageText(await renderEvidencePdf(await input()))
     const pairedPage = pages.find((text) => text.includes('Handover') && text.includes('Return'))

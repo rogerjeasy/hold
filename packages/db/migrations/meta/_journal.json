@@ -225,6 +225,13 @@
       "when": 1793266539080,
       "tag": "0031_insights_dashboards",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1793292568815,
+      "tag": "0032_self_return",
+      "breakpoints": true
     }
   ]
 }

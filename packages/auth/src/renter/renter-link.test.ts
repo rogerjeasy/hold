@@ -28,7 +28,7 @@ describe('a renter link token', () => {
   })
 
   it('has a fixed list of scopes, none of which moves money on its own', () => {
-    expect(RENTER_LINK_SCOPES).toEqual(['view', 'pay', 'confirm_condition', 'extend', 'accept', 'contest', 'report_incident'])
+    expect(RENTER_LINK_SCOPES).toEqual(['view', 'pay', 'confirm_condition', 'extend', 'accept', 'contest', 'report_incident', 'return_item'])
   })
 })
 

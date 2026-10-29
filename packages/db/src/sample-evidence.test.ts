@@ -7,6 +7,7 @@ import { comparisonReport } from './comparison-repository.ts'
 import { publishPriceList } from './price-list-repository.ts'
 import { rentalReturns } from './return-repository.ts'
 import { addSampleRentals, SAMPLE_PHOTOS } from './sample-rentals.ts'
+import { dropOffsWaiting } from './self-return-repository.ts'
 import { renters, rentals } from './schema/index.ts'
 import { inShop } from './scope.ts'
 import type { Scope } from './scope.ts'
@@ -62,6 +63,18 @@ describe('the sample claim awaiting approval', () => {
       ]),
     )
     expect(report?.findings.find((finding) => finding.class === 'new_damage')).toMatchObject({ priceDescription: 'Scratch on the frame, through the paint', amountCents: 35_00 })
+  })
+})
+
+describe('the sample return a renter dropped off overnight', () => {
+  it('waits for a person, sent before its end, with the chip the comparison found and where the renter left it', async () => {
+    const rentalId = await rentalOf('Chloé Martin')
+    const [waiting] = (await inShop(database, shop, dropOffsWaiting)).filter((entry) => entry.rentalId === rentalId)
+    expect(waiting).toMatchObject({ onTime: true, missingAt: null, simulated: true, holdCents: 300_00 })
+    expect(waiting?.items).toEqual([expect.objectContaining({ views: 1, findings: 1, comparison: 'findings', before: { view: expect.stringMatching(/^frame/) as unknown, displayKey: SAMPLE_PHOTOS.handover }, after: expect.objectContaining({ displayKey: SAMPLE_PHOTOS.damage }) as unknown, dropPoint: { view: 'drop-point', displayKey: SAMPLE_PHOTOS.dropPoint } })])
+    expect(waiting?.items[0]?.region?.width).toBeGreaterThan(0)
+    // Sent at 21:40 on the shop's clock the evening before (Lisbon is UTC+1 on 13 October).
+    expect(waiting?.droppedOffAt).toEqual(new Date('2026-10-13T20:40:00Z'))
   })
 })
 

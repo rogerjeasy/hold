@@ -14,6 +14,7 @@ export function standingOf(booking: Pick<CalendarBooking, 'rentalState' | 'holdS
   switch (booking.rentalState) {
     case 'overdue':
       return 'late'
+    case 'dropped_off':
     case 'returned':
     case 'inspecting':
     case 'settling':

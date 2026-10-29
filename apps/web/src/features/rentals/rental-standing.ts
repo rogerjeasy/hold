@@ -17,6 +17,7 @@ export function partOf(rental: Pick<RentalSummary, 'state' | 'paymentLapsed'>): 
     case 'out':
     case 'overdue':
       return 'out'
+    case 'dropped_off':
     case 'returned':
     case 'inspecting':
     case 'settling':

@@ -65,7 +65,7 @@ export type ShopException = {
 }
 
 const HOUR = 3_600_000
-const OPEN_RENTALS = ['ready', 'out', 'overdue', 'returned', 'inspecting', 'settling']
+const OPEN_RENTALS = ['ready', 'out', 'overdue', 'dropped_off', 'returned', 'inspecting', 'settling']
 const DECIDED_CLAIMS = ['accepted', 'lapsed', 'decided', 'agreed', 'charging', 'charged', 'charge_failed']
 const HOLD_ENDING_WITHIN = 3 * 24 * HOUR
 const AT_RISK_FOR = HOUR

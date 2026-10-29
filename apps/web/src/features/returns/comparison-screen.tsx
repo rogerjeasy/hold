@@ -1,7 +1,7 @@
 'use client'
 
 import type { ComparisonReport } from '@hold/db'
-import { confidenceLevel, formatMoney, money } from '@hold/domain'
+import { confidenceLevel, DROP_POINT_VIEW, formatMoney, money } from '@hold/domain'
 import type { ConfidenceLevel, Share } from '@hold/domain'
 import { useLocale, useTranslations } from 'next-intl'
 import { PhotoWithMarks } from '@/components/photo-with-marks'
@@ -31,7 +31,9 @@ export function ComparisonScreen({ shopName, report, canAct, calibration }: { sh
   const pending = report.state === 'pending' || report.state === 'running'
   useLookAgain(pending || [...report.before, ...report.after].some((photo) => photo.url === null), { forMs: 180_000 })
   const outcome = report.state === 'clean' ? 'clean' : report.state === 'findings' ? 'findings' : 'deferred'
-  const views = [...new Set([...report.before, ...report.after].map((photo) => photo.view))]
+  // Where a renter left the item has no handover twin: it is shown on its own and never compared (section 6.13).
+  const views = [...new Set([...report.before, ...report.after].map((photo) => photo.view))].filter((view) => view !== DROP_POINT_VIEW)
+  const dropPoint = report.after.find((photo) => photo.view === DROP_POINT_VIEW)
   return <ShopFrame shopName={shopName} title={report.label}><div className="grid gap-6">
     <Link className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4" href={rentalRoutes.rental(report.rentalId)}>{t('back')}</Link>
     {report.simulated ? <Notice title={t('simulated')} body={t('simulatedBody')} /> : null}
@@ -43,6 +45,7 @@ export function ComparisonScreen({ shopName, report, canAct, calibration }: { sh
       const photo = report[side].find((photo) => photo.view === view)
       return <figure key={side} className="min-w-0"><figcaption className="mb-2 font-semibold">{t(side)}</figcaption>{photo?.url == null ? <p>{t('preparing')}</p> : <PhotoWithMarks src={photo.url} alt={t('photo', { side: t(side), view })} marks={side === 'after' ? report.findings.filter((finding) => finding.view === view) : []} />}</figure>
     })}</div></Panel>)}
+    {dropPoint === undefined ? null : <Panel title={t('dropPoint')}><div className="grid max-w-md gap-2 px-4 py-4 md:px-5">{dropPoint.url === null ? <p>{t('preparing')}</p> : <img src={dropPoint.url} alt={t('dropPoint')} className="aspect-thumbnail w-full object-cover" />}<p className="text-sm text-muted-foreground">{t('dropPointBody')}</p></div></Panel>}
     {report.findings.length === 0 ? null : <Panel title={t('observations')}><ul className="grid gap-4 px-4 py-4 md:px-5">{report.findings.map((finding) => <li key={finding.id} className="grid min-w-0 gap-1 border-t pt-3 first:border-t-0 first:pt-0">
       <p className="font-semibold">{t(`classes.${finding.class}`)}</p><p className="wrap-long-words">{finding.description}</p>
       {finding.secondLookConfirmed === true ? <p className="text-muted-foreground">{t('secondLook')}</p> : null}

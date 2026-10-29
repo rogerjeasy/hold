@@ -82,6 +82,13 @@ describe('the claim machine', () => {
   })
 })
 
+describe('the rental machine', () => {
+  it('lets a renter drop the item off while it is out or late, and only a person makes it returned (architecture.md section 6.13)', () => {
+    expect(RENTAL_STATES.filter((state) => RENTAL_TRANSITIONS[state].includes('dropped_off')).sort()).toEqual(['out', 'overdue'])
+    expect(RENTAL_TRANSITIONS.dropped_off).toEqual(['returned'])
+  })
+})
+
 describe('the incident machine', () => {
   it('never returns to reported or triaged once a person or the renter decided', () => {
     for (const state of ['agreed', 'shop_matter', 'claim_opened', 'awaiting_staff'] as const) {

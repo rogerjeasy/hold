@@ -1241,6 +1241,7 @@
       "scorecard": "Fiabilidad",
       "incidents": "Incidentes",
       "trust": "Escalera de confianza",
+      "selfReturn": "Devoluciones fuera de horario",
       "settlement": "Representante de acuerdos",
       "queue": "Cola de la mañana",
       "money": "Dinero",
@@ -1909,6 +1910,7 @@
         "uploading": "Subiendo… {percent} %",
         "retake": "Hazla de nuevo: {problems}.",
         "failed": "La foto no se subió. Revisa la conexión y vuelve a intentarlo.",
+        "reused": "Esta foto ya se usó. Haz una nueva del artículo tal como está ahora.",
         "problems": {
           "blurred": "está desenfocada",
           "too_dark": "está demasiado oscura",
@@ -2002,6 +2004,8 @@
       "after": "Devolución",
       "photo": "{side}: {view}",
       "preparing": "Se está preparando la fotografía para mostrarla.",
+      "dropPoint": "Dónde lo dejó el cliente",
+      "dropPointBody": "Fotografiado por el cliente en el punto de entrega. Prueba el lugar y no se compara.",
       "observations": "Observaciones",
       "classes": {
         "new_damage": "Posible daño nuevo",
@@ -2195,6 +2199,10 @@
       "subject": "Tu alquiler en {shop}: cómo salió",
       "body": "Tu alquiler en {shop} ya va contigo. Estas son las fotos que se hicieron al entregarlo y las marcas que se anotaron.\n\nAbre este enlace para verlas. Si todo está bien, confírmalo. Si se pasó algo por alto, añade ahora una foto, en un plazo de 24 horas, para que nunca te lo cobren:\n\n{link}"
     },
+    "dropOffMissing": {
+      "subject": "{shop} no encontró tu devolución en el punto de entrega",
+      "body": "Enviaste tu devolución a {shop} el {sent}. Cuando alguien de la tienda miró en el punto de entrega el {looked}, el artículo no estaba.\n\nPonte en contacto con la tienda. Tus fotos del {sent} siguen en el registro de tu alquiler, y no se cobra nada mientras lo revisan. Tu devolución, tal como la enviaste:"
+    },
     "claimCode": {
       "subject": "Su código de verificación de Hold",
       "body": "Su código es {code}. Caduca en diez minutos. Introdúzcalo solo en su página privada de reclamación de Hold."
@@ -2249,6 +2257,10 @@
       "title": "Necesita una decisión",
       "empty": "Nada necesita una decisión.",
       "emptyBody": "Aquí aparecen las reclamaciones por aprobar, las retenciones a punto de vencer y las devoluciones con retraso.",
+      "dropped_off": {
+        "title": "{renter} lo devolvió en el punto de entrega {when}",
+        "body": "Comprueba que está allí y revisa la devolución. La retención sigue y no se cobra nada hasta que lo hagas."
+      },
       "claim": {
         "title": "Reclamación de {amount} a {renter}",
         "body": "{line}. Pendiente de aprobación.",
@@ -2373,6 +2385,7 @@
     "ready": "Listo para la entrega",
     "out": "Fuera",
     "overdue": "Con retraso",
+    "dropped_off": "Dejado, por revisar",
     "returned": "Devuelto",
     "inspecting": "En revisión",
     "settling": "Liquidando",
@@ -2439,6 +2452,8 @@
       "approveHold": "Aprobar la retención",
       "ready": "Tu retención está hecha. Puedes recoger tus artículos.",
       "out": "Tu alquiler está contigo.",
+      "dropped_off": "Lo devolviste en el punto de entrega. Una persona de la tienda lo revisará.",
+      "returnReceipt": "Ver tu devolución",
       "condition": "Ver cómo salió"
     },
     "paid": {
@@ -2488,7 +2503,12 @@
       "not_uploaded": "La foto no llegó. Tómala de nuevo.",
       "sealed": "Este informe ya se envió, así que no se pueden añadir fotos.",
       "unknown_view": "Esa vista no es de este artículo.",
-      "not_connected": "Ahora no hay ningún asistente conectado a este alquiler."
+      "not_connected": "Ahora no hay ningún asistente conectado a este alquiler.",
+      "not_allowed": "Esta tienda solo acepta devoluciones en el mostrador.",
+      "not_ready": "Este alquiler no se puede devolver aquí ahora.",
+      "staff_returning": "El personal ya está recibiendo esta devolución en el mostrador.",
+      "photo_reused": "Esta foto ya se usó. Haz una nueva del artículo tal como está ahora.",
+      "views_missing": "Aún faltan fotos."
     },
     "orderDescription": "{shop}: {items}, {days, plural, one {# día} other {# días}}",
     "holdPage": {
@@ -3857,5 +3877,148 @@
     "saved": "Tu panel está guardado para tu próxima visita.",
     "saveFailed": "No se pudo guardar tu panel. Tus cambios siguen en esta página.",
     "reset": "Volver al primer panel"
+  },
+  "selfReturn": {
+    "card": {
+      "closedTitle": "La tienda está cerrada. Aun así puedes devolverlo.",
+      "openTitle": "Devuélvelo tú",
+      "body": "Fotografíalo como se fotografió cuando lo recogiste, déjalo en el punto de entrega y listo. Cuenta como devuelto en el momento en que lo envías.",
+      "meta": "Unos dos minutos",
+      "start": "Devolverlo yo"
+    },
+    "renter": {
+      "title": "Devuélvelo tú",
+      "titles": {
+        "unavailable": "Devuélvelo tú",
+        "intro": "Antes de empezar",
+        "capture": "Fotografía la devolución",
+        "sent": "Tu devolución"
+      },
+      "back": "Volver a tu alquiler",
+      "unavailable": {
+        "title": "Esta devolución no está abierta aquí",
+        "body": "{shop} recibe esta devolución en el mostrador. Tráelo mientras la tienda esté abierta."
+      },
+      "when": {
+        "open": "Una persona de {shop} lo revisa hoy, mientras la tienda está abierta.",
+        "later": "Una persona de {shop} lo revisa cuando abra la tienda, {when}.",
+        "unknown": "Una persona de {shop} lo revisa la próxima vez que abra la tienda."
+      },
+      "intro": {
+        "dropPointLabel": "Déjalo en",
+        "writtenBy": "En palabras de {shop}",
+        "nextLabel": "Qué pasa después",
+        "nothingCharged": "Ahora no se cobra nada.",
+        "holdStays": "Tu retención de {amount} sigue reservada en PayPal hasta entonces. Después se libera, o recibes una reclamación con fotos que puedes responder.",
+        "how": "Fotografía cada vista como se fotografió cuando lo recogiste y luego dónde lo dejaste. Unos dos minutos.",
+        "light": "Busca buena luz. Las fotos que hagas ahora son tu prueba de cómo lo dejaste.",
+        "start": "Empezar las fotos",
+        "noScope": "Este enlace muestra el alquiler pero no permite devolverlo. Usa el enlace que la tienda envió con tu reserva."
+      },
+      "capture": {
+        "guidance": "La foto de cuando lo recogiste aparece tenue detrás de la cámara. Iguala su ángulo y pasa a la siguiente vista.",
+        "dropPointView": "Dónde lo dejaste",
+        "dropPointGuidance": "Aléjate para que el artículo y el punto de entrega salgan en la foto.",
+        "sampleTitle": "Fotos de ejemplo",
+        "sampleBody": "Son ejemplos para la demostración, no fotos de tu alquiler. El registro lo indica.",
+        "retake": "Repetirla",
+        "preparing": "Preparando la foto…",
+        "photo": "Tu foto: {view}"
+      },
+      "send": {
+        "ready": "Todas las fotos están hechas. Al enviarlas quedan selladas, y tu devolución cuenta desde ese momento.",
+        "missing": "{count, plural, one {Falta # foto} other {Faltan # fotos}}",
+        "button": "Enviar mi devolución"
+      },
+      "receipt": {
+        "onTime": "Devuelto a tiempo",
+        "late": "Devuelto después del final del alquiler",
+        "received": "Recibido",
+        "where": "{date}, en el punto de entrega",
+        "missingTitle": "{shop} no lo encontró en el punto de entrega",
+        "missingBody": "Lo buscaron {when}. Ponte en contacto con ellos. Tus fotos de las {time} siguen en el registro de tu alquiler.",
+        "reserved": "Reservado, no cobrado",
+        "released": "Liberado, nada cobrado",
+        "charged": "Cobrado después de que una persona aprobara una reclamación",
+        "checkedPayPal": "Comprobado con PayPal a las {time}",
+        "fromRecord": "Según el registro de Hold. No se pudo consultar a PayPal ahora mismo.",
+        "sample": "Un alquiler de ejemplo: no se llama a PayPal.",
+        "dropPointPhoto": "Dónde lo dejaste",
+        "photos": "Tus fotos",
+        "photosBody": "Selladas en el registro de tu alquiler en el momento en que las enviaste. Nadie puede cambiarlas.",
+        "record": "Ver el registro completo"
+      },
+      "steps": {
+        "title": "Qué pasa después",
+        "returned": "Lo devolviste",
+        "returnedDetail": "{count, plural, one {# foto} other {# fotos}}, selladas a las {time}",
+        "check": "Una persona lo revisa",
+        "checked": "{shop} lo revisó",
+        "checkedDetail": "Una persona lo vio en el punto de entrega.",
+        "notFound": "No encontrado en el punto de entrega",
+        "notFoundDetail": "Ponte en contacto con {shop}. No se cobra nada mientras lo revisan.",
+        "settle": "Retención liberada, o una reclamación que puedes responder",
+        "settleDetail": "No se cobra nada sin la aprobación de una persona.",
+        "released": "Retención liberada",
+        "releasedDetail": "No se cobró nada.",
+        "charged": "Cobrado después de que una persona aprobara una reclamación",
+        "seeClaim": "Ver la reclamación"
+      }
+    },
+    "staff": {
+      "sectionTitle": "{count, plural, one {Devuelto por un cliente} other {Devueltos por clientes}}",
+      "sectionLead": "Artículos que los clientes devolvieron sin nadie en el mostrador. Mira primero en el punto de entrega. La retención sigue y no se cobra nada hasta que una persona vea el artículo.",
+      "label": "Devuelto por el cliente",
+      "title": "{items} · {renter}",
+      "renterUnknown": "Un cliente",
+      "hold": "Retención de {amount}",
+      "returnedOnTime": "Devuelto {when}, a tiempo",
+      "returnedLate": "Devuelto {when}, después del final del alquiler",
+      "views": "{count, plural, one {# vista} other {# vistas}} y el punto de entrega",
+      "findings": "{count, plural, =0 {Sin hallazgos} one {# hallazgo} other {# hallazgos}}",
+      "comparing": "Aún se está comparando",
+      "clean": "Sin hallazgos",
+      "needsPerson": "Necesita que lo mire una persona",
+      "before": "Entrega · {view}",
+      "after": "Foto del cliente · {view}",
+      "dropPoint": "Dónde lo dejó",
+      "note": "Mira primero en el punto de entrega. Los hallazgos y cualquier reclamación se quedan contigo: el cliente no ve nada hasta que una persona lo aprueba.",
+      "here": "Está aquí, revisar la devolución",
+      "hereNow": "Ya está aquí, revisar la devolución",
+      "notHere": "No está aquí",
+      "notHereBody": "«No está aquí» registra quién miró y cuándo. La retención sigue y no se cobra nada.",
+      "missing": "No encontrado en el punto de entrega {when}, por {name}",
+      "someone": "alguien del personal",
+      "readOnly": "El personal del mostrador, la gerencia y el propietario revisan las devoluciones.",
+      "confirmed": "Marcado como presente. Abriendo la revisión…",
+      "recorded": "Registrado. La retención sigue.",
+      "recordedTold": "Registrado, y se envió un correo al cliente. La retención sigue.",
+      "results": {
+        "not_dropped_off": "Este artículo ya no espera en el punto de entrega.",
+        "already_reported": "Ya está registrado como no encontrado."
+      }
+    },
+    "settings": {
+      "title": "Devoluciones fuera de horario",
+      "lead": "Deja que los clientes devuelvan artículos sin nadie en el mostrador. Fotografían cada vista con su enlace, como en la entrega, y dejan el artículo donde tú digas. No se cobra nada y la retención sigue hasta que una persona lo vea.",
+      "allowed": "Dejar que los clientes devuelvan los artículos ellos mismos",
+      "dropPoint": "Dónde dejan los clientes los artículos",
+      "dropPointHint": "Los clientes leen estas palabras tal cual. Di dónde y cómo cerrarlo.",
+      "hours": "Cuándo hay alguien en el mostrador",
+      "hoursHint": "Los clientes sabrán cuándo una persona revisará su devolución. Deja ambos vacíos si prefieres no decirlo.",
+      "opens": "Abre",
+      "closes": "Cierra",
+      "save": "Guardar",
+      "saved": "Guardado.",
+      "readOnly": "Solo el propietario cambia estos ajustes. Esto es lo que se dice a los clientes.",
+      "preview": "Lo que ven los clientes",
+      "previewEmpty": "Escribe dónde dejan los clientes los artículos para ver su tarjeta aquí.",
+      "off": "Las devoluciones fuera de horario están desactivadas. Los clientes devuelven los artículos en el mostrador.",
+      "results": {
+        "drop_point_needed": "Di dónde dejan los clientes los artículos antes de activarlo.",
+        "drop_point_too_long": "No pases de 300 caracteres.",
+        "hours_invalid": "La apertura debe ser antes del cierre, por ejemplo 09:00 y 19:00."
+      }
+    }
   }
 }

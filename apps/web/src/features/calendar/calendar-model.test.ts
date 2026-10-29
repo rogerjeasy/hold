@@ -28,7 +28,7 @@ describe('where a rental on the calendar stands', () => {
 
   it('is late when the item is overdue, being settled once it is back, and done once closed', () => {
     expect(standingOf(booking({ rentalState: 'overdue' }))).toBe('late')
-    for (const rentalState of ['returned', 'inspecting', 'settling'] as const) expect(standingOf(booking({ rentalState }))).toBe('settling')
+    for (const rentalState of ['dropped_off', 'returned', 'inspecting', 'settling'] as const) expect(standingOf(booking({ rentalState }))).toBe('settling')
     expect(standingOf(booking({ rentalState: 'closed', holdState: 'released' }))).toBe('done')
   })
 })

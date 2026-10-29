@@ -1,5 +1,5 @@
 import { addDays } from '@hold/domain'
-import type { ActiveHold, ClaimWaiting, LateRental } from '@hold/db'
+import type { ActiveHold, ClaimWaiting, DroppedOff, LateRental } from '@hold/db'
 import { describe, expect, it } from 'vitest'
 import { decisionsFor, holdSummary } from './decisions'
 
@@ -22,10 +22,11 @@ const claim = (name: string, state: ClaimWaiting['state']): ClaimWaiting => ({
 })
 
 const late: LateRental = { rentalId: 'late', renterName: 'Lea', endsAt: addDays(NOW, -1), simulated: false }
+const droppedOff: DroppedOff = { rentalId: 'dropped', renterName: 'Priya', droppedOffAt: addDays(NOW, -0.5), simulated: false }
 
 describe('the decisions waiting', () => {
   it('puts claims to approve first, then holds near their end, then late returns, then contested claims', () => {
-    const decisions = decisionsFor({ claimsWaiting: [claim('Tom', 'contested'), claim('Priya', 'awaiting_approval')], activeHolds: [hold('Marco', 26.5), hold('Sofia', 1)], late: [late] }, NOW)
+    const decisions = decisionsFor({ claimsWaiting: [claim('Tom', 'contested'), claim('Priya', 'awaiting_approval')], activeHolds: [hold('Marco', 26.5), hold('Sofia', 1)], late: [late], droppedOff: [] }, NOW)
     expect(decisions.map((decision) => [decision.kind, decision.renterName])).toEqual([
       ['claim', 'Priya'],
       ['hold_ending', 'Marco'],
@@ -35,12 +36,17 @@ describe('the decisions waiting', () => {
   })
 
   it('gives the day of a hold near its end', () => {
-    const [ending] = decisionsFor({ claimsWaiting: [], activeHolds: [hold('Marco', 26.5)], late: [] }, NOW)
+    const [ending] = decisionsFor({ claimsWaiting: [], activeHolds: [hold('Marco', 26.5)], late: [], droppedOff: [] }, NOW)
     expect(ending).toMatchObject({ kind: 'hold_ending', day: 27 })
   })
 
   it('is empty on a quiet day', () => {
-    expect(decisionsFor({ claimsWaiting: [], activeHolds: [hold('Sofia', 1)], late: [] }, NOW)).toEqual([])
+    expect(decisionsFor({ claimsWaiting: [], activeHolds: [hold('Sofia', 1)], late: [], droppedOff: [] }, NOW)).toEqual([])
+  })
+
+  it('puts an item a renter dropped off before everything else, since it waits unattended at the drop point', () => {
+    const decisions = decisionsFor({ claimsWaiting: [claim('Tom', 'awaiting_approval')], activeHolds: [], late: [late], droppedOff: [droppedOff] }, NOW)
+    expect(decisions[0]).toEqual({ kind: 'dropped_off', key: 'dropped', rentalId: 'dropped', renterName: 'Priya', simulated: false, droppedOffAt: droppedOff.droppedOffAt })
   })
 })
 

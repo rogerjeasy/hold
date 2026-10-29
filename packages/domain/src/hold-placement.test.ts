@@ -55,7 +55,7 @@ describe('checking what PayPal placed', () => {
 
 describe('replacing a hold near its end', () => {
   it('is needed while the rental may still need its hold: before handover, out, and until it is settled', () => {
-    expect(RENTAL_STATES.filter(needsReplacement)).toEqual(['ready', 'out', 'overdue', 'returned', 'inspecting', 'settling'])
+    expect(RENTAL_STATES.filter(needsReplacement)).toEqual(['ready', 'out', 'overdue', 'dropped_off', 'returned', 'inspecting', 'settling'])
   })
 })
 

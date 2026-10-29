@@ -1,4 +1,4 @@
-import { addDays, HOLD_ASSURED_DAYS, HOLD_VALIDITY_DAYS, shopDay, suggestedPhotoPlan, viewKeys } from '@hold/domain'
+import { addDays, DROP_POINT_VIEW, HOLD_ASSURED_DAYS, HOLD_VALIDITY_DAYS, shopDay, suggestedPhotoPlan, viewKeys } from '@hold/domain'
 import type { ClaimState, HoldState, ItemCategory, PriceCategory, Region, RentalState } from '@hold/domain'
 import { and, asc, desc, eq, isNotNull, sql } from 'drizzle-orm'
 import {
@@ -58,12 +58,14 @@ function samplePlan(category: ItemCategory) {
   return views.map((view, index) => ({ ...view, key: keys[index] ?? view.label }))
 }
 
-// The sample photographs, one frame taken at the handover and again at the return with a chip in the paint. Their
-// display keys are reserved: the web app serves them from its own sample images, so no shop's bucket holds them.
-export const SAMPLE_PHOTOS = { handover: 'sample/sample-handover.jpg', damage: 'sample/sample-return-damage.jpg' } as const
+// The sample photographs, one frame taken at the handover and again at the return with a chip in the paint, and an
+// e-bike left at a drop point. Their display keys are reserved: the web app serves them from its own sample images, so
+// no shop's bucket holds them.
+export const SAMPLE_PHOTOS = { handover: 'sample/sample-handover.jpg', damage: 'sample/sample-return-damage.jpg', dropPoint: 'sample/sample-drop-point.jpg' } as const
 const SAMPLE_SHA256 = {
   handover: '7ac39badb505d60e5c4c92018f9ae4410ffb80912d2c7fbbc9cd9202990e8080',
   damage: '74072fc7d4f92e0398252661a83c83eb2427a99039f8ffcac9cc62a66a41cd39',
+  dropPoint: '7a12eaa48257d6988674aa9c18ba8c6dc6f8a8bc80a205fd37a622ff503a6869',
 } as const
 // Where each mark is on those photographs, as fractions of the frame.
 const SCUFF: Region = { x: 0.285, y: 0.77, width: 0.04, height: 0.07 }
@@ -86,6 +88,8 @@ type SampleRental = {
   readonly photographed?: true
   // What the operations agent would propose about it, had it read sample rentals: shown as a sample, it moves nothing.
   readonly proposal?: 'replacement_hold' | 'dispute_answer'
+  // Returned by the renter with nobody at the counter, at this moment, and compared overnight (architecture.md 6.13).
+  readonly droppedOff?: Moment
 }
 
 const SAMPLES: readonly SampleRental[] = [
@@ -96,6 +100,7 @@ const SAMPLES: readonly SampleRental[] = [
   { renter: 'Hannah Svensson', items: ['gravel'], starts: { fromNow: 210 }, ends: [2, 18, 0], state: 'awaiting_hold', hold: 'requested' },
   { renter: 'Ahmed Khan', items: ['hybrid', 'seat'], starts: [-1, 16, 30], ends: { fromNow: 300 }, state: 'out', hold: 'placed' },
   { renter: 'Lea Fischer', items: ['emtb'], starts: [-4, 10, 0], ends: [-1, 18, 0], state: 'overdue', hold: 'placed' },
+  { renter: 'Chloé Martin', items: ['ebike'], starts: [-3, 10, 0], ends: [-1, 22, 0], state: 'dropped_off', hold: 'placed', droppedOff: [-1, 21, 40] },
   { renter: 'Marco Rossi', items: ['ebike'], starts: [-26, 10, 0], ends: [-1, 17, 0], state: 'returned', hold: 'placed', proposal: 'replacement_hold' },
   { renter: 'Priya Natarajan', items: ['hybrid'], starts: [-6, 10, 0], ends: [-1, 17, 30], state: 'settling', hold: 'placed', claim: { state: 'awaiting_approval', kind: 'damage' }, photographed: true },
   {
@@ -265,6 +270,16 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
     await transaction.insert(moneyEvents).values({ shopId, rentalId: rental.id, holdId: hold.id, kind: 'hold_placed', currency, amountCents: reservedCents, paypalReference: reference('placed'), occurredAt: inMonth(startsAt) })
     await audit(sample.state === 'out' && startsAt >= day.start ? 'handover.done' : 'hold.placed', startsAt)
 
+    const [droppedItem] = rentalItemIds
+    if (sample.droppedOff !== undefined && droppedItem !== undefined) {
+      const droppedOffAt = moment(sample.droppedOff)
+      const damage = terms.entries.find((each) => each.category === 'damage') ?? terms.entries[0]
+      if (damage === undefined) throw new Error('The price list has no entries.')
+      await photographSample(transaction, { shopId, userId, item: droppedItem, planId: planIds.get(droppedItem.key) ?? '', view: samplePlan(CATALOG[droppedItem.key].category)[0]?.key ?? 'frame', startsAt, endsAt: droppedOffAt, priceEntryId: damage.id, byRenter: true })
+      await transaction.update(rentals).set({ droppedOffAt }).where(eq(rentals.id, rental.id))
+      await audit('renter.self_return_sent', droppedOffAt, 'renter')
+    }
+
     let capturedCents = 0
     if (sample.claim !== undefined) {
       const kind = sample.claim.kind
@@ -366,6 +381,8 @@ type PhotographedSample = {
   readonly startsAt: Date
   readonly endsAt: Date
   readonly priceEntryId: string
+  // The renter photographed the return through their link, and where they left the item.
+  readonly byRenter?: true
 }
 
 // One view photographed at the handover and again at the return, the faint scuff on record from the handover, and the
@@ -373,26 +390,30 @@ type PhotographedSample = {
 // demonstration's samples. Returns the finding the claim rests on.
 async function photographSample(transaction: Transaction, sample: PhotographedSample): Promise<string> {
   const { shopId, userId, item, view } = sample
-  const session = async (kind: 'handover' | 'return', at: Date, photo: keyof typeof SAMPLE_PHOTOS) => {
+  const byRenter = sample.byRenter === true
+  const session = async (kind: 'handover' | 'return', at: Date, shots: readonly (readonly [string, keyof typeof SAMPLE_PHOTOS])[]) => {
+    const renters = kind === 'return' && byRenter
     const [row] = await transaction
       .insert(captureSessions)
-      .values({ shopId, rentalItemId: item.rentalItemId, kind, photoPlanId: sample.planId, actorUserId: userId, startedAt: at, sealedAt: at })
+      .values({ shopId, rentalItemId: item.rentalItemId, kind, photoPlanId: sample.planId, actorUserId: renters ? null : userId, byRenter: renters, startedAt: at, sealedAt: at })
       .returning({ id: captureSessions.id })
     if (row === undefined) throw new Error('A sample capture session was not created.')
-    await transaction.insert(photos).values({
-      shopId,
-      sessionId: row.id,
-      view,
-      evidenceKey: `sample/${shopId}/${row.id}/${view}.jpg`,
-      displayKey: SAMPLE_PHOTOS[photo],
-      sha256: SAMPLE_SHA256[photo],
-      receivedAt: at,
-      quality: { simulated: 1 },
-    })
+    for (const [shotView, photo] of shots) {
+      await transaction.insert(photos).values({
+        shopId,
+        sessionId: row.id,
+        view: shotView,
+        evidenceKey: `sample/${shopId}/${row.id}/${shotView}.jpg`,
+        displayKey: SAMPLE_PHOTOS[photo],
+        sha256: SAMPLE_SHA256[photo],
+        receivedAt: at,
+        quality: { simulated: 1 },
+      })
+    }
     return row.id
   }
-  const handover = await session('handover', sample.startsAt, 'handover')
-  const returned = await session('return', sample.endsAt, 'damage')
+  const handover = await session('handover', sample.startsAt, [[view, 'handover']])
+  const returned = await session('return', sample.endsAt, byRenter ? [[view, 'damage'], [DROP_POINT_VIEW, 'dropPoint']] : [[view, 'damage']])
   const [scuff] = await transaction
     .insert(marks)
     .values({ shopId, itemId: item.itemId, view, region: SCUFF, description: 'A faint scuff on the down tube.', firstSeenSessionId: handover })

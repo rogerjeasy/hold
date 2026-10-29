@@ -1,6 +1,6 @@
 import { STAFF_ROLES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
-import { boolean, integer, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
+import { boolean, check, integer, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
 import { appRole, shopIsolation, workerRole } from './access.ts'
 import { cents, createdAt, currency, id, reference } from './columns.ts'
 import { allowed, PAYPAL_MODES, paypalMode, staffRole } from './enums.ts'
@@ -46,9 +46,20 @@ export const shops = pgTable(
     opsSettings: jsonb().$type<{ readonly confirmCleanWithinHours?: number; readonly invoiceUnpaidDays?: number; readonly incidentWaitHours?: number; readonly remindersOff?: readonly string[] }>().notNull().default({}),
     // A shop one judge's demo session opened (architecture.md section 20.3). Never listed for renters' assistants.
     demoSession: boolean().notNull().default(false),
+    // Whether renters may return an item themselves when nobody is at the counter, and where they leave it, in the
+    // shop's words (architecture.md section 6.13). Self-return is never on without a drop point.
+    selfReturn: boolean().notNull().default(false),
+    dropPoint: text(),
+    // When the counter is staffed, the same every day on the shop's clock, as "09:00". Both or neither.
+    opensAt: text(),
+    closesAt: text(),
     createdAt: createdAt(),
   },
-  (table) => [shopIsolation(table.id)],
+  (table) => [
+    check('self_return_has_drop_point', sql`not ${table.selfReturn} or ${table.dropPoint} is not null`),
+    check('hours_both_or_neither', sql`(${table.opensAt} is null) = (${table.closesAt} is null)`),
+    shopIsolation(table.id),
+  ],
 )
 
 // Every shop's row carries this. It is what row-level security checks.

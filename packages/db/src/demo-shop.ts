@@ -4,11 +4,12 @@ import { sql } from 'drizzle-orm'
 import { addItems, saveItemType } from './item-repository.ts'
 import { publishPriceList } from './price-list-repository.ts'
 import { addSampleRentals } from './sample-rentals.ts'
+import { saveSelfReturnSettings } from './self-return-repository.ts'
 import { staffRoles } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
 // The shop every demo session starts with (architecture.md section 20.3): Tomás's bike shop in Lisbon, with Jonas at
-// the counter, a published price list, four real bikes to book and the eleven sample rentals. Every sample is marked simulated.
+// the counter, a published price list, four real bikes to book, the twelve sample rentals and returns after hours. Every sample is marked simulated.
 export const DEMO_SHOP = {
   name: 'Ribeira Bikes',
   timeZone: 'Europe/Lisbon',
@@ -42,6 +43,10 @@ export const DEMO_SHOP = {
       { label: 'Rear wheel', outline: 'rear', required: false },
     ],
   },
+  // Returns with nobody at the counter (architecture.md section 6.13), in Tomás's words and hours.
+  dropPoint: 'The locked rack to the left of the shop door. Lock the bike with the code on its tag.',
+  opensAt: '09:00',
+  closesAt: '19:00',
   wearPolicy:
     'Light scuffs on tyres, pedals and grips are ordinary wear and are never charged. A mark already recorded at the handover is never charged again.',
 } as const
@@ -76,6 +81,7 @@ export async function furnishDemoShop(transaction: Transaction, shopId: string, 
   if (!saved.ok) throw new Error(`The demo item type was refused: ${saved.reason}.`)
   const added = await addItems(transaction, { itemTypeId: saved.id, count: bike.count, size: '', serial: '' }, now)
   if (!added.ok) throw new Error(`The demo bikes were refused: ${added.reason}.`)
+  await saveSelfReturnSettings(transaction, shopId, { allowed: true, dropPoint: DEMO_SHOP.dropPoint, hours: { opens: DEMO_SHOP.opensAt, closes: DEMO_SHOP.closesAt } })
   const samples = await addSampleRentals(transaction, { shopId, userId: ownerUserId, raisedByUserId: staff.userId, timeZone: DEMO_SHOP.timeZone, now })
   if (!samples.ok) throw new Error(`The sample rentals were refused: ${samples.reason}.`)
   return { rentals: samples.rentals }

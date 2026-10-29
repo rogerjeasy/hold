@@ -26,6 +26,8 @@ const STANDING_IN_RENTAL: Readonly<Record<RentalState, ItemStanding>> = {
   ready: 'booked',
   out: 'out',
   overdue: 'overdue',
+  // At the drop point, waiting for a person to check it.
+  dropped_off: 'checking',
   returned: 'checking',
   inspecting: 'checking',
   settling: 'available',

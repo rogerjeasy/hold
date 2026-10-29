@@ -15,6 +15,7 @@ describe('where an item stands', () => {
     expect(itemStanding('in_service', 'out')).toBe('out')
     expect(itemStanding('in_service', 'overdue')).toBe('overdue')
     expect(itemStanding('in_service', 'inspecting')).toBe('checking')
+    expect(itemStanding('in_service', 'dropped_off')).toBe('checking')
   })
 
   it('shows repair and retirement first, whatever the rental', () => {

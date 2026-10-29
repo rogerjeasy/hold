@@ -1,7 +1,9 @@
 import 'server-only'
-import { captureSession, conditionReport, inShop, rentalAssistant, rentalHold, rentalRenterKey, renterView, trustConsent } from '@hold/db'
+import { captureSession, conditionReport, inShop, rentalAssistant, rentalHold, rentalRenterKey, renterView, selfReturnFor, trustConsent } from '@hold/db'
 import type { RentalHold, RenterView } from '@hold/db'
+import { maySelfReturn, shopOpening } from '@hold/domain'
 import type { Metadata } from 'next'
+import type { SelfReturnOffer } from '@/features/self-return/self-return-card'
 import type { ConditionView } from '@/features/renter/condition-screen'
 import type { PayPalCheckout } from '@/features/renter/paypal-sdk'
 import { paypalCheckout } from './paypal-checkout'
@@ -16,8 +18,9 @@ export const renterPageMetadata = (title: string): Metadata => ({ title, robots:
 // The question is asked once (extensions.md section 7.6).
 // assistant: the renter's own assistant booked this rental (extensions.md section 8.5), and whether it is connected.
 // checkout: the shop's PayPal app for PayPal's own button, while the fee is still to pay.
+// selfReturn: whether the renter may return the item with nobody at the counter, or already did (section 6.13).
 export type RenterPage =
-  | { readonly ok: true; readonly view: RenterView; readonly canReport: boolean; readonly askConsent: boolean; readonly assistant: { readonly connected: boolean; readonly revoked: boolean } | null; readonly checkout: PayPalCheckout | undefined }
+  | { readonly ok: true; readonly view: RenterView; readonly canReport: boolean; readonly askConsent: boolean; readonly assistant: { readonly connected: boolean; readonly revoked: boolean } | null; readonly checkout: PayPalCheckout | undefined; readonly selfReturn: SelfReturnOffer }
   | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' }
 
 export async function renterPage(token: string): Promise<RenterPage> {
@@ -30,11 +33,18 @@ export async function renterPage(token: string): Promise<RenterPage> {
     const renter = await rentalRenterKey(transaction, rentalId)
     const consent = renter.key === undefined ? undefined : await trustConsent(transaction, renter.key)
     const assistant = await rentalAssistant(transaction, rentalId)
-    return { view: await renterView(transaction, rentalId, now), askConsent: renter.known && consent?.answered !== true, assistant: assistant === undefined ? null : { connected: assistant.connected, revoked: assistant.revokedAt !== null } }
+    return { view: await renterView(transaction, rentalId, now), askConsent: renter.known && consent?.answered !== true, assistant: assistant === undefined ? null : { connected: assistant.connected, revoked: assistant.revokedAt !== null }, ownReturn: await selfReturnFor(transaction, rentalId) }
   })
   if (loaded.view === undefined) return { ok: false, failure: 'link_invalid' }
   const checkout = loaded.view.state === 'pending_payment' ? await paypalCheckout(access.link.shopId) : undefined
-  return { ok: true, view: loaded.view, canReport: access.link.scopes.includes('report_incident'), askConsent: loaded.askConsent, assistant: loaded.assistant, checkout }
+  const { ownReturn } = loaded
+  const selfReturn: SelfReturnOffer = ownReturn === undefined ? { offered: false, shopClosed: false, droppedOffAt: null }
+    : {
+        offered: access.link.scopes.includes('return_item') && maySelfReturn({ allowed: ownReturn.settings.allowed, rentalState: ownReturn.state, handedOver: ownReturn.handedOver }),
+        shopClosed: shopOpening(ownReturn.settings.hours, ownReturn.timeZone, now)?.open === false,
+        droppedOffAt: ownReturn.droppedOffAt,
+      }
+  return { ok: true, view: loaded.view, canReport: access.link.scopes.includes('report_incident'), askConsent: loaded.askConsent, assistant: loaded.assistant, checkout, selfReturn }
 }
 
 export type RenterHoldPage = { readonly ok: true; readonly view: RenterView; readonly hold: RentalHold | undefined; readonly checkout: PayPalCheckout | undefined } | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' }

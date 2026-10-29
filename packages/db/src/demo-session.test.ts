@@ -31,11 +31,11 @@ describe('a demo session', () => {
   it('opens a busy shop of its own at an address nobody can guess, with the owner, the counter staff and the shared sandbox connection', async () => {
     const opened = await openDemoSession(database, { ...people('k3v9q2'), slug: 'ribeira-bikes-k3v9q2', paypal: PAYPAL, now: NOW })
 
-    expect(opened).toMatchObject({ slug: 'ribeira-bikes-k3v9q2', rentals: 11 })
+    expect(opened).toMatchObject({ slug: 'ribeira-bikes-k3v9q2', rentals: 12 })
     expect((await findPerson(database, 'owner-k3v9q2'))?.shops).toEqual([{ shopId: opened.shopId, name: DEMO_SHOP.name, role: 'owner' }])
     expect((await findPerson(database, 'staff-k3v9q2'))?.shops).toEqual([{ shopId: opened.shopId, name: DEMO_SHOP.name, role: 'counter_staff' }])
     const [shop] = await database.select().from(shops).where(eq(shops.id, opened.shopId))
-    expect(shop).toMatchObject({ name: DEMO_SHOP.name, demoSession: true, currency: 'EUR' })
+    expect(shop).toMatchObject({ name: DEMO_SHOP.name, demoSession: true, currency: 'EUR', selfReturn: true, dropPoint: DEMO_SHOP.dropPoint, opensAt: '09:00', closesAt: '19:00' })
     expect(await database.select({ credentialReference: paypalAccounts.credentialReference, mode: paypalAccounts.mode, webhookId: paypalAccounts.webhookId }).from(paypalAccounts).where(eq(paypalAccounts.shopId, opened.shopId))).toEqual([
       { ...PAYPAL, webhookId: null },
     ])

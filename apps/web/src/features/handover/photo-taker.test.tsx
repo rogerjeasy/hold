@@ -77,6 +77,14 @@ describe('taking a view’s photograph', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Use the sample photograph' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('did not upload')
   })
+
+  it('asks for a new photograph, without blame, when it repeats earlier evidence', async () => {
+    check.mockResolvedValue({ sharpness: 150, shadows: 20, highlights: 220, filled: 0.6 })
+    upload.mockResolvedValue({ ok: false, reason: 'photo_reused' })
+    renderWithIntl(<PhotoTaker view={view} upload={upload} onTaken={vi.fn()} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Use the sample photograph' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('This photograph was used before. Take a new one of the item as it is now.')
+  })
 })
 
 // architecture.md section 9.1: in a return session the camera also shows the handover photograph faintly, to match the angle.

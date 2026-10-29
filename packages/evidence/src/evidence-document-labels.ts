@@ -22,6 +22,7 @@ const words = {
   handover: ['Handover', 'Départ', 'Übergabe', 'Entrega'],
   return: ['Return', 'Retour', 'Rückgabe', 'Devolución'],
   view: ['View', 'Vue', 'Ansicht', 'Vista'],
+  dropPoint: ['Where the renter left the item', "Où le locataire a laissé l'article", 'Wo der Mieter den Artikel abgestellt hat', 'Dónde dejó el artículo el arrendatario'],
   session: ['Session', 'Session', 'Aufnahme', 'Sesión'],
   received: ['Server receipt time', 'Réception par le serveur', 'Server-Eingangszeit', 'Recepción en el servidor'],
   sealed: ['Sealed at', 'Scellé le', 'Versiegelt am', 'Sellado'],

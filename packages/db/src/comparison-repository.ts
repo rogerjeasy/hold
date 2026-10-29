@@ -22,7 +22,8 @@ export async function beginComparison(transaction: Transaction, comparisonId: st
     .from(rentalItems).innerJoin(rentals, eq(rentals.id, rentalItems.rentalId)).innerJoin(wearPolicies, eq(wearPolicies.id, rentals.wearPolicyId))
     .innerJoin(items, eq(items.id, rentalItems.itemId)).innerJoin(itemTypes, eq(itemTypes.id, items.itemTypeId))
     .where(eq(rentalItems.id, returned.rentalItemId)).for('update', { of: rentals })
-  if (rental === undefined || !['returned', 'inspecting'].includes(rental.state)) return undefined
+  // An item a renter dropped off is compared overnight; the rental stays dropped off until a person has seen it.
+  if (rental === undefined || !['dropped_off', 'returned', 'inspecting'].includes(rental.state)) return undefined
   if (transition(RENTAL_TRANSITIONS, rental.state, 'inspecting').ok) await transaction.update(rentals).set({ state: 'inspecting' }).where(eq(rentals.id, rental.id))
   await transaction.update(comparisons).set({ state: 'running', startedAt: now }).where(eq(comparisons.id, comparisonId))
   const [plan] = await transaction.select({ views: photoPlans.views }).from(photoPlans).where(eq(photoPlans.id, handover.photoPlanId))

@@ -44,6 +44,8 @@ export const shopRoutes = {
   trust: '/shop/trust',
   // The limits within which the shop's advocate may settle a contested claim (extensions.md section 9.4).
   settlement: '/shop/settlement',
+  // Whether renters may return items with nobody at the counter, where they leave them, and the shop's hours.
+  selfReturn: '/shop/self-return',
 } as const
 
 // Pages reached from the rentals page rather than from the menu.
@@ -76,6 +78,8 @@ export const linkRoutes = {
   // "Something happened": a renter's reports during the rental, and one report by its ID.
   incidents: (token: string) => `/r/${token}/incident`,
   incident: (token: string, incidentId: string) => `/r/${token}/incident/${incidentId}`,
+  // Returning the item with nobody at the counter, and the receipt once sent.
+  selfReturn: (token: string) => `/r/${token}/return`,
   // The renter's Clean Record, its credential and their consent.
   cleanRecord: (token: string) => `/r/${token}/trust`,
   // What the renter's own assistant did on the rental, and disconnecting it.

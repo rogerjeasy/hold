@@ -78,6 +78,6 @@ const RELEASED: ReadonlySet<RentalState> = new Set(['settling', 'closed', 'cance
 export function blocksItem(rental: Period & { readonly state: RentalState; readonly createdAt: Date }, period: Period, now: Date): boolean {
   if (RELEASED.has(rental.state)) return false
   if (rental.state === 'pending_payment' && paymentLapsed(rental.createdAt, now)) return false
-  const until = rental.state === 'overdue' ? Number.POSITIVE_INFINITY : Math.max(rental.endsAt.getTime(), ['out', 'returned', 'inspecting'].includes(rental.state) ? now.getTime() : 0)
+  const until = rental.state === 'overdue' ? Number.POSITIVE_INFINITY : Math.max(rental.endsAt.getTime(), ['out', 'dropped_off', 'returned', 'inspecting'].includes(rental.state) ? now.getTime() : 0)
   return rental.startsAt.getTime() < period.endsAt.getTime() && period.startsAt.getTime() < until
 }

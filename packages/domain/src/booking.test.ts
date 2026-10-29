@@ -90,6 +90,10 @@ describe('whether a rental keeps an item from a period', () => {
   it('counts an overdue rental for as long as the item is not back, whatever its period', () => {
     expect(blocksItem({ ...rental, state: 'overdue', startsAt: at(-72), endsAt: at(-24) }, period, NOW)).toBe(true)
   })
+
+  it('counts an item the renter dropped off until now at least, since nobody has checked it yet', () => {
+    expect(blocksItem({ ...rental, state: 'dropped_off', startsAt: at(-72), endsAt: at(-24) }, { startsAt: at(-1), endsAt: at(5) }, NOW)).toBe(true)
+  })
 })
 
 describe('an unpaid booking', () => {

@@ -10,7 +10,7 @@ import type { Transaction } from './scope.ts'
 export type FleetItemRecord = { readonly itemId: string; readonly rentals: readonly ItemRentalRecord[]; readonly openMarks: number }
 
 // Rentals whose items went out: a booking still to come, or one let go, has nothing to say about an item's wear.
-const WENT_OUT: readonly RentalState[] = ['out', 'overdue', 'returned', 'inspecting', 'settling', 'closed']
+const WENT_OUT: readonly RentalState[] = ['out', 'overdue', 'dropped_off', 'returned', 'inspecting', 'settling', 'closed']
 // A claim no person has decided on yet prices nothing.
 const UNDECIDED: readonly ClaimState[] = ['draft', 'awaiting_approval']
 const DAMAGE = ['new_damage', 'missing_part'] as const

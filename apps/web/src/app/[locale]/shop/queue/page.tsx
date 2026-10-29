@@ -1,9 +1,10 @@
-import { inShop, liveStandingRule, morningQueue, proposalAmount, recentDecisions, rulesForOwner } from '@hold/db'
+import { dropOffsWaiting, inShop, liveStandingRule, morningQueue, proposalAmount, recentDecisions, rulesForOwner } from '@hold/db'
 import type { Transaction } from '@hold/db'
 import { shopDay } from '@hold/domain'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { QueueScreen } from '@/features/operations/queue-screen'
+import { dropOffEntries } from '@/server/drop-offs'
 import { passkeyGate } from '@/server/passkey-gate'
 import { getServices } from '@/server/services'
 import { requireShop } from '@/server/shop-page'
@@ -33,6 +34,7 @@ export default async function Page() {
     recent: await recentDecisions(transaction, now),
     rules: await rulesWithAmounts(transaction),
     standingRule: await liveStandingRule(transaction, now),
+    dropOffs: await dropOffsWaiting(transaction),
   }))
   return (
     <QueueScreen
@@ -40,6 +42,8 @@ export default async function Page() {
       clock={{ timeZone: context.shop.timeZone, currency: context.shop.currency }}
       endOfDay={shopDay(context.shop.timeZone, now).end}
       {...loaded}
+      dropOffs={await dropOffEntries(loaded.dropOffs)}
+      canCheck={context.role !== 'read_only'}
       canDecide={context.role === 'owner' || context.role === 'manager'}
       isOwner={context.role === 'owner'}
       gate={await passkeyGate(context)}

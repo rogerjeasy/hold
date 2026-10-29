@@ -44,3 +44,10 @@ it('labels damage the renter reported and agreed during the rental, and links it
   expect(screen.getByText(/The renter reported it during the rental and agreed €35.00\./)).toBeInTheDocument()
   expect(screen.getByRole('link', { name: 'See the agreed line' })).toHaveAttribute('href', '/shop/rentals/rental/claim')
 })
+
+it('shows where a renter left the item on its own, never as a pair with nothing to compare', () => {
+  renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={{ ...report, after: [...report.after, { view: 'drop-point', url: '/drop.jpg' }] }} canAct />)
+  expect(screen.getByRole('img', { name: 'Where the renter left it' })).toHaveAttribute('src', '/drop.jpg')
+  expect(screen.queryByRole('heading', { name: 'drop-point' })).not.toBeInTheDocument()
+  expect(screen.queryByText('The display photograph is being prepared.')).not.toBeInTheDocument()
+})

@@ -52,6 +52,9 @@ export type ClaimWaiting = {
 
 export type LateRental = { readonly rentalId: string; readonly renterName: string | null; readonly endsAt: Date; readonly simulated: boolean }
 
+// An item a renter returned themselves that nobody has checked yet (architecture.md section 6.13).
+export type DroppedOff = { readonly rentalId: string; readonly renterName: string | null; readonly droppedOffAt: Date; readonly simulated: boolean }
+
 export type CounterVisit = {
   readonly rentalId: string
   readonly kind: 'handover' | 'return'
@@ -77,6 +80,7 @@ export type ShopToday = {
   readonly dueBackToday: number
   readonly activeHolds: readonly ActiveHold[]
   readonly claimsWaiting: readonly ClaimWaiting[]
+  readonly droppedOff: readonly DroppedOff[]
   readonly late: readonly LateRental[]
   readonly counter: readonly CounterVisit[]
   readonly month: { readonly feesCents: number; readonly releasedCents: number; readonly claimedCents: number; readonly recoveredCents: number }
@@ -87,8 +91,8 @@ export type ShopToday = {
 }
 
 const OUT: readonly RentalState[] = ['out', 'overdue']
-const HANDED_OVER: readonly RentalState[] = ['out', 'overdue', 'returned', 'inspecting', 'settling', 'closed']
-const BACK: readonly RentalState[] = ['returned', 'inspecting', 'settling', 'closed']
+const HANDED_OVER: readonly RentalState[] = ['out', 'overdue', 'dropped_off', 'returned', 'inspecting', 'settling', 'closed']
+const BACK: readonly RentalState[] = ['dropped_off', 'returned', 'inspecting', 'settling', 'closed']
 const HELD: readonly HoldState[] = ['placed', 'renewing', 'at_risk']
 const ACTIVITY_LINES = 6
 // A character no item label contains.
@@ -162,6 +166,16 @@ async function claimsWaiting(transaction: Transaction): Promise<ClaimWaiting[]> 
     .where(inArray(claims.state, ['awaiting_approval', 'contested']))
     .orderBy(sql`${claims.state} = 'contested'`, asc(claims.createdAt))
   return rows.map((row) => ({ ...row, state: row.state === 'contested' ? 'contested' : 'awaiting_approval' }))
+}
+
+async function droppedOff(transaction: Transaction): Promise<DroppedOff[]> {
+  const rows = await transaction
+    .select({ rentalId: rentals.id, renterName: renters.name, droppedOffAt: rentals.droppedOffAt, simulated: rentals.simulated })
+    .from(rentals)
+    .leftJoin(renters, eq(renters.id, rentals.renterId))
+    .where(eq(rentals.state, 'dropped_off'))
+    .orderBy(asc(rentals.droppedOffAt))
+  return rows.flatMap((row) => (row.droppedOffAt === null ? [] : [{ ...row, droppedOffAt: row.droppedOffAt }]))
 }
 
 // Rentals past their return time and not back. The decision board reads it too.
@@ -275,6 +289,7 @@ export async function shopToday(transaction: Transaction, window: TodayWindow): 
     ...(await outFigures(transaction, window)),
     activeHolds: await activeHolds(transaction),
     claimsWaiting: await claimsWaiting(transaction),
+    droppedOff: await droppedOff(transaction),
     late: await lateRentals(transaction, window.now),
     counter: await counter(transaction, window),
     month: await month(transaction, window),

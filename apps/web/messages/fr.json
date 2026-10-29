@@ -1241,6 +1241,7 @@
       "scorecard": "Fiabilité",
       "incidents": "Incidents",
       "trust": "Échelle de confiance",
+      "selfReturn": "Retours hors horaires",
       "settlement": "Représentant de règlement",
       "queue": "File du matin",
       "money": "Argent",
@@ -1909,6 +1910,7 @@
         "uploading": "Envoi… {percent} %",
         "retake": "Reprenez-la : {problems}.",
         "failed": "La photo n'a pas été envoyée. Vérifiez la connexion et réessayez.",
+        "reused": "Cette photo a déjà servi. Prenez-en une nouvelle de l’article tel qu’il est maintenant.",
         "problems": {
           "blurred": "elle est floue",
           "too_dark": "elle est trop sombre",
@@ -2002,6 +2004,8 @@
       "after": "Retour",
       "photo": "{side} : {view}",
       "preparing": "La photographie d’affichage est en préparation.",
+      "dropPoint": "Où le locataire l’a laissé",
+      "dropPointBody": "Photographié par le locataire au point de dépôt. Il prouve l’endroit et n’est pas comparé.",
       "observations": "Observations",
       "classes": {
         "new_damage": "Nouveau dommage possible",
@@ -2195,6 +2199,10 @@
       "subject": "Votre location chez {shop} : son état au départ",
       "body": "Votre location chez {shop} est maintenant avec vous. Voici les photos prises à la remise, et les marques notées.\n\nOuvrez ce lien pour les voir. Si tout y est, confirmez-le. Si quelque chose a été oublié, ajoutez-en une photo maintenant, sous 24 heures, pour qu'on ne vous le facture jamais :\n\n{link}"
     },
+    "dropOffMissing": {
+      "subject": "{shop} n’a pas trouvé votre retour au point de dépôt",
+      "body": "Vous avez envoyé votre retour à {shop} le {sent}. Quand quelqu’un de la boutique a regardé au point de dépôt le {looked}, l’article n’y était pas.\n\nMerci de contacter la boutique. Vos photos du {sent} restent dans le dossier de votre location, et rien n’est débité pendant qu’ils vérifient. Votre retour, tel que vous l’avez envoyé :"
+    },
     "claimCode": {
       "subject": "Votre code de vérification Hold",
       "body": "Votre code est {code}. Il expire dans dix minutes. Saisissez-le uniquement sur votre page privée de réclamation Hold."
@@ -2249,6 +2257,10 @@
       "title": "À décider",
       "empty": "Rien n’attend de décision.",
       "emptyBody": "Les réclamations à approuver, les empreintes proches de leur fin et les retours en retard apparaissent ici.",
+      "dropped_off": {
+        "title": "{renter} l’a rendu au point de dépôt {when}",
+        "body": "Vérifiez qu’il y est, puis examinez le retour. Le blocage reste en place et rien n’est débité avant que vous le fassiez."
+      },
       "claim": {
         "title": "Réclamation de {amount} pour {renter}",
         "body": "{line}. En attente d’approbation.",
@@ -2373,6 +2385,7 @@
     "ready": "Prête pour la remise",
     "out": "Sortie",
     "overdue": "En retard",
+    "dropped_off": "Déposé, à vérifier",
     "returned": "Rendue",
     "inspecting": "En vérification",
     "settling": "En cours de règlement",
@@ -2439,6 +2452,8 @@
       "approveHold": "Approuver l'empreinte",
       "ready": "Votre empreinte est posée. Vous pouvez récupérer vos articles.",
       "out": "Votre location est avec vous.",
+      "dropped_off": "Vous l’avez rendu au point de dépôt. Une personne de la boutique va le vérifier.",
+      "returnReceipt": "Voir votre retour",
       "condition": "Voir son état au départ"
     },
     "paid": {
@@ -2488,7 +2503,12 @@
       "not_uploaded": "La photo n’est pas arrivée. Reprenez-la.",
       "sealed": "Ce signalement a été envoyé : aucune photo ne peut être ajoutée.",
       "unknown_view": "Cette vue n’existe pas pour cet article.",
-      "not_connected": "Aucun assistant n'est connecté à cette location."
+      "not_connected": "Aucun assistant n'est connecté à cette location.",
+      "not_allowed": "Cette boutique ne prend les retours qu’au comptoir.",
+      "not_ready": "Cette location ne peut pas être rendue ici pour le moment.",
+      "staff_returning": "Le personnel prend déjà ce retour au comptoir.",
+      "photo_reused": "Cette photo a déjà servi. Prenez-en une nouvelle de l’article tel qu’il est maintenant.",
+      "views_missing": "Il reste des photos à prendre."
     },
     "orderDescription": "{shop} : {items}, {days, plural, one {# jour} other {# jours}}",
     "holdPage": {
@@ -3857,5 +3877,148 @@
     "saved": "Votre tableau de bord est enregistré pour votre prochaine visite.",
     "saveFailed": "Votre tableau de bord n’a pas pu être enregistré. Vos changements restent sur cette page.",
     "reset": "Revenir au premier tableau de bord"
+  },
+  "selfReturn": {
+    "card": {
+      "closedTitle": "La boutique est fermée. Vous pouvez quand même le rendre.",
+      "openTitle": "Le rendre vous-même",
+      "body": "Photographiez-le comme il a été photographié quand vous l’avez pris, laissez-le au point de dépôt, et c’est fini. Le retour compte dès l’envoi.",
+      "meta": "Environ deux minutes",
+      "start": "Le rendre moi-même"
+    },
+    "renter": {
+      "title": "Le rendre vous-même",
+      "titles": {
+        "unavailable": "Le rendre vous-même",
+        "intro": "Avant de commencer",
+        "capture": "Photographier le retour",
+        "sent": "Votre retour"
+      },
+      "back": "Retour à votre location",
+      "unavailable": {
+        "title": "Ce retour n’est pas ouvert ici",
+        "body": "{shop} prend ce retour au comptoir. Rapportez-le pendant les heures d’ouverture."
+      },
+      "when": {
+        "open": "Une personne de {shop} le vérifie aujourd’hui, pendant que la boutique est ouverte.",
+        "later": "Une personne de {shop} le vérifie à l’ouverture de la boutique, {when}.",
+        "unknown": "Une personne de {shop} le vérifie à la prochaine ouverture de la boutique."
+      },
+      "intro": {
+        "dropPointLabel": "Où le laisser",
+        "writtenBy": "Selon {shop}",
+        "nextLabel": "Ce qui se passe ensuite",
+        "nothingCharged": "Rien n’est débité maintenant.",
+        "holdStays": "Votre empreinte de {amount} reste réservée chez PayPal jusque-là. Ensuite, elle est libérée, ou vous recevez une réclamation avec des photos à laquelle vous pouvez répondre.",
+        "how": "Photographiez chaque vue comme elle l’a été quand vous l’avez pris, puis l’endroit où vous l’avez laissé. Environ deux minutes.",
+        "light": "Trouvez une bonne lumière. Les photos prises maintenant prouvent dans quel état vous l’avez laissé.",
+        "start": "Commencer les photos",
+        "noScope": "Ce lien montre la location mais ne permet pas de la rendre. Utilisez le lien envoyé par la boutique avec votre réservation."
+      },
+      "capture": {
+        "guidance": "La photo prise au départ apparaît en transparence derrière l’appareil. Reprenez son angle, puis passez à la vue suivante.",
+        "dropPointView": "Où vous l’avez laissé",
+        "dropPointGuidance": "Reculez pour que l’article et le point de dépôt soient tous deux sur la photo.",
+        "sampleTitle": "Photos d’exemple",
+        "sampleBody": "Ce sont des exemples pour la démonstration, pas des photos de votre location. Le dossier le précise.",
+        "retake": "La reprendre",
+        "preparing": "Préparation de la photo…",
+        "photo": "Votre photo : {view}"
+      },
+      "send": {
+        "ready": "Toutes les photos sont prises. L’envoi les scelle, et votre retour compte à partir de ce moment.",
+        "missing": "{count, plural, one {Encore # photo à prendre} other {Encore # photos à prendre}}",
+        "button": "Envoyer mon retour"
+      },
+      "receipt": {
+        "onTime": "Rendu à l’heure",
+        "late": "Rendu après la fin de la location",
+        "received": "Reçu",
+        "where": "{date}, au point de dépôt",
+        "missingTitle": "{shop} ne l’a pas trouvé au point de dépôt",
+        "missingBody": "Vérifié {when}. Merci de les contacter. Vos photos de {time} restent dans le dossier de votre location.",
+        "reserved": "Réservé, rien de débité",
+        "released": "Libéré, rien de débité",
+        "charged": "Débité après qu’une personne a approuvé une réclamation",
+        "checkedPayPal": "Vérifié auprès de PayPal à {time}",
+        "fromRecord": "D’après le dossier de Hold. PayPal n’a pas pu être consulté pour l’instant.",
+        "sample": "Une location d’exemple : PayPal n’est pas appelé.",
+        "dropPointPhoto": "Où vous l’avez laissé",
+        "photos": "Vos photos",
+        "photosBody": "Scellées dans le dossier de votre location au moment de l’envoi. Personne ne peut les modifier.",
+        "record": "Voir le dossier complet"
+      },
+      "steps": {
+        "title": "Ce qui se passe ensuite",
+        "returned": "Vous l’avez rendu",
+        "returnedDetail": "{count, plural, one {# photo} other {# photos}}, scellées à {time}",
+        "check": "Une personne le vérifie",
+        "checked": "{shop} l’a vérifié",
+        "checkedDetail": "Une personne l’a vu au point de dépôt.",
+        "notFound": "Introuvable au point de dépôt",
+        "notFoundDetail": "Merci de contacter {shop}. Rien n’est débité pendant qu’ils vérifient.",
+        "settle": "Empreinte libérée, ou une réclamation à laquelle vous pouvez répondre",
+        "settleDetail": "Rien n’est débité sans l’accord d’une personne.",
+        "released": "Empreinte libérée",
+        "releasedDetail": "Rien n’a été débité.",
+        "charged": "Débité après qu’une personne a approuvé une réclamation",
+        "seeClaim": "Voir la réclamation"
+      }
+    },
+    "staff": {
+      "sectionTitle": "{count, plural, one {Rendu par un locataire} other {Rendus par des locataires}}",
+      "sectionLead": "Articles rendus par des locataires sans personne au comptoir. Regardez d’abord au point de dépôt. Le blocage reste en place et rien n’est débité tant qu’une personne n’a pas vu l’article.",
+      "label": "Rendu par le locataire",
+      "title": "{items} · {renter}",
+      "renterUnknown": "Un locataire",
+      "hold": "Blocage de {amount}",
+      "returnedOnTime": "Rendu {when}, à l’heure",
+      "returnedLate": "Rendu {when}, après la fin de la location",
+      "views": "{count, plural, one {# vue} other {# vues}} et le point de dépôt",
+      "findings": "{count, plural, =0 {Aucun constat} one {# constat} other {# constats}}",
+      "comparing": "Comparaison en cours",
+      "clean": "Aucun constat",
+      "needsPerson": "Une personne doit regarder",
+      "before": "Départ · {view}",
+      "after": "Photo du locataire · {view}",
+      "dropPoint": "Où il l’a laissé",
+      "note": "Regardez d’abord au point de dépôt. Les constats et toute réclamation restent chez vous : le locataire ne voit rien tant qu’une personne n’a pas approuvé.",
+      "here": "Il est là, examiner le retour",
+      "hereNow": "Il est là maintenant, examiner le retour",
+      "notHere": "Il n’est pas là",
+      "notHereBody": "« Il n’est pas là » enregistre qui a regardé et quand. Le blocage reste en place et rien n’est débité.",
+      "missing": "Introuvable au point de dépôt {when}, selon {name}",
+      "someone": "un membre du personnel",
+      "readOnly": "Le personnel du comptoir, les responsables et le propriétaire vérifient les retours.",
+      "confirmed": "Marqué comme présent. Ouverture de l’examen…",
+      "recorded": "Enregistré. Le blocage reste en place.",
+      "recordedTold": "Enregistré, et le locataire a reçu un e-mail. Le blocage reste en place.",
+      "results": {
+        "not_dropped_off": "Cet article n’attend plus au point de dépôt.",
+        "already_reported": "Il est déjà enregistré comme introuvable."
+      }
+    },
+    "settings": {
+      "title": "Retours hors horaires",
+      "lead": "Permettez aux locataires de rendre les articles sans personne au comptoir. Ils photographient chaque vue par leur lien, comme au départ, et laissent l’article où vous le dites. Rien n’est débité et le blocage reste tant qu’une personne ne l’a pas vu.",
+      "allowed": "Permettre aux locataires de rendre les articles eux-mêmes",
+      "dropPoint": "Où les locataires laissent les articles",
+      "dropPointHint": "Les locataires lisent ces mots tels quels. Dites où, et comment le verrouiller.",
+      "hours": "Quand le comptoir est tenu",
+      "hoursHint": "Les locataires apprennent quand une personne vérifiera leur retour. Laissez les deux vides si vous préférez ne pas le dire.",
+      "opens": "Ouvre",
+      "closes": "Ferme",
+      "save": "Enregistrer",
+      "saved": "Enregistré.",
+      "readOnly": "Seul le propriétaire modifie ces réglages. Voici ce que lisent les locataires.",
+      "preview": "Ce que voient les locataires",
+      "previewEmpty": "Écrivez où les locataires laissent les articles pour voir leur carte ici.",
+      "off": "Les retours hors horaires sont désactivés. Les locataires rendent les articles au comptoir.",
+      "results": {
+        "drop_point_needed": "Dites où les locataires laissent les articles avant d’activer ceci.",
+        "drop_point_too_long": "Restez sous 300 caractères.",
+        "hours_invalid": "L’ouverture doit précéder la fermeture, par exemple 09:00 et 19:00."
+      }
+    }
   }
 }

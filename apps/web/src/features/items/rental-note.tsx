@@ -14,7 +14,7 @@ export function RentalNote({ rental, clock }: { rental: BindingRental | undefine
       ? t('out', { when: when(rental.endsAt) })
       : rental.state === 'overdue'
         ? t('overdue', { when: when(rental.endsAt) })
-        : rental.state === 'returned' || rental.state === 'inspecting'
+        : rental.state === 'dropped_off' || rental.state === 'returned' || rental.state === 'inspecting'
           ? t('checking')
           : t('booked', { when: when(rental.startsAt) })
   return <p className="text-[0.8125rem] text-muted-foreground">{text}</p>

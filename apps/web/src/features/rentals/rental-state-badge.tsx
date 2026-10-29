@@ -1,6 +1,6 @@
 import type { RentalState } from '@hold/domain'
 import { cn } from 'cn'
-import { ArrowDownLeft, ArrowUpRight, CircleCheck, Clock, Hourglass, ScanSearch, TriangleAlert, XCircle } from 'lucide-react'
+import { ArrowDownLeft, ArrowUpRight, CircleCheck, Clock, Hourglass, MapPin, ScanSearch, TriangleAlert, XCircle } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 
@@ -11,6 +11,7 @@ const ICONS: Readonly<Record<RentalState, LucideIcon>> = {
   ready: CircleCheck,
   out: ArrowUpRight,
   overdue: TriangleAlert,
+  dropped_off: MapPin,
   returned: ArrowDownLeft,
   inspecting: ScanSearch,
   settling: ScanSearch,

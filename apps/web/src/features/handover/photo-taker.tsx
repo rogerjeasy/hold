@@ -34,7 +34,8 @@ export type UploadTaken = (blob: Blob, measures: PhotoMeasures, onProgress: (sha
 // camera, or a sample. The phone checks it at once and asks for a retake before anything uploads. At a return, guide is
 // the handover photograph of the view: a ghost over the live camera to match the angle, or, with no camera to lay it
 // over, the photograph itself shown whole as the framing guide.
-export function PhotoTaker({ view, upload, onTaken, guide, returnSamples = false }: { view: View; upload: UploadTaken; onTaken: () => void; guide?: string; returnSamples?: boolean }) {
+// sample: the demonstration's own photograph for this view, where the frame would not do, such as a drop point.
+export function PhotoTaker({ view, upload, onTaken, guide, returnSamples = false, sample = SAMPLE }: { view: View; upload: UploadTaken; onTaken: () => void; guide?: string; returnSamples?: boolean; sample?: string }) {
   const t = useTranslations('shop.handover.taker')
   const check = useQualityCheck()
   const camera = useCamera(true)
@@ -86,7 +87,7 @@ export function PhotoTaker({ view, upload, onTaken, guide, returnSamples = false
             <input type="file" accept="image/jpeg" capture="environment" className="sr-only" disabled={busy} onChange={(event) => { const file = event.target.files?.[0]; if (file !== undefined) void take(() => readImage(file)) }} />
           </label>
         </Button>
-        <Button type="button" variant="ghost" className="min-h-12" disabled={busy} onClick={() => { takeSample(SAMPLE) }}>
+        <Button type="button" variant="ghost" className="min-h-12" disabled={busy} onClick={() => { takeSample(sample) }}>
           <FlaskConical aria-hidden="true" />
           {t('sample')}
         </Button>
@@ -104,7 +105,7 @@ export function PhotoTaker({ view, upload, onTaken, guide, returnSamples = false
         </p>
       ) : null}
       {step.kind === 'retake' ? <p role="alert" className="text-destructive">{t('retake', { problems: step.problems.map((problem) => t(`problems.${problem}`)).join(', ') })}</p> : null}
-      {step.kind === 'failed' ? <p role="alert" className="text-destructive">{t('failed')}</p> : null}
+      {step.kind === 'failed' ? <p role="alert" className="text-destructive">{step.reason === 'photo_reused' ? t('reused') : t('failed')}</p> : null}
     </div>
   )
 }

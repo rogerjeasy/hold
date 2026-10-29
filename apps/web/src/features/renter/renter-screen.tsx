@@ -11,6 +11,8 @@ import { useShopFormat } from '@/hooks/use-shop-format'
 import { Link } from '@/i18n/navigation'
 import { formatMoney } from '@/lib/money'
 import { linkRoutes } from '@/lib/routes'
+import { SelfReturnCard } from '@/features/self-return/self-return-card'
+import type { SelfReturnOffer } from '@/features/self-return/self-return-card'
 import { PayButton } from './pay-button'
 import { WalkInButton } from './walk-in-button'
 import { TwoAmounts } from './two-amounts'
@@ -44,6 +46,16 @@ function Status({ token, view }: { token: string; view: RenterView }) {
       </div>
     )
   }
+  if (view.state === 'dropped_off') {
+    return (
+      <div className="grid justify-items-start gap-3">
+        <StatusLine icon={CircleCheck} text={t('dropped_off')} />
+        <Link href={linkRoutes.selfReturn(token)} referrerPolicy="no-referrer" className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
+          {t('returnReceipt')}
+        </Link>
+      </div>
+    )
+  }
   if (view.state === 'booked') {
     return (
       <div className="grid gap-1">
@@ -73,6 +85,7 @@ export function RenterScreen({
   askConsent = false,
   assistant = null,
   checkout,
+  selfReturn = { offered: false, shopClosed: false, droppedOffAt: null },
 }: {
   token: string
   view: RenterView
@@ -81,6 +94,7 @@ export function RenterScreen({
   assistant?: { readonly connected: boolean; readonly revoked: boolean } | null
   // The shop's PayPal app, for PayPal's own button. Absent where it is not known.
   checkout?: PayPalCheckout | undefined
+  selfReturn?: SelfReturnOffer
 }) {
   const t = useTranslations('renter')
   const trust = useTranslations('trust.record')
@@ -97,12 +111,14 @@ export function RenterScreen({
         </p>
         <h1 className="text-page-title text-balance wrap-long-words">{t('title', { shop: view.shopName })}</h1>
         <Status token={token} view={view} />
+        {selfReturn.shopClosed ? <SelfReturnCard token={token} offer={selfReturn} /> : null}
         {assistant === null ? null : <AssistantNotice token={token} assistant={assistant} />}
         {canReport && ['out', 'overdue'].includes(view.state) ? (
           <Button asChild variant="outline" className="min-h-12 justify-self-start">
             <Link href={linkRoutes.incidents(token)} referrerPolicy="no-referrer"><TriangleAlert aria-hidden="true" />{t('somethingHappened')}</Link>
           </Button>
         ) : null}
+        {selfReturn.shopClosed ? null : <SelfReturnCard token={token} offer={selfReturn} />}
         <Link href={linkRoutes.record(token)} referrerPolicy="no-referrer" className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{records('title')}</Link>
         {/* Asked once, in a sentence, at the first booking (extensions.md section 7.6). The answer needs the renter's code. */}
         {askConsent ? <p className="max-w-prose border-l-2 border-primary pl-3 text-pretty">{trust('consentQuestion')}</p> : null}

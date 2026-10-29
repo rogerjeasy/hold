@@ -1,5 +1,5 @@
 import { HOLD_VALIDITY_DAYS } from '@hold/domain'
-import { CircleCheck, Clock, Lock, MessageSquareQuote, Scale } from 'lucide-react'
+import { CircleCheck, Clock, Lock, MapPin, MessageSquareQuote, Scale } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
@@ -11,10 +11,10 @@ import { useShopFormat } from '@/hooks/use-shop-format'
 import { Link } from '@/i18n/navigation'
 import { rentalRoutes, shopRoutes } from '@/lib/routes'
 
-const icons: Record<Decision['kind'], LucideIcon> = { claim: Scale, hold_ending: Lock, late: Clock, contested: MessageSquareQuote }
+const icons: Record<Decision['kind'], LucideIcon> = { dropped_off: MapPin, claim: Scale, hold_ending: Lock, late: Clock, contested: MessageSquareQuote }
 
-// A claim is decided on its claim page; a hold near its end or a late rental, on the rental's own page. The whole row
-// is the link, named by its title, so it is a large target on a phone.
+// A claim is decided on its claim page; an item dropped off, a hold near its end or a late rental, on the rental's own
+// page. The whole row is the link, named by its title, so it is a large target on a phone.
 const placeOf = (decision: Decision) => (decision.kind === 'claim' || decision.kind === 'contested' ? rentalRoutes.claim(decision.rentalId) : rentalRoutes.rental(decision.rentalId))
 
 function Row({ decision, title, children }: { decision: Decision; title: string; children: ReactNode }) {
@@ -78,6 +78,12 @@ export function DecisionList({ decisions, clock }: { decisions: readonly Decisio
         <ul>
           {decisions.map((decision) => {
             switch (decision.kind) {
+              case 'dropped_off':
+                return (
+                  <Row key={decision.key} decision={decision} title={t('decisions.dropped_off.title', { renter: renter(decision.renterName), when: format.when(decision.droppedOffAt) })}>
+                    {t('decisions.dropped_off.body')}
+                  </Row>
+                )
               case 'claim':
                 return (
                   <Row key={decision.key} decision={decision} title={t('decisions.claim.title', { amount: format.money(decision.totalCents), renter: renter(decision.renterName) })}>

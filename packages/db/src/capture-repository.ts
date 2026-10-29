@@ -1,6 +1,6 @@
 import { reserveEvidencePack } from './evidence-repository.ts'
 import { createHash } from 'node:crypto'
-import { checkRegion, conditionReplyOpen, CONDITION_REPLY_HOURS, manifestText, mayHandOver, MISSED_VIEWS, missingViews, RENTAL_TRANSITIONS, transition } from '@hold/domain'
+import { checkRegion, conditionReplyOpen, CONDITION_REPLY_HOURS, manifestText, mayHandOver, MISSED_VIEWS, missingViews, RENTAL_TRANSITIONS, selfReturnViews, transition } from '@hold/domain'
 import type { CaptureSessionKind, ConditionReply, PhotoMeasures, Region } from '@hold/domain'
 import { and, asc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
 import type { PhotoPlanView } from './schema/catalog.ts'
@@ -16,9 +16,10 @@ export const MEDIA_QUEUE = 'media'
 
 const fingerprintOf = (text: string) => createHash('sha256').update(text).digest('hex')
 
-type StartRequest = { readonly rentalId: string; readonly rentalItemId: string; readonly kind: CaptureSessionKind; readonly actorUserId: string | null }
+// byRenter: a return the renter photographs through their link, with nobody at the counter (architecture.md section 6.13).
+type StartRequest = { readonly rentalId: string; readonly rentalItemId: string; readonly kind: CaptureSessionKind; readonly actorUserId: string | null; readonly byRenter?: boolean }
 
-export type StartResult = { readonly ok: true; readonly sessionId: string } | { readonly ok: false; readonly reason: 'not_found' | 'not_ready' }
+export type StartResult = { readonly ok: true; readonly sessionId: string } | { readonly ok: false; readonly reason: 'not_found' | 'not_ready' | 'staff_returning' }
 
 // Starts a session for one item of a rental, or gives the one already started. A handover needs the rental ready,
 // with its hold placed; a renter's condition session needs the item handed over and the reply still open.
@@ -34,7 +35,7 @@ export async function startCaptureSession(transaction: Transaction, request: Sta
     .for('update', { of: rentals })
   if (rental === undefined) return { ok: false, reason: 'not_found' }
   const sessionsOf = (kind: CaptureSessionKind) =>
-    transaction.select({ id: captureSessions.id, sealedAt: captureSessions.sealedAt, planId: captureSessions.photoPlanId }).from(captureSessions).where(and(eq(captureSessions.rentalItemId, request.rentalItemId), eq(captureSessions.kind, kind))).orderBy(asc(captureSessions.startedAt))
+    transaction.select({ id: captureSessions.id, sealedAt: captureSessions.sealedAt, planId: captureSessions.photoPlanId, byRenter: captureSessions.byRenter }).from(captureSessions).where(and(eq(captureSessions.rentalItemId, request.rentalItemId), eq(captureSessions.kind, kind))).orderBy(asc(captureSessions.startedAt))
   let planId = rental.planId
   if (request.kind === 'handover') {
     const [existing] = await sessionsOf('handover')
@@ -47,6 +48,11 @@ export async function startCaptureSession(transaction: Transaction, request: Sta
     if (open !== undefined) return { ok: true, sessionId: open.id }
   } else if (request.kind === 'return') {
     const [existing] = await sessionsOf('return')
+    const byRenter = request.byRenter === true
+    // A renter never continues what staff started. Staff at the counter take over a renter's return not yet sent, and
+    // then photograph the item in front of them, with no drop point.
+    if (existing !== undefined && byRenter && !existing.byRenter) return { ok: false, reason: 'staff_returning' }
+    if (existing !== undefined && !byRenter && existing.byRenter && existing.sealedAt === null) await transaction.update(captureSessions).set({ byRenter: false }).where(eq(captureSessions.id, existing.id))
     if (existing !== undefined) return { ok: true, sessionId: existing.id }
     const [handover] = await sessionsOf('handover')
     if (!['out', 'overdue'].includes(rental.state) || handover?.sealedAt == null) return { ok: false, reason: 'not_ready' }
@@ -56,7 +62,7 @@ export async function startCaptureSession(transaction: Transaction, request: Sta
   }
   const [created] = await transaction
     .insert(captureSessions)
-    .values({ shopId: rental.shopId, rentalItemId: request.rentalItemId, kind: request.kind, photoPlanId: planId, actorUserId: request.actorUserId, startedAt: now })
+    .values({ shopId: rental.shopId, rentalItemId: request.rentalItemId, kind: request.kind, photoPlanId: planId, actorUserId: request.actorUserId, byRenter: request.kind === 'return' && request.byRenter === true, startedAt: now })
     .returning({ id: captureSessions.id })
   if (created === undefined) throw new Error('The session was not created.')
   return { ok: true, sessionId: created.id }
@@ -66,6 +72,7 @@ type SessionRow = {
   readonly id: string
   readonly shopId: string
   readonly kind: CaptureSessionKind
+  readonly byRenter: boolean
   readonly rentalId: string
   readonly rentalItemId: string
   readonly itemId: string
@@ -83,6 +90,7 @@ async function sessionRow(transaction: Transaction, sessionId: string, lock = fa
       id: captureSessions.id,
       shopId: captureSessions.shopId,
       kind: captureSessions.kind,
+      byRenter: captureSessions.byRenter,
       rentalId: rentalItems.rentalId,
       rentalItemId: captureSessions.rentalItemId,
       itemId: rentalItems.itemId,
@@ -99,7 +107,10 @@ async function sessionRow(transaction: Transaction, sessionId: string, lock = fa
     .innerJoin(photoPlans, eq(photoPlans.id, captureSessions.photoPlanId))
     .where(eq(captureSessions.id, sessionId))
   const [row] = lock ? await query.for('update', { of: captureSessions }) : await query
-  return row
+  if (row?.kind !== 'return' || !row.byRenter) return row
+  const handover = await transaction.select({ view: photos.view }).from(photos).innerJoin(captureSessions, eq(captureSessions.id, photos.sessionId))
+    .where(and(eq(captureSessions.rentalItemId, row.rentalItemId), eq(captureSessions.kind, 'handover'), isNotNull(captureSessions.sealedAt), isNull(photos.supersededAt)))
+  return { ...row, planViews: selfReturnViews(row.planViews, handover.map((photo) => photo.view)) }
 }
 
 // The views a session photographs: its plan's for staff, a few free ones for what a renter adds, and for an incident
@@ -139,6 +150,7 @@ async function currentPhotos(transaction: Transaction, sessionId: string): Promi
 export type CaptureSession = {
   readonly id: string
   readonly kind: CaptureSessionKind
+  readonly byRenter: boolean
   readonly rentalId: string
   readonly rentalItemId: string
   readonly itemId: string
@@ -160,6 +172,7 @@ export async function captureSession(transaction: Transaction, sessionId: string
   return {
     id: row.id,
     kind: row.kind,
+    byRenter: row.byRenter,
     rentalId: row.rentalId,
     rentalItemId: row.rentalItemId,
     itemId: row.itemId,

@@ -15,6 +15,7 @@ const empty: ShopToday = {
   dueBackToday: 0,
   activeHolds: [],
   claimsWaiting: [],
+  droppedOff: [],
   late: [],
   counter: [],
   month: { feesCents: 0, releasedCents: 0, claimedCents: 0, recoveredCents: 0 },
@@ -41,6 +42,7 @@ const busy: ShopToday = {
     { claimId: 'c2', rentalId: 'r4', renterName: 'Tom Becker', state: 'contested', totalCents: 45_00, firstLine: 'Lost lock', renterComment: 'The lock was in the bag.', simulated: true },
   ],
   late: [{ rentalId: 'r5', renterName: 'Lea Fischer', endsAt: at('2026-10-13T17:00:00Z'), simulated: true }],
+  droppedOff: [{ rentalId: 'r8', renterName: 'Ana Costa', droppedOffAt: at('2026-10-13T20:40:00Z'), simulated: true }],
   counter: [
     { rentalId: 'r6', kind: 'handover', at: at('2026-10-14T07:30:00Z'), renterName: 'Lukas Weber', items: ['Hybrid bike 1'], done: true, hold: { reservedCents: 250_00, state: 'placed', assuredUntil: null }, simulated: true },
     { rentalId: 'r1', kind: 'return', at: at('2026-10-14T09:15:00Z'), renterName: 'Sofia Marques', items: ['E-bike 1', 'E-bike 2'], done: false, hold: { reservedCents: 600_00, state: 'placed', assuredUntil: addDays(NOW, 2) }, simulated: true },
@@ -72,8 +74,15 @@ describe('the Today page', () => {
   it('greets the person and says what the day holds', () => {
     show(busy)
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Good morning, Tomás')
-    expect(screen.getByText('4 things need a decision.')).toBeInTheDocument()
+    expect(screen.getByText('5 things need a decision.')).toBeInTheDocument()
     expect(screen.getByText('3 rentals come back today.')).toBeInTheDocument()
+  })
+
+  it('puts an item a renter left at the drop point overnight first, linked to its rental', () => {
+    show(busy)
+    const first = within(screen.getByRole('region', { name: 'Needs a decision' })).getAllByRole('link')[1]
+    expect(first).toHaveAccessibleName('Ana Costa returned it at the drop point Tue 09:40 PM')
+    expect(first).toHaveAttribute('href', '/shop/rentals/r8')
   })
 
   it('gives the day’s figures from the records', () => {
@@ -89,6 +98,7 @@ describe('the Today page', () => {
     show(busy)
     const decisions = within(screen.getByRole('region', { name: 'Needs a decision' })).getAllByRole('listitem')
     expect(decisions.map((item) => item.querySelector('h3')?.textContent)).toEqual([
+      'Ana Costa returned it at the drop point Tue 09:40 PM',
       'Claim of €35.00 for Priya Natarajan',
       expect.stringMatching(/^The hold for Marco Rossi ends /),
       'Lea Fischer is late',

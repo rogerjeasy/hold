@@ -1241,6 +1241,7 @@
       "scorecard": "Reliability",
       "incidents": "Incidents",
       "trust": "Trust ladder",
+      "selfReturn": "Returns after hours",
       "settlement": "Settlement advocate",
       "queue": "Morning queue",
       "money": "Money",
@@ -1909,6 +1910,7 @@
         "uploading": "Uploading… {percent}%",
         "retake": "Take it again: {problems}.",
         "failed": "The photograph did not upload. Check the connection and try again.",
+        "reused": "This photograph was used before. Take a new one of the item as it is now.",
         "problems": {
           "blurred": "it is blurred",
           "too_dark": "it is too dark",
@@ -2002,6 +2004,8 @@
       "after": "Return",
       "photo": "{side}: {view}",
       "preparing": "The display photograph is being prepared.",
+      "dropPoint": "Where the renter left it",
+      "dropPointBody": "Photographed by the renter at the drop point. It is evidence of where, and is not compared.",
       "observations": "Observations",
       "classes": {
         "new_damage": "Possible new damage",
@@ -2195,6 +2199,10 @@
       "subject": "Your rental at {shop}: the condition it left in",
       "body": "Your rental at {shop} is on its way with you. These are the photographs staff took as it left, and any marks they noted.\n\nOpen this link to look. If everything is there, confirm it. If staff missed something, add a photograph of it now, within 24 hours, so you are never charged for it:\n\n{link}"
     },
+    "dropOffMissing": {
+      "subject": "{shop} could not find your return at the drop point",
+      "body": "You sent your return to {shop} on {sent}. When someone from the shop looked at the drop point on {looked}, the item was not there.\n\nPlease contact the shop. Your photographs from {sent} stay on your rental's record, and nothing is charged while they look into it. Your return, as you sent it:"
+    },
     "claimCode": {
       "subject": "Your Hold claim verification code",
       "body": "Your verification code is {code}. It expires in ten minutes. Only enter it on your private Hold claim page."
@@ -2249,6 +2257,10 @@
       "title": "Needs a decision",
       "empty": "Nothing needs a decision.",
       "emptyBody": "Claims to approve, holds near their end and late returns appear here.",
+      "dropped_off": {
+        "title": "{renter} returned it at the drop point {when}",
+        "body": "Check it is there, then review the return. The hold stays and nothing is charged until you do."
+      },
       "claim": {
         "title": "Claim of {amount} for {renter}",
         "body": "{line}. Waiting for an approval.",
@@ -2373,6 +2385,7 @@
     "ready": "Ready for handover",
     "out": "Out",
     "overdue": "Overdue",
+    "dropped_off": "Dropped off, to check",
     "returned": "Returned",
     "inspecting": "Being checked",
     "settling": "Settling",
@@ -2439,6 +2452,8 @@
       "approveHold": "Approve the hold",
       "ready": "Your hold is placed. You can collect your items.",
       "out": "Your rental is with you.",
+      "dropped_off": "You returned it at the drop point. A person at the shop will check it.",
+      "returnReceipt": "See your return",
       "condition": "See how it left"
     },
     "paid": {
@@ -2488,7 +2503,12 @@
       "not_uploaded": "The photograph did not arrive. Take it again.",
       "sealed": "This report was sent, so no photograph can be added.",
       "unknown_view": "That view is not one of this item’s.",
-      "not_connected": "No assistant is connected to this rental now."
+      "not_connected": "No assistant is connected to this rental now.",
+      "not_allowed": "This shop takes returns at the counter only.",
+      "not_ready": "This rental cannot be returned here now.",
+      "staff_returning": "Staff are already taking this return at the counter.",
+      "photo_reused": "This photograph was used before. Take a new one of the item as it is now.",
+      "views_missing": "Some photographs are still to take."
     },
     "orderDescription": "{shop}: {items}, {days, plural, one {# day} other {# days}}",
     "holdPage": {
@@ -3857,5 +3877,148 @@
     "saved": "Your dashboard is saved for your next visit.",
     "saveFailed": "Your dashboard could not be saved. Your changes stay on this page.",
     "reset": "Back to the first dashboard"
+  },
+  "selfReturn": {
+    "card": {
+      "closedTitle": "The shop is closed. You can still return it.",
+      "openTitle": "Return it yourself",
+      "body": "Photograph it the way it was photographed when you took it, leave it at the drop point, and you are done. It counts as returned the moment you send.",
+      "meta": "About two minutes",
+      "start": "Return it myself"
+    },
+    "renter": {
+      "title": "Return it yourself",
+      "titles": {
+        "unavailable": "Return it yourself",
+        "intro": "Before you start",
+        "capture": "Photograph the return",
+        "sent": "Your return"
+      },
+      "back": "Back to your rental",
+      "unavailable": {
+        "title": "This return is not open here",
+        "body": "{shop} takes this return at the counter. Bring it back while the shop is open."
+      },
+      "when": {
+        "open": "A person at {shop} checks it today, while the shop is open.",
+        "later": "A person at {shop} checks it when the shop opens, {when}.",
+        "unknown": "A person at {shop} checks it when the shop next opens."
+      },
+      "intro": {
+        "dropPointLabel": "Leave it at",
+        "writtenBy": "In the words of {shop}",
+        "nextLabel": "What happens next",
+        "nothingCharged": "Nothing is charged now.",
+        "holdStays": "Your {amount} hold stays reserved with PayPal until they do. Then it is released, or you get a claim with photographs that you can answer.",
+        "how": "Photograph each view the way it was photographed when you took it, then where you left it. About two minutes.",
+        "light": "Find good light. The photographs you take now are your proof of how you left it.",
+        "start": "Start the photographs",
+        "noScope": "This link shows the rental but cannot return it. Use the link the shop sent with your booking."
+      },
+      "capture": {
+        "guidance": "The photograph from when you took it shows faintly behind the camera. Match its angle, then take the next view.",
+        "dropPointView": "Where you left it",
+        "dropPointGuidance": "Step back so the item and the drop point are both in the photograph.",
+        "sampleTitle": "Sample photographs",
+        "sampleBody": "These are samples for the demonstration, not photographs of your rental. The record says so.",
+        "retake": "Take it again",
+        "preparing": "Preparing the photograph…",
+        "photo": "Your photograph: {view}"
+      },
+      "send": {
+        "ready": "Every photograph is taken. Sending seals them, and your return counts from that moment.",
+        "missing": "{count, plural, one {# photograph still to take} other {# photographs still to take}}",
+        "button": "Send my return"
+      },
+      "receipt": {
+        "onTime": "Returned on time",
+        "late": "Returned after the rental ended",
+        "received": "Received",
+        "where": "{date}, at the drop point",
+        "missingTitle": "{shop} could not find it at the drop point",
+        "missingBody": "They looked {when}. Please contact them. Your photographs from {time} stay on your rental’s record.",
+        "reserved": "Reserved, not taken",
+        "released": "Released, nothing taken",
+        "charged": "Charged after a person approved a claim",
+        "checkedPayPal": "Checked with PayPal at {time}",
+        "fromRecord": "From Hold’s record. PayPal could not be asked just now.",
+        "sample": "A sample rental: no PayPal call is made.",
+        "dropPointPhoto": "Where you left it",
+        "photos": "Your photographs",
+        "photosBody": "Sealed into your rental’s record at the moment you sent them. Nobody can change them.",
+        "record": "See the full record"
+      },
+      "steps": {
+        "title": "What happens next",
+        "returned": "You returned it",
+        "returnedDetail": "{count, plural, one {# photograph} other {# photographs}}, sealed at {time}",
+        "check": "A person checks it",
+        "checked": "{shop} checked it",
+        "checkedDetail": "A person saw it at the drop point.",
+        "notFound": "Not found at the drop point",
+        "notFoundDetail": "Please contact {shop}. Nothing is charged while they look into it.",
+        "settle": "Hold released, or a claim you can answer",
+        "settleDetail": "Nothing is charged without a person’s approval.",
+        "released": "Hold released",
+        "releasedDetail": "Nothing was charged.",
+        "charged": "Charged after a person approved a claim",
+        "seeClaim": "See the claim"
+      }
+    },
+    "staff": {
+      "sectionTitle": "{count, plural, one {Returned by a renter} other {Returned by renters}}",
+      "sectionLead": "Items renters returned with nobody at the counter. Look at the drop point first. The hold stays and nothing is charged until a person has seen the item.",
+      "label": "Returned by the renter",
+      "title": "{items} · {renter}",
+      "renterUnknown": "A renter",
+      "hold": "Hold {amount} reserved",
+      "returnedOnTime": "Returned {when}, on time",
+      "returnedLate": "Returned {when}, after the rental ended",
+      "views": "{count, plural, one {# view} other {# views}} and the drop point",
+      "findings": "{count, plural, =0 {No findings} one {# finding} other {# findings}}",
+      "comparing": "Still comparing",
+      "clean": "No findings",
+      "needsPerson": "Needs a person to look",
+      "before": "Handover · {view}",
+      "after": "Renter’s photograph · {view}",
+      "dropPoint": "Where they left it",
+      "note": "Look at the drop point first. Findings and any claim stay with you: the renter sees nothing until a person approves.",
+      "here": "It’s here, review the return",
+      "hereNow": "It’s here now, review the return",
+      "notHere": "It’s not here",
+      "notHereBody": "“It’s not here” records who looked and when. The hold stays in place and nothing is charged.",
+      "missing": "Not found at the drop point {when}, by {name}",
+      "someone": "a staff member",
+      "readOnly": "Counter staff, managers and the owner check returns.",
+      "confirmed": "Marked as here. Opening the review…",
+      "recorded": "Recorded. The hold stays in place.",
+      "recordedTold": "Recorded, and the renter was emailed. The hold stays in place.",
+      "results": {
+        "not_dropped_off": "This item is no longer waiting at the drop point.",
+        "already_reported": "It is already recorded as not found."
+      }
+    },
+    "settings": {
+      "title": "Returns after hours",
+      "lead": "Let renters return items with nobody at the counter. They photograph each view through their link, as at the handover, and leave the item where you say. Nothing is charged and the hold stays until a person has seen it.",
+      "allowed": "Let renters return items themselves",
+      "dropPoint": "Where renters leave items",
+      "dropPointHint": "Renters read these words exactly. Say where, and how to lock it.",
+      "hours": "When the counter is staffed",
+      "hoursHint": "Renters are told when a person will check their return. Leave both empty if you would rather not say.",
+      "opens": "Opens",
+      "closes": "Closes",
+      "save": "Save",
+      "saved": "Saved.",
+      "readOnly": "Only the owner changes these settings. This is what renters are told.",
+      "preview": "What renters see",
+      "previewEmpty": "Write where renters leave items to see their card here.",
+      "off": "Returns after hours are off. Renters return items at the counter.",
+      "results": {
+        "drop_point_needed": "Say where renters leave items before you turn this on.",
+        "drop_point_too_long": "Keep it under 300 characters.",
+        "hours_invalid": "Opening must come before closing, as 09:00 and 19:00."
+      }
+    }
   }
 }

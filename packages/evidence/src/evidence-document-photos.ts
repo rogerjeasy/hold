@@ -1,4 +1,5 @@
 import type { EvidenceSnapshot } from '@hold/db'
+import { DROP_POINT_VIEW } from '@hold/domain'
 import { EvidenceRenderError } from './evidence-manifest.ts'
 import type { EvidenceDocument } from './evidence-document-layout.ts'
 
@@ -52,7 +53,8 @@ export function renderItemPhotos(context: EvidenceDocument, snapshot: EvidenceSn
     const pairs = comparisons.length > 0 ? comparisons.map((comparison) => ({ handover: item.sessions.find((session) => session.id === comparison.handoverSessionId), returned: item.sessions.find((session) => session.id === comparison.returnSessionId), findings: comparison.findings })) : [{ handover: handovers.at(-1), returned: returns.at(-1), findings: [] }]
     const shown = new Set<string>()
     for (const pair of pairs) {
-      const views = new Set([...(pair.handover?.photos ?? []), ...(pair.returned?.photos ?? [])].filter((photo) => photo.supersededAt === null).map((photo) => photo.view))
+      // Where a renter left the item has no handover twin; it is shown on its own below (architecture.md section 6.13).
+      const views = new Set([...(pair.handover?.photos ?? []), ...(pair.returned?.photos ?? [])].filter((photo) => photo.supersededAt === null && photo.view !== DROP_POINT_VIEW).map((photo) => photo.view))
       for (const view of views) {
         const before = pair.handover?.photos.find((photo) => photo.view === view && photo.supersededAt === null)
         const after = pair.returned?.photos.find((photo) => photo.view === view && photo.supersededAt === null)
@@ -62,7 +64,7 @@ export function renderItemPhotos(context: EvidenceDocument, snapshot: EvidenceSn
     }
     for (const session of item.sessions) for (const photo of session.photos.filter((photo) => !shown.has(photo.id))) {
       context.room(240)
-      context.line('session', `${session.kind} / ${photo.view}`)
+      context.line('session', photo.view === DROP_POINT_VIEW ? `${session.kind} / ${context.label('dropPoint')}` : `${session.kind} / ${photo.view}`)
       const top = context.doc.y
       panel(context, photo, photos, context.margin, top, (context.width - 14) / 2, [])
       context.doc.y = top + (context.width - 14) / 2 * 0.75 + 10

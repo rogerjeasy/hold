@@ -15,6 +15,8 @@ const REACHED: Readonly<Record<RentalState, number>> = {
   ready: 3,
   out: 4,
   overdue: 4,
+  // Back at the drop point, but nobody at the shop has seen it yet.
+  dropped_off: 4,
   returned: 5,
   inspecting: 5,
   settling: 5,

@@ -7,8 +7,9 @@ import { addDays } from '@hold/domain'
 
 // What a link may be used for. Paying the fee or approving the hold happens in PayPal, approved by the renter there;
 // accepting or contesting a claim also needs a one-time code. Reporting an incident during the rental stores a report
-// and photographs; agreeing small damage it found also needs the one-time code (extensions.md section 10.4).
-export const RENTER_LINK_SCOPES = ['view', 'pay', 'confirm_condition', 'extend', 'accept', 'contest', 'report_incident'] as const
+// and photographs; agreeing small damage it found also needs the one-time code (extensions.md section 10.4). Returning
+// the item at the drop point stores photographs and leaves the rental for a person to check (architecture.md 6.13).
+export const RENTER_LINK_SCOPES = ['view', 'pay', 'confirm_condition', 'extend', 'accept', 'contest', 'report_incident', 'return_item'] as const
 export type RenterLinkScope = (typeof RENTER_LINK_SCOPES)[number]
 
 const SIGNATURE_BYTES = 16

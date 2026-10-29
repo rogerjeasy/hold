@@ -61,7 +61,7 @@ export function checkPlacedAuthorization(asked: Money, authorization: { readonly
 
 // A hold near its end is replaced while its rental may still need it: from placement until the rental is settled
 // (architecture.md section 7.4). A closed or cancelled rental needs no hold.
-const NEEDS_ITS_HOLD: ReadonlySet<RentalState> = new Set(['ready', 'out', 'overdue', 'returned', 'inspecting', 'settling'])
+const NEEDS_ITS_HOLD: ReadonlySet<RentalState> = new Set(['ready', 'out', 'overdue', 'dropped_off', 'returned', 'inspecting', 'settling'])
 
 export function needsReplacement(state: RentalState): boolean {
   return NEEDS_ITS_HOLD.has(state)

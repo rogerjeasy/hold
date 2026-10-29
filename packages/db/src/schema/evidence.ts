@@ -28,6 +28,8 @@ export const captureSessions = pgTable(
       .references(() => photoPlans.id),
     // A staff member, or nobody when the renter took the photographs through their link.
     actorUserId: reference().references(() => users.id),
+    // A return the renter photographed through their link with nobody at the counter (architecture.md section 6.13).
+    byRenter: boolean().notNull().default(false),
     startedAt: createdAt(),
     sealedAt: at(),
     // The sealed manifest's exact text (domain manifestText). Its SHA-256 is the fingerprint the item's next session names.
