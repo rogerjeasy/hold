@@ -5,7 +5,7 @@ import { claimStaff } from './claim-access.ts'
 import { releaseCleanReturn } from './claim-repository.ts'
 import { reserveEvidencePack } from './evidence-repository.ts'
 import { escalateNegotiation } from './negotiation-ending.ts'
-import { liveStandingRule } from './ops-settings-repository.ts'
+import { liveStandingRule, mandateForUse } from './ops-settings-repository.ts'
 import { approvals, auditLog, authorizations, claimMessages as messages, claims, holds, negotiations, outbox, renters, rentals, shops, staffRoles, users } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
@@ -72,7 +72,9 @@ export async function keepClaimPromise(transaction: Transaction, claimId: string
   if (standing === 'kept') return { outcome: 'kept' }
   await transaction.update(claims).set({ promiseMissedAt: now }).where(eq(claims.id, claimId))
   if (claim.decidedAt !== null) return { outcome: 'decided_late' }
-  const mandate = await liveStandingRule(transaction, now, PROMISE_REASON)
+  // Locked until the transaction ends, so two claims missed at once count the rule's daily uses one after the other.
+  const live = await liveStandingRule(transaction, now, PROMISE_REASON)
+  const mandate = live === undefined ? undefined : await mandateForUse(transaction, live.id)
   const covered = mandate !== undefined && withinMandate({ kind: 'execute_proposal', proposalKind: 'release_hold', condition: PROMISE_REASON, doneToday: await waivedToday(transaction, mandate.id, now) }, mandate, now).ok
   const outcome = missedPromiseOutcome(claim.state, covered)
   await transaction.insert(auditLog).values({ shopId: claim.shopId, actorKind: 'system', action: 'claim.promise_missed', subjectKind: 'claim', subjectId: claimId, detail: { decideBy: claim.decideBy.toISOString(), outcome }, at: now })
