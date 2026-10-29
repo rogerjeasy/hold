@@ -1,6 +1,7 @@
 import { beforeAll, describe, expect, it } from 'vitest'
 import { registerOwner } from './accounts.ts'
-import { saveInsightsDashboard, savedInsightsDashboard } from './insights-dashboard-repository.ts'
+import { insightsTokensSince, saveInsightsDashboard, savedInsightsDashboard } from './insights-dashboard-repository.ts'
+import { auditLog } from './schema/index.ts'
 import { inShop } from './scope.ts'
 import type { Scope } from './scope.ts'
 import { createTestDatabase } from './testing/test-database.ts'
@@ -47,5 +48,21 @@ describe('a shop’s own insights dashboard', () => {
     await save(other, { selectedPageId: 'kayaks', pages: [] }, 2, NOW)
     expect(await read(other)).toMatchObject({ state: { selectedPageId: 'kayaks' } })
     expect(await read(shop)).toMatchObject({ state: { selectedPageId: 'money' } })
+  })
+})
+
+describe('what a shop’s insights agent has spent', () => {
+  const turnAt = (scope: Scope & { readonly userId: string }, tokens: number, at: Date, action = 'insights.turn') =>
+    inShop(database, scope, (transaction) => transaction.insert(auditLog).values({ shopId: scope.shopId, actorKind: 'person', actorId: scope.userId, action, detail: { tokens }, at }))
+
+  it('adds up the tokens of the shop’s own turns since a time, and no other shop’s or other line’s', async () => {
+    const since = new Date('2026-10-28T10:00:00Z')
+    await turnAt(shop, 12_000, new Date('2026-10-29T09:00:00Z'))
+    await turnAt(shop, 8_000, new Date('2026-10-29T09:30:00Z'))
+    await turnAt(shop, 50_000, new Date('2026-10-27T09:00:00Z'))
+    await turnAt(shop, 99_000, new Date('2026-10-29T09:40:00Z'), 'insights.dashboard_saved')
+    await turnAt(other, 70_000, new Date('2026-10-29T09:00:00Z'))
+    expect(await inShop(database, shop, (transaction) => insightsTokensSince(transaction, since))).toBe(20_000)
+    expect(await inShop(database, other, (transaction) => insightsTokensSince(transaction, since))).toBe(70_000)
   })
 })

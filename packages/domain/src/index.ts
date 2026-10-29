@@ -94,7 +94,7 @@ export { checkLadder, holdFor, LADDER_LIMITS, rentalHoldFor, TRUST_HISTORIES } f
 export type { ItemHold, LadderHold, LadderProblem, RentalLadderHold, TrustHistory, TrustLadder, TrustRung } from './trust-ladder.ts'
 export { simulateLadder } from './ladder-simulation.ts'
 export type { LadderSimulation, PastRental } from './ladder-simulation.ts'
-export { gateInsightsCalls, INSIGHTS_TOOLS } from './insights-gateway.ts'
+export { gateInsightsCalls, INSIGHTS_BUDGET_HOURS, INSIGHTS_DAILY_TOKENS, INSIGHTS_TOOLS, withinInsightsBudget } from './insights-gateway.ts'
 export type { DroppedCall, InsightsCall } from './insights-gateway.ts'
 export { daysOut, itemWear, recoveredCents, wearingFastest } from './fleet.ts'
 export type { ItemRentalRecord, ItemWear, WearComparison, DateWindow } from './fleet.ts'

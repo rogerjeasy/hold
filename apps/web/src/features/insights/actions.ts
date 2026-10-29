@@ -1,10 +1,11 @@
 'use server'
 
-import { createBedrockInsightsModel, createScriptedInsightsModel, runInsightsTurn, studioTurnSchema } from '@hold/agent'
-import { saveInsightsDashboard as saveDashboard } from '@hold/db'
+import { createBedrockInsightsModel, createScriptedInsightsModel, INSIGHTS_TURN_CHARACTERS, runInsightsTurn, studioTurnSchema } from '@hold/agent'
+import { insightsTokensSince, saveInsightsDashboard as saveDashboard } from '@hold/db'
+import { INSIGHTS_BUDGET_HOURS, withinInsightsBudget } from '@hold/domain'
 import { z } from 'zod'
 import { getServices } from '@/server/services'
-import { shopAction } from '@/server/shop-access'
+import { Refusal, shopAction } from '@/server/shop-access'
 
 // The insights dashboard's server functions (extensions.md section 12.5): a turn of the insights agent, which AG
 // Studio's loop asks for from the browser, and saving the shop's own dashboard. Built by shopAction, which checks who is asking and their role, limits how
@@ -26,7 +27,7 @@ const json = (limit: number) =>
         return z.NEVER
       }
     })
-const turn = json(1_000_000).pipe(studioTurnSchema)
+const turn = json(INSIGHTS_TURN_CHARACTERS).pipe(studioTurnSchema)
 // AG Studio's state as it hands it over: its pages and what it remembers of its panels. Studio checks the rest when it
 // loads it again; anything else at the top is refused.
 const dashboardState = json(500_000).pipe(
@@ -50,10 +51,13 @@ export const askInsights = shopAction(
     input: z.strictObject({ turn }),
     auditDetail: (result: Awaited<ReturnType<typeof runInsightsTurn>>) => ({ outcome: result.outcome, model: result.model, promptVersion: result.promptVersion, tokens: result.tokens, kept: result.kept, dropped: result.dropped, ...(result.reason === undefined ? {} : { reason: result.reason }) }),
   },
-  async (_context, input) => {
+  async (_context, input, transaction) => {
+    // A shop's turns of the last day must have tokens left before another model call is made.
+    const now = new Date()
+    if (!withinInsightsBudget(await insightsTokensSince(transaction, new Date(now.getTime() - INSIGHTS_BUDGET_HOURS * 60 * 60 * 1000)))) return new Refusal('insights_budget_spent')
     const { config } = await getServices()
     const model = config.services === 'fake' ? createScriptedInsightsModel() : createBedrockInsightsModel({ awsRegion: config.region })
-    return runInsightsTurn({ model, turn: input.turn, now: new Date() })
+    return runInsightsTurn({ model, turn: input.turn, now })
   },
 )
 

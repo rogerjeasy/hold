@@ -47,3 +47,12 @@ export function gateInsightsCalls<Call extends InsightsCall>(calls: readonly Cal
   }
   return { kept, dropped }
 }
+
+// What a shop's insights agent may spend in a day: some thirteen questions of Studio's ten to twenty turns each, about
+// fifteen dollars of Claude a day at most. Anyone can start a demo shop, so the bill has a ceiling for each one.
+export const INSIGHTS_DAILY_TOKENS = 3_000_000
+export const INSIGHTS_BUDGET_HOURS = 24
+
+export function withinInsightsBudget(spentTokens: number): boolean {
+  return spentTokens < INSIGHTS_DAILY_TOKENS
+}

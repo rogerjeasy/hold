@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { insightsRequest, insightsResponse, studioTurnSchema } from './insights-protocol.ts'
+import { INSIGHTS_TURN_CHARACTERS, insightsRequest, insightsResponse, studioTurnSchema } from './insights-protocol.ts'
 
 // One turn of the insights agent (extensions.md section 12.5): AG Studio's conversation, as its own agent loop sends it
 // from the browser, read into Claude's Messages API, and Claude's reply read back into what Studio's loop expects.
@@ -58,6 +58,16 @@ describe('a turn read into Claude’s Messages API', () => {
     expect(request.messages[1]).toEqual({ role: 'assistant', content: [{ type: 'text', text: 'I will place it.' }] })
     expect(request.messages[2]).toEqual({ role: 'user', content: [{ type: 'text', text: 'Carry on with the task from where you left off.' }] })
     expect(insightsRequest(turn, '').messages.at(-1)?.role).toBe('user')
+  })
+
+  it('refuses a turn larger than any AG Studio sends, so one turn cannot run up a bill', () => {
+    // Studio's largest live turn on 29 October 2026 was about 21,000 tokens, some 85,000 characters.
+    expect(INSIGHTS_TURN_CHARACTERS).toBe(400_000)
+    // Tool results within their own limit, the last filled to the size asked for.
+    const sized = (characters: number) => ({ input: [...Array.from({ length: 3 }, (_, index) => ({ type: 'function_call_output', callId: `c${String(index)}`, output: 'x'.repeat(100_000) })), { type: 'function_call_output', callId: 'last', output: 'x'.repeat(characters) }] })
+    const overhead = JSON.stringify(sized(0)).length
+    expect(studioTurnSchema.safeParse(sized(INSIGHTS_TURN_CHARACTERS - overhead)).success).toBe(true)
+    expect(studioTurnSchema.safeParse(sized(INSIGHTS_TURN_CHARACTERS - overhead + 1)).success).toBe(false)
   })
 
   it('refuses a turn with fields Studio never sends, or arguments that are not JSON', () => {

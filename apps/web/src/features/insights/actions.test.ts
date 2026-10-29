@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { INSIGHTS_PROMPT_VERSION } from '@hold/agent'
 import { acceptInvitation, auditLog, createInvitation, inShop, registerOwner, savedInsightsDashboard } from '@hold/db'
+import { INSIGHTS_DAILY_TOKENS } from '@hold/domain'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 
 process.env['HOLD_ENVIRONMENT'] = 'test'
@@ -61,6 +62,16 @@ describe('asking the insights agent', () => {
     await signIn(jar, OWNER, 'passkey')
     expect(await askInsights(null, form({ turn: '{"input": "not a list"}' }))).toMatchObject({ ok: false, failure: 'invalid' })
     expect(await askInsights(null, form({ turn: 'not json' }))).toMatchObject({ ok: false, failure: 'invalid' })
+  })
+})
+
+describe('the shop’s daily budget for the insights agent', () => {
+  it('refuses a turn once the shop’s turns of the last day have spent its tokens, and asks no model', async () => {
+    const { database } = await getServices()
+    await inShop(database, { role: 'hold_app', shopId, userId: ownerId }, (transaction) =>
+      transaction.insert(auditLog).values({ shopId, actorKind: 'person', actorId: ownerId, action: 'insights.turn', detail: { tokens: INSIGHTS_DAILY_TOKENS }, at: new Date() }))
+    await signIn(jar, OWNER, 'passkey')
+    expect(await askInsights(null, form({ turn }))).toEqual({ ok: false, failure: 'refused', reason: 'insights_budget_spent' })
   })
 })
 

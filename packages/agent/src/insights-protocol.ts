@@ -15,13 +15,18 @@ const item = z.discriminatedUnion('type', [
 ])
 const tool = z.object({ name: z.string().min(1).max(100), description: z.string().max(20_000).optional(), parameters: z.record(z.string(), z.unknown()), kind: z.string().optional() })
 
-// The turn as the browser sends it. Anything else at the top is refused.
-export const studioTurnSchema = z.strictObject({
-  input: z.array(item).max(500),
-  instructions: z.string().max(100_000).optional(),
-  tools: z.array(tool).max(60).optional(),
-  toolChoice: z.union([z.enum(['auto', 'none', 'required']), z.object({ name: z.string().min(1).max(100) })]).optional(),
-})
+// The most a turn may hold, written out: some five times the largest AG Studio sent live, about 100,000 tokens.
+export const INSIGHTS_TURN_CHARACTERS = 400_000
+
+// The turn as the browser sends it. Anything else at the top is refused, and so is a turn larger than Studio sends.
+export const studioTurnSchema = z
+  .strictObject({
+    input: z.array(item).max(500),
+    instructions: z.string().max(100_000).optional(),
+    tools: z.array(tool).max(60).optional(),
+    toolChoice: z.union([z.enum(['auto', 'none', 'required']), z.object({ name: z.string().min(1).max(100) })]).optional(),
+  })
+  .refine((turn) => JSON.stringify(turn).length <= INSIGHTS_TURN_CHARACTERS, { message: 'The turn is larger than AG Studio sends.' })
 export type StudioTurn = z.infer<typeof studioTurnSchema>
 
 export type InsightsBlock =
