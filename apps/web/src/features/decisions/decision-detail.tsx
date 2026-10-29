@@ -9,7 +9,8 @@ import { Link } from '@/i18n/navigation'
 import { rentalRoutes, shopRoutes } from '@/lib/routes'
 import type { BoardRow, IncidentRow, ProposalMark, ProposalRow } from './board'
 import { ClaimDetail } from './claim-detail'
-import { detailLinkClass, Fact, RenterWords, SubHeading } from './detail-parts'
+import { detailLinkClass, Fact, SubHeading } from '@/components/detail-parts'
+import { RenterWords } from './detail-parts'
 import type { RowText } from './use-row-text'
 
 const MARK_ICONS: Readonly<Record<ProposalMark, LucideIcon>> = { raisedByAgent: Bot, notInvestigated: SearchX, paypalNotChecked: WifiOff, draftDropped: CircleSlash }

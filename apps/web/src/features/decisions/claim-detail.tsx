@@ -3,7 +3,8 @@ import { PhotoWithMarks } from '@/components/photo-with-marks'
 import { Link } from '@/i18n/navigation'
 import { rentalRoutes } from '@/lib/routes'
 import type { ClaimRow } from './board'
-import { detailLinkClass, Fact, RenterWords, SubHeading } from './detail-parts'
+import { detailLinkClass, Fact, SubHeading } from '@/components/detail-parts'
+import { RenterWords } from './detail-parts'
 import type { RowText } from './use-row-text'
 
 type ClaimDetailProps = { row: ClaimRow; text: RowText; photoUrls: Readonly<Record<string, string>> }
