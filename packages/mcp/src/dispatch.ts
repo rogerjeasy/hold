@@ -9,7 +9,7 @@ import type { ToolName } from './catalogue.ts'
 import { inShopOf } from './ports.ts'
 import { checkAvailability, createBooking, findShops, getBooking, getDamagePrices, getShop, quoteRental } from './public-tools.ts'
 import type { Caller, Handled, ShopSubject } from './public-tools.ts'
-import { claimNeedsThePerson, draftClaimReply, getClaim, getConditionReport, getHold, getHoldApprovalLink, getRecord, getRental } from './rental-tools.ts'
+import { claimNeedsThePerson, draftClaimReply, getClaim, getConditionReport, getHold, getHoldApprovalLink, getRecord, getRental, requestExtension } from './rental-tools.ts'
 import type { RentalSubject } from './rental-tools.ts'
 import { readSecret } from './secrets.ts'
 
@@ -107,6 +107,8 @@ async function handle(caller: Caller, name: ToolName, input: Readonly<Record<str
         return getHold(caller, subject)
       case 'get_hold_approval_link':
         return getHoldApprovalLink(caller, subject)
+      case 'request_extension':
+        return requestExtension(caller, subject, TOOLS.request_extension.input.parse(input))
       case 'get_condition_report':
         return getConditionReport(caller, subject)
       case 'get_claim':

@@ -1241,7 +1241,7 @@
       "scorecard": "Zuverlässigkeit",
       "incidents": "Vorfälle",
       "trust": "Vertrauensstufen",
-      "selfReturn": "Rückgabe nach Ladenschluss",
+      "selfService": "Selbstbedienung für Mieter",
       "settlement": "Vergleichsvertreter",
       "queue": "Morgenliste",
       "money": "Geld",
@@ -2508,7 +2508,9 @@
       "not_ready": "Diese Miete kann hier gerade nicht zurückgegeben werden.",
       "staff_returning": "Das Personal nimmt diese Rückgabe bereits an der Theke an.",
       "photo_reused": "Dieses Foto wurde schon einmal verwendet. Machen Sie ein neues vom Artikel, wie er jetzt ist.",
-      "views_missing": "Es fehlen noch Fotos."
+      "views_missing": "Es fehlen noch Fotos.",
+      "no_quote": "Wählen Sie zuerst die neue Rückgabezeit.",
+      "quote_stale": "Die Miete hat sich seit diesem Preis geändert. Wählen Sie die neue Zeit noch einmal."
     },
     "orderDescription": "{shop}: {items}, {days, plural, one {# Tag} other {# Tage}}",
     "holdPage": {
@@ -2552,6 +2554,7 @@
       "back": "Zu Ihrer Miete"
     },
     "somethingHappened": "Etwas ist passiert",
+    "keepLonger": "Länger behalten",
     "incident": {
       "title": "Etwas ist passiert",
       "lead": "Sagen Sie dem Laden, was mit dem Gemieteten passiert ist. Ihre Meldung wird datiert, gesperrt und zur Geschichte des Artikels gelegt.",
@@ -2719,6 +2722,7 @@
         "get_rental": "Hat die Miete gelesen",
         "get_hold": "Hat die Kaution gelesen",
         "get_hold_approval_link": "Hat nach dem Link zur Freigabe der Kaution gefragt",
+        "request_extension": "Hat nach dem Preis weiterer Tage und dem Link zum Bezahlen gefragt",
         "get_condition_report": "Hat das Zustandsprotokoll gelesen",
         "get_claim": "Hat die Forderung gelesen",
         "draft_claim_reply": "Hat eine Antwort auf die Forderung entworfen",
@@ -3711,6 +3715,7 @@
     },
     "kinds": {
       "fee_captured": "Mietgebühr eingezogen",
+      "extension_captured": "Zusätzliche Tage vom Mieter bezahlt",
       "hold_placed": "Reservierung gesetzt",
       "hold_renewed": "Reservierung erneuert",
       "hold_released": "An den Mieter freigegeben",
@@ -4020,5 +4025,83 @@
         "hours_invalid": "Die Öffnung muss vor dem Schließen liegen, etwa 09:00 und 19:00."
       }
     }
+  },
+  "extension": {
+    "title": "Länger behalten",
+    "back": "Zurück zu Ihrer Miete",
+    "dueNow": "Rückgabe jetzt fällig",
+    "latest": "Ihre Reservierung deckt eine Rückgabe bis {when}, und der Laden erlaubt bis zu {days, plural, one {# weiteren Tag} other {# weitere Tage}}.",
+    "closed": {
+      "title": "Verlängern geht nur, solange Sie den Artikel haben",
+      "body": "Wenden Sie sich an {shop}, um diese Miete zu ändern."
+    },
+    "off": {
+      "title": "Dieser Laden nimmt keine Verlängerungen per Telefon an",
+      "body": "Wenden Sie sich an {shop}, um länger zu behalten."
+    },
+    "noScope": "Dieser Link zeigt die Miete, kann sie aber nicht verlängern. Verwenden Sie den Link, den der Laden mit Ihrer Buchung geschickt hat.",
+    "orderDescription": "{days, plural, one {# weiterer Tag} other {# weitere Tage}} bei {shop}",
+    "form": {
+      "quick": "Wie viel länger?",
+      "days": "{count, plural, one {+# Tag} other {+# Tage}}",
+      "newEnd": "Neue Rückgabezeit",
+      "price": "Preis ansehen"
+    },
+    "refused": {
+      "beyond_hold": "Ihre Reservierung deckt eine Rückgabe bis {when}. Für länger wenden Sie sich an den Laden.",
+      "not_free": "Jemand hat den Artikel ab {when} gebucht. Wählen Sie eine frühere Zeit oder wenden Sie sich an den Laden.",
+      "too_many_days": "Der Laden erlaubt per Telefon bis zu {days, plural, one {# weiteren Tag} other {# weitere Tage}}. Für länger wenden Sie sich an den Laden.",
+      "not_later": "Wählen Sie eine Zeit nach Ihrer jetzigen Rückgabezeit.",
+      "not_out": "Verlängern geht nur, solange Sie den Artikel haben.",
+      "off": "Dieser Laden nimmt keine Verlängerungen per Telefon an.",
+      "no_hold": "Ihre Reservierung besteht nicht, daher muss der Laden das mit Ihnen klären.",
+      "quote_stale": "Die Miete hat sich seit diesem Preis geändert. Wählen Sie die neue Zeit noch einmal."
+    },
+    "quote": {
+      "title": "Ihr Preis",
+      "days": "{count, plural, one {# weiterer Tag} other {# weitere Tage}}",
+      "newEnd": "Neue Rückgabezeit",
+      "paidNow": "Jetzt mit PayPal bezahlt.",
+      "holdUnchanged": "Jetzt mit PayPal bezahlt, getrennt. Ihre Reservierung über {hold} bleibt genau, wie sie ist.",
+      "pay": "{amount} mit PayPal bezahlen",
+      "agree": "Sie genehmigen diese Zahlung bei PayPal. Ihre Rückgabezeit ändert sich, sobald sie genehmigt ist."
+    },
+    "list": {
+      "title": "Ihre Verlängerungen",
+      "paid": "{days, plural, one {# weiterer Tag} other {# weitere Tage}}, bis {when}. {amount} bezahlt.",
+      "capturing": "{days, plural, one {# weiterer Tag} other {# weitere Tage}}, bis {when}. PayPal bucht {amount} ab.",
+      "failed": "{days, plural, one {# weiterer Tag} other {# weitere Tage}}, bis {when}: PayPal hat die Zahlung abgelehnt, Ihre Rückgabezeit bleibt."
+    },
+    "extended": {
+      "title": "Ihre Verlängerung",
+      "checking": "Ihre Zahlung wird bei PayPal geprüft…",
+      "done": "Bezahlt. Ihre neue Rückgabezeit gilt.",
+      "retry": "Erneut versuchen",
+      "back": "Ihre Verlängerungen ansehen",
+      "again": "Zeit erneut wählen"
+    },
+    "settings": {
+      "title": "Verlängerungen",
+      "lead": "Ein Mieter behält den Artikel per Telefon länger und bezahlt die zusätzlichen Tage sofort mit PayPal, ohne jemanden zu fragen. Hold lehnt weiterhin Tage ab, an denen der Artikel gebucht ist, und jedes Ende, das die Reservierung nicht deckt.",
+      "maxDays": "Die meisten zusätzlichen Tage, die ein Mieter hinzufügen darf",
+      "hint": "Von 0 bis 28. 0 schaltet Verlängerungen aus, und Mieter melden sich bei Ihnen.",
+      "save": "Speichern",
+      "saved": "Gespeichert.",
+      "off": "Verlängerungen per Telefon sind aus.",
+      "readOnly": "Mieter dürfen per Telefon bis zu {days, plural, one {# Tag} other {# Tage}} hinzufügen. Nur der Inhaber ändert das."
+    },
+    "staff": {
+      "title": "Verlängerungen",
+      "line": "{days, plural, one {+# Tag} other {+# Tage}}, bis {when}",
+      "paid": "{amount} bezahlt",
+      "capturing": "PayPal bucht {amount} ab",
+      "failed": "PayPal hat {amount} abgelehnt, das Ende blieb",
+      "byLink": "vom Mieter über seinen Link",
+      "byAssistant": "vom eigenen Assistenten des Mieters"
+    }
+  },
+  "selfService": {
+    "title": "Selbstbedienung für Mieter",
+    "lead": "Was Mieter über ihr eigenes Telefon tun können, ohne jemanden im Laden zu fragen. Hold prüft jeden Fall mit festen Regeln, und jede Abbuchung gibt weiterhin eine Person frei."
   }
 }

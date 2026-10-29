@@ -241,7 +241,7 @@ async function month(transaction: Transaction, window: TodayWindow) {
     .from(claims)
     .where(and(gte(claims.createdAt, window.day.monthStart), lt(claims.createdAt, window.now), notInArray(claims.state, ['draft', 'waived'])))
   return {
-    feesCents: await sumOf(['fee_captured']),
+    feesCents: await sumOf(['fee_captured', 'extension_captured']),
     releasedCents: await sumOf(['hold_released']),
     claimedCents: claimed?.cents ?? 0,
     recoveredCents: await sumOf(['hold_captured', 'invoice_paid']),

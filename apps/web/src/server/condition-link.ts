@@ -9,7 +9,7 @@ import { getServices } from './services'
 
 // What a link to the condition report may do: see the rental, confirm or add to what staff photographed, and report
 // something that happens while the renter has it (extensions.md section 10).
-export const CONDITION_LINK_SCOPES = ['view', 'confirm_condition', 'report_incident', 'return_item']
+export const CONDITION_LINK_SCOPES = ['view', 'confirm_condition', 'extend', 'report_incident', 'return_item']
 
 // Once the rental is handed over, the renter is sent the condition report, and staff can show it as a code at the
 // counter (architecture.md section 11.2).

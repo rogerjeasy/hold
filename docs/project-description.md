@@ -121,7 +121,7 @@ Equipment and event rental is a large, established industry. The American Rental
 
 **Handover.** At the shop, Jonas opens the rental on his phone and shows Priya a QR code. She approves the 300 euro hold on her own phone in a few seconds. Hold walks him through six photographs: both sides of the frame, front wheel, rear wheel, display and battery. It tells him when a shot is blurred or too dark and asks for it again. The whole thing takes forty seconds. Hold notes two marks that were already on the bike from earlier rentals. Priya receives the condition report on her phone and confirms it.
 
-**During the rental.** Priya decides to keep the bike one more day. She extends from her phone. The extra day is paid and the hold continues.
+**During the rental.** Priya decides to keep the bike one more day. She opens her rental page, taps one more day and sees the price at the day rate she agreed: 40 euros, paid on its own in PayPal, with her 300 euro hold left exactly as it is. She approves it in PayPal and her return time moves at once, with nobody at the shop to ask. Had the bike been booked by someone else that day, or had the hold not covered the new return, she would have been told so, with the date, before paying anything.
 
 **A clean return.** Suppose Priya returns the bike undamaged. Jonas takes the same six photographs. Hold compares each with its handover twin and finds no new marks. Jonas confirms, and the hold is released. Priya's phone tells her: "Your bike is back safely. The 300 euro hold has been released. Nothing was charged." She is out of the shop in under a minute.
 

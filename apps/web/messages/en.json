@@ -1241,7 +1241,7 @@
       "scorecard": "Reliability",
       "incidents": "Incidents",
       "trust": "Trust ladder",
-      "selfReturn": "Returns after hours",
+      "selfService": "Renter self-service",
       "settlement": "Settlement advocate",
       "queue": "Morning queue",
       "money": "Money",
@@ -2508,7 +2508,9 @@
       "not_ready": "This rental cannot be returned here now.",
       "staff_returning": "Staff are already taking this return at the counter.",
       "photo_reused": "This photograph was used before. Take a new one of the item as it is now.",
-      "views_missing": "Some photographs are still to take."
+      "views_missing": "Some photographs are still to take.",
+      "no_quote": "Choose the new return time first.",
+      "quote_stale": "The rental changed since this price was given. Choose the new time again."
     },
     "orderDescription": "{shop}: {items}, {days, plural, one {# day} other {# days}}",
     "holdPage": {
@@ -2552,6 +2554,7 @@
       "back": "See your rental"
     },
     "somethingHappened": "Something happened",
+    "keepLonger": "Keep it longer",
     "incident": {
       "title": "Something happened",
       "lead": "Tell the shop what happened to what you rented. Your report is dated, locked and kept with the item’s history.",
@@ -2719,6 +2722,7 @@
         "get_rental": "Read the rental",
         "get_hold": "Read the hold",
         "get_hold_approval_link": "Asked for the link to approve the hold",
+        "request_extension": "Asked the price of more days, and the link to pay for them",
         "get_condition_report": "Read the condition report",
         "get_claim": "Read the claim",
         "draft_claim_reply": "Drafted a reply to the claim",
@@ -3711,6 +3715,7 @@
     },
     "kinds": {
       "fee_captured": "Rental fee taken",
+      "extension_captured": "Extra days paid by the renter",
       "hold_placed": "Hold placed",
       "hold_renewed": "Hold renewed",
       "hold_released": "Released to the renter",
@@ -4020,5 +4025,83 @@
         "hours_invalid": "Opening must come before closing, as 09:00 and 19:00."
       }
     }
+  },
+  "extension": {
+    "title": "Keep it longer",
+    "back": "Back to your rental",
+    "dueNow": "Due back now",
+    "latest": "Your hold covers a return up to {when}, and the shop allows up to {days, plural, one {# more day} other {# more days}}.",
+    "closed": {
+      "title": "Extensions are for a rental you have with you",
+      "body": "Contact {shop} about changing this rental."
+    },
+    "off": {
+      "title": "This shop does not take extensions from the phone",
+      "body": "Contact {shop} to keep it longer."
+    },
+    "noScope": "This link shows the rental but cannot extend it. Use the link the shop sent with your booking.",
+    "orderDescription": "{days, plural, one {# more day} other {# more days}} at {shop}",
+    "form": {
+      "quick": "How much longer?",
+      "days": "{count, plural, one {+# day} other {+# days}}",
+      "newEnd": "New return time",
+      "price": "See the price"
+    },
+    "refused": {
+      "beyond_hold": "Your hold covers a return up to {when}. To keep it longer than that, contact the shop.",
+      "not_free": "Someone has booked it from {when}. Choose an earlier time, or contact the shop.",
+      "too_many_days": "The shop allows up to {days, plural, one {# more day} other {# more days}} from the phone. For longer, contact the shop.",
+      "not_later": "Choose a time after your current return time.",
+      "not_out": "Extensions are for a rental you have with you.",
+      "off": "This shop does not take extensions from the phone.",
+      "no_hold": "Your hold is not in place, so the shop needs to arrange this with you.",
+      "quote_stale": "The rental changed since this price was given. Choose the new time again."
+    },
+    "quote": {
+      "title": "Your price",
+      "days": "{count, plural, one {# more day} other {# more days}}",
+      "newEnd": "New return time",
+      "paidNow": "Paid now with PayPal.",
+      "holdUnchanged": "Paid now with PayPal, on its own. Your {hold} hold stays exactly as it is.",
+      "pay": "Pay {amount} with PayPal",
+      "agree": "You approve this payment in PayPal. Your return time changes as soon as it is approved."
+    },
+    "list": {
+      "title": "Your extensions",
+      "paid": "{days, plural, one {# more day} other {# more days}}, to {when}. {amount} paid.",
+      "capturing": "{days, plural, one {# more day} other {# more days}}, to {when}. {amount} being taken by PayPal.",
+      "failed": "{days, plural, one {# more day} other {# more days}}, to {when}: PayPal refused the payment, so your return time did not change."
+    },
+    "extended": {
+      "title": "Your extension",
+      "checking": "Checking your payment with PayPal…",
+      "done": "Paid. Your new return time is set.",
+      "retry": "Try again",
+      "back": "See your extensions",
+      "again": "Choose the time again"
+    },
+    "settings": {
+      "title": "Extensions",
+      "lead": "A renter keeps the item longer from their phone and pays the extra days in PayPal at once, with nobody to ask. Hold still refuses days the item is booked, and any end the hold cannot cover.",
+      "maxDays": "The most extra days a renter may add",
+      "hint": "From 0 to 28. 0 turns extensions off, and renters contact you instead.",
+      "save": "Save",
+      "saved": "Saved.",
+      "off": "Extensions from the phone are off.",
+      "readOnly": "Renters may add up to {days, plural, one {# day} other {# days}} from their phone. Only the owner changes this."
+    },
+    "staff": {
+      "title": "Extensions",
+      "line": "{days, plural, one {+# day} other {+# days}}, to {when}",
+      "paid": "{amount} paid",
+      "capturing": "{amount} being taken by PayPal",
+      "failed": "PayPal refused {amount}, so the end did not change",
+      "byLink": "by the renter on their link",
+      "byAssistant": "by the renter's own assistant"
+    }
+  },
+  "selfService": {
+    "title": "Renter self-service",
+    "lead": "What renters may do from their own phone with nobody at the shop to ask. Hold checks every case in plain code, and a person still approves every charge."
   }
 }

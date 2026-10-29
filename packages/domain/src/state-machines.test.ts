@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { CLAIM_STATES, CLAIM_TRANSITIONS } from './claim.ts'
+import { EXTENSION_STATES, EXTENSION_TRANSITIONS } from './extension.ts'
 import { HOLD_STATES, HOLD_TRANSITIONS } from './hold.ts'
 import { INCIDENT_STATES, INCIDENT_TRANSITIONS } from './incident.ts'
 import { mayCapture, mayCloseRental, mayHandOver } from './lifecycle-links.ts'
@@ -13,6 +14,7 @@ const MACHINES = [
   { name: 'hold', states: HOLD_STATES, transitions: HOLD_TRANSITIONS as Transitions<string>, start: 'requested', finals: ['released', 'captured', 'invoiced', 'expired', 'declined'] },
   { name: 'claim', states: CLAIM_STATES, transitions: CLAIM_TRANSITIONS as Transitions<string>, start: 'draft', finals: ['closed'] },
   { name: 'incident', states: INCIDENT_STATES, transitions: INCIDENT_TRANSITIONS as Transitions<string>, start: 'reported', finals: ['resolved', 'withdrawn'] },
+  { name: 'extension', states: EXTENSION_STATES, transitions: EXTENSION_TRANSITIONS as Transitions<string>, start: 'quoted', finals: ['paid', 'failed', 'replaced'] },
   { name: 'negotiation', states: NEGOTIATION_STATES, transitions: NEGOTIATION_TRANSITIONS as Transitions<string>, start: 'open', finals: ['settled', 'escalated', 'replied'] },
 ] as const
 
@@ -86,6 +88,13 @@ describe('the rental machine', () => {
   it('lets a renter drop the item off while it is out or late, and only a person makes it returned (architecture.md section 6.13)', () => {
     expect(RENTAL_STATES.filter((state) => RENTAL_TRANSITIONS[state].includes('dropped_off')).sort()).toEqual(['out', 'overdue'])
     expect(RENTAL_TRANSITIONS.dropped_off).toEqual(['returned'])
+  })
+})
+
+describe('the extension machine', () => {
+  it('is paid only through its capture, and a newer quote replaces one not yet captured', () => {
+    expect(EXTENSION_STATES.filter((state) => EXTENSION_TRANSITIONS[state].includes('paid'))).toEqual(['capturing'])
+    expect(EXTENSION_STATES.filter((state) => EXTENSION_TRANSITIONS[state].includes('replaced')).sort()).toEqual(['ordered', 'quoted'])
   })
 })
 

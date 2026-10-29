@@ -18,9 +18,9 @@ const json = (schema: z.ZodType) => z.toJSONSchema(schema, { io: 'input' }) as J
 describe('the tools section 8.3 lists', () => {
   it('are offered, apart from those this server leaves out and says why', () => {
     expect(TOOL_NAMES.sort()).toEqual(
-      ['find_shops', 'get_shop', 'check_availability', 'get_damage_prices', 'quote_rental', 'create_booking', 'get_booking', 'get_rental', 'get_hold', 'get_hold_approval_link', 'get_condition_report', 'get_claim', 'draft_claim_reply', 'submit_claim_reply', 'get_record', 'get_negotiation', 'get_claim_lines', 'get_line_photos', 'get_price_list', 'get_known_marks', 'submit_offer'].sort(),
+      ['find_shops', 'get_shop', 'check_availability', 'get_damage_prices', 'quote_rental', 'create_booking', 'get_booking', 'get_rental', 'get_hold', 'get_hold_approval_link', 'request_extension', 'get_condition_report', 'get_claim', 'draft_claim_reply', 'submit_claim_reply', 'get_record', 'get_negotiation', 'get_claim_lines', 'get_line_photos', 'get_price_list', 'get_known_marks', 'submit_offer'].sort(),
     )
-    expect(Object.keys(NOT_OFFERED).sort()).toEqual(['report_incident', 'request_extension'])
+    expect(Object.keys(NOT_OFFERED).sort()).toEqual(['report_incident'])
   })
 
   it('gives the advocate’s tools a scope no agent token is issued with: the renter grants it for one claim', () => {

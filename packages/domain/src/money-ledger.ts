@@ -4,7 +4,8 @@ import type { HoldState } from './hold.ts'
 // money agrees with its hold, the claim a person approved, and PayPal. The money log records what PayPal did; nothing
 // here moves money or decides anything, it only reads the lines back.
 
-export const MONEY_EVENT_KINDS = ['fee_captured', 'hold_placed', 'hold_renewed', 'hold_released', 'hold_captured', 'refunded', 'invoice_sent', 'invoice_paid'] as const
+// extension_captured: extra days a renter paid for from their phone (architecture.md section 6.14), never from the hold.
+export const MONEY_EVENT_KINDS = ['fee_captured', 'hold_placed', 'hold_renewed', 'hold_released', 'hold_captured', 'refunded', 'invoice_sent', 'invoice_paid', 'extension_captured'] as const
 export type MoneyEventKind = (typeof MONEY_EVENT_KINDS)[number]
 
 // A line of one rental's money log, in the order the log holds them: when it happened, then when it was written.
@@ -19,6 +20,7 @@ const HOLDING: readonly HoldState[] = ['placed', 'renewing', 'at_risk', 'releasi
 
 const FIXED_FLOWS: Readonly<Record<Exclude<MoneyEventKind, 'hold_released'>, LineFlow>> = {
   fee_captured: 'to_shop',
+  extension_captured: 'to_shop',
   hold_captured: 'to_shop',
   invoice_paid: 'to_shop',
   refunded: 'to_renter',

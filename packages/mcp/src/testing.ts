@@ -1,6 +1,6 @@
 import { randomBytes } from 'node:crypto'
 import { addDays } from '@hold/domain'
-import { inShop, saveFeeOrder } from '@hold/db'
+import { inShop, openExtension, saveExtensionOrder, saveFeeOrder } from '@hold/db'
 import type { Database } from '@hold/db'
 import { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js'
@@ -29,6 +29,14 @@ export function testPorts(database: Database, logged: Readonly<Record<string, un
       return { ok: true, approvalUrl: `https://paypal.example/checkoutnow?token=${orderId}` }
     },
     holdApproval: () => Promise.resolve({ status: 'not_requested' }),
+    async extensionPayment(rental) {
+      const extension = await inShop(database, { role: 'hold_app', shopId: rental.shopId }, (transaction) => openExtension(transaction, rental.rentalId))
+      if (extension === undefined) return { ok: false, reason: 'no_quote' }
+      orders += 1
+      const orderId = `EXTENSION-${rental.rentalId.slice(0, 8)}-${String(orders)}`
+      await inShop(database, { role: 'hold_app', shopId: rental.shopId }, (transaction) => saveExtensionOrder(transaction, extension.id, orderId))
+      return { ok: true, approvalUrl: `https://paypal.example/checkoutnow?token=${orderId}` }
+    },
     photoLink: (key) => Promise.resolve(`https://photos.example/${key}`),
     sendNegotiation: (handOff) => { handedOff.push(handOff); return Promise.resolve() },
     qrCode: () => Promise.resolve('iVBORw0KGgo='),

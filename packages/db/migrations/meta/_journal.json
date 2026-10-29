@@ -232,6 +232,13 @@
       "when": 1793292568815,
       "tag": "0032_self_return",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1793298838601,
+      "tag": "0033_rental_extensions",
+      "breakpoints": true
     }
   ]
 }

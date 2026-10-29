@@ -25,6 +25,9 @@ export type McpPorts = {
   readonly startFeePayment: (booking: { readonly shopId: string; readonly rentalId: string; readonly renterLinkToken: string; readonly language: string }) => Promise<FeePayment>
   // The PayPal link for the hold at pickup, once staff have asked for it. The person approves it in PayPal.
   readonly holdApproval: (rental: { readonly shopId: string; readonly rentalId: string }) => Promise<HoldApproval>
+  // The PayPal order for the extension Hold just quoted, for the amount the quote stored. The person approves it in
+  // PayPal, and PayPal returns them to a link of their own (architecture.md section 6.14).
+  readonly extensionPayment: (rental: { readonly shopId: string; readonly rentalId: string }) => Promise<{ readonly ok: true; readonly approvalUrl: string } | { readonly ok: false; readonly reason: string }>
   // A short-lived link to a photograph's display copy, or nothing where photographs cannot be shown.
   readonly photoLink: (displayKey: string) => Promise<string | null>
   // Hands the shop's turn to the advocates' worker. It moves no money: the worker only runs the shop's advocate.

@@ -1,12 +1,12 @@
-import { HOLD_STATES, RENTAL_STATES } from '@hold/domain'
+import { EXTENSION_STATES, HOLD_STATES, RENTAL_STATES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
-import { boolean, integer, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
+import { boolean, check, integer, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 import type { Accessory } from '@hold/domain'
 import { appRole, shopIsolation, workerRole } from './access.ts'
 import { items, priceLists, wearPolicies } from './catalog.ts'
 import { at, cents, createdAt, currency, id, reference } from './columns.ts'
-import { allowed, AUTHORIZATION_STATES, authorizationState, BOOKING_CHANNELS, bookingChannel, CONDITION_REPLIES, conditionReply, holdState, PLACEMENT_STRATEGIES, placementStrategy, rentalState } from './enums.ts'
+import { allowed, AUTHORIZATION_STATES, authorizationState, BOOKING_CHANNELS, bookingChannel, CONDITION_REPLIES, conditionReply, extensionState, holdState, PLACEMENT_STRATEGIES, placementStrategy, rentalState } from './enums.ts'
 import { shopReference, users } from './shops.ts'
 import { trustLadders } from './trust.ts'
 
@@ -79,6 +79,32 @@ export const rentals = pgTable(
     createdAt: createdAt(),
   },
   (table) => [allowed(table.state, RENTAL_STATES), allowed(table.bookedThrough, BOOKING_CHANNELS), allowed(table.conditionReply, CONDITION_REPLIES), shopIsolation(table.shopId)],
+)
+
+// More days a renter asked for from their own phone or assistant (architecture.md section 6.14): the end it moves from
+// and to, the extra days and their fee as plain code priced them, and the PayPal order the person approves. The fee is
+// the extension's own, never taken from the hold.
+export const rentalExtensions = pgTable(
+  'rental_extensions',
+  {
+    id: id(),
+    shopId: shopReference(),
+    rentalId: reference()
+      .notNull()
+      .references(() => rentals.id),
+    fromEndsAt: at().notNull(),
+    toEndsAt: at().notNull(),
+    extraDays: integer().notNull(),
+    amountCents: cents().notNull(),
+    currency: currency().notNull(),
+    state: extensionState().notNull().default('quoted'),
+    paypalOrderId: text().unique(),
+    // Who asked: the renter on their link, or their own assistant through Hold's MCP server.
+    askedThrough: text().notNull(),
+    createdAt: createdAt(),
+    paidAt: at(),
+  },
+  (table) => [allowed(table.state, EXTENSION_STATES), check('asked_through_allowed', sql`${table.askedThrough} in ('link', 'assistant')`), check('later_end', sql`${table.toEndsAt} > ${table.fromEndsAt}`), shopIsolation(table.shopId)],
 )
 
 export const rentalItems = pgTable(

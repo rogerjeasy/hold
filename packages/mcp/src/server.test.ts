@@ -1,5 +1,5 @@
-import { addDays, money } from '@hold/domain'
-import { askForHold, auditLog, beginFeeCapture, beginHoldPlacement, confirmFeeCapture, confirmHoldPlaced, executions, inShop, moneyEvents, quotes, rentals, revokeAssistant, saveHoldOrder, savePayPalAccount, sessionByBookingSecret } from '@hold/db'
+import { addDays, money, shopTimeText } from '@hold/domain'
+import { askForHold, auditLog, beginFeeCapture, beginHoldPlacement, confirmFeeCapture, confirmHoldPlaced, executions, inShop, moneyEvents, quotes, rentalExtensionsOf, rentals, revokeAssistant, saveHoldOrder, savePayPalAccount, sessionByBookingSecret } from '@hold/db'
 import type { Scope, Transaction } from '@hold/db'
 import { createTestDatabase } from '@hold/db/testing'
 import type { TestDatabase } from '@hold/db/testing'
@@ -121,7 +121,7 @@ describe('the booking secret and the agent token (X3.2 in part, X3.5)', () => {
     const rentalId = await rentalOfSecret(secret)
     await payFee(rentalId)
     const paid = await call(client, 'get_booking', { booking_secret: secret })
-    expect(paid.data).toMatchObject({ status: 'paid', token: 'issued_now', rental_id: rentalId, scopes: ['rental', 'hold', 'condition', 'claim', 'record'] })
+    expect(paid.data).toMatchObject({ status: 'paid', token: 'issued_now', rental_id: rentalId, scopes: ['rental', 'hold', 'condition', 'claim', 'record', 'extend'] })
     expect(String(paid.data['agent_token'])).toMatch(/^hat_/)
     expect((await call(client, 'get_booking', { booking_secret: secret })).data).toMatchObject({ status: 'paid', token: 'issued_earlier', agent_token: null })
     const rental = await call(client, 'get_rental', { rental_id: rentalId, agent_token: String(paid.data['agent_token']) })
@@ -198,6 +198,28 @@ describe('money', () => {
     expect(captures).toEqual([])
     expect(await act((transaction) => transaction.select().from(moneyEvents).where(eq(moneyEvents.rentalId, rentalId)))).toEqual(before)
     expect((await call(client, 'get_hold', { rental_id: rentalId, agent_token: token })).data).toMatchObject({ state: 'placed', amount: { cents: 300_00 } })
+  })
+
+  it('prices more days for the rental the token names and returns a PayPal link the person approves, moving no money', async () => {
+    const client = await connect('203.0.113.22')
+    const { rentalId, token } = await paidBooking(client)
+    await act((transaction) => askForHold(transaction, rentalId, new Date()))
+    await act((transaction) => saveHoldOrder(transaction, rentalId, `HOLD-${rentalId}`))
+    const placement = await act((transaction) => beginHoldPlacement(transaction, rentalId, new Date()))
+    if (!placement.ok) throw new Error(placement.reason)
+    const endsAt = (await act((transaction) => transaction.select({ endsAt: rentals.endsAt }).from(rentals).where(eq(rentals.id, rentalId))))[0]?.endsAt ?? new Date()
+    // Placed as the rental began, as at a real pickup, so the hold has most of its 29 days left.
+    await act((transaction) => confirmHoldPlaced(transaction, placement.execution.id, { authorizationId: `AUTH-${rentalId}`, status: 'created', amount: money(300_00, 'EUR'), createdAt: new Date(), expiresAt: addDays(endsAt, 20) }, new Date()))
+    // The handover itself is not this test's business.
+    await act((transaction) => transaction.update(rentals).set({ state: 'out' }).where(eq(rentals.id, rentalId)))
+    const before = await act((transaction) => transaction.select().from(moneyEvents).where(eq(moneyEvents.rentalId, rentalId)))
+    const asked = await call(client, 'request_extension', { rental_id: rentalId, agent_token: token, ends_at: shopTimeText('UTC', new Date(endsAt.getTime() + 24 * 3_600_000)) })
+    expect(asked.data).toMatchObject({ rental_id: rentalId, status: 'awaiting_approval', extra_days: 1, fee: { cents: 40_00, currency: 'EUR' }, refused_because: null })
+    expect(String(asked.data['approval_url'])).toMatch(/^https:\/\/paypal\.example\//)
+    expect((await act((transaction) => rentalExtensionsOf(transaction, rentalId)))[0]).toMatchObject({ state: 'ordered', askedThrough: 'assistant' })
+    const refused = await call(client, 'request_extension', { rental_id: rentalId, agent_token: token, ends_at: shopTimeText('UTC', new Date(endsAt.getTime() + 20 * 24 * 3_600_000)) })
+    expect(refused.data).toMatchObject({ status: 'refused', refused_because: 'too_many_days', max_days: 7, approval_url: null })
+    expect(await act((transaction) => transaction.select().from(moneyEvents).where(eq(moneyEvents.rentalId, rentalId)))).toEqual(before)
   })
 
   it('reads a ready rental of another assistant-less booking as nothing it can reach', async () => {

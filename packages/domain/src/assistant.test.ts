@@ -62,6 +62,6 @@ describe('an agent token', () => {
   })
 
   it('has no scope that moves money', () => {
-    expect(AGENT_SCOPES).toEqual(['rental', 'hold', 'condition', 'claim', 'record'])
+    expect(AGENT_SCOPES).toEqual(['rental', 'hold', 'condition', 'claim', 'record', 'extend'])
   })
 })

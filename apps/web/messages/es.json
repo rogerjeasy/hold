@@ -1241,7 +1241,7 @@
       "scorecard": "Fiabilidad",
       "incidents": "Incidentes",
       "trust": "Escalera de confianza",
-      "selfReturn": "Devoluciones fuera de horario",
+      "selfService": "Autoservicio para clientes",
       "settlement": "Representante de acuerdos",
       "queue": "Cola de la mañana",
       "money": "Dinero",
@@ -2508,7 +2508,9 @@
       "not_ready": "Este alquiler no se puede devolver aquí ahora.",
       "staff_returning": "El personal ya está recibiendo esta devolución en el mostrador.",
       "photo_reused": "Esta foto ya se usó. Haz una nueva del artículo tal como está ahora.",
-      "views_missing": "Aún faltan fotos."
+      "views_missing": "Aún faltan fotos.",
+      "no_quote": "Elige primero la nueva hora de devolución.",
+      "quote_stale": "El alquiler cambió desde este precio. Elige la hora otra vez."
     },
     "orderDescription": "{shop}: {items}, {days, plural, one {# día} other {# días}}",
     "holdPage": {
@@ -2552,6 +2554,7 @@
       "back": "Ver tu alquiler"
     },
     "somethingHappened": "Ha pasado algo",
+    "keepLonger": "Quedártelo más tiempo",
     "incident": {
       "title": "Ha pasado algo",
       "lead": "Cuenta a la tienda qué le ha pasado a lo que alquilas. Tu informe queda fechado, bloqueado y en el historial del artículo.",
@@ -2719,6 +2722,7 @@
         "get_rental": "Consultó el alquiler",
         "get_hold": "Consultó la retención",
         "get_hold_approval_link": "Pidió el enlace para aprobar la retención",
+        "request_extension": "Pidió el precio de más días y el enlace para pagarlos",
         "get_condition_report": "Consultó el informe de estado",
         "get_claim": "Consultó la reclamación",
         "draft_claim_reply": "Preparó una respuesta a la reclamación",
@@ -3711,6 +3715,7 @@
     },
     "kinds": {
       "fee_captured": "Tarifa de alquiler cobrada",
+      "extension_captured": "Días extra pagados por el cliente",
       "hold_placed": "Retención puesta",
       "hold_renewed": "Retención renovada",
       "hold_released": "Liberada al cliente",
@@ -4020,5 +4025,83 @@
         "hours_invalid": "La apertura debe ser antes del cierre, por ejemplo 09:00 y 19:00."
       }
     }
+  },
+  "extension": {
+    "title": "Quedártelo más tiempo",
+    "back": "Volver a tu alquiler",
+    "dueNow": "Devolución prevista",
+    "latest": "Tu retención cubre una devolución hasta el {when}, y la tienda permite hasta {days, plural, one {# día más} other {# días más}}.",
+    "closed": {
+      "title": "Puedes ampliarlo mientras tengas el artículo",
+      "body": "Ponte en contacto con {shop} para cambiar este alquiler."
+    },
+    "off": {
+      "title": "Esta tienda no acepta ampliaciones desde el móvil",
+      "body": "Ponte en contacto con {shop} para quedártelo más tiempo."
+    },
+    "noScope": "Este enlace muestra el alquiler pero no permite ampliarlo. Usa el enlace que la tienda envió con tu reserva.",
+    "orderDescription": "{days, plural, one {# día más} other {# días más}} en {shop}",
+    "form": {
+      "quick": "¿Cuánto tiempo más?",
+      "days": "{count, plural, one {+# día} other {+# días}}",
+      "newEnd": "Nueva hora de devolución",
+      "price": "Ver el precio"
+    },
+    "refused": {
+      "beyond_hold": "Tu retención cubre una devolución hasta el {when}. Para más tiempo, contacta con la tienda.",
+      "not_free": "Alguien lo ha reservado desde el {when}. Elige una hora anterior o contacta con la tienda.",
+      "too_many_days": "La tienda permite hasta {days, plural, one {# día más} other {# días más}} desde el móvil. Para más, contacta con la tienda.",
+      "not_later": "Elige una hora posterior a tu hora de devolución actual.",
+      "not_out": "Puedes ampliarlo mientras tengas el artículo.",
+      "off": "Esta tienda no acepta ampliaciones desde el móvil.",
+      "no_hold": "Tu retención no está puesta, así que la tienda tiene que arreglarlo contigo.",
+      "quote_stale": "El alquiler cambió desde este precio. Elige la hora otra vez."
+    },
+    "quote": {
+      "title": "Tu precio",
+      "days": "{count, plural, one {# día más} other {# días más}}",
+      "newEnd": "Nueva hora de devolución",
+      "paidNow": "Pagado ahora con PayPal.",
+      "holdUnchanged": "Pagado ahora con PayPal, aparte. Tu retención de {hold} queda tal cual.",
+      "pay": "Pagar {amount} con PayPal",
+      "agree": "Apruebas este pago en PayPal. Tu hora de devolución cambia en cuanto se aprueba."
+    },
+    "list": {
+      "title": "Tus ampliaciones",
+      "paid": "{days, plural, one {# día más} other {# días más}}, hasta el {when}. {amount} pagados.",
+      "capturing": "{days, plural, one {# día más} other {# días más}}, hasta el {when}. PayPal está cobrando {amount}.",
+      "failed": "{days, plural, one {# día más} other {# días más}}, hasta el {when}: PayPal rechazó el pago, así que tu hora de devolución no cambió."
+    },
+    "extended": {
+      "title": "Tu ampliación",
+      "checking": "Comprobando tu pago con PayPal…",
+      "done": "Pagado. Tu nueva hora de devolución está fijada.",
+      "retry": "Reintentar",
+      "back": "Ver tus ampliaciones",
+      "again": "Elegir la hora otra vez"
+    },
+    "settings": {
+      "title": "Ampliaciones",
+      "lead": "Un cliente se queda el artículo más tiempo desde su móvil y paga al momento los días extra con PayPal, sin preguntar a nadie. Hold sigue rechazando los días en que el artículo está reservado y cualquier fin que la retención no cubra.",
+      "maxDays": "Los días extra que un cliente puede añadir como máximo",
+      "hint": "De 0 a 28. 0 desactiva las ampliaciones, y los clientes te contactan.",
+      "save": "Guardar",
+      "saved": "Guardado.",
+      "off": "Las ampliaciones desde el móvil están desactivadas.",
+      "readOnly": "Los clientes pueden añadir hasta {days, plural, one {# día} other {# días}} desde su móvil. Solo el propietario lo cambia."
+    },
+    "staff": {
+      "title": "Ampliaciones",
+      "line": "{days, plural, one {+# día} other {+# días}}, hasta el {when}",
+      "paid": "{amount} pagados",
+      "capturing": "PayPal está cobrando {amount}",
+      "failed": "PayPal rechazó {amount}, así que el fin no cambió",
+      "byLink": "por el cliente en su enlace",
+      "byAssistant": "por el asistente del cliente"
+    }
+  },
+  "selfService": {
+    "title": "Autoservicio para clientes",
+    "lead": "Lo que los clientes pueden hacer desde su propio móvil sin nadie a quien preguntar en la tienda. Hold comprueba cada caso con reglas fijas, y una persona sigue aprobando cada cobro."
   }
 }

@@ -7,8 +7,9 @@ import type { RentalState } from './rental.ts'
 // what a token may be used for, and how many unpaid bookings assistants may hold. Plain rules, no I/O.
 
 // What an agent token may read or prepare on its one rental. None of them moves money: the person approves every
-// payment in PayPal, and accepting or contesting a claim needs the person or a mandate.
-export const AGENT_SCOPES = ['rental', 'hold', 'condition', 'claim', 'record'] as const
+// payment in PayPal, and accepting or contesting a claim needs the person or a mandate. `extend` prices more days and
+// prepares their PayPal order; the person approves it in PayPal (architecture.md section 6.14).
+export const AGENT_SCOPES = ['rental', 'hold', 'condition', 'claim', 'record', 'extend'] as const
 export type AgentScope = (typeof AGENT_SCOPES)[number]
 
 export const ASSISTANT_LIMITS = {

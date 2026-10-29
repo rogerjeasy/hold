@@ -1241,7 +1241,7 @@
       "scorecard": "Fiabilité",
       "incidents": "Incidents",
       "trust": "Échelle de confiance",
-      "selfReturn": "Retours hors horaires",
+      "selfService": "Libre-service des locataires",
       "settlement": "Représentant de règlement",
       "queue": "File du matin",
       "money": "Argent",
@@ -2508,7 +2508,9 @@
       "not_ready": "Cette location ne peut pas être rendue ici pour le moment.",
       "staff_returning": "Le personnel prend déjà ce retour au comptoir.",
       "photo_reused": "Cette photo a déjà servi. Prenez-en une nouvelle de l’article tel qu’il est maintenant.",
-      "views_missing": "Il reste des photos à prendre."
+      "views_missing": "Il reste des photos à prendre.",
+      "no_quote": "Choisissez d’abord la nouvelle heure de retour.",
+      "quote_stale": "La location a changé depuis ce prix. Choisissez de nouveau l’heure."
     },
     "orderDescription": "{shop} : {items}, {days, plural, one {# jour} other {# jours}}",
     "holdPage": {
@@ -2552,6 +2554,7 @@
       "back": "Voir votre location"
     },
     "somethingHappened": "Il s’est passé quelque chose",
+    "keepLonger": "Le garder plus longtemps",
     "incident": {
       "title": "Il s’est passé quelque chose",
       "lead": "Dites à la boutique ce qui est arrivé à ce que vous louez. Votre signalement est daté, verrouillé et ajouté à l’historique de l’article.",
@@ -2719,6 +2722,7 @@
         "get_rental": "A consulté la location",
         "get_hold": "A consulté la caution",
         "get_hold_approval_link": "A demandé le lien pour approuver la caution",
+        "request_extension": "A demandé le prix de jours en plus, et le lien pour les payer",
         "get_condition_report": "A consulté l'état des lieux",
         "get_claim": "A consulté la réclamation",
         "draft_claim_reply": "A préparé une réponse à la réclamation",
@@ -3711,6 +3715,7 @@
     },
     "kinds": {
       "fee_captured": "Frais de location encaissés",
+      "extension_captured": "Jours supplémentaires payés par le client",
       "hold_placed": "Blocage posé",
       "hold_renewed": "Blocage renouvelé",
       "hold_released": "Libéré au client",
@@ -4020,5 +4025,83 @@
         "hours_invalid": "L’ouverture doit précéder la fermeture, par exemple 09:00 et 19:00."
       }
     }
+  },
+  "extension": {
+    "title": "Le garder plus longtemps",
+    "back": "Retour à votre location",
+    "dueNow": "Retour prévu",
+    "latest": "Votre empreinte couvre un retour jusqu’au {when}, et la boutique accepte jusqu’à {days, plural, one {# jour de plus} other {# jours de plus}}.",
+    "closed": {
+      "title": "Une prolongation est possible tant que vous avez l’article",
+      "body": "Contactez {shop} pour modifier cette location."
+    },
+    "off": {
+      "title": "Cette boutique ne prend pas de prolongations par téléphone",
+      "body": "Contactez {shop} pour le garder plus longtemps."
+    },
+    "noScope": "Ce lien montre la location mais ne permet pas de la prolonger. Utilisez le lien envoyé par la boutique avec votre réservation.",
+    "orderDescription": "{days, plural, one {# jour de plus} other {# jours de plus}} chez {shop}",
+    "form": {
+      "quick": "Combien de temps de plus ?",
+      "days": "{count, plural, one {+# jour} other {+# jours}}",
+      "newEnd": "Nouvelle heure de retour",
+      "price": "Voir le prix"
+    },
+    "refused": {
+      "beyond_hold": "Votre empreinte couvre un retour jusqu’au {when}. Au-delà, contactez la boutique.",
+      "not_free": "Quelqu’un l’a réservé à partir du {when}. Choisissez une heure plus tôt, ou contactez la boutique.",
+      "too_many_days": "La boutique accepte jusqu’à {days, plural, one {# jour de plus} other {# jours de plus}} par téléphone. Au-delà, contactez la boutique.",
+      "not_later": "Choisissez une heure après votre heure de retour actuelle.",
+      "not_out": "Une prolongation est possible tant que vous avez l’article.",
+      "off": "Cette boutique ne prend pas de prolongations par téléphone.",
+      "no_hold": "Votre empreinte n’est pas en place : la boutique doit voir cela avec vous.",
+      "quote_stale": "La location a changé depuis ce prix. Choisissez de nouveau l’heure."
+    },
+    "quote": {
+      "title": "Votre prix",
+      "days": "{count, plural, one {# jour de plus} other {# jours de plus}}",
+      "newEnd": "Nouvelle heure de retour",
+      "paidNow": "Payé maintenant avec PayPal.",
+      "holdUnchanged": "Payé maintenant avec PayPal, à part. Votre empreinte de {hold} reste telle quelle.",
+      "pay": "Payer {amount} avec PayPal",
+      "agree": "Vous approuvez ce paiement dans PayPal. Votre heure de retour change dès qu’il est approuvé."
+    },
+    "list": {
+      "title": "Vos prolongations",
+      "paid": "{days, plural, one {# jour de plus} other {# jours de plus}}, jusqu’au {when}. {amount} payés.",
+      "capturing": "{days, plural, one {# jour de plus} other {# jours de plus}}, jusqu’au {when}. PayPal encaisse {amount}.",
+      "failed": "{days, plural, one {# jour de plus} other {# jours de plus}}, jusqu’au {when} : PayPal a refusé le paiement, votre heure de retour n’a pas changé."
+    },
+    "extended": {
+      "title": "Votre prolongation",
+      "checking": "Vérification de votre paiement auprès de PayPal…",
+      "done": "Payé. Votre nouvelle heure de retour est enregistrée.",
+      "retry": "Réessayer",
+      "back": "Voir vos prolongations",
+      "again": "Choisir l’heure de nouveau"
+    },
+    "settings": {
+      "title": "Prolongations",
+      "lead": "Un locataire garde l’article plus longtemps depuis son téléphone et paie aussitôt les jours en plus avec PayPal, sans rien demander. Hold refuse toujours les jours où l’article est réservé, et toute fin que le blocage ne couvre pas.",
+      "maxDays": "Le plus de jours qu’un locataire peut ajouter",
+      "hint": "De 0 à 28. 0 désactive les prolongations, et les locataires vous contactent.",
+      "save": "Enregistrer",
+      "saved": "Enregistré.",
+      "off": "Les prolongations par téléphone sont désactivées.",
+      "readOnly": "Les locataires peuvent ajouter jusqu’à {days, plural, one {# jour} other {# jours}} depuis leur téléphone. Seul le propriétaire modifie cela."
+    },
+    "staff": {
+      "title": "Prolongations",
+      "line": "{days, plural, one {+# jour} other {+# jours}}, jusqu’au {when}",
+      "paid": "{amount} payés",
+      "capturing": "PayPal encaisse {amount}",
+      "failed": "PayPal a refusé {amount}, la fin n’a pas changé",
+      "byLink": "par le locataire, sur son lien",
+      "byAssistant": "par l’assistant du locataire"
+    }
+  },
+  "selfService": {
+    "title": "Libre-service des locataires",
+    "lead": "Ce que les locataires peuvent faire depuis leur propre téléphone, sans personne à qui demander à la boutique. Hold vérifie chaque cas par des règles fixes, et une personne approuve toujours chaque débit."
   }
 }

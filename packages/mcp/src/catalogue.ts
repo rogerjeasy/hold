@@ -184,6 +184,26 @@ export const TOOLS = {
     input: z.strictObject(rental),
     output: z.strictObject({ rental_id: z.uuid(), status: z.enum(['awaiting_approval', 'not_requested', 'placed', 'unavailable']), approval_url: z.url().nullable() }),
   }),
+  request_extension: tool({
+    tier: 'draft',
+    audience: 'rental',
+    scope: 'extend',
+    description:
+      'More days on the rental, to a new return time on the shop’s clock. Hold prices them from the day rates agreed at booking and checks the item is free and the hold still covers the return; the person approves the price in PayPal at approval_url, and the return time changes once they have. Nothing is charged by this tool, and the hold is never touched. A refusal says why and, where it can, the latest return time the hold covers, when the item is needed next, or the most extra days the shop allows.',
+    input: z.strictObject({ ...rental, ends_at: shopTime }),
+    output: z.strictObject({
+      rental_id: z.uuid(),
+      status: z.enum(['awaiting_approval', 'refused']),
+      extra_days: z.number().int().nullable(),
+      fee: amount.nullable(),
+      return_by: instant.nullable(),
+      approval_url: z.url().nullable(),
+      refused_because: z.enum(['not_out', 'not_later', 'off', 'too_many_days', 'no_hold', 'beyond_hold', 'not_free', 'unavailable']).nullable(),
+      latest_return_by: instant.nullable(),
+      needed_from: instant.nullable(),
+      max_days: z.number().int().nullable(),
+    }),
+  }),
   get_condition_report: tool({
     tier: 'read',
     audience: 'rental',
@@ -321,6 +341,5 @@ export type ToolOutput<Name extends ToolName> = z.infer<(typeof TOOLS)[Name]['ou
 
 // Tools section 8.3 lists that this server does not offer yet, and why. They are not listed to clients.
 export const NOT_OFFERED = {
-  request_extension: 'Hold has no extension flow yet: a rental’s end date and fee cannot change after booking.',
   report_incident: 'An incident report needs photographs taken on the renter’s phone through their rental link.',
 } as const

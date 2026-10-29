@@ -1,6 +1,6 @@
 import type { RenterView } from '@hold/db'
 import { money } from '@hold/domain'
-import { CircleCheck, Hourglass, TriangleAlert, XCircle } from 'lucide-react'
+import { CalendarPlus, CircleCheck, Hourglass, TriangleAlert, XCircle } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { TermsView } from '@/components/booking/terms-view'
 import { AssistantNotice } from '@/features/assistant/assistant-notice'
@@ -86,6 +86,7 @@ export function RenterScreen({
   assistant = null,
   checkout,
   selfReturn = { offered: false, shopClosed: false, droppedOffAt: null },
+  canExtend = false,
 }: {
   token: string
   view: RenterView
@@ -95,6 +96,8 @@ export function RenterScreen({
   // The shop's PayPal app, for PayPal's own button. Absent where it is not known.
   checkout?: PayPalCheckout | undefined
   selfReturn?: SelfReturnOffer
+  // The renter may keep the item longer from this link (architecture.md section 6.14).
+  canExtend?: boolean
 }) {
   const t = useTranslations('renter')
   const trust = useTranslations('trust.record')
@@ -113,6 +116,11 @@ export function RenterScreen({
         <Status token={token} view={view} />
         {selfReturn.shopClosed ? <SelfReturnCard token={token} offer={selfReturn} /> : null}
         {assistant === null ? null : <AssistantNotice token={token} assistant={assistant} />}
+        {canExtend ? (
+          <Button asChild variant="outline" className="min-h-12 justify-self-start">
+            <Link href={linkRoutes.extend(token)} referrerPolicy="no-referrer"><CalendarPlus aria-hidden="true" />{t('keepLonger')}</Link>
+          </Button>
+        ) : null}
         {canReport && ['out', 'overdue'].includes(view.state) ? (
           <Button asChild variant="outline" className="min-h-12 justify-self-start">
             <Link href={linkRoutes.incidents(token)} referrerPolicy="no-referrer"><TriangleAlert aria-hidden="true" />{t('somethingHappened')}</Link>

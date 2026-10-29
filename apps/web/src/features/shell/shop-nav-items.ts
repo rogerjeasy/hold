@@ -32,7 +32,7 @@ export const shopNavGroups: readonly ShopNavGroup[] = [
     items: [
       { key: 'prices', icon: Tag },
       { key: 'trust', icon: BadgeCheck },
-      { key: 'selfReturn', icon: MapPin },
+      { key: 'selfService', icon: MapPin },
       { key: 'settlement', icon: Handshake },
       { key: 'paypal', icon: Wallet },
       { key: 'staff', icon: Users },

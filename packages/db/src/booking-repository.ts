@@ -72,7 +72,7 @@ export type BookingResult =
   | { readonly ok: false; readonly reason: string }
 
 // A booking's link pays the fee and approves the hold, and during the rental reports what happened (extensions.md 10).
-export const BOOKING_LINK_SCOPES = ['view', 'pay', 'report_incident', 'return_item']
+export const BOOKING_LINK_SCOPES = ['view', 'pay', 'extend', 'report_incident', 'return_item']
 
 export type PricedBooking = {
   readonly currency: string

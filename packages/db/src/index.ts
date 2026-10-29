@@ -48,6 +48,8 @@ export { addMark, captureSession, conditionReport, confirmMarks, markPhotoMessag
 export type { AddMarkResult, CaptureSession, ConditionReport, RentalHandover, NewPhoto, RecordPhotoResult, ReplyResult, SealResult, SessionMark, SessionPhoto, StartResult } from './capture-repository.ts'
 export { COMPARISONS_QUEUE, rentalReturns, returnBaseline } from './return-repository.ts'
 export type { RentalReturn } from './return-repository.ts'
+export { beginExtensionCapture, confirmExtensionCapture, extensionMaxDays, failExtensionCapture, openExtension, quoteExtension, rentalExtensionsOf, saveExtensionMaxDays, saveExtensionOrder } from './extension-repository.ts'
+export type { BeginExtension, CapturedExtension, ExtensionQuote, RentalExtension } from './extension-repository.ts'
 export { confirmDropOff, dropOffNotice, dropOffsWaiting, photoRepeatsEvidence, reportDropOffMissing, saveSelfReturnSettings, selfReturnFor, selfReturnSettings, sendSelfReturn, startSelfReturn } from './self-return-repository.ts'
 export type { DropOffNotice, SelfReturnItem, SelfReturnStart, SelfReturnView, WaitingDropOff } from './self-return-repository.ts'
 export { beginComparison, comparisonReport, completeComparison } from './comparison-repository.ts'

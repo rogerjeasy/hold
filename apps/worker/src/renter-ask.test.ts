@@ -30,6 +30,6 @@ describe('asking a renter for a new hold, from the worker', () => {
     const token = asked.url.split('/r/')[1]?.replace('/pay', '') ?? ''
     const read = readRenterToken(renterLinkKey(LINK_SECRET), token)
     expect(read).toBeDefined()
-    expect(await findRenterLink(database, read?.fingerprint ?? '')).toMatchObject({ rentalId, scopes: ['view', 'pay', 'report_incident', 'return_item'] })
+    expect(await findRenterLink(database, read?.fingerprint ?? '')).toMatchObject({ rentalId, scopes: ['view', 'pay', 'extend', 'report_incident', 'return_item'] })
   })
 })

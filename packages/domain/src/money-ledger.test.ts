@@ -40,6 +40,8 @@ describe('where a rental’s money stands', () => {
     expect(rentalMoney([line('fee_captured', 45_00, 1), line('hold_placed', 250_00, 1), line('hold_released', 250_00, 3)], facts({ holdState: 'released', claimCents: null }))).toMatchObject({ toShopCents: 45_00, where: 'returned' })
     // Only the fee has moved, while the hold is still being asked for.
     expect(rentalMoney([line('fee_captured', 35_00, 1)], facts({ holdState: 'requested', claimCents: null }))).toMatchObject({ where: 'taken' })
+    // The extra days a renter paid for go to the shop, like the fee, and are never part of the hold.
+    expect(rentalMoney([line('fee_captured', 45_00, 1), line('hold_placed', 250_00, 1), line('extension_captured', 90_00, 3)], facts({ holdState: 'placed', claimCents: null }))).toMatchObject({ toShopCents: 135_00, heldNowCents: 250_00, checks: [] })
   })
 
   it('says what an invoice still waits for, until it is paid', () => {

@@ -1,4 +1,5 @@
-import { claimWorkspace, conditionReport, evidenceVersions, rentalHold, renterView, saveDraftReply } from '@hold/db'
+import { claimWorkspace, conditionReport, evidenceVersions, quoteExtension, rentalHold, renterView, saveDraftReply } from '@hold/db'
+import { atShopTime } from '@hold/domain'
 import type { ToolInput, ToolOutput } from './catalogue.ts'
 import { inShopOf } from './ports.ts'
 import type { Caller, Handled } from './public-tools.ts'
@@ -51,6 +52,35 @@ export async function getHold(caller: Caller, subject: RentalSubject): Promise<H
 export async function getHoldApprovalLink(caller: Caller, subject: RentalSubject): Promise<Handled<ToolOutput<'get_hold_approval_link'>>> {
   const approval = await caller.ports.holdApproval({ shopId: subject.shopId, rentalId: subject.rentalId })
   return ok({ rental_id: subject.rentalId, status: approval.status, approval_url: approval.status === 'awaiting_approval' ? approval.approvalUrl : null })
+}
+
+// More days for the person to approve in PayPal (architecture.md section 6.14). Hold prices them; the tool only returns
+// the price and the link. It never captures, and the hold is never touched.
+export async function requestExtension(caller: Caller, subject: RentalSubject, input: ToolInput<'request_extension'>): Promise<Handled<ToolOutput<'request_extension'>>> {
+  const none = { extra_days: null, fee: null, return_by: null, approval_url: null, latest_return_by: null, needed_from: null, max_days: null }
+  const now = caller.ports.now()
+  const view = await inShopOf(caller.ports, subject.shopId, (transaction) => renterView(transaction, subject.rentalId, now))
+  if (view === undefined) return refused('not_found')
+  const endsAt = atShopTime(view.timeZone, input.ends_at)
+  if (endsAt === undefined) return ok({ rental_id: subject.rentalId, status: 'refused', ...none, refused_because: 'not_later' })
+  const quoted = await inShopOf(caller.ports, subject.shopId, (transaction) => quoteExtension(transaction, subject.rentalId, endsAt, 'assistant', now))
+  if (!quoted.ok) {
+    const { problem } = quoted
+    if (problem.kind === 'not_found') return refused('not_found')
+    return ok({
+      rental_id: subject.rentalId,
+      status: 'refused',
+      ...none,
+      refused_because: problem.kind,
+      latest_return_by: problem.kind === 'beyond_hold' ? problem.latest.toISOString() : null,
+      needed_from: problem.kind === 'not_free' ? problem.neededFrom.toISOString() : null,
+      max_days: problem.kind === 'too_many_days' ? problem.maxDays : null,
+    })
+  }
+  const payment = await caller.ports.extensionPayment({ shopId: subject.shopId, rentalId: subject.rentalId })
+  if (!payment.ok) return ok({ rental_id: subject.rentalId, status: 'refused', ...none, refused_because: 'unavailable' })
+  const { terms } = quoted
+  return ok({ ...none, rental_id: subject.rentalId, status: 'awaiting_approval', extra_days: terms.extraDays, fee: amountOf(terms.fee.cents, terms.fee.currency), return_by: terms.endsAt.toISOString(), approval_url: payment.approvalUrl, refused_because: null })
 }
 
 export async function getConditionReport(caller: Caller, subject: RentalSubject): Promise<Handled<ToolOutput<'get_condition_report'>>> {

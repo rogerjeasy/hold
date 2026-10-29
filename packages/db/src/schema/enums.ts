@@ -1,4 +1,4 @@
-import { CAPTURE_SESSION_KINDS, CLAIM_STATES, CONDITION_REPLIES, DETECTOR_KINDS, ESCALATION_REASONS, FINDING_VERDICTS, HOLD_STATES, INCIDENT_HINTS, INCIDENT_KINDS, INCIDENT_STATES, ITEM_CATEGORIES, ITEM_STATUSES, MANDATE_KINDS, MONEY_EVENT_KINDS, MOVE_KINDS, NEGOTIATION_KINDS, NEGOTIATION_SIDES, NEGOTIATION_STATES, PASS_REASONS, PRICE_CATEGORIES, PROPOSAL_KINDS, PROPOSAL_STATES, REMINDER_KINDS, RENTAL_STATES, STAFF_ROLES, STORED_OUTCOMES, TRUST_HISTORIES } from '@hold/domain'
+import { CAPTURE_SESSION_KINDS, CLAIM_STATES, EXTENSION_STATES, CONDITION_REPLIES, DETECTOR_KINDS, ESCALATION_REASONS, FINDING_VERDICTS, HOLD_STATES, INCIDENT_HINTS, INCIDENT_KINDS, INCIDENT_STATES, ITEM_CATEGORIES, ITEM_STATUSES, MANDATE_KINDS, MONEY_EVENT_KINDS, MOVE_KINDS, NEGOTIATION_KINDS, NEGOTIATION_SIDES, NEGOTIATION_STATES, PASS_REASONS, PRICE_CATEGORIES, PROPOSAL_KINDS, PROPOSAL_STATES, REMINDER_KINDS, RENTAL_STATES, STAFF_ROLES, STORED_OUTCOMES, TRUST_HISTORIES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
 import { check, text } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
@@ -36,8 +36,9 @@ export const CLAIM_REPLY_DECISIONS = ['accept', 'contest'] as const
 export const APPROVAL_SUBJECTS = ['claim', 'release', 'refund', 'proposal'] as const
 export const APPROVAL_DECISIONS = ['approved', 'rejected', 'waived'] as const
 export const APPROVAL_METHODS = ['on_screen', 'mandate'] as const
-// authorize places a hold the renter approved; fee_capture takes the rental fee, before any hold.
-export const EXECUTION_ACTIONS = ['authorize', 'renew', 'release', 'capture', 'refund', 'invoice', 'fee_capture'] as const
+// authorize places a hold the renter approved; fee_capture takes the rental fee, before any hold; extension_capture
+// takes the extra days a renter paid for from their phone (architecture.md section 6.14).
+export const EXECUTION_ACTIONS = ['authorize', 'renew', 'release', 'capture', 'refund', 'invoice', 'fee_capture', 'extension_capture'] as const
 // Who made a booking: staff at the counter or on the phone, or the renter on the shop's page.
 // Who made a booking: staff, a renter on the shop's own page, or a renter's own assistant (extensions.md section 8).
 export const BOOKING_CHANNELS = ['staff', 'shop_page', 'assistant'] as const
@@ -53,6 +54,7 @@ export const TRIAGE_OUTCOMES = ['answered', 'refused', 'unavailable', 'invalid']
 export const CONSENT_PURPOSES = ['network_history'] as const
 
 export const rentalState = oneOf(RENTAL_STATES)
+export const extensionState = oneOf(EXTENSION_STATES)
 export const holdState = oneOf(HOLD_STATES)
 export const claimState = oneOf(CLAIM_STATES)
 export const staffRole = oneOf(STAFF_ROLES)

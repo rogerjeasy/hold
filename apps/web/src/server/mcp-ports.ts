@@ -4,6 +4,7 @@ import { findRenterLink, inShop, issueRenterLink, rentalDetail, rentalHold, rent
 import type { McpPorts } from '@hold/mcp'
 import { readLocale } from '@/features/auth/locale-input'
 import { Refusal } from './action'
+import { startExtensionPayment } from './extension'
 import { startFeePayment } from './fee-payment'
 import { startHoldApproval } from './hold-approval'
 import { sendNegotiation } from './negotiation-queue'
@@ -18,6 +19,8 @@ import { getServices } from './services'
 
 // A link the hold's PayPal order returns the person to: it can view the rental and approve the hold, nothing more.
 const HOLD_RETURN_SCOPES = ['view', 'pay']
+// A link an extension's PayPal order returns the person to: it can view the rental and confirm the days they approved.
+const EXTENSION_RETURN_SCOPES = ['view', 'extend']
 
 async function linkOf(token: string) {
   const { database } = await getServices()
@@ -65,6 +68,18 @@ export async function mcpPorts(): Promise<McpPorts> {
       const rental = await inThisShop((transaction) => rentalDetail(transaction, rentalId, new Date()))
       const started = await startHoldApproval(link, inThisShop, issued.token, readLocale(rental?.language))
       return started instanceof Refusal ? { status: 'unavailable' } : { status: 'awaiting_approval', approvalUrl: started.approvalUrl }
+    },
+    async extensionPayment({ shopId, rentalId }) {
+      const inThisShop = inLinkShop(shopId)
+      const rental = await inThisShop((transaction) => rentalDetail(transaction, rentalId, new Date()))
+      if (rental === undefined) return { ok: false, reason: 'not_found' }
+      // The order returns the person to a link of their own, which the assistant never sees.
+      const issued = await newRenterLink(rental.endsAt)
+      await inThisShop((transaction) => issueRenterLink(transaction, shopId, rentalId, issued, EXTENSION_RETURN_SCOPES))
+      const link = await linkOf(issued.token)
+      if (link === undefined) return { ok: false, reason: 'link_invalid' }
+      const started = await startExtensionPayment(link, inThisShop, issued.token, readLocale(rental.language))
+      return started instanceof Refusal ? { ok: false, reason: started.reason } : { ok: true, approvalUrl: started.approvalUrl }
     },
     photoLink: async (key) => (evidence === undefined ? null : evidence.displayLink(key)),
     // The renter's assistant moved and the shop's advocate is next: the same queue Hold's advocates run from.

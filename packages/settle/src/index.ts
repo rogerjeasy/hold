@@ -3,6 +3,7 @@ export type { Notice, Notifier, QueueMessage, RenterAsk, RequestDependencies, Sc
 export { executionMessage } from './execution-queue.ts'
 export type { ExecutionOutcome, RequestResult } from './execution-queue.ts'
 export { runExecution } from './executions.ts'
+export { requestExtensionCapture } from './extension-capture.ts'
 export { requestFeeCapture } from './fee-capture.ts'
 export { requestHoldPlacement } from './hold-placement.ts'
 export { createMemoryScheduler } from './memory-scheduler.ts'

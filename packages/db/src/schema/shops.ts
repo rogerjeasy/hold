@@ -53,11 +53,15 @@ export const shops = pgTable(
     // When the counter is staffed, the same every day on the shop's clock, as "09:00". Both or neither.
     opensAt: text(),
     closesAt: text(),
+    // The most extra days a renter may add from their phone, with nobody to ask (architecture.md section 6.14). Zero
+    // turns extensions off.
+    extensionMaxDays: integer().notNull().default(7),
     createdAt: createdAt(),
   },
   (table) => [
     check('self_return_has_drop_point', sql`not ${table.selfReturn} or ${table.dropPoint} is not null`),
     check('hours_both_or_neither', sql`(${table.opensAt} is null) = (${table.closesAt} is null)`),
+    check('extension_days_allowed', sql`${table.extensionMaxDays} between 0 and 28`),
     shopIsolation(table.id),
   ],
 )
