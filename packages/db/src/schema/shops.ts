@@ -56,12 +56,16 @@ export const shops = pgTable(
     // The most extra days a renter may add from their phone, with nobody to ask (architecture.md section 6.14). Zero
     // turns extensions off.
     extensionMaxDays: integer().notNull().default(7),
+    // How many days the shop promises renters it takes to decide a contested claim (architecture.md section 6.16).
+    // Always on: the owner chooses the days, never none.
+    decisionPromiseDays: integer().notNull().default(3),
     createdAt: createdAt(),
   },
   (table) => [
     check('self_return_has_drop_point', sql`not ${table.selfReturn} or ${table.dropPoint} is not null`),
     check('hours_both_or_neither', sql`(${table.opensAt} is null) = (${table.closesAt} is null)`),
     check('extension_days_allowed', sql`${table.extensionMaxDays} between 0 and 28`),
+    check('promise_days_allowed', sql`${table.decisionPromiseDays} between 1 and 14`),
     shopIsolation(table.id),
   ],
 )

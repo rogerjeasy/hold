@@ -42,6 +42,17 @@ describe('approval rules', () => {
     })
   })
 
+  it('leaves a contested claim to the owner alone once the shop missed its promised date', () => {
+    const missed: ApprovalAction = { kind: 'decide_contested_claim', raisedBy: 'someone', shopStaffCount: 3, promiseMissed: true }
+    expect(mayConfirm(person('owner'), missed)).toEqual(allowed)
+    expect(mayConfirm(person('manager'), missed)).toEqual({ ok: false, error: { kind: 'owner_decides_after_promise' } })
+    expect(mayConfirm(person('manager'), { ...missed, promiseMissed: false })).toEqual(allowed)
+  })
+
+  it('lets the owner decide a missed claim they raised themselves, or nobody could', () => {
+    expect(mayConfirm(person('owner'), { kind: 'decide_contested_claim', raisedBy: 'owner-1', shopStaffCount: 3, promiseMissed: true })).toEqual(allowed)
+  })
+
   it('leaves refunds to the owner or a manager', () => {
     expect(mayConfirm(person('manager'), { kind: 'refund_part_of_charge' })).toEqual(allowed)
     expect(mayConfirm(person('counter_staff'), { kind: 'refund_part_of_charge' })).toMatchObject({ ok: false })

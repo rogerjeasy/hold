@@ -1,5 +1,5 @@
 'use client'
-import type { ClaimWorkspace, ShopNegotiation } from '@hold/db'
+import type { ClaimMessage, ClaimPromise, ClaimWorkspace, ShopNegotiation } from '@hold/db'
 import { formatMoney, money } from '@hold/domain'
 import { useLocale, useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
@@ -17,6 +17,8 @@ import { TranscriptView } from '@/features/negotiation/transcript-view'
 import { ClaimDraftForm } from './claim-draft-form'
 import { ContestSummaryPanel } from '@/features/contest/contest-summary-panel'
 import type { ContestView } from '@/features/contest/contest-summary-panel'
+import { ClaimConversation } from '@/features/promise/claim-conversation'
+import { PromiseStatus } from '@/features/promise/promise-status'
 
 // Whether this session must still be proven by a passkey before a money decision, and how to offer it.
 type PasskeyState = { readonly needed: boolean; readonly hasPasskey: boolean; readonly email: string }
@@ -24,10 +26,11 @@ type PasskeyState = { readonly needed: boolean; readonly hasPasskey: boolean; re
 // A line's box is drawn only on the photograph it was found or drawn on: the return photograph for a finding (the
 // comparison's frame), the renter's own for a reported mark. The handover photograph may be turned against it.
 // contest: the neutral summary of the renter's contest, shown above the decision (architecture.md section 6.15).
-export function ClaimScreen({ shopName, timeZone = 'UTC', data, canAct, canDecide = false, photoUrls = {}, passkey, negotiation, contest }: { shopName: string; timeZone?: string; data: ClaimWorkspace; canAct: boolean; canDecide?: boolean; photoUrls?: Readonly<Record<string, string>>; passkey?: PasskeyState; negotiation?: ShopNegotiation; contest?: ContestView | undefined }) {
+export function ClaimScreen({ shopName, timeZone = 'UTC', data, canAct, canDecide = false, photoUrls = {}, passkey, negotiation, contest, promise = null, messages, renterName = null, isOwner = false, now }: { shopName: string; timeZone?: string; data: ClaimWorkspace; canAct: boolean; canDecide?: boolean; photoUrls?: Readonly<Record<string, string>>; passkey?: PasskeyState; negotiation?: ShopNegotiation; contest?: ContestView; promise?: ClaimPromise | null; messages?: readonly ClaimMessage[]; renterName?: string | null; isOwner?: boolean; now?: Date | undefined }) {
   const t = useTranslations('claim'); const locale = useLocale()
   const records = useTranslations('records')
   const advocates = useTranslations('negotiation')
+  const promiseText = useTranslations('promise.shop')
   const amount = (cents: number) => formatMoney(money(cents, data.currency), locale)
   const pending = ['releasing', 'renewing', 'capturing'].includes(data.holdState) || data.claim?.state === 'charging' || (data.execution !== null && ['pending', 'submitted'].includes(data.execution.state))
   useLookAgain(pending, { forMs: 180000 })
@@ -35,9 +38,12 @@ export function ClaimScreen({ shopName, timeZone = 'UTC', data, canAct, canDecid
   // The forms that decide money sit behind one prompt, however many of them apply.
   const decision = (forms: ReactNode) => passkey?.needed === true ? <PasskeyGate {...passkey} returnTo={rentalRoutes.claim(data.rentalId)} body={t('passkeyBody')}>{forms}</PasskeyGate> : forms
   const claim = data.claim
+  // Once the shop missed the date it promised the renter, only the owner decides, and the renter reads the reason.
+  const promiseMissed = promise?.standing === 'missed'
+  const ownerOnly = promiseMissed && !isOwner
   const claimForms = claim === null || !canAct ? [] : [
     ['awaiting_approval', 'approved', 'presented'].includes(claim.state) ? <ApproveClaimForm key="approve" claimId={claim.id} /> : null,
-    ['awaiting_approval', 'contested', 'escalated'].includes(claim.state) || (['charging', 'charged', 'charge_failed'].includes(claim.state) && data.protectedReply && data.replies.some((reply) => reply.decision === 'contest')) ? <DecideClaimForm key="decide" claim={claim} /> : null,
+    !ownerOnly && (['awaiting_approval', 'contested', 'escalated'].includes(claim.state) || (['charging', 'charged', 'charge_failed'].includes(claim.state) && data.protectedReply && data.replies.some((reply) => reply.decision === 'contest'))) ? <DecideClaimForm key="decide" claim={claim} reasonShownToRenter={promiseMissed} /> : null,
     negotiation?.awaitingShop === true ? <ShopConfirmForm key="confirm" negotiationId={negotiation.transcript.id} agreed={amount(negotiation.transcript.agreedCents ?? 0)} /> : null,
   ].filter((form) => form !== null)
   return <ShopFrame shopName={shopName} title={t('title')}><div className="grid gap-6">
@@ -45,6 +51,7 @@ export function ClaimScreen({ shopName, timeZone = 'UTC', data, canAct, canDecid
     <Link href={rentalRoutes.record(data.rentalId)} className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{records('title')}</Link>
     {data.simulated ? <Notice title={t('sampleTitle')} body={t('sampleBody')} /> : null}
     <Notice title={t('humanDecision')} body={t('boundary')} />
+    {promise === null ? null : <PromiseStatus promise={promise} audience="shop" claimState={data.claim?.state ?? 'contested'} shopName={shopName} timeZone={timeZone} now={now ?? new Date()} />}
     {data.rentalState === 'closed' ? <Notice title={t('settled')} body={t('settledBody')} /> : null}
     {pending ? <p role="status">{t('pending')}</p> : null}
     {data.execution?.state === 'failed' ? <Notice title={t('failed')} body={t('failedBody')} /> : null}
@@ -55,8 +62,10 @@ export function ClaimScreen({ shopName, timeZone = 'UTC', data, canAct, canDecid
         {data.decisions.map((decision, index) => <p key={index}>{t('decisionBy', { name: decision.name ?? t('staff') })}</p>)}
         {data.replies.map((reply, index) => <blockquote key={index} className="min-w-0 whitespace-pre-wrap border-l-2 pl-3 wrap-long-words">{reply.comment}</blockquote>)}
         {negotiation?.transcript.state === 'agreed' && negotiation.transcript.shopConfirmedAt !== null ? <p role="status">{advocates('confirm.waiting')}</p> : null}
+        {ownerOnly && canAct ? <p>{promiseText('ownerOnly')}</p> : null}
         {claimForms.length === 0 ? null : decision(<div className="grid gap-4">{claimForms}</div>)}
       </div></Panel>
+      {messages === undefined ? null : <ClaimConversation audience="shop" rentalId={data.rentalId} messages={messages} shopName={shopName} renterName={renterName} timeZone={timeZone} canWrite={canAct && data.claim.state !== 'closed'} />}
       {negotiation === undefined ? null : <TranscriptView transcript={negotiation.transcript} />}
     </>}
   </div></ShopFrame>

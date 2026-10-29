@@ -74,6 +74,11 @@ describe('the claim machine', () => {
     }
   })
 
+  it('sends a contested claim the shop did not decide by its promised date to the owner, and never back', () => {
+    expect(CLAIM_TRANSITIONS.contested).toContain('escalated')
+    expect(reachableFrom(CLAIM_TRANSITIONS, 'escalated').has('negotiating')).toBe(false)
+  })
+
   it('never lets an escalated claim return to contested', () => {
     expect(reachableFrom(CLAIM_TRANSITIONS, 'escalated').has('contested')).toBe(false)
   })

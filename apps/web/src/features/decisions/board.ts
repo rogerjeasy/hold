@@ -1,5 +1,5 @@
 import type { DecisionClaim, DecisionClaimLine, DecisionRecords, ExtensionAttention, ExtensionPaymentToCheck, QueueEntry, ShopIncident, WaitingDropOff } from '@hold/db'
-import { DETECTOR_KINDS, holdDay, holdStanding, mayConfirm, money, proposalMovesMoney, settle } from '@hold/domain'
+import { DETECTOR_KINDS, holdDay, holdStanding, mayConfirm, money, promiseStanding, proposalMovesMoney, settle } from '@hold/domain'
 import type { ApprovalAction, DetectorKind, ProposalKind, StaffRole } from '@hold/domain'
 import type { ContestView } from '@/features/contest/contest-summary-panel'
 
@@ -15,7 +15,8 @@ export type BoardGroup = (typeof BOARD_GROUPS)[number]
 
 // Who decides, as the viewer reads it: they do; an owner or manager does; another owner or manager does, because the
 // viewer raised the claim; or the shop's staff do, for a viewer who may only read.
-export type Decider = 'you' | 'senior' | 'another_senior' | 'staff'
+// Once the shop missed the date it promised the renter, the owner alone decides (architecture.md section 6.16).
+export type Decider = 'you' | 'senior' | 'another_senior' | 'owner' | 'staff'
 
 export type ProposalMark = 'raisedByAgent' | 'notInvestigated' | 'paypalNotChecked' | 'draftDropped'
 
@@ -44,6 +45,8 @@ export type ClaimRow = Common & {
   readonly settlement: { readonly captureCents: number; readonly releaseCents: number; readonly invoiceCents: number } | null
   // The neutral summary of what the renter contests, with the facts code found (architecture.md section 6.15).
   readonly contest: ContestView | null
+  // Where the shop's promise to decide stands, once the renter contested.
+  readonly promise: 'open' | 'missed' | null
 }
 
 export type ProposalRow = Common & {
@@ -109,13 +112,14 @@ const HOLD_PROPOSALS: readonly ProposalKind[] = ['release_hold', 'request_replac
 
 const isDetector = (kind: string | undefined): kind is DetectorKind => DETECTOR_KINDS.some((each) => each === kind)
 
-function claimDecider(viewer: Viewer, claim: DecisionClaim, staffCount: number): Decider {
+function claimDecider(viewer: Viewer, claim: DecisionClaim, staffCount: number, promiseMissed: boolean): Decider {
   if (viewer.role === 'read_only') return 'staff'
   const action: ApprovalAction = claim.state === 'awaiting_approval'
     ? { kind: 'approve_claim', total: money(claim.totalCents, claim.currency) }
-    : { kind: 'decide_contested_claim', raisedBy: claim.raisedByUserId ?? '', shopStaffCount: staffCount }
+    : { kind: 'decide_contested_claim', raisedBy: claim.raisedByUserId ?? '', shopStaffCount: staffCount, promiseMissed }
   const allowed = mayConfirm({ staffId: viewer.userId, role: viewer.role, approvalLimit: money(viewer.approvalLimitCents, claim.currency) }, action)
   if (allowed.ok) return 'you'
+  if (allowed.error.kind === 'owner_decides_after_promise') return 'owner'
   return allowed.error.kind === 'raised_the_claim' ? 'another_senior' : 'senior'
 }
 
@@ -127,6 +131,10 @@ const overdue = (due: Date | null, now: Date) => due !== null && due < now
 
 function claimRow(claim: DecisionClaim, viewer: Viewer, staffCount: number, now: Date, contest: ContestView | undefined): ClaimRow {
   const split = claim.reservedCents === null ? null : settle(money(claim.totalCents, claim.currency), money(claim.reservedCents, claim.currency))
+  const standing = promiseStanding({ decideBy: claim.decideBy, decidedAt: null, promiseMissedAt: claim.promiseMissedAt }, now)
+  const promise = standing === 'open' || standing === 'missed' ? standing : null
+  // The promise is the date the shop owes the renter; without one, the hold's end is the date that matters.
+  const due = claim.decideBy ?? claim.holdValidUntil
   return {
     id: `claim:${claim.claimId}`,
     kind: claim.state === 'awaiting_approval' ? 'claim' : claim.state,
@@ -134,17 +142,18 @@ function claimRow(claim: DecisionClaim, viewer: Viewer, staffCount: number, now:
     claimId: claim.claimId,
     rentalId: claim.rentalId,
     renterName: claim.renterName,
-    due: claim.holdValidUntil,
-    overdue: overdue(claim.holdValidUntil, now),
+    due,
+    overdue: overdue(due, now),
     waitingSince: claim.createdAt,
     amountCents: claim.totalCents,
     simulated: claim.simulated,
-    decider: claimDecider(viewer, claim, staffCount),
+    decider: claimDecider(viewer, claim, staffCount, promise === 'missed'),
     selectable: false,
     lines: claim.lines,
     renterComment: claim.renterComment,
     settlement: split === null ? null : { captureCents: split.capture.cents, releaseCents: split.release.cents, invoiceCents: split.invoice.cents },
     contest: contest ?? null,
+    promise,
   }
 }
 

@@ -18,5 +18,9 @@ export function useShopFormat({ timeZone, currency }: ShopClock) {
     day: (at: Date) => format.dateTime(at, { day: 'numeric', month: 'short', timeZone }),
     date: (at: Date) => format.dateTime(at, { weekday: 'long', day: 'numeric', month: 'long', timeZone }),
     month: (at: Date) => format.dateTime(at, { month: 'long', timeZone }),
+    // A date someone is held to, such as "Tue 3 Nov, 18:00".
+    deadline: (at: Date) => format.dateTime(at, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone }),
+    // How far off it is, such as "in 2 days".
+    fromNow: (at: Date, now: Date) => format.relativeTime(at, now),
   }
 }

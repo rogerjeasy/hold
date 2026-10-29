@@ -17,13 +17,14 @@ export type ApprovalAction =
   | { readonly kind: 'release_after_clean_return' }
   | { readonly kind: 'approve_claim'; readonly total: Money }
   | { readonly kind: 'reduce_or_waive_claim'; readonly raisedBy: string }
-  | { readonly kind: 'decide_contested_claim'; readonly raisedBy: string; readonly shopStaffCount: number }
+  | { readonly kind: 'decide_contested_claim'; readonly raisedBy: string; readonly shopStaffCount: number; readonly promiseMissed?: boolean }
   | { readonly kind: 'refund_part_of_charge' }
 
 export type ApprovalRefused =
   | { readonly kind: 'role_may_not_confirm'; readonly role: StaffRole }
   | { readonly kind: 'over_approval_limit'; readonly limit: Money }
   | { readonly kind: 'raised_the_claim' }
+  | { readonly kind: 'owner_decides_after_promise' }
 
 // architecture.md section 7.3.
 export function mayConfirm(approver: Approver, action: ApprovalAction): Result<void, ApprovalRefused> {
@@ -41,6 +42,9 @@ export function mayConfirm(approver: Approver, action: ApprovalAction): Result<v
       return senior || action.raisedBy === approver.staffId ? ok(undefined) : fail({ kind: 'role_may_not_confirm', role })
     case 'decide_contested_claim':
       if (!senior) return fail({ kind: 'role_may_not_confirm', role })
+      // The shop missed the date it promised the renter: the owner answers for it (section 6.16), even for a claim
+      // they raised, since nobody else may, and the renter reads their reason.
+      if (action.promiseMissed === true) return role === 'owner' ? ok(undefined) : fail({ kind: 'owner_decides_after_promise' })
       // A shop of one has nobody else to decide.
       if (action.raisedBy === approver.staffId && action.shopStaffCount > 1) return fail({ kind: 'raised_the_claim' })
       return ok(undefined)

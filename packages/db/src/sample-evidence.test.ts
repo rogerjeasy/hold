@@ -2,6 +2,7 @@ import { money } from '@hold/domain'
 import { eq } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { registerOwner } from './accounts.ts'
+import { claimMessages, promiseFor } from './claim-promise-repository.ts'
 import { claimWorkspace } from './claim-query.ts'
 import { comparisonReport } from './comparison-repository.ts'
 import { publishPriceList } from './price-list-repository.ts'
@@ -84,5 +85,14 @@ describe('the sample contested claim', () => {
     const workspace = await inShop(database, shop, (transaction) => claimWorkspace(transaction, rentalId))
     expect(workspace?.lines.map((line) => line.description)).toEqual(['Lost lock'])
     expect(workspace?.replies.map((reply) => reply.comment)).toEqual(['The lock was in the bag when I handed it back.'])
+  })
+
+  it('carries the shop’s promise to decide it, still open, and the words renter and shop wrote since', async () => {
+    const rentalId = await rentalOf('Tom Becker')
+    const promise = await inShop(database, shop, (transaction) => promiseFor(transaction, rentalId, NOW))
+    expect(promise).toMatchObject({ days: 3, standing: 'open' })
+    expect(promise?.decideBy?.getTime()).toBeGreaterThan(NOW.getTime())
+    const messages = await inShop(database, shop, (transaction) => claimMessages(transaction, rentalId))
+    expect(messages.map((message) => message.author)).toEqual(['renter', 'shop'])
   })
 })

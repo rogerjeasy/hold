@@ -49,6 +49,16 @@ describe('the detectors, which decide what needs attention', () => {
     expect(kinds({ ...snapshot, claims: [{ id: 'c1', rentalId: 'r1', state: 'presented', totalCents: 3500, currency: 'CHF', replyDueAt: hours(30) }] })).toEqual([])
   })
 
+  it('raise a contested claim in the last day before the shop promised to decide it, and one whose date passed', () => {
+    const contested = (promise: { decideBy: Date; decidedAt: Date | null; promiseMissedAt: Date | null }, state = 'contested') => ({ ...empty, rentals: [rental('r1', 'settling')], holds: [hold('r1')], claims: [{ id: 'c1', rentalId: 'r1', state, totalCents: 14000, currency: 'CHF', replyDueAt: hours(-24), promise }] })
+    const open = { decideBy: hours(20), decidedAt: null, promiseMissedAt: null }
+    expect(detectExceptions(contested(open))).toEqual([expect.objectContaining({ kind: 'decision_promise_due', subjectKind: 'claim', deadline: hours(20), moneyCents: 14000, allowed: ['send_message', 'note'] })])
+    expect(kinds(contested({ ...open, decideBy: hours(30) }))).toEqual([])
+    expect(kinds(contested({ ...open, decidedAt: hours(-1) }))).toEqual([])
+    expect(detectExceptions(contested({ decideBy: hours(-2), decidedAt: null, promiseMissedAt: hours(-2) }, 'escalated'))).toEqual([expect.objectContaining({ kind: 'decision_promise_missed', allowed: ['note'] })])
+    expect(kinds(contested({ decideBy: hours(-2), decidedAt: hours(-1), promiseMissedAt: hours(-2) }, 'decided'))).toEqual([])
+  })
+
   it('see a decided claim larger than the hold with no invoice yet', () => {
     const snapshot = { ...empty, rentals: [rental('r1', 'settling')], holds: [hold('r1', { state: 'captured' })], claims: [{ id: 'c1', rentalId: 'r1', state: 'charged', totalCents: 45000, currency: 'CHF', replyDueAt: null }] }
     expect(detectExceptions(snapshot)).toEqual([expect.objectContaining({ kind: 'balance_above_hold', subjectKind: 'claim', allowed: ['send_invoice'], moneyCents: 15000 })])
@@ -91,7 +101,7 @@ describe('the detectors, which decide what needs attention', () => {
   })
 
   it('knows every kind it can raise', () => {
-    expect(DETECTOR_KINDS).toHaveLength(11)
+    expect(DETECTOR_KINDS).toHaveLength(13)
   })
 })
 

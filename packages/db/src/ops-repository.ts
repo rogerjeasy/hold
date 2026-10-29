@@ -21,7 +21,7 @@ export async function shopSnapshot(transaction: Transaction, now: Date, fromPayP
     .from(holds).leftJoin(authorizations, eq(authorizations.id, holds.currentAuthorizationId))
   const comparisonRows = await transaction.select({ rentalId: rentalItems.rentalId, state: comparisons.state, completedAt: comparisons.completedAt, simulated: comparisons.simulated })
     .from(comparisons).innerJoin(captureSessions, eq(captureSessions.id, comparisons.returnSessionId)).innerJoin(rentalItems, eq(rentalItems.id, captureSessions.rentalItemId))
-  const claimRows = await transaction.select({ id: claims.id, rentalId: claims.rentalId, state: claims.state, totalCents: claims.totalCents, currency: claims.currency, replyDueAt: claims.replyDueAt }).from(claims)
+  const claimRows = await transaction.select({ id: claims.id, rentalId: claims.rentalId, state: claims.state, totalCents: claims.totalCents, currency: claims.currency, replyDueAt: claims.replyDueAt, decideBy: claims.decideBy, decidedAt: claims.decidedAt, promiseMissedAt: claims.promiseMissedAt }).from(claims)
   const invoiceRows = await transaction.select({ id: invoices.id, claimId: invoices.claimId, rentalId: invoices.rentalId, state: invoices.state, amountCents: invoices.amountCents, sentAt: invoices.sentAt }).from(invoices)
   // An incident waits for staff from when it was sorted to them (extensions.md section 10).
   const incidentRows = await transaction.select({ id: incidents.id, rentalId: incidents.rentalId, waitingSince: sql<Date | null>`coalesce(${incidents.sortedAt}, ${incidents.sentAt})`.mapWith(incidents.sortedAt) })
@@ -32,7 +32,7 @@ export async function shopSnapshot(transaction: Transaction, now: Date, fromPayP
     rentals: rentalRows,
     holds: holdRows.map(({ replacementOrderId, ...hold }) => ({ ...hold, replacementStarted: replacementOrderId !== null })),
     comparisons: comparisonRows,
-    claims: claimRows,
+    claims: claimRows.map(({ decideBy, decidedAt, promiseMissedAt, ...claim }) => ({ ...claim, promise: { decideBy, decidedAt, promiseMissedAt } })),
     invoices: invoiceRows,
     incidents: incidentRows,
     ...fromPayPal,

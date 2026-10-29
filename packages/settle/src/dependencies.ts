@@ -18,6 +18,9 @@ export type Notice =
   | { readonly kind: 'hold_expired'; readonly shopId: string; readonly rentalId: string }
   // To the renter: approve a new hold before the old one ends.
   | { readonly kind: 'hold_replacement'; readonly shopId: string; readonly rentalId: string; readonly approveUrl: string; readonly holdEndsAt: Date }
+  // To the owners: the shop did not decide a contested claim by the date it promised the renter, and either the owner
+  // now decides it or the owner's rule waived it (architecture.md section 6.16).
+  | { readonly kind: 'promise_missed'; readonly shopId: string; readonly rentalId: string; readonly waived: boolean }
 
 export type Notifier = {
   // Throws when it could not be told, so the queue tries again.

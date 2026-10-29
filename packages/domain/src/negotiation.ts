@@ -32,7 +32,7 @@ export const NEGOTIATION_TRANSITIONS: Transitions<NegotiationState> = {
 }
 
 // Why a negotiation went to the owner. Recorded on the negotiation and shown to both people.
-export const ESCALATION_REASONS = ['pass', 'refused_twice', 'time_limit', 'deadline', 'mandate_ended', 'declined', 'nothing_to_charge'] as const
+export const ESCALATION_REASONS = ['pass', 'refused_twice', 'time_limit', 'deadline', 'mandate_ended', 'declined', 'nothing_to_charge', 'promise_missed'] as const
 export type EscalationReason = (typeof ESCALATION_REASONS)[number]
 
 // Why a pass was made: the advocate chose it, or it could not move (the model was unavailable or refused, or a

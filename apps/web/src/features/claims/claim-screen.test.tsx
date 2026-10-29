@@ -5,6 +5,8 @@ import { ClaimScreen } from './claim-screen'
 import type { ClaimWorkspace } from '@hold/db'
 vi.mock('./actions', () => ({ prepareClaim: vi.fn(), approveAndPresent: vi.fn(), confirmClean: vi.fn(), decide: vi.fn() }))
 vi.mock('@/features/negotiation/actions', () => ({ confirmSettlementForShop: vi.fn() }))
+vi.mock('@/features/promise/actions', () => ({ writeToRenter: vi.fn() }))
+vi.mock('@/features/promise/renter-actions', () => ({ writeToShop: vi.fn() }))
 vi.mock('@/hooks/use-look-again', () => ({ useLookAgain: () => undefined }))
 const workspace: ClaimWorkspace = { protectedReply: false, agreedIncidents: [], rentalId: 'rental', rentalState: 'inspecting', currency: 'EUR', simulated: false, reservedCents: 30000, holdState: 'placed', claim: null, prices: [{ id: 'price', description: 'Scratch', amountCents: 3500 }], possibleFindings: [], lines: [], payments: [], invoices: [], execution: null, replies: [], decisions: [], amounts: { capture: { cents: 0, currency: 'EUR' }, release: { cents: 30000, currency: 'EUR' }, invoice: { cents: 0, currency: 'EUR' } } }
 describe('claim preparation and settlement screen', () => {
@@ -132,5 +134,33 @@ describe('a line the renter agreed during the rental (X5.3)', () => {
     renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={{ ...agreed, claim: { id: 'claim', state: 'awaiting_approval', totalCents: 2000, raisedByUserId: 'staff', replyDueAt: null }, lines: [{ id: 'line', amountCents: 2000, description: 'Scratch', reason: null, actorName: 'Ana', findingId: null, findingDescription: null, incidentDescription: 'A scratch on the left side', source: 'agreed_in_rental', incidentId: 'incident', region: null, beforeKey: null, afterKey: null }] }} canAct />)
     expect(screen.getByText('Agreed by the renter during the rental, confirmed by staff at the return.')).toBeInTheDocument()
     expect(screen.getByText('A scratch on the left side')).toBeInTheDocument()
+  })
+})
+
+describe('the promise to decide a contested claim', () => {
+  const decideBy = new Date('2026-11-03T17:00:00Z')
+  const contested = (state: 'contested' | 'escalated') => ({ ...workspace, rentalState: 'settling' as const, claim: { id: 'claim', state, totalCents: 3500, raisedByUserId: 'staff', replyDueAt: null } })
+  const open = { days: 3, decideBy, decidedAt: null, missedAt: null, standing: 'open' as const, missedReason: null }
+  const messages = [{ id: 'm1', author: 'renter', authorName: null, body: 'It was there at pickup.', createdAt: new Date('2026-11-01T09:00:00Z') }]
+
+  it('shows staff the date they promised and the renter’s messages, with a box to answer', () => {
+    renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={contested('contested')} canAct canDecide promise={open} messages={messages} renterName="Lena Brandt" now={new Date('2026-11-01T10:00:00Z')} />)
+    expect(screen.getByText('You promised to decide by')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Messages with Lena Brandt' })).toBeInTheDocument()
+    expect(screen.getByText('It was there at pickup.')).toBeInTheDocument()
+    expect(screen.getByLabelText('Write to Lena Brandt')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Uphold claim and settle' })).toBeInTheDocument()
+  })
+
+  it('once the date passed, leaves the decision to the owner, who is told the renter reads the reason', () => {
+    const missed = { ...open, standing: 'missed' as const, missedAt: decideBy }
+    const { unmount } = renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={contested('escalated')} canAct canDecide promise={missed} messages={[]} renterName="Lena Brandt" isOwner={false} />)
+    expect(screen.getByText('Promise missed')).toBeInTheDocument()
+    expect(screen.getByText('The promised date passed, so only the owner can decide this claim now.')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Uphold claim and settle' })).not.toBeInTheDocument()
+    unmount()
+    renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={contested('escalated')} canAct canDecide promise={missed} messages={[]} renterName="Lena Brandt" isOwner />)
+    expect(screen.getByRole('button', { name: 'Uphold claim and settle' })).toBeInTheDocument()
+    expect(screen.getByText('The renter will read this reason on their claim page.')).toBeInTheDocument()
   })
 })

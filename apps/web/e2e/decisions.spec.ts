@@ -33,7 +33,8 @@ test('an owner works through the morning by keyboard: grouped by kind, the late 
   await openBoard(page)
   await expect(page.getByTestId('decisions-brief')).toHaveText(/^6 decisions wait, 6 of them yours\./)
   await expect(dataRows(page)).toHaveCount(6)
-  await expect(groups(page)).toHaveText([/^Holds and returns\s*2 decisions · €300\.00 in all$/, /^From the agent\s*2 decisions · €300\.00 in all$/, /^Claims\s*2 decisions · €80\.00 in all$/])
+  // The contested claim falls due at the date the shop promised the renter (architecture.md section 6.16), so claims come before the agent's proposals.
+  await expect(groups(page)).toHaveText([/^Holds and returns\s*2 decisions · €300\.00 in all$/, /^Claims\s*2 decisions · €80\.00 in all$/, /^From the agent\s*2 decisions · €300\.00 in all$/])
   await expect(dataRows(page).first()).toContainText('Lea Fischer is late')
   await expect(dataRows(page).first()).toContainText('Overdue')
 
@@ -115,7 +116,7 @@ test('the board sorts by amount within each group, filters by group and finds a 
   await startDemo(page, 'Tomás, the owner')
   await openBoard(page)
   await grid(page).getByRole('columnheader', { name: 'Amount' }).click()
-  await expect(dataRows(page)).toHaveText([/Check what Chloé Martin dropped off/, /Lea Fischer is late/, /Send this answer to PayPal/, /Ask the renter for a new hold/, /Approve a claim/, /Decide a contested claim/])
+  await expect(dataRows(page)).toHaveText([/Check what Chloé Martin dropped off/, /Lea Fischer is late/, /Approve a claim/, /Decide a contested claim/, /Send this answer to PayPal/, /Ask the renter for a new hold/])
 
   await page.getByRole('button', { name: 'Claims 2' }).click()
   await expect(dataRows(page)).toHaveCount(2)

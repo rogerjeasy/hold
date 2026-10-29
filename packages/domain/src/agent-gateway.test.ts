@@ -13,6 +13,13 @@ describe('a mandate, checked by plain code', () => {
     expect(withinMandate({ kind: 'execute_proposal', proposalKind: 'send_invoice', condition: 'clean_return_unconfirmed', doneToday: 0 }, standing, now)).toEqual({ ok: false, reason: 'not_covered' })
   })
 
+  it('keeps a rule for missed promises to its own condition, and the clean-return rule to its own', () => {
+    const waiver: Mandate = { ...standing, limits: { proposalKind: 'release_hold', condition: 'decision_promise_missed', dailyCount: 5 } }
+    expect(withinMandate({ kind: 'execute_proposal', proposalKind: 'release_hold', condition: 'decision_promise_missed', doneToday: 4 }, waiver, now)).toEqual({ ok: true })
+    expect(withinMandate({ kind: 'execute_proposal', proposalKind: 'release_hold', condition: 'clean_return_unconfirmed', doneToday: 0 }, waiver, now)).toEqual({ ok: false, reason: 'not_covered' })
+    expect(withinMandate({ kind: 'execute_proposal', proposalKind: 'release_hold', condition: 'decision_promise_missed', doneToday: 0 }, standing, now)).toEqual({ ok: false, reason: 'not_covered' })
+  })
+
   it('stops at its end date and once revoked, at the very next action', () => {
     expect(withinMandate({ kind: 'execute_proposal', proposalKind: 'release_hold', condition: 'clean_return_unconfirmed', doneToday: 0 }, { ...standing, validUntil: now }, now)).toEqual({ ok: false, reason: 'expired' })
     expect(withinMandate({ kind: 'execute_proposal', proposalKind: 'release_hold', condition: 'clean_return_unconfirmed', doneToday: 0 }, { ...standing, revokedAt: new Date('2026-10-30T06:59:00Z') }, now)).toEqual({ ok: false, reason: 'revoked' })

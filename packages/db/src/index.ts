@@ -64,6 +64,8 @@ export { settlementWork, saveSettlementResource, confirmClaimCaptured, confirmRe
 
 export { issueClaimCode, useClaimCode } from './claim-code-repository.ts'
 export { decideClaim } from './claim-decision-repository.ts'
+export { claimMessageRecipients, claimMessages, decisionPromiseDays, keepClaimPromise, promiseFor, saveDecisionPromiseDays, writeClaimMessage } from './claim-promise-repository.ts'
+export type { ClaimMessage, ClaimPromise } from './claim-promise-repository.ts'
 
 export { beginSettlementRenewal, confirmSettlementRenewal, failSettlementRenewal } from './settlement-renewal.ts'
 

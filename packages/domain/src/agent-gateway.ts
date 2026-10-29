@@ -25,7 +25,11 @@ const ENTITLED: Readonly<Record<AgentActor['kind'], readonly ToolTier[]>> = {
 // limits; free text is never a limit.
 export const MANDATE_KINDS = ['ops_standing_rule', 'agent_hold', 'settlement_shop', 'settlement_renter'] as const
 export type MandateKind = (typeof MANDATE_KINDS)[number]
-export type StandingRuleLimits = { readonly proposalKind: 'release_hold'; readonly condition: 'clean_return_unconfirmed'; readonly dailyCount: number }
+// Each standing rule releases a hold, never charges: after a clean return nobody confirmed, or by waiving a contested
+// claim the shop did not decide by the date it promised (section 6.16).
+export const STANDING_RULE_CONDITIONS = ['clean_return_unconfirmed', 'decision_promise_missed'] as const
+export type StandingRuleCondition = (typeof STANDING_RULE_CONDITIONS)[number]
+export type StandingRuleLimits = { readonly proposalKind: 'release_hold'; readonly condition: StandingRuleCondition; readonly dailyCount: number }
 // The shop's advocate (extensions.md section 9.4): the smallest share of the claim it may agree to, the largest claim it
 // may take on, the most offers each side may make, whether every reduction must cite evidence (when not, it may concede
 // for goodwill), and whether the owner or a manager confirms the result.

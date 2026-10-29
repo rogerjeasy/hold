@@ -63,6 +63,8 @@ export { checkReportedRegion, INSPECTION_LIMITS, inspectFindings, regionOverlap,
 export type { InspectionClass, InspectionFinding } from './inspection.ts'
 
 export { claimDeadlineAction, claimReplyAllowed } from './claim-deadline.ts'
+export { checkPromiseDays, DECISION_PROMISE, decideByFor, missedPromiseOutcome, promiseDueSoon, promiseStanding } from './decision-promise.ts'
+export type { PromiseFacts, PromiseStanding } from './decision-promise.ts'
 export { claimCodeRecipient } from './claim-code-recipient.ts'
 export type { ClaimCodeRecipient } from './claim-code-recipient.ts'
 export { checkGate, confidenceLevel, CONFIDENCE_LEVELS, EVALUATION_GROUPS, EVALUATION_OVERLAP, measureEvaluation, sharePercent, zeroUpperBound } from './evaluation.ts'
@@ -75,8 +77,8 @@ export { fieldRecordAlarm } from './field-record.ts'
 export type { FieldRecordMonthCounts } from './field-record.ts'
 export { mayApproveTogether, PROPOSAL_EXECUTORS, PROPOSAL_KINDS, PROPOSAL_STATES, PROPOSAL_TRANSITIONS, proposalFingerprintInput, proposalMovesMoney } from './proposal.ts'
 export type { ProposalKind, ProposalState } from './proposal.ts'
-export { ACTOR_KINDS, checkSettlementLimits, gatewayDecision, MANDATE_KINDS, SETTLEMENT_LIMITS, shopFloorCents, TOOL_TIERS, withinMandate } from './agent-gateway.ts'
-export type { ActorKind, AgentActor, GatewayDecision, GatewayInput, Mandate, MandateAction, MandateCheck, MandateKind, RenterSettlementLimits, ShopSettlementLimits, StandingRuleLimits, ToolTier } from './agent-gateway.ts'
+export { ACTOR_KINDS, checkSettlementLimits, gatewayDecision, MANDATE_KINDS, SETTLEMENT_LIMITS, shopFloorCents, STANDING_RULE_CONDITIONS, TOOL_TIERS, withinMandate } from './agent-gateway.ts'
+export type { ActorKind, AgentActor, GatewayDecision, GatewayInput, Mandate, MandateAction, MandateCheck, MandateKind, RenterSettlementLimits, ShopSettlementLimits, StandingRuleCondition, StandingRuleLimits, ToolTier } from './agent-gateway.ts'
 
 // Extension 4: an advocate for each side, and the referee.
 export { ESCALATION_REASONS, GROUNDS, MOVE_KINDS, NEGOTIATION_KINDS, NEGOTIATION_LIMITS, NEGOTIATION_SIDES, NEGOTIATION_STATES, NEGOTIATION_TRANSITIONS, negotiationDeadline, otherSide, PASS_REASONS } from './negotiation.ts'

@@ -38,6 +38,8 @@ const FIXED_REASONS: Readonly<Record<DetectorKind, string>> = {
   dispute_open: 'A PayPal dispute is waiting for a response.',
   incident_waiting: 'An incident has waited for staff longer than the shop allows.',
   reconciliation_difference: 'PayPal\'s record of a hold differs from Hold\'s.',
+  decision_promise_due: 'The shop promised the renter a decision on this contested claim within a day.',
+  decision_promise_missed: 'The shop did not decide this contested claim by the date it promised; only the owner may decide it now.',
 }
 
 // What goes on the queue for one exception. A null reason means the detector's fixed reason.

@@ -1,4 +1,4 @@
-import { addDays, DROP_POINT_VIEW, SAMPLE_PHOTO_SHA256, HOLD_ASSURED_DAYS, HOLD_VALIDITY_DAYS, shopDay, suggestedPhotoPlan, viewKeys } from '@hold/domain'
+import { addDays, decideByFor, DROP_POINT_VIEW, SAMPLE_PHOTO_SHA256, HOLD_ASSURED_DAYS, HOLD_VALIDITY_DAYS, shopDay, suggestedPhotoPlan, viewKeys } from '@hold/domain'
 import type { ClaimState, HoldState, ItemCategory, PriceCategory, Region, RentalState } from '@hold/domain'
 import { and, asc, desc, eq, isNotNull, sql } from 'drizzle-orm'
 import {
@@ -7,6 +7,7 @@ import {
   authorizations,
   captureSessions,
   claimLines,
+  claimMessages,
   claimReplies,
   claims,
   comparisons,
@@ -166,6 +167,7 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
   // Money and claims land inside this month and before now, so the month's figures always show them.
   const inMonth = (at: Date) => new Date(Math.min(Math.max(at.getTime(), day.monthStart.getTime()), now.getTime() - MINUTE))
   const { currency } = terms
+  const [promise] = await transaction.select({ days: shops.decisionPromiseDays, closes: shops.closesAt }).from(shops).where(eq(shops.id, shopId))
 
   const typeIds = new Map<SampleItem, string>()
   const planIds = new Map<SampleItem, string>()
@@ -285,7 +287,7 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
       const presented = sample.claim.state !== 'awaiting_approval'
       const [claim] = await transaction
         .insert(claims)
-        .values({ shopId, rentalId: rental.id, currency, totalCents: entry.amountCents, state: sample.claim.state, raisedByUserId: raiser, presentedAt: presented ? raisedAt : null, createdAt: raisedAt })
+        .values({ shopId, rentalId: rental.id, currency, totalCents: entry.amountCents, state: sample.claim.state, raisedByUserId: raiser, presentedAt: presented ? raisedAt : null, promiseDays: presented ? (promise?.days ?? null) : null, createdAt: raisedAt })
         .returning({ id: claims.id })
       if (claim === undefined) throw new Error('A sample claim was not created.')
       const [photographed] = rentalItemIds
@@ -311,6 +313,12 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
         const repliedAt = inMonth(new Date(raisedAt.getTime() + 18 * 60 * MINUTE))
         await transaction.insert(claimReplies).values({ shopId, claimId: claim.id, decision: 'contest', comment: sample.claim.reply, createdAt: repliedAt })
         await audit('claim.contested', repliedAt, 'renter')
+        // The shop's promise to decide it, still open, and what renter and shop wrote since (architecture.md 6.16).
+        if (promise !== undefined) await transaction.update(claims).set({ decideBy: decideByFor({ contestedAt: repliedAt, days: promise.days, timeZone: input.timeZone, closes: promise.closes, validUntil: null }) }).where(eq(claims.id, claim.id))
+        await transaction.insert(claimMessages).values([
+          { shopId, claimId: claim.id, author: 'renter', authorUserId: null, body: 'The lock was in the side pocket of the bag. Could someone check there?', createdAt: inMonth(new Date(repliedAt.getTime() + 60 * MINUTE)) },
+          { shopId, claimId: claim.id, author: 'shop', authorUserId: raiser, body: 'Thank you, we will check the side pocket and the return photographs, and decide before the date above.', createdAt: inMonth(new Date(repliedAt.getTime() + 3 * 60 * MINUTE)) },
+        ])
       }
       if (sample.claim.state === 'charged') {
         await transaction.insert(approvals).values({ shopId, subject: 'claim', subjectId: claim.id, decidedByUserId: userId, decision: 'approved', method: 'on_screen', createdAt: raisedAt })

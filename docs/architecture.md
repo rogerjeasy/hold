@@ -325,6 +325,7 @@ Migration `0024` adds Extension 2's tables (`rental_outcomes`, `trust_ladders`, 
 Migration `0026` (Extension 3) adds `quotes` and `agent_sessions` and the booking channel `assistant` (section 6.11). Its hand-written block grants the web app `SELECT, INSERT` on both, `UPDATE` only of a quote's `rental_id` and of a session's token, use, draft and revocation columns, and the worker `SELECT`; checks that a quote's amounts are not negative and its period runs forward, and that a session's token fingerprint, issue time and end date are set together; the triggers `hold_quote_guard` (a quote is booked from once) and `hold_agent_session_guard` (a token is issued once and never extended; a disconnected session stays disconnected and takes no new token or draft); and four security-definer functions read before any shop is chosen, granted to `hold_app` only: `hold_public_shops` (shops taking bookings online, by place and kind), `hold_quote_shop`, `hold_agent_booking` (a session by booking-secret fingerprint) and `hold_agent_session` (a session by token fingerprint).
 
 Migration `0031` adds `insights_dashboards` (`extensions.md` section 12.5), one row per shop with row-level security. Its hand-written block grants the web app `SELECT, INSERT` and `UPDATE` only of the state, the report version, who saved it and when.
+Migration `0036` adds the shop's promise to decide a contested claim (section 6.16): `shops.decision_promise_days` (1 to 14), the claim columns `promise_days`, `decide_by`, `decided_at` and `promise_missed_at` with the trigger `claim_promise_guard` that writes each once, and the append-only `claim_messages` with row-level security, granted `SELECT, INSERT` only. It adds the detector kinds `decision_promise_due` and `decision_promise_missed` and the escalation reason `promise_missed`.
 
 **Tables added by the extensions.** `mandates`, `proposals`, `exceptions`, `ops_runs`, `eval_runs`, `finding_outcomes`, `rental_outcomes`, `trust_ladders`, `trust_rungs`, `renter_consents`, `quotes`, `agent_sessions`, `negotiations`, `negotiation_moves`, `incidents` and `insights_dashboards`. Their contents are listed in `extensions.md` section 4.6.
 
@@ -483,6 +484,19 @@ Added 29 October 2026, from the competitive gap analysis (feature 4). A conteste
 - **Where it shows.** Above the decision on the staff claim page, in the opened row of a contested or escalated claim on the decision board, and on the renter's claim page, each reader in their own version. For each line: disputed or not, the shop's side in the record's own words beside what the renter says with their quote, and a box of what the records show, worded by templates from the record, never by the model, with the line's two photographs and the finding outlined. The count of disputed lines is code's. The summary says it was written by Claude, or is simulated, takes no side and names no amount. With no summary, the panel quotes the renter's words in full and still shows every line's facts.
 - **What it cannot do.** It decides nothing, changes no amount and no state, and is not shown to any advocate as an instruction. The person deciding still reads the evidence and decides on the claim page, with their limits and passkey (section 7.3).
 
+### 6.16 A response promise to the renter, kept by code
+
+Added 29 October 2026, from the competitive gap analysis (feature 5). A renter has a deadline to reply to a claim; until now the shop had none to decide a contest. Hold makes the shop state one, shows it to the renter as a date, and keeps it by code.
+
+- **The setting.** `shops.decision_promise_days`, 1 to 14 days (`DECISION_PROMISE`, default 3), set by the owner on `/shop/settlement` ("Contested claims", which every staff member may read). It is always on: the owner chooses the days, never none.
+- **Fixed when made.** Presenting a claim copies the shop's days onto it (`claims.promise_days`), so the renter reads "If you contest, the shop promises to decide within 3 days of your reply" before contesting. Contesting (`replyToClaim`, the one path a contest takes) fixes the date, `claims.decide_by` (`decideByFor`): the shop's closing time, on its own clock, that many days after the contest, or the last minute of that day when the shop has not said its hours; never after the hold's last charge time (`latestChargeTime`), so a shop that keeps its promise can still collect. The trigger `claim_promise_guard` (migration `0036`) lets `promise_days`, `decide_by`, `decided_at` and `promise_missed_at` each be written once, so a later setting never moves a promise already made.
+- **Decided.** Deciding a contested or escalated claim (`decideClaim`), settling an agreement (`settleIfConfirmed`) or the waiver below writes `claims.decided_at` once. `promiseStanding` reads `none`, `open`, `kept` or `missed` from the three dates and the clock.
+- **Kept by code.** The contest writes an outbox row `{ kind: 'claim_promise' }` to the `upkeep` queue; `runClaimPromise` schedules `claim-promise-{claim}` at the date with EventBridge Scheduler, and at the date runs `keepClaimPromise`. A claim still undecided is recorded missed once (`promise_missed_at`, audit `claim.promise_missed`). Any running negotiation ends as `escalated` with reason `promise_missed`, and the claim moves `contested → escalated` (the one transition this adds). From then on only the owner may decide it (`mayConfirm`, refusal `owner_decides_after_promise`), even a claim they raised, and the renter reads the reason they write. The owners and the renter are emailed (`promiseMissedEmail`, `promiseMissedRenterEmail`).
+- **The waiver rule.** The owner may grant a standing rule with condition `decision_promise_missed` (an `ops_standing_rule` mandate, with a passkey, a daily count of 1 to 20 and an end of 1 to 90 days). When it is live and within its daily count, a missed claim nothing was taken for yet is waived instead: `escalated → decided → waived`, an approval with method `mandate` naming the mandate, and the hold released through `releaseCleanReturn`, as a person's waiver would. It can only release; a claim already charged to protect an expiring hold goes to the owner instead (`missedPromiseOutcome`).
+- **The morning queue.** Two detectors (`decision_promise_due`, raised in the promise's last day, and `decision_promise_missed`) put it in front of the owner; they allow only a drafted message or a note, never money. On the decision board a contested claim falls due at its promised date, and once missed reads "The owner decides".
+- **Messages.** The renter writes to the shop from their claim page through the claim link (scope `contest`, ten an hour a link), and staff who may act on claims answer from the staff claim page (sixty an hour a shop). Each message is kept as written in the append-only `claim_messages` (1 to 1,000 characters, author `renter` or `shop`, the staff member named). The owners and managers are emailed that the renter wrote, with a link and never the words (`renterWroteEmail`); the renter is emailed the shop's words (`shopMessageEmail`). A renter's message is quoted data: no agent reads it and nothing it says moves money.
+- **The screens.** On the renter's claim page: the promise inside the reply panel before contesting; the date and the time left once contested; "The shop missed its date" once missed; the owner's reason for a late decision; "Waived: not decided in time" under the rule; and the conversation. On the staff claim page: the date promised, "Promise missed" once missed, the conversation, and, after a miss, the decision for the owner only, with a note that the renter reads the reason.
+
 ---
 
 ## 7. The hold core
@@ -577,6 +591,7 @@ stateDiagram-v2
     presented --> charging: approved, hold near expiry
     contested --> negotiating
     contested --> decided
+    contested --> escalated: promised date passed
     negotiating --> agreed
     negotiating --> escalated
     agreed --> charging
@@ -601,7 +616,7 @@ stateDiagram-v2
 - **adjusted:** part of a charge was refunded after review.
 - **negotiating:** both sides gave an advocate limits, and the advocates are exchanging offers.
 - **agreed:** the advocates agreed. Each person confirms, unless their mandate waives it.
-- **escalated:** the advocates did not agree, or a person declined the result. The owner decides. A claim never returns to `contested`.
+- **escalated:** the advocates did not agree, a person declined the result, or the shop did not decide by the date it promised the renter (section 6.16). The owner decides. A claim never returns to `contested`.
 
 **How they connect.** A rental cannot be handed over unless its hold is placed. A hold cannot be captured unless a claim reached charging. A rental cannot close while its hold is in any state but released, captured, invoiced or expired.
 
@@ -627,6 +642,7 @@ Before any action on a hold, the approval rules decide who must confirm it.
 | Approve a claim above the staff limit | The owner or a manager |
 | Reduce or waive a claim | The owner, a manager, or the staff member who raised it |
 | Decide a contested claim | The owner or a manager, and not the person who raised it where the shop has more than one |
+| Decide a contested claim after the shop missed the date it promised the renter | The owner alone, even for a claim they raised. The renter reads the written reason (section 6.16) |
 | Refund part of a charge | The owner or a manager |
 | Move a booking that has not started to another item of the same type | Any staff member |
 
@@ -643,6 +659,7 @@ A person may also approve earlier, by granting a mandate. A mandate has a fixed 
 | Mandate | Granted by | Allows |
 |---|---|---|
 | Standing rule | The owner | The operations agent to release a hold after a clean comparison that nobody confirmed |
+| Standing rule, missed promise | The owner | Hold to waive a contested claim not decided by the date promised to the renter, and release its hold (section 6.16) |
 | Settlement, shop side | The owner | The shop's advocate to agree a contested claim, down to a stated share |
 | Settlement, renter side | The renter | The renter's advocate to agree a contested claim, up to a stated total |
 | Hold by assistant | A renter with a saved method | The renter's own assistant to accept a hold, up to a stated amount. Optional. |
@@ -1704,7 +1721,7 @@ Every queue has a dead-letter queue and an alarm on it.
 
 The outbox relay carries evidence and receipt identities without tokens or contact details. Separate evidence and receipt Lambda roles have only their required database, logs, queue and artifact/secret access: the renderer reads face-blurred display copies and writes/reads `packs/*`, without PayPal credentials; the receipt worker reads its link-signing and SMTP secrets. PDFKit and sharp are external pinned worker modules so PDFKit font data and sharp's native loader ship with the bundle. Deploy the updated `HoldDelivery` permissions boundary before the compute stack. AWS deployment and Linux Lambda runtime execution remain unverified in this change.
 
-**Schedules:** hold replacement before validity ends, the charge of an unanswered claim before the hold lapses, hold expiry, return-due reminders, overdue alerts, reply-period end, the nightly reconciliation, the operations agent's run after it, and the expiry of unpaid bookings. Schedules for a hold are created when it is placed and removed when it ends.
+**Schedules:** hold replacement before validity ends, the charge of an unanswered claim before the hold lapses, the date the shop promised to decide a contest (section 6.16), hold expiry, return-due reminders, overdue alerts, reply-period end, the nightly reconciliation, the operations agent's run after it, and the expiry of unpaid bookings. Schedules for a hold are created when it is placed and removed when it ends.
 
 ### 14.8 Configuration
 
@@ -1802,6 +1819,9 @@ The outbox relay carries evidence and receipt identities without tokens or conta
 | **Someone at the counter hands a renter's contest to an advocate, or confirms an agreement for them** (extension 4) | Both need a one-time code emailed to the payer, bound to the link; the code to confirm is a fresh one with its own purpose in its digest. Stopping the advocate needs none, since it charges nothing. Tested in `negotiation-flow.test.ts` and `negotiation-repository.test.ts`. |
 | **Extra days are kept on money PayPal never settles** (section 6.14) | A pending capture counts as nothing paid. Hold reads it back from PayPal on its event and at a deadline no later than the old end, or a day after the capture began; still pending then, the old end comes back. Money PayPal moves that Hold did not apply goes to the money log and to an owner or manager on the decision board. Tests: `extension-capture.test.ts` in `packages/settle`. |
 | **The contest summary takes a side, speaks for the shop, slips in an amount, or misquotes the renter** (section 6.15) | No amount reaches the model. The shop's side of each line is the record's own words; the model has no field to write it in, and its overview and the renter's side are labelled as Claude's. `checkContestSummary` drops an answer with any number, refuses one that leaves out, adds or splits a line, and keeps a quote only when it is the renter's own words. The facts under each line are templates over the record, never the model's words, and the panel says who wrote the summary. It decides nothing: the person deciding still opens the evidence on the claim page. Tests: `contest-summary.test.ts` in `packages/domain` and `packages/compare`. |
+| **A shop misses the date it promised a renter, quietly or by moving it** (section 6.16) | The days are copied onto the claim when it is presented and the date fixed when the renter contests; the trigger `claim_promise_guard` writes each promise date once. The upkeep queue keeps the date by code, records a miss once, escalates the claim, and leaves the decision to the owner alone, whose reason the renter reads. The renter and the owners are emailed. Tested in `decision-promise.test.ts`, `claim-promise-repository.test.ts`, `claim-promise.test.ts` and `promise-flow.test.ts`. |
+| **The rule for missed promises takes money, or waives a claim already charged** (section 6.16) | It is a standing rule that only releases: it waives an uncharged claim and releases its hold through `releaseCleanReturn`, inside its daily count and end date, with an approval naming it. A claim charged early to protect an expiring hold goes to the owner (`missedPromiseOutcome`). Tested in `decision-promise.test.ts`, `agent-gateway.test.ts` and `claim-promise-repository.test.ts`. |
+| **A renter's message floods staff, phishes them, or steers an agent** (section 6.16) | Only a claim link may write, ten messages an hour a link, 1 to 1,000 characters, kept append-only. Staff are emailed that the renter wrote, with a link and never the words. No agent reads messages and no step that reads them can move money. Tested in `claim-promise-emails.test.ts` and `promise-flow.test.ts`. |
 | **A model writes a number past the guard in another form** (security review of extensions 4 and 5) | `guardNumbers` refuses digits of any other script, Roman numerals, a share sign, and number words in English, French, Spanish and German, also when spaced or hyphenated; property tests write any amount in many forms. Tested in `number-guard.test.ts`. |
 
 ### 15.2 Data protection

@@ -400,6 +400,8 @@ flowchart LR
 | Invoice unpaid | An invoice has been sent and unpaid for the shop's set time | Invoice reminder, automatic |
 | Dispute open | A dispute is open with no response and a due date | `respond_to_dispute` |
 | Incident waiting | An incident from Extension 5 has waited for staff longer than the shop's set time | `note` |
+| Decision promised | A contested claim the shop promised to decide within a day (architecture.md section 6.16) | `send_message`, `note` |
+| Promise missed | A contested claim not decided by the date the shop promised; only the owner may decide it | `note` |
 | Reconciliation difference | The nightly comparison with PayPal found a difference it could not apply | `note` |
 
 Section 12.5 adds one more detector, a booking blocked by an overdue or damaged item, with the rental calendar.

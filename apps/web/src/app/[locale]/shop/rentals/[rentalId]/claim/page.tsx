@@ -1,4 +1,4 @@
-import { claimWorkspace, inShop, shopNegotiation } from '@hold/db'
+import { claimMessages, claimWorkspace, inShop, promiseFor, rentalDetail, shopNegotiation } from '@hold/db'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
@@ -16,9 +16,10 @@ export default async function Page({ params }: { params: Promise<{ rentalId: str
   const { rentalId } = await params
   if (!z.uuid().safeParse(rentalId).success) notFound()
   const { database, evidence } = await getServices()
-  const { data, negotiation, contest } = await inShop(database, { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId }, async (transaction) => ({ data: await claimWorkspace(transaction, rentalId), negotiation: await shopNegotiation(transaction, rentalId), contest: await contestViewFor(transaction, rentalId, 'shop') }))
+  const now = new Date()
+  const { data, negotiation, contest, promise, messages, rental } = await inShop(database, { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId }, async (transaction) => ({ data: await claimWorkspace(transaction, rentalId), negotiation: await shopNegotiation(transaction, rentalId), contest: await contestViewFor(transaction, rentalId, 'shop'), promise: await promiseFor(transaction, rentalId, now), messages: await claimMessages(transaction, rentalId), rental: await rentalDetail(transaction, rentalId, now) }))
   if (data === undefined) notFound()
   const keys = [...new Set(data.lines.flatMap((line) => [line.beforeKey, line.afterKey]).filter((key): key is string => key !== null))]
   const photoUrls: Readonly<Record<string, string>> = evidence === undefined ? {} : Object.fromEntries(await Promise.all(keys.map(async (key) => [key, await evidence.displayLink(key)] as const)))
-  return <ClaimScreen photoUrls={photoUrls} shopName={context.shop.name} timeZone={context.shop.timeZone} data={data} canAct={context.role !== 'read_only'} canDecide={context.role === 'owner' || context.role === 'manager'} passkey={await passkeyGate(context)} negotiation={negotiation} contest={contest} />
+  return <ClaimScreen photoUrls={photoUrls} shopName={context.shop.name} timeZone={context.shop.timeZone} data={data} canAct={context.role !== 'read_only'} canDecide={context.role === 'owner' || context.role === 'manager'} passkey={await passkeyGate(context)} negotiation={negotiation} contest={contest} promise={promise ?? null} messages={data.claim === null || ['draft', 'awaiting_approval', 'approved'].includes(data.claim.state) ? undefined : messages} renterName={rental?.who ?? null} isOwner={context.role === 'owner'} now={now} />
 }

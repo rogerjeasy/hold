@@ -1242,7 +1242,7 @@
       "incidents": "Vorfälle",
       "trust": "Vertrauensstufen",
       "selfService": "Selbstbedienung für Mieter",
-      "settlement": "Vergleichsvertreter",
+      "settlement": "Bestrittene Forderungen",
       "queue": "Morgenliste",
       "money": "Geld",
       "insights": "Einblicke"
@@ -2870,7 +2870,8 @@
       "decision_recorded": "Eine Entscheidung wurde bereits erfasst. Aktualisieren Sie die Seite, um den Abwicklungsstatus zu sehen.",
       "incident_not_agreed": "Diese Meldung wurde von der mietenden Person nicht akzeptiert.",
       "raises_agreed_line": "Ein akzeptierter Posten kann gesenkt, nie erhöht werden.",
-      "empty_line": "Lassen Sie den Posten weg, statt ihn bei null zu behalten."
+      "empty_line": "Lassen Sie den Posten weg, statt ihn bei null zu behalten.",
+      "owner_decides_after_promise": "Das Geschäft hat das der mietenden Person zugesagte Datum verpasst. Nur die Inhaberin oder der Inhaber kann diese Forderung jetzt entscheiden."
     },
     "acknowledge": "Ich habe diese Forderung geprüft",
     "reviewFirst": "Prüfen Sie die Belege und Preise. Ihre Antwortfrist beginnt mit Ihrer Prüfbestätigung.",
@@ -3320,7 +3321,8 @@
       "deadline": "Die Zeit für die Verhandlung ist abgelaufen.",
       "mandate_ended": "Ein Vertreter wurde gestoppt, oder seine Grenzen sind abgelaufen.",
       "declined": "Eine Person hat den vereinbarten Betrag abgelehnt.",
-      "nothing_to_charge": "Sie haben sich auf keine Zahlung geeinigt: Der Inhaber verzichtet auf die Forderung."
+      "nothing_to_charge": "Sie haben sich auf keine Zahlung geeinigt: Der Inhaber verzichtet auf die Forderung.",
+      "promise_missed": "Das zugesagte Datum des Geschäfts ist verstrichen: Die Inhaberin oder der Inhaber entscheidet."
     },
     "confirm": {
       "renterTitle": "Den vereinbarten Betrag bestätigen",
@@ -3471,7 +3473,9 @@
       "invoice_unpaid": "Die Rechnung ist noch unbezahlt.",
       "dispute_open": "Ein PayPal-Konflikt wartet auf eine Antwort.",
       "incident_waiting": "Ein Vorfall wartet länger auf das Team, als der Verleih erlaubt.",
-      "reconciliation_difference": "Der PayPal-Eintrag einer Reservierung weicht von dem in Hold ab."
+      "reconciliation_difference": "Der PayPal-Eintrag einer Reservierung weicht von dem in Hold ab.",
+      "decision_promise_due": "Das Geschäft hat der mietenden Person innerhalb eines Tages eine Entscheidung über diese bestrittene Forderung zugesagt.",
+      "decision_promise_missed": "Das Geschäft hat diese bestrittene Forderung nicht bis zum zugesagten Datum entschieden. Nur die Inhaberin oder der Inhaber darf sie jetzt entscheiden."
     },
     "recent": {
       "title": "Am letzten Tag entschieden",
@@ -3613,13 +3617,15 @@
       "you": "Du",
       "senior": "Inhaber oder Leitung",
       "another_senior": "Andere Inhaber oder Leitung",
-      "staff": "Personal"
+      "staff": "Personal",
+      "owner": "Die Inhaberin oder der Inhaber"
     },
     "deciderLine": {
       "you": "Du entscheidest.",
       "senior": "Inhaber oder Leitung entscheiden.",
       "another_senior": "Andere Inhaber oder Leitung entscheiden: Du hast sie erhoben.",
-      "staff": "Das Personal entscheidet. Du kannst sie lesen."
+      "staff": "Das Personal entscheidet. Du kannst sie lesen.",
+      "owner": "Die Inhaberin oder der Inhaber entscheidet: Das zugesagte Datum ist verstrichen."
     },
     "list": "Entscheidungen",
     "open": "Belege und Aktionen",
@@ -4177,6 +4183,74 @@
       "incidentReported": "Während der Miete wurde etwas gemeldet.",
       "noIncident": "Während der Miete wurde nichts gemeldet.",
       "renterPhotos": "{count, plural, one {# Foto wurde} other {# Fotos wurden}} dem Widerspruch beigefügt."
+    }
+  },
+  "promise": {
+    "settingsTitle": "Bestrittene Forderungen",
+    "settingsLead": "Was Sie einer Mieterin oder einem Mieter zusagen, die eine Forderung bestreiten, und der Vertreter, der eine für Sie vergleichen darf.",
+    "title": "Unsere Zusage an Mietende",
+    "lead": "Wenn eine Forderung bestritten wird, entscheidet das Geschäft innerhalb dieser Anzahl Tage, bis Ladenschluss. Die mietende Person sieht das Datum, bevor sie bestreitet, und Hold hält es ein: Eine nicht rechtzeitig entschiedene Forderung geht an die Inhaberin oder den Inhaber, die eine schriftliche Begründung geben müssen.",
+    "days": "Tage für die Entscheidung über eine bestrittene Forderung (1 bis 14)",
+    "hint": "Eine Forderung behält die Tage, mit denen sie vorgelegt wurde. Eine Änderung verschiebt nie ein bereits zugesagtes Datum.",
+    "save": "Zusage speichern",
+    "saved": "Gespeichert. Neue Forderungen tragen sie.",
+    "preview": "Was Mietende lesen",
+    "readOnly": "Das Geschäft sagt zu, eine bestrittene Forderung innerhalb von {days, plural, one {# Tag} other {# Tagen}} zu entscheiden. Nur die Inhaberin oder der Inhaber ändert das.",
+    "waiver": {
+      "title": "Erlassen, was wir nicht rechtzeitig entscheiden",
+      "lead": "Verstreicht das zugesagte Datum ohne Entscheidung, erlässt Hold die Forderung und gibt die Reservierung für Sie frei. Das kann nur Geld freigeben, nie belasten. Aus, bis die Inhaberin oder der Inhaber sie einschaltet.",
+      "live": "An bis {until}, für höchstens {count, plural, one {# Forderung} other {# Forderungen}} am Tag.",
+      "off": "Aus. Eine nicht rechtzeitig entschiedene Forderung geht an die Inhaberin oder den Inhaber.",
+      "dailyCount": "Forderungen am Tag, höchstens (1 bis 20)",
+      "days": "Für wie viele Tage (1 bis 90)",
+      "grant": "Einschalten",
+      "granted": "An. Nicht rechtzeitig entschiedene Forderungen werden erlassen.",
+      "revoke": "Ausschalten",
+      "revoked": "Aus. Nicht rechtzeitig entschiedene Forderungen gehen an die Inhaberin oder den Inhaber.",
+      "ownerOnly": "Nur die Inhaberin oder der Inhaber schaltet sie ein oder aus."
+    },
+    "renter": {
+      "beforeLabel": "Wenn Sie widersprechen",
+      "beforeBody": "{shop} sagt zu, innerhalb von {days, plural, one {# Tag} other {# Tagen}} nach Ihrer Antwort zu entscheiden. Das genaue Datum sehen Sie, sobald Sie sie senden.",
+      "openLabel": "Das Geschäft entscheidet bis",
+      "keptBody": "{shop} hat am {when} entschieden, bis zum zugesagten Datum.",
+      "missedTitle": "Das Geschäft hat sein Datum verpasst",
+      "missedBody": "{shop} hat zugesagt, bis {when} zu entscheiden, und hat es nicht getan. Die Inhaberin oder der Inhaber wurde informiert. Nur sie können jetzt entscheiden und müssen Ihnen eine schriftliche Begründung geben.",
+      "lateTitle": "Nach dem zugesagten Datum entschieden",
+      "lateBody": "{shop} hat zugesagt, bis {when} zu entscheiden, und hat später entschieden. Die Inhaberin oder der Inhaber schrieb:",
+      "waivedTitle": "Erlassen: nicht rechtzeitig entschieden",
+      "waivedBody": "{shop} hat zugesagt, bis {when} zu entscheiden. Das ist nicht geschehen, also wird nach der eigenen Regel des Geschäfts nichts belastet."
+    },
+    "shop": {
+      "openLabel": "Sie haben zugesagt, zu entscheiden bis",
+      "missedLabel": "Zusage verpasst",
+      "missedBody": "Fällig war {when}. Nur die Inhaberin oder der Inhaber kann jetzt entscheiden, mit einer Begründung, die die mietende Person liest.",
+      "keptBody": "Entschieden {when}, bis zum zugesagten Datum.",
+      "lateBody": "Entschieden {when}, nach dem zugesagten Datum.",
+      "ownerOnly": "Das zugesagte Datum ist verstrichen, daher kann nur die Inhaberin oder der Inhaber diese Forderung jetzt entscheiden.",
+      "reasonShown": "Die mietende Person liest diese Begründung auf ihrer Forderungsseite."
+    },
+    "left": "{when}",
+    "dueNow": "Jetzt fällig",
+    "messages": {
+      "renterTitle": "Nachrichten mit {shop}",
+      "shopTitle": "Nachrichten mit {renter}",
+      "empty": "Noch keine Nachrichten.",
+      "you": "Sie",
+      "theRenter": "Die mietende Person",
+      "staff": "Personal",
+      "writeRenter": "An das Geschäft schreiben",
+      "writeShop": "An {renter} schreiben",
+      "send": "Senden",
+      "sent": "Gesendet.",
+      "renterHint": "Das Geschäft erhält eine E-Mail, dass Sie geschrieben haben. Bis zu 1.000 Zeichen.",
+      "shopHint": "{renter} erhält Ihre Worte per E-Mail. Bis zu 1.000 Zeichen."
+    },
+    "results": {
+      "message_invalid": "Schreiben Sie eine Nachricht mit bis zu 1.000 Zeichen.",
+      "rate_limited": "Vorerst zu viele Nachrichten. Versuchen Sie es in einer Stunde erneut.",
+      "not_found": "Diese Forderung ist nicht für Nachrichten offen.",
+      "standing_rule_off": "Sie ist bereits aus."
     }
   }
 }

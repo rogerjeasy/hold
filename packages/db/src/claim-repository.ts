@@ -122,7 +122,8 @@ async function openClaimReply(transaction: Transaction, claim: typeof claims.$in
   const [shop] = await transaction.select().from(shops).where(eq(shops.id, claim.shopId))
   if (shop === undefined) return refused('not_found')
   const replyDueAt = new Date(now.getTime() + shop.replyPeriodHours * 3_600_000)
-  await transaction.update(claims).set({ state: 'presented', presentedAt: now, replyDueAt }).where(eq(claims.id, claim.id))
+  // The promise the renter reads before contesting is the shop's at this moment (architecture.md section 6.16).
+  await transaction.update(claims).set({ state: 'presented', presentedAt: now, replyDueAt, promiseDays: shop.decisionPromiseDays }).where(eq(claims.id, claim.id))
   await transaction.insert(outbox).values({ shopId: claim.shopId, queue: 'upkeep', messageGroup: claim.rentalId, payload: { kind: 'claim_plan', claimId: claim.id }, createdAt: now })
   await reserveEvidencePack(transaction, claim.rentalId, now)
   return { ok: true, rentalId: claim.rentalId, replyDueAt } as const

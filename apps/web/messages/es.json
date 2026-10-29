@@ -1242,7 +1242,7 @@
       "incidents": "Incidentes",
       "trust": "Escalera de confianza",
       "selfService": "Autoservicio para clientes",
-      "settlement": "Representante de acuerdos",
+      "settlement": "Reclamaciones impugnadas",
       "queue": "Cola de la mañana",
       "money": "Dinero",
       "insights": "Análisis"
@@ -2870,7 +2870,8 @@
       "decision_recorded": "Ya se ha registrado una decisión. Actualiza esta página para ver el estado de la liquidación.",
       "incident_not_agreed": "Quien alquila no aceptó ese informe.",
       "raises_agreed_line": "Una línea aceptada por quien alquila puede rebajarse, nunca subirse.",
-      "empty_line": "Quita la línea en vez de dejarla en cero."
+      "empty_line": "Quita la línea en vez de dejarla en cero.",
+      "owner_decides_after_promise": "La tienda no cumplió la fecha prometida a quien alquila. Ahora solo el propietario puede decidir esta reclamación."
     },
     "acknowledge": "He revisado esta reclamación",
     "reviewFirst": "Revise las pruebas y precios. Su plazo empieza cuando confirme que ha revisado la reclamación.",
@@ -3320,7 +3321,8 @@
       "deadline": "Se acabó el tiempo de la negociación.",
       "mandate_ended": "Un representante fue detenido o sus límites terminaron.",
       "declined": "Una persona rechazó el importe acordado.",
-      "nothing_to_charge": "Acordaron que no hay nada que pagar: el propietario renuncia a la reclamación."
+      "nothing_to_charge": "Acordaron que no hay nada que pagar: el propietario renuncia a la reclamación.",
+      "promise_missed": "Pasó la fecha prometida por la tienda: decide el propietario."
     },
     "confirm": {
       "renterTitle": "Confirmar el importe acordado",
@@ -3471,7 +3473,9 @@
       "invoice_unpaid": "La factura sigue sin pagar.",
       "dispute_open": "Una disputa de PayPal espera respuesta.",
       "incident_waiting": "Un incidente lleva esperando al equipo más de lo que la tienda permite.",
-      "reconciliation_difference": "El registro de PayPal de una retención difiere del de Hold."
+      "reconciliation_difference": "El registro de PayPal de una retención difiere del de Hold.",
+      "decision_promise_due": "La tienda prometió a quien alquila una decisión sobre esta reclamación impugnada en menos de un día.",
+      "decision_promise_missed": "La tienda no decidió esta reclamación impugnada antes de la fecha prometida. Ahora solo el propietario puede decidirla."
     },
     "recent": {
       "title": "Decidido en el último día",
@@ -3613,13 +3617,15 @@
       "you": "Tú",
       "senior": "Propietario o encargado",
       "another_senior": "Otro propietario o encargado",
-      "staff": "El personal"
+      "staff": "El personal",
+      "owner": "El propietario"
     },
     "deciderLine": {
       "you": "Decides tú.",
       "senior": "Decide un propietario o encargado.",
       "another_senior": "Decide otro propietario o encargado: la presentaste tú.",
-      "staff": "Decide el personal. Tú puedes leerla."
+      "staff": "Decide el personal. Tú puedes leerla.",
+      "owner": "Decide el propietario: pasó la fecha prometida."
     },
     "list": "Decisiones",
     "open": "Pruebas y acciones",
@@ -4177,6 +4183,74 @@
       "incidentReported": "Se informó de algo durante el alquiler.",
       "noIncident": "No se informó de nada durante el alquiler.",
       "renterPhotos": "{count, plural, one {Se añadió # foto} other {Se añadieron # fotos}} a la disputa."
+    }
+  },
+  "promise": {
+    "settingsTitle": "Reclamaciones impugnadas",
+    "settingsLead": "Lo que promete a quien impugna una reclamación, y el representante que puede llegar a un acuerdo por usted.",
+    "title": "Nuestra promesa a quienes alquilan",
+    "lead": "Cuando alguien impugna una reclamación, la tienda decide en este número de días, antes del cierre. Quien alquila ve la fecha antes de impugnar y Hold la hace cumplir: una reclamación no decidida a tiempo pasa al propietario, que debe dar un motivo por escrito.",
+    "days": "Días para decidir una reclamación impugnada (1 a 14)",
+    "hint": "Una reclamación conserva los días con los que se presentó. Cambiar esto nunca mueve una fecha ya prometida.",
+    "save": "Guardar la promesa",
+    "saved": "Guardada. Las nuevas reclamaciones la llevan.",
+    "preview": "Lo que leen quienes alquilan",
+    "readOnly": "La tienda promete decidir una reclamación impugnada en {days, plural, one {# día} other {# días}}. Solo el propietario lo cambia.",
+    "waiver": {
+      "title": "Anular lo que no decidamos a tiempo",
+      "lead": "Si pasa la fecha prometida sin decisión, Hold anula la reclamación y libera la retención por usted. Solo puede liberar dinero, nunca cobrarlo. Desactivada salvo que el propietario la active.",
+      "live": "Activa hasta el {until}, para un máximo de {count, plural, one {# reclamación} other {# reclamaciones}} al día.",
+      "off": "Desactivada. Una reclamación no decidida a tiempo pasa al propietario.",
+      "dailyCount": "Reclamaciones al día, como máximo (1 a 20)",
+      "days": "Durante cuántos días (1 a 90)",
+      "grant": "Activar",
+      "granted": "Activada. Las reclamaciones no decididas a tiempo se anulan.",
+      "revoke": "Desactivar",
+      "revoked": "Desactivada. Las reclamaciones no decididas a tiempo pasan al propietario.",
+      "ownerOnly": "Solo el propietario la activa o desactiva."
+    },
+    "renter": {
+      "beforeLabel": "Si la impugna",
+      "beforeBody": "{shop} promete decidir en {days, plural, one {# día} other {# días}} desde su respuesta. Verá la fecha exacta en cuanto la envíe.",
+      "openLabel": "La tienda decide antes del",
+      "keptBody": "{shop} decidió el {when}, dentro de la fecha prometida.",
+      "missedTitle": "La tienda no cumplió su fecha",
+      "missedBody": "{shop} prometió decidir antes del {when} y no lo hizo. Se ha informado al propietario. Ahora solo el propietario puede decidir, y debe darle un motivo por escrito.",
+      "lateTitle": "Decidida después de la fecha prometida",
+      "lateBody": "{shop} prometió decidir antes del {when} y decidió más tarde. El propietario escribió:",
+      "waivedTitle": "Anulada: no se decidió a tiempo",
+      "waivedBody": "{shop} prometió decidir antes del {when}. No lo hizo, así que según su propia regla no se cobra nada."
+    },
+    "shop": {
+      "openLabel": "Prometió decidir antes del",
+      "missedLabel": "Promesa incumplida",
+      "missedBody": "Vencía el {when}. Ahora solo el propietario puede decidir, con un motivo que leerá quien alquila.",
+      "keptBody": "Decidida el {when}, dentro de la fecha prometida.",
+      "lateBody": "Decidida el {when}, después de la fecha prometida.",
+      "ownerOnly": "La fecha prometida pasó, así que ahora solo el propietario puede decidir esta reclamación.",
+      "reasonShown": "Quien alquila leerá este motivo en la página de su reclamación."
+    },
+    "left": "{when}",
+    "dueNow": "Vence ahora",
+    "messages": {
+      "renterTitle": "Mensajes con {shop}",
+      "shopTitle": "Mensajes con {renter}",
+      "empty": "Aún no hay mensajes.",
+      "you": "Usted",
+      "theRenter": "Quien alquila",
+      "staff": "Personal",
+      "writeRenter": "Escribir a la tienda",
+      "writeShop": "Escribir a {renter}",
+      "send": "Enviar",
+      "sent": "Enviado.",
+      "renterHint": "La tienda recibe un correo avisando de que ha escrito. Hasta 1000 caracteres.",
+      "shopHint": "{renter} recibe sus palabras por correo. Hasta 1000 caracteres."
+    },
+    "results": {
+      "message_invalid": "Escriba un mensaje de hasta 1000 caracteres.",
+      "rate_limited": "Demasiados mensajes por ahora. Inténtelo de nuevo en una hora.",
+      "not_found": "Esta reclamación no está abierta a mensajes.",
+      "standing_rule_off": "Ya está desactivada."
     }
   }
 }

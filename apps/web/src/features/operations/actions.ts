@@ -84,7 +84,7 @@ export const discardRule = shopAction({ name: 'operations.rule_discarded', roles
   (await decideRule(transaction, input.ruleId, context.person.userId, 'discard', new Date())) ? { ruleId: input.ruleId } : new Refusal('rule_not_open'),
 )
 
-// The one standing rule offered (section 6.4): release a clean return nobody confirmed in time. The owner turns it on
+// The clean-return standing rule (section 6.4): release a clean return nobody confirmed in time. The owner turns it on
 // with a passkey, within a daily count and a number of days; turning it on again replaces the live one.
 export const grantStandingRule = shopAction({ name: 'operations.standing_rule_granted', roles: OWNER, needsPasskey: true, input: withLocale({ dailyCount: z.coerce.number().int().min(1).max(20), days: z.coerce.number().int().min(1).max(90) }) }, async (context, input, transaction) => {
   const now = new Date()

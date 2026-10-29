@@ -1242,7 +1242,7 @@
       "incidents": "Incidents",
       "trust": "Trust ladder",
       "selfService": "Renter self-service",
-      "settlement": "Settlement advocate",
+      "settlement": "Contested claims",
       "queue": "Morning queue",
       "money": "Money",
       "insights": "Insights"
@@ -2870,7 +2870,8 @@
       "decision_recorded": "A decision is already recorded. Refresh this page to see its settlement status.",
       "incident_not_agreed": "That report was not agreed by the renter.",
       "raises_agreed_line": "A line the renter agreed can be lowered, never raised.",
-      "empty_line": "Leave the line out rather than keep it at nothing."
+      "empty_line": "Leave the line out rather than keep it at nothing.",
+      "owner_decides_after_promise": "The shop missed the date it promised the renter. Only the owner can decide this claim now."
     },
     "acknowledge": "I have reviewed this claim",
     "reviewFirst": "Review the evidence and prices. Your reply period starts when you confirm you have reviewed this claim.",
@@ -3320,7 +3321,8 @@
       "deadline": "The time for the negotiation ran out.",
       "mandate_ended": "An advocate was stopped, or its limits ended.",
       "declined": "A person declined the agreed amount.",
-      "nothing_to_charge": "They agreed on nothing to pay: the owner waives the claim."
+      "nothing_to_charge": "They agreed on nothing to pay: the owner waives the claim.",
+      "promise_missed": "The shop's promised date passed: the owner decides."
     },
     "confirm": {
       "renterTitle": "Confirm the agreed amount",
@@ -3471,7 +3473,9 @@
       "invoice_unpaid": "The invoice is still unpaid.",
       "dispute_open": "A PayPal dispute is waiting for a response.",
       "incident_waiting": "An incident has waited for staff longer than the shop allows.",
-      "reconciliation_difference": "PayPal's record of a hold differs from Hold's."
+      "reconciliation_difference": "PayPal's record of a hold differs from Hold's.",
+      "decision_promise_due": "The shop promised the renter a decision on this contested claim within a day.",
+      "decision_promise_missed": "The shop did not decide this contested claim by the date it promised. Only the owner may decide it now."
     },
     "recent": {
       "title": "Decided in the last day",
@@ -3613,13 +3617,15 @@
       "you": "You",
       "senior": "An owner or manager",
       "another_senior": "Another owner or manager",
-      "staff": "Staff"
+      "staff": "Staff",
+      "owner": "The owner"
     },
     "deciderLine": {
       "you": "You decide.",
       "senior": "An owner or manager decides.",
       "another_senior": "Another owner or manager decides: you raised it.",
-      "staff": "Staff decide. You can read it."
+      "staff": "Staff decide. You can read it.",
+      "owner": "The owner decides: the promised date passed."
     },
     "list": "Decisions",
     "open": "Evidence and actions",
@@ -4177,6 +4183,74 @@
       "incidentReported": "Something was reported during the rental.",
       "noIncident": "Nothing was reported during the rental.",
       "renterPhotos": "{count, plural, one {# photograph was} other {# photographs were}} added to the contest."
+    }
+  },
+  "promise": {
+    "settingsTitle": "Contested claims",
+    "settingsLead": "What you promise a renter who contests a claim, and the advocate that may settle one for you.",
+    "title": "Our promise to renters",
+    "lead": "When a renter contests a claim, the shop decides within this many days, by closing time. The renter sees the date before they contest, and Hold keeps it: a claim not decided in time goes to the owner, who must give the renter a written reason.",
+    "days": "Days to decide a contested claim (1 to 14)",
+    "hint": "A claim keeps the days it was presented with. Changing this never moves a date already promised.",
+    "save": "Save the promise",
+    "saved": "Saved. New claims carry it.",
+    "preview": "What renters read",
+    "readOnly": "The shop promises to decide a contested claim within {days, plural, one {# day} other {# days}}. Only the owner changes it.",
+    "waiver": {
+      "title": "Waive what we do not decide in time",
+      "lead": "When the promised date passes undecided, Hold waives the claim and releases the hold for you. It can only release money, never charge it. Off unless the owner turns it on.",
+      "live": "On until {until}, for up to {count, plural, one {# claim} other {# claims}} a day.",
+      "off": "Off. A claim not decided in time goes to the owner.",
+      "dailyCount": "Claims a day, at most (1 to 20)",
+      "days": "For how many days (1 to 90)",
+      "grant": "Turn on",
+      "granted": "On. Claims not decided in time are waived.",
+      "revoke": "Turn off",
+      "revoked": "Off. Claims not decided in time go to the owner.",
+      "ownerOnly": "Only the owner turns it on or off."
+    },
+    "renter": {
+      "beforeLabel": "If you contest",
+      "beforeBody": "{shop} promises to decide within {days, plural, one {# day} other {# days}} of your reply. You will see the exact date as soon as you send it.",
+      "openLabel": "The shop decides by",
+      "keptBody": "{shop} decided on {when}, by the date it promised.",
+      "missedTitle": "The shop missed its date",
+      "missedBody": "{shop} promised to decide by {when}, and did not. The owner has been told. Only the owner can decide now, and they must give you a written reason.",
+      "lateTitle": "Decided after the promised date",
+      "lateBody": "{shop} promised to decide by {when} and decided later. The owner wrote:",
+      "waivedTitle": "Waived: not decided in time",
+      "waivedBody": "{shop} promised to decide by {when}. It did not, so under its own rule nothing is charged."
+    },
+    "shop": {
+      "openLabel": "You promised to decide by",
+      "missedLabel": "Promise missed",
+      "missedBody": "It was due {when}. Only the owner can decide now, with a reason the renter will read.",
+      "keptBody": "Decided {when}, by the promised date.",
+      "lateBody": "Decided {when}, after the promised date.",
+      "ownerOnly": "The promised date passed, so only the owner can decide this claim now.",
+      "reasonShown": "The renter will read this reason on their claim page."
+    },
+    "left": "{when}",
+    "dueNow": "Due now",
+    "messages": {
+      "renterTitle": "Messages with {shop}",
+      "shopTitle": "Messages with {renter}",
+      "empty": "No messages yet.",
+      "you": "You",
+      "theRenter": "The renter",
+      "staff": "Staff",
+      "writeRenter": "Write to the shop",
+      "writeShop": "Write to {renter}",
+      "send": "Send",
+      "sent": "Sent.",
+      "renterHint": "The shop is told by email that you wrote. Up to 1,000 characters.",
+      "shopHint": "{renter} gets your words by email. Up to 1,000 characters."
+    },
+    "results": {
+      "message_invalid": "Write a message of up to 1,000 characters.",
+      "rate_limited": "Too many messages for now. Try again in an hour.",
+      "not_found": "This claim is not open for messages.",
+      "standing_rule_off": "It is already off."
     }
   }
 }

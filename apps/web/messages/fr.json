@@ -1242,7 +1242,7 @@
       "incidents": "Incidents",
       "trust": "Échelle de confiance",
       "selfService": "Libre-service des locataires",
-      "settlement": "Représentant de règlement",
+      "settlement": "Réclamations contestées",
       "queue": "File du matin",
       "money": "Argent",
       "insights": "Analyses"
@@ -2870,7 +2870,8 @@
       "decision_recorded": "Une décision est déjà enregistrée. Actualisez cette page pour voir le statut du règlement.",
       "incident_not_agreed": "Ce signalement n’a pas été accepté par le locataire.",
       "raises_agreed_line": "Une ligne acceptée par le locataire peut être baissée, jamais augmentée.",
-      "empty_line": "Retirez la ligne plutôt que de la garder à zéro."
+      "empty_line": "Retirez la ligne plutôt que de la garder à zéro.",
+      "owner_decides_after_promise": "La boutique a manqué la date promise au locataire. Seul le propriétaire peut maintenant décider de cette réclamation."
     },
     "acknowledge": "J’ai examiné cette réclamation",
     "reviewFirst": "Vérifiez les preuves et les prix. Votre délai commence quand vous confirmez avoir examiné cette réclamation.",
@@ -3320,7 +3321,8 @@
       "deadline": "Le temps de la négociation est écoulé.",
       "mandate_ended": "Un représentant a été arrêté, ou ses limites ont pris fin.",
       "declined": "Une personne a refusé le montant convenu.",
-      "nothing_to_charge": "Ils se sont accordés sur rien à payer : le propriétaire renonce à la réclamation."
+      "nothing_to_charge": "Ils se sont accordés sur rien à payer : le propriétaire renonce à la réclamation.",
+      "promise_missed": "La date promise par la boutique est passée : le propriétaire décide."
     },
     "confirm": {
       "renterTitle": "Confirmer le montant convenu",
@@ -3471,7 +3473,9 @@
       "invoice_unpaid": "La facture n’est toujours pas payée.",
       "dispute_open": "Un litige PayPal attend une réponse.",
       "incident_waiting": "Un incident attend l’équipe depuis plus longtemps que la boutique ne le permet.",
-      "reconciliation_difference": "L’enregistrement PayPal d’une empreinte diffère de celui de Hold."
+      "reconciliation_difference": "L’enregistrement PayPal d’une empreinte diffère de celui de Hold.",
+      "decision_promise_due": "La boutique a promis au locataire une décision sur cette réclamation contestée dans la journée.",
+      "decision_promise_missed": "La boutique n’a pas décidé de cette réclamation contestée avant la date promise. Seul le propriétaire peut maintenant en décider."
     },
     "recent": {
       "title": "Décidé ces dernières 24 heures",
@@ -3613,13 +3617,15 @@
       "you": "Vous",
       "senior": "Propriétaire ou responsable",
       "another_senior": "Un autre propriétaire ou responsable",
-      "staff": "Le personnel"
+      "staff": "Le personnel",
+      "owner": "Le propriétaire"
     },
     "deciderLine": {
       "you": "Vous décidez.",
       "senior": "Un propriétaire ou un responsable décide.",
       "another_senior": "Un autre propriétaire ou responsable décide : vous l’avez émise.",
-      "staff": "Le personnel décide. Vous pouvez la lire."
+      "staff": "Le personnel décide. Vous pouvez la lire.",
+      "owner": "Le propriétaire décide : la date promise est passée."
     },
     "list": "Décisions",
     "open": "Preuves et actions",
@@ -4177,6 +4183,74 @@
       "incidentReported": "Quelque chose a été signalé pendant la location.",
       "noIncident": "Rien n’a été signalé pendant la location.",
       "renterPhotos": "{count, plural, one {# photo a été ajoutée} other {# photos ont été ajoutées}} à la contestation."
+    }
+  },
+  "promise": {
+    "settingsTitle": "Réclamations contestées",
+    "settingsLead": "Ce que vous promettez au locataire qui conteste une réclamation, et le représentant qui peut la régler pour vous.",
+    "title": "Notre promesse aux locataires",
+    "lead": "Quand un locataire conteste une réclamation, la boutique décide dans ce nombre de jours, avant la fermeture. Le locataire voit la date avant de contester, et Hold la fait respecter : une réclamation non décidée à temps passe au propriétaire, qui doit donner un motif écrit.",
+    "days": "Jours pour décider d’une réclamation contestée (1 à 14)",
+    "hint": "Une réclamation garde les jours avec lesquels elle a été présentée. Modifier ceci ne déplace jamais une date déjà promise.",
+    "save": "Enregistrer la promesse",
+    "saved": "Enregistrée. Les nouvelles réclamations la portent.",
+    "preview": "Ce que lisent les locataires",
+    "readOnly": "La boutique promet de décider d’une réclamation contestée sous {days, plural, one {# jour} other {# jours}}. Seul le propriétaire la modifie.",
+    "waiver": {
+      "title": "Renoncer à ce que nous ne décidons pas à temps",
+      "lead": "Si la date promise passe sans décision, Hold abandonne la réclamation et libère l’empreinte pour vous. Elle ne peut que libérer de l’argent, jamais débiter. Désactivée tant que le propriétaire ne l’active pas.",
+      "live": "Active jusqu’au {until}, pour au plus {count, plural, one {# réclamation} other {# réclamations}} par jour.",
+      "off": "Désactivée. Une réclamation non décidée à temps passe au propriétaire.",
+      "dailyCount": "Réclamations par jour, au plus (1 à 20)",
+      "days": "Pendant combien de jours (1 à 90)",
+      "grant": "Activer",
+      "granted": "Activée. Les réclamations non décidées à temps sont abandonnées.",
+      "revoke": "Désactiver",
+      "revoked": "Désactivée. Les réclamations non décidées à temps passent au propriétaire.",
+      "ownerOnly": "Seul le propriétaire l’active ou la désactive."
+    },
+    "renter": {
+      "beforeLabel": "Si vous contestez",
+      "beforeBody": "{shop} promet de décider sous {days, plural, one {# jour} other {# jours}} après votre réponse. Vous verrez la date exacte dès que vous l’enverrez.",
+      "openLabel": "La boutique décide avant le",
+      "keptBody": "{shop} a décidé le {when}, avant la date promise.",
+      "missedTitle": "La boutique a manqué sa date",
+      "missedBody": "{shop} a promis de décider avant le {when} et ne l’a pas fait. Le propriétaire a été informé. Seul le propriétaire peut maintenant décider, et il doit vous donner un motif écrit.",
+      "lateTitle": "Décidée après la date promise",
+      "lateBody": "{shop} a promis de décider avant le {when} et a décidé plus tard. Le propriétaire a écrit :",
+      "waivedTitle": "Abandonnée : pas décidée à temps",
+      "waivedBody": "{shop} a promis de décider avant le {when}. Ce n’est pas le cas, donc selon sa propre règle rien n’est débité."
+    },
+    "shop": {
+      "openLabel": "Vous avez promis de décider avant le",
+      "missedLabel": "Promesse manquée",
+      "missedBody": "L’échéance était le {when}. Seul le propriétaire peut maintenant décider, avec un motif que le locataire lira.",
+      "keptBody": "Décidée le {when}, avant la date promise.",
+      "lateBody": "Décidée le {when}, après la date promise.",
+      "ownerOnly": "La date promise est passée : seul le propriétaire peut maintenant décider de cette réclamation.",
+      "reasonShown": "Le locataire lira ce motif sur la page de sa réclamation."
+    },
+    "left": "{when}",
+    "dueNow": "Échéance maintenant",
+    "messages": {
+      "renterTitle": "Messages avec {shop}",
+      "shopTitle": "Messages avec {renter}",
+      "empty": "Aucun message pour l’instant.",
+      "you": "Vous",
+      "theRenter": "Le locataire",
+      "staff": "Personnel",
+      "writeRenter": "Écrire à la boutique",
+      "writeShop": "Écrire à {renter}",
+      "send": "Envoyer",
+      "sent": "Envoyé.",
+      "renterHint": "La boutique reçoit un e-mail indiquant que vous avez écrit. Jusqu’à 1 000 caractères.",
+      "shopHint": "{renter} reçoit vos mots par e-mail. Jusqu’à 1 000 caractères."
+    },
+    "results": {
+      "message_invalid": "Écrivez un message de 1 000 caractères au plus.",
+      "rate_limited": "Trop de messages pour l’instant. Réessayez dans une heure.",
+      "not_found": "Cette réclamation n’est pas ouverte aux messages.",
+      "standing_rule_off": "Elle est déjà désactivée."
     }
   }
 }

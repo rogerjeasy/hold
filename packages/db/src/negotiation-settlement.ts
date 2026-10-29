@@ -3,6 +3,7 @@ import type { Mandate } from '@hold/domain'
 import { count, eq } from 'drizzle-orm'
 import { claimStaff } from './claim-access.ts'
 import { liveLink, storeRenterCode } from './claim-code-repository.ts'
+import { markClaimDecided } from './claim-promise-repository.ts'
 import { queueClaimCapture } from './claim-reply-repository.ts'
 import { escalateNegotiation } from './negotiation-ending.ts'
 import { negotiationRecords } from './negotiation-view.ts'
@@ -75,6 +76,7 @@ export async function settleIfConfirmed(transaction: Transaction, negotiationId:
     createdAt: now,
   })
   await transaction.update(claims).set({ totalCents: agreed.totalCents }).where(eq(claims.id, claim.id))
+  await markClaimDecided(transaction, claim, now)
   await transaction.update(negotiations).set({ state: 'settled', endedAt: now, updatedAt: now }).where(eq(negotiations.id, negotiationId))
   const capture = await queueClaimCapture(transaction, claim.id, now)
   if (!capture.ok) throw new Error(`The agreed claim could not be charged: ${capture.reason}.`)

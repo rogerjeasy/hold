@@ -1,3 +1,5 @@
+import { promiseDueSoon, promiseStanding } from './decision-promise.ts'
+import type { PromiseFacts } from './decision-promise.ts'
 import type { ProposalKind } from './proposal.ts'
 
 // What needs the owner's attention, decided by plain code over the shop's records (extensions.md section 6.3, step 1).
@@ -14,6 +16,8 @@ export const DETECTOR_KINDS = [
   'dispute_open',
   'incident_waiting',
   'reconciliation_difference',
+  'decision_promise_due',
+  'decision_promise_missed',
 ] as const
 export type DetectorKind = (typeof DETECTOR_KINDS)[number]
 
@@ -30,6 +34,9 @@ export const DETECTOR_PROPOSALS: Readonly<Record<DetectorKind, readonly Proposal
   dispute_open: ['respond_to_dispute'],
   incident_waiting: ['note'],
   reconciliation_difference: ['note'],
+  // A promise to the renter moves no money: the claim page decides it (architecture.md section 6.16).
+  decision_promise_due: ['send_message', 'note'],
+  decision_promise_missed: ['note'],
 }
 
 // Fixed-template messages that move no money, sent without asking (section 6.4).
@@ -42,7 +49,7 @@ export type ShopSnapshot = {
   readonly rentals: readonly { readonly id: string; readonly state: string; readonly endsAt: Date; readonly renterId: string | null }[]
   readonly holds: readonly { readonly id: string; readonly rentalId: string; readonly state: string; readonly reservedCents: number; readonly currency: string; readonly validUntil: Date | null; readonly stateChangedAt: Date; readonly replacementStarted: boolean }[]
   readonly comparisons: readonly { readonly rentalId: string; readonly state: string; readonly completedAt: Date | null; readonly simulated: boolean }[]
-  readonly claims: readonly { readonly id: string; readonly rentalId: string; readonly state: string; readonly totalCents: number; readonly currency: string; readonly replyDueAt: Date | null }[]
+  readonly claims: readonly { readonly id: string; readonly rentalId: string; readonly state: string; readonly totalCents: number; readonly currency: string; readonly replyDueAt: Date | null; readonly promise?: PromiseFacts }[]
   readonly invoices: readonly { readonly id: string; readonly claimId: string; readonly rentalId: string; readonly state: string; readonly amountCents: number; readonly sentAt: Date | null }[]
   // Read from PayPal by code. A dispute may name no rental Hold knows.
   readonly disputes: readonly { readonly id: string; readonly rentalId: string | null; readonly state: string; readonly amountCents: number; readonly responseDueAt: Date | null; readonly respondedAt: Date | null }[]
@@ -106,6 +113,11 @@ export function detectExceptions(snapshot: ShopSnapshot): readonly ShopException
   for (const claim of snapshot.claims) {
     if (claim.state === 'presented' && claim.replyDueAt !== null && claim.replyDueAt.getTime() > at && claim.replyDueAt.getTime() - at <= REPLY_DUE_WITHIN) {
       found.push(exception({ kind: 'claim_reply_due', subjectKind: 'claim', subjectId: claim.id, rentalId: claim.rentalId, allowed: DETECTOR_PROPOSALS.claim_reply_due, reminder: 'reply_due', deadline: claim.replyDueAt, moneyCents: claim.totalCents, seen: claim.replyDueAt.toISOString() }))
+    }
+    if (claim.promise !== undefined && claim.promise.decideBy !== null) {
+      const { decideBy } = claim.promise
+      if (promiseDueSoon(claim.promise, snapshot.now)) found.push(exception({ kind: 'decision_promise_due', subjectKind: 'claim', subjectId: claim.id, rentalId: claim.rentalId, allowed: DETECTOR_PROPOSALS.decision_promise_due, deadline: decideBy, moneyCents: claim.totalCents, seen: decideBy.toISOString() }))
+      if (claim.promise.decidedAt === null && promiseStanding(claim.promise, snapshot.now) === 'missed') found.push(exception({ kind: 'decision_promise_missed', subjectKind: 'claim', subjectId: claim.id, rentalId: claim.rentalId, allowed: DETECTOR_PROPOSALS.decision_promise_missed, moneyCents: claim.totalCents, seen: decideBy.toISOString() }))
     }
     const reserved = holdOf(claim.rentalId)?.reservedCents ?? 0
     if (DECIDED_CLAIMS.includes(claim.state) && claim.totalCents > reserved && !snapshot.invoices.some((invoice) => invoice.claimId === claim.id)) {

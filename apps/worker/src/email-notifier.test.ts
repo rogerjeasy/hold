@@ -40,6 +40,16 @@ describe('telling people from the worker', () => {
     expect(mailer.sent[0]?.text).toContain('300,00')
   })
 
+  it('emails each owner, in their language, that a promised decision was missed, with a link to the claim', async () => {
+    const { database, shopId, rentalId } = await shopWithRental()
+    const mailer = createMemoryMailer()
+    await createEmailNotifier({ database, mailer, publicUrl: 'https://hold.test' }).tell({ kind: 'promise_missed', shopId, rentalId, waived: false })
+    expect(mailer.sent).toHaveLength(2)
+    expect(mailer.sent[0]).toMatchObject({ to: 'ana@ribeira.example', subject: 'Zugesagte Entscheidung verpasst: Priya Natarajan' })
+    expect(mailer.sent[1]).toMatchObject({ to: 'priya@example.com', subject: 'Ribeira Bikes n’a pas décidé de votre réclamation à temps' })
+    expect(mailer.sent[0]?.text).toContain(`https://hold.test/de/shop/rentals/${rentalId}/claim`)
+  })
+
   it('throws when an email could not be sent, so the queue tries again', async () => {
     const { database, shopId, rentalId } = await shopWithRental()
     const notifier = createEmailNotifier({ database, mailer: { send: () => Promise.resolve(false) }, publicUrl: 'https://hold.test' })

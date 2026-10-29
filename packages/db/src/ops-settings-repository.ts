@@ -1,5 +1,5 @@
-import type { Mandate, OwnerRule, ReminderKind } from '@hold/domain'
-import { and, desc, eq, gt, inArray, isNull, lte, or } from 'drizzle-orm'
+import type { Mandate, OwnerRule, ReminderKind, StandingRuleCondition } from '@hold/domain'
+import { and, desc, eq, gt, inArray, isNull, lte, or, sql } from 'drizzle-orm'
 import { mandates, opsRules, reminders, rentals, shops } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
@@ -42,12 +42,13 @@ export async function rulesForOwner(transaction: Transaction) {
   return transaction.select({ id: opsRules.id, rule: opsRules.rule, state: opsRules.state, fromProposalId: opsRules.fromProposalId, createdAt: opsRules.createdAt }).from(opsRules).where(or(eq(opsRules.state, 'drafted'), eq(opsRules.state, 'confirmed'))).orderBy(desc(opsRules.createdAt))
 }
 
-// The one standing rule the hackathon build offers: release a hold when the comparison was clean and nobody confirmed
-// it in the set time (section 6.4). Off until the owner grants it.
-export async function grantStandingRule(transaction: Transaction, ownerId: string, limits: { readonly dailyCount: number; readonly days: number }, now: Date): Promise<string> {
+// The standing rules: release a hold when the comparison was clean and nobody confirmed it in the set time (section
+// 6.4), or waive a contested claim the shop did not decide by the date it promised (architecture.md section 6.16).
+// Each releases, never charges, and is off until the owner grants it.
+export async function grantStandingRule(transaction: Transaction, ownerId: string, limits: { readonly dailyCount: number; readonly days: number }, now: Date, condition: StandingRuleCondition = 'clean_return_unconfirmed'): Promise<string> {
   const [row] = await transaction.insert(mandates).values({
     shopId: await shopInScope(transaction), kind: 'ops_standing_rule', grantedByUserId: ownerId, agent: 'operations_agent',
-    limits: { proposalKind: 'release_hold', condition: 'clean_return_unconfirmed', dailyCount: limits.dailyCount },
+    limits: { proposalKind: 'release_hold', condition, dailyCount: limits.dailyCount },
     validFrom: now, validUntil: new Date(now.getTime() + limits.days * 24 * 3_600_000), grantedHow: 'on_screen', createdAt: now,
   }).returning({ id: mandates.id })
   if (row === undefined) throw new Error('The mandate was not recorded.')
@@ -61,8 +62,8 @@ export async function revokeMandate(transaction: Transaction, mandateId: string,
 
 const asMandate = (row: typeof mandates.$inferSelect): Mandate => ({ id: row.id, kind: row.kind, grantedTo: row.agent, validFrom: row.validFrom, validUntil: row.validUntil, revokedAt: row.revokedAt, limits: row.limits })
 
-export async function liveStandingRule(transaction: Transaction, now: Date): Promise<Mandate | undefined> {
-  const [row] = await transaction.select().from(mandates).where(and(eq(mandates.kind, 'ops_standing_rule'), isNull(mandates.revokedAt), lte(mandates.validFrom, now), gt(mandates.validUntil, now))).orderBy(desc(mandates.createdAt)).limit(1)
+export async function liveStandingRule(transaction: Transaction, now: Date, condition: StandingRuleCondition = 'clean_return_unconfirmed'): Promise<Mandate | undefined> {
+  const [row] = await transaction.select().from(mandates).where(and(eq(mandates.kind, 'ops_standing_rule'), sql`${mandates.limits}->>'condition' = ${condition}`, isNull(mandates.revokedAt), lte(mandates.validFrom, now), gt(mandates.validUntil, now))).orderBy(desc(mandates.createdAt)).limit(1)
   return row === undefined ? undefined : asMandate(row)
 }
 

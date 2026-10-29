@@ -25,6 +25,8 @@ const claim = (overrides: Partial<DecisionClaim> = {}): DecisionClaim => ({
   holdValidUntil: at('2026-11-10T10:00:00Z'),
   renterComment: null,
   simulated: false,
+  decideBy: null,
+  promiseMissedAt: null,
   lines: [{ id: 'line-1', description: 'Scratch on the frame', amountCents: 35_00, source: 'finding', reason: null, region: { x: 0.3, y: 0.5, width: 0.1, height: 0.1 }, beforeKey: 'before.jpg', afterKey: 'after.jpg' }],
   ...overrides,
 })
@@ -190,6 +192,17 @@ describe('who decides, as the viewer reads it', () => {
     expect(boardRows(records({ claims: [contested] }), counter, NOW)[0]?.decider).toBe('senior')
     expect(boardRows(records({ claims: [contested] }), owner, NOW)[0]?.decider).toBe('another_senior')
     expect(boardRows(records({ claims: [contested], staffCount: 1 }), owner, NOW)[0]?.decider).toBe('you')
+  })
+
+  it('falls due at the date the shop promised the renter, and once that passed only the owner decides', () => {
+    const manager: Viewer = { userId: 'manager-1', role: 'manager', approvalLimitCents: 0 }
+    const decideBy = new Date(NOW.getTime() + 20 * 3_600_000)
+    const open = claim({ state: 'contested', raisedByUserId: 'staff-1', holdValidUntil: new Date(NOW.getTime() + 20 * 86_400_000), decideBy, promiseMissedAt: null })
+    expect(boardRows(records({ claims: [open] }), manager, NOW)[0]).toMatchObject({ due: decideBy, overdue: false, promise: 'open', decider: 'you' })
+    const missed = { ...open, state: 'escalated' as const, decideBy: new Date(NOW.getTime() - 3_600_000), promiseMissedAt: new Date(NOW.getTime() - 3_600_000) }
+    expect(boardRows(records({ claims: [missed] }), manager, NOW)[0]).toMatchObject({ overdue: true, promise: 'missed', decider: 'owner' })
+    expect(boardRows(records({ claims: [missed] }), owner, NOW)[0]).toMatchObject({ promise: 'missed', decider: 'you' })
+    expect(boardRows(records({ claims: [claim()] }), owner, NOW)[0]).toMatchObject({ promise: null })
   })
 
   it('leaves the agent’s proposals to an owner or manager', () => {

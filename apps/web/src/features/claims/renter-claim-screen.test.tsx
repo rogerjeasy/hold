@@ -4,6 +4,8 @@ import { renderWithIntl } from '@/test/render'
 import { RenterClaimScreen } from './renter-claim-screen'
 vi.mock('./renter-actions', () => ({ acknowledgeClaim: vi.fn(), sendClaimCode: vi.fn(), acceptClaim: vi.fn(), contestClaim: vi.fn() }))
 vi.mock('@/features/negotiation/renter-actions', () => ({ startAdvocate: vi.fn() }))
+vi.mock('@/features/promise/renter-actions', () => ({ writeToShop: vi.fn() }))
+vi.mock('@/features/promise/actions', () => ({ writeToRenter: vi.fn() }))
 vi.mock('@/hooks/use-look-again', () => ({ useLookAgain: () => undefined }))
 it('shows the evidence and stored charge, asks for an email code and provides a contest path', () => {
   renderWithIntl(<RenterClaimScreen token="token" data={{ shopName: 'Ribeira Bikes', currency: 'EUR', state: 'presented', totalCents: 3500, captureCents: 3500, releaseCents: 26500, invoiceCents: 0, replyDueAt: new Date('2026-10-22'), holdState: 'placed', lines: [{ id: 'line', description: 'Scratch', reason: 'Fresh scratch on the frame.', amountCents: 3500, actorName: 'Ana', beforeUrl: null, afterUrl: null }], canReply: true }} />)
@@ -59,4 +61,19 @@ it('says plainly when a sandbox code went to the booking contact rather than the
   renderWithIntl(<RenterClaimScreen token="token" data={{ shopName: 'Ribeira Bikes', currency: 'EUR', state: 'presented', totalCents: 3500, captureCents: 3500, releaseCents: 26500, invoiceCents: 0, replyDueAt: new Date('2026-10-22'), holdState: 'placed', lines: [], canReply: true }} />)
   screen.getByRole('button', { name: 'Email me a verification code' }).click()
   expect(await screen.findByRole('status')).toHaveTextContent('This is the PayPal sandbox')
+})
+
+it('tells the renter what the shop promises before they contest, and the date and the conversation once they have', () => {
+  const base = { shopName: 'Ribeira Bikes', currency: 'EUR', totalCents: 3500, captureCents: 3500, releaseCents: 26500, invoiceCents: 0, replyDueAt: new Date('2026-10-22'), holdState: 'placed' as const, lines: [], timeZone: 'UTC', now: new Date('2026-10-21T10:00:00Z') }
+  const { unmount } = renderWithIntl(<RenterClaimScreen token="token" data={{ ...base, state: 'presented', canReply: true, promise: { days: 3, decideBy: null, decidedAt: null, missedAt: null, standing: 'none', missedReason: null }, messages: [], canWrite: true }} />)
+  expect(screen.getByText('If you contest')).toBeInTheDocument()
+  expect(screen.getByText(/Ribeira Bikes promises to decide within 3 days of your reply/)).toBeInTheDocument()
+  unmount()
+  renderWithIntl(<RenterClaimScreen token="token" data={{ ...base, state: 'contested', canReply: false, promise: { days: 3, decideBy: new Date('2026-10-24T18:00:00Z'), decidedAt: null, missedAt: null, standing: 'open', missedReason: null }, messages: [{ id: 'm1', author: 'shop', authorName: 'Ana', body: 'We are checking.', createdAt: new Date('2026-10-21T09:00:00Z') }], canWrite: true }} />)
+  expect(screen.getByText('The shop decides by')).toBeInTheDocument()
+  // The renter's own reply deadline means nothing once they have replied; the shop's date is the one that counts.
+  expect(screen.queryByText(/Reply by/)).not.toBeInTheDocument()
+  expect(screen.getByRole('heading', { name: 'Messages with Ribeira Bikes' })).toBeInTheDocument()
+  expect(screen.getByText('We are checking.')).toBeInTheDocument()
+  expect(screen.getByLabelText('Write to the shop')).toBeInTheDocument()
 })

@@ -1,6 +1,7 @@
 import { reserveEvidencePack } from './evidence-repository.ts'
 import { claimDeadlineAction, CLAIM_TRANSITIONS, HOLD_TRANSITIONS, money, planCharge, settle, transition } from '@hold/domain'
 import { and, eq } from 'drizzle-orm'
+import { makeClaimPromise } from './claim-promise-repository.ts'
 import { resolveClaimSettlement } from './claim-resolution.ts'
 import { EXECUTIONS_QUEUE } from './fee-repository.ts'
 import { approvals, authorizations, claimReplies, claims, executions, holds, outbox } from './schema/index.ts'
@@ -55,6 +56,7 @@ export async function replyToClaim(transaction: Transaction, rentalId: string, d
   if (!transition(CLAIM_TRANSITIONS, claim.state, target).ok) return { ok: false, reason: 'already_replied' } as const
   await transaction.insert(claimReplies).values({ shopId: claim.shopId, claimId: claim.id, decision, comment: comment.trim(), createdAt: now })
   await transaction.update(claims).set({ state: target }).where(eq(claims.id, claim.id))
+  if (decision === 'contest') await makeClaimPromise(transaction, claim, now)
   await reserveEvidencePack(transaction, rentalId, now)
   if (decision === 'contest') return { ok: true, executionId: null, rentalId } as const
   return queueClaimCapture(transaction, claim.id, now)

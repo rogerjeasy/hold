@@ -42,7 +42,7 @@ const counter: Viewer = { userId: 'staff-1', role: 'counter_staff', approvalLimi
 
 const claim = (overrides: Partial<DecisionClaim> = {}): DecisionClaim => ({
   claimId: 'claim-1', rentalId: '00000000-0000-4000-8000-000000000001', renterName: 'Priya Natarajan', state: 'awaiting_approval', totalCents: 35_00, currency: 'EUR', raisedByUserId: 'staff-1',
-  createdAt: at('2026-10-13T17:30:00Z'), reservedCents: 250_00, holdValidUntil: at('2026-11-10T10:00:00Z'), renterComment: null, simulated: true,
+  createdAt: at('2026-10-13T17:30:00Z'), reservedCents: 250_00, holdValidUntil: at('2026-11-10T10:00:00Z'), renterComment: null, simulated: true, decideBy: null, promiseMissedAt: null,
   lines: [{ id: 'line-1', description: 'Scratch on the frame, through the paint', amountCents: 35_00, source: 'finding', reason: null, region: { x: 0.3, y: 0.5, width: 0.1, height: 0.1 }, beforeKey: 'before.jpg', afterKey: 'after.jpg' }],
   ...overrides,
 })

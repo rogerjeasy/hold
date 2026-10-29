@@ -6,7 +6,7 @@ import type { ShopActionResult } from '@/server/shop-access'
 
 // A feature whose refusals have their own words. Reasons it does not word, such as a missing passkey, are worded once
 // in shop.results.
-type Results = 'shop.results' | 'trust.ladder.results' | 'shop.items.results' | 'shop.rentals.results' | 'shop.handover.results' | 'shop.returns.results' | 'shop.incidents.results' | 'claim.results' | 'negotiation.results' | 'operations.results' | 'selfReturn.staff.results' | 'selfReturn.settings.results' | 'contest.results' | 'decisions.detail.extensionPayment.results'
+type Results = 'shop.results' | 'trust.ladder.results' | 'shop.items.results' | 'shop.rentals.results' | 'shop.handover.results' | 'shop.returns.results' | 'shop.incidents.results' | 'claim.results' | 'negotiation.results' | 'operations.results' | 'selfReturn.staff.results' | 'selfReturn.settings.results' | 'contest.results' | 'decisions.detail.extensionPayment.results' | 'promise.results'
 
 // What a shop action answered, in plain words. A refusal can name a row of the form, as "amount_invalid:2".
 export function ActionMessage({ result, success, results = 'shop.results' }: { result: ShopActionResult<unknown> | null; success: string; results?: Results }) {

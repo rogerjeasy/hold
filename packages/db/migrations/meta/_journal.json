@@ -253,6 +253,13 @@
       "when": 1793306381614,
       "tag": "0035_extension_attention",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1793312582851,
+      "tag": "0036_decision_promise",
+      "breakpoints": true
     }
   ]
 }

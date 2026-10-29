@@ -1,7 +1,7 @@
 import { CLAIM_STATES } from '@hold/domain'
 import type { ContestSummary } from '@hold/domain'
 import { sql } from 'drizzle-orm'
-import { boolean, check, jsonb, pgTable, text } from 'drizzle-orm/pg-core'
+import { boolean, check, integer, jsonb, pgTable, text } from 'drizzle-orm/pg-core'
 import { shopIsolation } from './access.ts'
 import { priceEntries } from './catalog.ts'
 import { at, cents, createdAt, currency, id, reference } from './columns.ts'
@@ -26,9 +26,15 @@ export const claims = pgTable(
     raisedByUserId: reference().references(() => users.id),
     presentedAt: at(),
     replyDueAt: at(),
+    // The shop's promise to decide a contest (architecture.md section 6.16): the days it promised when the claim was
+    // presented, the date fixed when the renter contested, when it was decided, and when Hold found the date passed.
+    promiseDays: integer(),
+    decideBy: at(),
+    decidedAt: at(),
+    promiseMissedAt: at(),
     createdAt: createdAt(),
   },
-  (table) => [allowed(table.state, CLAIM_STATES), shopIsolation(table.shopId)],
+  (table) => [allowed(table.state, CLAIM_STATES), check('promise_days_allowed', sql`${table.promiseDays} is null or ${table.promiseDays} between 1 and 14`), shopIsolation(table.shopId)],
 )
 
 // Each line has a finding with photographs, a named person and their written reason, or the renter's agreement during
@@ -111,4 +117,28 @@ export const contestSummaries = pgTable(
     createdAt: createdAt(),
   },
   (table) => [check('outcome_allowed', sql`${table.outcome} in ('answered', 'refused', 'unavailable', 'invalid', 'dropped')`), check('summary_when_answered', sql`(${table.outcome} = 'answered') = (${table.summary} is not null)`), shopIsolation(table.shopId)],
+)
+
+// Words between the renter and the shop about a claim (architecture.md section 6.16), on both claim pages. Append-only.
+// The renter's are quoted data, never instructions, and no step that reads them can move money.
+export const claimMessages = pgTable(
+  'claim_messages',
+  {
+    id: id(),
+    shopId: shopReference(),
+    claimId: reference()
+      .notNull()
+      .references(() => claims.id),
+    author: text().notNull(),
+    // The staff member who wrote it; none for the renter.
+    authorUserId: reference().references(() => users.id),
+    body: text().notNull(),
+    createdAt: createdAt(),
+  },
+  (table) => [
+    check('author_allowed', sql`${table.author} in ('renter', 'shop')`),
+    check('shop_author_named', sql`(${table.author} = 'shop') = (${table.authorUserId} is not null)`),
+    check('body_length', sql`char_length(${table.body}) between 1 and 1000`),
+    shopIsolation(table.shopId),
+  ],
 )

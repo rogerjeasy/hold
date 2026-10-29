@@ -46,6 +46,10 @@ export type DecisionClaim = {
   // The hold the claim would be taken from, and the end of its validity: the date a decision must come before.
   readonly reservedCents: number | null
   readonly holdValidUntil: Date | null
+  // The date the shop promised the renter a decision, once they contested, and when Hold found it passed
+  // (architecture.md section 6.16).
+  readonly decideBy: Date | null
+  readonly promiseMissedAt: Date | null
   // The renter's own words. Quoted data, shown as written and never acted on.
   readonly renterComment: string | null
   readonly simulated: boolean
@@ -82,6 +86,8 @@ async function waitingClaims(transaction: Transaction): Promise<DecisionClaim[]>
       createdAt: claims.createdAt,
       reservedCents: holds.reservedCents,
       holdValidUntil: authorizations.validUntil,
+      decideBy: claims.decideBy,
+      promiseMissedAt: claims.promiseMissedAt,
       renterComment: sql<string | null>`(${latestComment})`,
       simulated: rentals.simulated,
     })

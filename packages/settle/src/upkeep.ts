@@ -1,4 +1,5 @@
 import { runClaimDeadline } from './claim-deadline.ts'
+import { runClaimPromise } from './claim-promise.ts'
 import { expireHold, saveReplacementOrder, upkeepTarget } from '@hold/db'
 import type { UpkeepTarget } from '@hold/db'
 import { money, needsReplacement } from '@hold/domain'
@@ -13,13 +14,13 @@ import type { UpkeepMessage } from './queue-messages.ts'
 // The timed steps that keep a placed hold watched (architecture.md section 7.4), each sent by its schedule. Hold acts on
 // its own clock and confirms with PayPal: PayPal sends no event when a hold expires.
 
-export type UpkeepOutcome = 'expired' | 'still_valid' | 'replacement_asked' | 'nothing_to_do' | 'claim_scheduled' | 'claim_charging'
+export type UpkeepOutcome = 'expired' | 'still_valid' | 'replacement_asked' | 'nothing_to_do' | 'claim_scheduled' | 'claim_charging' | 'promise_scheduled' | 'promise_missed' | 'promise_waived'
 
 // PayPal still holds the money on an authorization in these states until its end.
 const STILL_HELD: ReadonlySet<string> = new Set(['created', 'partially_captured', 'pending'])
 
 export async function runUpkeep(dependencies: SettleDependencies, message: UpkeepMessage): Promise<UpkeepOutcome> {
-  if ('claimId' in message) return runClaimDeadline(dependencies, message)
+  if ('claimId' in message) return message.kind === 'claim_promise' ? runClaimPromise(dependencies, message) : runClaimDeadline(dependencies, { ...message, kind: message.kind })
   const { shopId, holdId, authorizationId } = message
   const { target, account } = await inWorkerShop(dependencies, shopId, async (transaction) => ({
     target: await upkeepTarget(transaction, holdId, authorizationId),

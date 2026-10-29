@@ -11,8 +11,9 @@ import { expect, test } from './support/test'
 
 // The owner sets the shop advocate's limits once, in settings: half of a claim, on claims up to €200.
 async function shopAdvocate(page: Page, checkWidths = false): Promise<void> {
-  await page.getByRole('navigation', { name: 'Shop pages' }).getByRole('link', { name: 'Settlement advocate' }).click()
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Settlement advocate')
+  await page.getByRole('navigation', { name: 'Shop pages' }).getByRole('link', { name: 'Contested claims' }).click()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Contested claims')
+  await expect(page.getByRole('heading', { level: 2, name: 'Settlement advocate' })).toBeVisible()
   await expect(page.getByText('No shop advocate. Contested claims come to you, as now.')).toBeVisible()
   await page.getByLabel('Lowest share of a claim it may agree to, in percent').fill('50')
   await page.getByLabel('Largest claim it may take on, in EUR').fill('200')
