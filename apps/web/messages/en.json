@@ -3545,7 +3545,7 @@
     "lead": "Claims, the agent's proposals, renters' reports and the counter's own, in the order they fall due. Nothing here charges anyone: a charge still begins only from a claim a person approved.",
     "passkeyBody": "Approving the agent's releases and requests for money needs your passkey. Nothing else on this board does.",
     "empty": "Nothing waits on a person.",
-    "emptyBody": "Claims to approve, the agent's proposals, renters' reports, holds near their end and late returns appear here.",
+    "emptyBody": "Claims to approve, the agent's proposals, renters' reports, items renters dropped off, holds near their end and late returns appear here.",
     "noMatch": "Nothing matches. Clear the search or show every group.",
     "toolbar": "Filter the decisions",
     "groups": {
@@ -3573,7 +3573,8 @@
       "escalated": "Decide a claim the advocates did not settle",
       "incident": "{kind} on {item}",
       "hold_ending": "The hold for {renter} ends {when}",
-      "late": "{renter} is late"
+      "late": "{renter} is late",
+      "dropped_off": "Check what {renter} dropped off"
     },
     "headings": {
       "claim": "Approve a claim of {amount}",
@@ -3590,6 +3591,7 @@
     "renter": "a renter",
     "holdLine": "Day {day} of {max} · {amount} held",
     "lateLine": "Due back {when}",
+    "dropOffLine": "{items} · left {when}",
     "due": {
       "none": "No date",
       "overdue": "Overdue since {when}",
@@ -4103,5 +4105,54 @@
   "selfService": {
     "title": "Renter self-service",
     "lead": "What renters may do from their own phone with nobody at the shop to ask. Hold checks every case in plain code, and a person still approves every charge."
+  },
+  "contest": {
+    "title": "Where the two sides differ",
+    "count": "Disputed: {disputed} of {total, plural, one {# line} other {# lines}}",
+    "byClaude": "Written by Claude",
+    "bySimulated": "Simulated summary",
+    "neutral": "Takes no side and names no amount. The facts under each line come from Hold's records. Check the evidence before deciding.",
+    "disputed": "Disputed",
+    "notDisputed": "Not disputed",
+    "shopSays": "The shop says",
+    "renterSays": "The renter says",
+    "youSaid": "You said",
+    "records": "What the records show",
+    "staffReason": "Their written reason:",
+    "before": "Handover photograph: {line}",
+    "after": "Return photograph: {line}",
+    "beforeShort": "Handover",
+    "afterShort": "Return",
+    "renterWrote": "The renter wrote",
+    "youWrote": "You wrote",
+    "noWords": "No words, only the contest.",
+    "missing": {
+      "pending": "No summary has been written yet. The renter’s words and the records are below.",
+      "refused": "The summary could not be written this time. The renter's words and the records are below.",
+      "unavailable": "The summary could not be written this time. The renter's words and the records are below.",
+      "invalid": "The summary did not meet Hold's checks, so it is not shown. The renter's words and the records are below.",
+      "dropped": "The summary named a number, which Hold does not allow, so it is not shown. The renter's words and the records are below."
+    },
+    "rewrite": "Write the summary again",
+    "write": "Write the summary",
+    "rewritten": "Asked. The page now shows what came back.",
+    "results": {
+      "not_contested": "The renter has not contested this claim."
+    },
+    "facts": {
+      "confirmedTwice": "Found by the comparison, and confirmed by an independent second look.",
+      "foundOnce": "Found by the comparison. The second look did not confirm it.",
+      "markNearby": "A mark recorded before this rental is near the same spot.",
+      "noMarkNearby": "No mark recorded before this rental is near this spot.",
+      "agreedDuringRental": "The renter agreed this price when they reported it during the rental.",
+      "addedBy": "Added by {name}, with a written reason.",
+      "someone": "a staff member",
+      "conditionConfirmed": "The condition report at handover was confirmed, {when}, with nothing added.",
+      "conditionAdded": "Photographs of what staff missed were added to the condition report at handover.",
+      "conditionNotAnswered": "The condition report at handover was never answered.",
+      "incidentReported": "Something was reported during the rental.",
+      "noIncident": "Nothing was reported during the rental.",
+      "renterPhotos": "{count, plural, one {# photograph was} other {# photographs were}} added to the contest."
+    }
   }
 }

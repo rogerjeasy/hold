@@ -1,6 +1,6 @@
 import 'server-only'
-import { comparisonMessageSchema, createBedrockIncidentModel, createSimulatedIncidentModel, runComparison } from '@hold/compare'
-import type { IncidentModel } from '@hold/compare'
+import { comparisonMessageSchema, createBedrockContestModel, createBedrockIncidentModel, createSimulatedContestModel, createSimulatedIncidentModel, runComparison } from '@hold/compare'
+import type { ContestModel, IncidentModel } from '@hold/compare'
 import { createCognitoIdentity, createDemoSessionAccounts, createFakeIdentity, readKeySecret } from '@hold/auth'
 import type { Identity } from '@hold/auth'
 import { loadWebConfig } from '@hold/config'
@@ -62,6 +62,8 @@ export type Services = {
   readonly documents: DocumentStore | undefined
   // Sorts a renter's incident report: Claude on Bedrock, or in the test environment a stand-in that says it is simulated.
   readonly incidentModel: IncidentModel
+  // Writes the neutral summary when a renter contests a claim (architecture.md section 6.15).
+  readonly contestModel: ContestModel
   readonly flushRecords: (shopId: string) => Promise<void>
   // The Clean Record (extensions.md section 7): the renter key, made with a secret only Hold has, and the key that
   // signs credentials, read from KMS on first use so the app starts without it.
@@ -218,6 +220,7 @@ async function build(): Promise<Services> {
       simulatedEvidence,
       documents,
       incidentModel: createSimulatedIncidentModel(),
+      contestModel: createSimulatedContestModel(),
       flushRecords: (shopId) => records.flush(shopId),
       trust: { renterKey: renterKeyFor(await loadKey(config.trustKey, 'us-east-1')), signer: credentialSigner(config.credentialKey, 'us-east-1') },
     }
@@ -258,6 +261,7 @@ async function build(): Promise<Services> {
     simulatedEvidence: undefined,
     documents: config.photoBuckets === undefined ? undefined : createS3DocumentStore({ evidenceBucket: config.photoBuckets.evidence, region: config.region }),
     incidentModel: createBedrockIncidentModel({ awsRegion: config.region }),
+    contestModel: createBedrockContestModel({ awsRegion: config.region }),
     flushRecords: () => Promise.resolve(),
     trust: { renterKey: renterKeyFor(await loadKey(config.trustKey, config.region)), signer: credentialSigner(config.credentialKey, config.region) },
   }

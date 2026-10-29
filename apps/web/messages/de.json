@@ -3545,7 +3545,7 @@
     "lead": "Forderungen, Vorschläge des Agenten, Meldungen von Mietern und was am Tresen ansteht, in der Reihenfolge ihrer Fälligkeit. Hier wird niemandem etwas belastet: Eine Belastung beginnt nur mit einer Forderung, die ein Mensch freigegeben hat.",
     "passkeyBody": "Freigaben und Geldanfragen des Agenten zu genehmigen, braucht deinen Passkey. Sonst nichts auf dieser Seite.",
     "empty": "Nichts wartet auf einen Menschen.",
-    "emptyBody": "Freizugebende Forderungen, Vorschläge des Agenten, Meldungen von Mietern, Reservierungen kurz vor dem Ablauf und verspätete Rückgaben erscheinen hier.",
+    "emptyBody": "Freizugebende Forderungen, Vorschläge des Agenten, Meldungen von Mietern, von Mietern abgegebene Artikel, Reservierungen kurz vor dem Ablauf und verspätete Rückgaben erscheinen hier.",
     "noMatch": "Nichts passt. Leere die Suche oder zeige alle Gruppen.",
     "toolbar": "Entscheidungen filtern",
     "groups": {
@@ -3573,7 +3573,8 @@
       "escalated": "Über eine Forderung entscheiden, die die Vertreter nicht beigelegt haben",
       "incident": "{kind} an {item}",
       "hold_ending": "Die Reservierung für {renter} endet {when}",
-      "late": "{renter} ist verspätet"
+      "late": "{renter} ist verspätet",
+      "dropped_off": "Prüfen, was {renter} abgegeben hat"
     },
     "headings": {
       "claim": "Eine Forderung über {amount} freigeben",
@@ -3590,6 +3591,7 @@
     "renter": "ein Mieter",
     "holdLine": "Tag {day} von {max} · {amount} reserviert",
     "lateLine": "Rückgabe fällig {when}",
+    "dropOffLine": "{items} · abgegeben {when}",
     "due": {
       "none": "Kein Datum",
       "overdue": "Überfällig seit {when}",
@@ -4103,5 +4105,54 @@
   "selfService": {
     "title": "Selbstbedienung für Mieter",
     "lead": "Was Mieter über ihr eigenes Telefon tun können, ohne jemanden im Laden zu fragen. Hold prüft jeden Fall mit festen Regeln, und jede Abbuchung gibt weiterhin eine Person frei."
+  },
+  "contest": {
+    "title": "Wo die beiden Seiten auseinanderliegen",
+    "count": "Bestritten: {disputed} von {total, plural, one {# Position} other {# Positionen}}",
+    "byClaude": "Geschrieben von Claude",
+    "bySimulated": "Simulierte Zusammenfassung",
+    "neutral": "Ergreift keine Partei und nennt keinen Betrag. Die Fakten unter jeder Position stammen aus Holds Unterlagen. Prüfen Sie die Belege, bevor Sie entscheiden.",
+    "disputed": "Bestritten",
+    "notDisputed": "Nicht bestritten",
+    "shopSays": "Der Laden sagt",
+    "renterSays": "Der Mieter sagt",
+    "youSaid": "Sie sagten",
+    "records": "Was die Unterlagen zeigen",
+    "staffReason": "Die schriftliche Begründung:",
+    "before": "Foto bei Abholung: {line}",
+    "after": "Foto bei Rückgabe: {line}",
+    "beforeShort": "Abholung",
+    "afterShort": "Rückgabe",
+    "renterWrote": "Der Mieter schrieb",
+    "youWrote": "Sie schrieben",
+    "noWords": "Keine Worte, nur der Widerspruch.",
+    "missing": {
+      "pending": "Es wurde noch keine Zusammenfassung geschrieben. Die Worte des Mieters und die Unterlagen stehen unten.",
+      "refused": "Die Zusammenfassung konnte diesmal nicht geschrieben werden. Die Worte des Mieters und die Unterlagen stehen unten.",
+      "unavailable": "Die Zusammenfassung konnte diesmal nicht geschrieben werden. Die Worte des Mieters und die Unterlagen stehen unten.",
+      "invalid": "Die Zusammenfassung hat Holds Prüfungen nicht bestanden und wird nicht gezeigt. Die Worte des Mieters und die Unterlagen stehen unten.",
+      "dropped": "Die Zusammenfassung nannte eine Zahl, was Hold nicht erlaubt, und wird nicht gezeigt. Die Worte des Mieters und die Unterlagen stehen unten."
+    },
+    "rewrite": "Zusammenfassung erneut schreiben",
+    "write": "Zusammenfassung schreiben",
+    "rewritten": "Angefragt. Die Seite zeigt jetzt das Ergebnis.",
+    "results": {
+      "not_contested": "Der Mieter hat dieser Forderung nicht widersprochen."
+    },
+    "facts": {
+      "confirmedTwice": "Vom Vergleich gefunden und von einer unabhängigen zweiten Prüfung bestätigt.",
+      "foundOnce": "Vom Vergleich gefunden. Die zweite Prüfung hat es nicht bestätigt.",
+      "markNearby": "Eine vor dieser Miete erfasste Markierung liegt nahe derselben Stelle.",
+      "noMarkNearby": "Keine vor dieser Miete erfasste Markierung liegt nahe dieser Stelle.",
+      "agreedDuringRental": "Der Mieter hat diesem Preis zugestimmt, als er es während der Miete meldete.",
+      "addedBy": "Von {name} hinzugefügt, mit schriftlicher Begründung.",
+      "someone": "einer Person des Personals",
+      "conditionConfirmed": "Der Zustandsbericht bei Abholung wurde {when} bestätigt, ohne Ergänzung.",
+      "conditionAdded": "Zum Zustandsbericht bei Abholung wurden Fotos von Übersehenem hinzugefügt.",
+      "conditionNotAnswered": "Der Zustandsbericht bei Abholung wurde nie beantwortet.",
+      "incidentReported": "Während der Miete wurde etwas gemeldet.",
+      "noIncident": "Während der Miete wurde nichts gemeldet.",
+      "renterPhotos": "{count, plural, one {# Foto wurde} other {# Fotos wurden}} dem Widerspruch beigefügt."
+    }
   }
 }

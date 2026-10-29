@@ -2,6 +2,8 @@ import type { ClaimState, Region } from '@hold/domain'
 import { and, asc, count, desc, eq, inArray, isNull, sql } from 'drizzle-orm'
 import { incidentEvidence } from './claim-query.ts'
 import { incidentsWaitingForStaff } from './incident-repository.ts'
+import { dropOffsWaiting } from './self-return-repository.ts'
+import type { WaitingDropOff } from './self-return-repository.ts'
 import type { ShopIncident } from './incident-repository.ts'
 import { morningQueue } from './ops-repository.ts'
 import type { QueueEntry } from './ops-repository.ts'
@@ -54,6 +56,8 @@ export type DecisionRecords = {
   readonly incidents: readonly ShopIncident[]
   readonly holds: readonly ActiveHold[]
   readonly late: readonly LateRental[]
+  // Items renters dropped off with nobody at the counter, which a person has not checked yet.
+  readonly dropOffs: readonly WaitingDropOff[]
   // A shop of one has nobody else to decide a claim its owner raised (architecture.md section 7.3).
   readonly staffCount: number
 }
@@ -141,6 +145,7 @@ export async function decisionRecords(transaction: Transaction, now: Date): Prom
     incidents: await incidentsWaitingForStaff(transaction),
     holds: await activeHolds(transaction),
     late: await lateRentals(transaction, now),
+    dropOffs: await dropOffsWaiting(transaction),
     staffCount: staff?.count ?? 0,
   }
 }

@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl'
 import { PhotoWithMarks } from '@/components/photo-with-marks'
+import { ContestSummaryPanel } from '@/features/contest/contest-summary-panel'
 import { Link } from '@/i18n/navigation'
 import { rentalRoutes } from '@/lib/routes'
 import type { ClaimRow } from './board'
@@ -11,17 +12,30 @@ type ClaimDetailProps = { row: ClaimRow; text: RowText; photoUrls: Readonly<Reco
 
 // A claim as the person deciding it needs it: the renter's words, each line and where it came from, the two
 // photographs of the first line that has them with its mark outlined on the return, and how the hold would be split.
-// Approving and deciding happen on the claim's own page, with its passkey and limits.
+// A contested claim opens on the neutral summary of where the two sides differ, which pictures each disputed line
+// itself. Approving and deciding happen on the claim's own page, with its passkey and limits.
 export function ClaimDetail({ row, text, photoUrls }: ClaimDetailProps) {
   const t = useTranslations('decisions.detail')
-  const pictured = row.lines.flatMap((line) => {
+  const urlOf = (key: string | null) => (key === null ? null : (photoUrls[key] ?? null))
+  const pictured = row.contest !== null ? undefined : row.lines.flatMap((line) => {
     const before = line.beforeKey === null ? undefined : photoUrls[line.beforeKey]
     const after = line.afterKey === null ? undefined : photoUrls[line.afterKey]
     return before === undefined || after === undefined ? [] : [{ line, before, after }]
   })[0]
   return (
     <>
-      {row.renterComment === null ? null : <RenterWords words={row.renterComment} />}
+      {row.contest === null ? null : (
+        <ContestSummaryPanel
+          view={row.contest}
+          audience="shop"
+          timeZone={text.timeZone}
+          photos={Object.fromEntries(row.lines.map((line) => [line.id, { before: urlOf(line.beforeKey), after: urlOf(line.afterKey), region: line.region }]))}
+          rentalId={row.rentalId ?? undefined}
+          canRewrite={row.decider === 'you' || row.decider === 'another_senior'}
+        />
+      )}
+      {/* Without a summary the panel quotes the renter itself. */}
+      {row.renterComment === null || row.contest?.version === null ? null : <RenterWords words={row.renterComment} />}
       <section className="grid gap-2" aria-label={t('lines')}>
         <SubHeading>{t('lines')}</SubHeading>
         <ul className="grid divide-y border">

@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
 import { Refusal } from '@/server/action'
+import { writeContestSummary } from '@/server/contest-summary'
 import { sendNegotiation } from '@/server/negotiation-queue'
 import { renterAction, withToken } from '@/server/renter-access'
 import { CODE_PURPOSES, newRenterCode, renterCodeDigest } from '@/server/renter-code'
@@ -30,6 +31,8 @@ export const startAdvocate = renterAction({ name: 'renter.advocate_started', sco
   })
   if (!result.ok) return new Refusal(result.reason)
   try { await sendNegotiation(link.shopId, link.rentalId, result.negotiationId, result.outboxId) } catch { /* The committed outbox retries delivery. */ }
+  // The owner decides if the advocates do not agree: the summary is there for them, and the renter, either way.
+  await writeContestSummary(link.shopId, link.rentalId)
   return { kind: result.kind }
 })
 

@@ -81,9 +81,10 @@ describe('the records a decision board reads', () => {
     await inShop(database, shop, (transaction) => transaction.update(claims).set({ state: 'contested' }).where(eq(claims.id, tomClaim)))
   })
 
-  it('lists the held holds, the late rentals, the waiting incidents, the sample proposals and how many staff the shop has', async () => {
+  it('lists the held holds, the late rentals, the drop-offs, the waiting incidents, the sample proposals and how many staff the shop has', async () => {
     const records = await read(shop)
     expect(records.holds.map((hold) => hold.renterName)).toContain('Marco Rossi')
+    expect(records.dropOffs.map((dropOff) => dropOff.renterName)).toEqual(['Chloé Martin'])
     expect(records.late.map((rental) => rental.renterName)).toEqual(['Lea Fischer'])
     expect(records.incidents).toEqual([])
     expect(records.proposals.map((entry) => entry.kind).sort()).toEqual(['request_replacement_hold', 'respond_to_dispute'])
@@ -91,6 +92,6 @@ describe('the records a decision board reads', () => {
   })
 
   it('reads nothing of another shop', async () => {
-    expect(await read(other)).toEqual({ claims: [], proposals: [], incidents: [], holds: [], late: [], staffCount: 1 })
+    expect(await read(other)).toEqual({ claims: [], proposals: [], incidents: [], holds: [], late: [], dropOffs: [], staffCount: 1 })
   })
 })

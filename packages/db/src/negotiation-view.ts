@@ -31,15 +31,16 @@ export async function itemMarks(transaction: Transaction, itemId: string, rental
 }
 
 // The facts code reads for each claim line (extensions.md section 9.6): the finding, how well its photographs aligned,
-// and the marks on its item that were there before this rental. A line a person added has no finding.
-async function claimLineFacts(transaction: Transaction, claimId: string, rentalId: string, wearRules: string) {
-  const rows = await transaction.select({ id: claimLines.id, amountCents: claimLines.amountCents, findingId: claimLines.findingId, description: priceEntries.description, reason: claimLines.reason }).from(claimLines).innerJoin(priceEntries, eq(priceEntries.id, claimLines.priceEntryId)).where(eq(claimLines.claimId, claimId)).orderBy(asc(claimLines.createdAt), asc(claimLines.id))
+// and the marks on its item that were there before this rental. A line a person added has no finding. The contest
+// summary reads them too (architecture.md section 6.15).
+export async function claimLineFacts(transaction: Transaction, claimId: string, rentalId: string, wearRules: string) {
+  const rows = await transaction.select({ id: claimLines.id, amountCents: claimLines.amountCents, findingId: claimLines.findingId, description: priceEntries.description, reason: claimLines.reason, source: claimLines.source, addedByUserId: claimLines.addedByUserId }).from(claimLines).innerJoin(priceEntries, eq(priceEntries.id, claimLines.priceEntryId)).where(eq(claimLines.claimId, claimId)).orderBy(asc(claimLines.createdAt), asc(claimLines.id))
   return Promise.all(rows.map(async (line) => {
     const [finding] = line.findingId === null ? [] : await transaction.select({ view: findings.view, region: findings.region, confidence: findings.confidence, secondLookConfirmed: findings.secondLookConfirmed, description: findings.description, alignment: comparisons.alignment, itemId: rentalItems.itemId })
       .from(findings).innerJoin(comparisons, eq(comparisons.id, findings.comparisonId)).innerJoin(captureSessions, eq(captureSessions.id, comparisons.returnSessionId)).innerJoin(rentalItems, eq(rentalItems.id, captureSessions.rentalItemId)).where(eq(findings.id, line.findingId))
     const before = finding === undefined ? [] : await itemMarks(transaction, finding.itemId, rentalId)
     const facts = lineFacts({ lineId: line.id, publishedCents: line.amountCents, finding: finding === undefined ? null : { ...finding, alignment: finding.alignment?.[finding.view] ?? null }, marks: before, wearRules })
-    return { facts, description: line.description, reason: line.reason ?? finding?.description ?? '' }
+    return { facts, description: line.description, reason: line.reason ?? finding?.description ?? '', source: line.source, addedByUserId: line.addedByUserId, findingDescription: finding?.description ?? null }
   }))
 }
 

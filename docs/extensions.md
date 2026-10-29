@@ -1397,6 +1397,8 @@ Page `/shop/decisions`, right after Today in the menu. Every record that waits o
 
 **Status, 28 October 2026.** Built: `features/decisions` in the web app and `decisionRecords` in `packages/db`. D1 to D5 pass in tests (`decision-records.test.ts`, `board.test.ts`, `decisions-screen.test.tsx`, `e2e/decisions.spec.ts`). The operations agent reads no sample rental, so a shop's samples bring two sample proposals of their own (`addSampleRentals`): a replacement hold for the hold near its end and an answer to a sample PayPal dispute, each with its detector's fixed reason and marked `simulated: 'yes'`. Approving one records the decision and carries nothing out (`decideProposal`), so no PayPal call is made with a sample's references. A demo raises its sample claims as the counter staff member, so the owner may decide the contested one.
 
+**29 October 2026.** Items renters dropped off with nobody at the counter are rows of their own (`dropped_off`, under holds and returns), with the same photographs and the two choices as the morning queue (`architecture.md` section 6.13). A contested or escalated claim opens on the neutral summary of where the two sides differ (section 6.15).
+
 **Status, 29 October 2026.** Moved to AG Grid Enterprise: grouped by kind, each decision opening in place, the right-click menu. D1 to D5 pass again in the same tests; the side panel is gone, and the component tests draw the opened decision through a stand-in grid.
 
 **The price list editor, on AG Grid**

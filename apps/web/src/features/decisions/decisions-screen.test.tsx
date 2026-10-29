@@ -1,4 +1,4 @@
-import type { DecisionClaim, DecisionRecords, QueueEntry } from '@hold/db'
+import type { DecisionClaim, DecisionRecords, QueueEntry, WaitingDropOff } from '@hold/db'
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
@@ -29,6 +29,8 @@ vi.mock('./decision-grid', async () => {
     },
   }
 })
+vi.mock('@/features/claims/actions', () => ({ rewriteContestSummary: vi.fn() }))
+vi.mock('@/features/self-return/actions', () => ({ confirmDropOff: vi.fn(), reportDropOffMissing: vi.fn() }))
 vi.mock('@/features/operations/actions', () => ({ approveProposals: vi.fn(), rejectProposal: vi.fn(), postponeProposal: vi.fn() }))
 vi.mock('@/features/auth/passkey-button', () => ({ PasskeyButton: ({ label }: { label: string }) => <button type="button">{label}</button> }))
 
@@ -53,9 +55,23 @@ const records = (overrides: Partial<DecisionRecords> = {}): DecisionRecords => (
   incidents: [],
   holds: [],
   late: [{ rentalId: '00000000-0000-4000-8000-000000000005', renterName: 'Lea Fischer', endsAt: at('2026-10-13T17:00:00Z'), simulated: false }],
+  dropOffs: [],
   staffCount: 2,
   ...overrides,
 })
+
+const dropOff: WaitingDropOff = {
+  rentalId: '00000000-0000-4000-8000-000000000006', renterName: 'Chloé Martin', droppedOffAt: at('2026-10-13T21:40:00Z'), onTime: true, missingAt: null, missingBy: null, holdCents: 250_00, currency: 'EUR', simulated: false,
+  items: [{ label: 'E-bike 3', views: 4, findings: 1, comparison: 'findings', comparisonId: 'comparison-1', dropPoint: { view: 'drop_point', displayKey: 'drop.jpg' }, viewLabel: 'Left side', before: { view: 'left', displayKey: 'before.jpg' }, after: { view: 'left', displayKey: 'after.jpg' }, region: { x: 0.3, y: 0.5, width: 0.1, height: 0.1 } }],
+}
+const contest = {
+  outcome: 'answered' as const,
+  simulated: true,
+  version: { overview: 'The renter says the lock was handed back in the bag.', lines: [{ lineId: 'line-2', disputed: true, shopSays: 'Staff found no lock in the bag at the return.', renterSays: 'They say it was in the bag.', renterQuote: 'The lock was in the bag when I handed it back.' }] },
+  comment: 'The lock was in the bag when I handed it back.',
+  lines: [{ id: 'line-2', description: 'Lost lock', source: 'person' as const, findingDescription: null, bothLooksConfirmed: false, knownMarkNearby: false, addedBy: 'Jonas', reason: 'No lock in the bag at the return.' }],
+  rental: { conditionReply: 'confirmed' as const, conditionRepliedAt: at('2026-10-10T09:00:00Z'), renterPhotos: 0, incidentsReported: 0 },
+}
 
 const props = (viewer: Viewer = owner, overrides: Partial<DecisionsScreenProps> = {}): DecisionsScreenProps => ({
   shopName: 'Ribeira Bikes',
@@ -134,6 +150,38 @@ describe('the decision board', () => {
     expect(within(chosen).getByRole('blockquote')).toHaveTextContent('The lock was in the bag when I handed it back.')
     expect(within(chosen).getByText('No lock in the bag at the return.')).toBeInTheDocument()
     expect(within(chosen).getByText('Another owner or manager decides: you raised it.')).toBeInTheDocument()
+  })
+
+  it('opens a contested claim on the neutral summary of where the two sides differ', async () => {
+    const user = userEvent.setup()
+    renderWithIntl(<DecisionsScreen {...props(owner, { rows: boardRows(records(), owner, NOW, { 'claim-2': contest }) })} />)
+    await user.click(screen.getByRole('button', { name: 'Open claim:claim-2' }))
+    const summary = within(panel()).getByRole('region', { name: 'Where the two sides differ' })
+    expect(within(summary).getByText('The renter says the lock was handed back in the bag.')).toBeInTheDocument()
+    expect(within(summary).getByText('Disputed: 1 of 1 line')).toBeInTheDocument()
+    expect(within(summary).getByText('Simulated summary')).toBeInTheDocument()
+  })
+
+  it('offers to write the summary of a contest that has none yet, to whoever may decide it', async () => {
+    const user = userEvent.setup()
+    const pending = { ...contest, outcome: 'pending' as const, version: null }
+    renderWithIntl(<DecisionsScreen {...props(owner, { rows: boardRows(records(), owner, NOW, { 'claim-2': pending }) })} />)
+    await user.click(screen.getByRole('button', { name: 'Open claim:claim-2' }))
+    expect(within(panel()).getByText('No summary has been written yet. The renter’s words and the records are below.')).toBeInTheDocument()
+    expect(within(panel()).getByRole('button', { name: 'Write the summary' })).toBeInTheDocument()
+  })
+
+  it('opens what a renter dropped off: when, what the comparison found, the photographs and the two choices', async () => {
+    const user = userEvent.setup()
+    renderWithIntl(<DecisionsScreen {...props(counter, { rows: boardRows(records({ dropOffs: [dropOff] }), counter, NOW), photoUrls: { 'before.jpg': '/before.jpg', 'after.jpg': '/after.jpg', 'drop.jpg': '/drop.jpg' } })} />)
+    await user.click(screen.getByRole('button', { name: 'Open drop:00000000-0000-4000-8000-000000000006' }))
+    const chosen = panel()
+    expect(within(chosen).getByRole('heading', { name: 'Check what Chloé Martin dropped off' })).toBeInTheDocument()
+    expect(within(chosen).getByText(/on time/)).toBeInTheDocument()
+    expect(within(chosen).getByText('1 finding')).toBeInTheDocument()
+    expect(within(chosen).getByRole('img', { name: 'Where they left it' })).toHaveAttribute('src', '/drop.jpg')
+    expect(within(chosen).getByRole('button', { name: 'It’s here, review the return' })).toBeInTheDocument()
+    expect(within(chosen).getByRole('button', { name: 'It’s not here' })).toBeInTheDocument()
   })
 
   it('lets an owner approve, postpone or reject the agent’s proposal where it stands, with its reason and PayPal reference', async () => {

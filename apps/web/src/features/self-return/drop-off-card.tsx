@@ -34,12 +34,13 @@ export type DropOffEntry = {
 }
 
 // What the overnight comparison says so far, when it found nothing to count.
-const compared = (state: string | null) => (state === null || state === 'pending' || state === 'running' ? 'comparing' : state === 'clean' ? 'clean' : 'needsPerson')
+export const compared = (state: string | null) => (state === null || state === 'pending' || state === 'running' ? 'comparing' : state === 'clean' ? 'clean' : 'needsPerson')
 
-function Photo({ photo, caption, region = null }: { photo: ShownPhoto; caption: string; region?: Region | null }) {
+export function DropOffPhoto({ photo, caption, region = null }: { photo: ShownPhoto; caption: string; region?: Region | null }) {
   return (
     <figure className="grid min-w-0 content-start gap-1.5">
-      {photo?.url == null ? <span aria-hidden="true" className="aspect-thumbnail bg-muted" /> : region === null ? <img src={photo.url} alt={caption} className="aspect-thumbnail w-full object-cover" /> : <PhotoWithMarks src={photo.url} alt={caption} marks={[{ id: 'finding', region, confirmed: true }]} />}
+      {/* Each shown whole, at its own shape, so the handover and the return of one view line up and a finding's box stays true. */}
+      {photo?.url == null ? <span aria-hidden="true" className="aspect-thumbnail bg-muted" /> : <PhotoWithMarks src={photo.url} alt={caption} marks={region === null ? [] : [{ id: 'finding', region, confirmed: true }]} />}
       <figcaption className="label text-[0.6875rem] text-muted-foreground wrap-long-words">{caption}</figcaption>
     </figure>
   )
@@ -71,9 +72,9 @@ export function DropOffCard({ entry, clock, canAct }: { entry: DropOffEntry; clo
       </ul>
       {entry.items.map((item) => (
         <div key={item.label} className="grid gap-3 sm:grid-cols-3">
-          <Photo photo={item.before} caption={t('before', { view: item.viewLabel ?? '' })} />
-          <Photo photo={item.after} caption={t('after', { view: item.viewLabel ?? '' })} region={item.region} />
-          <Photo photo={item.dropPoint} caption={t('dropPoint')} />
+          <DropOffPhoto photo={item.before} caption={t('before', { view: item.viewLabel ?? '' })} />
+          <DropOffPhoto photo={item.after} caption={t('after', { view: item.viewLabel ?? '' })} region={item.region} />
+          <DropOffPhoto photo={item.dropPoint} caption={t('dropPoint')} />
         </div>
       ))}
       {entry.missingAt === null ? <p className="max-w-prose border-l-2 border-primary pl-3 text-pretty">{t('note')}</p> : (

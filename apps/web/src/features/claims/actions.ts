@@ -1,10 +1,11 @@
 'use server'
-import { approveClaim, confirmCleanReturn, decideClaim, draftClaim, issueRenterLink, rentalDetail } from '@hold/db'
+import { approveClaim, confirmCleanReturn, contestRecord, decideClaim, draftClaim, issueRenterLink, rentalDetail } from '@hold/db'
 import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
 import { newRenterLink, renterUrl } from '@/server/renter-links'
 import { qrSvg } from '@/server/qr'
 import { Refusal, shopAction, withLocale } from '@/server/shop-access'
+import { writeContestSummary } from '@/server/contest-summary'
 import { sendSettlement } from '@/server/settlement-queue'
 import { claimLinesInput, claimReason } from './claim-input'
 
@@ -32,3 +33,11 @@ export const decide = shopAction({ name: 'claim.decided', roles: STAFF, needsPas
   const result = await decideClaim(transaction, input.claimId, context.person.userId, input.decision, input.reason, new Date())
   return result.ok ? result : new Refusal(result.reason)
 }, (context, result) => sendSettlement(context.shop.id, result.rentalId, result.executionId))
+
+// Asks for the neutral summary of a contest again, when the model could not write it the first time. Owners and
+// managers decide contested claims, so they may ask; a few times an hour, since each asks a model.
+export const rewriteContestSummary = shopAction(
+  { name: 'claim.contest_summary_requested', roles: ['owner', 'manager'], needsPasskey: false, input: withLocale({ rentalId: z.uuid() }), rateLimit: { name: 'contest-summary', max: 6, windowSeconds: 3600 } },
+  async (_context, input, transaction) => (await contestRecord(transaction, input.rentalId)) === undefined ? new Refusal('not_contested') : { rentalId: input.rentalId },
+  (context, output) => writeContestSummary(context.shop.id, output.rentalId),
+)

@@ -35,6 +35,8 @@ export function useRowText(clock: ShopClock) {
         return t('titles.hold_ending', { renter: renter(row), when: format.when(row.validUntil) })
       case 'late':
         return t('titles.late', { renter: renter(row) })
+      case 'dropped_off':
+        return t('titles.dropped_off', { renter: renter(row) })
     }
   }
 
@@ -56,6 +58,8 @@ export function useRowText(clock: ShopClock) {
         return t('holdLine', { day: row.day, max: HOLD_VALIDITY_DAYS, amount: money(row.amountCents) })
       case 'late':
         return t('lateLine', { when: moment(row.endsAt) })
+      case 'dropped_off':
+        return t('dropOffLine', { items: row.items.map((item) => item.label).join(', '), when: moment(row.droppedOffAt) })
     }
   }
 
@@ -76,6 +80,7 @@ export function useRowText(clock: ShopClock) {
     ].join(' ')
 
   return {
+    timeZone: clock.timeZone,
     title,
     heading,
     subject,

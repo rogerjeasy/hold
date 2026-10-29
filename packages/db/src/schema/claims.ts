@@ -1,5 +1,7 @@
 import { CLAIM_STATES } from '@hold/domain'
-import { jsonb, pgTable, text } from 'drizzle-orm/pg-core'
+import type { ContestSummary } from '@hold/domain'
+import { sql } from 'drizzle-orm'
+import { boolean, check, jsonb, pgTable, text } from 'drizzle-orm/pg-core'
 import { shopIsolation } from './access.ts'
 import { priceEntries } from './catalog.ts'
 import { at, cents, createdAt, currency, id, reference } from './columns.ts'
@@ -88,4 +90,25 @@ export const approvals = pgTable(
     createdAt: createdAt(),
   },
   (table) => [allowed(table.subject, APPROVAL_SUBJECTS), allowed(table.decision, APPROVAL_DECISIONS), allowed(table.method, APPROVAL_METHODS), shopIsolation(table.shopId)],
+)
+
+// A neutral summary written when a renter contests a claim (architecture.md section 6.15): the model's plain words for
+// each side, in the shop's language and the renter's, which plain code checked before keeping. Every attempt is kept,
+// including one the model could not answer; the latest is shown. Nothing here decides or moves anything.
+export const contestSummaries = pgTable(
+  'contest_summaries',
+  {
+    id: id(),
+    shopId: shopReference(),
+    claimId: reference()
+      .notNull()
+      .references(() => claims.id),
+    outcome: text().notNull(),
+    summary: jsonb().$type<ContestSummary>(),
+    model: text().notNull(),
+    promptVersion: text().notNull(),
+    simulated: boolean().notNull().default(false),
+    createdAt: createdAt(),
+  },
+  (table) => [check('outcome_allowed', sql`${table.outcome} in ('answered', 'refused', 'unavailable', 'invalid', 'dropped')`), check('summary_when_answered', sql`(${table.outcome} = 'answered') = (${table.summary} is not null)`), shopIsolation(table.shopId)],
 )

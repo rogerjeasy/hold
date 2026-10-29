@@ -7,6 +7,7 @@ import { Refusal } from '@/server/action'
 import { renterAction, withToken } from '@/server/renter-access'
 import { CODE_PURPOSES, newRenterCode, renterCodeDigest } from '@/server/renter-code'
 import { getServices } from '@/server/services'
+import { writeContestSummary } from '@/server/contest-summary'
 import { sendSettlement } from '@/server/settlement-queue'
 
 const digest = (linkId: string, code: string) => renterCodeDigest(CODE_PURPOSES.claimReply, linkId, code)
@@ -35,6 +36,7 @@ function reply(decision: 'accept' | 'contest') {
     if (result.executionId !== null) {
       try { await sendSettlement(link.shopId, link.rentalId, result.executionId) } catch { /* The committed outbox retries delivery. */ }
     }
+    if (decision === 'contest') await writeContestSummary(link.shopId, link.rentalId)
     return {}
   })
 }

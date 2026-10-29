@@ -3545,7 +3545,7 @@
     "lead": "Les réclamations, les propositions de l’agent, les signalements des locataires et ce qui attend au comptoir, dans l’ordre de leur échéance. Rien ici ne débite qui que ce soit : un débit ne part que d’une réclamation qu’une personne a approuvée.",
     "passkeyBody": "Approuver les libérations et les demandes d’argent de l’agent demande votre clé d’accès. Rien d’autre sur cette page.",
     "empty": "Rien n’attend une personne.",
-    "emptyBody": "Les réclamations à approuver, les propositions de l’agent, les signalements des locataires, les blocages proches de leur fin et les retours en retard apparaissent ici.",
+    "emptyBody": "Les réclamations à approuver, les propositions de l’agent, les signalements des locataires, les articles déposés par les locataires, les blocages proches de leur fin et les retours en retard apparaissent ici.",
     "noMatch": "Rien ne correspond. Effacez la recherche ou affichez tous les groupes.",
     "toolbar": "Filtrer les décisions",
     "groups": {
@@ -3573,7 +3573,8 @@
       "escalated": "Trancher une réclamation que les représentants n’ont pas réglée",
       "incident": "{kind} sur {item}",
       "hold_ending": "Le blocage de {renter} prend fin {when}",
-      "late": "{renter} est en retard"
+      "late": "{renter} est en retard",
+      "dropped_off": "Vérifier ce que {renter} a déposé"
     },
     "headings": {
       "claim": "Approuver une réclamation de {amount}",
@@ -3590,6 +3591,7 @@
     "renter": "un locataire",
     "holdLine": "Jour {day} sur {max} · {amount} bloqués",
     "lateLine": "Retour prévu {when}",
+    "dropOffLine": "{items} · déposé {when}",
     "due": {
       "none": "Sans date",
       "overdue": "En retard depuis {when}",
@@ -4103,5 +4105,54 @@
   "selfService": {
     "title": "Libre-service des locataires",
     "lead": "Ce que les locataires peuvent faire depuis leur propre téléphone, sans personne à qui demander à la boutique. Hold vérifie chaque cas par des règles fixes, et une personne approuve toujours chaque débit."
+  },
+  "contest": {
+    "title": "Où les deux parties divergent",
+    "count": "Contesté : {disputed} sur {total, plural, one {# ligne} other {# lignes}}",
+    "byClaude": "Écrit par Claude",
+    "bySimulated": "Résumé simulé",
+    "neutral": "Ne prend pas parti et ne cite aucun montant. Les faits sous chaque ligne viennent des dossiers de Hold. Vérifiez les preuves avant de décider.",
+    "disputed": "Contesté",
+    "notDisputed": "Non contesté",
+    "shopSays": "La boutique dit",
+    "renterSays": "Le locataire dit",
+    "youSaid": "Vous avez dit",
+    "records": "Ce que montrent les dossiers",
+    "staffReason": "Sa raison écrite :",
+    "before": "Photo au départ : {line}",
+    "after": "Photo au retour : {line}",
+    "beforeShort": "Départ",
+    "afterShort": "Retour",
+    "renterWrote": "Le locataire a écrit",
+    "youWrote": "Vous avez écrit",
+    "noWords": "Aucun mot, seulement la contestation.",
+    "missing": {
+      "pending": "Aucun résumé n’a encore été rédigé. Les mots du locataire et les dossiers figurent ci-dessous.",
+      "refused": "Le résumé n’a pas pu être rédigé cette fois. Les mots du locataire et les dossiers figurent ci-dessous.",
+      "unavailable": "Le résumé n’a pas pu être rédigé cette fois. Les mots du locataire et les dossiers figurent ci-dessous.",
+      "invalid": "Le résumé n’a pas passé les contrôles de Hold et n’est pas affiché. Les mots du locataire et les dossiers figurent ci-dessous.",
+      "dropped": "Le résumé citait un nombre, ce que Hold n’autorise pas, et n’est pas affiché. Les mots du locataire et les dossiers figurent ci-dessous."
+    },
+    "rewrite": "Rédiger de nouveau le résumé",
+    "write": "Rédiger le résumé",
+    "rewritten": "Demandé. La page affiche maintenant le résultat.",
+    "results": {
+      "not_contested": "Le locataire n’a pas contesté cette réclamation."
+    },
+    "facts": {
+      "confirmedTwice": "Trouvé par la comparaison, et confirmé par un second examen indépendant.",
+      "foundOnce": "Trouvé par la comparaison. Le second examen ne l’a pas confirmé.",
+      "markNearby": "Une marque relevée avant cette location se trouve près du même endroit.",
+      "noMarkNearby": "Aucune marque relevée avant cette location ne se trouve près de cet endroit.",
+      "agreedDuringRental": "Le locataire a accepté ce prix en le signalant pendant la location.",
+      "addedBy": "Ajouté par {name}, avec une raison écrite.",
+      "someone": "un membre du personnel",
+      "conditionConfirmed": "Le rapport d’état au départ a été confirmé, {when}, sans ajout.",
+      "conditionAdded": "Des photos de ce que le personnel avait manqué ont été ajoutées au rapport d’état au départ.",
+      "conditionNotAnswered": "Le rapport d’état au départ n’a jamais reçu de réponse.",
+      "incidentReported": "Quelque chose a été signalé pendant la location.",
+      "noIncident": "Rien n’a été signalé pendant la location.",
+      "renterPhotos": "{count, plural, one {# photo a été ajoutée} other {# photos ont été ajoutées}} à la contestation."
+    }
   }
 }

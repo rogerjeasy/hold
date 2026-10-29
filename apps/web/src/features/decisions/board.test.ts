@@ -1,4 +1,4 @@
-import type { DecisionClaim, DecisionRecords, QueueEntry, ShopIncident } from '@hold/db'
+import type { DecisionClaim, DecisionRecords, QueueEntry, ShopIncident, WaitingDropOff } from '@hold/db'
 import { describe, expect, it } from 'vitest'
 import { boardBrief, boardRows, groupCounts, visibleRows } from './board'
 import type { Viewer } from './board'
@@ -74,7 +74,21 @@ const incident = (overrides: Partial<ShopIncident> = {}): ShopIncident => ({
   ...overrides,
 })
 
-const records = (overrides: Partial<DecisionRecords> = {}): DecisionRecords => ({ claims: [], proposals: [], incidents: [], holds: [], late: [], staffCount: 2, ...overrides })
+const records = (overrides: Partial<DecisionRecords> = {}): DecisionRecords => ({ claims: [], proposals: [], incidents: [], holds: [], late: [], dropOffs: [], staffCount: 2, ...overrides })
+
+const dropOff = (overrides: Partial<WaitingDropOff> = {}): WaitingDropOff => ({
+  rentalId: 'rental-10',
+  renterName: 'Chloé Martin',
+  droppedOffAt: at('2026-10-13T21:40:00Z'),
+  onTime: true,
+  missingAt: null,
+  missingBy: null,
+  holdCents: 250_00,
+  currency: 'EUR',
+  simulated: false,
+  items: [{ label: 'E-bike 3', views: 4, findings: 1, comparison: 'findings', comparisonId: 'comparison-1', dropPoint: { view: 'drop_point', displayKey: 'drop.jpg' }, viewLabel: 'Left side', before: { view: 'left', displayKey: 'before.jpg' }, after: { view: 'left', displayKey: 'after.jpg' }, region: null }],
+  ...overrides,
+})
 
 const endingHold = { rentalId: 'rental-4', renterName: 'Marco Rossi', reservedCents: 300_00, createdAt: at('2026-09-17T10:00:00Z'), assuredUntil: at('2026-09-20T10:00:00Z'), validUntil: at('2026-10-16T10:00:00Z'), simulated: false }
 
@@ -86,10 +100,12 @@ describe('the rows of the decision board', () => {
       incidents: [incident()],
       holds: [endingHold],
       late: [{ rentalId: 'rental-7', renterName: 'Ahmed Khan', endsAt: at('2026-10-13T18:00:00Z'), simulated: false }],
+      dropOffs: [dropOff()],
     }), owner, NOW)
     expect(rows.map((row) => [row.kind, row.group]).sort()).toEqual([
       ['claim', 'claims'],
       ['contested', 'claims'],
+      ['dropped_off', 'counter'],
       ['escalated', 'claims'],
       ['hold_ending', 'counter'],
       ['incident', 'incidents'],
@@ -97,6 +113,19 @@ describe('the rows of the decision board', () => {
       ['proposal', 'agent'],
     ])
     expect(new Set(rows.map((row) => row.id)).size).toBe(rows.length)
+  })
+
+  it('asks a person to check what a renter dropped off, with the hold still on it, waiting since it was left', () => {
+    const [row] = boardRows(records({ dropOffs: [dropOff()] }), counter, NOW)
+    expect(row).toMatchObject({ id: 'drop:rental-10', kind: 'dropped_off', rentalId: 'rental-10', renterName: 'Chloé Martin', due: null, overdue: false, waitingSince: at('2026-10-13T21:40:00Z'), amountCents: 250_00, decider: 'you', selectable: false, onTime: true })
+    expect(row?.kind === 'dropped_off' ? row.items.map((item) => item.label) : []).toEqual(['E-bike 3'])
+    expect(boardRows(records({ dropOffs: [dropOff()] }), reader, NOW)[0]?.decider).toBe('staff')
+  })
+
+  it('carries the neutral summary of a contested claim with its row, and nothing for a claim not contested', () => {
+    const contest = { outcome: 'pending' as const, simulated: false, version: null, comment: 'It was already there.', lines: [], rental: { conditionReply: null, conditionRepliedAt: null, renterPhotos: 0, incidentsReported: 0 } }
+    const rows = boardRows(records({ claims: [claim(), claim({ claimId: 'claim-2', state: 'contested' })] }), owner, NOW, { 'claim-2': contest })
+    expect(rows.map((row) => (row.kind === 'claim' || row.kind === 'contested' ? [row.kind, row.contest] : []))).toEqual([['claim', null], ['contested', contest]])
   })
 
   it('leaves out a hold that is not near its end', () => {
@@ -157,7 +186,7 @@ describe('who decides, as the viewer reads it', () => {
   })
 
   it('lets any staff member act on an incident, a hold near its end or a late rental, and a read-only viewer none', () => {
-    const all = records({ incidents: [incident()], holds: [endingHold], late: [{ rentalId: 'rental-7', renterName: null, endsAt: at('2026-10-13T18:00:00Z'), simulated: false }], claims: [claim()], proposals: [proposal()] })
+    const all = records({ incidents: [incident()], holds: [endingHold], late: [{ rentalId: 'rental-7', renterName: null, endsAt: at('2026-10-13T18:00:00Z'), simulated: false }], claims: [claim()], proposals: [proposal()], dropOffs: [dropOff()] })
     expect(boardRows(all, counter, NOW).filter((row) => row.group !== 'agent').every((row) => row.decider === 'you')).toBe(true)
     expect(boardRows(all, reader, NOW).every((row) => row.decider === 'staff')).toBe(true)
   })

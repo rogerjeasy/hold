@@ -3545,7 +3545,7 @@
     "lead": "Reclamaciones, propuestas del agente, avisos de los clientes y lo pendiente en el mostrador, en el orden en que vencen. Aquí no se cobra a nadie: un cobro solo empieza con una reclamación que una persona aprobó.",
     "passkeyBody": "Aprobar las liberaciones y las peticiones de dinero del agente requiere tu llave de acceso. Nada más en esta página la requiere.",
     "empty": "Nada espera a una persona.",
-    "emptyBody": "Aquí aparecen las reclamaciones por aprobar, las propuestas del agente, los avisos de los clientes, las retenciones a punto de vencer y las devoluciones con retraso.",
+    "emptyBody": "Aquí aparecen las reclamaciones por aprobar, las propuestas del agente, los avisos de los clientes, los artículos que dejaron los clientes, las retenciones a punto de vencer y las devoluciones con retraso.",
     "noMatch": "Nada coincide. Borra la búsqueda o muestra todos los grupos.",
     "toolbar": "Filtrar las decisiones",
     "groups": {
@@ -3573,7 +3573,8 @@
       "escalated": "Decidir una reclamación que los representantes no resolvieron",
       "incident": "{kind} en {item}",
       "hold_ending": "La retención de {renter} vence {when}",
-      "late": "{renter} se retrasa"
+      "late": "{renter} se retrasa",
+      "dropped_off": "Revisa lo que dejó {renter}"
     },
     "headings": {
       "claim": "Aprobar una reclamación de {amount}",
@@ -3590,6 +3591,7 @@
     "renter": "un cliente",
     "holdLine": "Día {day} de {max} · {amount} retenidos",
     "lateLine": "Debía volver {when}",
+    "dropOffLine": "{items} · dejado {when}",
     "due": {
       "none": "Sin fecha",
       "overdue": "Vencida desde {when}",
@@ -4103,5 +4105,54 @@
   "selfService": {
     "title": "Autoservicio para clientes",
     "lead": "Lo que los clientes pueden hacer desde su propio móvil sin nadie a quien preguntar en la tienda. Hold comprueba cada caso con reglas fijas, y una persona sigue aprobando cada cobro."
+  },
+  "contest": {
+    "title": "Dónde difieren las dos partes",
+    "count": "Disputado: {disputed} de {total, plural, one {# línea} other {# líneas}}",
+    "byClaude": "Escrito por Claude",
+    "bySimulated": "Resumen simulado",
+    "neutral": "No toma partido ni nombra ningún importe. Los hechos bajo cada línea vienen de los registros de Hold. Revisa las pruebas antes de decidir.",
+    "disputed": "Disputado",
+    "notDisputed": "No disputado",
+    "shopSays": "La tienda dice",
+    "renterSays": "El cliente dice",
+    "youSaid": "Dijiste",
+    "records": "Lo que muestran los registros",
+    "staffReason": "Su razón por escrito:",
+    "before": "Foto de la entrega: {line}",
+    "after": "Foto de la devolución: {line}",
+    "beforeShort": "Entrega",
+    "afterShort": "Devolución",
+    "renterWrote": "El cliente escribió",
+    "youWrote": "Escribiste",
+    "noWords": "Sin palabras, solo la disputa.",
+    "missing": {
+      "pending": "Aún no se ha escrito ningún resumen. Las palabras del cliente y los registros están abajo.",
+      "refused": "El resumen no se pudo escribir esta vez. Las palabras del cliente y los registros están abajo.",
+      "unavailable": "El resumen no se pudo escribir esta vez. Las palabras del cliente y los registros están abajo.",
+      "invalid": "El resumen no pasó las comprobaciones de Hold y no se muestra. Las palabras del cliente y los registros están abajo.",
+      "dropped": "El resumen nombraba un número, algo que Hold no permite, y no se muestra. Las palabras del cliente y los registros están abajo."
+    },
+    "rewrite": "Escribir el resumen otra vez",
+    "write": "Escribir el resumen",
+    "rewritten": "Pedido. La página ya muestra el resultado.",
+    "results": {
+      "not_contested": "El cliente no ha disputado esta reclamación."
+    },
+    "facts": {
+      "confirmedTwice": "Encontrado por la comparación y confirmado por una segunda revisión independiente.",
+      "foundOnce": "Encontrado por la comparación. La segunda revisión no lo confirmó.",
+      "markNearby": "Una marca registrada antes de este alquiler está cerca del mismo sitio.",
+      "noMarkNearby": "Ninguna marca registrada antes de este alquiler está cerca de este sitio.",
+      "agreedDuringRental": "El cliente aceptó este precio al informarlo durante el alquiler.",
+      "addedBy": "Añadido por {name}, con una razón por escrito.",
+      "someone": "alguien del personal",
+      "conditionConfirmed": "El informe de estado de la entrega se confirmó, {when}, sin añadir nada.",
+      "conditionAdded": "Se añadieron fotos de lo que el personal pasó por alto al informe de estado de la entrega.",
+      "conditionNotAnswered": "El informe de estado de la entrega nunca se respondió.",
+      "incidentReported": "Se informó de algo durante el alquiler.",
+      "noIncident": "No se informó de nada durante el alquiler.",
+      "renterPhotos": "{count, plural, one {Se añadió # foto} other {Se añadieron # fotos}} a la disputa."
+    }
   }
 }

@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { captureSession, inShop, moneyEvents, priceEntries, recordPhoto, rentalDetail, sealSession, startCaptureSession } from '@hold/db'
+import { captureSession, contestSummaries, inShop, moneyEvents, priceEntries, recordPhoto, rentalDetail, sealSession, startCaptureSession } from '@hold/db'
 import { randomUUID } from 'node:crypto'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 process.env['HOLD_ENVIRONMENT'] = 'test'
@@ -49,6 +49,35 @@ async function presented() {
   expect(await renter.acknowledgeClaim(null, form({ token: claimToken, locale: 'en' }))).toMatchObject({ ok: true })
   return { ...rental, claimId: created.value.claimId, claimToken }
 }
+describe('a neutral summary when the renter contests (architecture.md section 6.15)', () => {
+  const summaries = async (claimId: string) => (await inShop((await getServices()).database, { role: 'hold_app', shopId: shop.shopId }, (transaction) => transaction.select().from(contestSummaries))).filter((row) => row.claimId === claimId)
+
+  it('is written as soon as the renter contests, from the record, and marked simulated where no model ran', async () => {
+    const rental = await presented()
+    jar.clear()
+    await renter.sendClaimCode(null, form({ token: rental.claimToken, locale: 'en' }))
+    expect(await renter.contestClaim(null, form({ token: rental.claimToken, code: TEST_SIGN_IN_CODE, comment: 'The scratch on the frame was there when I picked it up.', locale: 'en' }))).toMatchObject({ ok: true })
+    const written = await summaries(rental.claimId)
+    expect(written).toHaveLength(1)
+    expect(written[0]).toMatchObject({ outcome: 'answered', simulated: true, promptVersion: 'contest-1' })
+    const words = [written[0]?.summary?.forShop, written[0]?.summary?.forRenter].flatMap((version) => [version?.overview ?? '', ...(version?.lines ?? []).flatMap((line) => [line.shopSays, line.renterSays ?? ''])])
+    expect(words.join(' ')).not.toMatch(/\d/)
+  })
+
+  it('can be written again by the owner, and only once a contest exists', async () => {
+    const rental = await presented()
+    await signIn(jar, OWNER, 'passkey')
+    expect(await actions.rewriteContestSummary(null, form({ rentalId: rental.rentalId, locale: 'en' }))).toMatchObject({ ok: false, reason: 'not_contested' })
+    jar.clear()
+    await renter.sendClaimCode(null, form({ token: rental.claimToken, locale: 'en' }))
+    await renter.contestClaim(null, form({ token: rental.claimToken, code: TEST_SIGN_IN_CODE, comment: 'Not mine.', locale: 'en' }))
+    expect(await actions.rewriteContestSummary(null, form({ rentalId: rental.rentalId, locale: 'en' }))).toEqual({ ok: false, failure: 'signed_out' })
+    await signIn(jar, OWNER, 'passkey')
+    expect(await actions.rewriteContestSummary(null, form({ rentalId: rental.rentalId, locale: 'en' }))).toMatchObject({ ok: true })
+    expect(await summaries(rental.claimId)).toHaveLength(2)
+  })
+})
+
 describe('claim approval and renter settlement', () => {
   it('requires a payer-email code before accepting, then captures only the approved stored amount', async () => {
     const rental = await presented()

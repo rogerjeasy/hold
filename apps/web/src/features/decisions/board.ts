@@ -1,6 +1,7 @@
-import type { DecisionClaim, DecisionClaimLine, DecisionRecords, QueueEntry, ShopIncident } from '@hold/db'
+import type { DecisionClaim, DecisionClaimLine, DecisionRecords, QueueEntry, ShopIncident, WaitingDropOff } from '@hold/db'
 import { DETECTOR_KINDS, holdDay, holdStanding, mayConfirm, money, proposalMovesMoney, settle } from '@hold/domain'
 import type { ApprovalAction, DetectorKind, ProposalKind, StaffRole } from '@hold/domain'
+import type { ContestView } from '@/features/contest/contest-summary-panel'
 
 // The decision board (extensions.md section 12.5): every record that waits on a person, as one row each. What a row
 // asks, who may decide it from where the viewer stands, and when it falls due are read here from the records and the
@@ -41,6 +42,8 @@ export type ClaimRow = Common & {
   readonly lines: readonly DecisionClaimLine[]
   readonly renterComment: string | null
   readonly settlement: { readonly captureCents: number; readonly releaseCents: number; readonly invoiceCents: number } | null
+  // The neutral summary of what the renter contests, with the facts code found (architecture.md section 6.15).
+  readonly contest: ContestView | null
 }
 
 export type ProposalRow = Common & {
@@ -72,7 +75,19 @@ export type IncidentRow = Common & {
 export type HoldEndingRow = Common & { readonly kind: 'hold_ending'; readonly group: 'counter'; readonly day: number; readonly validUntil: Date }
 export type LateRow = Common & { readonly kind: 'late'; readonly group: 'counter'; readonly endsAt: Date }
 
-export type BoardRow = ClaimRow | ProposalRow | IncidentRow | HoldEndingRow | LateRow
+// An item a renter dropped off with nobody at the counter: its hold stays until a person has seen it.
+export type DropOffRow = Common & {
+  readonly rentalId: string
+  readonly kind: 'dropped_off'
+  readonly group: 'counter'
+  readonly droppedOffAt: Date
+  readonly onTime: boolean
+  readonly missingAt: Date | null
+  readonly missingBy: string | null
+  readonly items: WaitingDropOff['items']
+}
+
+export type BoardRow = ClaimRow | ProposalRow | IncidentRow | HoldEndingRow | LateRow | DropOffRow
 export type BoardKind = BoardRow['kind']
 
 const SENIOR: readonly StaffRole[] = ['owner', 'manager']
@@ -95,7 +110,7 @@ const staffDecider = (viewer: Viewer): Decider => (viewer.role === 'read_only' ?
 
 const overdue = (due: Date | null, now: Date) => due !== null && due < now
 
-function claimRow(claim: DecisionClaim, viewer: Viewer, staffCount: number, now: Date): ClaimRow {
+function claimRow(claim: DecisionClaim, viewer: Viewer, staffCount: number, now: Date, contest: ContestView | undefined): ClaimRow {
   const split = claim.reservedCents === null ? null : settle(money(claim.totalCents, claim.currency), money(claim.reservedCents, claim.currency))
   return {
     id: `claim:${claim.claimId}`,
@@ -114,6 +129,7 @@ function claimRow(claim: DecisionClaim, viewer: Viewer, staffCount: number, now:
     lines: claim.lines,
     renterComment: claim.renterComment,
     settlement: split === null ? null : { captureCents: split.capture.cents, releaseCents: split.release.cents, invoiceCents: split.invoice.cents },
+    contest: contest ?? null,
   }
 }
 
@@ -172,6 +188,28 @@ function incidentRow(incident: ShopIncident, viewer: Viewer): IncidentRow {
   }
 }
 
+function dropOffRow(dropOff: WaitingDropOff, viewer: Viewer): DropOffRow {
+  return {
+    id: `drop:${dropOff.rentalId}`,
+    kind: 'dropped_off',
+    group: 'counter',
+    rentalId: dropOff.rentalId,
+    renterName: dropOff.renterName,
+    due: null,
+    overdue: false,
+    waitingSince: dropOff.droppedOffAt,
+    amountCents: dropOff.holdCents,
+    simulated: dropOff.simulated,
+    decider: staffDecider(viewer),
+    selectable: false,
+    droppedOffAt: dropOff.droppedOffAt,
+    onTime: dropOff.onTime,
+    missingAt: dropOff.missingAt,
+    missingBy: dropOff.missingBy,
+    items: dropOff.items,
+  }
+}
+
 const time = (date: Date | null) => (date === null ? Number.POSITIVE_INFINITY : date.getTime())
 
 // What falls due first comes first, a return already missed before anything; then what has no date, the oldest first.
@@ -179,10 +217,11 @@ function byUrgency(first: BoardRow, second: BoardRow): number {
   return time(first.due) - time(second.due) || time(first.waitingSince) - time(second.waitingSince) || first.id.localeCompare(second.id)
 }
 
-export function boardRows(records: DecisionRecords, viewer: Viewer, now: Date): BoardRow[] {
+// The contest summaries come keyed by claim, for the contested claims among the records.
+export function boardRows(records: DecisionRecords, viewer: Viewer, now: Date, contests: Readonly<Record<string, ContestView>> = {}): BoardRow[] {
   const proposedHolds = new Set(records.proposals.filter((entry) => HOLD_PROPOSALS.includes(entry.kind)).flatMap((entry) => (entry.rentalId === null ? [] : [entry.rentalId])))
   const rows: BoardRow[] = [
-    ...records.claims.map((claim) => claimRow(claim, viewer, records.staffCount, now)),
+    ...records.claims.map((claim) => claimRow(claim, viewer, records.staffCount, now, contests[claim.claimId])),
     ...records.proposals.map((entry) => proposalRow(entry, viewer, now)),
     ...records.incidents.map((incident) => incidentRow(incident, viewer)),
     ...records.holds
@@ -218,6 +257,7 @@ export function boardRows(records: DecisionRecords, viewer: Viewer, now: Date): 
       selectable: false,
       endsAt: rental.endsAt,
     })),
+    ...records.dropOffs.map((dropOff) => dropOffRow(dropOff, viewer)),
   ]
   return rows.sort(byUrgency)
 }

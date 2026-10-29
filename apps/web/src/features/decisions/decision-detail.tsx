@@ -9,6 +9,7 @@ import { Link } from '@/i18n/navigation'
 import { rentalRoutes, shopRoutes } from '@/lib/routes'
 import type { BoardRow, IncidentRow, ProposalMark, ProposalRow } from './board'
 import { ClaimDetail } from './claim-detail'
+import { DropOffDetail } from './drop-off-detail'
 import { detailLinkClass, Fact, SubHeading } from '@/components/detail-parts'
 import { RenterWords } from './detail-parts'
 import type { RowText } from './use-row-text'
@@ -116,6 +117,7 @@ export function DecisionDetail({ row, text, photoUrls, passkeyNeeded, heading }:
         </div>
       ) : null}
       {row.kind === 'late' ? <p>{t('lateBody', { when: text.moment(row.endsAt) })}</p> : null}
+      {row.kind === 'dropped_off' ? <DropOffDetail row={row} text={text} photoUrls={photoUrls} /> : null}
       {row.rentalId === null ? null : <Link href={rentalRoutes.rental(row.rentalId)} className={detailLinkClass}>{t('openRental')}</Link>}
     </div>
   )
