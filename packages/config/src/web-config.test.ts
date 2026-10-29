@@ -86,6 +86,13 @@ describe('loadWebConfig', () => {
     expect(() => loadWebConfig({ HOLD_ENVIRONMENT: 'production', HOLD_COOKIE_KEY: KEY })).toThrow(/HOLD_COGNITO_USER_POOL_ID/)
   })
 
+  it('hands the AG Grid licence key to the grids in every environment, and none when it is not set', () => {
+    const licence = '[TRIAL]_this_is_a_licence_key_MTc5NDUyODAwMDAwMA==0123456789abcdef'
+    expect(loadWebConfig({ ...AWS, HOLD_AG_GRID_LICENCE_KEY: licence })).toMatchObject({ gridLicenceKey: licence })
+    expect(loadWebConfig({ HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: KEY, HOLD_AG_GRID_LICENCE_KEY: licence })).toMatchObject({ gridLicenceKey: licence })
+    expect(loadWebConfig(AWS)).toMatchObject({ gridLicenceKey: undefined })
+    expect(() => loadWebConfig({ ...AWS, HOLD_AG_GRID_LICENCE_KEY: '' })).toThrow()
+  })
   it('records the open scorecard’s fixture run only in the test environment, and only when asked', () => {
     expect(loadWebConfig({ HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: KEY })).toMatchObject({ evalFixture: false })
     expect(loadWebConfig({ HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: KEY, HOLD_EVAL_FIXTURE: 'on' })).toMatchObject({ evalFixture: true })

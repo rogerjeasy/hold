@@ -1,4 +1,4 @@
-import { CfnOutput, Stack } from 'aws-cdk-lib'
+import { CfnOutput, RemovalPolicy, Stack } from 'aws-cdk-lib'
 import type { App, StackProps } from 'aws-cdk-lib'
 import * as apprunner from 'aws-cdk-lib/aws-apprunner'
 import type * as cognito from 'aws-cdk-lib/aws-cognito'
@@ -6,7 +6,7 @@ import type * as ecr from 'aws-cdk-lib/aws-ecr'
 import * as iam from 'aws-cdk-lib/aws-iam'
 import type * as s3 from 'aws-cdk-lib/aws-s3'
 import type * as rds from 'aws-cdk-lib/aws-rds'
-import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 import { ACCOUNT, CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES, CREDENTIAL_KEY_ALIAS, DATABASE_NAME, name, PREFIX, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
 import type * as sqs from 'aws-cdk-lib/aws-sqs'
 
@@ -55,7 +55,7 @@ function queueOf(props: WebStackProps, queueName: string): sqs.IQueue {
 
 // What the running app may do, and no more: query the database as hold_app, read its secrets, keep each shop's PayPal
 // credentials and put a new owner in the owner group. Email goes out through the SMTP account, not SES.
-function instanceRole(stack: Stack, props: WebStackProps): iam.Role {
+function instanceRole(stack: Stack, props: WebStackProps, gridLicence: secretsmanager.ISecret): iam.Role {
   const role = new iam.Role(stack, 'InstanceRole', {
     roleName: name('web'),
     description: 'The Hold web app, as it runs on App Runner',
@@ -73,7 +73,7 @@ function instanceRole(stack: Stack, props: WebStackProps): iam.Role {
   role.addToPolicy(
     new iam.PolicyStatement({
       actions: ['secretsmanager:GetSecretValue'],
-      resources: [props.appUserSecret.secretArn, props.cookieKey.secretArn, props.renterLinkKey.secretArn, props.trustKey.secretArn, paypalCredentials, smtpLogin],
+      resources: [props.appUserSecret.secretArn, props.cookieKey.secretArn, props.renterLinkKey.secretArn, props.trustKey.secretArn, paypalCredentials, smtpLogin, gridLicence.secretArn],
     }),
   )
   role.addToPolicy(new iam.PolicyStatement({ actions: ['secretsmanager:CreateSecret', 'secretsmanager:PutSecretValue', 'secretsmanager:TagResource'], resources: [paypalCredentials] }))
@@ -140,6 +140,14 @@ export function createWebStack(app: App, props: WebStackProps): WebResources {
   })
   props.repository.grantPull(accessRole)
 
+  // The AG Grid Enterprise licence key. An administrator puts the key AG Grid sent into it; until then it holds a
+  // random value, and the grids work with AG Grid's watermark. Kept if the stack goes, like the other web keys.
+  const gridLicence = new secretsmanager.Secret(stack, 'GridLicence', {
+    secretName: secretName('web', 'ag-grid-licence'),
+    description: 'Hold: the AG Grid Enterprise licence key',
+    removalPolicy: RemovalPolicy.RETAIN,
+  })
+
   const scaling = new apprunner.CfnAutoScalingConfiguration(stack, 'Scaling', {
     autoScalingConfigurationName: name('web'),
     minSize: 1,
@@ -154,10 +162,11 @@ export function createWebStack(app: App, props: WebStackProps): WebResources {
       imageRepository: {
         imageRepositoryType: 'ECR',
         imageIdentifier: `${props.repository.repositoryUri}:${props.imageTag}`,
-        imageConfiguration: { port: String(PORT), runtimeEnvironmentVariables: settings(props) },
+        // The AG Grid licence key is read from its secret as the service starts, so it is in no file or setting.
+        imageConfiguration: { port: String(PORT), runtimeEnvironmentVariables: settings(props), runtimeEnvironmentSecrets: [{ name: 'HOLD_AG_GRID_LICENCE_KEY', value: gridLicence.secretArn }] },
       },
     },
-    instanceConfiguration: { cpu: '1 vCPU', memory: '2 GB', instanceRoleArn: instanceRole(stack, props).roleArn },
+    instanceConfiguration: { cpu: '1 vCPU', memory: '2 GB', instanceRoleArn: instanceRole(stack, props, gridLicence).roleArn },
     autoScalingConfigurationArn: scaling.attrAutoScalingConfigurationArn,
     healthCheckConfiguration: { protocol: 'TCP' },
   })
