@@ -93,6 +93,6 @@ describe('the records a decision board reads', () => {
   })
 
   it('reads nothing of another shop', async () => {
-    expect(await read(other)).toEqual({ claims: [], proposals: [], incidents: [], holds: [], late: [], dropOffs: [], extensionPayments: [], staffCount: 1 })
+    expect(await read(other)).toEqual({ claims: [], proposals: [], incidents: [], holds: [], late: [], dropOffs: [], extensionPayments: [], repairs: [], staffCount: 1 })
   })
 })

@@ -55,9 +55,13 @@ beforeAll(async () => {
 describe('the records the fleet passport reads', () => {
   it('gives an item rented alone every line of its rental’s decided claim, even one a person wrote, and what PayPal collected', async () => {
     const itemId = await itemRentedBy('Daniel Ortiz')
+    const itemIdOf = await itemRentedBy('Tom Becker')
     const item = (await read(shop)).find((each) => each.itemId === itemId)
     expect(item?.rentals).toHaveLength(1)
-    expect(item?.rentals[0]).toMatchObject({ damageFindings: 0, claimLinesCents: 35_00, claimTotalCents: 35_00, collectedCents: 35_00 })
+    expect(item?.rentals[0]).toMatchObject({ damageFindings: 1, claimLinesCents: 35_00, claimTotalCents: 35_00, collectedCents: 35_00 })
+    // Tom Becker's claim is one line a person wrote, with no finding: rented alone, it is still the item's.
+    const written = (await read(shop)).find((each) => each.itemId === itemIdOf)
+    expect(written?.rentals[0]).toMatchObject({ damageFindings: 0, claimLinesCents: 45_00, claimTotalCents: 45_00, collectedCents: 0 })
   })
 
   it('counts damage found on a claim nobody has decided yet, but prices none of it', async () => {

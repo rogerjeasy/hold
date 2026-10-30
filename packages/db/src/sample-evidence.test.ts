@@ -9,7 +9,9 @@ import { publishPriceList } from './price-list-repository.ts'
 import { rentalReturns } from './return-repository.ts'
 import { addSampleRentals, SAMPLE_PHOTOS } from './sample-rentals.ts'
 import { dropOffsWaiting } from './self-return-repository.ts'
-import { renters, rentals } from './schema/index.ts'
+import { reserveEvidencePack } from './evidence-repository.ts'
+import { itemRepairs } from './repair-repository.ts'
+import { rentalItems, renters, rentals } from './schema/index.ts'
 import { inShop } from './scope.ts'
 import type { Scope } from './scope.ts'
 import { createTestDatabase } from './testing/test-database.ts'
@@ -94,5 +96,23 @@ describe('the sample contested claim', () => {
     expect(promise?.decideBy?.getTime()).toBeGreaterThan(NOW.getTime())
     const messages = await inShop(database, shop, (transaction) => claimMessages(transaction, rentalId))
     expect(messages.map((message) => message.author)).toEqual(['renter', 'shop'])
+  })
+})
+
+describe('the sample charged claim', () => {
+  it('has opened a repair for the damage paid for, now a known mark on the item, for staff to photograph', async () => {
+    const rentalId = await rentalOf('Daniel Ortiz')
+    const [rentalItem] = await inShop(database, shop, (transaction) => transaction.select().from(rentalItems).where(eq(rentalItems.rentalId, rentalId)))
+    const repairs = await inShop(database, shop, (transaction) => itemRepairs(transaction, rentalItem?.itemId ?? ''))
+    expect(repairs).toEqual([expect.objectContaining({ state: 'open', renterName: 'Daniel Ortiz', lines: [expect.objectContaining({ markId: expect.any(String) as unknown, claimedCents: expect.any(Number) as unknown })] })])
+  })
+})
+
+describe('the sample photographs', () => {
+  it('are sealed into each item’s chain like any others, so a sample rental’s record can be built', async () => {
+    for (const renter of ['Priya Natarajan', 'Daniel Ortiz']) {
+      const rentalId = await rentalOf(renter)
+      await expect(inShop(database, shop, (transaction) => reserveEvidencePack(transaction, rentalId, NOW))).resolves.toMatchObject({ rentalId })
+    }
   })
 })

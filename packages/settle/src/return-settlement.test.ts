@@ -1,5 +1,5 @@
 import { approveClaim, confirmCleanReturn, draftClaim, inShop, presentClaim, replyToClaim, rentalDetail } from '@hold/db'
-import { authorizations, executions, holds, moneyEvents, claimWorkspace, publishPriceList, receiptDeliveriesFor, rentals, staffRoles } from '@hold/db'
+import { authorizations, executions, holds, moneyEvents, claimWorkspace, publishPriceList, receiptDeliveriesFor, rentals, repairs, staffRoles } from '@hold/db'
 import { eq } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { createMemoryScheduler, requestHoldPlacement, runExecution } from './index.ts'
@@ -61,6 +61,8 @@ describe('settling a returned rental', () => {
     expect(await act((transaction) => receiptDeliveriesFor(transaction, rentalId))).toMatchObject([{ kind: 'capture', status: 'queued', amountCents: 3500, releasedCents: 26500 }])
     expect((await act((transaction) => rentalDetail(transaction, rentalId, NOW)))?.state).toBe('closed')
     expect((await act((transaction) => transaction.select().from(executions).where(eq(executions.id, accepted.executionId ?? ''))))[0]?.state).toBe('confirmed')
+    // The confirmed charge opens a repair for the item, with the claim's line (architecture.md section 9.6).
+    expect(await act((transaction) => transaction.select().from(repairs).where(eq(repairs.claimId, drafted.claimId)))).toEqual([expect.objectContaining({ state: 'open' })])
   })
 })
 

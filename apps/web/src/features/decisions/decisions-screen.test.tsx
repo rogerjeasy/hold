@@ -58,6 +58,7 @@ const records = (overrides: Partial<DecisionRecords> = {}): DecisionRecords => (
   late: [{ rentalId: '00000000-0000-4000-8000-000000000005', renterName: 'Lea Fischer', endsAt: at('2026-10-13T17:00:00Z'), simulated: false }],
   dropOffs: [],
   extensionPayments: [],
+  repairs: [],
   staffCount: 2,
   ...overrides,
 })

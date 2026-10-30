@@ -1,4 +1,4 @@
-import type { ItemPassport } from '@hold/db'
+import type { ItemPassport, ItemRepair } from '@hold/db'
 import type { StaffRole } from '@hold/domain'
 import { ArrowLeft } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -11,12 +11,13 @@ import { shopRoutes } from '@/lib/routes'
 import { EditItemForm } from './edit-item-form'
 import { PassportMarks, PassportPlan, PassportSessions } from './passport-evidence'
 import { PassportRentals } from './passport-rentals'
+import { RepairsPanel } from '@/features/repairs/repairs-panel'
 import { StatusPanel } from './status-panel'
 
-type PassportScreenProps = { shopName: string; clock: ShopClock; passport: ItemPassport; role: StaffRole }
+type PassportScreenProps = { shopName: string; clock: ShopClock; passport: ItemPassport; role: StaffRole; repairs?: readonly ItemRepair[] }
 
 // One item's record: where it is, its details, its rentals, its known marks and its chain of photographs.
-export function PassportScreen({ shopName, clock, passport, role }: PassportScreenProps) {
+export function PassportScreen({ shopName, clock, passport, role, repairs = [] }: PassportScreenProps) {
   const t = useTranslations('shop.items')
   const { item, type } = passport
   const kind = t(`categories.${type.category}`)
@@ -45,6 +46,7 @@ export function PassportScreen({ shopName, clock, passport, role }: PassportScre
             <div id="status" className="scroll-mt-6">
               <StatusPanel item={item} role={role} clock={clock} />
             </div>
+            <RepairsPanel itemId={item.id} repairs={repairs} marks={passport.marks} views={type.views} clock={clock} canAct={role !== 'read_only' && item.status !== 'retired'} itemInService={item.status === 'in_service'} />
             <Panel title={t('passport.details')}>
               {mayEdit ? (
                 <EditItemForm itemId={item.id} label={item.label} size={item.size} serial={item.serial} />

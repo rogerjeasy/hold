@@ -1,10 +1,11 @@
 import { amountText, money } from '@hold/domain'
-import { currentPriceList, inShop, priceListVersions } from '@hold/db'
+import { currentPriceList, inShop, priceListVersions, repairCosts } from '@hold/db'
 import type { Metadata } from 'next'
 import { getMessages, getTranslations } from 'next-intl/server'
 import { readAccessToken } from '@/features/auth/session-cookies'
 import { GridLicence } from '@/components/grid/grid-licence'
 import { PricesScreen } from '@/features/prices/prices-screen'
+import { repairCostRows } from '@/features/prices/repair-cost-rows'
 import type { TermsMessages } from '@/features/prices/terms-preview'
 import { routing } from '@/i18n/routing'
 import type { Locale } from '@/i18n/routing'
@@ -30,7 +31,7 @@ export default async function Page() {
   const { config, database, identity } = await getServices()
   const scope = { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId } as const
   const [loaded, passkeys, terms] = await Promise.all([
-    inShop(database, scope, async (transaction) => ({ current: await currentPriceList(transaction), versions: await priceListVersions(transaction) })),
+    inShop(database, scope, async (transaction) => ({ current: await currentPriceList(transaction), versions: await priceListVersions(transaction), repairs: (await repairCosts(transaction)).byPrice })),
     identity.listPasskeys((await readAccessToken()) ?? ''),
     previewTerms(),
   ])
@@ -48,6 +49,7 @@ export default async function Page() {
         canPublish={context.role === 'owner' || context.role === 'manager'}
         gate={{ needed: context.passkeyNeeded, hasPasskey: passkeys.ok && passkeys.value.length > 0, email: context.person.email }}
         previewTerms={terms}
+        repairCosts={repairCostRows(loaded.repairs)}
       />
     </>
   )

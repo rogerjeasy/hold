@@ -84,6 +84,8 @@ export const marks = pgTable(
     // The report it was first seen in, when a renter reported it during the rental.
     incidentId: reference().references(() => incidents.id),
     closedAt: at(),
+    // The repair that closed it, whose photographs are its evidence (architecture.md section 9.6).
+    repairId: reference(),
   },
   (table) => [allowed(table.status, MARK_STATUSES), shopIsolation(table.shopId)],
 )

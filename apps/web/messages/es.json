@@ -1383,6 +1383,21 @@
         "loss": "Pérdida",
         "lateness": "Devolución tardía",
         "cleaning": "Limpieza"
+      },
+      "repairs": {
+        "title": "Lo que cuestan las reparaciones",
+        "lead": "Cada precio contra el que se registró una reparación: cuántas reparaciones, cuánto costaron de media y cuánto está el precio por encima o por debajo. Un precio solo cambia cuando publica una nueva lista de precios, que aceptan quienes alquilan.",
+        "repaired": "{count, plural, one {Reparado una vez} other {Reparado # veces}}, de media {average}",
+        "below": "Por debajo del coste de reparación",
+        "covers": "Cubre el coste de reparación",
+        "columns": {
+          "price": "Daño",
+          "amount": "Precio",
+          "repairs": "Reparaciones",
+          "average": "Reparación media",
+          "gap": "Precio menos reparación",
+          "standing": "Situación"
+        }
       }
     },
     "rentals": {
@@ -1719,7 +1734,8 @@
           "firstSeen": "Vista por primera vez el {date}",
           "open": "Sigue ahí",
           "repaired": "Reparada",
-          "reported": "Informado durante un alquiler"
+          "reported": "Informado durante un alquiler",
+          "repairedOn": "Reparado {date}"
         },
         "rentals": {
           "title": "Alquileres",
@@ -1736,7 +1752,8 @@
             "return": "Devolución",
             "packing": "Embalaje",
             "unboxing": "Desembalaje",
-            "send_back": "Envío de vuelta"
+            "send_back": "Envío de vuelta",
+            "repair": "Reparación"
           },
           "photographs": "{count, plural, one {# fotografía} other {# fotografías}}",
           "sealed": "Sellado el {date}",
@@ -1825,7 +1842,10 @@
           "incurred": "Daños con precio",
           "recovered": "Recuperado",
           "marks": "Marcas abiertas",
-          "signal": "Señal"
+          "signal": "Señal",
+          "repairCost": "Coste de reparación",
+          "repairMargin": "Recuperado menos reparaciones",
+          "openRepairs": "Reparaciones pendientes"
         },
         "menu": {
           "passport": "Abrir el pasaporte",
@@ -2880,7 +2900,10 @@
       "amount": "Importe que mantener, como máximo {amount}",
       "neverRaised": "Una línea aceptada por quien alquila puede rebajarse, nunca subirse.",
       "drafted": "Aceptada por quien alquila durante el alquiler, confirmada por el personal en la devolución."
-    }
+    },
+    "repairedOn": "Reparado {date}",
+    "repairedBody": "La tienda reparó lo que usted pagó. Lo que costó la reparación lo asume la tienda.",
+    "repairedAlt": "Reparado: {line}"
   },
   "scorecard": {
     "title": "Qué tan fiable es la comparación",
@@ -3585,7 +3608,8 @@
       "hold_ending": "La retención de {renter} vence {when}",
       "late": "{renter} se retrasa",
       "dropped_off": "Revisa lo que dejó {renter}",
-      "extension_payment": "Revisa un pago de días extra de {renter}"
+      "extension_payment": "Revisa un pago de días extra de {renter}",
+      "repair": "Reparar {item}"
     },
     "headings": {
       "claim": "Aprobar una reclamación de {amount}",
@@ -3672,7 +3696,9 @@
           "not_found": "Este pago no es de esta tienda.",
           "already_checked": "Alguien ya lo revisó."
         }
-      }
+      },
+      "repairBody": "Fotografíe las vistas reparadas y registre el coste desde el pasaporte del artículo. Las marcas reparadas salen del pasaporte.",
+      "openPassport": "Abrir el pasaporte del artículo"
     },
     "together": {
       "label": "Liberaciones elegidas",
@@ -3689,7 +3715,12 @@
       "open": "Abrir la decisión",
       "close": "Cerrar la decisión",
       "claim": "Abrir la página de la reclamación",
-      "rental": "Abrir el alquiler"
+      "rental": "Abrir el alquiler",
+      "passport": "Abrir el pasaporte del artículo"
+    },
+    "repairLine": {
+      "claim": "De la reclamación cobrada a {renter}",
+      "opened": "Abierta desde el pasaporte"
     }
   },
   "money": {
@@ -4251,6 +4282,65 @@
       "rate_limited": "Demasiados mensajes por ahora. Inténtelo de nuevo en una hora.",
       "not_found": "Esta reclamación no está abierta a mensajes.",
       "standing_rule_off": "Ya está desactivada."
+    }
+  },
+  "repairs": {
+    "toDoTitle": "Reparación pendiente",
+    "fromClaim": "De la reclamación cobrada a {renter}, {date}.",
+    "fromClaimUnnamed": "De una reclamación cobrada, {date}.",
+    "openedBy": "Abierta por {name}, {date}.",
+    "claimed": "{amount} reclamados",
+    "stillRentable": "El artículo se puede seguir alquilando. El daño está en su pasaporte, así que no se cobra a nadie por él.",
+    "outOfService": "El artículo está fuera de servicio hasta que se cierren sus reparaciones.",
+    "takeOut": "Retirarlo del servicio",
+    "photograph": "Fotografiar la reparación",
+    "close": "Cerrar la reparación",
+    "chooseTitle": "Reparar marcas",
+    "chooseLead": "Marcas abiertas que ninguna reparación cubre aún. Elija las que va a reparar.",
+    "open": "Abrir una reparación",
+    "opened": "Reparación abierta.",
+    "historyTitle": "Reparaciones",
+    "doneBy": "Reparado por {name}, {date}",
+    "doneUnnamed": "Reparado {date}",
+    "costLabel": "Coste de la reparación",
+    "claimedLabel": "Reclamado",
+    "staff": "personal",
+    "page": {
+      "title": "Reparación",
+      "back": "Volver al pasaporte",
+      "lead": "Fotografíe cada vista donde había una marca, con el mismo encuadre que antes. Después indique qué se hizo con cada línea y cuánto costó.",
+      "where": "Dónde estaba la marca",
+      "now": "Ahora",
+      "noPhoto": "Aún sin fotografiar.",
+      "preparing": "Preparando la fotografía…",
+      "retake": "Volver a tomarla",
+      "outcomesTitle": "Qué se hizo",
+      "repaired": "Reparado",
+      "left": "Se deja así",
+      "cost": "Cuánto costó la reparación, en {currency}",
+      "costHint": "Piezas y mano de obra. Cero para una reparación propia sin coste.",
+      "note": "Nota (opcional)",
+      "submit": "Cerrar la reparación",
+      "photosFirst": "Fotografíe primero cada vista de arriba.",
+      "nothingToPhotograph": "Nada en esta reparación tiene una marca que fotografiar.",
+      "doneTitle": "Reparación cerrada",
+      "doneBody": "Las marcas reparadas salen del pasaporte, con estas fotografías como prueba. No se cobra por ellas a quien alquile después, y un daño nuevo en el mismo sitio es suyo.",
+      "sampleTitle": "Fotografías de muestra",
+      "sampleBody": "Las fotografías de aquí son de la demostración.",
+      "whereAlt": "Dónde estaba la marca: {mark}",
+      "nowAlt": "Reparado: {view}"
+    },
+    "results": {
+      "marks_needed": "Elija al menos una marca.",
+      "mark_in_repair": "Una reparación ya cubre una de esas marcas.",
+      "item_in_use": "Alguien tiene el artículo alquilado. Repárelo cuando vuelva.",
+      "views_missing": "Fotografíe primero cada vista.",
+      "outcome_missing": "Indique qué se hizo con cada línea.",
+      "cost_invalid": "Escriba el coste como un importe, por ejemplo 62,00.",
+      "note_too_long": "La nota debe tener menos de 500 caracteres.",
+      "already_done": "Esta reparación ya está cerrada.",
+      "currency_unset": "Publique primero sus precios.",
+      "not_found": "No se encontró esa reparación o marca."
     }
   }
 }

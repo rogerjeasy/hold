@@ -1383,6 +1383,21 @@
         "loss": "Loss",
         "lateness": "Late return",
         "cleaning": "Cleaning"
+      },
+      "repairs": {
+        "title": "What repairs cost",
+        "lead": "Each price a repair was costed against: how many repairs, what they cost on average, and how far the price is above or below. A price changes only when you publish a new price list, which renters agree to.",
+        "repaired": "Repaired {count, plural, one {once} other {# times}}, on average {average}",
+        "below": "Below repair cost",
+        "covers": "Covers repair cost",
+        "columns": {
+          "price": "Damage",
+          "amount": "Price",
+          "repairs": "Repairs",
+          "average": "Average repair",
+          "gap": "Price less repair",
+          "standing": "Standing"
+        }
       }
     },
     "rentals": {
@@ -1719,7 +1734,8 @@
           "firstSeen": "First seen {date}",
           "open": "Still there",
           "repaired": "Repaired",
-          "reported": "Reported during a rental"
+          "reported": "Reported during a rental",
+          "repairedOn": "Repaired {date}"
         },
         "rentals": {
           "title": "Rentals",
@@ -1736,7 +1752,8 @@
             "return": "Return",
             "packing": "Packing",
             "unboxing": "Unboxing",
-            "send_back": "Sending back"
+            "send_back": "Sending back",
+            "repair": "Repair"
           },
           "photographs": "{count, plural, one {# photograph} other {# photographs}}",
           "sealed": "Sealed {date}",
@@ -1825,7 +1842,10 @@
           "incurred": "Damage priced",
           "recovered": "Recovered",
           "marks": "Open marks",
-          "signal": "Signal"
+          "signal": "Signal",
+          "repairCost": "Repair cost",
+          "repairMargin": "Recovered less repairs",
+          "openRepairs": "Repairs to do"
         },
         "menu": {
           "passport": "Open the passport",
@@ -2880,7 +2900,10 @@
       "amount": "Amount to keep, at most {amount}",
       "neverRaised": "A line the renter agreed can be lowered, never raised.",
       "drafted": "Agreed by the renter during the rental, confirmed by staff at the return."
-    }
+    },
+    "repairedOn": "Repaired {date}",
+    "repairedBody": "The shop repaired what you paid for. What the repair cost stays with the shop.",
+    "repairedAlt": "Repaired: {line}"
   },
   "scorecard": {
     "title": "How reliable is the comparison",
@@ -3585,7 +3608,8 @@
       "hold_ending": "The hold for {renter} ends {when}",
       "late": "{renter} is late",
       "dropped_off": "Check what {renter} dropped off",
-      "extension_payment": "Check an extra-days payment from {renter}"
+      "extension_payment": "Check an extra-days payment from {renter}",
+      "repair": "Repair {item}"
     },
     "headings": {
       "claim": "Approve a claim of {amount}",
@@ -3672,7 +3696,9 @@
           "not_found": "This payment is not one of this shop's.",
           "already_checked": "Someone has already checked it."
         }
-      }
+      },
+      "repairBody": "Photograph the repaired views and record what the repair cost, from the item’s passport. Marks repaired leave the passport.",
+      "openPassport": "Open the item’s passport"
     },
     "together": {
       "label": "Releases chosen",
@@ -3689,7 +3715,12 @@
       "open": "Open the decision",
       "close": "Close the decision",
       "claim": "Open the claim page",
-      "rental": "Open the rental"
+      "rental": "Open the rental",
+      "passport": "Open the item’s passport"
+    },
+    "repairLine": {
+      "claim": "From {renter}’s charged claim",
+      "opened": "Opened from the passport"
     }
   },
   "money": {
@@ -4251,6 +4282,65 @@
       "rate_limited": "Too many messages for now. Try again in an hour.",
       "not_found": "This claim is not open for messages.",
       "standing_rule_off": "It is already off."
+    }
+  },
+  "repairs": {
+    "toDoTitle": "Repair to do",
+    "fromClaim": "From {renter}’s charged claim, {date}.",
+    "fromClaimUnnamed": "From a charged claim, {date}.",
+    "openedBy": "Opened by {name}, {date}.",
+    "claimed": "{amount} claimed",
+    "stillRentable": "The item can still be rented. The damage is on its passport, so no renter is charged for it.",
+    "outOfService": "The item is out of service until its repairs are closed.",
+    "takeOut": "Take it out of service",
+    "photograph": "Photograph the repair",
+    "close": "Close the repair",
+    "chooseTitle": "Repair marks",
+    "chooseLead": "Open marks no repair covers yet. Choose the ones to repair.",
+    "open": "Open a repair",
+    "opened": "Repair opened.",
+    "historyTitle": "Repairs",
+    "doneBy": "Repaired by {name}, {date}",
+    "doneUnnamed": "Repaired {date}",
+    "costLabel": "Repair cost",
+    "claimedLabel": "Claimed",
+    "staff": "staff",
+    "page": {
+      "title": "Repair",
+      "back": "Back to the passport",
+      "lead": "Photograph each view where a mark was, framed as before. Then say what was done to each line and what it cost.",
+      "where": "Where the mark was",
+      "now": "Now",
+      "noPhoto": "Not photographed yet.",
+      "preparing": "Preparing the photograph…",
+      "retake": "Take it again",
+      "outcomesTitle": "What was done",
+      "repaired": "Repaired",
+      "left": "Left as is",
+      "cost": "What the repair cost, in {currency}",
+      "costHint": "Parts and work. Zero for a repair done in-house at no cost.",
+      "note": "Note (optional)",
+      "submit": "Close the repair",
+      "photosFirst": "Photograph every view above first.",
+      "nothingToPhotograph": "Nothing on this repair has a mark to photograph.",
+      "doneTitle": "Repair closed",
+      "doneBody": "Marks repaired leave the passport, with these photographs as evidence. The next renter is not charged for them, and new damage in the same place is theirs.",
+      "sampleTitle": "Sample photographs",
+      "sampleBody": "The photographs here are the demonstration’s own.",
+      "whereAlt": "Where the mark was: {mark}",
+      "nowAlt": "Repaired: {view}"
+    },
+    "results": {
+      "marks_needed": "Choose at least one mark.",
+      "mark_in_repair": "A repair already covers one of those marks.",
+      "item_in_use": "A renter has the item. Repair it once it is back.",
+      "views_missing": "Photograph every view first.",
+      "outcome_missing": "Say what was done to every line.",
+      "cost_invalid": "Write the cost as an amount, such as 62.00.",
+      "note_too_long": "Keep the note under 500 characters.",
+      "already_done": "This repair is already closed.",
+      "currency_unset": "Publish your prices first.",
+      "not_found": "That repair or mark was not found."
     }
   }
 }

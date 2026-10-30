@@ -31,10 +31,10 @@ const evidence = (page: Page, heading: string) => grid(page).getByRole('region',
 test('an owner works through the morning by keyboard: grouped by kind, the late return first, then the claim opened in place', async ({ page }) => {
   await startDemo(page, 'Tomás, the owner')
   await openBoard(page)
-  await expect(page.getByTestId('decisions-brief')).toHaveText(/^6 decisions wait, 6 of them yours\./)
-  await expect(dataRows(page)).toHaveCount(6)
+  await expect(page.getByTestId('decisions-brief')).toHaveText(/^7 decisions wait, 7 of them yours\./)
+  await expect(dataRows(page)).toHaveCount(7)
   // The contested claim falls due at the date the shop promised the renter (architecture.md section 6.16), so claims come before the agent's proposals.
-  await expect(groups(page)).toHaveText([/^Holds and returns\s*2 decisions · €300\.00 in all$/, /^Claims\s*2 decisions · €80\.00 in all$/, /^From the agent\s*2 decisions · €300\.00 in all$/])
+  await expect(groups(page)).toHaveText([/^Holds and returns\s*3 decisions · €335\.00 in all$/, /^Claims\s*2 decisions · €80\.00 in all$/, /^From the agent\s*2 decisions · €300\.00 in all$/])
   await expect(dataRows(page).first()).toContainText('Lea Fischer is late')
   await expect(dataRows(page).first()).toContainText('Overdue')
 
@@ -116,11 +116,11 @@ test('the board sorts by amount within each group, filters by group and finds a 
   await startDemo(page, 'Tomás, the owner')
   await openBoard(page)
   await grid(page).getByRole('columnheader', { name: 'Amount' }).click()
-  await expect(dataRows(page)).toHaveText([/Check what Chloé Martin dropped off/, /Lea Fischer is late/, /Approve a claim/, /Decide a contested claim/, /Send this answer to PayPal/, /Ask the renter for a new hold/])
+  await expect(dataRows(page)).toHaveText([/Repair Hybrid bike 4/, /Check what Chloé Martin dropped off/, /Lea Fischer is late/, /Approve a claim/, /Decide a contested claim/, /Send this answer to PayPal/, /Ask the renter for a new hold/])
 
   await page.getByRole('button', { name: 'Claims 2' }).click()
   await expect(dataRows(page)).toHaveCount(2)
-  await page.getByRole('button', { name: 'All 6' }).click()
+  await page.getByRole('button', { name: 'All 7' }).click()
   await page.getByRole('searchbox', { name: 'Search decisions' }).fill('becker')
   await expect(dataRows(page)).toHaveCount(1)
   await expect(dataRows(page).first()).toContainText('Decide a contested claim')
@@ -138,8 +138,9 @@ test('the board sorts by amount within each group, filters by group and finds a 
 test('counter staff see which decisions are theirs and which wait for the owner', async ({ page }) => {
   await startDemo(page, 'Jonas, at the counter')
   await openBoard(page)
+  // The repair to do is the counter's work, so it is theirs as well (architecture.md section 9.6).
   await page.getByRole('checkbox', { name: 'Only mine' }).check()
-  await expect(dataRows(page)).toHaveCount(3)
+  await expect(dataRows(page)).toHaveCount(4)
   await page.getByRole('checkbox', { name: 'Only mine' }).uncheck()
   const contested = dataRows(page).filter({ hasText: 'Decide a contested claim' })
   await expect(contested).toContainText('An owner or manager decides.')
@@ -150,7 +151,7 @@ for (const theme of ['light', 'dark'] as const) {
     await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' })
     await startDemo(page, 'Tomás, the owner')
     await openBoard(page)
-    await expect(dataRows(page)).toHaveCount(6)
+    await expect(dataRows(page)).toHaveCount(7)
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze()
     expect(results.violations.map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`)).toEqual([])
   })

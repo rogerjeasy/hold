@@ -1,4 +1,4 @@
-import type { DecisionClaim, DecisionClaimLine, DecisionRecords, ExtensionAttention, ExtensionPaymentToCheck, QueueEntry, ShopIncident, WaitingDropOff } from '@hold/db'
+import type { DecisionClaim, DecisionClaimLine, DecisionRecords, ExtensionAttention, ExtensionPaymentToCheck, OpenRepair, QueueEntry, ShopIncident, WaitingDropOff } from '@hold/db'
 import { DETECTOR_KINDS, holdDay, holdStanding, mayConfirm, money, promiseStanding, proposalMovesMoney, settle } from '@hold/domain'
 import type { ApprovalAction, DetectorKind, ProposalKind, StaffRole } from '@hold/domain'
 import type { ContestView } from '@/features/contest/contest-summary-panel'
@@ -103,7 +103,10 @@ export type ExtensionPaymentRow = Common & {
   readonly paypalCaptureId: string
 }
 
-export type BoardRow = ClaimRow | ProposalRow | IncidentRow | HoldEndingRow | LateRow | DropOffRow | ExtensionPaymentRow
+// A repair still to do (architecture.md section 9.6): any staff member photographs and closes it from the passport.
+export type RepairRow = Common & { readonly kind: 'repair'; readonly group: 'counter'; readonly repairId: string; readonly itemId: string; readonly itemLabel: string }
+
+export type BoardRow = ClaimRow | ProposalRow | IncidentRow | HoldEndingRow | LateRow | DropOffRow | ExtensionPaymentRow | RepairRow
 export type BoardKind = BoardRow['kind']
 
 const SENIOR: readonly StaffRole[] = ['owner', 'manager']
@@ -256,6 +259,26 @@ function extensionPaymentRow(payment: ExtensionPaymentToCheck, viewer: Viewer): 
   }
 }
 
+function repairRow(repair: OpenRepair, viewer: Viewer): RepairRow {
+  return {
+    id: `repair:${repair.id}`,
+    kind: 'repair',
+    group: 'counter',
+    rentalId: null,
+    renterName: repair.renterName,
+    due: null,
+    overdue: false,
+    waitingSince: repair.createdAt,
+    amountCents: repair.claimedCents > 0 ? repair.claimedCents : null,
+    simulated: repair.simulated,
+    decider: staffDecider(viewer),
+    selectable: false,
+    repairId: repair.id,
+    itemId: repair.itemId,
+    itemLabel: repair.itemLabel,
+  }
+}
+
 const time = (date: Date | null) => (date === null ? Number.POSITIVE_INFINITY : date.getTime())
 
 // What falls due first comes first, a return already missed before anything; then what has no date, the oldest first.
@@ -305,6 +328,7 @@ export function boardRows(records: DecisionRecords, viewer: Viewer, now: Date, c
     })),
     ...records.dropOffs.map((dropOff) => dropOffRow(dropOff, viewer)),
     ...records.extensionPayments.map((payment) => extensionPaymentRow(payment, viewer)),
+    ...records.repairs.map((repair) => repairRow(repair, viewer)),
   ]
   return rows.sort(byUrgency)
 }

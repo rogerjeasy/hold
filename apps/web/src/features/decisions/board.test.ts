@@ -76,7 +76,7 @@ const incident = (overrides: Partial<ShopIncident> = {}): ShopIncident => ({
   ...overrides,
 })
 
-const records = (overrides: Partial<DecisionRecords> = {}): DecisionRecords => ({ claims: [], proposals: [], incidents: [], holds: [], late: [], dropOffs: [], extensionPayments: [], staffCount: 2, ...overrides })
+const records = (overrides: Partial<DecisionRecords> = {}): DecisionRecords => ({ claims: [], proposals: [], incidents: [], holds: [], late: [], dropOffs: [], extensionPayments: [], repairs: [], staffCount: 2, ...overrides })
 
 const extensionPayment: ExtensionPaymentToCheck = {
   extensionId: 'extension-1', rentalId: 'rental-11', renterName: 'Sofia Lopes', attention: 'paid_after_expiry', attentionAt: at('2026-10-14T08:30:00Z'),
@@ -192,6 +192,13 @@ describe('who decides, as the viewer reads it', () => {
     expect(boardRows(records({ claims: [contested] }), counter, NOW)[0]?.decider).toBe('senior')
     expect(boardRows(records({ claims: [contested] }), owner, NOW)[0]?.decider).toBe('another_senior')
     expect(boardRows(records({ claims: [contested], staffCount: 1 }), owner, NOW)[0]?.decider).toBe('you')
+  })
+
+  it('puts a repair to do with the counter’s work, for any staff member, with what was claimed for it', () => {
+    const repair = { id: 'repair-1', itemId: 'item-7', itemLabel: 'Cube Touring 54', claimId: 'claim-9', currency: 'EUR', createdAt: at('2026-10-14T10:00:00Z'), renterName: 'Lena Brandt', claimedCents: 90_00, simulated: false }
+    const [row] = boardRows(records({ repairs: [repair] }), counter, NOW)
+    expect(row).toMatchObject({ id: 'repair:repair-1', kind: 'repair', group: 'counter', itemId: 'item-7', itemLabel: 'Cube Touring 54', amountCents: 90_00, due: null, waitingSince: repair.createdAt, decider: 'you', renterName: 'Lena Brandt', rentalId: null })
+    expect(boardRows(records({ repairs: [{ ...repair, claimedCents: 0, claimId: null, renterName: null }] }), counter, NOW)[0]).toMatchObject({ amountCents: null })
   })
 
   it('falls due at the date the shop promised the renter, and once that passed only the owner decides', () => {

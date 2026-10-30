@@ -78,3 +78,11 @@ export function wearingFastest(items: readonly WearComparison[]): ReadonlySet<st
   }
   return fastest
 }
+
+// An item's repairs (architecture.md section 9.6): how many were done and what they cost, and how many are open.
+export type ItemRepairs = { readonly done: number; readonly doneCostCents: number; readonly open: number }
+
+// What damage recovered on the item less what its repairs cost. Nothing to say before a repair was done.
+export function repairMargin(recoveredCents: number, repairs: ItemRepairs): number | null {
+  return repairs.done === 0 ? null : recoveredCents - repairs.doneCostCents
+}

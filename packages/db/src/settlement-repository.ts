@@ -8,6 +8,7 @@ import { approvals, auditLog, authorizations, claims, executions, holds, moneyEv
 import type { Transaction } from './scope.ts'
 import { recordFindingOutcomes } from './scorecard-repository.ts'
 import { writeRentalOutcome } from './trust-repository.ts'
+import { openRepairsForClaim } from './repair-repository.ts'
 
 export async function settlementWork(transaction: Transaction, executionId: string) {
   const [execution] = await transaction.select().from(executions).where(eq(executions.id, executionId)).for('update')
@@ -75,6 +76,8 @@ export async function confirmClaimCaptured(transaction: Transaction, executionId
   await transaction.update(holds).set({ state: 'captured' }).where(eq(holds.id, hold.id))
   await transaction.update(authorizations).set({ state: 'captured' }).where(eq(authorizations.id, work.authorization.id))
   await transaction.update(claims).set({ state: 'charged' }).where(eq(claims.id, claim.id))
+  // The damage paid for goes on the item's passport, and a repair opens for each item (architecture.md section 9.6).
+  await openRepairsForClaim(transaction, claim.id, now)
   await transaction.insert(moneyEvents).values({ shopId: hold.shopId, rentalId: hold.rentalId, holdId: hold.id, kind: 'hold_captured', currency: capture.amount.currency, amountCents: capture.amount.cents, paypalReference: capture.captureId, occurredAt: capture.createdAt }).onConflictDoNothing()
   if (amounts.release.cents > 0) await transaction.insert(moneyEvents).values({ shopId: hold.shopId, rentalId: hold.rentalId, holdId: hold.id, kind: 'hold_released', currency: hold.currency, amountCents: amounts.release.cents, paypalReference: `${authorization.authorizationId}:remainder`, occurredAt: now }).onConflictDoNothing()
   await transaction.update(executions).set({ state: 'confirmed', lastError: null, updatedAt: now }).where(eq(executions.id, executionId))

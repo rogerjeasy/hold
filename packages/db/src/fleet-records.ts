@@ -1,13 +1,14 @@
-import type { ClaimState, ItemRentalRecord, RentalState } from '@hold/domain'
+import type { ClaimState, ItemRentalRecord, ItemRepairs, RentalState } from '@hold/domain'
 import { and, count, eq, inArray, notInArray, sql } from 'drizzle-orm'
 import { captureSessions, claimLines, claims, comparisons, findings, items, marks, moneyEvents, rentalItems, rentals } from './schema/index.ts'
+import { repairCosts } from './repair-repository.ts'
 import type { Transaction } from './scope.ts'
 
 // What the fleet passport reads (extensions.md section 12.5): for every item, each rental that went out with the damage
 // the comparison found on the item at the return, the claim lines about the item (those priced from its findings, or
 // all of them when it was rented alone), what PayPal collected on the claim, and the marks still open on the item. Plain rows; the domain's itemWear and wearingFastest read them.
 
-export type FleetItemRecord = { readonly itemId: string; readonly rentals: readonly ItemRentalRecord[]; readonly openMarks: number }
+export type FleetItemRecord = { readonly itemId: string; readonly rentals: readonly ItemRentalRecord[]; readonly openMarks: number; readonly repairs: ItemRepairs }
 
 // Rentals whose items went out: a booking still to come, or one let go, has nothing to say about an item's wear.
 const WENT_OUT: readonly RentalState[] = ['out', 'overdue', 'dropped_off', 'returned', 'inspecting', 'settling', 'closed']
@@ -63,6 +64,8 @@ export async function fleetRecords(transaction: Transaction): Promise<FleetItemR
     .groupBy(moneyEvents.rentalId)
   const open = await transaction.select({ itemId: marks.itemId, count: count(marks.id) }).from(marks).where(eq(marks.status, 'open')).groupBy(marks.itemId)
 
+  const repaired = new Map((await repairCosts(transaction)).byItem.map((row) => [row.itemId, { done: row.done, doneCostCents: row.costCents, open: row.open }]))
+
   const damageOf = new Map(found.map((row) => [row.rentalItemId, row.damage]))
   const pricedOf = new Map(priced.map((row) => [row.rentalItemId, row.cents]))
   const collectedOf = new Map(collected.map((row) => [row.rentalId, row.cents]))
@@ -86,5 +89,6 @@ export async function fleetRecords(transaction: Transaction): Promise<FleetItemR
         collectedCents: collectedOf.get(row.rentalId) ?? 0,
       })),
     openMarks: openOf.get(item.id) ?? 0,
+    repairs: repaired.get(item.id) ?? { done: 0, doneCostCents: 0, open: 0 },
   }))
 }

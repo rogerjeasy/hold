@@ -244,7 +244,7 @@ export type PassportRental = {
   readonly claim: { readonly state: ClaimState; readonly totalCents: number; readonly currency: string } | undefined
 }
 
-export type PassportMark = { readonly id: string; readonly view: string; readonly description: string; readonly status: (typeof MARK_STATUSES)[number]; readonly firstSeenAt: Date }
+export type PassportMark = { readonly id: string; readonly view: string; readonly description: string; readonly status: (typeof MARK_STATUSES)[number]; readonly firstSeenAt: Date; readonly closedAt: Date | null }
 
 export type PassportSession = {
   readonly id: string
@@ -293,7 +293,7 @@ export async function itemPassport(transaction: Transaction, itemId: string): Pr
   const binding = await bindingRentals(transaction, [itemId])
 
   const knownMarks = await transaction
-    .select({ id: marks.id, view: marks.view, description: marks.description, status: marks.status, firstSeenAt: captureSessions.startedAt })
+    .select({ id: marks.id, view: marks.view, description: marks.description, status: marks.status, firstSeenAt: captureSessions.startedAt, closedAt: marks.closedAt })
     .from(marks)
     .innerJoin(captureSessions, eq(captureSessions.id, marks.firstSeenSessionId))
     .where(eq(marks.itemId, itemId))

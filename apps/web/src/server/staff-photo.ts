@@ -10,9 +10,9 @@ import { Refusal, shopAction, withLocale } from './shop-access'
 export const CAPTURE_STAFF = ['owner', 'manager', 'counter_staff'] as const
 const photoFields = { sessionId: z.uuid(), view: z.string().min(1).max(64) }
 
-// Staff's handover and return use the same upload contract and evidence store. The action binds the session kind;
+// Staff's handover, return and repair use the same upload contract and evidence store. The action binds the session kind;
 // changing the id can never turn a return photograph into a handover baseline.
-export function staffPhotoActions(kind: 'handover' | 'return') {
+export function staffPhotoActions(kind: 'handover' | 'return' | 'repair') {
   const request = shopAction({ name: `${kind}.upload_requested`, roles: CAPTURE_STAFF, needsPasskey: false, input: withLocale({ ...photoFields, sha256: z.string().regex(/^[0-9a-f]{64}$/), bytes: z.coerce.number().int().min(1).max(MAX_PHOTO_BYTES) }) },
     async (context, input, transaction) => {
       const session = await captureSession(transaction, input.sessionId)

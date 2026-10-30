@@ -76,3 +76,12 @@ describe('which items are wearing fastest', () => {
     expect(wearingFastest([{ itemId: 'a', typeId: 't', ...wear(0, 0) }, { itemId: 'b', typeId: 't', ...wear(0, 0) }])).toEqual(new Set())
   })
 })
+
+describe('what repairs cost against what damage recovered', () => {
+  it('is the recovered amount less the cost of the repairs done, once one was done', async () => {
+    const { repairMargin } = await import('./fleet.ts')
+    expect(repairMargin(90_00, { done: 1, doneCostCents: 62_00, open: 0 })).toBe(28_00)
+    expect(repairMargin(35_00, { done: 2, doneCostCents: 71_50, open: 1 })).toBe(-36_50)
+    expect(repairMargin(90_00, { done: 0, doneCostCents: 0, open: 1 })).toBeNull()
+  })
+})

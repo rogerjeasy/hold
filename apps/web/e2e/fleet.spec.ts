@@ -27,7 +27,9 @@ test('an owner reads the fleet by type: what each item’s rentals cost and reco
 
   const third = row(page, 'Hybrid bike 3')
   await expect(third).toContainText('Wearing fastest')
-  await expect(row(page, 'Hybrid bike 4')).not.toContainText('Wearing fastest')
+  // Hybrid bike 4's one rental found the damage its renter was charged for: as much per rental as Hybrid bike 3.
+  await expect(row(page, 'Hybrid bike 4')).toContainText('Wearing fastest')
+  await expect(row(page, 'Hybrid bike 4').locator('[col-id="openRepairs"]')).toHaveText('1')
   await expect(third.locator('[col-id="marks"]')).toHaveText('1')
   await expect(third.locator('[col-id="findings"] canvas')).toBeVisible()
   await expect(row(page, 'Hybrid bike 4').locator('[col-id="recovered"]')).toHaveText('€35.00 of €35.00')

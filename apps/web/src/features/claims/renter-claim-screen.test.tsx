@@ -77,3 +77,12 @@ it('tells the renter what the shop promises before they contest, and the date an
   expect(screen.getByText('We are checking.')).toBeInTheDocument()
   expect(screen.getByLabelText('Write to the shop')).toBeInTheDocument()
 })
+
+it('shows the renter who paid that the shop repaired what they paid for, with the photograph', () => {
+  const base = { shopName: 'Ribeira Bikes', currency: 'EUR', totalCents: 9000, captureCents: 9000, releaseCents: 21000, invoiceCents: 0, replyDueAt: null, holdState: 'captured' as const, canReply: false, timeZone: 'UTC' }
+  const line = { id: 'line', description: 'Frame scratch, top tube', reason: 'Fresh scratch.', amountCents: 9000, actorName: 'Ana', beforeUrl: null, afterUrl: null, region: null }
+  renderWithIntl(<RenterClaimScreen token="token" data={{ ...base, state: 'closed', lines: [{ ...line, repair: { repairedAt: new Date('2026-11-04T15:00:00Z'), url: '/repaired.jpg' } }] }} />)
+  expect(screen.getByText('Repaired Nov 4')).toBeInTheDocument()
+  expect(screen.getByRole('img', { name: 'Repaired: Frame scratch, top tube' })).toHaveAttribute('src', '/repaired.jpg')
+  expect(screen.getByText('The shop repaired what you paid for. What the repair cost stays with the shop.')).toBeInTheDocument()
+})

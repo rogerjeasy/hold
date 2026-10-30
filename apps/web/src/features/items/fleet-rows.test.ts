@@ -11,9 +11,9 @@ const item = (id: string, typeId: string, standing: CatalogItem['standing'] = 'a
 const rental = (n: number, damageFindings: number): ItemRentalRecord => ({ rentalId: `r${String(n)}`, startsAt: new Date(Date.UTC(2026, 9, n, 9)), endsAt: new Date(Date.UTC(2026, 9, n + 1, 9)), damageFindings, claimLinesCents: damageFindings * 35_00, claimTotalCents: damageFindings > 0 ? damageFindings * 35_00 : null, collectedCents: damageFindings * 35_00 })
 const catalog: ItemCatalog = { types: [type('ebike', 'City e-bike'), type('kayak', 'Kayak')], items: [item('e1', 'ebike'), item('e2', 'ebike', 'in_repair'), item('k1', 'kayak', 'retired')] }
 const records: FleetItemRecord[] = [
-  { itemId: 'e1', rentals: [rental(1, 1), rental(5, 1)], openMarks: 2 },
-  { itemId: 'e2', rentals: [rental(2, 0)], openMarks: 0 },
-  { itemId: 'k1', rentals: [], openMarks: 0 },
+  { itemId: 'e1', rentals: [rental(1, 1), rental(5, 1)], openMarks: 2, repairs: { done: 1, doneCostCents: 52_00, open: 1 } },
+  { itemId: 'e2', rentals: [rental(2, 0)], openMarks: 0, repairs: { done: 0, doneCostCents: 0, open: 0 } },
+  { itemId: 'k1', rentals: [], openMarks: 0, repairs: { done: 0, doneCostCents: 0, open: 0 } },
 ]
 const YEAR = { start: new Date(Date.UTC(2026, 0, 1)), end: new Date(Date.UTC(2027, 0, 1)) }
 
@@ -25,6 +25,12 @@ describe('the fleet passport’s rows', () => {
     const e1 = rows.find((row) => row.kind === 'item' && row.item.id === 'e1')
     expect(e1).toMatchObject({ kind: 'item', openMarks: 2, fastest: true, wear: { rentals: 2, damageFindings: 2, findingsByRental: [1, 1], incurredCents: 70_00, recoveredCents: 70_00, daysOut: 2 } })
     expect(rows.find((row) => row.kind === 'item' && row.item.id === 'e2')).toMatchObject({ fastest: false })
+  })
+
+  it('carries what the item’s repairs cost, how many are open, and what damage recovered less that', () => {
+    const rows = fleetRows(catalog, records, YEAR, 'all')
+    expect(rows.find((row) => row.kind === 'item' && row.item.id === 'e1')).toMatchObject({ repairCostCents: 52_00, openRepairs: 1, repairMarginCents: 18_00 })
+    expect(rows.find((row) => row.kind === 'item' && row.item.id === 'e2')).toMatchObject({ repairCostCents: null, openRepairs: 0, repairMarginCents: null })
   })
 
   it('shows the items the filter asks for, and a type only while it has one to show, except with every item shown', () => {

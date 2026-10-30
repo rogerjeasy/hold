@@ -12,7 +12,7 @@ import { createMasterDetail, useRowToggle } from '@/components/grid/master-detai
 import { usePopupParent } from '@/components/grid/use-popup-parent'
 import type { DetailHeading } from '@/components/grid/master-detail'
 import { useRouter } from '@/i18n/navigation'
-import { rentalRoutes } from '@/lib/routes'
+import { itemRoutes, rentalRoutes } from '@/lib/routes'
 import type { BoardRow } from './board'
 import { AmountCell, ChooseCell, DecisionCell, DueCell, GridStateContext } from './decision-cells'
 import { DecisionGroupLabel } from './decision-group-label'
@@ -96,6 +96,7 @@ export function DecisionGrid({ rows, text, grouped, selectedIds, onSelect, rende
       { name: node.expanded ? t('menu.close') : t('menu.open'), action: () => { toggle(node) } },
       ...((row.kind === 'claim' || row.kind === 'contested' || row.kind === 'escalated') && row.rentalId !== null ? [{ name: t('menu.claim'), action: () => { router.push(rentalRoutes.claim(row.rentalId ?? '')) } }] : []),
       ...(row.rentalId === null ? [] : [{ name: t('menu.rental'), action: () => { router.push(rentalRoutes.rental(row.rentalId ?? '')) } }]),
+      ...(row.kind === 'repair' ? [{ name: t('menu.passport'), action: () => { router.push(itemRoutes.item(row.itemId)) } }] : []),
     ]
   }, [t, toggle, router])
 

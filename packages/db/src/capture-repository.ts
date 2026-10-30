@@ -1,4 +1,5 @@
 import { reserveEvidencePack } from './evidence-repository.ts'
+import { repairSessionViews } from './repair-repository.ts'
 import { createHash } from 'node:crypto'
 import { checkRegion, conditionReplyOpen, isSamplePhoto, CONDITION_REPLY_HOURS, manifestText, mayHandOver, MISSED_VIEWS, missingViews, RENTAL_TRANSITIONS, selfReturnViews, transition } from '@hold/domain'
 import type { CaptureSessionKind, ConditionReply, PhotoMeasures, Region } from '@hold/domain'
@@ -107,6 +108,11 @@ async function sessionRow(transaction: Transaction, sessionId: string, lock = fa
     .innerJoin(photoPlans, eq(photoPlans.id, captureSessions.photoPlanId))
     .where(eq(captureSessions.id, sessionId))
   const [row] = lock ? await query.for('update', { of: captureSessions }) : await query
+  // A repair photographs only the views its marks are on, each one needed (architecture.md section 9.6).
+  if (row?.kind === 'repair') {
+    const views = await repairSessionViews(transaction, row.id)
+    return { ...row, planViews: row.planViews.filter((view) => views.includes(view.key)).map((view) => ({ ...view, required: true })) }
+  }
   if (row?.kind !== 'return' || !row.byRenter) return row
   const handover = await transaction.select({ view: photos.view }).from(photos).innerJoin(captureSessions, eq(captureSessions.id, photos.sessionId))
     .where(and(eq(captureSessions.rentalItemId, row.rentalItemId), eq(captureSessions.kind, 'handover'), isNotNull(captureSessions.sealedAt), isNull(photos.supersededAt)))

@@ -4,6 +4,8 @@ import { incidentEvidence } from './claim-query.ts'
 import { extensionPaymentsToCheck } from './extension-repository.ts'
 import type { ExtensionPaymentToCheck } from './extension-repository.ts'
 import { incidentsWaitingForStaff } from './incident-repository.ts'
+import { openRepairs } from './repair-repository.ts'
+import type { OpenRepair } from './repair-repository.ts'
 import { dropOffsWaiting } from './self-return-repository.ts'
 import type { WaitingDropOff } from './self-return-repository.ts'
 import type { ShopIncident } from './incident-repository.ts'
@@ -64,6 +66,8 @@ export type DecisionRecords = {
   readonly late: readonly LateRental[]
   // Items renters dropped off with nobody at the counter, which a person has not checked yet.
   readonly dropOffs: readonly WaitingDropOff[]
+  // Repairs still to do (architecture.md section 9.6).
+  readonly repairs: readonly OpenRepair[]
   // Money PayPal moved for extra days that Hold did not apply as quoted, which an owner or manager checks.
   readonly extensionPayments: readonly ExtensionPaymentToCheck[]
   // A shop of one has nobody else to decide a claim its owner raised (architecture.md section 7.3).
@@ -156,6 +160,7 @@ export async function decisionRecords(transaction: Transaction, now: Date): Prom
     holds: await activeHolds(transaction),
     late: await lateRentals(transaction, now),
     dropOffs: await dropOffsWaiting(transaction),
+    repairs: await openRepairs(transaction),
     extensionPayments: await extensionPaymentsToCheck(transaction),
     staffCount: staff?.count ?? 0,
   }

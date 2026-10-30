@@ -1,4 +1,5 @@
-import { addDays, decideByFor, DROP_POINT_VIEW, SAMPLE_PHOTO_SHA256, HOLD_ASSURED_DAYS, HOLD_VALIDITY_DAYS, shopDay, suggestedPhotoPlan, viewKeys } from '@hold/domain'
+import { createHash } from 'node:crypto'
+import { addDays, decideByFor, DROP_POINT_VIEW, manifestText, SAMPLE_PHOTO_SHA256, HOLD_ASSURED_DAYS, HOLD_VALIDITY_DAYS, shopDay, suggestedPhotoPlan, viewKeys } from '@hold/domain'
 import type { ClaimState, HoldState, ItemCategory, PriceCategory, Region, RentalState } from '@hold/domain'
 import { and, asc, desc, eq, isNotNull, sql } from 'drizzle-orm'
 import {
@@ -28,6 +29,7 @@ import {
   wearPolicies,
 } from './schema/index.ts'
 import { writeProposal } from './ops-repository.ts'
+import { openRepairsForClaim } from './repair-repository.ts'
 import type { Transaction } from './scope.ts'
 
 // Sample rentals for a demonstration (architecture.md section 20.3): a shop's day with items out, returns due,
@@ -110,7 +112,7 @@ const SAMPLES: readonly SampleRental[] = [
     claim: { state: 'contested', kind: 'loss', reply: 'The lock was in the bag when I handed it back.' },
   },
   { renter: 'Julia Novak', items: ['ebike'], starts: [-9, 10, 0], ends: [-7, 17, 0], state: 'closed', hold: 'released' },
-  { renter: 'Daniel Ortiz', items: ['hybrid'], starts: [-8, 9, 0], ends: [-6, 18, 0], state: 'closed', hold: 'captured', claim: { state: 'charged', kind: 'damage' }, proposal: 'dispute_answer' },
+  { renter: 'Daniel Ortiz', items: ['hybrid'], starts: [-8, 9, 0], ends: [-6, 18, 0], state: 'closed', hold: 'captured', claim: { state: 'charged', kind: 'damage' }, photographed: true, proposal: 'dispute_answer' },
 ]
 
 const MINUTE = 60 * 1000
@@ -323,6 +325,8 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
       if (sample.claim.state === 'charged') {
         await transaction.insert(approvals).values({ shopId, subject: 'claim', subjectId: claim.id, decidedByUserId: userId, decision: 'approved', method: 'on_screen', createdAt: raisedAt })
         capturedCents = entry.amountCents
+        // The damage paid for goes on the item's passport and opens a repair, as a confirmed charge does (section 9.6).
+        await openRepairsForClaim(transaction, claim.id, raisedAt)
       }
     }
 
@@ -402,7 +406,9 @@ async function photographSample(transaction: Transaction, sample: PhotographedSa
       .values({ shopId, rentalItemId: item.rentalItemId, kind, photoPlanId: sample.planId, actorUserId: renters ? null : userId, byRenter: renters, startedAt: at, sealedAt: at })
       .returning({ id: captureSessions.id })
     if (row === undefined) throw new Error('A sample capture session was not created.')
+    const taken: { view: string; sha256: string; receivedAt: Date }[] = []
     for (const [shotView, photo] of shots) {
+      taken.push({ view: shotView, sha256: SAMPLE_SHA256[photo], receivedAt: at })
       await transaction.insert(photos).values({
         shopId,
         sessionId: row.id,
@@ -414,6 +420,13 @@ async function photographSample(transaction: Transaction, sample: PhotographedSa
         quality: { simulated: 1 },
       })
     }
+    // Sealed into the item's chain as any session is, so the rental's record can be built from it.
+    const [chained] = await transaction.select({ head: items.chainHeadFingerprint }).from(items).where(eq(items.id, item.itemId))
+    const previous = chained?.head ?? null
+    const manifest = manifestText({ sessionId: row.id, itemId: item.itemId, kind, sealedAt: at, previousManifestFingerprint: previous, photos: taken })
+    const fingerprint = createHash('sha256').update(manifest).digest('hex')
+    await transaction.update(captureSessions).set({ manifest, manifestFingerprint: fingerprint, previousManifestFingerprint: previous }).where(eq(captureSessions.id, row.id))
+    await transaction.update(items).set({ chainHeadFingerprint: fingerprint }).where(eq(items.id, item.itemId))
     return row.id
   }
   const handover = await session('handover', sample.startsAt, [[view, 'handover']])

@@ -1,3 +1,5 @@
+import { RepairCostSection } from './repair-cost-section'
+import type { RepairCostRow } from './repair-cost-rows'
 import type { PriceListVersion, PublishedPriceList } from '@hold/db'
 import { amountText, money } from '@hold/domain'
 import { useFormatter, useTranslations } from 'next-intl'
@@ -20,6 +22,8 @@ export type PricesScreenProps = {
   threshold: string
   canPublish: boolean
   gate: { needed: boolean; hasPasskey: boolean; email: string }
+  // What repairs cost against each price (architecture.md section 9.6).
+  repairCosts?: readonly RepairCostRow[]
   previewTerms: Readonly<Record<Locale, TermsMessages>>
 }
 
@@ -31,7 +35,7 @@ function publishedDraft(current: PublishedPriceList | undefined): Draft {
 
 // The shop's prices and wear policy: what is in force, the editor for the next version, and every version with what
 // changed. Publishing needs an owner or a manager, proven by a passkey; everyone else reads the versions.
-export function PricesScreen({ shopName, shopId, current, versions, fixedCurrency, threshold, canPublish, gate, previewTerms }: PricesScreenProps) {
+export function PricesScreen({ shopName, shopId, current, versions, fixedCurrency, threshold, canPublish, gate, previewTerms, repairCosts = [] }: PricesScreenProps) {
   const t = useTranslations('shop.prices')
   const format = useFormatter()
   return (
@@ -50,6 +54,7 @@ export function PricesScreen({ shopName, shopId, current, versions, fixedCurrenc
         ) : (
           <PriceEditor shopId={shopId} baseVersion={current?.version ?? null} published={publishedDraft(current)} fixedCurrency={fixedCurrency} threshold={threshold} versions={versions} previewTerms={previewTerms} />
         )}
+        {fixedCurrency === null ? null : <RepairCostSection rows={repairCosts} currency={fixedCurrency} />}
       </div>
     </ShopFrame>
   )

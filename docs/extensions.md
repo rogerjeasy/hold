@@ -1401,6 +1401,8 @@ Page `/shop/decisions`, right after Today in the menu. Every record that waits o
 
 **29 October 2026.** Items renters dropped off with nobody at the counter are rows of their own (`dropped_off`, under holds and returns), with the same photographs and the two choices as the morning queue (`architecture.md` section 6.13). A contested or escalated claim opens on the neutral summary of where the two sides differ (section 6.15).
 
+**29 October 2026.** Repairs still to do are rows of their own (`repair`, under holds and returns), for any staff member, with what was claimed for the damage and a link to the item's passport, where it is photographed and closed (architecture.md section 9.6).
+
 **Status, 29 October 2026.** Moved to AG Grid Enterprise: grouped by kind, each decision opening in place, the right-click menu. D1 to D5 pass again in the same tests; the side panel is gone, and the component tests draw the opened decision through a stand-in grid.
 
 **The price list editor, on AG Grid**
@@ -1458,6 +1460,7 @@ On `/shop/items`, from `md`. An owner deciding which bike to repair, retire or i
 - **What each item's rentals say.** Read by the domain's `itemWear` from the rentals that went out: how many, the days out this year on the shop's clock (`shopYear`, a part day counted whole), the damage the comparison found at each of the last twelve returns as a line of bars, and what was recovered of the damage priced. The damage priced is the claim lines priced from the item's findings on a claim a person decided, or every line of such a claim when the item went out alone; what was recovered is the item's share of what PayPal collected on the claim, never more than its lines (`recoveredCents`). Open marks are counted from the item's record.
 - **Wearing fastest.** The domain's `wearingFastest`: within each type, the items with the most damage found per rental, when that is more than nothing and more than another item of the type shows. Retired items are not compared. It shows beside the item's name, in words with a sign.
 - **Row actions, each through the page that already does it.** Enter on an item opens its passport. The right-click menu opens the passport, its status panel to send it to repair or retire it, and, for an owner or manager and a type that is not a sample, the type's hold, where it is changed with a passkey. A type's row opens the type. Nothing in the grid changes a record itself.
+- **What repairs cost.** Since 29 October 2026 (architecture.md section 9.6): each item's repair cost, what its damage recovered less that (`repairMargin`, none before a repair was done) and its repairs to do, totalled by type.
 - **For the shop's records.** The fleet downloads for a spreadsheet, the damage priced and recovered in columns of their own.
 - **On AG Grid Enterprise.** Tree data, aggregation, sparklines with AG Charts, the context menu and the Excel export, registered by this grid alone; every column is drawn, so one scrolled out of sight is still read by a screen reader.
 

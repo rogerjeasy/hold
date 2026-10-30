@@ -24,7 +24,7 @@ registerGridModules()
 // Types above their items, the types' totals, the line of damage findings, the right-click menu and the spreadsheet
 // download: AG Grid Enterprise, with AG Charts drawing the lines.
 const MODULES = [TreeDataModule, SparklinesModule.with(AgChartsCommunityModule), ContextMenuModule, ExcelExportModule]
-const EXPORTED = ['type', 'name', 'standing', 'rentals', 'daysOut', 'damage', 'incurred', 'recovered', 'marks', 'signal']
+const EXPORTED = ['type', 'name', 'standing', 'rentals', 'daysOut', 'damage', 'incurred', 'recovered', 'repairCost', 'repairMargin', 'openRepairs', 'marks', 'signal']
 
 // A type's total, from its items that have the figure.
 function total({ values }: IAggFuncParams<FleetRow>): number | null {
@@ -71,6 +71,11 @@ export function FleetGrid({ rows, clock, canManage }: FleetGridProps) {
     // Priced and recovered are read together on screen, and kept apart for the spreadsheet.
     { colId: 'incurred', headerName: t('columns.incurred'), valueGetter: itemFigure((row) => row.wear.incurredCents), valueFormatter: ({ value }: { value: number | null | undefined }) => (typeof value === 'number' ? format.money(value) : ''), aggFunc: total, hide: true },
     { colId: 'recovered', headerName: t('columns.recovered'), cellRenderer: FleetRecoveredCell, valueGetter: itemFigure((row) => row.wear.recoveredCents), valueFormatter: ({ value }: { value: number | null | undefined }) => (typeof value === 'number' ? format.money(value) : ''), aggFunc: total, width: 176, minWidth: 168, type: 'rightAligned' },
+    // What repairs cost against what the damage recovered (architecture.md section 9.6): above nothing, the price list
+    // paid for the repairs; below, it did not.
+    { colId: 'repairCost', headerName: t('columns.repairCost'), valueGetter: ({ data }) => (data?.kind === 'item' ? data.repairCostCents : null), valueFormatter: ({ value }: { value: number | null | undefined }) => (typeof value === 'number' ? format.money(value) : '—'), aggFunc: total, width: 140, minWidth: 128, type: 'rightAligned' },
+    { colId: 'repairMargin', headerName: t('columns.repairMargin'), valueGetter: ({ data }) => (data?.kind === 'item' ? data.repairMarginCents : null), valueFormatter: ({ value }: { value: number | null | undefined }) => (typeof value === 'number' ? `${value > 0 ? '+' : value < 0 ? '−' : ''}${format.money(Math.abs(value))}` : '—'), cellClassRules: { 'text-success': ({ value }: { value: unknown }) => typeof value === 'number' && value > 0, 'text-destructive': ({ value }: { value: unknown }) => typeof value === 'number' && value < 0 }, aggFunc: total, width: 176, minWidth: 160, type: 'rightAligned' },
+    { colId: 'openRepairs', headerName: t('columns.openRepairs'), cellRenderer: FleetCountCell, valueGetter: itemFigure((row) => row.openRepairs), aggFunc: total, width: 128, minWidth: 120, type: 'rightAligned' },
     { colId: 'marks', headerName: t('columns.marks'), cellRenderer: FleetCountCell, valueGetter: itemFigure((row) => row.openMarks), aggFunc: total, width: 112, minWidth: 104, type: 'rightAligned' },
   ], [t, items, format, accent])
 

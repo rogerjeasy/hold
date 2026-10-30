@@ -20,7 +20,7 @@ export function PassportMarks({ marks, views, clock }: { marks: readonly Passpor
             <li key={mark.id} className="grid gap-0.5 border-b px-4 py-3.5 last:border-b-0 md:px-5">
               <p className="font-semibold wrap-long-words">{mark.description}</p>
               <p className="text-sm text-muted-foreground">
-                {views.find((view) => view.key === mark.view)?.label ?? mark.view} · {t('firstSeen', { date: format.day(mark.firstSeenAt) })} · {t(mark.status)}
+                {views.find((view) => view.key === mark.view)?.label ?? mark.view} · {t('firstSeen', { date: format.day(mark.firstSeenAt) })} · {mark.status === 'repaired' && mark.closedAt !== null ? t('repairedOn', { date: format.day(mark.closedAt) }) : t(mark.status)}
               </p>
             </li>
           ))}

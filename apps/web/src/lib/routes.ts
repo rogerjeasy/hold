@@ -64,6 +64,8 @@ export const rentalRoutes = {
 export const itemRoutes = {
   newType: '/shop/items/new',
   item: (itemId: string) => `/shop/items/${itemId}`,
+  // Photographing and closing one repair (architecture.md section 9.6).
+  repair: (itemId: string, repairId: string) => `/shop/items/${itemId}/repairs/${repairId}`,
   type: (itemTypeId: string) => `/shop/items/types/${itemTypeId}`,
 } as const
 

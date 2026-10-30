@@ -39,6 +39,8 @@ export function useRowText(clock: ShopClock) {
         return t('titles.dropped_off', { renter: renter(row) })
       case 'extension_payment':
         return t('titles.extension_payment', { renter: renter(row) })
+      case 'repair':
+        return t('titles.repair', { item: row.itemLabel })
     }
   }
 
@@ -64,6 +66,8 @@ export function useRowText(clock: ShopClock) {
         return t('dropOffLine', { items: row.items.map((item) => item.label).join(', '), when: moment(row.droppedOffAt) })
       case 'extension_payment':
         return t(`extensionLine.${row.attention}`, { captured: money(row.amountCents), quoted: money(row.quotedCents) })
+      case 'repair':
+        return row.renterName === null ? t('repairLine.opened') : t('repairLine.claim', { renter: row.renterName })
     }
   }
 
@@ -81,6 +85,7 @@ export function useRowText(clock: ShopClock) {
       row.kind === 'proposal' ? row.references.join(' ') : '',
       row.kind === 'extension_payment' ? row.paypalCaptureId : '',
       row.kind === 'incident' ? `${row.itemLabel} ${row.description}` : '',
+      row.kind === 'repair' ? row.itemLabel : '',
       isClaimKind(row.kind) && 'lines' in row ? row.lines.map((line) => line.description).join(' ') : '',
     ].join(' ')
 
