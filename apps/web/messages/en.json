@@ -4333,7 +4333,7 @@
     "results": {
       "marks_needed": "Choose at least one mark.",
       "mark_in_repair": "A repair already covers one of those marks.",
-      "item_in_use": "A renter has the item. Repair it once it is back.",
+      "item_in_use": "A renter has the item, or its return is still being checked. Repair it once it is back and checked.",
       "views_missing": "Photograph every view first.",
       "outcome_missing": "Say what was done to every line.",
       "cost_invalid": "Write the cost as an amount, such as 62.00.",

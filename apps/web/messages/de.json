@@ -4333,7 +4333,7 @@
     "results": {
       "marks_needed": "Wählen Sie mindestens eine Spur.",
       "mark_in_repair": "Eine Reparatur deckt eine dieser Spuren bereits ab.",
-      "item_in_use": "Eine mietende Person hat den Artikel. Reparieren Sie ihn, wenn er zurück ist.",
+      "item_in_use": "Eine mietende Person hat den Artikel, oder seine Rückgabe wird noch geprüft. Reparieren Sie ihn, wenn er zurück und geprüft ist.",
       "views_missing": "Fotografieren Sie zuerst jede Ansicht.",
       "outcome_missing": "Sagen Sie, was mit jedem Posten geschah.",
       "cost_invalid": "Schreiben Sie die Kosten als Betrag, etwa 62,00.",

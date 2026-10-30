@@ -1,12 +1,13 @@
 import { randomUUID } from 'node:crypto'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { captureSession, recordPhoto } from './capture-repository.ts'
 import { approveClaim, draftClaim } from './claim-repository.ts'
+import { evidenceSnapshot } from './evidence-snapshot.ts'
 import { fleetRecords } from './fleet-records.ts'
 import { changeStatus } from './item-repository.ts'
 import { claimRepairs, closeRepair, itemRepairs, repairGuides, openRepairFromMarks, openRepairs, openRepairsForClaim, repairCosts, startRepairCapture } from './repair-repository.ts'
-import { claims, items, marks, paypalAccounts, repairLines, repairs, staffRoles, users } from './schema/index.ts'
+import { captureSessions, claims, items, marks, paypalAccounts, rentalItems, rentals, repairLines, repairs, staffRoles, users } from './schema/index.ts'
 import { inShop } from './scope.ts'
 import type { Transaction } from './scope.ts'
 import { returnedWithFinding } from './testing/found-damage.ts'
@@ -165,5 +166,47 @@ describe('what the shop reads', () => {
     expect(fleet.some((record) => record.repairs.open > 0)).toBe(true)
     expect(await other.act((transaction) => openRepairs(transaction))).toEqual([])
     expect(await other.act((transaction) => repairCosts(transaction))).toEqual({ byItem: [], byPrice: [] })
+  })
+})
+
+describe('a repair and the renters around it', () => {
+  it('cannot be photographed or closed while a renter has the item, so no rental loses a mark it was handed over with', async () => {
+    const fresh = await readyRentalShop(database, 'repair-renter', NOW)
+    await database.insert(paypalAccounts).values({ shopId: fresh.scope.shopId, credentialReference: 'hold/paypal/repair-renter', mode: 'sandbox' })
+    const charged = await chargedClaim(fresh)
+    await inShop(database, { role: 'hold_worker', shopId: fresh.scope.shopId }, (transaction) => openRepairsForClaim(transaction, charged.claimId, NOW))
+    const owner = fresh.scope.userId ?? ''
+    const repair = (await fresh.act((transaction) => itemRepairs(transaction, charged.itemId)))[0]
+    const started = await fresh.act((transaction) => startRepairCapture(transaction, repair?.id ?? '', owner, NOW))
+    await photographed(started.ok ? (started.sessionId ?? '') : '', fresh)
+    // The item goes out to its next renter before anyone closes the repair.
+    await database.update(rentals).set({ state: 'out' }).where(eq(rentals.id, charged.rentalId))
+    const outcomes = Object.fromEntries((repair?.lines ?? []).map((line) => [line.id, 'repaired'] as const))
+    expect(await fresh.act((transaction) => closeRepair(transaction, { repairId: repair?.id ?? '', userId: owner, outcomes, costCents: 10_00, note: '' }, later(30)))).toEqual({ ok: false, reason: 'item_in_use' })
+    expect(await fresh.act((transaction) => startRepairCapture(transaction, repair?.id ?? '', owner, later(30)))).toEqual({ ok: false, reason: 'item_in_use' })
+    expect((await database.select().from(marks).where(eq(marks.id, repair?.lines[0]?.markId ?? '')))[0]?.status).toBe('open')
+  })
+
+  it('opened by hand, goes with a rental that has ended, and stays out of that renter’s record', async () => {
+    const fresh = await readyRentalShop(database, 'repair-record', NOW)
+    await database.insert(paypalAccounts).values({ shopId: fresh.scope.shopId, credentialReference: 'hold/paypal/repair-record', mode: 'sandbox' })
+    const charged = await chargedClaim(fresh)
+    await database.update(rentals).set({ state: 'closed' }).where(eq(rentals.id, charged.rentalId))
+    const [returnSession] = await database.select().from(captureSessions).where(and(eq(captureSessions.rentalItemId, charged.rentalItemId), eq(captureSessions.kind, 'return')))
+    const [known] = await database.insert(marks).values({ shopId: fresh.scope.shopId, itemId: charged.itemId, view: 'left-side', region: { x: 0.5, y: 0.5, width: 0.1, height: 0.1 }, description: 'A scuff on the chain stay.', firstSeenSessionId: returnSession?.id ?? '' }).returning()
+    const markId = known?.id ?? ''
+    // A later booking of both items, which a repair must not be filed under.
+    await fresh.readyRental(2)
+    const owner = fresh.scope.userId ?? ''
+    const opened = await fresh.act((transaction) => openRepairFromMarks(transaction, { itemId: charged.itemId, markIds: [markId], userId: owner }, later(1)))
+    if (!opened.ok) throw new Error(opened.reason)
+    const [anchor] = await database.select({ rentalId: rentalItems.rentalId }).from(repairs).innerJoin(rentalItems, eq(rentalItems.id, repairs.rentalItemId)).where(eq(repairs.id, opened.repairId))
+    expect(anchor?.rentalId).toBe(charged.rentalId)
+    const started = await fresh.act((transaction) => startRepairCapture(transaction, opened.repairId, owner, later(2)))
+    await photographed(started.ok ? (started.sessionId ?? '') : '', fresh)
+    const lineId = (await database.select().from(repairLines).where(eq(repairLines.repairId, opened.repairId)))[0]?.id ?? ''
+    expect(await fresh.act((transaction) => closeRepair(transaction, { repairId: opened.repairId, userId: owner, outcomes: { [lineId]: 'repaired' }, costCents: 0, note: '' }, later(3)))).toMatchObject({ ok: true })
+    const snapshot = await fresh.act((transaction) => evidenceSnapshot(transaction, charged.rentalId))
+    expect(JSON.stringify(snapshot)).not.toContain(started.ok ? (started.sessionId ?? 'none') : 'none')
   })
 })

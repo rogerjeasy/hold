@@ -18,7 +18,9 @@ export async function evidenceSnapshot(transaction: Transaction, rentalId: strin
       'sessions', coalesce((select jsonb_agg(jsonb_build_object(
         'id', s.id, 'kind', s.kind, 'sealedAt', s.sealed_at, 'manifest', s.manifest, 'manifestFingerprint', s.manifest_fingerprint, 'previousManifestFingerprint', s.previous_manifest_fingerprint,
         'photos', coalesce((select jsonb_agg(jsonb_build_object('id', p.id, 'view', p.view, 'sha256', p.sha256, 'receivedAt', p.received_at, 'displayKey', coalesce(p.display_key, p.evidence_key), 'supersededAt', p.superseded_at, 'simulated', coalesce((p.quality->>'simulated')::numeric = 1, false)) order by p.view, p.received_at, p.id) from photos p where p.session_id = s.id), '[]'::jsonb)
-      ) order by s.sealed_at, s.id) from capture_sessions s where s.rental_item_id = ri.id and s.sealed_at is not null), '[]'::jsonb)
+      ) order by s.sealed_at, s.id) from capture_sessions s where s.rental_item_id = ri.id and s.sealed_at is not null
+        -- A repair belongs to the record of the rental whose claim opened it, never to another renter's.
+        and (s.kind <> 'repair' or exists (select 1 from repairs r join claims rc on rc.id = r.claim_id where r.session_id = s.id and rc.rental_id = ri.rental_id))), '[]'::jsonb)
     ) order by ri.id) from rental_items ri join items i on i.id = ri.item_id where ri.rental_id = ${rentals.id}), '[]'::jsonb)`,
     comparisons: sql<unknown>`coalesce((select jsonb_agg(jsonb_build_object(
       'id', c.id, 'handoverSessionId', c.handover_session_id, 'returnSessionId', c.return_session_id, 'state', c.state, 'model', c.model, 'promptVersion', c.prompt_version, 'simulated', c.simulated, 'deferredReason', c.deferred_reason,

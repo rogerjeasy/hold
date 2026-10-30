@@ -4333,7 +4333,7 @@
     "results": {
       "marks_needed": "Elija al menos una marca.",
       "mark_in_repair": "Una reparación ya cubre una de esas marcas.",
-      "item_in_use": "Alguien tiene el artículo alquilado. Repárelo cuando vuelva.",
+      "item_in_use": "Alguien tiene el artículo, o su devolución aún se está revisando. Repárelo cuando haya vuelto y esté revisado.",
       "views_missing": "Fotografíe primero cada vista.",
       "outcome_missing": "Indique qué se hizo con cada línea.",
       "cost_invalid": "Escriba el coste como un importe, por ejemplo 62,00.",

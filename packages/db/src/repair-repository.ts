@@ -15,8 +15,16 @@ import type { Transaction } from './scope.ts'
 
 type Refused<Reason extends string> = { readonly ok: false; readonly reason: Reason }
 const refused = <Reason extends string>(reason: Reason): Refused<Reason> => ({ ok: false, reason })
-// An item a renter has, or that waits at the drop point, is not in the shop to repair.
-const WITH_RENTER: readonly RentalState[] = ['out', 'overdue', 'dropped_off']
+// An item a renter has, that waits at the drop point, or whose return is still being compared is not repaired or
+// closed: a mark closed then would no longer be set aside for the rental it was handed over with.
+const IN_USE: readonly RentalState[] = ['out', 'overdue', 'dropped_off', 'returned', 'inspecting']
+// A repair opened by hand is filed under a rental that has ended, never a booking still to come or one under way.
+const ENDED: readonly RentalState[] = ['settling', 'closed']
+
+async function inUse(transaction: Transaction, itemId: string): Promise<boolean> {
+  const using = await transaction.select({ id: rentals.id }).from(rentalItems).innerJoin(rentals, eq(rentals.id, rentalItems.rentalId)).where(and(eq(rentalItems.itemId, itemId), inArray(rentals.state, [...IN_USE]))).limit(1)
+  return using.length > 0
+}
 
 type ItemLines = { rentalItemId: string; lines: { markId: string | null; claimLineId: string; description: string; claimedCents: number }[] }
 
@@ -82,7 +90,8 @@ export async function openRepairFromMarks(transaction: Transaction, input: { rea
   if (chosen.length !== new Set(input.markIds).size) return refused('not_found')
   const covered = await transaction.select({ id: repairLines.id }).from(repairLines).innerJoin(repairs, eq(repairs.id, repairLines.repairId)).where(and(eq(repairs.state, 'open'), inArray(repairLines.markId, [...input.markIds])))
   if (covered.length > 0) return refused('mark_in_repair')
-  const [latest] = await transaction.select({ id: rentalItems.id }).from(rentalItems).innerJoin(rentals, eq(rentals.id, rentalItems.rentalId)).where(eq(rentalItems.itemId, input.itemId)).orderBy(desc(rentals.startsAt)).limit(1)
+  if (await inUse(transaction, input.itemId)) return refused('item_in_use')
+  const [latest] = await transaction.select({ id: rentalItems.id }).from(rentalItems).innerJoin(rentals, eq(rentals.id, rentalItems.rentalId)).where(and(eq(rentalItems.itemId, input.itemId), inArray(rentals.state, [...ENDED]))).orderBy(desc(rentals.endsAt)).limit(1)
   const shopId = chosen[0]?.shopId
   if (latest === undefined || shopId === undefined) return refused('not_found')
   const [repair] = await transaction.insert(repairs).values({ shopId, itemId: input.itemId, rentalItemId: latest.id, currency: staff.currency, openedByUserId: input.userId, createdAt: now }).returning({ id: repairs.id })
@@ -113,10 +122,9 @@ export async function startRepairCapture(transaction: Transaction, repairId: str
   const staff = await staffFor(transaction, userId, repair.itemId)
   if (!staff.ok) return staff
   if (repair.state !== 'open') return refused('already_done')
+  if (await inUse(transaction, repair.itemId)) return refused('item_in_use')
   if (repair.sessionId !== null) return { ok: true, sessionId: repair.sessionId } as const
   if (repairViews(await linesOf(transaction, [repairId])).length === 0) return { ok: true, sessionId: null } as const
-  const using = await transaction.select({ state: rentals.state }).from(rentalItems).innerJoin(rentals, eq(rentals.id, rentalItems.rentalId)).where(and(eq(rentalItems.itemId, repair.itemId), inArray(rentals.state, [...WITH_RENTER])))
-  if (using.length > 0) return refused('item_in_use')
   const [plan] = await transaction.select({ planId: itemTypes.photoPlanId }).from(items).innerJoin(itemTypes, eq(itemTypes.id, items.itemTypeId)).where(eq(items.id, repair.itemId))
   if (plan === undefined) return refused('not_found')
   const [session] = await transaction.insert(captureSessions).values({ shopId: repair.shopId, rentalItemId: repair.rentalItemId, kind: 'repair', photoPlanId: plan.planId, actorUserId: userId, startedAt: now }).returning({ id: captureSessions.id })
@@ -135,6 +143,7 @@ export async function closeRepair(transaction: Transaction, input: CloseInput, n
   const staff = await staffFor(transaction, input.userId, repair.itemId)
   if (!staff.ok) return staff
   if (!transition(REPAIR_TRANSITIONS, repair.state === 'done' ? 'done' : 'open', 'done').ok) return refused('already_done')
+  if (await inUse(transaction, repair.itemId)) return refused('item_in_use')
   const lines = await linesOf(transaction, [repair.id])
   if (repairViews(lines).length > 0) {
     if (repair.sessionId === null) return refused('views_missing')

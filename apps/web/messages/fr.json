@@ -4333,7 +4333,7 @@
     "results": {
       "marks_needed": "Choisissez au moins une marque.",
       "mark_in_repair": "Une réparation couvre déjà l’une de ces marques.",
-      "item_in_use": "Un locataire a l’article. Réparez-le à son retour.",
+      "item_in_use": "Un locataire a l’article, ou son retour est encore en vérification. Réparez-le une fois revenu et vérifié.",
       "views_missing": "Photographiez d’abord chaque vue.",
       "outcome_missing": "Indiquez ce qui a été fait pour chaque ligne.",
       "cost_invalid": "Écrivez le coût comme un montant, par exemple 62,00.",
