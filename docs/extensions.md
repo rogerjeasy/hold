@@ -290,6 +290,7 @@ The pipeline in GitHub Actions runs the gate half whenever a prompt, a threshold
 - The run is stored in `eval_runs` with the model ID, prompt version and thresholds.
 - The build fails if clean returns wrongly flagged rises above its limit, or if damage found falls by more than its tolerance against the last accepted run.
 - **The limits are set after the first run, not before.** The gate's job is to stop the comparison getting worse without anyone noticing.
+- **Set 1 November 2026** in `eval/gate-limits.json`: at most 5 percent of clean returns wrongly flagged, which keeps the scorecard's "below about 6 percent" true, and damage found falling by no more than 10 points. Before then the file was missing, and every gate run after the first accepted run (29 October) stopped with an error.
 
 ### 5.7 The field record
 
