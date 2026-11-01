@@ -43,3 +43,11 @@ apps/web/public/vendor/
 
 # The gate half's display copies, made from eval/set before each build (apps/web/scripts/copy-eval-photos.ts)
 apps/web/public/eval/
+
+# Firebase and Google credentials for the phone app's push notifications: uploaded to EAS, never committed
+hold-f014d-firebase-adminsdk-fbsvc-546835fd41.json
+google-services-prod.json
+google-services-dev.json
+*firebase-adminsdk*.json
+google-services*.json
+GoogleService-Info*.plist
