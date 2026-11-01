@@ -4,6 +4,7 @@ import { Slot } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import { staffSession } from '@/storage/staff-session';
 import { renderRoutes } from '@/test/render-router';
+import * as device from './device';
 import { pushStore } from './push-store';
 import { PushResponder } from './push-responder';
 
@@ -58,5 +59,18 @@ describe('a tapped notification', () => {
     await renderRoutes(routes);
     const handler = jest.mocked(Notifications.setNotificationHandler).mock.calls[0]?.[0];
     await expect(handler?.handleNotification({} as Notifications.Notification)).resolves.toMatchObject({ shouldShowBanner: true, shouldPlaySound: false });
+  });
+});
+
+describe('on a platform without push notifications', () => {
+  it('asks nothing of the notifications module, which the web build does not have', async () => {
+    const platform = jest.spyOn(device, 'pushPlatform').mockReturnValue(undefined);
+    jest.mocked(Notifications.useLastNotificationResponse).mockClear();
+    jest.mocked(Notifications.addPushTokenListener).mockClear();
+    await renderRoutes(routes, { initialUrl: '/' });
+    expect(await screen.findByText('Start')).toBeOnTheScreen();
+    expect(Notifications.useLastNotificationResponse).not.toHaveBeenCalled();
+    expect(Notifications.addPushTokenListener).not.toHaveBeenCalled();
+    platform.mockRestore();
   });
 });

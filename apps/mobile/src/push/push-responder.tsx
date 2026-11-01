@@ -4,13 +4,19 @@ import * as Notifications from 'expo-notifications';
 import { useLocale } from 'use-intl';
 import { useApi } from '@/api';
 import { staffSession } from '@/storage/staff-session';
+import { pushPlatform } from './device';
 import { pushTarget } from './push-route';
 import { keepPushCurrent } from './registration';
 
 // Mounted once at the root (architecture.md section 13.9): opens the screen a tapped notification names, whether it
 // started the app or found it running, and keeps this phone's registrations current when its push token changes.
-// Asks for nothing: permission is asked only from a screen that says why (features/push).
+// Asks for nothing: permission is asked only from a screen that says why (features/push). Renders nothing where the
+// phone has no push notifications, such as the web build, whose notifications module lacks what this reads.
 export function PushResponder() {
+  return pushPlatform() === undefined ? null : <ListeningPushResponder />;
+}
+
+function ListeningPushResponder() {
   const api = useApi();
   const locale = useLocale();
   const response = Notifications.useLastNotificationResponse();
