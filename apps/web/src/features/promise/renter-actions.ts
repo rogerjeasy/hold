@@ -1,10 +1,10 @@
 'use server'
 import { claimMessageRecipients, takeRateToken, writeClaimMessage } from '@hold/db'
 import { renterWroteEmail } from '@hold/notify'
-import { z } from 'zod'
 import { rentalRoutes } from '@/lib/routes'
 import { Refusal } from '@/server/action'
-import { renterAction, withToken } from '@/server/renter-access'
+import { renterAction, renterInput } from '@/server/renter-access'
+import { pushToStaff } from '@/server/push'
 import { getServices } from '@/server/services'
 
 const MESSAGES = { name: 'claim-message-renter', max: 10, windowSeconds: 3600 } as const
@@ -12,7 +12,7 @@ const MESSAGES = { name: 'claim-message-renter', max: 10, windowSeconds: 3600 } 
 // The renter writes to the shop from their claim page (architecture.md section 6.16). Only a claim link carries the
 // contest scope. The words are stored as written; the email to staff names the renter and links to the claim, and
 // never quotes them.
-export const writeToShop = renterAction({ name: 'renter.claim_message_sent', scope: 'contest', input: withToken({ body: z.string().max(1000) }) }, async (link, input, inLinkShop) => {
+export const writeToShop = renterAction({ name: 'renter.claim_message_sent', scope: 'contest', input: renterInput('write-to-shop') }, async (link, input, inLinkShop) => {
   const services = await getServices()
   if (!(await takeRateToken(services.database, MESSAGES, link.id))) return new Refusal('rate_limited')
   const written = await inLinkShop((transaction) => writeClaimMessage(transaction, { rentalId: link.rentalId, author: 'renter', userId: null, body: input.body }, new Date()))
@@ -24,5 +24,6 @@ export const writeToShop = renterAction({ name: 'renter.claim_message_sent', sco
   } catch {
     // The message is stored and shown on the staff claim page whether or not an email went out.
   }
+  await pushToStaff(link.shopId, 'renter_message', { to: 'rental', id: link.rentalId })
   return {}
 })

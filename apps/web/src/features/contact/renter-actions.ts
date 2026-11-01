@@ -1,12 +1,11 @@
 'use server'
 import { chooseEmail as chooseRenterEmail, confirmPhone as confirmRenterPhone, issueContactChangeCode, requestPhoneCode, useClaimCode } from '@hold/db'
 import { maskedPhone, phoneNumber, textAllowed } from '@hold/domain'
-import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
 import { Refusal } from '@/server/action'
 import { tellPayerOfPhone } from '@/server/decision-copy'
 import { deliverRenterCode } from '@/server/renter-code-delivery'
-import { renterAction, withToken } from '@/server/renter-access'
+import { renterAction, renterInput } from '@/server/renter-access'
 import { newRenterCode, renterCodeDigest } from '@/server/renter-code'
 
 // How a renter is reached (architecture.md section 12.3), chosen on their own phone through any of their links. Until
@@ -18,7 +17,7 @@ const phoneDigest = (rentalId: string, code: string) => renterCodeDigest('phone-
 const changeDigest = (linkId: string, code: string) => renterCodeDigest('contact-change', linkId, code)
 
 export const sendPhoneCode = renterAction(
-  { name: 'renter.phone_code_requested', scope: 'view', input: withToken({ phone: z.string().trim().max(40), changeCode: z.union([z.literal(''), z.string().regex(/^[0-9]{8}$/)]) }) },
+  { name: 'renter.phone_code_requested', scope: 'view', input: renterInput('send-phone-code') },
   async (link, input, inLinkShop) => {
     // Checked before a change code is spent, so a mistyped number never costs the renter their code.
     const phone = phoneNumber(input.phone)
@@ -42,7 +41,7 @@ export const sendPhoneCode = renterAction(
 )
 
 export const confirmPhone = renterAction(
-  { name: 'renter.phone_confirmed', scope: 'view', input: withToken({ code: z.string().regex(/^[0-9]{8}$/) }) },
+  { name: 'renter.phone_confirmed', scope: 'view', input: renterInput('confirm-phone') },
   async (link, input, inLinkShop) => {
     const hash = await phoneDigest(link.rentalId, input.code)
     const confirmed = await inLinkShop((transaction) => confirmRenterPhone(transaction, link.rentalId, hash, new Date()))
@@ -52,13 +51,13 @@ export const confirmPhone = renterAction(
   },
 )
 
-export const chooseEmail = renterAction({ name: 'renter.email_chosen', scope: 'view', input: withToken({}) }, async (link, _input, inLinkShop) => {
+export const chooseEmail = renterAction({ name: 'renter.email_chosen', scope: 'view', input: renterInput('choose-email') }, async (link, _input, inLinkShop) => {
   await inLinkShop((transaction) => chooseRenterEmail(transaction, link.rentalId))
-  return { channel: 'email' }
+  return { channel: 'email' as const }
 })
 
 // The first step of a new number once the hold is placed: a code to the channel trusted now.
-export const sendContactChangeCode = renterAction({ name: 'renter.contact_change_code_requested', scope: 'view', input: withToken({}) }, async (link, input, inLinkShop) => {
+export const sendContactChangeCode = renterAction({ name: 'renter.contact_change_code_requested', scope: 'view', input: renterInput('send-contact-change-code') }, async (link, input, inLinkShop) => {
   const code = await newRenterCode()
   const issued = await inLinkShop(async (transaction) => issueContactChangeCode(transaction, link.id, await changeDigest(link.id, code), new Date()))
   if (!issued.ok) return new Refusal(issued.reason)

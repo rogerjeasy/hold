@@ -8,6 +8,7 @@ import { incidentAlertEmail } from '@hold/notify'
 import { shopRoutes } from '@/lib/routes'
 import { Refusal } from './action'
 import { sendMediaMessage } from './media'
+import { pushToStaff } from './push'
 import type { InLinkShop } from './renter-access'
 import { getServices } from './services'
 
@@ -79,6 +80,7 @@ export async function alertStaff(shopId: string, incidentId: string): Promise<vo
     const facts = { shopName: alert.shopName, itemLabel: alert.itemLabel, kind: alert.kind, incidentsUrl: `${config.publicUrl}${shopRoutes.incidents}` }
     const sent = await Promise.all(alert.recipients.map((recipient) => mailer.send(incidentAlertEmail(recipient.email, recipient.language, facts))))
     if (sent.some(Boolean)) await inShop(database, scope, (transaction) => markIncidentAlerted(transaction, incidentId, new Date()))
+    await pushToStaff(shopId, 'decision_waiting', { to: 'rental', id: alert.rentalId })
   } catch {
     // The report is stored and listed for staff; a failed email is visible there as not sent.
   }

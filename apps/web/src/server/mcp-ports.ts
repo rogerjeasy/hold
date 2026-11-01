@@ -46,7 +46,7 @@ export async function mcpPorts(): Promise<McpPorts> {
     async startFeePayment({ shopId, renterLinkToken, language }) {
       const link = await linkOf(renterLinkToken)
       if (link === undefined) return { ok: false, reason: 'link_invalid' }
-      const started = await startFeePayment(link, inLinkShop(shopId), renterLinkToken, readLocale(language))
+      const started = await startFeePayment(link, inLinkShop(shopId), renterLinkToken, readLocale(language), 'page')
       return started instanceof Refusal ? { ok: false, reason: started.reason } : { ok: true, approvalUrl: started.approvalUrl }
     },
     async holdApproval({ shopId, rentalId }) {
@@ -66,7 +66,7 @@ export async function mcpPorts(): Promise<McpPorts> {
       const link = await linkOf(issued.token)
       if (link === undefined) return { status: 'unavailable' }
       const rental = await inThisShop((transaction) => rentalDetail(transaction, rentalId, new Date()))
-      const started = await startHoldApproval(link, inThisShop, issued.token, readLocale(rental?.language))
+      const started = await startHoldApproval(link, inThisShop, issued.token, readLocale(rental?.language), 'page')
       return started instanceof Refusal ? { status: 'unavailable' } : { status: 'awaiting_approval', approvalUrl: started.approvalUrl }
     },
     async extensionPayment({ shopId, rentalId }) {
@@ -78,7 +78,7 @@ export async function mcpPorts(): Promise<McpPorts> {
       await inThisShop((transaction) => issueRenterLink(transaction, shopId, rentalId, issued, EXTENSION_RETURN_SCOPES))
       const link = await linkOf(issued.token)
       if (link === undefined) return { ok: false, reason: 'link_invalid' }
-      const started = await startExtensionPayment(link, inThisShop, issued.token, readLocale(rental.language))
+      const started = await startExtensionPayment(link, inThisShop, issued.token, readLocale(rental.language), 'page')
       return started instanceof Refusal ? { ok: false, reason: started.reason } : { ok: true, approvalUrl: started.approvalUrl }
     },
     photoLink: async (key) => (evidence === undefined ? null : evidence.displayLink(key)),

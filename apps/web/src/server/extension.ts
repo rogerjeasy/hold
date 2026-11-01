@@ -3,11 +3,13 @@ import { extensionPaymentHeld, inShop, openExtension, quoteExtension, rentalExte
 import type { RenterLink } from '@hold/db'
 import { atShopTime } from '@hold/domain'
 import type { ExtensionProblem } from '@hold/domain'
+import type { ReturnTo } from '@hold/mobile-api'
 import { requestExtensionCapture } from '@hold/settle'
 import { getTranslations } from 'next-intl/server'
 import type { Locale } from '@/i18n/routing'
 import { Refusal } from './action'
 import { paypalForShop } from './paypal-for-shop'
+import { paypalReturn } from './paypal-return'
 import type { InLinkShop } from './renter-access'
 import { renterUrl } from './renter-links'
 import { getServices } from './services'
@@ -43,7 +45,7 @@ export type StartedExtension = { readonly approvalUrl: string; readonly orderId:
 
 // The PayPal order for the quoted days, for the amount the quote stored. A second visit reuses the order the person is
 // approving.
-export async function startExtensionPayment(link: RenterLink, inLinkShop: InLinkShop, token: string, language: Locale): Promise<StartedExtension | Refusal> {
+export async function startExtensionPayment(link: RenterLink, inLinkShop: InLinkShop, token: string, language: Locale, returnTo: ReturnTo): Promise<StartedExtension | Refusal> {
   const loaded = await inLinkShop(async (transaction) => ({ extension: await openExtension(transaction, link.rentalId), view: await renterView(transaction, link.rentalId, new Date()) }))
   const { extension, view } = loaded
   if (view === undefined) return new Refusal('not_found')
@@ -51,7 +53,8 @@ export async function startExtensionPayment(link: RenterLink, inLinkShop: InLink
   const paypal = await inLinkShop((transaction) => paypalForShop(transaction, link.shopId))
   if (paypal === undefined) return new Refusal('paypal_not_connected')
   const url = await renterUrl(token, language)
-  const started = (orderId: string, approvalUrl: string): StartedExtension => ({ approvalUrl, orderId, returnUrl: `${url}/extended?token=${encodeURIComponent(orderId)}` })
+  const back = await paypalReturn(returnTo, 'extension', { returnUrl: `${url}/extended`, cancelUrl: `${url}/extend` })
+  const started = (orderId: string, approvalUrl: string): StartedExtension => ({ approvalUrl, orderId, returnUrl: `${back.returnUrl}?token=${encodeURIComponent(orderId)}` })
   if (extension.paypalOrderId !== null) {
     const order = await paypal.readHoldOrder(extension.paypalOrderId)
     if (order.ok && order.value.status === 'awaiting_approval' && order.value.approvalUrl !== undefined) return started(extension.paypalOrderId, order.value.approvalUrl)
@@ -63,8 +66,7 @@ export async function startExtensionPayment(link: RenterLink, inLinkShop: InLink
     amount: { cents: extension.amountCents, currency: extension.currency },
     rentalReference: link.rentalId,
     description: t('orderDescription', { shop: view.shopName, days: extension.extraDays }).slice(0, 127),
-    returnUrl: `${url}/extended`,
-    cancelUrl: `${url}/extend`,
+    ...back,
     idempotencyKey: `extension-order-${extension.id}`,
   })
   if (!created.ok || created.value.approvalUrl === undefined) return new Refusal('paypal_unavailable')

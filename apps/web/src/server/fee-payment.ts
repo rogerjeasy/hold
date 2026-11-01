@@ -1,5 +1,6 @@
 import 'server-only'
 import { money } from '@hold/domain'
+import type { ReturnTo } from '@hold/mobile-api'
 import { itemsStillFree, renterView, saveFeeOrder } from '@hold/db'
 import { requestFeeCapture } from '@hold/settle'
 import type { RenterLink } from '@hold/db'
@@ -7,6 +8,7 @@ import { getTranslations } from 'next-intl/server'
 import type { Locale } from '@/i18n/routing'
 import { Refusal } from './action'
 import { paypalForShop } from './paypal-for-shop'
+import { paypalReturn } from './paypal-return'
 import type { InLinkShop } from './renter-access'
 import { renterUrl } from './renter-links'
 import { getServices } from './services'
@@ -15,10 +17,11 @@ import { getServices } from './services'
 // one stored on the rental. Each step can be repeated: an order the renter is approving is reused, and a capture is
 // keyed by the rental and its order. The worker calls PayPal to capture; this only records the execution and sends it.
 
-// approvalUrl: PayPal's page; returnUrl: where that page returns to, for PayPal's own button to return to as well.
+// approvalUrl: PayPal's page; returnUrl: where that page returns to, for PayPal's own button to return to as well. An
+// order is reused while it waits for approval, so it returns where it was first started from.
 export type StartedPayment = { readonly approvalUrl: string; readonly orderId: string; readonly returnUrl: string }
 
-export async function startFeePayment(link: RenterLink, inLinkShop: InLinkShop, token: string, language: Locale): Promise<StartedPayment | Refusal> {
+export async function startFeePayment(link: RenterLink, inLinkShop: InLinkShop, token: string, language: Locale, returnTo: ReturnTo): Promise<StartedPayment | Refusal> {
   const now = new Date()
   const view = await inLinkShop((transaction) => renterView(transaction, link.rentalId, now))
   if (view === undefined) return new Refusal('not_found')
@@ -28,7 +31,8 @@ export async function startFeePayment(link: RenterLink, inLinkShop: InLinkShop, 
   if (paypal === undefined) return new Refusal('paypal_not_connected')
 
   const url = await renterUrl(token, language)
-  const started = (orderId: string, approvalUrl: string): StartedPayment => ({ approvalUrl, orderId, returnUrl: `${url}/paid?token=${encodeURIComponent(orderId)}` })
+  const back = await paypalReturn(returnTo, 'fee', { returnUrl: `${url}/paid`, cancelUrl: url })
+  const started = (orderId: string, approvalUrl: string): StartedPayment => ({ approvalUrl, orderId, returnUrl: `${back.returnUrl}?token=${encodeURIComponent(orderId)}` })
   if (view.feeOrderId !== null) {
     const order = await paypal.readHoldOrder(view.feeOrderId)
     if (order.ok && order.value.status === 'awaiting_approval' && order.value.approvalUrl !== undefined) return started(view.feeOrderId, order.value.approvalUrl)
@@ -39,8 +43,7 @@ export async function startFeePayment(link: RenterLink, inLinkShop: InLinkShop, 
     amount: money(view.feeCents, view.currency),
     rentalReference: link.rentalId,
     description: t('orderDescription', { shop: view.shopName, items: view.lines.map((line) => `${String(line.count)} × ${line.name}`).join(', '), days: view.days }).slice(0, 127),
-    returnUrl: `${url}/paid`,
-    cancelUrl: url,
+    ...back,
     // A first order, or a fresh one after an order that can no longer be approved.
     idempotencyKey: view.feeOrderId === null ? `fee-order-${link.rentalId}` : `fee-order-${link.rentalId}-after-${view.feeOrderId}`,
   })

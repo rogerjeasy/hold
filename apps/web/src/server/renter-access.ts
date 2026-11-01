@@ -3,6 +3,8 @@ import { RENTER_LINK_SCOPES } from '@hold/auth'
 import type { RenterLinkScope } from '@hold/auth'
 import { auditLog, findRenterLink, inShop, takeRateToken } from '@hold/db'
 import type { RenterLink, Transaction } from '@hold/db'
+import { renterActions } from '@hold/mobile-api'
+import type { RenterActionName } from '@hold/mobile-api'
 import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { failedFields, formObject, Refusal } from './action'
@@ -87,3 +89,6 @@ export function renterAction<Input extends { readonly token: string }, Output>(
 
 // The token travels with every renter form. The schema checks its shape; renterAccess checks the rest.
 export const withToken = <Shape extends z.ZodRawShape>(shape: Shape) => z.object({ ...shape, token: z.string().min(1).max(200), locale: z.string().max(5) }).strict()
+
+// An action's input as the phone app checks it too: one schema, kept in the phone's contract (AGENTS.md section 4).
+export const renterInput = <Name extends RenterActionName>(name: Name) => withToken<(typeof renterActions)[Name]['input']['shape']>(renterActions[name].input.shape)

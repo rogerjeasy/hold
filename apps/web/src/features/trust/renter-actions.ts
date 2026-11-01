@@ -3,11 +3,9 @@
 import { createHmac, randomInt } from 'node:crypto'
 import { answerTrustConsent, auditLog, deleteTrustRecord, issueTrustCode, renterTrustKey, useTrustCode } from '@hold/db'
 import type { Transaction } from '@hold/db'
-import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
 import { Refusal } from '@/server/action'
-import { renterAction, withToken } from '@/server/renter-access'
-import { codeVia } from '@/server/renter-code'
+import { renterAction, renterInput } from '@/server/renter-access'
 import { deliverRenterCode } from '@/server/renter-code-delivery'
 import { getServices, TEST_SIGN_IN_CODE } from '@/server/services'
 
@@ -19,9 +17,8 @@ import { getServices, TEST_SIGN_IN_CODE } from '@/server/services'
 // address PayPal gave for the payer: proof the renter is present, as a claim reply needs.
 
 const digest = (key: Buffer, linkId: string, code: string) => createHmac('sha256', key).update(`trust:${linkId}:${code}`).digest('hex')
-const withCode = <Shape extends z.ZodRawShape>(shape: Shape) => withToken({ ...shape, code: z.string().regex(/^[0-9]{8}$/) })
 
-export const sendTrustCode = renterAction({ name: 'trust.code_requested', scope: 'view', input: withToken({ via: codeVia }) }, async (link, input, inLinkShop) => {
+export const sendTrustCode = renterAction({ name: 'trust.code_requested', scope: 'view', input: renterInput('send-trust-code') }, async (link, input, inLinkShop) => {
   const services = await getServices()
   const code = services.config.services === 'fake' ? TEST_SIGN_IN_CODE : String(randomInt(0, 100000000)).padStart(8, '0')
   const issued = await inLinkShop((transaction) => issueTrustCode(transaction, link.id, digest(services.renterLinkKey, link.id, code), new Date(), input.via))
@@ -43,7 +40,7 @@ async function provenRenter(transaction: Transaction, link: { readonly id: strin
 }
 
 // Asked once, in a sentence, and off until the renter turns it on. They may change their answer at any time.
-export const answerConsent = renterAction({ name: 'trust.consent_answered', scope: 'view', input: withCode({ consent: z.enum(['yes', 'no']) }) }, (link, input, inLinkShop) =>
+export const answerConsent = renterAction({ name: 'trust.consent_answered', scope: 'view', input: renterInput('answer-consent') }, (link, input, inLinkShop) =>
   inLinkShop(async (transaction) => {
     const key = await provenRenter(transaction, link, input.code)
     if (key instanceof Refusal) return key
@@ -53,7 +50,7 @@ export const answerConsent = renterAction({ name: 'trust.consent_answered', scop
 )
 
 // Deleting the record returns the renter to the ordinary hold everywhere.
-export const deleteRecord = renterAction({ name: 'trust.record_deleted', scope: 'view', input: withCode({ understood: z.literal('yes') }) }, (link, input, inLinkShop) =>
+export const deleteRecord = renterAction({ name: 'trust.record_deleted', scope: 'view', input: renterInput('delete-record') }, (link, input, inLinkShop) =>
   inLinkShop(async (transaction) => {
     const key = await provenRenter(transaction, link, input.code)
     if (key instanceof Refusal) return key

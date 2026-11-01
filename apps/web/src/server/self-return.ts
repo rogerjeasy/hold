@@ -8,6 +8,7 @@ import { MAX_PHOTO_BYTES } from '@hold/evidence'
 import { Refusal } from './action'
 import { sendComparisons } from './comparison-queue'
 import { sendMediaMessage } from './media'
+import { pushToStaff } from './push'
 import type { InLinkShop } from './renter-access'
 import { getServices } from './services'
 
@@ -75,5 +76,6 @@ export async function sendRenterReturn(link: RenterLink, inLinkShop: InLinkShop)
   } catch {
     // The sealing transaction wrote the outbox; the relay sends it.
   }
+  await pushToStaff(link.shopId, 'drop_off_waiting', { to: 'drop_offs' })
   return {}
 }

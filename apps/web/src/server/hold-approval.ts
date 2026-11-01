@@ -1,5 +1,6 @@
 import 'server-only'
 import { holdOrderCents, money } from '@hold/domain'
+import type { ReturnTo } from '@hold/mobile-api'
 import { rentalHold, renterView, saveHoldOrder } from '@hold/db'
 import { holdOrderDescription, walkInOrderDescription } from '@hold/notify'
 import { requestHoldPlacement } from '@hold/settle'
@@ -7,6 +8,7 @@ import type { RenterLink } from '@hold/db'
 import type { Locale } from '@/i18n/routing'
 import { Refusal } from './action'
 import { paypalForShop } from './paypal-for-shop'
+import { paypalReturn } from './paypal-return'
 import type { StartedPayment } from './fee-payment'
 import type { InLinkShop } from './renter-access'
 import { renterUrl } from './renter-links'
@@ -16,7 +18,7 @@ import { getServices } from './services'
 // it first. The amount is the hold agreed at booking, stored on the hold. The worker authorizes the order; this only
 // records the execution and sends it.
 
-export async function startHoldApproval(link: RenterLink, inLinkShop: InLinkShop, token: string, language: Locale): Promise<StartedPayment | Refusal> {
+export async function startHoldApproval(link: RenterLink, inLinkShop: InLinkShop, token: string, language: Locale, returnTo: ReturnTo): Promise<StartedPayment | Refusal> {
   const { hold, view } = await inLinkShop(async (transaction) => ({ hold: await rentalHold(transaction, link.rentalId), view: await renterView(transaction, link.rentalId, new Date()) }))
   if (hold === undefined || view === undefined) return new Refusal('not_requested')
   // A placed hold asks for approval only while a replacement for it waits.
@@ -27,7 +29,8 @@ export async function startHoldApproval(link: RenterLink, inLinkShop: InLinkShop
   // An order still waiting for approval is reused, the hold's own or a replacement's. One approved and then declined
   // needs a new one.
   const url = `${await renterUrl(token, language)}/pay`
-  const started = (orderId: string, approvalUrl: string): StartedPayment => ({ approvalUrl, orderId, returnUrl: `${url}?token=${encodeURIComponent(orderId)}` })
+  const back = await paypalReturn(returnTo, 'hold', { returnUrl: url, cancelUrl: url })
+  const started = (orderId: string, approvalUrl: string): StartedPayment => ({ approvalUrl, orderId, returnUrl: `${back.returnUrl}?token=${encodeURIComponent(orderId)}` })
   if (hold.orderId !== null) {
     const order = await paypal.readHoldOrder(hold.orderId)
     if (order.ok && order.value.status === 'awaiting_approval' && order.value.approvalUrl !== undefined) return started(hold.orderId, order.value.approvalUrl)
@@ -38,8 +41,7 @@ export async function startHoldApproval(link: RenterLink, inLinkShop: InLinkShop
     rentalReference: link.rentalId,
     // What the renter reads in PayPal, in their language. The worker words a replacement the same way.
     description: hold.strategy === 'combined' && hold.state === 'requested' ? walkInOrderDescription(language, view.shopName) : holdOrderDescription(language, view.shopName),
-    returnUrl: url,
-    cancelUrl: url,
+    ...back,
     idempotencyKey: hold.orderId === null ? `hold-order-${hold.id}` : `hold-order-${hold.id}-after-${hold.orderId}`,
   })
   if (!created.ok || created.value.approvalUrl === undefined) return new Refusal('paypal_unavailable')

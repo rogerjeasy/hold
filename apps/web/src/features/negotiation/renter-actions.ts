@@ -1,25 +1,23 @@
 'use server'
 import { auditLog, confirmAgreement, issueSettlementCode, openAdvocate, renterNegotiation, renterView, stopRenterAdvocate, useClaimCode } from '@hold/db'
 import { parseAmount } from '@hold/domain'
-import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
 import { Refusal } from '@/server/action'
 import { writeContestSummary } from '@/server/contest-summary'
 import { sendNegotiation } from '@/server/negotiation-queue'
-import { renterAction, withToken } from '@/server/renter-access'
-import { CODE_PURPOSES, codeVia, newRenterCode, renterCodeDigest } from '@/server/renter-code'
+import { renterAction, renterInput } from '@/server/renter-access'
+import { CODE_PURPOSES, newRenterCode, renterCodeDigest } from '@/server/renter-code'
 import { copyDecisionToEmail } from '@/server/decision-copy'
 import { deliverRenterCode } from '@/server/renter-code-delivery'
 import { getServices } from '@/server/services'
 import { sendSettlement } from '@/server/settlement-queue'
-import { advocateInput } from './negotiation-input'
 
 // The renter's side of an advocate (extensions.md section 9.4). Handing the contest to an advocate is a money decision,
 // so it takes the same one-time code as accepting or contesting; confirming what the advocates agreed takes a fresh one.
 // The advocate is Hold's, or the renter's own assistant connected to this rental: then the code grants that assistant
 // alone the negotiation scope on this claim, and the shop's turn comes back to the worker after each of its moves.
 
-export const startAdvocate = renterAction({ name: 'renter.advocate_started', scope: 'contest', input: withToken(advocateInput) }, async (link, input, inLinkShop) => {
+export const startAdvocate = renterAction({ name: 'renter.advocate_started', scope: 'contest', input: renterInput('start-advocate') }, async (link, input, inLinkShop) => {
   const { config } = await getServices()
   const hash = await renterCodeDigest(CODE_PURPOSES.claimReply, link.id, input.code)
   const result = await inLinkShop(async (transaction) => {
@@ -37,7 +35,7 @@ export const startAdvocate = renterAction({ name: 'renter.advocate_started', sco
   return { kind: result.kind }
 })
 
-export const sendSettlementCode = renterAction({ name: 'renter.settlement_code_requested', scope: 'accept', input: withToken({ via: codeVia }) }, async (link, input, inLinkShop) => {
+export const sendSettlementCode = renterAction({ name: 'renter.settlement_code_requested', scope: 'accept', input: renterInput('send-settlement-code') }, async (link, input, inLinkShop) => {
   const code = await newRenterCode()
   const hash = await renterCodeDigest(CODE_PURPOSES.settlement, link.id, code)
   const issued = await inLinkShop((transaction) => issueSettlementCode(transaction, link.id, hash, new Date(), input.via))
@@ -48,7 +46,7 @@ export const sendSettlementCode = renterAction({ name: 'renter.settlement_code_r
   return delivered
 })
 
-export const confirmSettlement = renterAction({ name: 'renter.settlement_decided', scope: 'accept', input: withToken({ code: z.string().regex(/^[0-9]{8}$/), decision: z.enum(['confirm', 'decline']) }) }, async (link, input, inLinkShop) => {
+export const confirmSettlement = renterAction({ name: 'renter.settlement_decided', scope: 'accept', input: renterInput('confirm-settlement') }, async (link, input, inLinkShop) => {
   const hash = await renterCodeDigest(CODE_PURPOSES.settlement, link.id, input.code)
   const result = await inLinkShop(async (transaction) => {
     const verified = await useClaimCode(transaction, link.id, hash, new Date())
@@ -66,7 +64,7 @@ export const confirmSettlement = renterAction({ name: 'renter.settlement_decided
 })
 
 // Stopping the advocate needs no code: it moves no money, and the owner then decides (section 3, rule 7).
-export const stopAdvocate = renterAction({ name: 'renter.advocate_stopped', scope: 'contest', input: withToken({}) }, async (link, _input, inLinkShop) => {
+export const stopAdvocate = renterAction({ name: 'renter.advocate_stopped', scope: 'contest', input: renterInput('stop-advocate') }, async (link, _input, inLinkShop) => {
   const result = await inLinkShop((transaction) => stopRenterAdvocate(transaction, link.rentalId, new Date()))
   return result.ok ? {} : new Refusal(result.reason)
 })
