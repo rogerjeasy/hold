@@ -21,7 +21,7 @@ test('the renter reads the shop’s promise, contests, and renter and shop write
   await expect(renter.getByText('If you contest')).toBeVisible()
   await expect(renter.getByText(/Porto Promise Bikes promises to decide within 3 days of your reply/)).toBeVisible()
   await expectFitsEveryWidth(renter)
-  await renter.getByRole('button', { name: 'Email me a verification code' }).click()
+  await renter.getByRole('button', { name: 'Send me a verification code' }).click()
   await expect(renter.getByText('Verification code sent. It expires in ten minutes.')).toBeVisible()
   await renter.getByLabel('Verification code', { exact: true }).fill(TEST_CODE)
   await renter.getByLabel('Your explanation (required to contest)').fill('The scratch was there when I picked the bike up.')

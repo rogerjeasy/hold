@@ -40,13 +40,13 @@ test('a renter answers the consent question with their emailed code, shows their
 
   const consent = renter.getByRole('region', { name: 'Other Hold shops' })
   await consent.getByRole('button', { name: 'Yes, use it' }).click()
-  await expect(consent.getByLabel('Code from the email')).toBeFocused()
-  await consent.getByRole('button', { name: 'Email me a code' }).click()
+  await expect(consent.getByLabel('Your code')).toBeFocused()
+  await consent.getByRole('button', { name: 'Send me a code' }).click()
   await expect(consent.getByText('Code sent. It works for ten minutes.')).toBeVisible()
-  await consent.getByLabel('Code from the email').fill('11111111')
+  await consent.getByLabel('Your code').fill('11111111')
   await consent.getByRole('button', { name: 'Yes, use it' }).click()
   await expect(consent.getByRole('alert').filter({ hasText: 'That code is not right. Check the email and try again.' })).toBeVisible()
-  await consent.getByLabel('Code from the email').fill(EMAILED_CODE)
+  await consent.getByLabel('Your code').fill(EMAILED_CODE)
   await consent.getByRole('button', { name: 'Yes, use it' }).click()
   await expect(consent.getByText('Other Hold shops may use your record to lower your hold.')).toBeVisible()
 
