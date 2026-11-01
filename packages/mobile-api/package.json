@@ -1,0 +1,14 @@
+{
+  "name": "@hold/mobile-api",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "The phone app's HTTP contract: the schemas both the web app's /api/mobile/v1 routes and the phone app validate with.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@hold/domain": "workspace:*",
+    "zod": "^4.6.7"
+  }
+}
