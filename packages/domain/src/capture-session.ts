@@ -17,6 +17,10 @@ export type ConditionReply = (typeof CONDITION_REPLIES)[number]
 // The views a renter may add to a condition session: what staff missed, in no plan.
 export const MISSED_VIEWS = ['missed-1', 'missed-2', 'missed-3', 'missed-4', 'missed-5', 'missed-6'] as const
 
+// The largest photograph Hold takes, from the counter or a renter's phone. The phone checks it before it asks to
+// upload, and the store's signed link and the server check it again.
+export const MAX_PHOTO_BYTES = 15 * 1024 * 1024
+
 // The required views not yet photographed, in the plan's order.
 export function missingViews(plan: readonly { readonly key: string; readonly required: boolean }[], taken: readonly string[]): readonly string[] {
   const have = new Set(taken)

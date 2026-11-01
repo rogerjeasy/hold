@@ -1,11 +1,12 @@
-import { textAllowed } from '@hold/domain'
-import type { ContactChannel, TextPurpose, TextStatus } from '@hold/domain'
+import { PUSH_FOR_TEXT, textAllowed } from '@hold/domain'
+import type { ContactChannel, RenterPushEvent, TextPurpose, TextStatus } from '@hold/domain'
 import type { Email, Mailer } from './mailer.ts'
 import type { Texter } from './texter.ts'
 
 // The one way Hold reaches a renter (architecture.md section 12.3), from the web app and the worker alike: a text when
 // they chose texts, an email otherwise or when the text cannot go. A demo shop shows the text on the renter's page
-// instead of sending it. Each text is recorded, without its words unless it was only shown.
+// instead of sending it. Each text is recorded, without its words unless it was only shown. Beside the text or email,
+// a notice (never a code, never the link itself) is pushed to the phones that registered for this rental in Hold's app.
 
 export type ReachTarget = { readonly shopId: string; readonly rentalId: string; readonly channel: ContactChannel; readonly phone: string | null; readonly simulated: boolean }
 
@@ -22,11 +23,27 @@ export type ReachDependencies = {
   readonly allowText: (target: { readonly shopId: string; readonly rentalId: string; readonly phone: string }) => Promise<boolean>
   // The number replied STOP: the rental goes back to email.
   readonly stopTexts: (rentalId: string) => Promise<void>
+  // Pushes the event to the rental's registered phones (architecture.md section 13.9). Absent, nothing is pushed.
+  readonly push?: (event: RenterPushEvent) => Promise<void>
 }
 
 export type Reached = { readonly via: 'text' | 'email' | 'none'; readonly simulated: boolean; readonly fellBack: 'limit' | 'unavailable' | 'opted_out' | 'country' | null }
 
 export async function reachRenter(dependencies: ReachDependencies, target: ReachTarget, message: RenterMessage): Promise<Reached> {
+  const reached = await byChoice(dependencies, target, message)
+  const event = PUSH_FOR_TEXT[message.purpose]
+  if (event !== undefined && dependencies.push !== undefined) {
+    // A push is extra: its failure never changes how the renter was reached, nor fails the work that reached them.
+    try {
+      await dependencies.push(event)
+    } catch (error) {
+      console.warn(JSON.stringify({ event: 'push_failed', error: error instanceof Error ? error.name : 'unknown' }))
+    }
+  }
+  return reached
+}
+
+async function byChoice(dependencies: ReachDependencies, target: ReachTarget, message: RenterMessage): Promise<Reached> {
   if (target.channel === 'email') return byEmail(dependencies, message, null)
   const phone = target.phone
   if (phone === null || !textAllowed(phone)) return byEmail(dependencies, message, 'country')

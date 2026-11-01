@@ -2,14 +2,17 @@ import { inShop, rentalDetail, shopOwners, shopSettings } from '@hold/db'
 import type { Database } from '@hold/db'
 import { money } from '@hold/domain'
 import { holdExpiredEmail, holdReplacementEmail, holdReplacementText, promiseMissedEmail, promiseMissedRenterEmail, promiseMissedRenterText } from '@hold/notify'
-import type { Email, Mailer, Reached, Texter } from '@hold/notify'
+import type { Email, Mailer, PushSender, Reached, Texter } from '@hold/notify'
+import { createStaffPush } from './push.ts'
 import { createRenterReach } from './renter-reach.ts'
 import type { Notifier } from '@hold/settle'
 
 // Tells people what the worker found, each in their own language: staff by email through Hold's SMTP account, and the
-// renter the way they chose, by text or by email (architecture.md section 12.3).
-export function createNotifier(options: { readonly database: Database; readonly mailer: Mailer; readonly texter: Texter; readonly publicUrl: string }): Notifier {
+// renter the way they chose, by text or by email (architecture.md section 12.3), and each on their phone app too, when a
+// push sender is given (section 13.9).
+export function createNotifier(options: { readonly database: Database; readonly mailer: Mailer; readonly texter: Texter; readonly push?: PushSender; readonly publicUrl: string }): Notifier {
   const reach = createRenterReach(options)
+  const pushToStaff = options.push === undefined ? () => Promise.resolve() : createStaffPush({ database: options.database, push: options.push })
   // The web app's rental page for staff (apps/web/src/lib/routes.ts), in the reader's language.
   const rentalUrl = (language: string, rentalId: string) => `${options.publicUrl}${language === 'en' ? '' : `/${language}`}/shop/rentals/${rentalId}`
   const send = async (email: Email) => {
@@ -38,6 +41,7 @@ export function createNotifier(options: { readonly database: Database; readonly 
       }
       if (notice.kind === 'promise_missed') {
         for (const owner of owners) await send(promiseMissedEmail(owner.email, owner.language, { shopName: shop.name, renter: rental.who ?? '—', claimUrl: `${rentalUrl(owner.language, rental.id)}/claim`, waived: notice.waived }))
+        await pushToStaff(notice.shopId, 'decision_waiting', { to: 'rental', id: rental.id })
         const facts = { shopName: shop.name, waived: notice.waived }
         reached(await reach(notice.shopId, notice.rentalId, (renter) => ({ purpose: 'promise_missed', email: renter.email === null ? null : promiseMissedRenterEmail(renter.email, renter.language, facts), text: promiseMissedRenterText(renter.language, facts) })))
         return
@@ -45,6 +49,7 @@ export function createNotifier(options: { readonly database: Database; readonly 
       for (const owner of owners) {
         await send(holdExpiredEmail(owner.email, owner.language, { shopName: shop.name, renter: rental.who ?? '—', amount, rentalUrl: rentalUrl(owner.language, rental.id) }))
       }
+      await pushToStaff(notice.shopId, 'decision_waiting', { to: 'rental', id: rental.id })
     },
   }
 }

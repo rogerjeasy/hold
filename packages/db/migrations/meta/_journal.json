@@ -281,6 +281,13 @@
       "when": 1793521634871,
       "tag": "0039_phone_payer_told",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1793523886570,
+      "tag": "0040_push_devices",
+      "breakpoints": true
     }
   ]
 }

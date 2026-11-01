@@ -7,6 +7,7 @@ import type { CarryOutDependencies, OpsDependencies } from '@hold/ops'
 import { createRestPayPalHolds } from '@hold/paypal'
 import { createReminderSender } from './reminder-sender.ts'
 import { createRenterReach } from './renter-reach.ts'
+import { workerPushSender } from './push.ts'
 import { workerTexter } from './worker-texter.ts'
 import { loadOperationsSettings } from './operations-settings.ts'
 import { shopPayPalClient } from './worker-settle.ts'
@@ -36,7 +37,7 @@ export function workerOperations(): OpsDependencies {
         },
       }
     },
-    remind: createReminderSender({ database, mailer, texter: workerTexter(process.env) }),
+    remind: createReminderSender({ database, mailer, texter: workerTexter(process.env), push: workerPushSender(process.env) }),
   }
 }
 
@@ -47,7 +48,7 @@ export function workerCarryOut(): CarryOutDependencies {
   const database = createDataApiDatabase({ region: settings.region, clusterArn: settings.database.clusterArn, secretArn: settings.database.secretArn, database: settings.database.name })
   const mailer = createLazyMailer(async () => createSmtpMailer(await loadSmtpSettings(settings.smtpSecret, settings.region)))
   const documents = createS3DocumentStore({ evidenceBucket: settings.evidenceBucket, region: settings.region })
-  const reach = createRenterReach({ database, mailer, texter: workerTexter(process.env) })
+  const reach = createRenterReach({ database, mailer, texter: workerTexter(process.env), push: workerPushSender(process.env) })
   return {
     database,
     now: () => new Date(),

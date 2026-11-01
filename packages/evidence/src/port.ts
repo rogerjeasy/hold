@@ -23,4 +23,5 @@ export type EvidenceStore = {
 
 // How long a link to put or see a photograph lasts.
 export const LINK_SECONDS = 300
-export const MAX_PHOTO_BYTES = 15 * 1024 * 1024
+// Kept in the domain, so the phone app checks the same limit.
+export { MAX_PHOTO_BYTES } from '@hold/domain'

@@ -1,0 +1,7 @@
+{
+  "data": {
+    "019a3f0c-7b1e-7d55-9a2e-4c1f6b8d2e01": { "status": "ok" },
+    "019a3f0c-7b1e-7d55-9a2e-4c1f6b8d2e02": { "status": "error", "message": "The device cannot receive push notifications anymore and you should stop sending messages to the corresponding Expo push token.", "details": { "error": "DeviceNotRegistered" } },
+    "019a3f0c-7b1e-7d55-9a2e-4c1f6b8d2e03": { "status": "error", "message": "The Apple Push Notification service rejected the message.", "details": { "error": "MessageTooBig" } }
+  }
+}

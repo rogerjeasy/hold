@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { createMemoryMailer } from './mailer.ts'
 import { reachRenter } from './reach-renter.ts'
 import type { ReachDependencies, ReachTarget } from './reach-renter.ts'
@@ -92,5 +92,33 @@ describe('reaching a renter', () => {
     const { reach } = dependencies()
     const unsent = { ...reach, mailer: { send: () => Promise.resolve(false) } }
     expect(await reachRenter(unsent, { ...texting, channel: 'email' }, message)).toEqual({ via: 'none', simulated: false, fellBack: null })
+  })
+})
+
+describe('a push to the renter’s phone app, beside the message', () => {
+  it('goes with each notice that has one, whichever way the renter is reached', async () => {
+    const pushed: string[] = []
+    const { reach } = dependencies()
+    const withPush: ReachDependencies = { ...reach, push: (event) => { pushed.push(event); return Promise.resolve() } }
+    await reachRenter(withPush, texting, { ...message, purpose: 'condition_link' })
+    await reachRenter(withPush, { ...texting, channel: 'email' }, { ...message, purpose: 'receipt' })
+    await reachRenter(withPush, { ...texting, simulated: true }, { ...message, purpose: 'reminder' })
+    expect(pushed).toEqual(['condition_ready', 'receipt', 'due_back'])
+  })
+
+  it('never goes with a one-time code or the link itself', async () => {
+    const push = vi.fn(() => Promise.resolve())
+    const { reach } = dependencies()
+    for (const purpose of ['renter_code', 'phone_code', 'renter_link'] as const) await reachRenter({ ...reach, push }, texting, { ...message, purpose })
+    expect(push).not.toHaveBeenCalled()
+  })
+
+  it('never changes how the renter was reached when it fails', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined)
+    const { reach, recorded } = dependencies()
+    const failing: ReachDependencies = { ...reach, push: () => Promise.reject(new Error('Expo is down')) }
+    expect(await reachRenter(failing, texting, { ...message, purpose: 'drop_off' })).toEqual({ via: 'text', simulated: false, fellBack: null })
+    expect(recorded).toHaveLength(1)
+    warn.mockRestore()
   })
 })

@@ -5,6 +5,7 @@ import { createPayPalClient, createRestPayPalHolds, createSecretsManagerCredenti
 import { createEventBridgeScheduler, createSqsSender } from '@hold/settle'
 import type { SettleDependencies } from '@hold/settle'
 import { createNotifier } from './notifier.ts'
+import { workerPushSender } from './push.ts'
 import { workerTexter } from './worker-texter.ts'
 import { createWorkerRenterAsk } from './renter-ask.ts'
 import { loadWorkerSettings } from './worker-settings.ts'
@@ -40,7 +41,7 @@ export function workerSettle(): SettleDependencies {
     paypalFor: (credentialReference) => createRestPayPalHolds(shopPayPalClient(settings, credentialReference)),
     send: createSqsSender({ queues: settings.queues, region: settings.region }),
     scheduler: createEventBridgeScheduler({ ...settings.schedules, region: settings.region }),
-    notifier: createNotifier({ database, mailer, texter: workerTexter(process.env), publicUrl: settings.publicUrl }),
+    notifier: createNotifier({ database, mailer, texter: workerTexter(process.env), push: workerPushSender(process.env), publicUrl: settings.publicUrl }),
     renterAsk: createWorkerRenterAsk({ database, publicUrl: settings.publicUrl, linkKey: readLinkKey }),
     now: () => new Date(),
   }

@@ -2,6 +2,8 @@ import { comparisonMessageSchema, createBedrockComparisonModel, runComparison } 
 import { createDataApiDatabase } from '@hold/db/data-api'
 import { createS3EvidenceStore } from '@hold/evidence/photos'
 import { z } from 'zod'
+import { withReviewPush } from './comparison-push.ts'
+import { createStaffPush, workerPushSender } from './push.ts'
 import { createQueueHandler } from './queue-batch.ts'
 
 // This function has a separate role: no PayPal secret, money queue, or write access to photograph storage.
@@ -15,4 +17,5 @@ const dependencies = {
   model: createBedrockComparisonModel({ awsRegion: value.AWS_REGION }),
   now: () => new Date(),
 }
-export const handler = createQueueHandler({ schema: comparisonMessageSchema, handle: (message) => runComparison(dependencies, message) })
+const staffPush = createStaffPush({ database: dependencies.database, push: workerPushSender(process.env) })
+export const handler = createQueueHandler({ schema: comparisonMessageSchema, handle: withReviewPush((message) => runComparison(dependencies, message), staffPush) })

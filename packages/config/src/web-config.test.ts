@@ -46,6 +46,11 @@ describe('loadWebConfig', () => {
     expect(loadWebConfig(AWS)).toMatchObject({ texts: { sender: undefined, configurationSet: undefined } })
   })
 
+  it('names the secret holding Expo’s push access token, and pushes without one when unset', () => {
+    expect(loadWebConfig({ ...AWS, HOLD_PUSH_SECRET: 'hold/notify/expo-push-access-token' })).toMatchObject({ pushSecret: 'hold/notify/expo-push-access-token' })
+    expect(loadWebConfig(AWS)).toMatchObject({ pushSecret: undefined })
+  })
+
   it('sends work to the worker’s queues when it knows them, and must know them when deployed', () => {
     const queues = { HOLD_EXECUTIONS_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-executions.fifo', HOLD_PAYPAL_EVENTS_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-paypal-events.fifo', HOLD_MEDIA_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-media' }
     expect(loadWebConfig({ ...AWS, ...queues })).toMatchObject({ queues: { executions: queues.HOLD_EXECUTIONS_QUEUE_URL, 'paypal-events': queues.HOLD_PAYPAL_EVENTS_QUEUE_URL, media: queues.HOLD_MEDIA_QUEUE_URL } })

@@ -11,6 +11,7 @@ import * as scheduler from 'aws-cdk-lib/aws-scheduler'
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 import type * as sqs from 'aws-cdk-lib/aws-sqs'
 import { ACCOUNT, DATABASE_NAME, name, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
+import { allowPushes, PUSH_ENVIRONMENT } from './pushes.ts'
 import { allowTexting, textEnvironment } from './texts.ts'
 import type { TextSettings } from './texts.ts'
 
@@ -85,8 +86,9 @@ function workerRole(stack: Stack, props: WorkerProps): iam.Role {
   role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:PutObject'], resources: [props.displayBucket.arnForObjects('*')] }))
   // DetectFaces names no resource.
   role.addToPolicy(new iam.PolicyStatement({ actions: ['rekognition:DetectFaces'], resources: ['*'] }))
-  // Tells the renter the way they chose: the request for a new hold, a missed promise.
+  // Tells the renter the way they chose: the request for a new hold, a missed promise; and their phone app, and the owners'.
   allowTexting(role)
+  allowPushes(role)
   for (const queueName of ['paypal-events', 'executions', 'upkeep', 'comparisons', 'media', 'evidence', 'messages', 'ops-agent', 'ops-execute', 'negotiations']) {
     const queue = props.queues.get(queueName)
     if (queue === undefined) throw new Error(`No ${queueName} queue.`)
@@ -145,6 +147,7 @@ export function createWorker(stack: Stack, props: WorkerProps): void {
     HOLD_EVIDENCE_BUCKET: props.evidenceBucket.bucketName,
     HOLD_DISPLAY_BUCKET: props.displayBucket.bucketName,
     ...textEnvironment(props.texts),
+    ...PUSH_ENVIRONMENT,
   }
 
   const events = workerFunction(stack, 'PayPalEventsWorker', name('worker', 'paypal', 'events'), 'paypal-events-lambda.ts', role, environment)

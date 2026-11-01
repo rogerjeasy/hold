@@ -1,0 +1,7 @@
+{
+  "data": [
+    { "status": "ok", "id": "019a3f0c-7b1e-7d55-9a2e-4c1f6b8d2e01" },
+    { "status": "error", "message": "\"ExponentPushToken[gonegonegonegonegone00]\" is not a registered push notification recipient", "details": { "error": "DeviceNotRegistered", "expoPushToken": "ExponentPushToken[gonegonegonegonegone00]" } },
+    { "status": "error", "message": "Message rate exceeded.", "details": { "error": "MessageRateExceeded" } }
+  ]
+}

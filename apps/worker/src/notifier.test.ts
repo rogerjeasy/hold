@@ -1,7 +1,7 @@
-import { addItems, createBooking, inShop, publishPriceList, registerOwner, requestPhoneCode, saveItemType } from '@hold/db'
+import { addItems, createBooking, inShop, publishPriceList, registerOwner, registerRenterPush, registerStaffPush, renterLinks, requestPhoneCode, saveItemType } from '@hold/db'
 import { createTestDatabase } from '@hold/db/testing'
 import { money } from '@hold/domain'
-import { createMemoryMailer, createMemoryTexter } from '@hold/notify'
+import { createMemoryMailer, createMemoryPushSender, createMemoryTexter } from '@hold/notify'
 import { describe, expect, it } from 'vitest'
 import { createNotifier } from './notifier.ts'
 
@@ -26,7 +26,7 @@ async function shopWithRental() {
     if (!booked.ok) throw new Error(booked.reason)
     return booked.rentalId
   })
-  return { database, shopId: owner.shopId, rentalId }
+  return { database, shopId: owner.shopId, ownerId: owner.userId, rentalId }
 }
 
 describe('telling people from the worker', () => {
@@ -77,5 +77,36 @@ describe('telling people from the worker', () => {
     await notifier.tell({ kind: 'promise_missed', shopId, rentalId, waived: true })
     expect(texter.sent.map((text) => text.body)).toEqual([expect.stringContaining('https://hold.test/fr/r/TOKEN/pay'), expect.stringContaining('rien n\'est débité')])
     expect(mailer.sent.map((email) => email.to)).toEqual(['ana@ribeira.example'])
+  })
+})
+
+describe('pushing to the phone app from the worker', () => {
+  it('tells the owners’ phones a decision waits, and the renter’s phone, beside its text or email, what happened', async () => {
+    const { database, shopId, ownerId, rentalId } = await shopWithRental()
+    const [link] = await database.select().from(renterLinks)
+    await inShop(database, { role: 'hold_app', shopId, userId: ownerId }, async (transaction) => {
+      await registerStaffPush(transaction, { shopId, userId: ownerId }, { token: 'ExponentPushToken[owner]', platform: 'ios', locale: 'de' }, new Date())
+      await registerRenterPush(transaction, { id: link?.id ?? '', shopId, rentalId }, { token: 'ExponentPushToken[renter]', platform: 'android', locale: 'fr' }, 'renter-reference', new Date())
+    })
+    const push = createMemoryPushSender()
+    const notifier = createNotifier({ database, mailer: createMemoryMailer(), texter: createMemoryTexter(), push, publicUrl: 'https://hold.test' })
+    await notifier.tell({ kind: 'promise_missed', shopId, rentalId, waived: false })
+    await notifier.tell({ kind: 'hold_expired', shopId, rentalId })
+    await notifier.tell({ kind: 'hold_replacement', shopId, rentalId, approveUrl: 'https://hold.test/fr/r/TOKEN/pay', holdEndsAt: new Date('2026-11-14T09:00:00Z') })
+    expect(push.sent.map((message) => [message.to, message.data])).toEqual([
+      ['ExponentPushToken[owner]', { kind: 'staff', shopId, path: `/shop/rental/${rentalId}` }],
+      ['ExponentPushToken[renter]', { kind: 'renter', reference: 'renter-reference', page: 'claim' }],
+      ['ExponentPushToken[owner]', { kind: 'staff', shopId, path: `/shop/rental/${rentalId}` }],
+      ['ExponentPushToken[renter]', { kind: 'renter', reference: 'renter-reference', page: 'rental' }],
+    ])
+    expect(JSON.stringify(push.sent)).not.toContain('TOKEN')
+  })
+
+  it('still tells everyone by email when Expo is down', async () => {
+    const { database, shopId, rentalId } = await shopWithRental()
+    const mailer = createMemoryMailer()
+    const down = { send: () => Promise.reject(new Error('Expo is down')), receipts: () => Promise.reject(new Error('Expo is down')) }
+    await createNotifier({ database, mailer, texter: createMemoryTexter(), push: down, publicUrl: 'https://hold.test' }).tell({ kind: 'promise_missed', shopId, rentalId, waived: false })
+    expect(mailer.sent).toHaveLength(2)
   })
 })

@@ -59,6 +59,9 @@ const awsServices = z
     // the sender and reports nothing back.
     HOLD_TEXT_SENDER: z.string().min(1).max(200).optional(),
     HOLD_TEXT_CONFIGURATION_SET: z.string().min(1).max(200).optional(),
+    // The Secrets Manager secret holding the Expo access token push notifications are sent with (architecture.md section
+    // 13.9), by name or ARN. Unset, or a secret not created yet, pushes go without one.
+    HOLD_PUSH_SECRET: z.string().min(1).max(300).optional(),
     // Only sandbox accounts are connected in the hackathon build.
     HOLD_PAYPAL_MODE: z.literal('sandbox').default('sandbox'),
     // The worker's queues, for work the app hands on at once. Without them, work waits in the outbox for the relay.
@@ -146,6 +149,7 @@ export type WebConfig =
       readonly smtpSecret: string
       readonly demoSessions: boolean
       readonly texts: { readonly sender: string | undefined; readonly configurationSet: string | undefined }
+      readonly pushSecret: string | undefined
       readonly paypalMode: 'sandbox'
       // By queue name, as the outbox names them.
       readonly queues: Readonly<Record<'executions' | 'paypal-events', string> & Partial<Record<'media' | 'comparisons' | 'evidence' | 'negotiations', string>>> | undefined
@@ -206,6 +210,7 @@ export function loadWebConfig(environment: Readonly<Record<string, string | unde
     smtpSecret: value.HOLD_SMTP_SECRET,
     demoSessions: value.HOLD_DEMO_SESSIONS === 'on',
     texts: { sender: value.HOLD_TEXT_SENDER, configurationSet: value.HOLD_TEXT_CONFIGURATION_SET },
+    pushSecret: value.HOLD_PUSH_SECRET,
     paypalMode: value.HOLD_PAYPAL_MODE,
     queues:
       value.HOLD_EXECUTIONS_QUEUE_URL === undefined || value.HOLD_PAYPAL_EVENTS_QUEUE_URL === undefined

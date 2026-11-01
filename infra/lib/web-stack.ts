@@ -7,6 +7,7 @@ import * as iam from 'aws-cdk-lib/aws-iam'
 import type * as s3 from 'aws-cdk-lib/aws-s3'
 import type * as rds from 'aws-cdk-lib/aws-rds'
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
+import { allowPushes, PUSH_ENVIRONMENT } from './pushes.ts'
 import { allowTexting, textEnvironment } from './texts.ts'
 import type { TextSettings } from './texts.ts'
 import { ACCOUNT, CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES, CREDENTIAL_KEY_ALIAS, DATABASE_NAME, name, PREFIX, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
@@ -102,6 +103,8 @@ function instanceRole(stack: Stack, props: WebStackProps, licences: readonly sec
   role.addToPolicy(new iam.PolicyStatement({ actions: CLAUDE_INVOKE_ACTIONS, resources: CLAUDE_INVOKE_RESOURCES }))
   // Links, notices and one-time codes to a renter who chose texts (architecture.md section 12.3).
   allowTexting(role)
+  // Notices to the phones registered in Hold's app (architecture.md section 13.9).
+  allowPushes(role)
   return role
 }
 
@@ -131,6 +134,7 @@ function settings(props: WebStackProps): apprunner.CfnService.KeyValuePairProper
     HOLD_DISPLAY_BUCKET: props.displayBucket.bucketName,
     ...(props.publicUrl === undefined ? {} : { HOLD_PUBLIC_URL: props.publicUrl }),
     ...textEnvironment(props.texts),
+    ...PUSH_ENVIRONMENT,
   }
   return Object.entries(values).map(([key, value]) => ({ name: key, value }))
 }

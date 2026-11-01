@@ -3,6 +3,7 @@ import * as iam from 'aws-cdk-lib/aws-iam'
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources'
 import * as scheduler from 'aws-cdk-lib/aws-scheduler'
 import { ACCOUNT, CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES, DATABASE_NAME, name, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
+import { allowPushes, PUSH_ENVIRONMENT } from './pushes.ts'
 import { allowTexting, textEnvironment } from './texts.ts'
 import { workerFunction } from './worker.ts'
 import type { WorkerProps } from './worker.ts'
@@ -28,8 +29,9 @@ export function createOperationsWorker(stack: Stack, props: WorkerProps): void {
   // A dispute answer attaches the rental's published record, read by its version. No photograph, and nothing written.
   role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:GetObjectVersion'], resources: [props.evidenceBucket.arnForObjects('packs/*')] }))
   queue.grantSendMessages(role)
-  // Reminders and the messages a person approved reach the renter the way they chose.
+  // Reminders and the messages a person approved reach the renter the way they chose, and their phone app.
   allowTexting(role)
+  allowPushes(role)
   const environment = {
     HOLD_DATABASE_CLUSTER_ARN: props.cluster.clusterArn,
     HOLD_DATABASE_SECRET_ARN: props.workerUserSecret.secretArn,
@@ -38,6 +40,7 @@ export function createOperationsWorker(stack: Stack, props: WorkerProps): void {
     HOLD_SMTP_SECRET: SMTP_SECRET_NAME,
     HOLD_EVIDENCE_BUCKET: props.evidenceBucket.bucketName,
     ...textEnvironment(props.texts),
+    ...PUSH_ENVIRONMENT,
   }
   const agent = workerFunction(stack, 'OperationsWorker', name('worker', 'operations'), 'ops-agent-lambda.ts', role, environment, { memorySize: 1024 })
   agent.addEventSource(new SqsEventSource(queue, { batchSize: 1, reportBatchItemFailures: true }))

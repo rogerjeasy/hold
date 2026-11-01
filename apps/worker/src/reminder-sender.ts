@@ -1,13 +1,13 @@
 import { inShop, shopSettings } from '@hold/db'
 import type { Database } from '@hold/db'
 import { reminderEmail, reminderText } from '@hold/notify'
-import type { Mailer, Texter } from '@hold/notify'
+import type { Mailer, PushSender, Texter } from '@hold/notify'
 import { createRenterReach } from './renter-reach.ts'
 import type { Reminder } from '@hold/ops'
 
 // Sends one of the operations agent's automatic reminders to the renter, the way they chose and in their language, with
 // the due time in the shop's own time zone. The run has already recorded it, so it is never sent twice in a day.
-export function createReminderSender(options: { readonly database: Database; readonly mailer: Mailer; readonly texter: Texter }): (reminder: Reminder) => Promise<void> {
+export function createReminderSender(options: { readonly database: Database; readonly mailer: Mailer; readonly texter: Texter; readonly push?: PushSender }): (reminder: Reminder) => Promise<void> {
   const reach = createRenterReach(options)
   return async (reminder) => {
     const shop = await inShop(options.database, { role: 'hold_worker', shopId: reminder.shopId }, (transaction) => shopSettings(transaction, reminder.shopId))

@@ -1,0 +1,5 @@
+{
+  "errors": [
+    { "code": "PUSH_TOO_MANY_EXPERIENCE_IDS", "message": "All push notification messages in the same request must be for the same project; separate your push notifications by project." }
+  ]
+}

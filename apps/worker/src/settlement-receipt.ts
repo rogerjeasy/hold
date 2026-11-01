@@ -3,13 +3,13 @@ import { issueRenterToken, renterLinkExpiry, renterLinkKey, renterLinkPath } fro
 import { inShop, issueRenterLink } from '@hold/db'
 import type { Database } from '@hold/db'
 import { settlementReceiptEmail, settlementReceiptText } from '@hold/notify'
-import type { Mailer, Texter } from '@hold/notify'
+import type { Mailer, PushSender, Texter } from '@hold/notify'
 import { receiptMessageSchema, runReceipt } from '@hold/settle'
 import type { z } from 'zod'
 import { createRenterReach } from './renter-reach.ts'
 
 export { receiptMessageSchema }
-export type ReceiptDependencies = { readonly database: Database; readonly mailer: Mailer; readonly texter: Texter; readonly publicUrl: string; readonly linkKey: () => Promise<Buffer>; readonly now: () => Date }
+export type ReceiptDependencies = { readonly database: Database; readonly mailer: Mailer; readonly texter: Texter; readonly push?: PushSender; readonly publicUrl: string; readonly linkKey: () => Promise<Buffer>; readonly now: () => Date }
 
 export function sendSettlementReceipt(options: ReceiptDependencies, message: z.infer<typeof receiptMessageSchema>) {
   return runReceipt({ database: options.database, now: options.now, async send(notice) {
