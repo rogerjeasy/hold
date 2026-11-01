@@ -47,7 +47,7 @@ export const confirmPhone = renterAction(
     const hash = await phoneDigest(link.rentalId, input.code)
     const confirmed = await inLinkShop((transaction) => confirmRenterPhone(transaction, link.rentalId, hash, new Date()))
     if (!confirmed.ok) return new Refusal(confirmed.reason)
-    await tellPayerOfPhone(inLinkShop, link, maskedPhone(confirmed.phone), readLocale(input.locale))
+    await tellPayerOfPhone(inLinkShop, link, readLocale(input.locale))
     return { phone: maskedPhone(confirmed.phone) }
   },
 )

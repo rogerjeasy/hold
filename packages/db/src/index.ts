@@ -37,7 +37,7 @@ export { beginFeeCapture, confirmFeeCapture, EXECUTIONS_QUEUE, failExecution, fi
 export type { BeginResult, CapturedFee, ConfirmResult, FeeExecution, StoredExecution } from './fee-repository.ts'
 export { findRenterLink, renterContact, renterView } from './renter-repository.ts'
 export type { RenterContact } from './renter-repository.ts'
-export { chooseEmail, confirmPhone, decisionCopyRecipient, issueContactChangeCode, markTextStatus, recordText, requestPhoneCode, shownTexts, textsOf } from './renter-contact-repository.ts'
+export { chooseEmail, confirmPhone, decisionCopyRecipient, issueContactChangeCode, markPhoneNoticeSent, markTextStatus, phoneNoticeDue, recordText, requestPhoneCode, shownTexts, textsOf } from './renter-contact-repository.ts'
 export type { RentalText } from './renter-contact-repository.ts'
 export type { RenterLink, RenterView } from './renter-repository.ts'
 export { feeRentalByOrder, markOutboxSent, outboxWrittenAt, markPayPalEvent, PAYPAL_EVENTS_QUEUE, payPalEvent, pendingOutbox, recordPayPalEvent } from './paypal-event-repository.ts'

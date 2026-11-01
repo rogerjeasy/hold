@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { storeRenterCode } from './claim-code-repository.ts'
-import { chooseEmail, confirmPhone, decisionCopyRecipient, markTextStatus, recordText, requestPhoneCode, shownTexts, textsOf } from './renter-contact-repository.ts'
+import { chooseEmail, confirmPhone, decisionCopyRecipient, markPhoneNoticeSent, markTextStatus, phoneNoticeDue, recordText, requestPhoneCode, shownTexts, textsOf } from './renter-contact-repository.ts'
 import { renterContact } from './renter-repository.ts'
 import { renterLinks, rentals, shops } from './schema/index.ts'
 import { inShop } from './scope.ts'
@@ -117,6 +117,27 @@ describe('a copy of a money decision', () => {
     expect(await shop.act((transaction) => decisionCopyRecipient(transaction, rentalId))).toBeUndefined()
     await database.update(rentals).set({ phoneConfirmedAt: NOW }).where(eq(rentals.id, rentalId))
     expect(await shop.act((transaction) => decisionCopyRecipient(transaction, rentalId))).toEqual({ email: 'priya@example.com', sandboxContact: false })
+  })
+})
+
+describe('telling the payer a number was confirmed', () => {
+  it('waits until PayPal names the payer, is told once, and is due again for each new number', async () => {
+    const rentalId = await shop.paidRental('PAYER-TEXT-NOTICE')
+    const [paid] = await database.select({ renterId: rentals.renterId }).from(rentals).where(eq(rentals.id, rentalId))
+    // Confirmed before anyone paid: nobody to tell yet.
+    await database.update(rentals).set({ renterId: null }).where(eq(rentals.id, rentalId))
+    await shop.act((transaction) => requestPhoneCode(transaction, rentalId, { typed: '+41791234567', hash: 'first', stepUp: false }, NOW))
+    await shop.act((transaction) => confirmPhone(transaction, rentalId, 'first', NOW))
+    expect(await shop.act((transaction) => phoneNoticeDue(transaction, rentalId))).toBeUndefined()
+    // PayPal names the payer: the notice is now due, with the number to tell.
+    await database.update(rentals).set({ renterId: paid?.renterId ?? null }).where(eq(rentals.id, rentalId))
+    expect(await shop.act((transaction) => phoneNoticeDue(transaction, rentalId))).toEqual({ email: 'priya@example.com', sandboxContact: false, phone: '+41791234567' })
+    await shop.act((transaction) => markPhoneNoticeSent(transaction, rentalId, NOW))
+    expect(await shop.act((transaction) => phoneNoticeDue(transaction, rentalId))).toBeUndefined()
+    // A new number is told again.
+    await shop.act((transaction) => requestPhoneCode(transaction, rentalId, { typed: '+33612345678', hash: 'second', stepUp: false }, after(120)))
+    await shop.act((transaction) => confirmPhone(transaction, rentalId, 'second', after(130)))
+    expect(await shop.act((transaction) => phoneNoticeDue(transaction, rentalId))).toMatchObject({ phone: '+33612345678' })
   })
 })
 

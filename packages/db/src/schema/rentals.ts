@@ -61,6 +61,8 @@ export const rentals = pgTable(
     phoneCodeHash: text(),
     phoneCodeExpiresAt: at(),
     phoneCodeAttempts: integer().notNull().default(0),
+    // When the email PayPal gave was told which number texts go to. Null until it is, and again for each new number.
+    phonePayerToldAt: at(),
     bookedThrough: bookingChannel().notNull().default('staff'),
     priceListId: reference()
       .notNull()

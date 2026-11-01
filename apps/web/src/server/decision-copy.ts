@@ -1,5 +1,6 @@
 import 'server-only'
-import { decisionCopyRecipient, shopSettings } from '@hold/db'
+import { decisionCopyRecipient, markPhoneNoticeSent, phoneNoticeDue, shopSettings } from '@hold/db'
+import { maskedPhone } from '@hold/domain'
 import { getTranslations } from 'next-intl/server'
 import type { Locale } from '@/i18n/routing'
 import type { InLinkShop } from './renter-access'
@@ -18,10 +19,17 @@ async function emailPayer(inLinkShop: InLinkShop, link: { readonly shopId: strin
 }
 
 // A number newly confirmed for texts (architecture.md section 12.3): until the hold is placed anyone holding the link
-// may set one, so the payer is told it was set.
-export async function tellPayerOfPhone(inLinkShop: InLinkShop, link: { readonly shopId: string; readonly rentalId: string }, phone: string, locale: Locale): Promise<void> {
+// may set one, so the payer is told which number it is. Sent when the number is confirmed, or, if PayPal had not yet
+// named the payer then, before the first code goes to that phone. Marked sent only once the mail was taken.
+export async function tellPayerOfPhone(inLinkShop: InLinkShop, link: { readonly shopId: string; readonly rentalId: string }, locale: Locale): Promise<void> {
   const t = await getTranslations({ locale, namespace: 'emails.phoneConfirmed' })
-  await emailPayer(inLinkShop, link, (shop) => ({ subject: t('subject', { shop }), text: t('body', { shop, phone }) }))
+  await inLinkShop(async (transaction) => {
+    const due = await phoneNoticeDue(transaction, link.rentalId)
+    if (due === undefined) return
+    const shop = (await shopSettings(transaction, link.shopId))?.name ?? ''
+    const phone = maskedPhone(due.phone)
+    if (await (await getServices()).mailer.send({ to: due.email, subject: t('subject', { shop }), text: t('body', { shop, phone }) })) await markPhoneNoticeSent(transaction, link.rentalId, new Date())
+  })
 }
 
 // A money decision made with a code a phone received, so a misused phone never goes unnoticed.

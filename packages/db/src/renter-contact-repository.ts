@@ -46,7 +46,7 @@ export async function confirmPhone(transaction: Transaction, rentalId: string, h
     await transaction.update(rentals).set({ phoneCodeAttempts: rental.phoneCodeAttempts + 1 }).where(eq(rentals.id, rentalId))
     return refused('wrong_code')
   }
-  await transaction.update(rentals).set({ phoneConfirmedAt: now, phoneCodeHash: null, phoneCodeExpiresAt: null }).where(eq(rentals.id, rentalId))
+  await transaction.update(rentals).set({ phoneConfirmedAt: now, phoneCodeHash: null, phoneCodeExpiresAt: null, phonePayerToldAt: null }).where(eq(rentals.id, rentalId))
   return { ok: true, phone: rental.contactPhone } as const
 }
 
@@ -102,3 +102,16 @@ export async function issueContactChangeCode(transaction: Transaction, linkId: s
 }
 
 export type RentalText = Awaited<ReturnType<typeof textsOf>>[number]
+
+// The payer to tell that texts now go to a confirmed number, with that number: due once PayPal has named the payer, and
+// until it is marked sent. A number confirmed before anyone paid is told as soon as there is someone to tell.
+export async function phoneNoticeDue(transaction: Transaction, rentalId: string) {
+  const [row] = await transaction.select({ phone: rentals.contactPhone, toldAt: rentals.phonePayerToldAt }).from(rentals).where(eq(rentals.id, rentalId))
+  if (row?.phone == null || row.toldAt !== null) return undefined
+  const to = await decisionCopyRecipient(transaction, rentalId)
+  return to === undefined ? undefined : { ...to, phone: row.phone }
+}
+
+export async function markPhoneNoticeSent(transaction: Transaction, rentalId: string, now: Date): Promise<void> {
+  await transaction.update(rentals).set({ phonePayerToldAt: now }).where(eq(rentals.id, rentalId))
+}

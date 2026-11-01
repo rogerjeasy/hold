@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server'
 import type { Locale } from '@/i18n/routing'
 import { Refusal } from './action'
 import type { InLinkShop } from './renter-access'
+import { tellPayerOfPhone } from './decision-copy'
 import { codeLine, reachRenterIn } from './renter-reach'
 
 // Where a renter's one-time code went, for the page to say (architecture.md section 12.3): by text, to the masked
@@ -22,6 +23,8 @@ type EmailWords = 'emails.claimCode' | 'emails.incidentCode' | 'emails.trustCode
 export async function deliverRenterCode(inLinkShop: InLinkShop, link: { readonly shopId: string; readonly rentalId: string }, to: RenterCodeRecipient, input: { readonly locale: Locale; readonly code: string; readonly kind: CodeKind; readonly emailWords?: EmailWords }): Promise<CodeDelivery | Refusal> {
   const texts = await getTranslations({ locale: input.locale, namespace: 'texts.codes' })
   const emails = input.emailWords === undefined ? undefined : await getTranslations({ locale: input.locale, namespace: input.emailWords })
+  // The payer hears which number their codes go to before the first code goes there.
+  if (to.channel === 'text' && input.kind !== 'phone') await tellPayerOfPhone(inLinkShop, link, input.locale)
   return inLinkShop(async (transaction) => {
     const shop = await shopSettings(transaction, link.shopId)
     const text = `${texts(input.kind, { shop: shop?.name ?? '', code: input.code })}\n\n${await codeLine(input.code)}`

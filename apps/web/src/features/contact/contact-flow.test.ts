@@ -59,8 +59,12 @@ describe('a renter who chooses texts at the counter', () => {
 
   it('tells the email PayPal gave whenever a number is confirmed, so a number someone else set never goes unnoticed', async () => {
     const before = (await emails()).length
-    await shop.readyRental(1, confirmedAtCounter('+4915100000001'))
-    expect((await emails()).slice(before)).toEqual(expect.arrayContaining([expect.objectContaining({ to: 'renter@fake-paypal.test', text: expect.stringContaining('+49 ••• •• 01') as unknown })]))
+    const rental = await shop.readyRental(1, confirmedAtCounter('+4915100000001'))
+    const told = (await emails()).slice(before).filter((email) => email.text.includes('+49 ••• •• 01'))
+    expect(told).toEqual([expect.objectContaining({ to: 'renter@fake-paypal.test' })])
+    // Told once: the first code texted to the phone afterwards sends no second notice.
+    await contact.sendContactChangeCode(null, form({ token: rental.token, locale: 'en' }))
+    expect((await emails()).filter((email) => email.text.includes('+49 ••• •• 01'))).toHaveLength(1)
   })
 
   it('gets the money code by text, may ask for it by email instead, and every decision is copied to the email PayPal gave', async () => {
