@@ -78,7 +78,7 @@ async function paidRental(at: OpenShop): Promise<{ rentalId: string; token: stri
 
 // The renter asks for the one-time code that proves they are present, and reads it from their email.
 async function codeFor(token: string): Promise<string> {
-  expect(await renterTrust.sendTrustCode(null, form({ token, locale: 'en' }))).toEqual({ ok: true, value: { sandboxContact: false } })
+  expect(await renterTrust.sendTrustCode(null, form({ token, locale: 'en' }))).toEqual({ ok: true, value: { via: 'email', phone: null, sandboxContact: false, shown: null } })
   return TEST_SIGN_IN_CODE
 }
 

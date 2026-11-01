@@ -1,27 +1,27 @@
 'use server'
 import { acknowledgeClaimReview, auditLog, issueClaimCode, replyToClaim, useClaimCode } from '@hold/db'
-import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
 import { Refusal } from '@/server/action'
 import { renterAction, withToken } from '@/server/renter-access'
-import { CODE_PURPOSES, newRenterCode, renterCodeDigest } from '@/server/renter-code'
-import { getServices } from '@/server/services'
+import { CODE_PURPOSES, codeVia, newRenterCode, renterCodeDigest } from '@/server/renter-code'
+import { copyDecisionToEmail } from '@/server/decision-copy'
+import { deliverRenterCode } from '@/server/renter-code-delivery'
 import { writeContestSummary } from '@/server/contest-summary'
 import { sendSettlement } from '@/server/settlement-queue'
 
 const digest = (linkId: string, code: string) => renterCodeDigest(CODE_PURPOSES.claimReply, linkId, code)
-export const sendClaimCode = renterAction({ name: 'renter.claim_code_requested', scope: 'accept', input: withToken({}) }, async (link, input, inLinkShop) => {
-  const services = await getServices()
+// The code goes where the renter chose, a confirmed phone or the email PayPal gave; `via: 'email'` asks for it by email.
+export const sendClaimCode = renterAction({ name: 'renter.claim_code_requested', scope: 'accept', input: withToken({ via: codeVia }) }, async (link, input, inLinkShop) => {
   const code = await newRenterCode()
   const hash = await digest(link.id, code)
-  const issued = await inLinkShop((transaction) => issueClaimCode(transaction, link.id, hash, new Date()))
+  const issued = await inLinkShop((transaction) => issueClaimCode(transaction, link.id, hash, new Date(), input.via))
   if (!issued.ok) return new Refusal(issued.reason)
-  const t = await getTranslations({ locale: readLocale(input.locale), namespace: 'emails.claimCode' })
-  if (!await services.mailer.send({ to: issued.email, subject: t('subject'), text: t('body', { code }) })) return new Refusal('email_unavailable')
+  const delivered = await deliverRenterCode(inLinkShop, link, issued, { locale: readLocale(input.locale), code, kind: 'claimReply', emailWords: 'emails.claimCode' })
+  if (delivered instanceof Refusal) return delivered
   // Simulated things say so, in the record too: the address itself stays out of it.
-  if (issued.sandboxContact) await inLinkShop((transaction) => transaction.insert(auditLog).values({ shopId: link.shopId, actorKind: 'renter', actorId: link.id, action: 'renter.claim_code_sandbox_contact', subjectKind: 'rental', subjectId: link.rentalId, detail: { sandbox: true } }))
-  return { sandboxContact: issued.sandboxContact }
+  if (delivered.sandboxContact) await inLinkShop((transaction) => transaction.insert(auditLog).values({ shopId: link.shopId, actorKind: 'renter', actorId: link.id, action: 'renter.claim_code_sandbox_contact', subjectKind: 'rental', subjectId: link.rentalId, detail: { sandbox: true } }))
+  return delivered
 })
 
 function reply(decision: 'accept' | 'contest') {
@@ -37,6 +37,7 @@ function reply(decision: 'accept' | 'contest') {
       try { await sendSettlement(link.shopId, link.rentalId, result.executionId) } catch { /* The committed outbox retries delivery. */ }
     }
     if (decision === 'contest') await writeContestSummary(link.shopId, link.rentalId)
+    await copyDecisionToEmail(inLinkShop, link, decision === 'accept' ? 'claim_accepted' : 'claim_contested', readLocale(input.locale))
     return {}
   })
 }

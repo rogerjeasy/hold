@@ -37,3 +37,32 @@ export function reminderEmail(to: string, language: string, kind: Kind, facts: F
   const template = TEMPLATES[isLanguage(language) ? language : 'en'][kind]
   return { to, subject: template.subject(facts.shopName), text: template.text(facts) }
 }
+
+// The same reminder as a text, for a renter who chose texts (architecture.md section 12.3). French sets a space before
+// the colon.
+const TEXTS: Readonly<Record<Language, Readonly<Record<Kind, (shop: string, dueOn: string) => string>>>> = {
+  en: {
+    return_due: (shop, dueOn) => `${shop}: your rental was due back on ${dueOn}. Please bring it back, or contact the shop if you need more time.`,
+    reply_due: (shop, dueOn) => `${shop}: please reply to the claim by ${dueOn}. Open the shop's link to accept it or contest it.`,
+    invoice: (shop) => `${shop}: the invoice the shop sent you is still unpaid. You can pay it from PayPal's email.`,
+  },
+  de: {
+    return_due: (shop, dueOn) => `${shop}: Ihre Miete war am ${dueOn} zurückzugeben. Bitte bringen Sie sie zurück oder melden Sie sich beim Geschäft, wenn Sie mehr Zeit brauchen.`,
+    reply_due: (shop, dueOn) => `${shop}: Bitte antworten Sie bis ${dueOn} auf die Forderung. Öffnen Sie den Link des Geschäfts, um sie anzunehmen oder zu bestreiten.`,
+    invoice: (shop) => `${shop}: Die Rechnung des Geschäfts ist noch nicht bezahlt. Sie können sie über die E-Mail von PayPal bezahlen.`,
+  },
+  es: {
+    return_due: (shop, dueOn) => `${shop}: tu alquiler debía devolverse el ${dueOn}. Devuélvelo, o contacta con la tienda si necesitas más tiempo.`,
+    reply_due: (shop, dueOn) => `${shop}: responde a la reclamación antes del ${dueOn}. Abre el enlace de la tienda para aceptarla o impugnarla.`,
+    invoice: (shop) => `${shop}: la factura de la tienda sigue sin pagar. Puedes pagarla desde el correo de PayPal.`,
+  },
+  fr: {
+    return_due: (shop, dueOn) => `${shop} : votre location devait être rendue le ${dueOn}. Merci de la rapporter, ou de contacter le magasin s'il vous faut plus de temps.`,
+    reply_due: (shop, dueOn) => `${shop} : merci de répondre à la réclamation avant le ${dueOn}. Ouvrez le lien du magasin pour l'accepter ou la contester.`,
+    invoice: (shop) => `${shop} : la facture du magasin n'est pas encore payée. Vous pouvez la régler depuis l'e-mail de PayPal.`,
+  },
+}
+
+export function reminderText(language: string, kind: Kind, facts: Facts): string {
+  return TEXTS[isLanguage(language) ? language : 'en'][kind](facts.shopName, facts.dueOn ?? '')
+}

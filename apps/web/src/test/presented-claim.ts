@@ -10,7 +10,11 @@ import { form, signIn } from './shop-session'
 // owner approved and the renter has seen on their claim link. Each test file mocks next/headers onto its cookie jar.
 
 export async function inspectedRental(jar: Map<string, string>, shop: HandoverShop) {
-  const rental = await shop.readyRental()
+  return inspectedRentalOf(jar, shop, await shop.readyRental())
+}
+
+// The same, for a rental the test made ready itself.
+export async function inspectedRentalOf(jar: Map<string, string>, shop: HandoverShop, rental: { readonly rentalId: string; readonly token: string }) {
   const { database } = await getServices()
   const scoped = <Result>(work: Parameters<typeof inShop<Result>>[2]) => inShop(database, { role: 'hold_app', shopId: shop.shopId }, work)
   const item = (await scoped((transaction) => rentalDetail(transaction, rental.rentalId, new Date())))?.items[0]?.id ?? ''
@@ -27,7 +31,11 @@ export async function inspectedRental(jar: Map<string, string>, shop: HandoverSh
 }
 
 export async function presentedClaim(jar: Map<string, string>, shop: HandoverShop, priceId: string) {
-  const rental = await inspectedRental(jar, shop)
+  return presentedClaimOf(jar, shop, await shop.readyRental(), priceId)
+}
+
+export async function presentedClaimOf(jar: Map<string, string>, shop: HandoverShop, ready: { readonly rentalId: string; readonly token: string }, priceId: string) {
+  const rental = await inspectedRentalOf(jar, shop, ready)
   const created = await actions.prepareClaim(null, form({ rentalId: rental.rentalId, lines: JSON.stringify([{ priceEntryId: priceId, reason: 'Inspected the returned frame in person: fresh scratch.' }]), locale: 'en' }))
   if (!created.ok) throw new Error(JSON.stringify(created))
   const approved = await actions.approveAndPresent(null, form({ claimId: created.value.claimId, locale: 'en' }))

@@ -38,12 +38,13 @@ describe('the handover screen', () => {
   })
 
   it('seals once every required view is photographed, and shows the renter’s condition report when the rental is out', async () => {
-    sealHandover.mockResolvedValue({ ok: true, value: { rentalOut: true, conditionLink: { url: 'https://hold.test/r/abc/condition', qr: '<svg></svg>', emailed: true } } })
+    sealHandover.mockResolvedValue({ ok: true, value: { rentalOut: true, conditionLink: { url: 'https://hold.test/r/abc/condition', qr: '<svg></svg>', sent: 'text' } } })
     renderWithIntl(<HandoverScreen shopName="Ribeira Bikes" rentalId={RENTAL} session={session({ photos: [{ view: 'left-side', url: '/l.jpg' }, { view: 'right-side', url: '/r.jpg' }], missing: [] })} />)
     await userEvent.click(screen.getByRole('button', { name: 'Seal the photographs' }))
     await waitFor(() => {
       expect(screen.getByText('The rental is out.')).toBeInTheDocument()
     })
+    expect(screen.getByText('The renter has been texted the condition report. They can also scan this code.')).toBeInTheDocument()
     expect(screen.getByTestId('renter-link')).toHaveTextContent('https://hold.test/r/abc/condition')
   })
 
@@ -57,7 +58,7 @@ describe('the handover screen', () => {
   })
 
   it('keeps showing the renter’s code after the page is drawn again as sealed', async () => {
-    sealHandover.mockResolvedValue({ ok: true, value: { rentalOut: true, conditionLink: { url: 'https://hold.test/r/abc/condition', qr: '<svg></svg>', emailed: false } } })
+    sealHandover.mockResolvedValue({ ok: true, value: { rentalOut: true, conditionLink: { url: 'https://hold.test/r/abc/condition', qr: '<svg></svg>', sent: null } } })
     const ready = session({ photos: [{ view: 'left-side', url: '/l.jpg' }, { view: 'right-side', url: '/r.jpg' }], missing: [] })
     const { rerender } = renderWithIntl(<HandoverScreen shopName="Ribeira Bikes" rentalId={RENTAL} session={ready} />)
     await userEvent.click(screen.getByRole('button', { name: 'Seal the photographs' }))

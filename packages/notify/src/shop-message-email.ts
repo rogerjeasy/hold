@@ -16,3 +16,8 @@ const SUBJECTS: Readonly<Record<Language, (shop: string) => string>> = {
 export function shopMessageEmail(to: string, language: string, facts: { readonly shopName: string; readonly text: string }): Email {
   return { to, subject: SUBJECTS[isLanguage(language) ? language : 'en'](facts.shopName), text: `${facts.text}\n\n${facts.shopName}` }
 }
+
+// The same message as a text, for a renter who chose texts (architecture.md section 12.3).
+export function shopMessageText(facts: { readonly shopName: string; readonly text: string }): string {
+  return `${facts.shopName}: ${facts.text}`
+}

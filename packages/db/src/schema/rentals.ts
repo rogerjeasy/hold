@@ -1,4 +1,4 @@
-import { EXTENSION_STATES, HOLD_STATES, RENTAL_STATES } from '@hold/domain'
+import { CONTACT_CHANNELS, EXTENSION_STATES, HOLD_STATES, RENTAL_STATES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
 import { boolean, check, integer, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
@@ -53,6 +53,14 @@ export const rentals = pgTable(
     contactEmail: text(),
     // The renter's language, for the link and its emails.
     language: text().notNull().default('en'),
+    // How the renter is reached (architecture.md section 12.3): by email, or by text. Links and notices go to the phone
+    // as given; a one-time code only once the renter confirmed it with the code in phoneCodeHash.
+    contactChannel: text().notNull().default('email'),
+    contactPhone: text(),
+    phoneConfirmedAt: at(),
+    phoneCodeHash: text(),
+    phoneCodeExpiresAt: at(),
+    phoneCodeAttempts: integer().notNull().default(0),
     bookedThrough: bookingChannel().notNull().default('staff'),
     priceListId: reference()
       .notNull()
@@ -78,7 +86,15 @@ export const rentals = pgTable(
     trustRung: integer(),
     createdAt: createdAt(),
   },
-  (table) => [allowed(table.state, RENTAL_STATES), allowed(table.bookedThrough, BOOKING_CHANNELS), allowed(table.conditionReply, CONDITION_REPLIES), shopIsolation(table.shopId)],
+  (table) => [
+    allowed(table.state, RENTAL_STATES),
+    allowed(table.bookedThrough, BOOKING_CHANNELS),
+    allowed(table.conditionReply, CONDITION_REPLIES),
+    allowed(table.contactChannel, CONTACT_CHANNELS),
+    check('texts_need_a_phone', sql`${table.contactChannel} = 'email' or ${table.contactPhone} is not null`),
+    check('confirmed_phone_exists', sql`${table.phoneConfirmedAt} is null or ${table.contactPhone} is not null`),
+    shopIsolation(table.shopId),
+  ],
 )
 
 // More days a renter asked for from their own phone or assistant (architecture.md section 6.14): the end it moves from

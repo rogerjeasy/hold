@@ -3,11 +3,13 @@ import { captureSession, conditionReport, extensionMaxDays, inShop, rentalAssist
 import type { RentalHold, RenterView } from '@hold/db'
 import { maySelfReturn, shopOpening } from '@hold/domain'
 import type { Metadata } from 'next'
+import type { RenterContactView } from '@/features/contact/contact-view'
 import type { SelfReturnOffer } from '@/features/self-return/self-return-card'
 import type { ConditionView } from '@/features/renter/condition-screen'
 import type { PayPalCheckout } from '@/features/renter/paypal-sdk'
 import { paypalCheckout } from './paypal-checkout'
 import { renterAccess } from './renter-access'
+import { renterContactView } from './renter-contact-view'
 import { getServices } from './services'
 
 // A renter's page carries the token in its address. It is nobody's search result, and it sends no referrer, so the
@@ -19,8 +21,9 @@ export const renterPageMetadata = (title: string): Metadata => ({ title, robots:
 // assistant: the renter's own assistant booked this rental (extensions.md section 8.5), and whether it is connected.
 // checkout: the shop's PayPal app for PayPal's own button, while the fee is still to pay.
 // selfReturn: whether the renter may return the item with nobody at the counter, or already did (section 6.13).
+// contact: how the renter is reached, by text or by email (section 12.3).
 export type RenterPage =
-  | { readonly ok: true; readonly view: RenterView; readonly canReport: boolean; readonly askConsent: boolean; readonly assistant: { readonly connected: boolean; readonly revoked: boolean } | null; readonly checkout: PayPalCheckout | undefined; readonly selfReturn: SelfReturnOffer; readonly canExtend: boolean }
+  | { readonly ok: true; readonly view: RenterView; readonly canReport: boolean; readonly askConsent: boolean; readonly assistant: { readonly connected: boolean; readonly revoked: boolean } | null; readonly checkout: PayPalCheckout | undefined; readonly selfReturn: SelfReturnOffer; readonly canExtend: boolean; readonly contact: RenterContactView | undefined }
   | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' }
 
 export async function renterPage(token: string): Promise<RenterPage> {
@@ -33,7 +36,8 @@ export async function renterPage(token: string): Promise<RenterPage> {
     const renter = await rentalRenterKey(transaction, rentalId)
     const consent = renter.key === undefined ? undefined : await trustConsent(transaction, renter.key)
     const assistant = await rentalAssistant(transaction, rentalId)
-    return { view: await renterView(transaction, rentalId, now), askConsent: renter.known && consent?.answered !== true, assistant: assistant === undefined ? null : { connected: assistant.connected, revoked: assistant.revokedAt !== null }, ownReturn: await selfReturnFor(transaction, rentalId), maxDays: await extensionMaxDays(transaction) }
+    const view = await renterView(transaction, rentalId, now)
+    return { view, askConsent: renter.known && consent?.answered !== true, assistant: assistant === undefined ? null : { connected: assistant.connected, revoked: assistant.revokedAt !== null }, ownReturn: await selfReturnFor(transaction, rentalId), maxDays: await extensionMaxDays(transaction), contact: view === undefined ? undefined : await renterContactView(transaction, rentalId, view.state) }
   })
   if (loaded.view === undefined) return { ok: false, failure: 'link_invalid' }
   const checkout = loaded.view.state === 'pending_payment' ? await paypalCheckout(access.link.shopId) : undefined
@@ -44,10 +48,10 @@ export async function renterPage(token: string): Promise<RenterPage> {
         shopClosed: shopOpening(ownReturn.settings.hours, ownReturn.timeZone, now)?.open === false,
         droppedOffAt: ownReturn.droppedOffAt,
       }
-  return { ok: true, view: loaded.view, canReport: access.link.scopes.includes('report_incident'), askConsent: loaded.askConsent, assistant: loaded.assistant, checkout, selfReturn, canExtend: access.link.scopes.includes('extend') && loaded.view.state === 'out' && loaded.maxDays > 0 }
+  return { ok: true, view: loaded.view, canReport: access.link.scopes.includes('report_incident'), askConsent: loaded.askConsent, assistant: loaded.assistant, checkout, selfReturn, canExtend: access.link.scopes.includes('extend') && loaded.view.state === 'out' && loaded.maxDays > 0, contact: loaded.contact }
 }
 
-export type RenterHoldPage = { readonly ok: true; readonly view: RenterView; readonly hold: RentalHold | undefined; readonly checkout: PayPalCheckout | undefined } | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' }
+export type RenterHoldPage = { readonly ok: true; readonly view: RenterView; readonly hold: RentalHold | undefined; readonly checkout: PayPalCheckout | undefined; readonly contact: RenterContactView | undefined } | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' }
 
 // The rental and its hold, for the page where the renter approves the hold at pickup.
 export async function renterHoldPage(token: string): Promise<RenterHoldPage> {
@@ -56,11 +60,14 @@ export async function renterHoldPage(token: string): Promise<RenterHoldPage> {
   if (!access.ok) return access
   const { database } = await getServices()
   const { rentalId, shopId } = access.link
-  const { view, hold } = await inShop(database, { role: 'hold_app', shopId }, async (transaction) => ({ view: await renterView(transaction, rentalId, now), hold: await rentalHold(transaction, rentalId) }))
+  const { view, hold, contact } = await inShop(database, { role: 'hold_app', shopId }, async (transaction) => {
+    const view = await renterView(transaction, rentalId, now)
+    return { view, hold: await rentalHold(transaction, rentalId), contact: view === undefined ? undefined : await renterContactView(transaction, rentalId, view.state) }
+  })
   if (view === undefined) return { ok: false, failure: 'link_invalid' }
   // PayPal's own button only while there is a hold to approve: asked for at pickup, or a replacement waiting.
   const checkout = hold !== undefined && (hold.state === 'requested' || hold.orderId !== null) ? await paypalCheckout(shopId) : undefined
-  return { ok: true, view, hold, checkout }
+  return { ok: true, view, hold, checkout, contact }
 }
 
 export type ConditionPage = { readonly ok: true; readonly report: ConditionView } | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' | 'not_handed_over' }

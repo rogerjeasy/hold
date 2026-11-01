@@ -1,10 +1,11 @@
 'use server'
 
-import { abandonBooking, askForHold as askForRentalHold, BOOKING_LINK_SCOPES, findPayPalAccount, issueRenterLink, rentalDetail, renterTrustKey } from '@hold/db'
+import { abandonBooking, askForHold as askForRentalHold, BOOKING_LINK_SCOPES, findPayPalAccount, issueRenterLink, rentalDetail, renterContact, renterTrustKey } from '@hold/db'
+import { maskedPhone, phoneNumber, textAllowed } from '@hold/domain'
 import { trustedHold } from '@hold/trust'
 import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
-import { bookingFields, emailRenterLink, placeBooking } from '@/server/booking'
+import { bookingFields, placeBooking, sendRenterLink } from '@/server/booking'
 import { qrSvg } from '@/server/qr'
 import { newRenterLink, renterUrl } from '@/server/renter-links'
 import { getServices } from '@/server/services'
@@ -25,6 +26,8 @@ export const bookRental = shopAction(
       ...bookingFields,
       contactName: z.string().trim().max(120).default(''),
       contactEmail: z.union([z.email().max(254), z.literal('')]).default(''),
+      // A renter with only a phone at the counter gets their link and everything after by text (architecture.md 12.3).
+      contactPhone: z.string().trim().max(40).default(''),
       language: z.string().max(5),
       // A walk-in who approves the fee and the hold at once (architecture.md section 8.2), for a rental starting today.
       walkIn: z.literal('on').optional(),
@@ -36,11 +39,13 @@ export const bookRental = shopAction(
     if ((await findPayPalAccount(transaction, context.shop.id, config.paypalMode)) === undefined) return new Refusal('paypal_not_connected')
     const language = readLocale(input.language)
     const name = input.contactName.trim()
-    const contact = name === '' && input.contactEmail === '' ? undefined : { name, email: input.contactEmail }
+    const phone = input.contactPhone === '' ? undefined : phoneNumber(input.contactPhone)
+    if (input.contactPhone !== '' && phone === undefined) return new Refusal('phone_invalid')
+    if (phone !== undefined && !textAllowed(phone)) return new Refusal('country_not_texted')
+    const contact = name === '' && input.contactEmail === '' && phone === undefined ? undefined : { name, email: input.contactEmail, ...(phone === undefined ? {} : { phone }) }
     const placed = await placeBooking(transaction, context.shop, input, { contact, language, bookedThrough: 'staff', placement: input.walkIn === 'on' ? 'combined' : 'at_counter' })
     if (placed instanceof Refusal) return placed
-    const emailed = input.contactEmail === '' ? false : await emailRenterLink(input.contactEmail, placed.token, language, context.shop.name)
-    return { rentalId: placed.rentalId, emailed }
+    return { rentalId: placed.rentalId, sent: await sendRenterLink(transaction, placed.rentalId, placed.token, language, context.shop.name, input.contactEmail === '' ? null : input.contactEmail) }
   },
 )
 
@@ -57,16 +62,19 @@ export const showRenterLink = shopAction(
   },
 )
 
-export const emailRenterLinkAgain = shopAction(
-  { name: 'rental.link_emailed', roles: STAFF, needsPasskey: false, input: withLocale({ rentalId: z.uuid() }) },
+// A new link sent the way the renter is reached: by text to their phone, or by email.
+export const sendRenterLinkAgain = shopAction(
+  { name: 'rental.link_sent', roles: STAFF, needsPasskey: false, input: withLocale({ rentalId: z.uuid() }) },
   async (context, input, transaction) => {
     const rental = await rentalDetail(transaction, input.rentalId, new Date())
     if (rental === undefined) return new Refusal('not_found')
-    if (rental.contactEmail === null) return new Refusal('no_email')
+    const contact = await renterContact(transaction, rental.id)
+    if (contact === undefined || (rental.contactEmail === null && contact.channel === 'email')) return new Refusal('no_email')
     const link = await newRenterLink(rental.endsAt)
     await issueRenterLink(transaction, context.shop.id, rental.id, link, BOOKING_LINK_SCOPES)
-    const sent = await emailRenterLink(rental.contactEmail, link.token, readLocale(rental.language), context.shop.name)
-    return sent ? { email: rental.contactEmail } : new Refusal('email_failed')
+    const sent = await sendRenterLink(transaction, rental.id, link.token, readLocale(rental.language), context.shop.name, rental.contactEmail)
+    if (sent === null) return new Refusal('email_failed')
+    return { via: sent, to: sent === 'text' && contact.phone !== null ? maskedPhone(contact.phone) : (rental.contactEmail ?? '') }
   },
 )
 

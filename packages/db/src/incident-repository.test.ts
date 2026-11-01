@@ -228,7 +228,7 @@ describe('agreeing small damage (X5.1)', () => {
     await shop.act((transaction) => sortIncidentReport(transaction, report.incidentId, answered('small_damage', 'scratch'), NOW))
     expect(await shop.act((transaction) => issueIncidentCode(transaction, link.id, report.incidentId, 'hash', NOW))).toEqual({ ok: false, reason: 'not_agreeable' })
     await shop.act((transaction) => confirmIncidentPrice(transaction, report.incidentId, shop.scope.userId ?? '', priceId, NOW))
-    expect(await shop.act((transaction) => issueIncidentCode(transaction, link.id, report.incidentId, 'hash', NOW))).toEqual({ ok: true, email: 'priya@example.com', sandboxContact: false })
+    expect(await shop.act((transaction) => issueIncidentCode(transaction, link.id, report.incidentId, 'hash', NOW))).toEqual({ ok: true, channel: 'email', email: 'priya@example.com', sandboxContact: false })
     await shop.act((transaction) => transaction.update(renterLinks).set({ scopes: ['view', 'pay'] }).where(eq(renterLinks.id, link.id)))
     expect(await shop.act((transaction) => issueIncidentCode(transaction, link.id, report.incidentId, 'hash', new Date(NOW.getTime() + 3_600_000)))).toEqual({ ok: false, reason: 'link_invalid' })
   })

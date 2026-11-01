@@ -1,4 +1,6 @@
-import { integer, jsonb, pgTable, text } from 'drizzle-orm/pg-core'
+import { TEXT_PURPOSES, TEXT_STATUSES } from '@hold/domain'
+import { sql } from 'drizzle-orm'
+import { check, integer, jsonb, pgTable, text } from 'drizzle-orm/pg-core'
 import { shopIsolation } from './access.ts'
 import { at, createdAt, id, reference } from './columns.ts'
 import { allowed, OUTBOX_STATES, outboxState } from './enums.ts'
@@ -66,4 +68,32 @@ export const auditLog = pgTable(
     at: createdAt(),
   },
   (table) => [shopIsolation(table.shopId)],
+)
+
+// Each text sent to a renter (architecture.md section 12.3): what it was for, to which number, and what AWS End User
+// Messaging said became of it. A real text's words are never kept, since a code may be in them. A demo shop shows its
+// texts on the renter's page instead of sending them, and only those keep their words, so the page can show them.
+export const textMessages = pgTable(
+  'text_messages',
+  {
+    id: id(),
+    shopId: shopReference(),
+    rentalId: reference()
+      .notNull()
+      .references(() => rentals.id),
+    purpose: text().notNull(),
+    toPhone: text().notNull(),
+    status: text().notNull(),
+    providerMessageId: text().unique(),
+    body: text(),
+    failure: text(),
+    createdAt: createdAt(),
+    statusAt: at(),
+  },
+  (table) => [
+    allowed(table.purpose, TEXT_PURPOSES),
+    allowed(table.status, TEXT_STATUSES),
+    check('words_only_when_shown', sql`(${table.status} = 'simulated') = (${table.body} is not null)`),
+    shopIsolation(table.shopId),
+  ],
 )

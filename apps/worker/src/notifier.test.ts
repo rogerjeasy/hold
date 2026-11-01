@@ -1,9 +1,9 @@
-import { addItems, createBooking, inShop, publishPriceList, registerOwner, saveItemType } from '@hold/db'
+import { addItems, createBooking, inShop, publishPriceList, registerOwner, requestPhoneCode, saveItemType } from '@hold/db'
 import { createTestDatabase } from '@hold/db/testing'
 import { money } from '@hold/domain'
-import { createMemoryMailer } from '@hold/notify'
+import { createMemoryMailer, createMemoryTexter } from '@hold/notify'
 import { describe, expect, it } from 'vitest'
-import { createEmailNotifier } from './email-notifier.ts'
+import { createNotifier } from './notifier.ts'
 
 const eur = (cents: number) => money(cents, 'EUR')
 
@@ -33,7 +33,7 @@ describe('telling people from the worker', () => {
   it('emails each owner, in their language, that a hold expired, with a link to the rental', async () => {
     const { database, shopId, rentalId } = await shopWithRental()
     const mailer = createMemoryMailer()
-    await createEmailNotifier({ database, mailer, publicUrl: 'https://hold.test' }).tell({ kind: 'hold_expired', shopId, rentalId })
+    await createNotifier({ database, mailer, texter: createMemoryTexter(), publicUrl: 'https://hold.test' }).tell({ kind: 'hold_expired', shopId, rentalId })
     expect(mailer.sent).toHaveLength(1)
     expect(mailer.sent[0]).toMatchObject({ to: 'ana@ribeira.example', subject: 'Eine Reservierung ist abgelaufen: Priya Natarajan' })
     expect(mailer.sent[0]?.text).toContain(`https://hold.test/de/shop/rentals/${rentalId}`)
@@ -43,7 +43,7 @@ describe('telling people from the worker', () => {
   it('emails each owner, in their language, that a promised decision was missed, with a link to the claim', async () => {
     const { database, shopId, rentalId } = await shopWithRental()
     const mailer = createMemoryMailer()
-    await createEmailNotifier({ database, mailer, publicUrl: 'https://hold.test' }).tell({ kind: 'promise_missed', shopId, rentalId, waived: false })
+    await createNotifier({ database, mailer, texter: createMemoryTexter(), publicUrl: 'https://hold.test' }).tell({ kind: 'promise_missed', shopId, rentalId, waived: false })
     expect(mailer.sent).toHaveLength(2)
     expect(mailer.sent[0]).toMatchObject({ to: 'ana@ribeira.example', subject: 'Zugesagte Entscheidung verpasst: Priya Natarajan' })
     expect(mailer.sent[1]).toMatchObject({ to: 'priya@example.com', subject: 'Ribeira Bikes n’a pas décidé de votre réclamation à temps' })
@@ -52,7 +52,7 @@ describe('telling people from the worker', () => {
 
   it('throws when an email could not be sent, so the queue tries again', async () => {
     const { database, shopId, rentalId } = await shopWithRental()
-    const notifier = createEmailNotifier({ database, mailer: { send: () => Promise.resolve(false) }, publicUrl: 'https://hold.test' })
+    const notifier = createNotifier({ database, mailer: { send: () => Promise.resolve(false) }, texter: createMemoryTexter(), publicUrl: 'https://hold.test' })
     await expect(notifier.tell({ kind: 'hold_expired', shopId, rentalId })).rejects.toThrow(/could not be sent/)
   })
 
@@ -60,11 +60,22 @@ describe('telling people from the worker', () => {
     const { database, shopId, rentalId } = await shopWithRental()
     const mailer = createMemoryMailer()
     const approveUrl = 'https://hold.test/fr/r/TOKEN/pay'
-    await createEmailNotifier({ database, mailer, publicUrl: 'https://hold.test' }).tell({ kind: 'hold_replacement', shopId, rentalId, approveUrl, holdEndsAt: new Date('2026-11-14T09:00:00Z') })
+    await createNotifier({ database, mailer, texter: createMemoryTexter(), publicUrl: 'https://hold.test' }).tell({ kind: 'hold_replacement', shopId, rentalId, approveUrl, holdEndsAt: new Date('2026-11-14T09:00:00Z') })
     expect(mailer.sent).toHaveLength(1)
     expect(mailer.sent[0]).toMatchObject({ to: 'priya@example.com', subject: 'Veuillez approuver une nouvelle empreinte pour votre location chez Ribeira Bikes' })
     expect(mailer.sent[0]?.text).toContain(approveUrl)
     expect(mailer.sent[0]?.text).toContain('14 nov.')
   })
-})
 
+  it('texts the renter who chose texts, both the request for a new hold and a missed promise, and still emails the owners', async () => {
+    const { database, shopId, rentalId } = await shopWithRental()
+    await inShop(database, { role: 'hold_app', shopId }, (transaction) => requestPhoneCode(transaction, rentalId, { typed: '+33 6 12 34 56 78', hash: 'code', stepUp: false }, new Date()))
+    const mailer = createMemoryMailer()
+    const texter = createMemoryTexter()
+    const notifier = createNotifier({ database, mailer, texter, publicUrl: 'https://hold.test' })
+    await notifier.tell({ kind: 'hold_replacement', shopId, rentalId, approveUrl: 'https://hold.test/fr/r/TOKEN/pay', holdEndsAt: new Date('2026-11-14T09:00:00Z') })
+    await notifier.tell({ kind: 'promise_missed', shopId, rentalId, waived: true })
+    expect(texter.sent.map((text) => text.body)).toEqual([expect.stringContaining('https://hold.test/fr/r/TOKEN/pay'), expect.stringContaining('rien n\'est débité')])
+    expect(mailer.sent.map((email) => email.to)).toEqual(['ana@ribeira.example'])
+  })
+})

@@ -1,24 +1,26 @@
 'use client'
 
-import { Mail, QrCode } from 'lucide-react'
+import { Mail, MessageSquare, QrCode } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useActionState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Panel } from '@/components/ui/panel'
 import { ActionMessage } from '@/features/shop/action-message'
-import { emailRenterLinkAgain, showRenterLink } from './actions'
+import { sendRenterLinkAgain, showRenterLink } from './actions'
 import { LinkCode } from './link-code'
 
-// walkIn: a walk-in still to approve the fee and the hold, together, in one PayPal approval.
-type LinkPanelProps = { rentalId: string; contactEmail: string | null; paid: boolean; walkIn?: boolean }
+// walkIn: a walk-in still to approve the fee and the hold, together, in one PayPal approval. contact: how the renter is
+// reached, by text to their masked number or by email, if at all (architecture.md section 12.3).
+type LinkPanelProps = { rentalId: string; contact: { readonly channel: 'text' | 'email'; readonly to: string } | null; paid: boolean; walkIn?: boolean }
 
-// The renter's link: a QR code to scan at the counter, the address to copy, or an email. Each shows a new link, since
-// only a link's fingerprint is kept and an earlier one cannot be shown again.
-export function LinkPanel({ rentalId, contactEmail, paid, walkIn = false }: LinkPanelProps) {
+// The renter's link: a QR code to scan at the counter, the address to copy, or sent the way the renter is reached. Each
+// shows a new link, since only a link's fingerprint is kept and an earlier one cannot be shown again.
+export function LinkPanel({ rentalId, contact, paid, walkIn = false }: LinkPanelProps) {
   const t = useTranslations('shop.rentals.link')
   const locale = useLocale()
   const [shown, show, showing] = useActionState(showRenterLink, null)
-  const [emailed, email, emailing] = useActionState(emailRenterLinkAgain, null)
+  const [sent, send, sending] = useActionState(sendRenterLinkAgain, null)
+  const Icon = contact?.channel === 'text' ? MessageSquare : Mail
 
   return (
     <Panel title={t('title')}>
@@ -33,14 +35,14 @@ export function LinkPanel({ rentalId, contactEmail, paid, walkIn = false }: Link
               {showing ? t('showing') : t('show')}
             </Button>
           </form>
-          {contactEmail === null ? null : (
-            <form action={email} className="max-w-full min-w-0">
+          {contact === null ? null : (
+            <form action={send} className="max-w-full min-w-0">
               <input type="hidden" name="locale" value={locale} />
               <input type="hidden" name="rentalId" value={rentalId} />
               {/* An email address can be long, so the button wraps rather than widening the page. */}
-              <Button type="submit" variant="outline" disabled={emailing} className="h-auto max-w-full min-w-0 shrink py-2 text-left whitespace-normal wrap-anywhere">
-                <Mail aria-hidden="true" />
-                {emailing ? t('emailing') : t('email', { email: contactEmail })}
+              <Button type="submit" variant="outline" disabled={sending} className="h-auto max-w-full min-w-0 shrink py-2 text-left whitespace-normal wrap-anywhere">
+                <Icon aria-hidden="true" />
+                {sending ? t('emailing') : contact.channel === 'text' ? t('text', { phone: contact.to }) : t('email', { email: contact.to })}
               </Button>
             </form>
           )}
@@ -50,7 +52,7 @@ export function LinkPanel({ rentalId, contactEmail, paid, walkIn = false }: Link
         ) : (
           <ActionMessage result={shown} success="" results="shop.rentals.results" />
         )}
-        <ActionMessage result={emailed} success={emailed?.ok === true ? t('emailed', { email: emailed.value.email }) : ''} results="shop.rentals.results" />
+        <ActionMessage result={sent} success={sent?.ok === true ? (sent.value.via === 'text' ? t('texted', { phone: sent.value.to }) : t('emailed', { email: sent.value.to })) : ''} results="shop.rentals.results" />
       </div>
     </Panel>
   )

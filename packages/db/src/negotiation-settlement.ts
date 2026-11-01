@@ -41,12 +41,12 @@ export async function confirmAgreement(transaction: Transaction, negotiationId: 
 
 // The renter's one-time code to confirm or decline an agreement (section 9.9): only through a live link that may
 // accept, only while an agreement awaits them, sent where every renter money decision's code goes.
-export async function issueSettlementCode(transaction: Transaction, linkId: string, hash: string, now: Date) {
+export async function issueSettlementCode(transaction: Transaction, linkId: string, hash: string, now: Date, via: 'chosen' | 'email' = 'chosen') {
   const link = await liveLink(transaction, linkId, ['accept'], now)
   if (link === undefined) return { ok: false, reason: 'link_invalid' } as const
   const [negotiation] = await transaction.select({ state: negotiations.state, kind: negotiations.kind, renterConfirmedAt: negotiations.renterConfirmedAt }).from(negotiations).where(eq(negotiations.rentalId, link.rentalId))
   if (negotiation?.state !== 'agreed' || negotiation.renterConfirmedAt !== null) return { ok: false, reason: 'not_agreed' } as const
-  return storeRenterCode(transaction, link, hash, now)
+  return storeRenterCode(transaction, link, hash, now, via)
 }
 
 async function ended(transaction: Transaction, negotiationId: string, reason: 'deadline' | 'mandate_ended' | 'declined', now: Date): Promise<SettleResult> {

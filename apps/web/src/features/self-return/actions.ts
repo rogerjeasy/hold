@@ -40,6 +40,6 @@ export const reportDropOffMissing = shopAction(
     const now = new Date()
     const reported = await reportRentalDropOffMissing(transaction, input.rentalId, context.person.userId, now)
     if (!reported.ok) return new Refusal(reported.reason)
-    return { emailed: await tellRenterNotFound(transaction, context.shop, input.rentalId, now) }
+    return { sent: await tellRenterNotFound(transaction, context.shop, input.rentalId, now) }
   },
 )

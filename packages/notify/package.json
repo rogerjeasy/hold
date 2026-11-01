@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@aws-sdk/client-pinpoint-sms-voice-v2": "3.1151.0",
     "@aws-sdk/client-secrets-manager": "3.1151.0",
     "@hold/domain": "workspace:*",
     "nodemailer": "^10.2.1",

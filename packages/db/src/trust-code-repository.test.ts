@@ -35,7 +35,7 @@ beforeAll(async () => {
 describe('a code for changing the Clean Record', () => {
   it('goes to the address PayPal gave for the payer, and works once', async () => {
     const linkId = await freshLink()
-    expect(await shop.act((transaction) => issueTrustCode(transaction, linkId, 'hash-1', NOW))).toEqual({ ok: true, email: 'priya@example.com', sandboxContact: false })
+    expect(await shop.act((transaction) => issueTrustCode(transaction, linkId, 'hash-1', NOW))).toEqual({ ok: true, channel: 'email', email: 'priya@example.com', sandboxContact: false })
     expect(await shop.act((transaction) => useTrustCode(transaction, linkId, 'hash-1', later(1)))).toEqual({ ok: true })
     expect(await shop.act((transaction) => useTrustCode(transaction, linkId, 'hash-1', later(1)))).toEqual({ ok: false, reason: 'code_expired' })
   })
@@ -82,6 +82,6 @@ describe('a code for changing the Clean Record', () => {
     const rentalId = await shop.paidRental(payer)
     await database.update(renters).set({ email: 'buyer@personal.example.com' }).where(eq(renters.paypalPayerId, payer))
     const linkId = await linkOf(rentalId)
-    expect(await shop.act((transaction) => issueTrustCode(transaction, linkId, 'hash', NOW))).toEqual({ ok: true, email: 'priya@example.com', sandboxContact: true })
+    expect(await shop.act((transaction) => issueTrustCode(transaction, linkId, 'hash', NOW))).toEqual({ ok: true, channel: 'email', email: 'priya@example.com', sandboxContact: true })
   })
 })

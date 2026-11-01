@@ -4,7 +4,8 @@ import { createLazyMailer, createSmtpMailer, loadSmtpSettings } from '@hold/noti
 import { createPayPalClient, createRestPayPalHolds, createSecretsManagerCredentialStore } from '@hold/paypal'
 import { createEventBridgeScheduler, createSqsSender } from '@hold/settle'
 import type { SettleDependencies } from '@hold/settle'
-import { createEmailNotifier } from './email-notifier.ts'
+import { createNotifier } from './notifier.ts'
+import { workerTexter } from './worker-texter.ts'
 import { createWorkerRenterAsk } from './renter-ask.ts'
 import { loadWorkerSettings } from './worker-settings.ts'
 import type { WorkerSettings } from './worker-settings.ts'
@@ -23,8 +24,8 @@ export function shopPayPalClient(settings: Pick<WorkerSettings, 'region' | 'payp
 }
 
 // What settling needs, built once per function instance: the database as hold_worker, each shop's PayPal account
-// through its credentials in Secrets Manager, the worker's queues and its schedules, and email through Hold's SMTP
-// account, read when the first email is sent.
+// through its credentials in Secrets Manager, the worker's queues and its schedules, email through Hold's SMTP account,
+// read when the first email is sent, and texts through AWS End User Messaging.
 export function workerSettle(): SettleDependencies {
   const settings = loadWorkerSettings(process.env)
   const database = createDataApiDatabase({ region: settings.region, clusterArn: settings.database.clusterArn, secretArn: settings.database.secretArn, database: settings.database.name })
@@ -39,7 +40,7 @@ export function workerSettle(): SettleDependencies {
     paypalFor: (credentialReference) => createRestPayPalHolds(shopPayPalClient(settings, credentialReference)),
     send: createSqsSender({ queues: settings.queues, region: settings.region }),
     scheduler: createEventBridgeScheduler({ ...settings.schedules, region: settings.region }),
-    notifier: createEmailNotifier({ database, mailer, publicUrl: settings.publicUrl }),
+    notifier: createNotifier({ database, mailer, texter: workerTexter(process.env), publicUrl: settings.publicUrl }),
     renterAsk: createWorkerRenterAsk({ database, publicUrl: settings.publicUrl, linkKey: readLinkKey }),
     now: () => new Date(),
   }

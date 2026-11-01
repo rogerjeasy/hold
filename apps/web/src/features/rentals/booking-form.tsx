@@ -39,7 +39,7 @@ export function BookingForm({ types, currency, days, from, to, startsToday = fal
       <fieldset className="grid gap-4">
         <legend className="text-title">{t('renter')}</legend>
         <p className="max-w-prose text-muted-foreground">{t('renterHelp')}</p>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="grid min-w-0 gap-1.5">
             <Label htmlFor="contactName">{t('name')}</Label>
             <Input id="contactName" name="contactName" maxLength={120} autoComplete="off" />
@@ -47,6 +47,10 @@ export function BookingForm({ types, currency, days, from, to, startsToday = fal
           <div className="grid min-w-0 gap-1.5">
             <Label htmlFor="contactEmail">{t('email')}</Label>
             <Input id="contactEmail" name="contactEmail" type="email" maxLength={254} autoComplete="off" />
+          </div>
+          <div className="grid min-w-0 gap-1.5">
+            <Label htmlFor="contactPhone">{t('phone')}</Label>
+            <Input id="contactPhone" name="contactPhone" type="tel" inputMode="tel" maxLength={40} autoComplete="off" placeholder={t('phonePlaceholder')} />
           </div>
           <div className="grid min-w-0 gap-1.5">
             <Label htmlFor="language">{t('language')}</Label>

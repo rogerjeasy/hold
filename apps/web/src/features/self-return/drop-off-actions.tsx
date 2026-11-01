@@ -43,7 +43,7 @@ export function DropOffActions({ rentalId, missing }: { rentalId: string; missin
       </div>
       {missing ? null : <p className="text-sm text-muted-foreground">{t('notHereBody')}</p>}
       <ActionMessage result={confirmed} success={t('confirmed')} results="selfReturn.staff.results" />
-      <ActionMessage result={reported} success={reported?.ok === true && reported.value.emailed ? t('recordedTold') : t('recorded')} results="selfReturn.staff.results" />
+      <ActionMessage result={reported} success={reported?.ok === true && reported.value.sent !== null ? t('recordedTold') : t('recorded')} results="selfReturn.staff.results" />
     </div>
   )
 }

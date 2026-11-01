@@ -1,5 +1,6 @@
 import { timingSafeEqual } from 'node:crypto'
-import { claimCodeRecipient } from '@hold/domain'
+import { renterCodeRecipient } from '@hold/domain'
+import type { RenterCodeRecipient } from '@hold/domain'
 import { eq } from 'drizzle-orm'
 import { renterLinks, rentals, renters } from './schema/index.ts'
 import { shopPayPalMode } from './paypal-mode.ts'
@@ -14,15 +15,17 @@ const CODE_MINUTES = 10
 const RESEND_AFTER_MS = 60_000
 const MOST_ATTEMPTS = 3
 
-export type IssuedTrustCode = { readonly ok: true; readonly email: string; readonly sandboxContact: boolean } | { readonly ok: false; readonly reason: 'link_invalid' | 'code_recently_sent' | 'payer_missing' }
+export type IssuedTrustCode = ({ readonly ok: true } & RenterCodeRecipient) | { readonly ok: false; readonly reason: 'link_invalid' | 'code_recently_sent' | 'payer_missing' }
 
-export async function issueTrustCode(transaction: Transaction, linkId: string, hash: string, now: Date): Promise<IssuedTrustCode> {
+export async function issueTrustCode(transaction: Transaction, linkId: string, hash: string, now: Date, via: 'chosen' | 'email' = 'chosen'): Promise<IssuedTrustCode> {
   const [link] = await transaction.select().from(renterLinks).where(eq(renterLinks.id, linkId)).for('update')
   if (link === undefined || link.revokedAt !== null || link.expiresAt <= now || !link.scopes.includes('view')) return { ok: false, reason: 'link_invalid' }
   if (link.trustCodeExpiresAt !== null && link.trustCodeExpiresAt.getTime() - CODE_MINUTES * 60_000 + RESEND_AFTER_MS > now.getTime()) return { ok: false, reason: 'code_recently_sent' }
-  const [payer] = await transaction.select({ email: renters.email, contactEmail: rentals.contactEmail }).from(rentals).innerJoin(renters, eq(renters.id, rentals.renterId)).where(eq(rentals.id, link.rentalId))
+  const [payer] = await transaction
+    .select({ email: renters.email, contactEmail: rentals.contactEmail, channel: rentals.contactChannel, phone: rentals.contactPhone, confirmedAt: rentals.phoneConfirmedAt })
+    .from(rentals).innerJoin(renters, eq(renters.id, rentals.renterId)).where(eq(rentals.id, link.rentalId))
   if (payer === undefined) return { ok: false, reason: 'payer_missing' }
-  const recipient = claimCodeRecipient({ paypalMode: await shopPayPalMode(transaction, link.shopId), payerEmail: payer.email, contactEmail: payer.contactEmail })
+  const recipient = renterCodeRecipient({ paypalMode: await shopPayPalMode(transaction, link.shopId), payerEmail: payer.email, contactEmail: payer.contactEmail, channel: payer.channel === 'text' ? 'text' : 'email', phone: payer.phone, phoneConfirmed: payer.confirmedAt !== null, via })
   await transaction.update(renterLinks).set({ trustCodeHash: hash, trustCodeExpiresAt: new Date(now.getTime() + CODE_MINUTES * 60_000), trustCodeAttempts: 0 }).where(eq(renterLinks.id, linkId))
   return { ok: true, ...recipient }
 }

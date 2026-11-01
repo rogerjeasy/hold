@@ -1,4 +1,4 @@
-import type { RentalDetail, RentalExtension, RentalHandover, RentalHold, RentalReturn } from '@hold/db'
+import type { RentalDetail, RentalExtension, RentalHandover, RentalHold, RentalReturn, RentalText } from '@hold/db'
 import { ArrowLeft } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { SampleTag } from '@/components/ui/sample-tag'
@@ -6,6 +6,7 @@ import { ShopFrame } from '@/features/shop/shop-frame'
 import type { ShopClock } from '@/hooks/use-shop-format'
 import { Link } from '@/i18n/navigation'
 import { rentalRoutes, shopRoutes } from '@/lib/routes'
+import { TextsPanel } from '@/features/contact/texts-panel'
 import { HandoverPanel } from '@/features/handover/handover-panel'
 import { ReturnPanel } from '@/features/returns/return-panel'
 import { StaffExtensions } from '@/features/extension/staff-extensions'
@@ -19,10 +20,10 @@ import { RentalStateBadge } from './rental-state-badge'
 import { RentalTerms } from './rental-terms'
 
 // dropOff: the item a renter left at the drop point, while nobody has checked it (architecture.md section 6.13).
-type RentalScreenProps = { shopName: string; clock: ShopClock; rental: RentalDetail; hold: RentalHold | undefined; handovers: readonly RentalHandover[]; returns?: readonly RentalReturn[]; dropOff?: DropOffEntry | undefined; extensions?: readonly RentalExtension[]; canAct: boolean }
+type RentalScreenProps = { shopName: string; clock: ShopClock; rental: RentalDetail; hold: RentalHold | undefined; handovers: readonly RentalHandover[]; returns?: readonly RentalReturn[]; dropOff?: DropOffEntry | undefined; extensions?: readonly RentalExtension[]; texts?: readonly RentalText[]; canAct: boolean }
 
 // One rental: where it stands, what was agreed, the renter's link and the hold at pickup.
-export function RentalScreen({ shopName, clock, rental, hold, handovers, returns = [], dropOff, extensions = [], canAct }: RentalScreenProps) {
+export function RentalScreen({ shopName, clock, rental, hold, handovers, returns = [], dropOff, extensions = [], texts = [], canAct }: RentalScreenProps) {
   const t = useTranslations('shop.rentals')
   const claim = useTranslations('claim')
   const records = useTranslations('records')
@@ -60,8 +61,9 @@ export function RentalScreen({ shopName, clock, rental, hold, handovers, returns
             {rental.simulated && returns.some((item) => item.comparisonId !== null) ? <ReturnPanel rentalId={rental.id} returns={returns} canAct={false} /> : null}
             {handingOver ? <HandoverPanel rentalId={rental.id} handovers={handovers} /> : null}
             {asking || hold?.state === 'placed' ? <HoldPanel rentalId={rental.id} state={rental.state} holdCents={rental.holdCents} hold={hold} clock={clock} /> : null}
-            {canAct && live ? <LinkPanel rentalId={rental.id} contactEmail={rental.contactEmail} paid={!waiting} walkIn={waiting && hold?.strategy === 'combined'} /> : null}
+            {canAct && live ? <LinkPanel rentalId={rental.id} contact={rental.contactChannel === 'text' && rental.contactPhone !== null ? { channel: 'text', to: rental.contactPhone } : rental.contactEmail === null ? null : { channel: 'email', to: rental.contactEmail }} paid={!waiting} walkIn={waiting && hold?.strategy === 'combined'} /> : null}
             {canAct && waiting ? <LetGo rentalId={rental.id} /> : null}
+            {texts.length > 0 ? <TextsPanel texts={texts} clock={clock} /> : null}
           </div>
         </div>
       </div>

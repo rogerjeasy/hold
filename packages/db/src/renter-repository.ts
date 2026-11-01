@@ -1,5 +1,5 @@
 import { paymentLapsed, rentalDays } from '@hold/domain'
-import type { PriceCategory, RentalState } from '@hold/domain'
+import type { ContactChannel, PriceCategory, RentalState } from '@hold/domain'
 import { asc, count, eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { readJson } from './read-json.ts'
@@ -127,12 +127,19 @@ export async function renterView(transaction: Transaction, rentalId: string, now
 
 // Where to reach a rental's renter: the email PayPal gave when they paid, or the one staff typed, in the rental's
 // language. Nothing when neither is known.
-export async function renterContact(transaction: Transaction, rentalId: string): Promise<{ readonly email: string; readonly language: string } | undefined> {
+// How to reach the renter of a rental: the email PayPal gave for the payer, or the booking's own before anyone paid if any,
+// their language, and the phone they chose texts on, if they did (architecture.md section 12.3).
+// Simulated: a demo shop, or a sample rental, shows its texts on the renter's page and never sends them.
+export type RenterContact = { readonly shopId: string; readonly email: string | null; readonly language: string; readonly channel: ContactChannel; readonly phone: string | null; readonly phoneConfirmed: boolean; readonly simulated: boolean }
+
+export async function renterContact(transaction: Transaction, rentalId: string): Promise<RenterContact | undefined> {
   const [row] = await transaction
-    .select({ paid: renters.email, typed: rentals.contactEmail, language: rentals.language })
+    .select({ shopId: rentals.shopId, paid: renters.email, typed: rentals.contactEmail, language: rentals.language, channel: rentals.contactChannel, phone: rentals.contactPhone, confirmedAt: rentals.phoneConfirmedAt, sample: rentals.simulated, demo: shops.demoSession })
     .from(rentals)
+    .innerJoin(shops, eq(shops.id, rentals.shopId))
     .leftJoin(renters, eq(renters.id, rentals.renterId))
     .where(eq(rentals.id, rentalId))
   const email = row?.paid ?? row?.typed ?? null
-  return row === undefined || email === null ? undefined : { email, language: row.language }
+  // A renter who gave only a phone is reached by text.
+  return row === undefined || (email === null && row.phone === null) ? undefined : { shopId: row.shopId, email, language: row.language, channel: row.channel === 'text' ? 'text' : 'email', phone: row.phone, phoneConfirmed: row.confirmedAt !== null, simulated: row.sample || row.demo }
 }

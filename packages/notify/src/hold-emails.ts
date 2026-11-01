@@ -97,3 +97,16 @@ export function holdExpiredEmail(to: string, language: string, facts: ExpiredFac
   const words = EXPIRED[chosen]
   return { to, subject: words.subject(facts.renter), text: words.text(facts, formatMoney(facts.amount, chosen)) }
 }
+
+// The same request as a text, for a renter who chose texts (architecture.md section 12.3).
+const REPLACEMENT_TEXT: Readonly<Record<Language, (facts: ReplacementFacts, amount: string) => string>> = {
+  en: (facts, amount) => `${facts.shopName}: your ${amount} hold ends on ${facts.endsOn}. Please approve a new one, which is not a charge: ${facts.approveUrl}`,
+  de: (facts, amount) => `${facts.shopName}: Ihre Reservierung über ${amount} endet am ${facts.endsOn}. Bitte genehmigen Sie eine neue, keine Belastung: ${facts.approveUrl}`,
+  es: (facts, amount) => `${facts.shopName}: tu retención de ${amount} termina el ${facts.endsOn}. Aprueba una nueva, que no es un cobro: ${facts.approveUrl}`,
+  fr: (facts, amount) => `${facts.shopName} : votre empreinte de ${amount} se termine le ${facts.endsOn}. Approuvez-en une nouvelle, ce n'est pas un débit : ${facts.approveUrl}`,
+}
+
+export function holdReplacementText(language: string, facts: ReplacementFacts): string {
+  const chosen = isLanguage(language) ? language : 'en'
+  return REPLACEMENT_TEXT[chosen](facts, formatMoney(facts.amount, chosen))
+}

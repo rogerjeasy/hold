@@ -41,6 +41,11 @@ describe('loadWebConfig', () => {
     })
   })
 
+  it('names the text sender and the configuration set that reports deliveries, and leaves both to AWS when unset', () => {
+    expect(loadWebConfig({ ...AWS, HOLD_TEXT_SENDER: 'RIBEIRA', HOLD_TEXT_CONFIGURATION_SET: 'hold-texts' })).toMatchObject({ texts: { sender: 'RIBEIRA', configurationSet: 'hold-texts' } })
+    expect(loadWebConfig(AWS)).toMatchObject({ texts: { sender: undefined, configurationSet: undefined } })
+  })
+
   it('sends work to the worker’s queues when it knows them, and must know them when deployed', () => {
     const queues = { HOLD_EXECUTIONS_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-executions.fifo', HOLD_PAYPAL_EVENTS_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-paypal-events.fifo', HOLD_MEDIA_QUEUE_URL: 'https://sqs.us-east-1.amazonaws.com/1/hold-media' }
     expect(loadWebConfig({ ...AWS, ...queues })).toMatchObject({ queues: { executions: queues.HOLD_EXECUTIONS_QUEUE_URL, 'paypal-events': queues.HOLD_PAYPAL_EVENTS_QUEUE_URL, media: queues.HOLD_MEDIA_QUEUE_URL } })

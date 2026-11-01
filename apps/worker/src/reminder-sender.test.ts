@@ -1,13 +1,13 @@
-import { addItems, createBooking, inShop, publishPriceList, registerOwner, saveItemType } from '@hold/db'
+import { addItems, createBooking, inShop, publishPriceList, registerOwner, requestPhoneCode, saveItemType, textsOf } from '@hold/db'
 import { createTestDatabase } from '@hold/db/testing'
 import { money } from '@hold/domain'
-import { createMemoryMailer } from '@hold/notify'
-import { expect, it } from 'vitest'
+import { createMemoryMailer, createMemoryTexter } from '@hold/notify'
+import { describe, expect, it } from 'vitest'
 import { createReminderSender } from './reminder-sender.ts'
 
 const eur = (cents: number) => money(cents, 'EUR')
 
-it('emails the renter the reminder in their language, with the due time in the shop\'s time zone', async () => {
+async function rentalInFrench() {
   const database = await createTestDatabase()
   const owner = await registerOwner(database, { subject: 'owner', email: 'ana@ribeira.example', name: 'Ana', language: 'en', shop: { name: 'Ribeira Bikes', timeZone: 'Europe/Lisbon' } })
   const rentalId = await inShop(database, { role: 'hold_app', shopId: owner.shopId, userId: owner.userId }, async (transaction) => {
@@ -20,9 +20,28 @@ it('emails the renter the reminder in their language, with the due time in the s
     if (!booked.ok) throw new Error(booked.reason)
     return booked.rentalId
   })
-  const mailer = createMemoryMailer()
-  await createReminderSender({ database, mailer })({ kind: 'return_due', shopId: owner.shopId, rentalId, dueAt: new Date('2026-10-20T17:00:00Z') })
-  expect(mailer.sent).toHaveLength(1)
-  expect(mailer.sent[0]).toMatchObject({ to: 'priya@example.com', subject: 'Le retour de votre location chez Ribeira Bikes est attendu' })
-  expect(mailer.sent[0]?.text).toContain('18:00')
+  return { database, shopId: owner.shopId, rentalId }
+}
+
+describe('a reminder from the operations agent', () => {
+  it('emails the renter the reminder in their language, with the due time in the shop\'s time zone', async () => {
+    const { database, shopId, rentalId } = await rentalInFrench()
+    const mailer = createMemoryMailer()
+    await createReminderSender({ database, mailer, texter: createMemoryTexter() })({ kind: 'return_due', shopId, rentalId, dueAt: new Date('2026-10-20T17:00:00Z') })
+    expect(mailer.sent).toHaveLength(1)
+    expect(mailer.sent[0]).toMatchObject({ to: 'priya@example.com', subject: 'Le retour de votre location chez Ribeira Bikes est attendu' })
+    expect(mailer.sent[0]?.text).toContain('18:00')
+  })
+
+  it('texts it instead to a renter who chose texts, and records the text', async () => {
+    const { database, shopId, rentalId } = await rentalInFrench()
+    await inShop(database, { role: 'hold_app', shopId }, (transaction) => requestPhoneCode(transaction, rentalId, { typed: '+33 6 12 34 56 78', hash: 'code', stepUp: false }, new Date()))
+    const mailer = createMemoryMailer()
+    const texter = createMemoryTexter()
+    await createReminderSender({ database, mailer, texter })({ kind: 'return_due', shopId, rentalId, dueAt: new Date('2026-10-20T17:00:00Z') })
+    expect(mailer.sent).toEqual([])
+    expect(texter.sent).toEqual([expect.objectContaining({ to: '+33612345678', context: { shopId, rentalId } })])
+    expect(texter.sent[0]?.body).toMatch(/^Ribeira Bikes : votre location devait être rendue le .*18:00/)
+    expect(await inShop(database, { role: 'hold_worker', shopId }, (transaction) => textsOf(transaction, rentalId))).toEqual([expect.objectContaining({ purpose: 'reminder', status: 'sent' })])
+  })
 })

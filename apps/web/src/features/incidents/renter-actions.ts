@@ -3,14 +3,14 @@
 import { addPoliceReport, agreeIncident, auditLog, issueIncidentCode, leaveIncidentForReturn, saveTheftDetails, useClaimCode } from '@hold/db'
 import { INCIDENT_HINTS, INCIDENT_LIMITS } from '@hold/domain'
 import { MAX_PHOTO_BYTES } from '@hold/evidence'
-import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
 import { Refusal } from '@/server/action'
 import { confirmIncidentPhoto, requestIncidentPhoto, sendReport, startReport } from '@/server/incident-report'
 import { renterAction, withToken } from '@/server/renter-access'
-import { newRenterCode, renterCodeDigest } from '@/server/renter-code'
-import { getServices } from '@/server/services'
+import { codeVia, newRenterCode, renterCodeDigest } from '@/server/renter-code'
+import { copyDecisionToEmail } from '@/server/decision-copy'
+import { deliverRenterCode } from '@/server/renter-code-delivery'
 
 // What a renter does through their link when something happens during the rental (extensions.md section 10). Each is
 // built by renterAction, which checks the link, its report_incident scope and the network's rate first. No amount comes
@@ -53,16 +53,16 @@ export const sendIncidentReport = renterAction(
 
 const purpose = (incidentId: string) => `incident-agree:${incidentId}`
 
-export const sendIncidentCode = renterAction({ name: 'renter.incident_code_requested', scope: 'report_incident', input: withToken(incident) }, async (link, input, inLinkShop) => {
+export const sendIncidentCode = renterAction({ name: 'renter.incident_code_requested', scope: 'report_incident', input: withToken({ ...incident, via: codeVia }) }, async (link, input, inLinkShop) => {
   const code = await newRenterCode()
   const hash = await renterCodeDigest(purpose(input.incidentId), link.id, code)
-  const issued = await inLinkShop((transaction) => issueIncidentCode(transaction, link.id, input.incidentId, hash, new Date()))
+  const issued = await inLinkShop((transaction) => issueIncidentCode(transaction, link.id, input.incidentId, hash, new Date(), input.via))
   if (!issued.ok) return new Refusal(issued.reason)
-  const t = await getTranslations({ locale: readLocale(input.locale), namespace: 'emails.incidentCode' })
-  if (!await (await getServices()).mailer.send({ to: issued.email, subject: t('subject'), text: t('body', { code }) })) return new Refusal('email_unavailable')
+  const delivered = await deliverRenterCode(inLinkShop, link, issued, { locale: readLocale(input.locale), code, kind: 'incident', emailWords: 'emails.incidentCode' })
+  if (delivered instanceof Refusal) return delivered
   // Simulated things say so, in the record too: the address itself stays out of it.
-  if (issued.sandboxContact) await inLinkShop((transaction) => transaction.insert(auditLog).values({ shopId: link.shopId, actorKind: 'renter', actorId: link.id, action: 'renter.incident_code_sandbox_contact', subjectKind: 'incident', subjectId: input.incidentId, detail: { sandbox: true } }))
-  return { sandboxContact: issued.sandboxContact }
+  if (delivered.sandboxContact) await inLinkShop((transaction) => transaction.insert(auditLog).values({ shopId: link.shopId, actorKind: 'renter', actorId: link.id, action: 'renter.incident_code_sandbox_contact', subjectKind: 'incident', subjectId: input.incidentId, detail: { sandbox: true } }))
+  return delivered
 })
 
 // The code and the agreement in one transaction: a wrong code agrees nothing. Nothing is charged.
@@ -73,7 +73,9 @@ export const agreeIncidentPrice = renterAction({ name: 'renter.incident_agreed',
     if (!verified.ok) return verified
     return agreeIncident(transaction, link.rentalId, input.incidentId, new Date())
   })
-  return result.ok ? {} : new Refusal(result.reason)
+  if (!result.ok) return new Refusal(result.reason)
+  await copyDecisionToEmail(inLinkShop, link, 'incident_agreed', readLocale(input.locale))
+  return {}
 })
 
 export const leaveIncidentToReturn = renterAction({ name: 'renter.incident_left_for_return', scope: 'report_incident', input: withToken(incident) }, async (link, input, inLinkShop) => {

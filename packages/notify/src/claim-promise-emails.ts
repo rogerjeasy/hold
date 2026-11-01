@@ -85,3 +85,23 @@ export function promiseMissedRenterEmail(to: string, language: string, facts: { 
   const words = RENTER[isLanguage(language) ? language : 'en']
   return { to, subject: words.subject(facts.shopName), text: words.text(facts.shopName, facts.waived) }
 }
+
+// The same news as a text, for a renter who chose texts (architecture.md section 12.3).
+const RENTER_TEXT: Readonly<Record<Language, (shop: string, waived: boolean) => string>> = {
+  en: (shop, waived) => waived
+    ? `${shop} did not decide your contested claim by the date it promised, so the claim is waived: nothing is charged, and your hold is released.`
+    : `${shop} did not decide your contested claim by the date it promised. The owner must decide it now, with a written reason on your claim page. Nothing is charged until then.`,
+  de: (shop, waived) => waived
+    ? `${shop} hat Ihre bestrittene Forderung nicht bis zum zugesagten Datum entschieden. Die Forderung ist erlassen: Es wird nichts belastet und Ihre Reservierung wird freigegeben.`
+    : `${shop} hat Ihre bestrittene Forderung nicht bis zum zugesagten Datum entschieden. Die Inhaberin oder der Inhaber muss jetzt entscheiden, mit einer schriftlichen Begründung auf Ihrer Forderungsseite. Bis dahin wird nichts belastet.`,
+  es: (shop, waived) => waived
+    ? `${shop} no decidió tu reclamación impugnada antes de la fecha prometida, así que queda anulada: no se cobra nada y tu retención se libera.`
+    : `${shop} no decidió tu reclamación impugnada antes de la fecha prometida. La persona propietaria debe decidirla ahora, con un motivo por escrito en la página de tu reclamación. Hasta entonces no se cobra nada.`,
+  fr: (shop, waived) => waived
+    ? `${shop} n'a pas décidé de votre réclamation contestée avant la date promise : elle est abandonnée, rien n'est débité et votre empreinte est libérée.`
+    : `${shop} n'a pas décidé de votre réclamation contestée avant la date promise. Le propriétaire doit décider maintenant, avec un motif écrit sur la page de votre réclamation. Rien n'est débité d'ici là.`,
+}
+
+export function promiseMissedRenterText(language: string, facts: { readonly shopName: string; readonly waived: boolean }): string {
+  return RENTER_TEXT[isLanguage(language) ? language : 'en'](facts.shopName, facts.waived)
+}

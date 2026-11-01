@@ -101,13 +101,24 @@ describe('booking at the counter', () => {
   it('books at the prices the shop set, and emails the renter a link to pay', async () => {
     await signIn(jar, OWNER, 'email_code')
     const booked = await rentals.bookRental(null, form(booking('2')))
-    expect(booked).toMatchObject({ ok: true, value: { emailed: true } })
+    expect(booked).toMatchObject({ ok: true, value: { sent: 'email' } })
     if (!booked.ok) return
     expect(await detail(booked.value.rentalId)).toMatchObject({ state: 'pending_payment', feeCents: 2 * 3 * 40_00, holdCents: 2 * 300_00, contactEmail: 'priya@example.com' })
     const { mailer } = await getServices()
     const sent = (mailer as unknown as { sent: { to: string; text: string }[] }).sent.at(-1)
     expect(sent?.to).toBe('priya@example.com')
     expect(sent?.text).toMatch(/\/r\/[A-Za-z0-9_-]{65}/)
+  })
+
+  it('texts the link to a renter booked with a phone, and refuses a number it cannot text', async () => {
+    await signIn(jar, OWNER, 'email_code')
+    expect(await rentals.bookRental(null, form({ ...booking('1', '', 20), contactPhone: '079 123 45 67' }))).toMatchObject({ ok: false, reason: 'phone_invalid' })
+    const booked = await rentals.bookRental(null, form({ ...booking('1', '', 20), contactPhone: '+41 79 123 45 67' }))
+    expect(booked).toMatchObject({ ok: true, value: { sent: 'text' } })
+    const { texter } = await getServices()
+    const sent = (texter as unknown as { sent: { to: string; body: string }[] }).sent.at(-1)
+    expect(sent?.to).toBe('+41791234567')
+    expect(sent?.body).toMatch(/\/r\/[A-Za-z0-9_-]{65}/)
   })
 
   it('is open to counter staff and closed to read-only members', async () => {
@@ -123,7 +134,7 @@ describe('booking at the counter', () => {
       await acceptInvitation(database, { token, subject, email, name: role, language: 'en' }, new Date())
     }
     await signIn(jar, 'jonas@ribeira.example', 'email_code')
-    expect(await rentals.bookRental(null, form(booking('1', '')))).toMatchObject({ ok: true, value: { emailed: false } })
+    expect(await rentals.bookRental(null, form(booking('1', '')))).toMatchObject({ ok: true, value: { sent: null } })
     await signIn(jar, 'reader@ribeira.example', 'email_code')
     expect(await rentals.bookRental(null, form(booking()))).toEqual({ ok: false, failure: 'role' })
   })

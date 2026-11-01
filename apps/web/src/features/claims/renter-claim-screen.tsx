@@ -15,6 +15,8 @@ import { RenterMessage } from '@/features/renter/renter-message'
 import { useLookAgain } from '@/hooks/use-look-again'
 import { Link } from '@/i18n/navigation'
 import { linkRoutes } from '@/lib/routes'
+import { CodeSent } from '@/features/contact/code-sent'
+import { useCodeSender } from '@/features/contact/use-code-sender'
 import { AdvocateForm } from '@/features/negotiation/advocate-form'
 import { ContestSummaryPanel } from '@/features/contest/contest-summary-panel'
 import { ClaimConversation } from '@/features/promise/claim-conversation'
@@ -31,7 +33,7 @@ export function RenterClaimScreen({ token, data }: { token: string; data: Renter
   const advocate = useTranslations('negotiation')
   const amount = (cents: number) => formatMoney(money(cents, data.currency), locale)
   const [acknowledged, acknowledge, acknowledging] = useActionState(acknowledgeClaim, null)
-  const [sent, send, sending] = useActionState(sendClaimCode, null)
+  const code = useCodeSender(sendClaimCode, { token, locale })
   const [accepted, accept, accepting] = useActionState(acceptClaim, null)
   const [contested, contest, contesting] = useActionState(contestClaim, null)
   const pending = data.pendingSettlement === true || data.state === 'charging' || ['releasing', 'capturing', 'renewing'].includes(data.holdState)
@@ -55,7 +57,7 @@ export function RenterClaimScreen({ token, data }: { token: string; data: Renter
     {data.canAcknowledge ? <form action={acknowledge} className="grid gap-3"><input type="hidden" name="token" value={token} /><input type="hidden" name="locale" value={locale} /><p>{t('reviewFirst')}</p><Button disabled={acknowledging} className="min-h-12 justify-self-start whitespace-normal">{t('acknowledge')}</Button><RenterMessage result={acknowledged} wording={wording} /></form> : null}
     {data.canReply ? <Panel title={t('yourReply')}><div className="grid gap-6 p-4 md:p-5">
       {data.promise != null && data.state === 'presented' ? <PromiseBeforeContest shopName={data.shopName} days={data.promise.days} /> : null}
-      <form action={send} className="grid gap-3"><input type="hidden" name="token" value={token} /><input type="hidden" name="locale" value={locale} /><p>{t('codeGuidance')}</p><Button disabled={sending} className="min-h-12 justify-self-start whitespace-normal">{t('sendCode')}</Button>{sent?.ok === true ? <p role="status">{t(sent.value.sandboxContact ? 'codeSentSandbox' : 'codeSent')}</p> : null}<RenterMessage result={sent} wording={wording} /></form>
+      <div className="grid gap-3"><p>{t('codeGuidance')}</p><Button type="button" onClick={code.send} disabled={code.pending} className="min-h-12 justify-self-start whitespace-normal">{t('sendCode')}</Button><CodeSent result={code.result} pending={code.pending} onEmailInstead={code.sendByEmail} codeInputId="claim-code" emailWords={{ sent: t('codeSent'), sandbox: t('codeSentSandbox') }} wording={wording} /></div>
       <form action={accept} className="grid gap-3"><input type="hidden" name="token" value={token} /><input type="hidden" name="locale" value={locale} /><Label htmlFor="claim-code">{t('code')}</Label><Input id="claim-code" name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{8}" required minLength={8} maxLength={8} /><Label htmlFor="claim-comment">{t('comment')}</Label><Textarea id="claim-comment" name="comment" maxLength={1000} /><div className="flex flex-wrap gap-3"><Button type="submit" disabled={accepting || contesting} className="min-h-12 whitespace-normal">{t('accept')}</Button><Button type="submit" formAction={contest} variant="outline" disabled={accepting || contesting} className="min-h-12 whitespace-normal">{t('contest')}</Button></div><RenterMessage result={accepted} wording={wording} /><RenterMessage result={contested} wording={wording} /></form>
       {data.canAdvocate === true ? <AdvocateForm token={token} currency={data.currency} assistantName={data.assistantName ?? null} /> : null}
     </div></Panel> : null}

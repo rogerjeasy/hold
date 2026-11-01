@@ -9,7 +9,7 @@ vi.mock('@/features/promise/actions', () => ({ writeToRenter: vi.fn() }))
 vi.mock('@/hooks/use-look-again', () => ({ useLookAgain: () => undefined }))
 it('shows the evidence and stored charge, asks for an email code and provides a contest path', () => {
   renderWithIntl(<RenterClaimScreen token="token" data={{ shopName: 'Ribeira Bikes', currency: 'EUR', state: 'presented', totalCents: 3500, captureCents: 3500, releaseCents: 26500, invoiceCents: 0, replyDueAt: new Date('2026-10-22'), holdState: 'placed', lines: [{ id: 'line', description: 'Scratch', reason: 'Fresh scratch on the frame.', amountCents: 3500, actorName: 'Ana', beforeUrl: null, afterUrl: null }], canReply: true }} />)
-  expect(screen.getByRole('button', { name: 'Email me a verification code' })).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Send me a verification code' })).toBeInTheDocument()
   expect(screen.getByLabelText('Verification code')).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Contest this claim' })).toBeInTheDocument()
   expect(screen.getByText('Fresh scratch on the frame.')).toBeInTheDocument()
@@ -57,9 +57,9 @@ it('shows pending confirmation while a protected capture is being refunded', () 
 
 it('says plainly when a sandbox code went to the booking contact rather than the PayPal account', async () => {
   const actions = await import('./renter-actions')
-  vi.mocked(actions.sendClaimCode).mockResolvedValue({ ok: true, value: { sandboxContact: true } })
+  vi.mocked(actions.sendClaimCode).mockResolvedValue({ ok: true, value: { via: 'email', phone: null, sandboxContact: true, shown: null } })
   renderWithIntl(<RenterClaimScreen token="token" data={{ shopName: 'Ribeira Bikes', currency: 'EUR', state: 'presented', totalCents: 3500, captureCents: 3500, releaseCents: 26500, invoiceCents: 0, replyDueAt: new Date('2026-10-22'), holdState: 'placed', lines: [], canReply: true }} />)
-  screen.getByRole('button', { name: 'Email me a verification code' }).click()
+  screen.getByRole('button', { name: 'Send me a verification code' }).click()
   expect(await screen.findByRole('status')).toHaveTextContent('This is the PayPal sandbox')
 })
 

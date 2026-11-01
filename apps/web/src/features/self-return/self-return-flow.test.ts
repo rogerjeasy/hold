@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { createHash, randomBytes } from 'node:crypto'
 import { DROP_POINT_VIEW } from '@hold/domain'
-import { acceptInvitation, auditLog, createInvitation, inShop, listStaff, rentalDetail, rentalHold, selfReturnFor } from '@hold/db'
+import { acceptInvitation, auditLog, createInvitation, inShop, listStaff, rentalDetail, rentalHold, requestPhoneCode, selfReturnFor } from '@hold/db'
 import sharp from 'sharp'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -155,10 +155,22 @@ describe('a person checking an item a renter dropped off', () => {
     expect((await returnOf(rental.rentalId))?.state).toBe('returned')
   })
 
+  it('tells a renter who chose texts by text', async () => {
+    const rental = await droppedOff()
+    const { database, texter } = await getServices()
+    await inShop(database, { role: 'hold_app', shopId: shop.shopId }, (transaction) => requestPhoneCode(transaction, rental.rentalId, { typed: '+41791234567', hash: 'code', stepUp: true }, new Date()))
+    await signIn(jar, 'counter@self-return.example', 'email_code')
+    expect(await staff.reportDropOffMissing(null, form({ rentalId: rental.rentalId, locale: 'en' }))).toMatchObject({ ok: true, value: { sent: 'text' } })
+    const sent = (texter as unknown as { sent: readonly { to: string; body: string }[] }).sent.at(-1)
+    expect(sent?.to).toBe('+41791234567')
+    // This file's translations are their keys alone: the text's own words, not the email's.
+    expect(sent?.body).toBe('dropOffMissing')
+  })
+
   it('records who could not find it, tells the renter with a link to their return, and the hold stays', async () => {
     const rental = await droppedOff()
     await signIn(jar, 'counter@self-return.example', 'email_code')
-    expect(await staff.reportDropOffMissing(null, form({ rentalId: rental.rentalId, locale: 'en' }))).toMatchObject({ ok: true, value: { emailed: true } })
+    expect(await staff.reportDropOffMissing(null, form({ rentalId: rental.rentalId, locale: 'en' }))).toMatchObject({ ok: true, value: { sent: 'email' } })
     const { mailer } = await getServices()
     const sent = (mailer as unknown as { sent: readonly { to: string; subject: string; text: string }[] }).sent.at(-1)
     expect(sent?.to).toBe('renter@fake-paypal.test')

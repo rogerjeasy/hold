@@ -5,6 +5,8 @@ import { useActionState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { CodeSent } from '@/features/contact/code-sent'
+import { useCodeSender } from '@/features/contact/use-code-sender'
 import { RenterMessage } from '@/features/renter/renter-message'
 import { useRouter } from '@/i18n/navigation'
 import { agreeIncidentPrice, leaveIncidentToReturn, sendIncidentCode } from './renter-actions'
@@ -15,7 +17,7 @@ export function IncidentAgreeForm({ token, incidentId, price }: { token: string;
   const t = useTranslations('renter.incident.agree')
   const locale = useLocale()
   const router = useRouter()
-  const [sent, send, sending] = useActionState(sendIncidentCode, null)
+  const code = useCodeSender(sendIncidentCode, { token, locale, incidentId })
   const [agreed, agree, agreeing] = useActionState(agreeIncidentPrice, null)
   const [left, leave, leaving] = useActionState(leaveIncidentToReturn, null)
   useEffect(() => {
@@ -25,13 +27,11 @@ export function IncidentAgreeForm({ token, incidentId, price }: { token: string;
   const hidden = <><input type="hidden" name="token" value={token} /><input type="hidden" name="locale" value={locale} /><input type="hidden" name="incidentId" value={incidentId} /></>
   return (
     <div className="grid gap-6">
-      <form action={send} className="grid gap-3">
-        {hidden}
+      <div className="grid gap-3">
         <p>{t('codeGuidance', { price })}</p>
-        <Button disabled={sending} className="min-h-12 justify-self-start whitespace-normal">{t('sendCode')}</Button>
-        {sent?.ok === true ? <p role="status">{t(sent.value.sandboxContact ? 'codeSentSandbox' : 'codeSent')}</p> : null}
-        <RenterMessage result={sent?.ok === true ? null : sent} wording={wording} />
-      </form>
+        <Button type="button" onClick={code.send} disabled={code.pending} className="min-h-12 justify-self-start whitespace-normal">{t('sendCode')}</Button>
+        <CodeSent result={code.result} pending={code.pending} onEmailInstead={code.sendByEmail} codeInputId="incident-code" emailWords={{ sent: t('codeSent'), sandbox: t('codeSentSandbox') }} wording={wording} />
+      </div>
       <form action={agree} className="grid gap-3">
         {hidden}
         <Label htmlFor="incident-code">{t('code')}</Label>

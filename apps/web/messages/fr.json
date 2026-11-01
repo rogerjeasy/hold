@@ -1446,7 +1446,7 @@
         "title": "Nouvelle location",
         "back": "Toutes les locations",
         "renter": "Pour qui",
-        "renterHelp": "Facultatif. Avec un e-mail, le client reçoit le lien de paiement. L'identité du client vient de PayPal quand il règle.",
+        "renterHelp": "Facultatif. Avec un e-mail ou un portable, le client reçoit le lien de paiement ; avec un portable, par SMS. L'identité du client vient de PayPal quand il règle.",
         "name": "Nom",
         "email": "E-mail",
         "language": "Langue du client",
@@ -1454,7 +1454,9 @@
         "booking": "Réservation…",
         "booked": "Réservé.",
         "walkIn": "Client au comptoir : frais et empreinte en une seule approbation PayPal",
-        "walkInHelp": "Pour un client au comptoir maintenant, qui approuve les deux à la fois. Laissez-le désactivé pour un client qui revient : son Clean Record ne peut réduire l'empreinte qu'une fois que ses frais indiquent à Hold qui il est."
+        "walkInHelp": "Pour un client au comptoir maintenant, qui approuve les deux à la fois. Laissez-le désactivé pour un client qui revient : son Clean Record ne peut réduire l'empreinte qu'une fois que ses frais indiquent à Hold qui il est.",
+        "phone": "Portable",
+        "phonePlaceholder": "+41 79 123 45 67"
       },
       "detail": {
         "label": "Location",
@@ -1497,7 +1499,9 @@
         "emailing": "Envoi…",
         "emailed": "Envoyé à {email}.",
         "paid": "Le prix est réglé. Le même lien montre la location et, au retrait, demande l'empreinte.",
-        "walkIn": "Client au comptoir : il approuve les frais et l'empreinte ensemble, en une seule approbation PayPal, puis le vélo est prêt à être remis."
+        "walkIn": "Client au comptoir : il approuve les frais et l'empreinte ensemble, en une seule approbation PayPal, puis le vélo est prêt à être remis.",
+        "text": "Envoyer par SMS au {phone}",
+        "texted": "Envoyé par SMS au {phone}."
       },
       "letGo": {
         "title": "Abandonner cette réservation",
@@ -1525,7 +1529,9 @@
         "email_failed": "L'e-mail n'a pas pu être envoyé. Montrez le lien à la place.",
         "transition_not_allowed": "Seule une réservation dont le prix n'a pas été réglé peut être abandonnée.",
         "rows_mismatched": "Chaque ligne a besoin d'un article et d'un nombre.",
-        "not_booked": "Le prix doit être réglé avant de demander l'empreinte."
+        "not_booked": "Le prix doit être réglé avant de demander l'empreinte.",
+        "phone_invalid": "Écrivez le numéro avec son indicatif de pays, par exemple +41 79 123 45 67.",
+        "country_not_texted": "Hold n'envoie pas de SMS dans ce pays. Utilisez un e-mail."
       },
       "hold": {
         "title": "Empreinte au retrait",
@@ -1542,7 +1548,29 @@
         "validUntil": "Prend fin",
         "replacing": "Une nouvelle empreinte a été demandée à la personne qui loue avant la fin de celle-ci. En attente de son approbation."
       },
-      "fromAssistant": "Réservé par l'assistant du locataire"
+      "fromAssistant": "Réservé par l'assistant du locataire",
+      "texts": {
+        "title": "SMS à la personne qui loue",
+        "purposes": {
+          "renter_link": "Le lien de la personne qui loue",
+          "condition_link": "Le rapport d'état",
+          "drop_off": "L'avis de dépôt",
+          "shop_message": "Un message du magasin",
+          "renter_code": "Un code à usage unique",
+          "phone_code": "Le code qui confirme son téléphone",
+          "reminder": "Un rappel",
+          "hold_renewal": "Une demande de nouvelle empreinte",
+          "promise_missed": "Une date de décision manquée",
+          "receipt": "Un reçu"
+        },
+        "statuses": {
+          "sent": "Envoyé",
+          "delivered": "Remis",
+          "failed": "Non envoyé, Hold a utilisé l'e-mail quand il le pouvait",
+          "opted_out": "La personne a répondu STOP, Hold utilise l'e-mail",
+          "simulated": "Affiché sur la page de la personne qui loue (sandbox)"
+        }
+      }
     },
     "items": {
       "title": "Articles",
@@ -1963,7 +1991,8 @@
         "show": "Montrez ce code à la personne qui loue. Il ouvre le rapport d'état, qu'elle confirme ou complète sous 24 heures.",
         "scan": "À scanner avec le téléphone de la personne qui loue pour voir le rapport d'état",
         "back": "Retour à la location",
-        "sealedNote": "Scellé. Ces photos ne peuvent plus changer."
+        "sealedNote": "Scellé. Ces photos ne peuvent plus changer.",
+        "texted": "La personne qui loue a reçu le rapport d'état par SMS. Elle peut aussi scanner ce code."
       }
     },
     "returns": {
@@ -2234,6 +2263,20 @@
     "trustCode": {
       "subject": "Votre code Hold pour votre historique de retours",
       "body": "Votre code est {code}. Il expire dans dix minutes. Saisissez-le seulement sur votre propre page de location Hold, pour changer qui peut utiliser votre historique. Si vous ne l'avez pas demandé, ignorez cet e-mail."
+    },
+    "contactChangeCode": {
+      "subject": "Votre code pour modifier les SMS de votre location",
+      "body": "Votre code est {code}. Il expire dans dix minutes. Saisissez-le sur la page de votre location pour envoyer les SMS de votre location vers un nouveau téléphone. Si vous ne l'avez pas demandé, ignorez cet e-mail : rien ne change."
+    },
+    "decisionCopy": {
+      "subject": "Votre décision chez {shop}",
+      "body": {
+        "claim_accepted": "Depuis votre téléphone, vous avez accepté la réclamation de {shop}. Le montant sera pris sur votre empreinte, le reste libéré.\n\nSi ce n'était pas vous, contactez {shop} immédiatement.",
+        "claim_contested": "Depuis votre téléphone, vous avez contesté la réclamation de {shop}. Rien n'est débité pendant la décision.\n\nSi ce n'était pas vous, contactez {shop} immédiatement.",
+        "settlement_confirmed": "Depuis votre téléphone, vous avez confirmé l'accord sur votre réclamation de {shop}.\n\nSi ce n'était pas vous, contactez {shop} immédiatement.",
+        "settlement_declined": "Depuis votre téléphone, vous avez refusé l'accord sur votre réclamation de {shop}. Le magasin décide maintenant.\n\nSi ce n'était pas vous, contactez {shop} immédiatement.",
+        "incident_agreed": "Depuis votre téléphone, vous avez accepté le prix de ce que vous avez signalé à {shop}.\n\nSi ce n'était pas vous, contactez {shop} immédiatement."
+      }
     }
   },
   "shell": {
@@ -2666,8 +2709,8 @@
         }
       },
       "agree": {
-        "codeGuidance": "Pour accepter {price}, demandez un code à usage unique. Il est envoyé à l’adresse que PayPal a donnée pour vous.",
-        "sendCode": "M’envoyer un code",
+        "codeGuidance": "Pour accepter {price}, demandez un code à usage unique. Il part au téléphone que vous avez confirmé pour les SMS, ou à l'e-mail que PayPal a pour vous.",
+        "sendCode": "M'envoyer un code",
         "codeSent": "Code envoyé. Il expire dans dix minutes.",
         "codeSentSandbox": "Code envoyé à l’adresse de contact de la réservation, car il s’agit du bac à sable PayPal. Il expire dans dix minutes.",
         "code": "Code à usage unique",
@@ -2848,8 +2891,8 @@
     "beforeUrl": "Au départ",
     "afterUrl": "Au retour",
     "yourReply": "Votre réponse",
-    "codeGuidance": "Nous envoyons un code à usage unique à l’adresse confirmée par PayPal lors du paiement.",
-    "sendCode": "M’envoyer un code par e-mail",
+    "codeGuidance": "Nous envoyons un code à usage unique au téléphone que vous avez confirmé pour les SMS, ou à l'adresse e-mail que PayPal a confirmée lors du paiement.",
+    "sendCode": "M'envoyer un code de vérification",
     "codeSent": "Code envoyé. Il expire dans dix minutes.",
     "codeSentSandbox": "Code envoyé à l'adresse e-mail indiquée à la réservation. Il s'agit du bac à sable PayPal, dont les comptes de test ne reçoivent aucun e-mail ; avec un vrai compte PayPal, il est envoyé à votre adresse PayPal. Il expire dans dix minutes.",
     "code": "Code de vérification",
@@ -3223,11 +3266,11 @@
         "payer_missing": "Votre historique commence dès que PayPal a confirmé votre paiement."
       },
       "codeTitle": "Prouvez que c'est vous",
-      "codeLead": "Modifier votre historique demande un code envoyé à l'adresse que PayPal a pour vous, afin que personne d'autre ayant ce lien ne puisse le modifier.",
+      "codeLead": "Modifier votre dossier demande un code envoyé au téléphone que vous avez confirmé, ou à l'e-mail que PayPal a pour vous : personne d'autre avec ce lien ne peut le modifier.",
       "sendCode": "M'envoyer un code",
       "sending": "Envoi…",
       "codeSent": "Code envoyé. Il est valable dix minutes.",
-      "code": "Code reçu par e-mail"
+      "code": "Votre code"
     },
     "verify": {
       "title": "Vérifier un historique de retours",
@@ -4341,6 +4384,60 @@
       "already_done": "Cette réparation est déjà clôturée.",
       "currency_unset": "Publiez d’abord vos prix.",
       "not_found": "Cette réparation ou cette marque est introuvable."
+    }
+  },
+  "texts": {
+    "codes": {
+      "claimReply": "{shop} : {code} est votre code pour accepter ou contester la réclamation. Ne le partagez pas.",
+      "settlement": "{shop} : {code} est votre code pour confirmer ou refuser l'accord sur votre réclamation. Ne le partagez pas.",
+      "incident": "{shop} : {code} est votre code pour accepter le prix de ce que vous avez signalé. Ne le partagez pas.",
+      "trust": "{shop} : {code} est votre code pour modifier votre Clean Record. Ne le partagez pas.",
+      "phone": "{shop} : {code} confirme ce téléphone pour les SMS de votre location. Ne le partagez pas.",
+      "contactChange": "{shop} : {code} est votre code pour envoyer les SMS de votre location vers un nouveau téléphone. Ne le partagez pas."
+    },
+    "renterLink": "{shop} : votre location. Payez, voyez ce que vous louez et écrivez au magasin ici : {link}",
+    "conditionReport": "{shop} : vous avez l'article. Vérifiez les photos de la remise et signalez ce qui manque : {link}",
+    "dropOffMissing": "{shop} : le magasin a regardé au point de dépôt {looked} et votre article n'y était pas. Votre retour : {link}"
+  },
+  "contact": {
+    "title": "Comment on vous joint",
+    "byEmail": "Par e-mail",
+    "byText": "Par SMS au {phone}",
+    "confirmed": "Confirmé",
+    "notConfirmed": "Non confirmé",
+    "emailBody": "Les liens, rappels et codes arrivent par e-mail. Pas d'e-mail sur ce téléphone ? Choisissez les SMS.",
+    "textBody": "Les liens, rappels et codes arrivent par SMS. Une copie de chaque décision d'argent part aussi à l'e-mail que PayPal a pour vous.",
+    "notConfirmedBody": "Les liens et rappels arrivent par SMS. Les codes arrivent par e-mail jusqu'à ce que vous confirmiez ce numéro.",
+    "textInstead": "Plutôt par SMS",
+    "emailInstead": "Plutôt par e-mail",
+    "changeNumber": "Changer de numéro",
+    "confirmNumber": "Confirmer ce numéro",
+    "phoneLabel": "Votre portable, avec son indicatif de pays",
+    "newPhoneLabel": "Votre nouveau portable, avec son indicatif de pays",
+    "privacy": "Hold utilise ce numéro uniquement pour les liens, rappels et codes de cette location.",
+    "sendCode": "M'envoyer un code par SMS",
+    "codeLabel": "Le code envoyé au {phone}",
+    "confirm": "Confirmer ce téléphone",
+    "confirmedNow": "Les SMS de cette location vont désormais au {phone}.",
+    "changeLead": "Pour envoyer vos SMS vers un nouveau téléphone, nous envoyons d'abord un code là où vont vos codes aujourd'hui.",
+    "sendChangeCode": "M'envoyer ce code",
+    "changeCodeLabel": "Le code que nous venons d’envoyer",
+    "changeCodeEmailed": "Code envoyé à l'e-mail que PayPal a pour vous. Il expire dans dix minutes.",
+    "cancel": "Annuler",
+    "codeSentByText": "Code envoyé par SMS au {phone}. Il expire dans dix minutes.",
+    "emailInsteadButton": "Plutôt l'envoyer à mon e-mail PayPal",
+    "shownLabel": "Sandbox : ce SMS n'a pas été envoyé. C'est ce que recevrait la personne qui loue.",
+    "useCode": "Utiliser le code {code}",
+    "results": {
+      "phone_invalid": "Écrivez le numéro avec son indicatif de pays, par exemple +41 79 123 45 67.",
+      "country_not_texted": "Hold n'envoie pas de SMS dans ce pays. Vos codes arrivent par e-mail.",
+      "code_needed": "L'empreinte est posée : un nouveau numéro demande d'abord le code envoyé là où vont vos codes aujourd'hui.",
+      "code_recently_sent": "Attendez une minute avant de demander un autre code.",
+      "code_expired": "Ce code a expiré. Demandez-en un nouveau.",
+      "wrong_code": "Ce code n'est pas correct.",
+      "text_unavailable": "Le SMS n'a pas pu être envoyé.",
+      "email_unavailable": "Le code n'a pas pu être envoyé. Réessayez plus tard.",
+      "payer_missing": "Payez d'abord les frais : PayPal indique alors à Hold où envoyer vos codes."
     }
   }
 }

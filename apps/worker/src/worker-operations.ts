@@ -1,11 +1,13 @@
-import { findPayPalAccount, inShop, publishedEvidencePack, renterContact, shopSettings } from '@hold/db'
+import { findPayPalAccount, inShop, publishedEvidencePack, shopSettings } from '@hold/db'
 import { createDataApiDatabase } from '@hold/db/data-api'
 import { createS3DocumentStore } from '@hold/evidence'
-import { createLazyMailer, createSmtpMailer, loadSmtpSettings, shopMessageEmail } from '@hold/notify'
+import { createLazyMailer, createSmtpMailer, loadSmtpSettings, shopMessageEmail, shopMessageText } from '@hold/notify'
 import { createBedrockInvestigator, openPayPalReader, paypalTransport } from '@hold/ops'
 import type { CarryOutDependencies, OpsDependencies } from '@hold/ops'
 import { createRestPayPalHolds } from '@hold/paypal'
 import { createReminderSender } from './reminder-sender.ts'
+import { createRenterReach } from './renter-reach.ts'
+import { workerTexter } from './worker-texter.ts'
 import { loadOperationsSettings } from './operations-settings.ts'
 import { shopPayPalClient } from './worker-settle.ts'
 
@@ -34,7 +36,7 @@ export function workerOperations(): OpsDependencies {
         },
       }
     },
-    remind: createReminderSender({ database, mailer }),
+    remind: createReminderSender({ database, mailer, texter: workerTexter(process.env) }),
   }
 }
 
@@ -45,13 +47,16 @@ export function workerCarryOut(): CarryOutDependencies {
   const database = createDataApiDatabase({ region: settings.region, clusterArn: settings.database.clusterArn, secretArn: settings.database.secretArn, database: settings.database.name })
   const mailer = createLazyMailer(async () => createSmtpMailer(await loadSmtpSettings(settings.smtpSecret, settings.region)))
   const documents = createS3DocumentStore({ evidenceBucket: settings.evidenceBucket, region: settings.region })
+  const reach = createRenterReach({ database, mailer, texter: workerTexter(process.env) })
   return {
     database,
     now: () => new Date(),
     async message(input) {
-      const { shop, renter } = await inShop(database, { role: 'hold_worker', shopId: input.shopId }, async (transaction) => ({ shop: await shopSettings(transaction, input.shopId), renter: await renterContact(transaction, input.rentalId) }))
-      if (shop === undefined || renter === undefined) return false
-      return mailer.send(shopMessageEmail(renter.email, renter.language, { shopName: shop.name, text: input.text }))
+      const shop = await inShop(database, { role: 'hold_worker', shopId: input.shopId }, (transaction) => shopSettings(transaction, input.shopId))
+      if (shop === undefined) return false
+      const facts = { shopName: shop.name, text: input.text }
+      const reached = await reach(input.shopId, input.rentalId, (renter) => ({ purpose: 'shop_message', email: renter.email === null ? null : shopMessageEmail(renter.email, renter.language, facts), text: shopMessageText(facts) }))
+      return reached !== undefined && reached.via !== 'none'
     },
     // The approved notes go to PayPal as evidence, with the disputed rental's latest published record as a PDF.
     async answerDispute(shopId, input) {

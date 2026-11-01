@@ -1,5 +1,5 @@
 import { timingSafeEqual } from 'node:crypto'
-import { claimCodeRecipient, claimReplyAllowed } from '@hold/domain'
+import { claimReplyAllowed, renterCodeRecipient } from '@hold/domain'
 import { and, eq } from 'drizzle-orm'
 import { claimReplies, claims, executions, renterLinks, rentals, renters } from './schema/index.ts'
 import { shopPayPalMode } from './paypal-mode.ts'
@@ -8,13 +8,16 @@ import type { Transaction } from './scope.ts'
 type Link = typeof renterLinks.$inferSelect
 
 // The one-time code for a renter's money decision (architecture.md section 12.3): stored as its digest on the link, sent
-// to the address PayPal gave for the payer, or in the sandbox to the booking's contact. Every money decision a renter
-// makes through a link issues its code here, so the rule for who receives it lives in one place.
-export async function storeRenterCode(transaction: Transaction, link: Link, hash: string, now: Date) {
+// to the phone the renter confirmed for texts, or to the address PayPal gave for the payer (in the sandbox, the
+// booking's contact). `via: 'email'` is the renter asking for it by email instead. Every money decision a renter makes
+// through a link issues its code here, so the rule for who receives it lives in one place.
+export async function storeRenterCode(transaction: Transaction, link: Link, hash: string, now: Date, via: 'chosen' | 'email' = 'chosen') {
   if (link.claimCodeExpiresAt !== null && link.claimCodeExpiresAt.getTime() - 540000 > now.getTime()) return { ok: false, reason: 'code_recently_sent' } as const
-  const [payer] = await transaction.select({ email: renters.email, contactEmail: rentals.contactEmail }).from(rentals).innerJoin(renters, eq(renters.id, rentals.renterId)).where(eq(rentals.id, link.rentalId))
+  const [payer] = await transaction
+    .select({ email: renters.email, contactEmail: rentals.contactEmail, channel: rentals.contactChannel, phone: rentals.contactPhone, confirmedAt: rentals.phoneConfirmedAt })
+    .from(rentals).innerJoin(renters, eq(renters.id, rentals.renterId)).where(eq(rentals.id, link.rentalId))
   if (payer === undefined) return { ok: false, reason: 'payer_missing' } as const
-  const recipient = claimCodeRecipient({ paypalMode: await shopPayPalMode(transaction, link.shopId), payerEmail: payer.email, contactEmail: payer.contactEmail })
+  const recipient = renterCodeRecipient({ paypalMode: await shopPayPalMode(transaction, link.shopId), payerEmail: payer.email, contactEmail: payer.contactEmail, channel: payer.channel === 'text' ? 'text' : 'email', phone: payer.phone, phoneConfirmed: payer.confirmedAt !== null, via })
   await transaction.update(renterLinks).set({ claimCodeHash: hash, claimCodeExpiresAt: new Date(now.getTime() + 600000), claimCodeAttempts: 0 }).where(eq(renterLinks.id, link.id))
   return { ok: true, ...recipient } as const
 }
@@ -26,7 +29,7 @@ export async function liveLink(transaction: Transaction, linkId: string, scopes:
   return link
 }
 
-export async function issueClaimCode(transaction: Transaction, linkId: string, hash: string, now: Date) {
+export async function issueClaimCode(transaction: Transaction, linkId: string, hash: string, now: Date, via: 'chosen' | 'email' = 'chosen') {
   const link = await liveLink(transaction, linkId, ['accept', 'contest'], now)
   if (link === undefined) return { ok: false, reason: 'link_invalid' } as const
   const [claim] = await transaction.select().from(claims).where(eq(claims.rentalId, link.rentalId))
@@ -34,7 +37,7 @@ export async function issueClaimCode(transaction: Transaction, linkId: string, h
   const capture = (await transaction.select().from(executions).where(and(eq(executions.rentalId, link.rentalId), eq(executions.action, 'capture')))).some((row) => row.paypalResourceIds['claim'] === claim.id && row.paypalResourceIds['early'] === 'true')
   const replies = await transaction.select().from(claimReplies).where(eq(claimReplies.claimId, claim.id))
   if (!claimReplyAllowed(claim.state, claim.replyDueAt, now, capture, replies.length > 0)) return { ok: false, reason: 'reply_expired' } as const
-  return storeRenterCode(transaction, link, hash, now)
+  return storeRenterCode(transaction, link, hash, now, via)
 }
 
 export async function useClaimCode(transaction: Transaction, linkId: string, hash: string, now: Date) {

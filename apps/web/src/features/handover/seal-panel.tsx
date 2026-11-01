@@ -25,7 +25,7 @@ export function SealPanel({ sessionId, rentalId, missing, sealed: alreadySealed 
         </p>
         {sealed.value.conditionLink === undefined ? null : (
           <>
-            <p className="text-muted-foreground">{sealed.value.conditionLink.emailed ? t('emailed') : t('show')}</p>
+            <p className="text-muted-foreground">{sealed.value.conditionLink.sent === 'text' ? t('texted') : sealed.value.conditionLink.sent === 'email' ? t('emailed') : t('show')}</p>
             <LinkCode url={sealed.value.conditionLink.url} qr={sealed.value.conditionLink.qr} scan={t('scan')} />
           </>
         )}

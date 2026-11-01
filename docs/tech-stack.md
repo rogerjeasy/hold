@@ -31,6 +31,7 @@ This document says what to build with and why. It is not a design or an implemen
 | Face blurring | Amazon Rekognition |
 | Background work | Amazon SQS and EventBridge Scheduler |
 | Email | Hold's SMTP account (a Gmail account with an app password), through `nodemailer`. Cognito hands its codes to Hold's own sender |
+| Text messages | AWS End User Messaging SMS (`@aws-sdk/client-pinpoint-sms-voice-v2`), for renters who choose texts (architecture.md section 12.3) |
 | Secrets | AWS Secrets Manager |
 | Signing | An asymmetric key in AWS KMS, for the Clean Record credential |
 | Infrastructure as code | AWS CDK in TypeScript |
@@ -272,6 +273,7 @@ Photographs are Hold's evidence, so how they are stored matters as much as how t
 - **A passkey as the second factor** for owners, managers and anyone who can approve a claim above the shop's threshold, with user verification required, so the device and the person's fingerprint, face or PIN prove it together. Not an authenticator app: Cognito asks for one only after a password, and a person who turns one on can no longer sign in with an emailed code. Cognito's own MFA setting is off for that reason (`architecture.md` section 12.1, decision 31).
 - **Codes go out through Hold's SMTP account, not SES.** SES stayed in its sandbox, where it sends only to verified addresses, and Hold has no domain of its own. So Cognito hands each sign-up and sign-in code to a custom email sender, the Lambda function `hold-code-sender` (`apps/worker/src/code-sender.ts`). Cognito encrypts the code with Hold's KMS key; the function decrypts it with the AWS Encryption SDK (`@aws-crypto/client-node`) and emails it through the SMTP account. It never logs the code or the address. Cognito still needs an SES identity, `rogerjeasybavibidila@gmail.com`, before it allows email codes at all, but sends nothing through it.
 - **Staff invitations** go through the same SMTP account, by the `Mailer` interface in `packages/notify`.
+- **Texts to renters** go through AWS End User Messaging SMS, by the `Texter` port in `packages/notify`, chosen over Twilio on 1 November 2026 to keep everything inside the AWS account. The client is the one new dependency. The account was in the SMS sandbox on 1 November 2026, with a monthly text spending limit of 1 USD and no sender number, sender name, verified destination or configuration set. Before a real text reaches a phone an administrator must: deploy HoldDelivery, whose permissions boundary now allows `sms-voice:SendTextMessage` and whose CloudFormation role may make the `hold-texts` configuration set and its topic; verify the destination numbers used for the demo (sandbox); get a sender for the countries texted (a sender name where the country allows one without registration; a registered number for the United States, which takes weeks); raise the spending limit; then set `"textReports": "on"` and, once there is one, `"textSender"` in `infra/cdk.json`. Until then a text fails, Hold uses email, and demo shops show their texts on the renter's page without sending.
 - **The SMTP account** is a Gmail account with an app password, kept as the JSON secret `hold/email/smtp` (`host`, `port`, `user`, `password`). An administrator creates and fills it; no template, image or setting holds the password. Gmail sends up to about 500 messages a day, which covers judging. Mail comes from the Gmail address, which Gmail's own servers vouch for.
 - **Tokens** verified by each service with the `aws-jwt-verify` library.
 
@@ -466,6 +468,8 @@ Each of these should be tried against the real services before the build depends
 16. **The AG Grid licence through judging.** The Enterprise trial key AG Grid sent ends on 13 November 2026, the day after submissions close, and judging runs to 15 December. After that the three grids keep working, but show AG Grid's "Trial Period Expired" watermark to judges and write its notice to the console, which also fails CI's end-to-end tests of the decision board. Ask AG Grid, a sponsor of the hackathon, for a key that lasts through judging; it then goes into the `hold/web/ag-grid-licence` secret and the `AG_GRID_LICENCE_KEY` repository secret, and no code changes.
 
 ---
+
+17. **Texts to renters (architecture.md section 12.3).** Not yet tried against AWS: that a sandbox account with a verified destination delivers a transactional text with no sender named, and with a sender name in Switzerland and Portugal; that the configuration set's SNS event destination sends `eventType`, `messageId`, `eventTimestamp` and the `context` Hold set, as `text-report.ts` reads them; that a number which replied STOP is refused with `ConflictException` reason `DESTINATION_PHONE_NUMBER_OPTED_OUT`; and that Android Chrome offers the code from the WebOTP line on Hold's App Runner host. The code handles each failing safely, by email.
 
 ## 17. Access for judges
 

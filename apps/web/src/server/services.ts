@@ -13,8 +13,8 @@ import type { DisplayJobDependencies, DocumentStore, EvidenceStore, MemoryEviden
 import { noFaces } from '@hold/vision'
 import { opsAgentMessageSchema, runOperations } from '@hold/ops/run'
 import type { OpsDependencies } from '@hold/ops/run'
-import { createLazyMailer, createMemoryMailer, createSmtpMailer, loadSmtpSettings } from '@hold/notify'
-import type { Mailer } from '@hold/notify'
+import { createAwsTexter, createLazyMailer, createMemoryMailer, createMemoryTexter, createSmtpMailer, loadSmtpSettings } from '@hold/notify'
+import type { Mailer, Texter } from '@hold/notify'
 import { createFakePayPal, createMemoryCredentialStore, createPayPalClient, createRestPayPalHolds, createSecretsManagerCredentialStore, credentialReference, DEMO_CREDENTIAL_OWNER, PAYPAL_EVENT_TYPES } from '@hold/paypal'
 import type { CredentialStore, FakePayPal, PayPalCredentials, PayPalHolds } from '@hold/paypal'
 import { applyPayPalEvent, createMemoryScheduler, createSqsSender, executionMessageSchema, paypalEventMessageSchema, runExecution, runUpkeep, upkeepMessageSchema } from '@hold/settle'
@@ -44,6 +44,9 @@ export type Services = {
   readonly demoSessions: DemoSessionServices | undefined
   readonly database: Database
   readonly mailer: Mailer
+  // Texts to renters who chose them (architecture.md section 12.3), through AWS End User Messaging. Kept in memory in the
+  // test environment.
+  readonly texter: Texter
   readonly paypalCredentials: CredentialStore
   readonly checkPayPalCredentials: (credentials: PayPalCredentials) => Promise<CredentialCheck>
   // PayPal, acting in the shop account whose credentials the reference names.
@@ -210,6 +213,7 @@ async function build(): Promise<Services> {
       },
       database,
       mailer,
+      texter: createMemoryTexter(),
       paypalCredentials: createMemoryCredentialStore(),
       checkPayPalCredentials: (credentials) => Promise.resolve(credentials.clientSecret === TEST_REFUSED_PAYPAL_SECRET ? 'refused' : 'accepted'),
       paypalFor,
@@ -251,6 +255,7 @@ async function build(): Promise<Services> {
     database,
     // Through the SMTP account in Secrets Manager, read when the first email is sent.
     mailer: createLazyMailer(async () => createSmtpMailer(await loadSmtpSettings(config.smtpSecret, config.region))),
+    texter: createAwsTexter({ region: config.region, ...(config.texts.sender === undefined ? {} : { originationIdentity: config.texts.sender }), ...(config.texts.configurationSet === undefined ? {} : { configurationSet: config.texts.configurationSet }) }),
     paypalCredentials,
     checkPayPalCredentials: checkWithPayPal,
     paypalFor,

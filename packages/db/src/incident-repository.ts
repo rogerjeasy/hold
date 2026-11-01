@@ -257,12 +257,12 @@ export async function incidentForRenter(transaction: Transaction, rentalId: stri
 export type RenterIncident = NonNullable<Awaited<ReturnType<typeof incidentForRenter>>>
 
 // The one-time code for agreeing small damage. Only a link that may report, only for a price a staff member confirmed.
-export async function issueIncidentCode(transaction: Transaction, linkId: string, incidentId: string, hash: string, now: Date) {
+export async function issueIncidentCode(transaction: Transaction, linkId: string, incidentId: string, hash: string, now: Date, via: 'chosen' | 'email' = 'chosen') {
   const link = await liveLink(transaction, linkId, ['report_incident'], now)
   if (link === undefined) return refused('link_invalid')
   const incident = await lockedIncident(transaction, incidentId, link.rentalId)
   if (incident === undefined || !mayAgree(incident)) return refused('not_agreeable')
-  return storeRenterCode(transaction, link, hash, now)
+  return storeRenterCode(transaction, link, hash, now, via)
 }
 
 export type { IncidentKind }

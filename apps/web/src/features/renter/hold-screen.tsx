@@ -4,6 +4,8 @@ import { useTranslations } from 'next-intl'
 import { useShopFormat } from '@/hooks/use-shop-format'
 import { Link } from '@/i18n/navigation'
 import { linkRoutes } from '@/lib/routes'
+import { ContactPanel } from '@/features/contact/contact-panel'
+import type { RenterContactView } from '@/features/contact/contact-view'
 import { HoldReason } from '@/features/trust/hold-reason'
 import { HoldButton } from './hold-button'
 import { WalkInButton } from './walk-in-button'
@@ -16,11 +18,13 @@ type HoldScreenProps = {
   hold: RentalHold | undefined
   // The shop's PayPal app, for PayPal's own button. Absent where it is not known.
   checkout?: PayPalCheckout | undefined
+  // How the renter is reached: set here, at the counter, before the hold makes the number theirs (section 12.3).
+  contact?: RenterContactView | undefined
 }
 
 // Where the renter approves the hold at pickup, from the code staff show. It says what the hold is, that it is not a
 // charge, and sends them to PayPal for exactly the amount agreed at booking.
-export function HoldScreen({ token, view, hold, checkout }: HoldScreenProps) {
+export function HoldScreen({ token, view, hold, checkout, contact }: HoldScreenProps) {
   const t = useTranslations('renter.holdPage')
   const walkIn = useTranslations('renter.walkIn')
   const format = useShopFormat({ timeZone: view.timeZone, currency: view.currency })
@@ -37,6 +41,7 @@ export function HoldScreen({ token, view, hold, checkout }: HoldScreenProps) {
         <div className="grid gap-5">
           <p className="max-w-prose text-lg text-pretty">{replacing && hold.validUntil !== null ? t('replaceLead', { amount, date: format.day(hold.validUntil) }) : t('lead', { amount })}</p>
           <HoldReason hold={hold} money={format.money} audience="renter" />
+          {contact === undefined || contact.locked ? null : <ContactPanel token={token} contact={contact} />}
           {hold.placementFailure === null ? null : (
             <p role="alert" className="flex gap-1.5 text-[0.9375rem] text-destructive">
               <CircleAlert aria-hidden="true" className="mt-0.5 size-4.5 shrink-0" />

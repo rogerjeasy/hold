@@ -3,6 +3,7 @@ import { createDataApiDatabase } from '@hold/db/data-api'
 import { createLazyMailer, createSmtpMailer, loadSmtpSettings } from '@hold/notify'
 import { z } from 'zod'
 import type { sendSettlementReceipt } from './settlement-receipt.ts'
+import { workerTexter } from './worker-texter.ts'
 
 const schema = z.object({
   AWS_REGION: z.string().min(1),
@@ -22,6 +23,7 @@ export function workerReceipts(): Parameters<typeof sendSettlementReceipt>[0] {
   return {
     database: createDataApiDatabase({ region: settings.AWS_REGION, clusterArn: settings.HOLD_DATABASE_CLUSTER_ARN, secretArn: settings.HOLD_DATABASE_SECRET_ARN, database: settings.HOLD_DATABASE_NAME }),
     mailer: createLazyMailer(async () => createSmtpMailer(await loadSmtpSettings(settings.HOLD_SMTP_SECRET, settings.AWS_REGION))),
+    texter: workerTexter(process.env),
     publicUrl: settings.HOLD_PUBLIC_URL.replace(/\/$/, ''),
     linkKey: () => (linkKey ??= readKeySecret(settings.HOLD_RENTER_LINK_KEY_SECRET_ARN, settings.AWS_REGION)),
     now: () => new Date(),

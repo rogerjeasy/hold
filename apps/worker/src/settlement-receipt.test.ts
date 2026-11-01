@@ -1,10 +1,10 @@
 import { afterAll, beforeAll, expect, it } from 'vitest'
 import { createTestDatabase } from '@hold/db/testing'
 import { readyRentalShop } from '@hold/db/testing/ready-rental'
-import { evidencePackFor, findRenterLink, moneyEvents, queueSettlementReceipts, receiptDeliveriesFor, rentals } from '@hold/db'
+import { evidencePackFor, findRenterLink, moneyEvents, queueSettlementReceipts, receiptDeliveriesFor, rentals, requestPhoneCode } from '@hold/db'
 import { readRenterToken, renterLinkKey } from '@hold/auth'
 import { createMemoryDocumentStore, createMemoryEvidenceStore, makeEvidencePack } from '@hold/evidence'
-import { createMemoryMailer } from '@hold/notify'
+import { createMemoryMailer, createMemoryTexter } from '@hold/notify'
 
 const now = new Date('2026-10-20T13:00:00Z')
 let database: Awaited<ReturnType<typeof createTestDatabase>>
@@ -28,7 +28,7 @@ it('sends one confirmed receipt with a read-only signed link to its exact immuta
   const { sendSettlementReceipt } = await import('./settlement-receipt.ts')
   const rental = await prepared('REF-VERIFIED-WORKER')
   const mailer = createMemoryMailer()
-  const options = { database, mailer, publicUrl: 'https://hold.test', linkKey: () => Promise.resolve(key), now: () => now }
+  const options = { database, mailer, texter: createMemoryTexter(), publicUrl: 'https://hold.test', linkKey: () => Promise.resolve(key), now: () => now }
   const message = { shopId: shop.scope.shopId, receiptId: rental.receiptId }
   expect(await sendSettlementReceipt(options, message)).toBe('sent')
   expect(await sendSettlementReceipt(options, message)).toBe('nothing_to_do')
@@ -41,10 +41,21 @@ it('sends one confirmed receipt with a read-only signed link to its exact immuta
   const pack = await shop.act((transaction) => evidencePackFor(transaction, rental.rentalId, rental.packId))
   expect(JSON.stringify(pack)).not.toContain(token)
 })
+it('texts the record link as well to a renter who chose texts, and still emails the address PayPal gave', async () => {
+  const { sendSettlementReceipt } = await import('./settlement-receipt.ts')
+  const rental = await prepared('REF-TEXTED-WORKER')
+  await shop.act((transaction) => requestPhoneCode(transaction, rental.rentalId, { typed: '+41791234567', hash: 'code', stepUp: true }, now))
+  const mailer = createMemoryMailer()
+  const texter = createMemoryTexter()
+  expect(await sendSettlementReceipt({ database, mailer, texter, publicUrl: 'https://hold.test', linkKey: () => Promise.resolve(key), now: () => now }, { shopId: shop.scope.shopId, receiptId: rental.receiptId })).toBe('sent')
+  expect(mailer.sent).toHaveLength(1)
+  expect(texter.sent).toEqual([expect.objectContaining({ to: '+41791234567' })])
+  expect(texter.sent[0]?.body).toContain(`version=${rental.packId}`)
+})
 it('retries a refused transport without rebuilding or changing the document version', async () => {
   const { sendSettlementReceipt } = await import('./settlement-receipt.ts')
   const rental = await prepared('REF-RETRY-WORKER')
-  const options = { database, publicUrl: 'https://hold.test', linkKey: () => Promise.resolve(key), now: () => now }
+  const options = { database, texter: createMemoryTexter(), publicUrl: 'https://hold.test', linkKey: () => Promise.resolve(key), now: () => now }
   await expect(sendSettlementReceipt({ ...options, mailer: { send: () => Promise.resolve(false) } }, { shopId: shop.scope.shopId, receiptId: rental.receiptId })).rejects.toThrow('email_unavailable')
   const failed = await shop.act((transaction) => receiptDeliveriesFor(transaction, rental.rentalId))
   expect(failed).toMatchObject([{ status: 'failed', packId: rental.packId }])
@@ -60,7 +71,7 @@ it('records missing verified contact as a delivery failure without using the boo
   const { sendSettlementReceipt } = await import('./settlement-receipt.ts')
   const rental = await prepared('REF-CONTACT-MISSING', true)
   const mailer = createMemoryMailer()
-  await expect(sendSettlementReceipt({ database, mailer, publicUrl: 'https://hold.test', linkKey: () => Promise.resolve(key), now: () => now }, { shopId: shop.scope.shopId, receiptId: rental.receiptId })).rejects.toThrow('contact_missing')
+  await expect(sendSettlementReceipt({ database, mailer, texter: createMemoryTexter(), publicUrl: 'https://hold.test', linkKey: () => Promise.resolve(key), now: () => now }, { shopId: shop.scope.shopId, receiptId: rental.receiptId })).rejects.toThrow('contact_missing')
   expect(mailer.sent).toHaveLength(0)
   expect(await shop.act((transaction) => receiptDeliveriesFor(transaction, rental.rentalId))).toMatchObject([{ status: 'failed', packId: rental.packId }])
 })

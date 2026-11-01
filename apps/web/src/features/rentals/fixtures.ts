@@ -31,6 +31,8 @@ export const detail = (overrides: Partial<RentalDetail> = {}): RentalDetail => (
   ...rentals.waiting,
   contactName: 'Priya Natarajan',
   contactEmail: 'priya@example.com',
+  contactChannel: 'email',
+  contactPhone: null,
   renterName: null,
   language: 'en',
   createdAt: new Date('2026-10-15T09:00:00Z'),

@@ -1,5 +1,5 @@
-import { blocksItem, bookingTerms, checkBooking, money, paymentLapsed, placementStrategy, RENTAL_TRANSITIONS, rentalDays, transition } from '@hold/domain'
-import type { BookingTerms, ItemCategory, Period, PlacementStrategy, RentalState } from '@hold/domain'
+import { blocksItem, bookingTerms, checkBooking, maskedPhone, money, paymentLapsed, placementStrategy, RENTAL_TRANSITIONS, rentalDays, transition } from '@hold/domain'
+import type { BookingTerms, ContactChannel, ItemCategory, Period, PlacementStrategy, RentalState } from '@hold/domain'
 import { and, asc, desc, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm'
 import { holds, items, itemTypes, priceLists, rentalItems, rentals, renterLinks, renters, shops, wearPolicies } from './schema/index.ts'
 import type { BookingChannel } from './schema/index.ts'
@@ -56,7 +56,9 @@ export async function bookableTypes(transaction: Transaction, period: Period, no
 
 export type NewBooking = Period & {
   readonly lines: readonly { readonly itemTypeId: string; readonly count: number }[]
-  readonly contact: { readonly name: string; readonly email: string } | undefined
+  // A phone, in the international form, makes texts the way the renter is reached until they choose otherwise on their
+  // own page (architecture.md section 12.3). A one-time code goes to it only once they confirm it.
+  readonly contact: { readonly name: string; readonly email: string; readonly phone?: string } | undefined
   readonly language: string
   readonly bookedThrough: BookingChannel
   // How staff asked for the hold to be placed: combined for a walk-in who approves the fee and the hold once. Only
@@ -141,7 +143,9 @@ export async function createBooking(transaction: Transaction, shopId: string, bo
       priceListId: list.id,
       wearPolicyId,
       contactName: booking.contact?.name.trim() ?? null,
-      contactEmail: booking.contact?.email.trim().toLowerCase() ?? null,
+      contactEmail: booking.contact === undefined || booking.contact.email.trim() === '' ? null : booking.contact.email.trim().toLowerCase(),
+      contactPhone: booking.contact?.phone ?? null,
+      contactChannel: booking.contact?.phone === undefined ? 'email' : 'text',
       language: booking.language,
       bookedThrough: booking.bookedThrough,
       createdAt: now,
@@ -248,6 +252,9 @@ export type BookedItem = { readonly id: string; readonly label: string; readonly
 export type RentalDetail = Omit<RentalSummary, 'items'> & {
   readonly contactName: string | null
   readonly contactEmail: string | null
+  // How the renter is reached, and their number masked (architecture.md section 12.3).
+  readonly contactChannel: ContactChannel
+  readonly contactPhone: string | null
   readonly renterName: string | null
   readonly language: string
   readonly createdAt: Date
@@ -258,7 +265,7 @@ export type RentalDetail = Omit<RentalSummary, 'items'> & {
 export async function rentalDetail(transaction: Transaction, rentalId: string, now: Date): Promise<RentalDetail | undefined> {
   if (!UUID.test(rentalId)) return undefined
   const [row] = await transaction
-    .select({ ...summaryColumns, contactEmail: rentals.contactEmail, language: rentals.language, priceListVersion: priceLists.version })
+    .select({ ...summaryColumns, contactEmail: rentals.contactEmail, contactChannel: rentals.contactChannel, contactPhone: rentals.contactPhone, language: rentals.language, priceListVersion: priceLists.version })
     .from(rentals)
     .leftJoin(renters, eq(renters.id, rentals.renterId))
     .innerJoin(priceLists, eq(priceLists.id, rentals.priceListId))
@@ -275,6 +282,8 @@ export async function rentalDetail(transaction: Transaction, rentalId: string, n
     ...summary,
     contactName: row.contactName,
     contactEmail: row.contactEmail,
+    contactChannel: row.contactChannel === 'text' ? 'text' : 'email',
+    contactPhone: row.contactPhone === null ? null : maskedPhone(row.contactPhone),
     renterName: row.renterName,
     language: row.language,
     createdAt: row.createdAt,

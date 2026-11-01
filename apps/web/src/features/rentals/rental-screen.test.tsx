@@ -4,7 +4,7 @@ import { renderWithIntl } from '@/test/render'
 import { detail } from './fixtures'
 import { RentalScreen } from './rental-screen'
 
-vi.mock('./actions', () => ({ showRenterLink: () => Promise.resolve(null), emailRenterLinkAgain: () => Promise.resolve(null), letGoOfBooking: () => Promise.resolve(null), askForHold: () => Promise.resolve(null) }))
+vi.mock('./actions', () => ({ showRenterLink: () => Promise.resolve(null), sendRenterLinkAgain: () => Promise.resolve(null), letGoOfBooking: () => Promise.resolve(null), askForHold: () => Promise.resolve(null) }))
 vi.mock('@/features/returns/actions', () => ({ startReturn: vi.fn() }))
 vi.mock('@/i18n/navigation', async (original) => ({ ...(await original<object>()), useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }) }))
 
@@ -17,6 +17,26 @@ describe('a rental', () => {
     renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail()} hold={walkInHold} handovers={[]} canAct />)
     expect(screen.getByText(/A walk-in: the renter approves the fee and the hold together/)).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Ask for the hold' })).not.toBeInTheDocument()
+  })
+
+  it('offers to text the link to a renter who chose texts, showing only enough of the number to recognise it', () => {
+    renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ contactChannel: 'text', contactPhone: '+41 ••• •• 67', contactEmail: 'priya@example.com' })} hold={undefined} handovers={[]} canAct />)
+    expect(screen.getByRole('button', { name: 'Text it to +41 ••• •• 67' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Email it to/ })).not.toBeInTheDocument()
+  })
+
+  it('shows staff each text sent to the renter and what became of it, number masked', () => {
+    const texts = [
+      { id: 't2', purpose: 'renter_code' as const, toPhone: '+41 ••• •• 67', status: 'failed' as const, failure: 'unavailable', createdAt: new Date('2026-10-16T10:05:00Z'), statusAt: null },
+      { id: 't1', purpose: 'renter_link' as const, toPhone: '+41 ••• •• 67', status: 'delivered' as const, failure: null, createdAt: new Date('2026-10-16T10:00:00Z'), statusAt: new Date('2026-10-16T10:00:04Z') },
+    ]
+    renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ contactChannel: 'text', contactPhone: '+41 ••• •• 67' })} hold={undefined} handovers={[]} texts={texts} canAct />)
+    const panel = screen.getByRole('region', { name: 'Texts to the renter' })
+    const rows = within(panel).getAllByRole('listitem')
+    expect(rows[0]).toHaveTextContent('A one-time code')
+    expect(rows[0]).toHaveTextContent('Not sent, so Hold used email where it could')
+    expect(rows[1]).toHaveTextContent('The renter’s link')
+    expect(rows[1]).toHaveTextContent('Delivered')
   })
 
   it('links even read-only staff to the rental record', () => {

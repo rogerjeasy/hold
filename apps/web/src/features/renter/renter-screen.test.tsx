@@ -5,6 +5,7 @@ import { renderWithIntl } from '@/test/render'
 import { RenterScreen } from './renter-screen'
 
 vi.mock('./actions', () => ({ payFee: () => Promise.resolve(null), confirmFee: () => Promise.resolve(null), approveHold: () => Promise.resolve(null) }))
+vi.mock('@/features/contact/renter-actions', () => ({ sendPhoneCode: vi.fn(), confirmPhone: vi.fn(), chooseEmail: vi.fn(), sendContactChangeCode: vi.fn() }))
 
 const view: RenterView = {
   rentalId: 'rental-1',
@@ -127,5 +128,13 @@ describe('the renter’s page', () => {
   it('does not ask again once the renter has answered', () => {
     renderWithIntl(<RenterScreen token="token" view={view} />)
     expect(screen.queryByText('Use my record of clean returns to lower future holds at Hold shops.')).not.toBeInTheDocument()
+  })
+})
+
+describe('how the renter is reached', () => {
+  it('asks a renter on their own phone whether they want texts, before anything else they must do', () => {
+    renderWithIntl(<RenterScreen token="token" view={view} contact={{ channel: 'email', phone: null, confirmed: false, locked: false, shown: [] }} />)
+    const panel = screen.getByRole('region', { name: 'How we reach you' })
+    expect(within(panel).getByRole('button', { name: 'Text me instead' })).toBeInTheDocument()
   })
 })

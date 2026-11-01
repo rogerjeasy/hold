@@ -1,5 +1,6 @@
 import 'server-only'
 import { createHmac, randomInt } from 'node:crypto'
+import { z } from 'zod'
 import { getServices, TEST_SIGN_IN_CODE } from './services'
 
 // The one-time code a renter types for a money decision (architecture.md section 12.3). Its digest names what it is
@@ -17,3 +18,7 @@ export async function newRenterCode(): Promise<string> {
 export async function renterCodeDigest(purpose: string, linkId: string, code: string): Promise<string> {
   return createHmac('sha256', (await getServices()).renterLinkKey).update(`${purpose}:${linkId}:${code}`).digest('hex')
 }
+
+// Where the renter asks for a code: where they chose, or by email instead (architecture.md section 12.3). Absent from
+// older pages' forms, which means where they chose.
+export const codeVia = z.enum(['chosen', 'email']).default('chosen')

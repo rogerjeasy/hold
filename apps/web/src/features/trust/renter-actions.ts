@@ -3,11 +3,12 @@
 import { createHmac, randomInt } from 'node:crypto'
 import { answerTrustConsent, auditLog, deleteTrustRecord, issueTrustCode, renterTrustKey, useTrustCode } from '@hold/db'
 import type { Transaction } from '@hold/db'
-import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
 import { Refusal } from '@/server/action'
 import { renterAction, withToken } from '@/server/renter-access'
+import { codeVia } from '@/server/renter-code'
+import { deliverRenterCode } from '@/server/renter-code-delivery'
 import { getServices, TEST_SIGN_IN_CODE } from '@/server/services'
 
 // What a renter does with their Clean Record through any of their links (extensions.md section 7.6). Each is built by
@@ -20,16 +21,16 @@ import { getServices, TEST_SIGN_IN_CODE } from '@/server/services'
 const digest = (key: Buffer, linkId: string, code: string) => createHmac('sha256', key).update(`trust:${linkId}:${code}`).digest('hex')
 const withCode = <Shape extends z.ZodRawShape>(shape: Shape) => withToken({ ...shape, code: z.string().regex(/^[0-9]{8}$/) })
 
-export const sendTrustCode = renterAction({ name: 'trust.code_requested', scope: 'view', input: withToken({}) }, async (link, input, inLinkShop) => {
+export const sendTrustCode = renterAction({ name: 'trust.code_requested', scope: 'view', input: withToken({ via: codeVia }) }, async (link, input, inLinkShop) => {
   const services = await getServices()
   const code = services.config.services === 'fake' ? TEST_SIGN_IN_CODE : String(randomInt(0, 100000000)).padStart(8, '0')
-  const issued = await inLinkShop((transaction) => issueTrustCode(transaction, link.id, digest(services.renterLinkKey, link.id, code), new Date()))
+  const issued = await inLinkShop((transaction) => issueTrustCode(transaction, link.id, digest(services.renterLinkKey, link.id, code), new Date(), input.via))
   if (!issued.ok) return new Refusal(issued.reason)
-  const t = await getTranslations({ locale: readLocale(input.locale), namespace: 'emails.trustCode' })
-  if (!(await services.mailer.send({ to: issued.email, subject: t('subject'), text: t('body', { code }) }))) return new Refusal('email_unavailable')
+  const delivered = await deliverRenterCode(inLinkShop, link, issued, { locale: readLocale(input.locale), code, kind: 'trust', emailWords: 'emails.trustCode' })
+  if (delivered instanceof Refusal) return delivered
   // Simulated things say so, in the record too: the address itself stays out of it.
-  if (issued.sandboxContact) await inLinkShop((transaction) => transaction.insert(auditLog).values({ shopId: link.shopId, actorKind: 'renter', actorId: link.id, action: 'trust.code_sandbox_contact', subjectKind: 'rental', subjectId: link.rentalId, detail: { sandbox: true } }))
-  return { sandboxContact: issued.sandboxContact }
+  if (delivered.sandboxContact) await inLinkShop((transaction) => transaction.insert(auditLog).values({ shopId: link.shopId, actorKind: 'renter', actorId: link.id, action: 'trust.code_sandbox_contact', subjectKind: 'rental', subjectId: link.rentalId, detail: { sandbox: true } }))
+  return delivered
 })
 
 // Spends the code, then finds the renter key of whoever PayPal says paid the rental's fee, kept on them so their

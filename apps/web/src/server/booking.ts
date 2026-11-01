@@ -9,7 +9,7 @@ import { z } from 'zod'
 import type { Locale } from '@/i18n/routing'
 import { list, Refusal } from './action'
 import { newRenterLink, renterUrl } from './renter-links'
-import { getServices } from './services'
+import { reachRenterIn } from './renter-reach'
 
 // What a booking form sends, from the counter or from the shop's page: a period on the shop's clock and a count of
 // each item type. No amount: the fee and the hold come from the item types.
@@ -42,9 +42,17 @@ export async function placeBooking(
   return { rentalId: booked.rentalId, token: link.token, path: renterLinkPath(link.token, who.language) }
 }
 
-// Sends the renter their link, in their language. Without the email the booking still stands: staff can show the link.
-export async function emailRenterLink(to: string, token: string, language: Locale, shopName: string): Promise<boolean> {
-  const { mailer } = await getServices()
-  const t = await getTranslations({ locale: language, namespace: 'emails.renterLink' })
-  return mailer.send({ to, subject: t('subject', { shop: shopName }), text: t('body', { shop: shopName, link: await renterUrl(token, language) }) })
+// Sends the renter their link, in their language, by text or email as they are reached (architecture.md section 12.3).
+// The email goes to the address given at booking, as every link does. Says how it went, or null when it reached
+// nobody: the booking still stands, and staff can show the link.
+export async function sendRenterLink(transaction: Transaction, rentalId: string, token: string, language: Locale, shopName: string, contactEmail: string | null): Promise<'text' | 'email' | null> {
+  const emails = await getTranslations({ locale: language, namespace: 'emails.renterLink' })
+  const texts = await getTranslations({ locale: language, namespace: 'texts' })
+  const link = await renterUrl(token, language)
+  const reached = await reachRenterIn(transaction, rentalId, () => ({
+    purpose: 'renter_link',
+    email: contactEmail === null ? null : { to: contactEmail, subject: emails('subject', { shop: shopName }), text: emails('body', { shop: shopName, link }) },
+    text: texts('renterLink', { shop: shopName, link }),
+  }))
+  return reached === undefined || reached.via === 'none' ? null : reached.via
 }

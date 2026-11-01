@@ -1446,7 +1446,7 @@
         "title": "New rental",
         "back": "All rentals",
         "renter": "For whom",
-        "renterHelp": "Optional. With an email, the renter is sent the link to pay. The renter's identity comes from PayPal when they pay.",
+        "renterHelp": "Optional. With an email or a mobile number, the renter is sent the link to pay; with a number, by text. The renter's identity comes from PayPal when they pay.",
         "name": "Name",
         "email": "Email",
         "language": "The renter's language",
@@ -1454,7 +1454,9 @@
         "booking": "Booking…",
         "booked": "Booked.",
         "walkIn": "Walk-in: fee and hold in one PayPal approval",
-        "walkInHelp": "For a renter at the counter now, who approves both at once. Leave it off for a returning renter: their Clean Record can lower the hold only once their fee tells Hold who they are."
+        "walkInHelp": "For a renter at the counter now, who approves both at once. Leave it off for a returning renter: their Clean Record can lower the hold only once their fee tells Hold who they are.",
+        "phone": "Mobile phone",
+        "phonePlaceholder": "+41 79 123 45 67"
       },
       "detail": {
         "label": "Rental",
@@ -1497,7 +1499,9 @@
         "emailing": "Sending…",
         "emailed": "Sent to {email}.",
         "paid": "The fee is paid. The same link shows the rental and, at pickup, asks for the hold.",
-        "walkIn": "A walk-in: the renter approves the fee and the hold together, in one PayPal approval, and the bike is then ready to hand over."
+        "walkIn": "A walk-in: the renter approves the fee and the hold together, in one PayPal approval, and the bike is then ready to hand over.",
+        "text": "Text it to {phone}",
+        "texted": "Texted to {phone}."
       },
       "letGo": {
         "title": "Let go of this booking",
@@ -1525,7 +1529,9 @@
         "email_failed": "The email could not be sent. Show the link instead.",
         "transition_not_allowed": "Only a booking whose fee was not paid can be let go.",
         "rows_mismatched": "Every line needs an item and a number.",
-        "not_booked": "The fee must be paid before the hold is asked for."
+        "not_booked": "The fee must be paid before the hold is asked for.",
+        "phone_invalid": "Write the number with its country code, such as +41 79 123 45 67.",
+        "country_not_texted": "Hold does not text that country. Use an email instead."
       },
       "hold": {
         "title": "Hold at pickup",
@@ -1542,7 +1548,29 @@
         "validUntil": "Ends",
         "replacing": "A new hold was asked of the renter before this one ends. Waiting for their approval."
       },
-      "fromAssistant": "Booked by the renter's assistant"
+      "fromAssistant": "Booked by the renter's assistant",
+      "texts": {
+        "title": "Texts to the renter",
+        "purposes": {
+          "renter_link": "The renter’s link",
+          "condition_link": "The condition report",
+          "drop_off": "The drop-off notice",
+          "shop_message": "A message from the shop",
+          "renter_code": "A one-time code",
+          "phone_code": "The code that confirms their phone",
+          "reminder": "A reminder",
+          "hold_renewal": "A request for a new hold",
+          "promise_missed": "A missed decision date",
+          "receipt": "A receipt"
+        },
+        "statuses": {
+          "sent": "Sent",
+          "delivered": "Delivered",
+          "failed": "Not sent, so Hold used email where it could",
+          "opted_out": "The renter replied STOP, so Hold uses email",
+          "simulated": "Shown on the renter’s page (sandbox)"
+        }
+      }
     },
     "items": {
       "title": "Items",
@@ -1963,7 +1991,8 @@
         "show": "Show the renter this code. It opens the condition report, which they confirm or add to within 24 hours.",
         "scan": "Scan with the renter's phone to see the condition report",
         "back": "Back to the rental",
-        "sealedNote": "Sealed. These photographs can no longer change."
+        "sealedNote": "Sealed. These photographs can no longer change.",
+        "texted": "The renter has been texted the condition report. They can also scan this code."
       }
     },
     "returns": {
@@ -2234,6 +2263,20 @@
     "trustCode": {
       "subject": "Your Hold Clean Record code",
       "body": "Your code is {code}. It expires in ten minutes. Enter it only on your own Hold rental page, to change who may use your Clean Record. If you did not ask for it, you can ignore this email."
+    },
+    "contactChangeCode": {
+      "subject": "Your code to change your rental texts",
+      "body": "Your code is {code}. It expires in ten minutes. Enter it on your rental page to send your rental texts to a new phone. If you did not ask for this, ignore this email: nothing changes."
+    },
+    "decisionCopy": {
+      "subject": "Your decision at {shop}",
+      "body": {
+        "claim_accepted": "From your phone, you accepted the claim from {shop}. The amount will be taken from your hold, and the rest released.\n\nIf this was not you, contact {shop} at once.",
+        "claim_contested": "From your phone, you contested the claim from {shop}. Nothing is charged while it is decided.\n\nIf this was not you, contact {shop} at once.",
+        "settlement_confirmed": "From your phone, you confirmed the agreement on your claim from {shop}.\n\nIf this was not you, contact {shop} at once.",
+        "settlement_declined": "From your phone, you declined the agreement on your claim from {shop}. The shop decides it now.\n\nIf this was not you, contact {shop} at once.",
+        "incident_agreed": "From your phone, you agreed the price of what you reported to {shop}.\n\nIf this was not you, contact {shop} at once."
+      }
     }
   },
   "shell": {
@@ -2666,8 +2709,8 @@
         }
       },
       "agree": {
-        "codeGuidance": "To agree {price}, ask for a one-time code. It goes to the email PayPal gave for you.",
-        "sendCode": "Email me a code",
+        "codeGuidance": "To agree {price}, ask for a one-time code. It goes to the phone you confirmed for texts, or to the email PayPal gave for you.",
+        "sendCode": "Send me a code",
         "codeSent": "Code sent. It expires in ten minutes.",
         "codeSentSandbox": "Code sent to the booking’s contact address, since this is PayPal’s sandbox. It expires in ten minutes.",
         "code": "One-time code",
@@ -2848,8 +2891,8 @@
     "beforeUrl": "At handover",
     "afterUrl": "At return",
     "yourReply": "Your reply",
-    "codeGuidance": "We send a one-time code to the email address PayPal confirmed when you paid.",
-    "sendCode": "Email me a verification code",
+    "codeGuidance": "We send a one-time code to the phone you confirmed for texts, or to the email address PayPal confirmed when you paid.",
+    "sendCode": "Send me a verification code",
     "codeSent": "Verification code sent. It expires in ten minutes.",
     "codeSentSandbox": "Code sent to the email given at booking. This is the PayPal sandbox, whose test accounts receive no mail; with a real PayPal account it goes to your PayPal address. It expires in ten minutes.",
     "code": "Verification code",
@@ -3223,11 +3266,11 @@
         "payer_missing": "Your record starts once PayPal has confirmed your payment."
       },
       "codeTitle": "Prove it is you",
-      "codeLead": "Changing your record needs a code we email to the address PayPal has for you, so nobody else holding this link can change it.",
-      "sendCode": "Email me a code",
+      "codeLead": "Changing your record needs a code we send to the phone you confirmed, or to the email PayPal has for you, so nobody else holding this link can change it.",
+      "sendCode": "Send me a code",
       "sending": "Sending…",
       "codeSent": "Code sent. It works for ten minutes.",
-      "code": "Code from the email"
+      "code": "Your code"
     },
     "verify": {
       "title": "Check a Clean Record",
@@ -3350,7 +3393,7 @@
     "confirm": {
       "renterTitle": "Confirm the agreed amount",
       "renterGuidance": "Nothing is charged until you confirm. If you decline, the shop's owner decides.",
-      "sendCode": "Email me a verification code",
+      "sendCode": "Send me a verification code",
       "codeSent": "Verification code sent. It expires in ten minutes.",
       "codeSentSandbox": "Code sent to the email given at booking: this is the PayPal sandbox, whose test accounts receive no mail.",
       "code": "Verification code",
@@ -4341,6 +4384,60 @@
       "already_done": "This repair is already closed.",
       "currency_unset": "Publish your prices first.",
       "not_found": "That repair or mark was not found."
+    }
+  },
+  "texts": {
+    "codes": {
+      "claimReply": "{shop}: {code} is your code to accept or contest the claim. Don't share it.",
+      "settlement": "{shop}: {code} is your code to confirm or decline the agreement on your claim. Don't share it.",
+      "incident": "{shop}: {code} is your code to agree the price of what you reported. Don't share it.",
+      "trust": "{shop}: {code} is your code to change your Clean Record. Don't share it.",
+      "phone": "{shop}: {code} confirms this phone for texts about your rental. Don't share it.",
+      "contactChange": "{shop}: {code} is your code to move your rental's texts to a new phone. Don't share it."
+    },
+    "renterLink": "{shop}: your rental. Pay, see what you rent and talk to the shop here: {link}",
+    "conditionReport": "{shop}: you have the item. Check the handover photos and tell the shop anything they missed: {link}",
+    "dropOffMissing": "{shop}: the shop looked at the drop point {looked} and your item was not there. Your return: {link}"
+  },
+  "contact": {
+    "title": "How we reach you",
+    "byEmail": "By email",
+    "byText": "By text to {phone}",
+    "confirmed": "Confirmed",
+    "notConfirmed": "Not confirmed",
+    "emailBody": "Links, reminders and codes come by email. No email on this phone? Choose texts instead.",
+    "textBody": "Links, reminders and codes come by text. A copy of any money decision also goes to the email PayPal has for you.",
+    "notConfirmedBody": "Links and reminders come by text. Codes come by email until you confirm this number.",
+    "textInstead": "Text me instead",
+    "emailInstead": "Use email instead",
+    "changeNumber": "Change the number",
+    "confirmNumber": "Confirm this number",
+    "phoneLabel": "Your mobile number, with its country code",
+    "newPhoneLabel": "Your new mobile number, with its country code",
+    "privacy": "Hold uses this number only for this rental's links, reminders and codes.",
+    "sendCode": "Text me a code",
+    "codeLabel": "The code we texted to {phone}",
+    "confirm": "Confirm this phone",
+    "confirmedNow": "Texts about this rental now go to {phone}.",
+    "changeLead": "To move your texts to a new phone, we first send a code where your codes go now.",
+    "sendChangeCode": "Send me that code",
+    "changeCodeLabel": "The code we just sent",
+    "changeCodeEmailed": "Code sent to the email PayPal has for you. It expires in ten minutes.",
+    "cancel": "Cancel",
+    "codeSentByText": "Code sent by text to {phone}. It expires in ten minutes.",
+    "emailInsteadButton": "Send it to my PayPal email instead",
+    "shownLabel": "Sandbox: this text was not sent. It is what the renter would receive.",
+    "useCode": "Use the code {code}",
+    "results": {
+      "phone_invalid": "Write the number with its country code, such as +41 79 123 45 67.",
+      "country_not_texted": "Hold does not send texts to that country. Your codes come by email.",
+      "code_needed": "The hold is placed, so a new number first needs the code sent where your codes go now.",
+      "code_recently_sent": "Wait one minute before asking for another code.",
+      "code_expired": "That code has expired. Ask for a new one.",
+      "wrong_code": "That code is not correct.",
+      "text_unavailable": "The text could not be sent.",
+      "email_unavailable": "The code could not be sent. Please try again later.",
+      "payer_missing": "Pay the fee first: PayPal then tells Hold where to send your codes."
     }
   }
 }

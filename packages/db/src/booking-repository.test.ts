@@ -8,7 +8,7 @@ import { beginFeeCapture, confirmFeeCapture, saveFeeOrder } from './fee-reposito
 import { rentalHold } from './hold-repository.ts'
 import { addItems, changeStatus, itemCatalog, saveItemType } from './item-repository.ts'
 import { publishPriceList } from './price-list-repository.ts'
-import { findRenterLink, renterView } from './renter-repository.ts'
+import { findRenterLink, renterContact, renterView } from './renter-repository.ts'
 import { executions, moneyEvents, outbox, rentals } from './schema/index.ts'
 import { inShop } from './scope.ts'
 import type { Scope, Transaction } from './scope.ts'
@@ -129,6 +129,14 @@ describe('a booking', () => {
     const detail = await act(owner, (transaction) => rentalDetail(transaction, rentalId, NOW))
     expect(detail).toMatchObject({ state: 'pending_payment', feeCents: 3 * (2 * 40_00 + 8_00), holdCents: 2 * 300_00 + 50_00, contactName: 'Priya Natarajan', bookedThrough: 'staff' })
     expect(detail?.items.map((item) => item.label)).toEqual(['Child seat 1', 'City e-bike 1', 'City e-bike 2'])
+  })
+
+  it('reaches by text a renter booked with a phone, until they confirm it or choose email on their own page', async () => {
+    const created = await act(owner, (transaction) => createBooking(transaction, shopId, { ...booking([{ itemTypeId: seatTypeId, count: 1 }], at(900), at(920)), contact: { name: 'Priya Natarajan', email: '', phone: '+41791234567' } }, NOW))
+    if (!created.ok) throw new Error(created.reason)
+    expect(await act(owner, (transaction) => renterContact(transaction, created.rentalId))).toMatchObject({ channel: 'text', phone: '+41791234567', phoneConfirmed: false, email: null })
+    // Staff see how the renter is reached, and only enough of the number to recognise it.
+    expect(await act(owner, (transaction) => rentalDetail(transaction, created.rentalId, NOW))).toMatchObject({ contactChannel: 'text', contactPhone: '+41 ••• •• 67' })
   })
 
   it('takes the items no overlapping rental keeps, and refuses when there are not enough', async () => {

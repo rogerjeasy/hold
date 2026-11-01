@@ -44,6 +44,6 @@ describe('claim reply codes', () => {
     await database.update(rentals).set({ contactEmail: 'priya.contact@example.org' }).where(eq(rentals.id, first.rentalId))
     await database.update(renters).set({ email: 'sb-test42@personal.example.com' }).where(eq(renters.id, rental?.renterId ?? ''))
     await database.insert(paypalAccounts).values({ shopId: shop.scope.shopId, credentialReference: 'hold/paypal/shops/test/sandbox', mode: 'sandbox' }).onConflictDoNothing()
-    expect(await shop.act((transaction) => issueClaimCode(transaction, first.id, 'hash-sandbox', NOW))).toEqual({ ok: true, email: 'priya.contact@example.org', sandboxContact: true })
+    expect(await shop.act((transaction) => issueClaimCode(transaction, first.id, 'hash-sandbox', NOW))).toEqual({ ok: true, channel: 'email', email: 'priya.contact@example.org', sandboxContact: true })
   })
 })

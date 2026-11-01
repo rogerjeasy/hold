@@ -1,14 +1,15 @@
 'use server'
 import { auditLog, confirmAgreement, issueSettlementCode, openAdvocate, renterNegotiation, renterView, stopRenterAdvocate, useClaimCode } from '@hold/db'
 import { parseAmount } from '@hold/domain'
-import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
 import { Refusal } from '@/server/action'
 import { writeContestSummary } from '@/server/contest-summary'
 import { sendNegotiation } from '@/server/negotiation-queue'
 import { renterAction, withToken } from '@/server/renter-access'
-import { CODE_PURPOSES, newRenterCode, renterCodeDigest } from '@/server/renter-code'
+import { CODE_PURPOSES, codeVia, newRenterCode, renterCodeDigest } from '@/server/renter-code'
+import { copyDecisionToEmail } from '@/server/decision-copy'
+import { deliverRenterCode } from '@/server/renter-code-delivery'
 import { getServices } from '@/server/services'
 import { sendSettlement } from '@/server/settlement-queue'
 import { advocateInput } from './negotiation-input'
@@ -36,16 +37,15 @@ export const startAdvocate = renterAction({ name: 'renter.advocate_started', sco
   return { kind: result.kind }
 })
 
-export const sendSettlementCode = renterAction({ name: 'renter.settlement_code_requested', scope: 'accept', input: withToken({}) }, async (link, input, inLinkShop) => {
-  const services = await getServices()
+export const sendSettlementCode = renterAction({ name: 'renter.settlement_code_requested', scope: 'accept', input: withToken({ via: codeVia }) }, async (link, input, inLinkShop) => {
   const code = await newRenterCode()
   const hash = await renterCodeDigest(CODE_PURPOSES.settlement, link.id, code)
-  const issued = await inLinkShop((transaction) => issueSettlementCode(transaction, link.id, hash, new Date()))
+  const issued = await inLinkShop((transaction) => issueSettlementCode(transaction, link.id, hash, new Date(), input.via))
   if (!issued.ok) return new Refusal(issued.reason)
-  const t = await getTranslations({ locale: readLocale(input.locale), namespace: 'emails.claimCode' })
-  if (!await services.mailer.send({ to: issued.email, subject: t('subject'), text: t('body', { code }) })) return new Refusal('email_unavailable')
-  if (issued.sandboxContact) await inLinkShop((transaction) => transaction.insert(auditLog).values({ shopId: link.shopId, actorKind: 'renter', actorId: link.id, action: 'renter.settlement_code_sandbox_contact', subjectKind: 'rental', subjectId: link.rentalId, detail: { sandbox: true } }))
-  return { sandboxContact: issued.sandboxContact }
+  const delivered = await deliverRenterCode(inLinkShop, link, issued, { locale: readLocale(input.locale), code, kind: 'settlement', emailWords: 'emails.claimCode' })
+  if (delivered instanceof Refusal) return delivered
+  if (delivered.sandboxContact) await inLinkShop((transaction) => transaction.insert(auditLog).values({ shopId: link.shopId, actorKind: 'renter', actorId: link.id, action: 'renter.settlement_code_sandbox_contact', subjectKind: 'rental', subjectId: link.rentalId, detail: { sandbox: true } }))
+  return delivered
 })
 
 export const confirmSettlement = renterAction({ name: 'renter.settlement_decided', scope: 'accept', input: withToken({ code: z.string().regex(/^[0-9]{8}$/), decision: z.enum(['confirm', 'decline']) }) }, async (link, input, inLinkShop) => {
@@ -61,6 +61,7 @@ export const confirmSettlement = renterAction({ name: 'renter.settlement_decided
   if (result.executionId !== null) {
     try { await sendSettlement(link.shopId, result.rentalId, result.executionId) } catch { /* The committed outbox retries delivery. */ }
   }
+  await copyDecisionToEmail(inLinkShop, link, input.decision === 'confirm' ? 'settlement_confirmed' : 'settlement_declined', readLocale(input.locale))
   return {}
 })
 

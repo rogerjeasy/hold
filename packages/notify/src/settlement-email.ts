@@ -72,3 +72,12 @@ export function settlementReceiptEmail(to: string, language: string, details: Se
   lines.push('', details.final ? words.final : words.pending, '', `${words.link}: ${details.recordUrl}`)
   return { to, subject: `${simulated}${event}: ${details.shopName}`, text: lines.join('\n') }
 }
+
+// The same confirmation as a text, for a renter who chose texts (architecture.md section 12.3). The email still goes to
+// the address PayPal gave, so both channels hear of every amount PayPal moved.
+export function settlementReceiptText(language: string, details: Pick<SettlementDetails, 'shopName' | 'kind' | 'amount' | 'simulated' | 'recordUrl'>): string {
+  const chosen = language === 'fr' || language === 'de' || language === 'es' ? language : 'en'
+  const words = WORDS[chosen]
+  const simulated = details.simulated ? `[${words.simulated}] ` : ''
+  return `${simulated}${details.shopName}: ${words.events[details.kind]}: ${formatMoney(details.amount, chosen)}. ${words.link}: ${details.recordUrl}`
+}

@@ -67,6 +67,8 @@ export { checkPromiseDays, DECISION_PROMISE, decideByFor, missedPromiseOutcome, 
 export type { PromiseFacts, PromiseStanding } from './decision-promise.ts'
 export { claimCodeRecipient } from './claim-code-recipient.ts'
 export type { ClaimCodeRecipient } from './claim-code-recipient.ts'
+export { callingCodeFor, CONTACT_CHANNELS, contactChangeNeedsCode, maskedPhone, PHONE_CODE, phoneNumber, renterCodeRecipient, TEXT_LIMITS, TEXT_PURPOSES, TEXT_STATUSES, textAllowed } from './renter-contact.ts'
+export type { ContactChannel, RenterCodeRecipient, TextPurpose, TextStatus } from './renter-contact.ts'
 export { checkGate, confidenceLevel, CONFIDENCE_LEVELS, EVALUATION_GROUPS, EVALUATION_OVERLAP, measureEvaluation, sharePercent, zeroUpperBound } from './evaluation.ts'
 export type { ConfidenceLevel, EvaluatedCase, EvaluatedFinding, EvaluationGroup, GateLimits, Measures, Share, Spread } from './evaluation.ts'
 export { caseVerdict, expectedOutcome, outcomeMatrix, runTrend } from './scorecard-cases.ts'

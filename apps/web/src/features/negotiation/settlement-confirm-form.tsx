@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Panel } from '@/components/ui/panel'
+import { CodeSent } from '@/features/contact/code-sent'
+import { useCodeSender } from '@/features/contact/use-code-sender'
 import { RenterMessage } from '@/features/renter/renter-message'
 import { confirmSettlement, sendSettlementCode } from './renter-actions'
 import { useResultWording } from './use-result-wording'
@@ -14,20 +16,17 @@ export function SettlementConfirmForm({ token, agreed }: { token: string; agreed
   const t = useTranslations('negotiation.confirm')
   const locale = useLocale()
   const wording = useResultWording()
-  const [sent, send, sending] = useActionState(sendSettlementCode, null)
+  const code = useCodeSender(sendSettlementCode, { token, locale })
   const [decided, decide, deciding] = useActionState(confirmSettlement, null)
   return (
     <Panel title={t('renterTitle')}>
       <div className="grid gap-4 p-4 md:p-5">
         <p className="text-lg font-semibold">{agreed}</p>
         <p>{t('renterGuidance')}</p>
-        <form action={send} className="grid gap-3">
-          <input type="hidden" name="token" value={token} />
-          <input type="hidden" name="locale" value={locale} />
-          <Button disabled={sending} className="min-h-12 justify-self-start whitespace-normal">{t('sendCode')}</Button>
-          {sent?.ok === true ? <p role="status">{t(sent.value.sandboxContact ? 'codeSentSandbox' : 'codeSent')}</p> : null}
-          <RenterMessage result={sent} wording={wording} />
-        </form>
+        <div className="grid gap-3">
+          <Button type="button" onClick={code.send} disabled={code.pending} className="min-h-12 justify-self-start whitespace-normal">{t('sendCode')}</Button>
+          <CodeSent result={code.result} pending={code.pending} onEmailInstead={code.sendByEmail} codeInputId="settlement-code" emailWords={{ sent: t('codeSent'), sandbox: t('codeSentSandbox') }} wording={wording} />
+        </div>
         <form action={decide} className="grid gap-3">
           <input type="hidden" name="token" value={token} />
           <input type="hidden" name="locale" value={locale} />

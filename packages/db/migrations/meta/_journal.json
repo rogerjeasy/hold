@@ -267,6 +267,13 @@
       "when": 1793317361001,
       "tag": "0037_repairs",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1793499445369,
+      "tag": "0038_text_messages",
+      "breakpoints": true
     }
   ]
 }

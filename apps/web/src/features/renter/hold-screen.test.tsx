@@ -5,6 +5,7 @@ import { renderWithIntl } from '@/test/render'
 import { HoldScreen } from './hold-screen'
 
 vi.mock('./actions', () => ({ approveHold: () => Promise.resolve(null) }))
+vi.mock('@/features/contact/renter-actions', () => ({ sendPhoneCode: vi.fn(), confirmPhone: vi.fn(), chooseEmail: vi.fn(), sendContactChangeCode: vi.fn() }))
 
 const view = { shopName: 'Ribeira Bikes', timeZone: 'Europe/Lisbon', currency: 'EUR', holdCents: 300_00, replyPeriodHours: 48, feeCents: 25_00, state: 'awaiting_hold' as const }
 const hold = (overrides: Partial<RentalHold> = {}): RentalHold => ({
@@ -89,5 +90,17 @@ describe('the renter’s hold page', () => {
   it('gives no reason for an ordinary hold', () => {
     renderWithIntl(<HoldScreen token="token" view={view} hold={hold()} />)
     expect(screen.queryByText(/because you have returned/)).not.toBeInTheDocument()
+  })
+})
+
+describe('how the renter is reached, at the counter', () => {
+  it('lets the renter choose texts on their own phone before approving the hold, while the number is still theirs to set', () => {
+    renderWithIntl(<HoldScreen token="token" view={view} hold={hold()} contact={{ channel: 'email', phone: null, confirmed: false, locked: false, shown: [] }} />)
+    expect(screen.getByRole('region', { name: 'How we reach you' })).toBeInTheDocument()
+  })
+
+  it('leaves it off once the hold is placed', () => {
+    renderWithIntl(<HoldScreen token="token" view={{ ...view, state: 'ready' }} hold={hold({ state: 'placed' })} contact={{ channel: 'email', phone: null, confirmed: false, locked: true, shown: [] }} />)
+    expect(screen.queryByRole('region', { name: 'How we reach you' })).not.toBeInTheDocument()
   })
 })

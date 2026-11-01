@@ -17,13 +17,15 @@ const orderOf = (approvalUrl: string) => approvalUrl.split('/').at(-1) ?? ''
 export type HandoverShop = {
   readonly shopId: string
   readonly owner: string
-  readyRental(count?: number): Promise<{ readonly rentalId: string; readonly token: string }>
+  // `beforeHold` runs once the fee is paid, before staff ask for the hold: where a renter at the counter chooses texts.
+  readyRental(count?: number, beforeHold?: (token: string) => Promise<void>): Promise<{ readonly rentalId: string; readonly token: string }>
 }
 
-export async function handoverShop(jar: Map<string, string>, owner: string, shopName: string): Promise<HandoverShop> {
+// `demoSession`: a shop as a judge's demo opens it, which shows its texts on the renter's page instead of sending them.
+export async function handoverShop(jar: Map<string, string>, owner: string, shopName: string, options: { readonly demoSession?: boolean } = {}): Promise<HandoverShop> {
   const { database, simulatedPayPal } = await getServices()
   const subject = await signIn(jar, owner, 'passkey')
-  const registered = await registerOwner(database, { subject, email: owner, name: 'Ana', language: 'en', shop: { name: shopName, timeZone: 'UTC' } })
+  const registered = await registerOwner(database, { subject, email: owner, name: 'Ana', language: 'en', shop: { name: shopName, timeZone: 'UTC', demoSession: options.demoSession ?? false } })
   await shop.publishPrices(null, form({ currency: 'EUR', threshold: '', wearPolicy: 'Scuffs are wear.', description: 'Scratch', category: 'damage', amount: '35', locale: 'en' }))
   await shop.connectPayPal(null, form({ clientId: 'sandbox-client-id', clientSecret: 'sandbox-client-secret', locale: 'en' }))
   await items.saveItemType(
@@ -36,7 +38,7 @@ export async function handoverShop(jar: Map<string, string>, owner: string, shop
   return {
     shopId: registered.shopId,
     owner,
-    async readyRental(count = 1) {
+    async readyRental(count = 1, beforeHold) {
       from += 3
       await signIn(jar, owner, 'email_code')
       const booked = await rentals.bookRental(null, form({ startsAt: day(from), endsAt: day(from + 2), itemTypeId: typeId, count: String(count), contactName: 'Priya', contactEmail: 'priya@renter.example', language: 'en', locale: 'en' }))
@@ -49,6 +51,8 @@ export async function handoverShop(jar: Map<string, string>, owner: string, shop
       if (!fee.ok) throw new Error(JSON.stringify(fee))
       simulatedPayPal?.approveOrder(orderOf(fee.value.approvalUrl))
       await renter.confirmFee(null, form({ token, orderId: orderOf(fee.value.approvalUrl), locale: 'en' }))
+      await beforeHold?.(token)
+      await signIn(jar, owner, 'email_code')
       const asked = await rentals.askForHold(null, form({ rentalId, locale: 'en' }))
       if (!asked.ok) throw new Error(JSON.stringify(asked))
       const hold = await renter.approveHold(null, form({ token, locale: 'en' }))

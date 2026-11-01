@@ -4,6 +4,8 @@ import { CalendarPlus, CircleCheck, Hourglass, TriangleAlert, XCircle } from 'lu
 import { useLocale, useTranslations } from 'next-intl'
 import { TermsView } from '@/components/booking/terms-view'
 import { AssistantNotice } from '@/features/assistant/assistant-notice'
+import { ContactPanel } from '@/features/contact/contact-panel'
+import type { RenterContactView } from '@/features/contact/contact-view'
 import { Button } from '@/components/ui/button'
 import { Panel } from '@/components/ui/panel'
 import { SampleTag } from '@/components/ui/sample-tag'
@@ -87,6 +89,7 @@ export function RenterScreen({
   checkout,
   selfReturn = { offered: false, shopClosed: false, droppedOffAt: null },
   canExtend = false,
+  contact,
 }: {
   token: string
   view: RenterView
@@ -98,6 +101,8 @@ export function RenterScreen({
   selfReturn?: SelfReturnOffer
   // The renter may keep the item longer from this link (architecture.md section 6.14).
   canExtend?: boolean
+  // How the renter is reached, chosen here on their own phone (architecture.md section 12.3).
+  contact?: RenterContactView | undefined
 }) {
   const t = useTranslations('renter')
   const trust = useTranslations('trust.record')
@@ -132,6 +137,7 @@ export function RenterScreen({
         {askConsent ? <p className="max-w-prose border-l-2 border-primary pl-3 text-pretty">{trust('consentQuestion')}</p> : null}
         <Link href={linkRoutes.cleanRecord(token)} referrerPolicy="no-referrer" className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{trust('link')}</Link>
       </header>
+      {contact === undefined || ['closed', 'cancelled', 'abandoned'].includes(view.state) || view.simulated ? null : <ContactPanel token={token} contact={contact} />}
       <Panel title={t('what')}>
         <ul>
           {view.lines.map((line) => (
