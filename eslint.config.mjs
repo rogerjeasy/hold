@@ -4,7 +4,9 @@ import tseslint from 'typescript-eslint'
 
 export default defineConfig(
   {
-    ignores: ['**/.next/**', 'apps/web/public/vendor/**', '**/cdk.out/**', '**/next-env.d.ts', '**/playwright-report/**', '**/test-results/**', '.superpowers/**', '.claude/**'],
+    ignores: ['**/.next/**', 'apps/web/public/vendor/**', '**/cdk.out/**', '**/next-env.d.ts', '**/playwright-report/**', '**/test-results/**', '.superpowers/**', '.claude/**',
+      // The phone app lints with Expo's own config (apps/mobile/eslint.config.js).
+      'apps/mobile/**'],
   },
   eslint.configs.recommended,
   tseslint.configs.strictTypeChecked,

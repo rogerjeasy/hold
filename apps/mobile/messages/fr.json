@@ -1,0 +1,1438 @@
+{
+  "brand": {
+    "name": "Hold"
+  },
+  "common": {
+    "retry": "Réessayer",
+    "cancel": "Annuler",
+    "done": "Terminé",
+    "loading": "Chargement…",
+    "sample": "Exemple",
+    "simulated": "Simulé"
+  },
+  "start": {
+    "tagline": "La caution qui ne quitte jamais votre compte.",
+    "renter": {
+      "label": "Pour les clients",
+      "title": "Je loue",
+      "body": "Ouvrez le lien de location envoyé par la boutique, ou scannez son code au comptoir.",
+      "saved": "{count, plural, one {# location sur ce téléphone} other {# locations sur ce téléphone}}"
+    },
+    "shop": {
+      "label": "Pour les loueurs",
+      "title": "Je travaille dans une boutique",
+      "body": "Remettez les articles, photographiez les retours et vérifiez les dépôts."
+    }
+  },
+  "rentals": {
+    "title": "Vos locations",
+    "empty": {
+      "title": "Aucune location sur ce téléphone",
+      "body": "La boutique envoie un lien par e-mail ou SMS à la réservation, et affiche un code au comptoir. Ouvrez l'un ou l'autre ici."
+    },
+    "scan": "Scanner le code de la boutique",
+    "paste": "Coller un lien",
+    "untitled": "Location",
+    "savedOn": "Ajoutée le {date}",
+    "remove": "Retirer de ce téléphone",
+    "removed": "Retirée de ce téléphone. La location elle-même ne change pas."
+  },
+  "addLink": {
+    "title": "Coller un lien",
+    "field": "Lien de location",
+    "hint": "Il commence par https:// et contient /r/.",
+    "submit": "Ouvrir la location",
+    "missing": "Collez le lien envoyé par la boutique.",
+    "invalid": "Ce n'est pas un lien de location Hold. Vérifiez que vous l'avez copié en entier."
+  },
+  "scan": {
+    "title": "Scanner le code de la boutique",
+    "hint": "Visez le code posé sur le comptoir ou affiché sur l'écran de la boutique.",
+    "notHold": "Ce code n'est pas un lien de location Hold. Demandez à la boutique de vous montrer le vôtre.",
+    "cameraReason": "Pour lire le code de la boutique au comptoir. Rien n'est photographié ni conservé."
+  },
+  "rental": {
+    "title": "Votre location",
+    "what": "Ce que vous louez",
+    "period": "{start} à {end}",
+    "line": "{count} × {name}",
+    "lineTerms": "{rate} par jour · {hold} d'empreinte par article",
+    "twoAmounts": "Deux montants, gardés séparés",
+    "fee": "Prix de la location",
+    "feeNow": "Réglé maintenant avec PayPal.",
+    "feePaid": "Réglé avec PayPal.",
+    "hold": "Empreinte",
+    "holdBody": "Posée au retrait, sur votre propre compte PayPal. Ce n'est pas un prélèvement. Si tout revient dans le même état, l'empreinte est libérée dès le retour.",
+    "holdRules": "Une personne de la boutique approuve chaque prélèvement. Vous voyez toute réclamation avant qu'elle ne soit prélevée, avec les photographies et le prix, et vous pouvez la contester. Vous avez {hours} heures pour répondre.",
+    "prices": "Les prix des dommages de la boutique",
+    "pricesLead": "Une réclamation ne peut porter que sur ce qui figure sur cette liste.",
+    "wear": "Ce qui compte comme usure normale",
+    "wearLead": "On ne vous débite jamais pour cela.",
+    "keepLonger": "Le garder plus longtemps",
+    "somethingHappened": "Il s’est passé quelque chose",
+    "status": {
+      "pending_payment": "En attente de votre règlement",
+      "booked": "Réservée. Votre prix est réglé.",
+      "next": "Ensuite : au retrait, vous approuvez l'empreinte sur votre téléphone.",
+      "lapsed": "Le délai de paiement est dépassé et les articles ont été réservés par quelqu'un d'autre. Contactez la boutique pour réserver à nouveau.",
+      "abandoned": "Cette réservation a été abandonnée. Contactez la boutique pour réserver à nouveau.",
+      "other": "Votre location : {state}",
+      "awaiting_hold": "La boutique est prête pour votre empreinte.",
+      "holdNext": "Approuvez l'empreinte sur ce téléphone pour récupérer vos articles.",
+      "approveHold": "Approuver l'empreinte",
+      "ready": "Votre empreinte est posée. Vous pouvez récupérer vos articles.",
+      "out": "Votre location est avec vous.",
+      "dropped_off": "Vous l’avez rendu au point de dépôt. Une personne de la boutique va le vérifier.",
+      "returnReceipt": "Voir votre retour",
+      "condition": "Voir son état au départ"
+    },
+    "states": {
+      "pending_payment": "En attente du prix",
+      "booked": "Prix réglé",
+      "awaiting_hold": "En attente de l'empreinte",
+      "ready": "Prête pour la remise",
+      "out": "Sortie",
+      "overdue": "En retard",
+      "dropped_off": "Déposé, à vérifier",
+      "returned": "Rendue",
+      "inspecting": "En vérification",
+      "settling": "En cours de règlement",
+      "closed": "Clôturée",
+      "cancelled": "Annulée",
+      "abandoned": "Prix non réglé, abandonnée",
+      "lapsed": "Délai de paiement dépassé"
+    },
+    "claimStates": {
+      "draft": "Brouillon",
+      "awaiting_approval": "Approbation en attente",
+      "approved": "Approuvée",
+      "presented": "Votre réponse est attendue",
+      "accepted": "Acceptée",
+      "contested": "Contestée — examen en attente",
+      "lapsed": "Délai de réponse terminé",
+      "negotiating": "En négociation",
+      "agreed": "Accord trouvé",
+      "escalated": "Transmise",
+      "decided": "Décision enregistrée",
+      "charging": "Règlement en cours",
+      "charged": "Débitée",
+      "charge_failed": "Échec du débit",
+      "adjusted": "Ajustée",
+      "waived": "Réclamation annulée",
+      "closed": "Clôturée"
+    },
+    "results": {
+      "link_invalid": "Ce lien est inutilisable. Demandez-en un nouveau à la boutique.",
+      "scope": "Ce lien ne permet pas cela.",
+      "rate_limited": "Trop d'essais depuis ce réseau. Attendez une minute et réessayez.",
+      "not_pending": "Cette réservation n'attend pas de règlement.",
+      "payment_lapsed": "Le délai de paiement est dépassé et les articles ont été réservés par quelqu'un d'autre.",
+      "paypal_not_connected": "La boutique ne peut pas encore encaisser de paiements. Contactez la boutique.",
+      "paypal_unavailable": "PayPal n'a pas pu être joint. Rien n'a été débité. Réessayez dans un instant.",
+      "not_approved": "PayPal n'a pas encore confirmé votre accord. Rien n'a été débité.",
+      "declined": "PayPal a refusé le paiement. Rien n'a été débité.",
+      "order_mismatch": "Ce paiement n'appartient pas à cette location. Rien n'a été débité.",
+      "amount_mismatch": "Le montant de PayPal ne correspondait pas au prix. La boutique a été prévenue.",
+      "not_completed": "PayPal n'a pas encore terminé le paiement.",
+      "not_found": "Cette location n'existe plus.",
+      "not_requested": "La boutique n'a pas encore demandé l'empreinte. Elle le fait quand vous récupérez vos articles.",
+      "already_placed": "Votre empreinte est déjà posée.",
+      "hold_refused": "PayPal n'a pas pu poser l'empreinte. Rien n'a été réservé. Demandez à la boutique.",
+      "nothing_added": "Ajoutez d'abord une photo.",
+      "already_replied": "Vous avez déjà répondu.",
+      "closed": "Le délai pour répondre est passé.",
+      "not_handed_over": "La location n'a pas encore été remise.",
+      "upload_failed": "La photo n'a pas été envoyée. Réessayez.",
+      "not_out": "Les signalements sont ouverts tant que vous avez les articles.",
+      "description_invalid": "Décrivez ce qui s’est passé, en 1 000 caractères au plus.",
+      "already_sent": "Ce signalement a déjà été envoyé.",
+      "region_invalid": "Gardez le cadre sur la photo, serré autour du dommage.",
+      "not_agreeable": "Ce prix ne peut pas être accepté maintenant. La page montre où en est le signalement.",
+      "not_theft": "Ces détails concernent un vol ou une perte en attente de la boutique.",
+      "already_given": "Ces détails ont déjà été donnés.",
+      "no_details": "Donnez d’abord les détails.",
+      "police_report_invalid": "Saisissez le numéro de plainte.",
+      "storage_unavailable": "Impossible de prendre des photos ici pour le moment.",
+      "key_mismatch": "Cette photo n’appartient pas à ce signalement.",
+      "not_uploaded": "La photo n’est pas arrivée. Reprenez-la.",
+      "sealed": "Ce signalement a été envoyé : aucune photo ne peut être ajoutée.",
+      "unknown_view": "Cette vue n’existe pas pour cet article.",
+      "not_connected": "Aucun assistant n'est connecté à cette location.",
+      "not_allowed": "Cette boutique ne prend les retours qu’au comptoir.",
+      "not_ready": "Cette location ne peut pas être rendue ici pour le moment.",
+      "staff_returning": "Le personnel prend déjà ce retour au comptoir.",
+      "photo_reused": "Cette photo a déjà servi. Prenez-en une nouvelle de l’article tel qu’il est maintenant.",
+      "views_missing": "Il reste des photos à prendre.",
+      "no_quote": "Choisissez d’abord la nouvelle heure de retour.",
+      "quote_stale": "La location a changé depuis ce prix. Choisissez de nouveau l’heure."
+    },
+    "selfReturn": {
+      "closedTitle": "La boutique est fermée. Vous pouvez quand même le rendre.",
+      "openTitle": "Le rendre vous-même",
+      "body": "Photographiez-le comme il a été photographié quand vous l’avez pris, laissez-le au point de dépôt, et c’est fini. Le retour compte dès l’envoi.",
+      "meta": "Environ deux minutes",
+      "start": "Le rendre moi-même"
+    },
+    "assistantState": {
+      "connected": "Un assistant est connecté à cette location",
+      "disconnected": "L'assistant a été déconnecté",
+      "booked": "Un assistant a fait cette réservation"
+    },
+    "record": "Votre dossier de location",
+    "cleanRecord": "Votre historique de retours",
+    "consentQuestion": "Utiliser mon historique de retours sans réclamation pour baisser mes futures empreintes dans les boutiques Hold.",
+    "dueBack": "À rendre {when}",
+    "todo": "Pour cette location",
+    "claim": "Votre réclamation pour dommages",
+    "assistant": "Votre assistant"
+  },
+  "shop": {
+    "signIn": {
+      "title": "Connexion à votre boutique",
+      "lead": "Pour les propriétaires et le personnel du comptoir. Hold vous envoie par e-mail un code valable une fois.",
+      "email": "E-mail professionnel",
+      "submit": "M'envoyer un code",
+      "sending": "Envoi…",
+      "codeTitle": "Consultez vos e-mails",
+      "codeLead": "Nous avons envoyé un code à {email}. Il est valable une seule fois, pendant dix minutes.",
+      "verify": "Continuer",
+      "checking": "Vérification…",
+      "resend": "Envoyer un nouveau code",
+      "resent": "Un nouveau code arrive. Utilisez le code de l'e-mail le plus récent.",
+      "startOver": "Utiliser une autre adresse",
+      "renting": "Vous louez quelque chose ? Aucun compte n'est nécessaire.",
+      "rentingAction": "Ouvrir mes locations",
+      "problems": {
+        "emailMissing": "Saisissez votre adresse e-mail.",
+        "emailInvalid": "Cela ne ressemble pas à une adresse e-mail. Vérifiez-la et réessayez.",
+        "codeMissing": "Saisissez le code reçu par e-mail.",
+        "codeInvalid": "Le code est la suite de chiffres de l'e-mail. Vérifiez-le et réessayez.",
+        "wrong": "Ce code n'est pas le bon. Vérifiez-le et réessayez.",
+        "expired": "Ce code a expiré. Demandez-en un nouveau.",
+        "attempt_over": "Ce code n'est plus utilisable. Demandez-en un nouveau, ou recommencez.",
+        "second_factor": "Ce compte demande aussi un code d'une application d'authentification, que Hold n'accepte pas encore.",
+        "busy": "Trop de tentatives. Patientez quelques minutes, puis réessayez.",
+        "unavailable": "Hold n'a pas pu vérifier le code pour l'instant. Réessayez dans un instant."
+      }
+    },
+    "demo": {
+      "title": "Essayer la boutique de démonstration",
+      "lead": "Chaque démonstration est votre propre Ribeira Bikes, avec des locations déjà en cours. Un geste la lance : rien à saisir, aucun code à attendre.",
+      "leadCurrent": "Ce téléphone garde votre démonstration. Revenez-y comme l'une ou l'autre personne, ou lancez-en une nouvelle.",
+      "owner": {
+        "start": "Lancer une démo en tant que Tomás, le propriétaire",
+        "continue": "Continuer en tant que Tomás, le propriétaire",
+        "hint": "Voit tout et décide de chaque réclamation.",
+        "name": "Tomás, le propriétaire"
+      },
+      "staff": {
+        "start": "Lancer une démo en tant que Jonas, au comptoir",
+        "continue": "Continuer en tant que Jonas, au comptoir",
+        "hint": "Remet et reprend les vélos, et approuve les petites réclamations.",
+        "name": "Jonas, au comptoir"
+      },
+      "fresh": "Lancer une nouvelle démo",
+      "freshHint": "Une nouvelle boutique et de nouveaux comptes, en tant que Tomás. Votre démonstration actuelle reste telle quelle.",
+      "note": "PayPal fonctionne dans son bac à sable : aucun argent réel ne circule. Une étape qui déplace de l'argent se décide sur le web, avec une clé d'accès."
+    },
+    "chooseShop": {
+      "title": "Choisir une boutique",
+      "lead": "Vous travaillez dans plusieurs boutiques. Choisissez celle de ce comptoir.",
+      "opening": "Ouverture de votre boutique…",
+      "noShopTitle": "Vous ne faites encore partie d'aucune boutique",
+      "noShopBody": "Demandez au propriétaire de la boutique de vous inviter, puis connectez-vous avec cette adresse e-mail."
+    },
+    "account": {
+      "title": "Vous",
+      "open": "Vous et votre boutique",
+      "signedInAs": "Connecté en tant que",
+      "shop": "Boutique",
+      "role": "Rôle",
+      "switchTo": "Passer à {person}",
+      "switching": "Changement…",
+      "changeShop": "Changer de boutique",
+      "signOut": "Se déconnecter",
+      "signingOut": "Déconnexion…",
+      "demoNote": "Une boutique de démonstration rien qu'à vous. Ses locations sont des exemples et PayPal fonctionne dans son bac à sable."
+    },
+    "roles": {
+      "owner": "Propriétaire",
+      "manager": "Responsable",
+      "counter_staff": "Personnel du comptoir",
+      "read_only": "Lecture seule"
+    },
+    "tabs": {
+      "today": "Aujourd'hui",
+      "rentals": "Locations",
+      "dropOffs": "Dépôts"
+    },
+    "today": {
+      "decisions": {
+        "title": "{count, plural, =0 {Aucune décision en attente} one {# chose attend une décision} other {# choses attendent une décision}}",
+        "body": "Réclamations, libérations et débits contestés se décident sur le web, où une clé d'accès confirme la personne. Rien n'est débité depuis ce téléphone.",
+        "none": "Les réclamations à approuver et les empreintes proches de leur fin apparaissent sur le tableau des décisions du web."
+      },
+      "dropOffs": "{count, plural, one {# retour attend au point de dépôt} other {# retours attendent au point de dépôt}}",
+      "dropOffsAction": "Vérifier le point de dépôt",
+      "goingOut": "Départs",
+      "comingBack": "Retours",
+      "none": "Rien d'autre aujourd'hui.",
+      "emptyTitle": "Aucune remise ni aucun retour aujourd'hui",
+      "emptyBody": "Les locations qui commencent ou finissent aujourd'hui apparaissent ici, dans l'ordre de la journée.",
+      "done": "Fait",
+      "toDo": "À faire",
+      "renter": "Un client",
+      "hold": {
+        "requested": "En attente de l'approbation du client",
+        "placed": "Retenu",
+        "released": "Libérée",
+        "captured": "Débitée",
+        "none": "Aucune empreinte"
+      }
+    },
+    "rentals": {
+      "search": "Chercher par client ou article",
+      "searchHint": "Un nom, un e-mail ou un article",
+      "emptyTitle": "Aucune location pour l'instant",
+      "emptyBody": "Les locations se réservent sur le web ou sur la page de la boutique. Elles apparaissent ici pour être remises et reprises.",
+      "noMatchTitle": "Aucune location ne correspond",
+      "noMatchBody": "Essayez une partie du nom du client, ou de l'article.",
+      "renter": "Un client",
+      "period": "Du {start} au {end}"
+    },
+    "states": {
+      "pending_payment": "En attente du prix",
+      "booked": "Prix réglé",
+      "awaiting_hold": "En attente de l'empreinte",
+      "ready": "Prête pour la remise",
+      "out": "Sortie",
+      "overdue": "En retard",
+      "dropped_off": "Déposé, à vérifier",
+      "returned": "Rendue",
+      "inspecting": "En vérification",
+      "settling": "En cours de règlement",
+      "closed": "Clôturée",
+      "cancelled": "Annulée",
+      "abandoned": "Prix non réglé, abandonnée",
+      "lapsed": "Délai de paiement dépassé",
+      "other": "En cours"
+    },
+    "rental": {
+      "title": "Location",
+      "when": "Quand",
+      "fee": "Prix de la location",
+      "items": "Articles",
+      "sample": "Une location d'exemple pour la démonstration. Rien n'est photographié, envoyé ni débité pour elle.",
+      "readOnly": "Votre rôle permet de voir cette location, pas d'agir au comptoir.",
+      "decidedOnWeb": "Les réclamations, libérations et approbations de cette location se décident sur le web.",
+      "hold": {
+        "title": "Empreinte au retrait",
+        "none": "Pas encore d'empreinte. Le client l'approuve dans PayPal sur son propre téléphone.",
+        "placed": "Réservée sur le compte PayPal du client",
+        "requested": "En attente de l'approbation du client",
+        "released": "Libérée",
+        "captured": "Débitée après une réclamation approuvée",
+        "other": "Empreinte",
+        "assuredUntil": "À débiter de préférence avant le {date}",
+        "ask": "Demander l'empreinte",
+        "askHint": "Affiche un code que le client scanne pour approuver l'empreinte dans PayPal. Demander ne déplace aucun argent."
+      },
+      "link": {
+        "title": "Le lien du client",
+        "body": "Le client y voit la location, règle le prix et approuve l'empreinte. Montrez-le au comptoir ou envoyez-le.",
+        "show": "Afficher le lien",
+        "send": "Le renvoyer",
+        "sentText": "Envoyé par SMS au {to}.",
+        "sentEmail": "Envoyé par e-mail à {to}."
+      },
+      "handover": {
+        "title": "Remise",
+        "body": "Photographiez chaque article avant son départ. Une fois tous les articles scellés, la location est partie.",
+        "startItem": "Photographier {item}",
+        "continueItem": "Continuer la remise de {item}",
+        "sealed": "Photographié et scellé"
+      },
+      "return": {
+        "title": "Retour",
+        "body": "Photographiez chaque article à son retour. Une personne décide de la suite, sur le web.",
+        "startItem": "Commencer le retour de {item}",
+        "continueItem": "Continuer le retour de {item}",
+        "sealed": "Retour photographié",
+        "reviewItem": "Noter ce que vous avez vu sur {item}"
+      },
+      "item": {
+        "status": "Statut",
+        "statusItem": "Changer le statut de {item}"
+      },
+      "message": {
+        "title": "Écrire au client"
+      }
+    },
+    "link": {
+      "renter": "À scanner avec le téléphone du client",
+      "renterBody": "Il ouvre la location sur le téléphone du client : les conditions, le prix et l'empreinte.",
+      "hold": "À scanner pour approuver l'empreinte",
+      "holdBody": "Le client approuve l'empreinte dans PayPal sur son propre téléphone. Rien n'est prélevé maintenant.",
+      "condition": "À scanner pour voir le rapport d'état",
+      "code": "Un code qui ouvre {url}",
+      "making": "Création du lien…",
+      "done": "Terminé"
+    },
+    "dropOffs": {
+      "lead": "Les articles rendus sans personne au comptoir. Regardez d'abord au point de dépôt. L'empreinte reste et rien n'est débité tant qu'une personne n'a pas vu l'article.",
+      "emptyTitle": "Rien au point de dépôt",
+      "emptyBody": "Quand un client rend un article lui-même, il attend ici qu'une personne le vérifie.",
+      "returned": "Rendu {when}",
+      "renter": "Un client",
+      "here": "Il est là, examiner le retour",
+      "notHere": "Il n'est pas là",
+      "confirmTitle": "Consigner qu'il n'est pas au point de dépôt ?",
+      "confirmBody": "Hold consigne qui a regardé et quand, et peut écrire au client. L'empreinte reste en place et rien n'est débité.",
+      "confirm": "Consigner",
+      "recorded": "Consigné. L'empreinte reste en place.",
+      "recordedTold": "Consigné, et le client a reçu un e-mail. L'empreinte reste en place."
+    },
+    "capture": {
+      "handover": "Remise",
+      "return": "Retour",
+      "progress": "{done} vues requises sur {total}",
+      "guidanceHandover": "Photographiez chaque vue. Encadrez toute marque déjà présente, pour qu'elle ne soit jamais facturée à ce client.",
+      "guidanceReturn": "Reproduisez chaque vue de départ avec la photographie superposée à la caméra. Consignez ce qui revient ; une personne décide de la suite.",
+      "views": "Vues",
+      "needed": "Requise",
+      "optional": "Facultative",
+      "photographed": "Photographiée",
+      "preparing": "Préparation de la photo…",
+      "uploading": "Envoi…",
+      "failed": "Non envoyée",
+      "retryItem": "Renvoyer la photo de {view}",
+      "retake": "La reprendre",
+      "photograph": "Photographier {view}",
+      "retakeView": "Reprendre {view}",
+      "hint": "{position} sur {total} · {view}",
+      "close": "Fermer la caméra",
+      "marks": "Marques",
+      "marksItem": "Marques sur {view}",
+      "marksCount": "{count, plural, =0 {Aucune marque} one {# marque} other {# marques}}",
+      "toCheck": "{count, plural, one {# marque connue à vérifier} other {# marques connues à vérifier}}",
+      "photo": "Photo de {view}",
+      "upload": {
+        "upload_failed": "La photo n'a pas été envoyée. Vérifiez la connexion et réessayez.",
+        "not_uploaded": "La photo n'est pas arrivée. Reprenez-la.",
+        "key_mismatch": "Cette photo appartient à une autre vue. Reprenez-la.",
+        "too_large": "La photo est trop lourde. Reprenez-la.",
+        "unreadable": "La photo n'a pas pu être lue sur ce téléphone. Reprenez-la."
+      },
+      "seal": {
+        "handover": "Sceller les photos",
+        "return": "Sceller les photos du retour",
+        "ready": "Toutes les vues requises sont photographiées. Sceller les fige et les enchaîne à l'historique de l'article.",
+        "missing": "{count, plural, one {Une vue attend} other {# vues attendent}} encore une photo.",
+        "waiting": "Attendez la fin des envois.",
+        "out": "La location est partie.",
+        "next": "Scellé. Photographiez l'article suivant de la location.",
+        "emailed": "Le client a reçu le rapport d'état par e-mail. Il peut aussi scanner ce code.",
+        "texted": "La personne qui loue a reçu le rapport d'état par SMS. Elle peut aussi scanner ce code.",
+        "show": "Montrez ce code au client. Il ouvre le rapport d'état, qu'il confirme ou complète sous 24 heures.",
+        "returned": "Retour scellé. Les photos sont en cours de comparaison. Rien n'a été débité.",
+        "returnedNext": "Retour scellé. Photographiez l'article suivant de la location.",
+        "review": "Noter ce que vous avez vu",
+        "back": "Retour à la location",
+        "sealedHandover": "Scellé. Ces photos ne peuvent plus changer.",
+        "sealedReturn": "Ces photos du retour sont scellées. Rien n'a été débité."
+      }
+    },
+    "marks": {
+      "title": "Marques",
+      "lead": "Les marques déjà présentes au départ ne sont jamais facturées à ce client.",
+      "known": "Déjà sur l'article",
+      "stillThere": "Toujours là",
+      "stillThereItem": "Toujours là : {mark}",
+      "confirmed": "Toujours là",
+      "added": "Ajoutée à l'instant",
+      "add": "Ajouter une marque",
+      "howTo": "Touchez la marque sur la photo, ou tracez un cadre autour.",
+      "box": "Le cadre de la nouvelle marque",
+      "boxAt": "{x} % depuis la gauche, {y} % depuis le haut, {width} % de large, {height} % de haut",
+      "description": "Quelle est cette marque ?",
+      "descriptionHint": "Par exemple : rayure sur le tube supérieur, 2 cm",
+      "save": "Enregistrer la marque",
+      "cancel": "Annuler",
+      "saved": "Marque enregistrée.",
+      "noPhoto": "Photographiez d'abord cette vue, puis encadrez ses marques.",
+      "readOnly": "Scellé. Ces marques font partie de l'historique de l'article."
+    },
+    "review": {
+      "title": "Ce que vous avez vu",
+      "lead": "Décrivez vos observations et vos raisons. Elles sont enregistrées avec votre nom, sans approuver de débit.",
+      "outcome": "Résultat de votre inspection",
+      "outcomes": {
+        "clean": "Aucun nouveau dommage",
+        "findings": "Constatations",
+        "deferred": "Examen humain nécessaire"
+      },
+      "notes": "Vos notes d'inspection",
+      "record": "Enregistrer l'inspection",
+      "recorded": "Votre inspection est enregistrée. Une éventuelle réclamation se prépare et s'approuve sur le web.",
+      "needsNote": "Décrivez ce que vous avez observé."
+    },
+    "itemStatus": {
+      "title": "Statut de l'article",
+      "lead": "Un pneu crevé envoie l'article en réparation. Il n'est plus proposé aux clients tant qu'il n'est pas remis en service.",
+      "statuses": {
+        "in_service": "En service",
+        "in_repair": "En réparation",
+        "retired": "Retiré"
+      },
+      "note": "Note (facultative)",
+      "save": "Enregistrer le statut",
+      "saved": "Statut enregistré."
+    },
+    "message": {
+      "title": "Écrire au client",
+      "lead": "Une réponse sur la réclamation. Le client la lit sur son lien et la reçoit par e-mail.",
+      "body": "Votre message",
+      "send": "Envoyer",
+      "sent": "Envoyé.",
+      "needsText": "Écrivez un message de 1000 caractères au plus."
+    },
+    "refusal": {
+      "web": {
+        "title": "Cela se décide sur le web",
+        "body": "Les décisions d'argent demandent une clé d'accès, sur l'application web de Hold. Rien n'a été modifié depuis ce téléphone."
+      },
+      "reasons": {
+        "not_ready": "L'empreinte doit être posée avant la remise.",
+        "not_found": "Cela ne fait plus partie de cette boutique.",
+        "storage_unavailable": "Les photos ne peuvent pas encore être enregistrées ici. Demandez au propriétaire de la boutique.",
+        "sealed": "Ces photos sont scellées et ne peuvent plus changer.",
+        "session_sealed": "Ces photos sont scellées et ne peuvent plus changer.",
+        "unknown_view": "Cette vue n'est pas dans le plan photo de l'article.",
+        "views_missing": "Certaines vues attendent encore une photo.",
+        "region_invalid": "Tracez le cadre à l'intérieur de la photo.",
+        "description_invalid": "Décrivez la marque en 200 caractères au plus.",
+        "no_email": "Cette réservation n'a pas d'e-mail où écrire.",
+        "email_failed": "L'e-mail n'a pas pu être envoyé. Montrez plutôt le lien.",
+        "not_booked": "Le prix doit être réglé avant de demander l'empreinte.",
+        "not_dropped_off": "Cet article n'attend plus au point de dépôt.",
+        "already_reported": "Il est déjà consigné comme introuvable.",
+        "role_may_not_retire": "Seuls le propriétaire ou un responsable peuvent retirer un article.",
+        "item_in_use": "Un client a l'article, ou son retour est encore en vérification. Changez-le une fois rendu et vérifié.",
+        "message_invalid": "Écrivez un message de 1000 caractères au plus.",
+        "transition_not_allowed": "La location n'en est pas à cette étape."
+      }
+    }
+  },
+  "camera": {
+    "permission": {
+      "title": "Hold a besoin de l'appareil photo",
+      "body": "Pour photographier l'article quand il est remis et quand il revient, afin que chacun ait le même état des lieux. Rien d'autre.",
+      "allow": "Autoriser l'appareil photo",
+      "deniedTitle": "L'appareil photo est désactivé pour Hold",
+      "deniedBody": "Activez-le dans Réglages pour prendre les photographies. En attendant, la boutique peut les prendre au comptoir.",
+      "openSettings": "Ouvrir Réglages",
+      "checking": "Vérification de l'accès à l'appareil photo…"
+    },
+    "capture": {
+      "shutter": "Prendre la photographie",
+      "ghostShow": "Afficher la photographie précédente",
+      "ghostHide": "Masquer la photographie précédente",
+      "alignHint": "Alignez l'article sur la photographie pâle prise à la remise.",
+      "retake": "Reprendre",
+      "use": "Utiliser la photographie",
+      "preparing": "Préparation de la photographie…",
+      "review": "L'article est-il net et entièrement cadré ?",
+      "failed": "La photographie n'a pas pu être prise. Réessayez.",
+      "ghostImage": "Photographie précédente : {view}"
+    }
+  },
+  "code": {
+    "label": "Code à usage unique",
+    "hint": "{length} chiffres, dans l'e-mail ou le SMS envoyé par Hold."
+  },
+  "loadState": {
+    "offline": {
+      "title": "Pas de connexion",
+      "body": "Ce téléphone est hors ligne. Rien n'a été modifié. Réessayez quand vous aurez du réseau."
+    },
+    "timeout": {
+      "title": "Hold met trop de temps à répondre",
+      "body": "Rien n'a été modifié. Réessayez dans un instant."
+    },
+    "unexpected": {
+      "title": "Une erreur s'est produite",
+      "body": "Hold n'a pas pu afficher ceci. Rien n'a été débité et rien n'a été modifié."
+    },
+    "link_invalid": {
+      "title": "Ce lien est inutilisable",
+      "body": "Il est peut-être mal saisi, ou il a expiré. Demandez-en un nouveau à la boutique."
+    },
+    "signed_out": {
+      "title": "Vous êtes déconnecté",
+      "body": "Reconnectez-vous pour continuer."
+    },
+    "refused": {
+      "title": "Hold n'a pas fait cela",
+      "body": "Rien n'a été débité et rien n'a été modifié."
+    },
+    "scope": {
+      "title": "Ce lien ne permet pas cela",
+      "body": "Demandez de l'aide à la boutique."
+    },
+    "rate_limited": {
+      "title": "Trop d'essais",
+      "body": "Patientez une minute, puis réessayez."
+    },
+    "invalid": {
+      "title": "Certains détails ne sont pas corrects",
+      "body": "Vérifiez ce que vous avez saisi et réessayez."
+    },
+    "no_shop": {
+      "title": "Vous ne faites pas encore partie d'une boutique",
+      "body": "Demandez au propriétaire de la boutique de vous ajouter."
+    },
+    "role": {
+      "title": "Votre rôle ne permet pas cela",
+      "body": "Demandez à un propriétaire ou à un responsable."
+    },
+    "passkey_needed": {
+      "title": "Confirmez avec votre clé d'accès",
+      "body": "Cette action demande la clé d'accès de ce téléphone."
+    },
+    "not_found": {
+      "title": "Introuvable",
+      "body": "Il a peut-être été supprimé, ou le lien est mal saisi."
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "Cet écran n'existe pas",
+      "body": "Le lien est peut-être mal saisi, ou il concerne une version plus récente de Hold.",
+      "home": "Aller au début"
+    }
+  },
+  "pay": {
+    "pay": "Régler {amount} avec PayPal",
+    "paying": "Ouverture de PayPal…",
+    "agree": "En réglant, vous acceptez l'empreinte et les prix ci-dessus.",
+    "cancelled": "Vous avez fermé PayPal sans approuver. Rien n’a été débité.",
+    "walkIn": {
+      "approve": "Régler {fee} et approuver l'empreinte de {hold} avec PayPal",
+      "approving": "Ouverture de PayPal…",
+      "agree": "Vous approuvez les deux à la fois dans PayPal. Seuls les frais sont prélevés. L'empreinte n'est pas prélevée. En approuvant, vous acceptez l'empreinte et les prix ci-dessus.",
+      "placed": "Vos frais de {fee} sont réglés et votre empreinte de {hold} est posée. Seuls les frais ont été prélevés.",
+      "taking": "Votre empreinte de {hold} est posée. PayPal prélève vos frais de {fee}.",
+      "done": "Empreinte posée. Seuls vos frais sont prélevés."
+    },
+    "hold": {
+      "title": "Approuvez votre empreinte",
+      "lead": "{amount} sont réservés sur votre compte PayPal pendant la location. Ce n'est pas un prélèvement.",
+      "notYet": "La boutique demande l'empreinte quand vous récupérez vos articles.",
+      "approve": "Approuver {amount} avec PayPal",
+      "approving": "Ouverture de PayPal…",
+      "agree": "En approuvant, vous acceptez l'empreinte et les prix de la boutique affichés sur la page de votre location.",
+      "declined": "PayPal a refusé l'empreinte. Rien n'a été réservé. Vous pouvez l'approuver à nouveau avec un autre moyen de paiement.",
+      "placed": "Votre empreinte de {amount} est posée. Rien n'a été prélevé.",
+      "validUntil": "Elle prend fin au plus tard le {date}, et elle est libérée dès que tout revient dans le même état.",
+      "back": "Voir votre location",
+      "return": {
+        "title": "Confirmation de votre empreinte",
+        "checking": "Vérification auprès de PayPal…",
+        "done": "Empreinte posée. Rien n'a été prélevé.",
+        "retry": "Réessayer",
+        "again": "Approuver à nouveau"
+      },
+      "replaceTitle": "Approuvez une nouvelle empreinte",
+      "replaceLead": "Votre empreinte prend fin le {date}, et votre location est toujours en cours. Approuvez une nouvelle empreinte de {amount} pour qu'elle reste couverte. Ce n'est pas un prélèvement, et l'ancienne est libérée dès que vous approuvez."
+    },
+    "paid": {
+      "title": "Confirmation de votre règlement",
+      "checking": "Vérification auprès de PayPal…",
+      "done": "Règlement confirmé. Votre location est réservée.",
+      "back": "Voir votre location",
+      "retry": "Réessayer"
+    },
+    "trustReason": "Votre empreinte est de {amount}, et non de {ordinary}, car vous avez rendu {count, plural, one {# location} other {# locations}} en bon état au cours des {months} derniers mois.",
+    "secure": "PayPal s’ouvre dans une fenêtre sécurisée sur ce téléphone, puis vous ramène directement ici.",
+    "openAgain": "Rouvrir PayPal",
+    "stillWorking": "PayPal traite encore la demande. Vérifiez à nouveau dans un instant.",
+    "checkAgain": "Vérifier à nouveau"
+  },
+  "condition": {
+    "title": "L'état de votre location au départ",
+    "lead": "Voici les photos prises à la remise, avec chaque marque notée. Rien de ce qui figure ici ne vous sera jamais facturé.",
+    "preparing": "Préparation de la photo…",
+    "photoOf": "{item} : {view}",
+    "noMarks": "Aucune marque n'a été notée.",
+    "addedCount": "Vous avez ajouté {count, plural, one {une photo} other {# photos}}.",
+    "openUntil": "Vous pouvez confirmer ou ajouter ce qui a été oublié jusqu'au {when}.",
+    "closed": "Le délai pour répondre est passé.",
+    "repliedConfirmed": "Vous avez confirmé les photos.",
+    "repliedAdded": "Vous avez ajouté des photos de ce qui avait été oublié. La boutique les voit avec la remise.",
+    "otherLink": "Répondez depuis le lien que la boutique vous a envoyé à la remise.",
+    "confirm": "Tout est comme montré",
+    "add": "Ajouter une photo de quelque chose d'oublié",
+    "which": "Quel article ?",
+    "missedView": "Quelque chose d'oublié",
+    "send": "Envoyer ce que j'ai ajouté",
+    "back": "Voir votre location",
+    "notHandedOver": "La location n'a pas encore été remise.",
+    "photograph": "Photographier quelque chose d’oublié",
+    "cameraHint": "Photographiez ce que l’équipe a oublié, de près et avec une bonne lumière.",
+    "addedPhoto": "Votre photo {number} de {item}",
+    "added": "Ce que vous avez ajouté",
+    "cancelAdd": "Revenir à la confirmation"
+  },
+  "extend": {
+    "title": "Le garder plus longtemps",
+    "back": "Retour à votre location",
+    "dueNow": "Retour prévu",
+    "latest": "Votre empreinte couvre un retour jusqu’au {when}, et la boutique accepte jusqu’à {days, plural, one {# jour de plus} other {# jours de plus}}.",
+    "closed": {
+      "title": "Une prolongation est possible tant que vous avez l’article",
+      "body": "Contactez {shop} pour modifier cette location."
+    },
+    "off": {
+      "title": "Cette boutique ne prend pas de prolongations par téléphone",
+      "body": "Contactez {shop} pour le garder plus longtemps."
+    },
+    "noScope": "Ce lien montre la location mais ne permet pas de la prolonger. Utilisez le lien envoyé par la boutique avec votre réservation.",
+    "refused": {
+      "beyond_hold": "Votre empreinte couvre un retour jusqu’au {when}. Au-delà, contactez la boutique.",
+      "not_free": "Quelqu’un l’a réservé à partir du {when}. Choisissez une heure plus tôt, ou contactez la boutique.",
+      "too_many_days": "La boutique accepte jusqu’à {days, plural, one {# jour de plus} other {# jours de plus}} par téléphone. Au-delà, contactez la boutique.",
+      "not_later": "Choisissez une heure après votre heure de retour actuelle.",
+      "not_out": "Une prolongation est possible tant que vous avez l’article.",
+      "off": "Cette boutique ne prend pas de prolongations par téléphone.",
+      "no_hold": "Votre empreinte n’est pas en place : la boutique doit voir cela avec vous.",
+      "quote_stale": "La location a changé depuis ce prix. Choisissez de nouveau l’heure."
+    },
+    "quote": {
+      "title": "Votre prix",
+      "days": "{count, plural, one {# jour de plus} other {# jours de plus}}",
+      "newEnd": "Nouvelle heure de retour",
+      "paidNow": "Payé maintenant avec PayPal.",
+      "holdUnchanged": "Payé maintenant avec PayPal, à part. Votre empreinte de {hold} reste telle quelle.",
+      "pay": "Payer {amount} avec PayPal",
+      "agree": "Vous approuvez ce paiement dans PayPal. Votre heure de retour change dès qu’il est approuvé."
+    },
+    "list": {
+      "title": "Vos prolongations",
+      "paid": "{days, plural, one {# jour de plus} other {# jours de plus}}, jusqu’au {when}. {amount} payés.",
+      "capturing": "{days, plural, one {# jour de plus} other {# jours de plus}}, jusqu’au {when}. PayPal encaisse {amount}.",
+      "failed": "{days, plural, one {# jour de plus} other {# jours de plus}}, jusqu’au {when} : PayPal a refusé le paiement, votre heure de retour n’a pas changé."
+    },
+    "extended": {
+      "title": "Votre prolongation",
+      "checking": "Vérification de votre paiement auprès de PayPal…",
+      "done": "Payé. Votre nouvelle heure de retour est enregistrée.",
+      "retry": "Réessayer",
+      "back": "Voir vos prolongations",
+      "again": "Choisir l’heure de nouveau",
+      "reviewing": "PayPal examine votre paiement, ce qui peut prendre un jour ou plus. Votre nouvelle heure de retour vaut pour l’instant. Si PayPal refuse le paiement, ou n’a pas terminé avant votre heure de retour précédente, celle-ci s’applique de nouveau."
+    },
+    "form": {
+      "quick": "Combien de temps de plus ?",
+      "days": "{count, plural, one {+# jour} other {+# jours}}",
+      "newEnd": "Nouvelle heure de retour",
+      "price": "Voir le prix",
+      "fewer": "Un jour de moins",
+      "more": "Un jour de plus"
+    }
+  },
+  "renterAction": {
+    "reasons": {
+      "refused": "Hold ne l’a pas fait. Rien n’a été débité ni modifié.",
+      "offline": "Ce téléphone est hors ligne. Rien n’a été modifié. Réessayez quand vous aurez du réseau.",
+      "timeout": "Hold a mis trop de temps à répondre. Rien n’a été modifié. Réessayez dans un instant.",
+      "unexpected": "Un problème est survenu. Rien n’a été débité ni modifié.",
+      "invalid": "Certains détails ne sont pas corrects. Vérifiez ce que vous avez saisi et réessayez.",
+      "link_invalid": "Ce lien est inutilisable. Demandez-en un nouveau à la boutique.",
+      "scope": "Ce lien ne permet pas cela.",
+      "rate_limited": "Trop d'essais depuis ce réseau. Attendez une minute et réessayez.",
+      "not_found": "Hold ne trouve plus cet élément. Revenez en arrière et rouvrez-le.",
+      "upload_failed": "La photo n'a pas été envoyée. Réessayez.",
+      "not_out": "Les signalements sont ouverts tant que vous avez les articles.",
+      "description_invalid": "Décrivez ce qui s’est passé, en 1 000 caractères au plus.",
+      "already_sent": "Ce signalement a déjà été envoyé.",
+      "region_invalid": "Gardez le cadre sur la photo, serré autour du dommage.",
+      "not_agreeable": "Ce prix ne peut pas être accepté maintenant. La page montre où en est le signalement.",
+      "not_theft": "Ces détails concernent un vol ou une perte en attente de la boutique.",
+      "already_given": "Ces détails ont déjà été donnés.",
+      "no_details": "Donnez d’abord les détails.",
+      "police_report_invalid": "Saisissez le numéro de plainte.",
+      "storage_unavailable": "Impossible de prendre des photos ici pour le moment.",
+      "key_mismatch": "Cette photo n’appartient pas à ce signalement.",
+      "not_uploaded": "La photo n’est pas arrivée. Reprenez-la.",
+      "sealed": "Ce signalement a été envoyé : aucune photo ne peut être ajoutée.",
+      "unknown_view": "Cette vue n’existe pas pour cet article.",
+      "not_connected": "Aucun assistant n'est connecté à cette location.",
+      "not_allowed": "Cette boutique ne prend les retours qu’au comptoir.",
+      "not_ready": "Cette location ne peut pas être rendue ici pour le moment.",
+      "staff_returning": "Le personnel prend déjà ce retour au comptoir.",
+      "photo_reused": "Cette photo a déjà servi. Prenez-en une nouvelle de l’article tel qu’il est maintenant.",
+      "views_missing": "Il reste des photos à prendre.",
+      "already_replied": "Vous avez déjà répondu.",
+      "closed": "Le délai pour répondre est passé.",
+      "paypal_unavailable": "PayPal n'a pas pu être joint. Rien n'a été débité. Réessayez dans un instant."
+    },
+    "code": {
+      "send": "Recevoir un code",
+      "sendAgain": "Recevoir un nouveau code",
+      "sent": "Code envoyé. Il expire dans dix minutes.",
+      "sentSandbox": "Code envoyé à l’adresse de contact de la réservation, car il s’agit du bac à sable PayPal. Il expire dans dix minutes.",
+      "expired": "Ce code a expiré. Demandez-en un nouveau.",
+      "wrong": "Ce code n’est pas le bon. Vérifiez-le et réessayez.",
+      "recentlySent": "Un code vient d'être envoyé. Attendez une minute avant d'en redemander un.",
+      "emailUnavailable": "Le code n’a pas pu être envoyé. Réessayez dans un instant.",
+      "sentByText": "Code envoyé par SMS au {phone}. Il expire dans dix minutes.",
+      "emailInstead": "Plutôt l'envoyer à mon e-mail PayPal",
+      "textUnavailable": "Le SMS n'a pas pu être envoyé.",
+      "shownLabel": "Sandbox : ce SMS n'a pas été envoyé. C'est ce que recevrait la personne qui loue.",
+      "useCode": "Utiliser le code {code}"
+    },
+    "photo": {
+      "preparing": "Préparation de la photo…",
+      "taken": "Prise",
+      "toTake": "À prendre",
+      "optional": "Facultative",
+      "takeHint": "Ouvre l’appareil photo pour cette vue.",
+      "retakeHint": "Ouvre l’appareil photo pour reprendre cette vue.",
+      "close": "Fermer l’appareil photo",
+      "uploadFailed": "La photo n'a pas été envoyée. Réessayez."
+    }
+  },
+  "incident": {
+    "title": "Il s’est passé quelque chose",
+    "reportScreenTitle": "Votre signalement",
+    "lead": "Dites à la boutique ce qui est arrivé à ce que vous louez. Votre signalement est daté, verrouillé et ajouté à l’historique de l’article.",
+    "emergencyTitle": "D’abord les urgences",
+    "emergencyFirst": "Si quelqu’un est blessé ou en danger, appelez d’abord les secours : 112 en Europe, 911 en Amérique du Nord.",
+    "newReport": "Un nouveau signalement",
+    "closed": "Les signalements sont ouverts tant que vous avez les articles. Pour le reste, contactez la boutique.",
+    "earlier": "Vos signalements",
+    "reportTitle": "Ce qui est arrivé à {item}",
+    "yourWords": "Ce que vous avez dit à la boutique",
+    "start": {
+      "which": "Quel article",
+      "what": "Ce qui s’est passé",
+      "hints": {
+        "damage": "Une marque ou un dommage, comme une rayure ou un choc",
+        "fault": "Quelque chose ne fonctionne plus",
+        "gone": "Il a disparu : volé ou perdu",
+        "unsafe": "Quelqu’un a été blessé, ou ce n’est peut-être pas sûr",
+        "not_sure": "Je ne sais pas"
+      },
+      "describe": "Décrivez ce qui s’est passé",
+      "describeHelp": "Avec vos mots. La boutique lit exactement ce que vous écrivez.",
+      "describeMissing": "Décrivez ce qui s’est passé, en 1 000 caractères au plus.",
+      "continue": "Continuer"
+    },
+    "capture": {
+      "title": "Photos",
+      "guidance": "Photographiez ce qui s’est passé, du côté où cela se voit. La photo prise au départ apparaît en transparence derrière l’appareil, pour retrouver l’angle. Chaque vue est facultative.",
+      "sampleTitle": "Photos d’exemple",
+      "sampleBody": "Certaines photos sont des exemples pour la démonstration, pas un vrai article."
+    },
+    "send": {
+      "noPhotos": "Pas encore de photo. Vous pouvez quand même envoyer le signalement, par exemple si l’article a disparu.",
+      "markTitle": "Indiquer où c’est",
+      "howTo": "Touchez votre photo à l’endroit du dommage. Le cadre devient la marque vérifiée au retour. C’est facultatif.",
+      "whichPhoto": "Photo à annoter",
+      "tapToMark": "Touchez l’endroit du dommage sur {view}",
+      "marked": "Marqué sur {view}, vers {x} % en largeur et {y} % en hauteur",
+      "tapHint": "Touchez à nouveau pour déplacer le cadre.",
+      "removeBox": "Retirer le cadre",
+      "send": "Envoyer le signalement"
+    },
+    "outcome": {
+      "simulated": "Classé par un substitut de l’environnement de test, pas par Claude.",
+      "unsafe": {
+        "title": "Arrêtez d’utiliser l’article",
+        "stop": "Arrêtez de l’utiliser maintenant et gardez-le en lieu sûr.",
+        "contact": "La boutique a été prévenue et vous contactera.",
+        "emergency": "Si quelqu’un est blessé ou en danger, appelez les secours : 112 en Europe, 911 en Amérique du Nord."
+      },
+      "photographs": {
+        "title": "Pas encore envoyé",
+        "body": "Ajoutez des photos si vous le pouvez, puis envoyez le signalement."
+      },
+      "stored": {
+        "title": "Votre signalement est enregistré",
+        "body": "La boutique a été prévenue et vous contactera."
+      },
+      "theft": {
+        "title": "Un vol ou une perte",
+        "body": "La boutique a été prévenue et vous contactera. Donnez ces détails maintenant. Le numéro de plainte peut être ajouté plus tard."
+      },
+      "fault": {
+        "title": "Une panne",
+        "body": "Une panne ne vous est pas facturée. La boutique a été prévenue et vous contactera pour un échange ou une récupération."
+      },
+      "pricing": {
+        "title": "Petit dommage",
+        "body": "La boutique confirmera lequel de ses prix publiés s’applique, et cette page l’affichera. Rien n’est prélevé maintenant."
+      },
+      "offer": {
+        "title": "Petit dommage à un prix publié",
+        "priceFor": "Le prix publié par la boutique pour {description}",
+        "body": "Vous pouvez l’accepter maintenant, ou attendre le retour. Rien n’est débité maintenant."
+      },
+      "agreed": {
+        "title": "Accepté",
+        "body": "Vous avez accepté le prix publié par la boutique.",
+        "amountLabel": "Prix accepté",
+        "notCharged": "Rien n’a été prélevé. Au retour, un membre du personnel le confirme après avoir vu l’article et ne peut que le baisser. Il est prélevé une seule fois avec les autres lignes, et le reste de votre empreinte est libéré."
+      },
+      "return": {
+        "title": "Laissé pour le retour",
+        "body": "Une personne de la boutique l’examinera quand vous rapporterez l’article."
+      },
+      "resolved": {
+        "title": "Réglé",
+        "body": "La boutique a réglé ce signalement."
+      }
+    },
+    "agree": {
+      "codeGuidance": "Pour accepter ce prix, demandez un code à usage unique. Il est envoyé à l’adresse e-mail que PayPal a donnée pour vous.",
+      "agree": "Accepter ce prix",
+      "agreeing": "Vous acceptez",
+      "leaveGuidance": "Ou laissez-le pour le retour : une personne de la boutique l’examinera.",
+      "leave": "Laisser pour le retour"
+    },
+    "theft": {
+      "where": "Où c’est arrivé",
+      "when": "Quand c’est arrivé",
+      "lockAndKeys": "Le cadenas et les clés : était-il attaché, et où sont les clés ?",
+      "policeReport": "Numéro de plainte",
+      "policeLater": "Si vous ne l’avez pas encore, vous pourrez l’ajouter plus tard.",
+      "send": "Envoyer ces détails",
+      "notGiven": "Pas encore donné",
+      "addPolice": "Ajouter le numéro de plainte",
+      "required": "Obligatoire."
+    },
+    "states": {
+      "reported": "Signalé",
+      "triaged": "Classé",
+      "agreed": "Accepté par le locataire",
+      "shop_matter": "Pris en charge par la boutique",
+      "awaiting_staff": "En attente d’une personne",
+      "claim_opened": "Dans la réclamation",
+      "resolved": "Réglé",
+      "withdrawn": "Retiré"
+    }
+  },
+  "selfReturn": {
+    "title": "Le rendre vous-même",
+    "unavailable": {
+      "title": "Ce retour n’est pas ouvert ici",
+      "body": "{shop} prend ce retour au comptoir. Rapportez-le pendant les heures d’ouverture."
+    },
+    "when": {
+      "open": "Une personne de {shop} le vérifie aujourd’hui, pendant que la boutique est ouverte.",
+      "later": "Une personne de {shop} le vérifie à l’ouverture de la boutique, {when}.",
+      "unknown": "Une personne de {shop} le vérifie à la prochaine ouverture de la boutique."
+    },
+    "intro": {
+      "title": "Avant de commencer",
+      "dropPointLabel": "Où le laisser",
+      "writtenBy": "Selon {shop}",
+      "nextLabel": "Ce qui se passe ensuite",
+      "nothingCharged": "Rien n’est débité maintenant.",
+      "yourHold": "Votre réservation",
+      "holdStays": "Elle reste réservée chez PayPal jusque-là. Ensuite, elle est libérée, ou vous recevez une réclamation avec photos à laquelle vous pouvez répondre.",
+      "how": "Photographiez chaque vue comme elle l’a été quand vous l’avez pris, puis l’endroit où vous l’avez laissé. Environ deux minutes.",
+      "light": "Trouvez une bonne lumière. Les photos prises maintenant prouvent dans quel état vous l’avez laissé.",
+      "start": "Commencer les photos",
+      "noScope": "Ce lien montre la location mais ne permet pas de la rendre. Utilisez le lien envoyé par la boutique avec votre réservation."
+    },
+    "capture": {
+      "title": "Photographier le retour",
+      "guidance": "La photo prise au départ apparaît en transparence derrière l’appareil. Reprenez son angle, puis passez à la vue suivante.",
+      "dropPointView": "Où vous l’avez laissé",
+      "dropPointGuidance": "Reculez pour que l’article et le point de dépôt soient tous deux sur la photo.",
+      "sampleTitle": "Photos d’exemple",
+      "sampleBody": "Ce sont des exemples pour la démonstration, pas des photos de votre location. Le dossier le précise."
+    },
+    "send": {
+      "ready": "Toutes les photos sont prises. L’envoi les scelle, et votre retour compte à partir de ce moment.",
+      "missing": "{count, plural, one {Encore # photo à prendre} other {Encore # photos à prendre}}",
+      "button": "Envoyer mon retour"
+    },
+    "receipt": {
+      "onTime": "Rendu à l’heure",
+      "late": "Rendu après la fin de la location",
+      "received": "Reçu",
+      "where": "{date}, au point de dépôt",
+      "missingTitle": "{shop} ne l’a pas trouvé au point de dépôt",
+      "missingBody": "Vérifié {when}. Merci de les contacter. Vos photos de {time} restent dans le dossier de votre location.",
+      "reserved": "Réservé, rien de débité",
+      "released": "Libéré, rien de débité",
+      "charged": "Débité après qu’une personne a approuvé une réclamation",
+      "checkedPayPal": "Vérifié auprès de PayPal à {time}",
+      "fromRecord": "D’après le dossier de Hold. PayPal n’a pas pu être consulté pour l’instant.",
+      "sample": "Une location d’exemple : PayPal n’est pas appelé.",
+      "dropPointPhoto": "Où vous l’avez laissé",
+      "photos": "Vos photos",
+      "photosBody": "Scellées dans le dossier de votre location au moment de l’envoi. Personne ne peut les modifier.",
+      "record": "Voir le dossier complet"
+    },
+    "steps": {
+      "title": "Ce qui se passe ensuite",
+      "returned": "Vous l’avez rendu",
+      "returnedDetail": "{count, plural, one {# photo} other {# photos}}, scellées à {time}",
+      "check": "Une personne le vérifie",
+      "checked": "{shop} l’a vérifié",
+      "checkedDetail": "Une personne l’a vu au point de dépôt.",
+      "notFound": "Introuvable au point de dépôt",
+      "notFoundDetail": "Merci de contacter {shop}. Rien n’est débité pendant qu’ils vérifient.",
+      "settle": "Empreinte libérée, ou une réclamation à laquelle vous pouvez répondre",
+      "settleDetail": "Rien n’est débité sans l’accord d’une personne.",
+      "released": "Empreinte libérée",
+      "releasedDetail": "Rien n’a été débité.",
+      "charged": "Débité après qu’une personne a approuvé une réclamation",
+      "seeClaim": "Voir la réclamation"
+    }
+  },
+  "claim": {
+    "title": "Votre réclamation pour dommage",
+    "renterTitle": "Votre réclamation pour dommage",
+    "none": {
+      "title": "Aucune réclamation",
+      "body": "Une personne de la boutique approuve d’abord toute réclamation. S’il y en a une après votre retour, elle s’affiche ici avec ses photos, et vous pouvez y répondre."
+    },
+    "record": "Votre dossier de location",
+    "negotiationLink": "Voir les échanges des représentants",
+    "states": {
+      "draft": "Brouillon",
+      "awaiting_approval": "Approbation en attente",
+      "approved": "Approuvée",
+      "presented": "Votre réponse est attendue",
+      "accepted": "Acceptée",
+      "contested": "Contestée — examen en attente",
+      "lapsed": "Délai de réponse terminé",
+      "negotiating": "En négociation",
+      "agreed": "Accord trouvé",
+      "escalated": "Transmise",
+      "decided": "Décision enregistrée",
+      "charging": "Règlement en cours",
+      "charged": "Débitée",
+      "charge_failed": "Échec du débit",
+      "adjusted": "Ajustée",
+      "waived": "Réclamation annulée",
+      "closed": "Clôturée"
+    },
+    "settledBody": "PayPal a confirmé le règlement. Cette location est clôturée.",
+    "renterBoundary": "Vérifiez les preuves et les prix. Acceptez avec un code ou contestez avec votre explication.",
+    "afterReply": "Votre réponse est enregistrée. Les preuves et les prix restent ci-dessous, et cette page montre chaque étape jusqu’au règlement.",
+    "pending": "Confirmation PayPal en attente…",
+    "replyDue": "Répondez avant le {when}",
+    "summary": "Montants du règlement",
+    "capture": "Débit sur la réserve",
+    "release": "Restitution au locataire",
+    "invoice": "Facture séparée",
+    "lines": "{count, plural, one {La ligne} other {Les lignes}}",
+    "namedBy": "Enregistré par {name}",
+    "staff": "Membre du personnel",
+    "beforeUrl": "Au départ",
+    "afterUrl": "Au retour",
+    "repairedOn": "Réparé {date}",
+    "repairedBody": "La boutique a réparé ce que vous avez payé. Le coût de la réparation reste à la charge de la boutique.",
+    "repairedAlt": "Réparé : {line}",
+    "reviewFirst": "Vérifiez les preuves et les prix. Votre délai commence quand vous confirmez avoir examiné cette réclamation.",
+    "acknowledge": "J’ai examiné cette réclamation",
+    "yourReply": "Votre réponse",
+    "choose": "Ce que vous voulez faire",
+    "codeGuidance": "Nous envoyons un code à usage unique à l’adresse confirmée par PayPal lors du paiement.",
+    "comment": "Votre explication",
+    "commentHint": "Obligatoire pour contester. Facultative si vous acceptez. Jusqu’à 1 000 caractères.",
+    "accept": "Accepter la réclamation et régler",
+    "contest": {
+      "title": "Où les deux parties divergent",
+      "count": "Contesté : {disputed} sur {total, plural, one {# ligne} other {# lignes}}",
+      "byClaude": "Écrit par Claude",
+      "bySimulated": "Résumé simulé",
+      "neutral": "Ne prend pas parti et ne cite aucun montant. Les faits sous chaque ligne viennent des dossiers de Hold. Vérifiez les preuves avant de décider.",
+      "disputed": "Contesté",
+      "notDisputed": "Non contesté",
+      "shopSays": "La boutique dit",
+      "youSaid": "Vous avez dit",
+      "records": "Ce que montrent les dossiers",
+      "before": "Photo au départ : {line}",
+      "after": "Photo au retour : {line}",
+      "beforeShort": "Départ",
+      "afterShort": "Retour",
+      "youWrote": "Vous avez écrit",
+      "noWords": "Aucun mot, seulement la contestation.",
+      "missing": {
+        "pending": "Aucun résumé n’a encore été rédigé. Les mots du locataire et les dossiers figurent ci-dessous.",
+        "refused": "Le résumé n’a pas pu être rédigé cette fois. Les mots du locataire et les dossiers figurent ci-dessous.",
+        "unavailable": "Le résumé n’a pas pu être rédigé cette fois. Les mots du locataire et les dossiers figurent ci-dessous.",
+        "invalid": "Le résumé n’a pas passé les contrôles de Hold et n’est pas affiché. Les mots du locataire et les dossiers figurent ci-dessous.",
+        "dropped": "Le résumé citait un nombre, ce que Hold n’autorise pas, et n’est pas affiché. Les mots du locataire et les dossiers figurent ci-dessous."
+      },
+      "facts": {
+        "confirmedTwice": "Trouvé par la comparaison, et confirmé par un second examen indépendant.",
+        "foundOnce": "Trouvé par la comparaison. Le second examen ne l’a pas confirmé.",
+        "markNearby": "Une marque relevée avant cette location se trouve près du même endroit.",
+        "noMarkNearby": "Aucune marque relevée avant cette location ne se trouve près de cet endroit.",
+        "agreedDuringRental": "Le locataire a accepté ce prix en le signalant pendant la location.",
+        "addedBy": "Ajouté par {name}, avec une raison écrite.",
+        "someone": "un membre du personnel",
+        "conditionConfirmed": "Le rapport d’état au départ a été confirmé, {when}, sans ajout.",
+        "conditionAdded": "Des photos de ce que le personnel avait manqué ont été ajoutées au rapport d’état au départ.",
+        "conditionNotAnswered": "Le rapport d’état au départ n’a jamais reçu de réponse.",
+        "incidentReported": "Quelque chose a été signalé pendant la location.",
+        "noIncident": "Rien n’a été signalé pendant la location.",
+        "renterPhotos": "{count, plural, one {# photo a été ajoutée} other {# photos ont été ajoutées}} à la contestation."
+      }
+    },
+    "contestAction": "Contester cette réclamation",
+    "results": {
+      "over_approval_limit": "Cette réclamation dépasse votre limite. Demandez au propriétaire ou responsable.",
+      "line_without_evidence": "Chaque ligne exige des photos ou votre justification écrite.",
+      "raised_the_claim": "Un autre propriétaire ou responsable doit décider votre réclamation.",
+      "role_may_not_confirm": "Votre rôle ne peut pas confirmer cette action.",
+      "code_expired": "Demandez un nouveau code.",
+      "wrong_code": "Ce code est incorrect.",
+      "code_recently_sent": "Attendez une minute avant de demander un autre code.",
+      "reply_expired": "Le délai est terminé. Demandez au magasin de revoir la réclamation.",
+      "already_replied": "Cette réclamation a déjà une réponse.",
+      "reason_required": "Indiquez votre motif avant de continuer.",
+      "email_unavailable": "Le code n’a pas pu être envoyé. Réessayez plus tard.",
+      "decision_recorded": "Une décision est déjà enregistrée. Actualisez cette page pour voir le statut du règlement.",
+      "incident_not_agreed": "Ce signalement n’a pas été accepté par le locataire.",
+      "raises_agreed_line": "Une ligne acceptée par le locataire peut être baissée, jamais augmentée.",
+      "empty_line": "Retirez la ligne plutôt que de la garder à zéro.",
+      "owner_decides_after_promise": "La boutique a manqué la date promise au locataire. Seul le propriétaire peut maintenant décider de cette réclamation."
+    },
+    "promise": {
+      "beforeLabel": "Si vous contestez",
+      "beforeBody": "{shop} promet de décider sous {days, plural, one {# jour} other {# jours}} après votre réponse. Vous verrez la date exacte dès que vous l’enverrez.",
+      "openLabel": "La boutique décide avant le",
+      "keptBody": "{shop} a décidé le {when}, avant la date promise.",
+      "missedTitle": "La boutique a manqué sa date",
+      "missedBody": "{shop} a promis de décider avant le {when} et ne l’a pas fait. Le propriétaire a été informé. Seul le propriétaire peut maintenant décider, et il doit vous donner un motif écrit.",
+      "lateTitle": "Décidée après la date promise",
+      "lateBody": "{shop} a promis de décider avant le {when} et a décidé plus tard. Le propriétaire a écrit :",
+      "waivedTitle": "Abandonnée : pas décidée à temps",
+      "waivedBody": "{shop} a promis de décider avant le {when}. Ce n’est pas le cas, donc selon sa propre règle rien n’est débité.",
+      "dueNow": "Échéance maintenant"
+    },
+    "messages": {
+      "renterTitle": "Messages avec {shop}",
+      "empty": "Aucun message pour l’instant.",
+      "you": "Vous",
+      "staff": "Personnel",
+      "writeRenter": "Écrire à la boutique",
+      "send": "Envoyer",
+      "sent": "Envoyé.",
+      "renterHint": "La boutique reçoit un e-mail indiquant que vous avez écrit. Jusqu’à 1 000 caractères."
+    },
+    "messageResults": {
+      "message_invalid": "Écrivez un message de 1 000 caractères au plus.",
+      "rate_limited": "Trop de messages pour l’instant. Réessayez dans une heure.",
+      "not_found": "Cette réclamation n’est pas ouverte aux messages.",
+      "standing_rule_off": "Elle est déjà désactivée."
+    }
+  },
+  "negotiation": {
+    "title": "Votre représentant",
+    "none": {
+      "title": "Pas encore d’avocat",
+      "body": "Un avocat ne défend une réclamation contestée que si vous la lui confiez, depuis la réclamation, avec le montant maximal que vous paierez.",
+      "toClaim": "Votre réclamation pour dommage"
+    },
+    "yourLimit": "Votre total maximal",
+    "onlyYou": "Vous seul le voyez.",
+    "assistantArgues": "Votre propre assistant défend votre contestation. Le représentant de Hold n'agit pas pour vous, et chaque coup passe par l'arbitre de Hold.",
+    "simulated": "Représentants simulés : environnement de test, aucun modèle d'IA n'a été sollicité.",
+    "advocate": {
+      "title": "Laisser un représentant défendre ma contestation",
+      "guidance": "Un représentant lit les mêmes photos, marques et prix que la boutique, et défend chaque ligne sur les preuves. Il ne voit jamais les limites de la boutique, et la boutique ne voit jamais les vôtres. Il utilise le code de vérification que nous vous envoyons, comme pour accepter ou contester.",
+      "highest": "Le maximum que je paierai, en {currency}",
+      "comment": "Ce que votre représentant doit savoir (facultatif)",
+      "start": "Confier ma contestation à un représentant",
+      "who": "Qui défend ma contestation",
+      "hold": "Le représentant de Hold",
+      "assistant": "Mon propre assistant, {name}. Ce nom est le sien et n'est pas vérifié.",
+      "assistantGuidance": "Votre assistant lit les mêmes preuves par Hold et fait chaque coup devant l'arbitre de Hold. Il ne voit jamais les limites de la boutique et ne peut pas accepter plus que ce que vous écrivez ici. Vous confirmez toujours un accord avec un code.",
+      "upTo": "Votre avocat peut accepter de payer jusqu’à",
+      "asksFirst": "Il vous demande avant d’accepter."
+    },
+    "confirm": {
+      "renterTitle": "Confirmer le montant convenu",
+      "agreedLabel": "Les avocats se sont accordés sur",
+      "renterGuidance": "Rien n'est prélevé avant votre confirmation. Si vous refusez, le propriétaire de la boutique décide.",
+      "lead": "Pour confirmer ou refuser, demandez un nouveau code à usage unique par e-mail.",
+      "confirm": "Confirmer et régler",
+      "decline": "Refuser",
+      "done": "Votre réponse est enregistrée.",
+      "waitingShop": "Vous avez confirmé. En attente de la confirmation de la boutique."
+    },
+    "stop": {
+      "title": "Arrêter mon représentant",
+      "guidance": "Arrêter ne prélève rien. Le propriétaire de la boutique décide alors, et vous voyez toujours tout ici.",
+      "button": "Arrêter mon représentant",
+      "done": "Votre représentant est arrêté.",
+      "stopped": "Vous avez arrêté votre représentant."
+    },
+    "states": {
+      "open": "Les représentants échangent des offres.",
+      "agreed": "Les avocats se sont accordés. Rien n’est débité tant que chacun n’a pas confirmé.",
+      "settled": "Accord confirmé. La réservation est réglée via PayPal.",
+      "escalated": "Les représentants n'ont pas trouvé d'accord. Le propriétaire de la boutique décide, avec ces échanges.",
+      "replied": "Le représentant du locataire a rédigé la contestation ci-dessous. Le propriétaire de la boutique décide."
+    },
+    "agreedAmount": "Montant convenu",
+    "ended": {
+      "pass": "Un représentant a passé.",
+      "refused_twice": "Les coups d'un représentant ont été refusés deux fois.",
+      "time_limit": "Un représentant a mis trop de temps.",
+      "deadline": "Le temps de la négociation est écoulé.",
+      "mandate_ended": "Un représentant a été arrêté, ou ses limites ont pris fin.",
+      "declined": "Une personne a refusé le montant convenu.",
+      "nothing_to_charge": "Ils se sont accordés sur rien à payer : le propriétaire renonce à la réclamation.",
+      "promise_missed": "La date promise par la boutique est passée : le propriétaire décide."
+    },
+    "transcript": {
+      "title": "Les échanges des représentants",
+      "noLimits": "Les échanges montrent chaque offre et les preuves sur lesquelles elle repose. Les limites des deux parties n'y figurent pas.",
+      "move": "Coup {number}",
+      "side": {
+        "shop": "Le représentant de la boutique",
+        "renter": "Le représentant du locataire",
+        "renter_assistant": "Le propre assistant du locataire"
+      },
+      "accept": "A accepté la dernière offre de l'autre partie",
+      "pass": "A passé",
+      "passReasons": {
+        "chose": "Il a choisi d'arrêter.",
+        "unavailable": "Le représentant n'a pas pu répondre.",
+        "ceiling": "Le représentant a atteint sa limite de temps ou d'appels."
+      },
+      "chainVerified": "La chaîne des empreintes est vérifiée : aucun coup n'a été modifié, retiré ou déplacé.",
+      "chainBroken": "La chaîne des empreintes n'est pas vérifiée.",
+      "offer": "A proposé",
+      "instead": "au lieu de"
+    },
+    "grounds": {
+      "known_mark": "Une marque déjà présente sur l'article se trouve à côté",
+      "ordinary_wear": "Les règles d'usure la couvrent : {clause}",
+      "uncertain_evidence": "Les photos ne permettent pas de trancher",
+      "renter_photo": "Une photo du locataire la concerne",
+      "evidence_stands": "Les deux examens l'ont confirmée",
+      "goodwill": "Geste commercial, sans preuve"
+    },
+    "results": {
+      "amount_invalid": "Indiquez un montant, comme 30 ou 30,50.",
+      "already_replied": "Cette réclamation a déjà reçu une réponse.",
+      "invalid_limits": "Ces limites ne peuvent pas être utilisées. Vérifiez chacune.",
+      "not_agreed": "Aucun accord n'attend de réponse.",
+      "not_found": "Aucun représentant sur cette réclamation.",
+      "role_may_not_confirm": "Seul le propriétaire ou un responsable peut confirmer.",
+      "raised_the_claim": "Une autre personne que celle qui a établi la réclamation doit confirmer.",
+      "no_currency": "Publiez d'abord vos prix.",
+      "code_expired": "Ce code a expiré. Demandez-en un nouveau.",
+      "wrong_code": "Ce code n'est pas le bon. Vérifiez-le et réessayez.",
+      "code_recently_sent": "Un code a été envoyé il y a moins d'une minute. Consultez vos courriels.",
+      "email_unavailable": "Le courriel n'a pas pu être envoyé. Réessayez dans un instant.",
+      "link_invalid": "Ce lien ne permet pas cette action.",
+      "assistant_not_connected": "Aucun assistant n'est connecté à cette location pour l'instant. Choisissez le représentant de Hold."
+    }
+  },
+  "record": {
+    "title": "Votre dossier de location",
+    "lead": "Conservez une copie versionnée des photographies, constats, décisions et du règlement de la location. Chaque version préparée reste inchangée.",
+    "prepare": "Préparer le dossier actuel",
+    "update": "Actualiser le dossier",
+    "retry": "Réessayer la préparation",
+    "requested": "Votre dossier est en préparation. Cette page s’actualise automatiquement.",
+    "empty": "Aucun dossier n’a encore été préparé.",
+    "version": "Version {number}",
+    "building": "Votre dossier est en préparation. Cette page s’actualise automatiquement.",
+    "buildFailed": "Le dossier n’a pas pu être préparé. Veuillez réessayer.",
+    "pdfHash": "Empreinte du PDF (SHA-256)",
+    "manifestHash": "Empreinte du manifeste (SHA-256)",
+    "unavailable": "Indisponible",
+    "unavailableVersion": "Version du dossier indisponible",
+    "receiptsTitle": "Reçus par e-mail",
+    "receiptsEmpty": "Aucun reçu envoyé par e-mail pour le moment.",
+    "receiptKinds": {
+      "capture": "Paiement reçu",
+      "release": "Empreinte libérée",
+      "refund": "Remboursement confirmé",
+      "invoice_sent": "Paiement demandé",
+      "invoice_paid": "Facture payée"
+    },
+    "receiptStates": {
+      "queued": "En attente d’envoi",
+      "sending": "Envoi en cours",
+      "sent": "Envoyé",
+      "failed": "Échec de l’envoi ; une nouvelle tentative sera effectuée."
+    },
+    "created": "Préparé le {when} UTC",
+    "readyTag": "Prêt",
+    "openPdf": "Ouvrir le PDF",
+    "sharePdf": "Partager le PDF",
+    "openManifest": "Ouvrir le manifeste"
+  },
+  "trust": {
+    "title": "Votre historique de retours",
+    "lead": "Chaque location rendue en bon état est comptée ici. L'historique ne contient ni nom, ni e-mail, ni montant, et vous décidez si d'autres boutiques Hold l'utilisent.",
+    "notYet": "Votre historique commence dès que PayPal a confirmé votre paiement.",
+    "counts": "Vos locations des {months} derniers mois",
+    "clean": "Rendues en bon état",
+    "settled": "Réclamation réglée",
+    "unpaid": "Réclamation impayée",
+    "open": "Réclamation en cours",
+    "shops": "Boutiques Hold",
+    "neverTakenNone": "Aucune empreinte ne vous a encore été libérée.",
+    "credential": "Montrer votre historique",
+    "credentialLead": "Chacun peut scanner ce code pour vérifier votre historique avec la clé publiée par Hold. Il ne montre que les nombres ci-dessus et cesse de fonctionner à {time}. Rouvrez cette page pour en obtenir un nouveau.",
+    "credentialScan": "Scannez pour vérifier cet historique",
+    "credentialText": "Ou partagez cette attestation",
+    "credentialUnavailable": "Votre historique ne peut pas être signé pour le moment. Réessayez dans un instant.",
+    "consentTitle": "Autres boutiques Hold",
+    "consentQuestion": "Utiliser mon historique de retours sans réclamation pour baisser mes futures empreintes dans les boutiques Hold.",
+    "consentYes": "Oui, l'utiliser",
+    "consentNo": "Non, merci",
+    "consentIsOn": "D'autres boutiques Hold peuvent utiliser votre historique pour baisser votre empreinte.",
+    "consentIsOff": "Chaque boutique utilise seulement son propre historique de vos retours.",
+    "turnOn": "Utiliser mon historique dans les autres boutiques Hold",
+    "turnOff": "Ne plus utiliser mon historique dans les autres boutiques Hold",
+    "delete": "Supprimer mon historique",
+    "deleteLead": "Vos retours sont supprimés dans toutes les boutiques Hold, et votre prochaine empreinte est l'habituelle. Une réclamation encore en cours reste jusqu'à son règlement.",
+    "deleteConfirm": "Je comprends que mon historique est supprimé dans toutes les boutiques Hold",
+    "deleted": "Votre historique est supprimé.",
+    "results": {
+      "renter_unknown": "Votre historique commence dès que PayPal a confirmé votre paiement.",
+      "code_expired": "Ce code a expiré ou a déjà servi. Demandez-en un nouveau.",
+      "wrong_code": "Ce code n'est pas le bon. Vérifiez l'e-mail et réessayez.",
+      "code_recently_sent": "Un code vient d'être envoyé. Attendez une minute avant d'en redemander un.",
+      "email_unavailable": "L'e-mail n'a pas pu être envoyé. Réessayez dans un instant.",
+      "payer_missing": "Votre historique commence dès que PayPal a confirmé votre paiement."
+    },
+    "codeLead": "Modifier votre historique demande un code envoyé à l'adresse que PayPal a pour vous, afin que personne d'autre ayant ce lien ne puisse le modifier.",
+    "neverTakenTitle": "Cautions jamais prélevées",
+    "across": "sur {count, plural, one {# location} other {# locations}}",
+    "share": "Partager cette attestation"
+  },
+  "assistant": {
+    "title": "Votre assistant",
+    "noneTitle": "Aucun assistant",
+    "state": {
+      "connected": "Un assistant est connecté à cette location",
+      "disconnected": "L'assistant a été déconnecté",
+      "booked": "Un assistant a fait cette réservation"
+    },
+    "callsItself": "Il se présente comme",
+    "notVerified": "Ce nom est le sien et n’est pas vérifié.",
+    "unnamed": "un assistant qui n'a pas donné de nom",
+    "lead": "Il peut consulter cette location, sa caution, son état des lieux et toute réclamation, et préparer une réponse pour vous. Il ne peut ni payer, ni approuver une caution, ni répondre à une réclamation : vous le faites vous-même, dans PayPal ou sur ce lien.",
+    "disconnectLead": "Son jeton cesse de fonctionner dès son prochain appel. Ce lien continue de fonctionner comme avant.",
+    "disconnect": "Déconnecter l'assistant",
+    "disconnected": "Déconnecté. Son prochain appel sera refusé.",
+    "notConnected": "Aucun assistant n'est connecté à cette location.",
+    "did": "Ce qu'il a fait",
+    "nothing": "Rien pour l'instant.",
+    "outcome": {
+      "refused": "Refusé",
+      "human_confirmation_required": "Vous attendait"
+    },
+    "draft": {
+      "title": "Une réponse qu'il a préparée pour vous",
+      "decision": {
+        "accept": "Accepter la réclamation",
+        "contest": "Contester la réclamation"
+      },
+      "note": "Ce sont les mots de l'assistant et ils ne décident rien. Pour répondre, ouvrez la réclamation depuis votre lien et confirmez avec le code que Hold vous envoie par e-mail."
+    },
+    "tools": {
+      "find_shops": "A cherché des boutiques",
+      "get_shop": "A consulté les informations de la boutique",
+      "check_availability": "A vérifié ce qui était libre",
+      "get_damage_prices": "A consulté les prix des dommages",
+      "quote_rental": "A demandé un prix",
+      "create_booking": "A fait cette réservation",
+      "get_booking": "A vérifié si les frais étaient payés",
+      "get_rental": "A consulté la location",
+      "get_hold": "A consulté la caution",
+      "get_hold_approval_link": "A demandé le lien pour approuver la caution",
+      "request_extension": "A demandé le prix de jours en plus, et le lien pour les payer",
+      "get_condition_report": "A consulté l'état des lieux",
+      "get_claim": "A consulté la réclamation",
+      "draft_claim_reply": "A préparé une réponse à la réclamation",
+      "submit_claim_reply": "A demandé à répondre à la réclamation",
+      "get_record": "A consulté le dossier de preuves",
+      "get_negotiation": "A consulté la négociation",
+      "get_claim_lines": "A consulté les lignes de la réclamation et leurs constats",
+      "get_line_photos": "A regardé les photos d'une ligne",
+      "get_price_list": "A consulté la liste de prix acceptée",
+      "get_known_marks": "A consulté les marques connues avant la location",
+      "submit_offer": "A joué un coup comme votre représentant"
+    }
+  },
+  "contact": {
+    "title": "Comment on vous joint",
+    "byEmail": "Par e-mail",
+    "byText": "Par SMS au {phone}",
+    "confirmed": "Confirmé",
+    "notConfirmed": "Non confirmé",
+    "emailBody": "Les liens, rappels et codes arrivent par e-mail. Pas d'e-mail sur ce téléphone ? Choisissez les SMS.",
+    "textBody": "Les liens, rappels et codes arrivent par SMS. Une copie de chaque décision d'argent part aussi à l'e-mail que PayPal a pour vous.",
+    "notConfirmedBody": "Les liens et rappels arrivent par SMS. Les codes arrivent par e-mail jusqu'à ce que vous confirmiez ce numéro.",
+    "textInstead": "Plutôt par SMS",
+    "emailInstead": "Plutôt par e-mail",
+    "changeNumber": "Changer de numéro",
+    "confirmNumber": "Confirmer ce numéro",
+    "phoneLabel": "Votre portable, avec son indicatif de pays",
+    "newPhoneLabel": "Votre nouveau portable, avec son indicatif de pays",
+    "privacy": "Hold utilise ce numéro uniquement pour les liens, rappels et codes de cette location.",
+    "sendCode": "M'envoyer un code par SMS",
+    "codeLabel": "Le code envoyé au {phone}",
+    "confirm": "Confirmer ce téléphone",
+    "confirmedNow": "Les SMS de cette location vont désormais au {phone}.",
+    "changeLead": "Pour envoyer vos SMS vers un nouveau téléphone, nous envoyons d'abord un code là où vont vos codes aujourd'hui.",
+    "sendChangeCode": "M'envoyer ce code",
+    "changeCodeLabel": "Le code que nous venons d’envoyer",
+    "changeCodeEmailed": "Code envoyé à l'e-mail que PayPal a pour vous. Il expire dans dix minutes.",
+    "cancel": "Annuler",
+    "results": {
+      "phone_invalid": "Écrivez le numéro avec son indicatif de pays, par exemple +41 79 123 45 67.",
+      "country_not_texted": "Hold n'envoie pas de SMS dans ce pays. Vos codes arrivent par e-mail.",
+      "code_needed": "L'empreinte est posée : un nouveau numéro demande d'abord le code envoyé là où vont vos codes aujourd'hui.",
+      "code_recently_sent": "Attendez une minute avant de demander un autre code.",
+      "code_expired": "Ce code a expiré. Demandez-en un nouveau.",
+      "wrong_code": "Ce code n'est pas correct.",
+      "text_unavailable": "Le SMS n'a pas pu être envoyé.",
+      "email_unavailable": "Le code n'a pas pu être envoyé. Réessayez plus tard.",
+      "payer_missing": "Payez d'abord les frais : PayPal indique alors à Hold où envoyer vos codes."
+    },
+    "open": "Choisir SMS ou e-mail",
+    "unavailable": "La façon de vous joindre ne peut pas être changée depuis ce lien."
+  },
+  "push": {
+    "offerTitle": "Suivre cette location sur ce téléphone",
+    "offerBody": "Hold peut vous prévenir ici quand votre état des lieux, une réclamation, un message du magasin ou votre reçu est prêt. Les codes à usage unique arrivent toujours seulement par SMS ou e-mail.",
+    "counterOfferTitle": "Suivre le comptoir sur ce téléphone",
+    "counterOfferBody": "Hold peut vous prévenir ici quand un dépôt attend, qu'un client écrit, qu'une comparaison de retour est prête ou qu'une décision attend sur le web.",
+    "turnOn": "Activer les notifications",
+    "notNow": "Pas maintenant",
+    "onTitle": "Notifications activées",
+    "onBody": "Ce téléphone est prévenu pour cette location.",
+    "counterOnBody": "Ce téléphone est prévenu pour {shop}.",
+    "offTitle": "Notifications désactivées",
+    "offBody": "Ce téléphone n'est pas prévenu pour cette location. Les SMS et e-mails arrivent toujours.",
+    "counterOffBody": "Ce téléphone n'est pas prévenu pour {shop}. Les e-mails arrivent toujours.",
+    "turnOff": "Désactiver",
+    "deniedTitle": "Les notifications sont désactivées pour Hold",
+    "deniedBody": "Autorisez-les pour Hold dans les Réglages du téléphone, puis activez-les ici.",
+    "openSettings": "Ouvrir les Réglages",
+    "unavailableTitle": "Les notifications n'ont pas pu être activées",
+    "unavailableBody": "Ce téléphone n'a pas pu obtenir d'adresse pour les notifications. Réessayez plus tard.",
+    "failedTitle": "Hold n'a pas pu être prévenu",
+    "failedBody": "Rien n'a été activé. Réessayez.",
+    "channel": "Locations et retours"
+  }
+}

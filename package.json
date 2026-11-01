@@ -12,11 +12,13 @@
     "test": "vitest run",
     "test:e2e": "pnpm --filter @hold/web test:e2e",
     "test:e2e:key": "pnpm --filter @hold/web test:e2e:key",
-    "lint": "pnpm -r --if-present run typegen && eslint .",
+    "lint": "pnpm -r --if-present run typegen && eslint . && pnpm --filter @hold/mobile lint",
     "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck",
-    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm test:mobile",
     "eval": "pnpm --filter @hold/eval run eval",
-    "demo:paypal": "pnpm --filter @hold/web demo:paypal"
+    "demo:paypal": "pnpm --filter @hold/web demo:paypal",
+    "test:mobile": "pnpm --filter @hold/mobile test",
+    "mobile": "pnpm --filter @hold/mobile dev"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

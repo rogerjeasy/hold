@@ -33,7 +33,9 @@ pnpm test:e2e:key        # the key flows only (sign-in, money, access), without 
 pnpm lint
 pnpm typecheck
 pnpm eval                # the photo evaluation set
-pnpm check               # lint, typecheck and test together
+pnpm mobile              # the phone app's bundler (apps/mobile), for its development build
+pnpm test:mobile         # Jest for the phone app
+pnpm check               # lint, typecheck and test together, the phone app included
 ```
 
 ## 3. Test first, always
@@ -149,6 +151,8 @@ The full rules are in `extensions.md` section 3. The ones that shape code:
 - Store the model and prompt version with each result.
 
 ## 9. Frontend
+
+The phone app (`apps/mobile`, Expo) follows these rules in its own terms; `apps/mobile/AGENTS.md` says how.
 
 Next.js, React, Tailwind CSS and shadcn/ui. One app serves a phone at the counter and a laptop in the office.
 

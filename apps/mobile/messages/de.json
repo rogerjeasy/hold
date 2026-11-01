@@ -1,0 +1,1438 @@
+{
+  "brand": {
+    "name": "Hold"
+  },
+  "common": {
+    "retry": "Erneut versuchen",
+    "cancel": "Abbrechen",
+    "done": "Fertig",
+    "loading": "Wird geladen…",
+    "sample": "Beispiel",
+    "simulated": "Simuliert"
+  },
+  "start": {
+    "tagline": "Die Kaution, die Ihr Konto nie verlässt.",
+    "renter": {
+      "label": "Für Mietende",
+      "title": "Ich miete",
+      "body": "Öffnen Sie den Mietlink, den der Verleih Ihnen geschickt hat, oder scannen Sie seinen Code am Tresen.",
+      "saved": "{count, plural, one {# Miete auf diesem Telefon} other {# Mieten auf diesem Telefon}}"
+    },
+    "shop": {
+      "label": "Für Verleihe",
+      "title": "Ich arbeite in einem Verleih",
+      "body": "Artikel übergeben, Rückgaben fotografieren und abgestellte Artikel prüfen."
+    }
+  },
+  "rentals": {
+    "title": "Ihre Mieten",
+    "empty": {
+      "title": "Noch keine Miete auf diesem Telefon",
+      "body": "Der Verleih schickt bei der Buchung einen Link per E-Mail oder SMS und zeigt am Tresen einen Code. Öffnen Sie eines davon hier."
+    },
+    "scan": "Code des Verleihs scannen",
+    "paste": "Link einfügen",
+    "untitled": "Miete",
+    "savedOn": "Hinzugefügt am {date}",
+    "remove": "Von diesem Telefon entfernen",
+    "removed": "Von diesem Telefon entfernt. Die Miete selbst bleibt unverändert."
+  },
+  "addLink": {
+    "title": "Link einfügen",
+    "field": "Mietlink",
+    "hint": "Er beginnt mit https:// und enthält /r/.",
+    "submit": "Miete öffnen",
+    "missing": "Fügen Sie den Link ein, den der Verleih Ihnen geschickt hat.",
+    "invalid": "Das ist kein Hold-Mietlink. Prüfen Sie, ob Sie ihn vollständig kopiert haben."
+  },
+  "scan": {
+    "title": "Code des Verleihs scannen",
+    "hint": "Richten Sie die Kamera auf den Code am Tresen oder auf dem Bildschirm des Verleihs.",
+    "notHold": "Dieser Code ist kein Hold-Mietlink. Bitten Sie den Verleih, Ihnen Ihren zu zeigen.",
+    "cameraReason": "Um den Code des Verleihs am Tresen zu lesen. Nichts wird fotografiert oder gespeichert."
+  },
+  "rental": {
+    "title": "Ihre Miete",
+    "what": "Was Sie mieten",
+    "period": "{start} bis {end}",
+    "line": "{count} × {name}",
+    "lineTerms": "{rate} pro Tag · {hold} Reservierung je Artikel",
+    "twoAmounts": "Zwei Beträge, getrennt gehalten",
+    "fee": "Mietpreis",
+    "feeNow": "Wird jetzt mit PayPal bezahlt.",
+    "feePaid": "Mit PayPal bezahlt.",
+    "hold": "Reservierung",
+    "holdBody": "Wird bei der Abholung auf Ihrem eigenen PayPal-Konto gesetzt. Das ist keine Abbuchung. Kommt alles im gleichen Zustand zurück, wird die Reservierung bei der Rückgabe sofort freigegeben.",
+    "holdRules": "Eine Person im Verleih genehmigt jede Abbuchung. Sie sehen jede Forderung, bevor sie abgebucht wird, mit Fotos und Preis, und können widersprechen. Sie haben {hours} Stunden Zeit zu antworten.",
+    "prices": "Die Schadenspreise des Verleihs",
+    "pricesLead": "Eine Forderung kann nur für das erhoben werden, was auf dieser Liste steht.",
+    "wear": "Was als normale Abnutzung gilt",
+    "wearLead": "Dafür wird Ihnen nie etwas berechnet.",
+    "keepLonger": "Länger behalten",
+    "somethingHappened": "Etwas ist passiert",
+    "status": {
+      "pending_payment": "Wartet auf Ihre Zahlung",
+      "booked": "Gebucht. Ihr Mietpreis ist bezahlt.",
+      "next": "Als Nächstes: Bei der Abholung genehmigen Sie die Reservierung auf Ihrem Telefon.",
+      "lapsed": "Die Zahlungsfrist ist abgelaufen, und die Artikel wurden von jemand anderem gebucht. Wenden Sie sich an den Verleih, um neu zu buchen.",
+      "abandoned": "Diese Buchung wurde aufgegeben. Wenden Sie sich an den Verleih, um neu zu buchen.",
+      "other": "Ihre Miete: {state}",
+      "awaiting_hold": "Der Laden ist bereit für Ihre Reservierung.",
+      "holdNext": "Genehmigen Sie die Reservierung auf diesem Telefon, um Ihre Artikel abzuholen.",
+      "approveHold": "Reservierung genehmigen",
+      "ready": "Ihre Reservierung ist gesetzt. Sie können Ihre Artikel abholen.",
+      "out": "Ihre Miete ist bei Ihnen.",
+      "dropped_off": "Sie haben es am Abgabeort zurückgegeben. Eine Person im Laden wird es prüfen.",
+      "returnReceipt": "Ihre Rückgabe ansehen",
+      "condition": "Ansehen, wie sie übergeben wurde"
+    },
+    "states": {
+      "pending_payment": "Wartet auf den Mietpreis",
+      "booked": "Mietpreis bezahlt",
+      "awaiting_hold": "Wartet auf die Reservierung",
+      "ready": "Bereit zur Übergabe",
+      "out": "Verliehen",
+      "overdue": "Überfällig",
+      "dropped_off": "Abgestellt, zu prüfen",
+      "returned": "Zurückgegeben",
+      "inspecting": "Wird geprüft",
+      "settling": "Wird abgerechnet",
+      "closed": "Abgeschlossen",
+      "cancelled": "Storniert",
+      "abandoned": "Mietpreis nicht bezahlt, aufgegeben",
+      "lapsed": "Zahlungsfrist abgelaufen"
+    },
+    "claimStates": {
+      "draft": "Entwurf",
+      "awaiting_approval": "Genehmigung ausstehend",
+      "approved": "Genehmigt",
+      "presented": "Ihre Antwort steht aus",
+      "accepted": "Akzeptiert",
+      "contested": "Bestritten — Prüfung ausstehend",
+      "lapsed": "Antwortfrist abgelaufen",
+      "negotiating": "In Verhandlung",
+      "agreed": "Vereinbart",
+      "escalated": "Eskaliert",
+      "decided": "Entscheidung erfasst",
+      "charging": "Abrechnung läuft",
+      "charged": "Belastet",
+      "charge_failed": "Belastung fehlgeschlagen",
+      "adjusted": "Angepasst",
+      "waived": "Forderung erlassen",
+      "closed": "Abgeschlossen"
+    },
+    "results": {
+      "link_invalid": "Dieser Link ist nicht nutzbar. Bitten Sie den Verleih um einen neuen.",
+      "scope": "Das kann dieser Link nicht.",
+      "rate_limited": "Zu viele Versuche aus diesem Netzwerk. Warten Sie eine Minute und versuchen Sie es erneut.",
+      "not_pending": "Diese Buchung wartet auf keine Zahlung.",
+      "payment_lapsed": "Die Zahlungsfrist ist abgelaufen, und die Artikel wurden von jemand anderem gebucht.",
+      "paypal_not_connected": "Der Verleih kann noch keine Zahlungen annehmen. Wenden Sie sich an den Verleih.",
+      "paypal_unavailable": "PayPal war nicht erreichbar. Es wurde nichts abgebucht. Versuchen Sie es gleich noch einmal.",
+      "not_approved": "PayPal hat Ihre Genehmigung noch nicht bestätigt. Es wurde nichts abgebucht.",
+      "declined": "PayPal hat die Zahlung abgelehnt. Es wurde nichts abgebucht.",
+      "order_mismatch": "Diese Zahlung gehört nicht zu dieser Miete. Es wurde nichts abgebucht.",
+      "amount_mismatch": "Der Betrag bei PayPal passte nicht zum Mietpreis. Der Verleih wurde informiert.",
+      "not_completed": "PayPal hat die Zahlung noch nicht abgeschlossen.",
+      "not_found": "Diese Miete gibt es nicht mehr.",
+      "not_requested": "Der Laden hat noch nicht nach der Reservierung gefragt. Das geschieht, wenn Sie Ihre Artikel abholen.",
+      "already_placed": "Ihre Reservierung ist bereits gesetzt.",
+      "hold_refused": "PayPal konnte die Reservierung nicht setzen. Es wurde nichts reserviert. Fragen Sie im Laden nach.",
+      "nothing_added": "Fügen Sie zuerst ein Foto hinzu.",
+      "already_replied": "Sie haben bereits geantwortet.",
+      "closed": "Die Zeit zum Antworten ist abgelaufen.",
+      "not_handed_over": "Die Miete wurde noch nicht übergeben.",
+      "upload_failed": "Das Foto wurde nicht hochgeladen. Versuchen Sie es erneut.",
+      "not_out": "Meldungen sind offen, solange Sie die Artikel haben.",
+      "description_invalid": "Beschreiben Sie, was passiert ist, in höchstens 1000 Zeichen.",
+      "already_sent": "Diese Meldung wurde schon gesendet.",
+      "region_invalid": "Halten Sie den Rahmen auf dem Foto, eng um den Schaden.",
+      "not_agreeable": "Diesem Preis kann jetzt nicht zugestimmt werden. Die Seite zeigt, wo die Meldung steht.",
+      "not_theft": "Diese Angaben gehören zu einem Diebstahl oder Verlust, der auf den Laden wartet.",
+      "already_given": "Diese Angaben wurden schon gemacht.",
+      "no_details": "Machen Sie zuerst die Angaben.",
+      "police_report_invalid": "Geben Sie die Nummer der Anzeige ein.",
+      "storage_unavailable": "Hier können gerade keine Fotos aufgenommen werden.",
+      "key_mismatch": "Dieses Foto gehört nicht zu dieser Meldung.",
+      "not_uploaded": "Das Foto ist nicht angekommen. Nehmen Sie es noch einmal auf.",
+      "sealed": "Diese Meldung wurde gesendet, daher kann kein Foto hinzugefügt werden.",
+      "unknown_view": "Diese Ansicht gehört nicht zu diesem Artikel.",
+      "not_connected": "Mit dieser Miete ist gerade kein Assistent verbunden.",
+      "not_allowed": "Dieser Laden nimmt Rückgaben nur an der Theke an.",
+      "not_ready": "Diese Miete kann hier gerade nicht zurückgegeben werden.",
+      "staff_returning": "Das Personal nimmt diese Rückgabe bereits an der Theke an.",
+      "photo_reused": "Dieses Foto wurde schon einmal verwendet. Machen Sie ein neues vom Artikel, wie er jetzt ist.",
+      "views_missing": "Es fehlen noch Fotos.",
+      "no_quote": "Wählen Sie zuerst die neue Rückgabezeit.",
+      "quote_stale": "Die Miete hat sich seit diesem Preis geändert. Wählen Sie die neue Zeit noch einmal."
+    },
+    "selfReturn": {
+      "closedTitle": "Der Laden ist geschlossen. Sie können trotzdem zurückgeben.",
+      "openTitle": "Selbst zurückgeben",
+      "body": "Fotografieren Sie den Artikel so, wie er bei der Abholung fotografiert wurde, lassen Sie ihn am Abgabeort, und fertig. Er gilt ab dem Moment des Sendens als zurückgegeben.",
+      "meta": "Etwa zwei Minuten",
+      "start": "Selbst zurückgeben"
+    },
+    "assistantState": {
+      "connected": "Ein Assistent ist mit dieser Miete verbunden",
+      "disconnected": "Der Assistent wurde getrennt",
+      "booked": "Ein Assistent hat diese Buchung gemacht"
+    },
+    "record": "Ihre Mietunterlagen",
+    "cleanRecord": "Ihre Rückgabebilanz",
+    "consentQuestion": "Meine Bilanz einwandfreier Rückgaben nutzen, um künftige Reservierungen in Hold-Läden zu senken.",
+    "dueBack": "Rückgabe {when}",
+    "todo": "Zu dieser Miete",
+    "claim": "Ihre Schadensforderung",
+    "assistant": "Ihr Assistent"
+  },
+  "shop": {
+    "signIn": {
+      "title": "Bei Ihrem Verleih anmelden",
+      "lead": "Für Inhaber und das Personal an der Theke. Hold schickt Ihnen per E-Mail einen Code, der einmal gilt.",
+      "email": "Geschäftliche E-Mail",
+      "submit": "Code per E-Mail senden",
+      "sending": "Wird gesendet…",
+      "codeTitle": "Sehen Sie in Ihre E-Mails",
+      "codeLead": "Wir haben einen Code an {email} geschickt. Er gilt einmal, zehn Minuten lang.",
+      "verify": "Weiter",
+      "checking": "Wird geprüft…",
+      "resend": "Neuen Code senden",
+      "resent": "Ein neuer Code ist unterwegs. Verwenden Sie den Code aus der neuesten E-Mail.",
+      "startOver": "Andere E-Mail-Adresse verwenden",
+      "renting": "Sie mieten etwas? Dafür brauchen Sie kein Konto.",
+      "rentingAction": "Meine Mieten öffnen",
+      "problems": {
+        "emailMissing": "Geben Sie Ihre E-Mail-Adresse ein.",
+        "emailInvalid": "Das sieht nicht nach einer E-Mail-Adresse aus. Bitte prüfen und erneut versuchen.",
+        "codeMissing": "Geben Sie den Code aus der E-Mail ein.",
+        "codeInvalid": "Der Code besteht aus den Ziffern in der E-Mail. Bitte prüfen und erneut versuchen.",
+        "wrong": "Dieser Code stimmt nicht. Bitte prüfen und erneut versuchen.",
+        "expired": "Dieser Code ist abgelaufen. Fordern Sie einen neuen an.",
+        "attempt_over": "Dieser Code gilt nicht mehr. Fordern Sie einen neuen an oder beginnen Sie von vorn.",
+        "second_factor": "Dieses Konto verlangt zusätzlich einen Code aus einer Authenticator-App. Den nimmt Hold noch nicht an.",
+        "busy": "Zu viele Versuche. Warten Sie ein paar Minuten und versuchen Sie es dann erneut.",
+        "unavailable": "Hold konnte den Code gerade nicht prüfen. Versuchen Sie es gleich noch einmal."
+      }
+    },
+    "demo": {
+      "title": "Den Demo-Verleih ausprobieren",
+      "lead": "Jede Demo ist Ihr eigenes Ribeira Bikes, mit laufenden Mieten. Ein Tippen startet sie: nichts eingeben, auf keinen Code warten.",
+      "leadCurrent": "Dieses Telefon hat Ihre eigene Demo. Kehren Sie als eine der beiden Personen zurück, oder starten Sie eine neue.",
+      "owner": {
+        "start": "Demo als Tomás starten, der Inhaber",
+        "continue": "Als Tomás weitermachen, der Inhaber",
+        "hint": "Sieht alles und entscheidet jede Forderung.",
+        "name": "Tomás, der Inhaber"
+      },
+      "staff": {
+        "start": "Demo als Jonas starten, an der Theke",
+        "continue": "Als Jonas weitermachen, an der Theke",
+        "hint": "Gibt Räder aus, nimmt sie zurück und genehmigt kleine Forderungen.",
+        "name": "Jonas, an der Theke"
+      },
+      "fresh": "Neue Demo starten",
+      "freshHint": "Ein neuer Verleih und neue Konten, als Tomás. Ihre jetzige Demo bleibt, wie sie ist.",
+      "note": "PayPal läuft in seiner Sandbox, es fließt also kein echtes Geld. Ein Schritt, der Geld bewegt, wird im Web entschieden, mit einem Passkey."
+    },
+    "chooseShop": {
+      "title": "Verleih wählen",
+      "lead": "Sie arbeiten in mehr als einem Verleih. Wählen Sie den an dieser Theke.",
+      "opening": "Ihr Verleih wird geöffnet…",
+      "noShopTitle": "Sie gehören noch zu keinem Verleih",
+      "noShopBody": "Bitten Sie die Inhaberin oder den Inhaber, Sie einzuladen, und melden Sie sich dann mit dieser E-Mail-Adresse an."
+    },
+    "account": {
+      "title": "Sie",
+      "open": "Sie und Ihr Verleih",
+      "signedInAs": "Angemeldet als",
+      "shop": "Verleih",
+      "role": "Rolle",
+      "switchTo": "Wechseln zu {person}",
+      "switching": "Wird gewechselt…",
+      "changeShop": "Verleih wechseln",
+      "signOut": "Abmelden",
+      "signingOut": "Wird abgemeldet…",
+      "demoNote": "Ein Demo-Verleih ganz für Sie. Seine Mieten sind Beispiele, und PayPal läuft in seiner Sandbox."
+    },
+    "roles": {
+      "owner": "Inhaber",
+      "manager": "Leitung",
+      "counter_staff": "Thekenpersonal",
+      "read_only": "Nur lesen"
+    },
+    "tabs": {
+      "today": "Heute",
+      "rentals": "Mieten",
+      "dropOffs": "Abgaben"
+    },
+    "today": {
+      "decisions": {
+        "title": "{count, plural, =0 {Keine Entscheidung wartet} one {# Sache wartet auf eine Entscheidung} other {# Sachen warten auf eine Entscheidung}}",
+        "body": "Forderungen, Freigaben und bestrittene Abbuchungen werden im Web entschieden, wo ein Passkey die Person bestätigt. Von diesem Telefon wird nichts abgebucht.",
+        "none": "Zu genehmigende Forderungen und bald endende Reservierungen erscheinen auf der Entscheidungstafel im Web."
+      },
+      "dropOffs": "{count, plural, one {# Rückgabe wartet an der Abgabestelle} other {# Rückgaben warten an der Abgabestelle}}",
+      "dropOffsAction": "Abgabestelle prüfen",
+      "goingOut": "Ausgaben",
+      "comingBack": "Rückgaben",
+      "none": "Heute sonst nichts.",
+      "emptyTitle": "Heute keine Übergaben oder Rückgaben",
+      "emptyBody": "Mieten, die heute beginnen oder enden, erscheinen hier in der Reihenfolge des Tages.",
+      "done": "Erledigt",
+      "toDo": "Offen",
+      "renter": "Eine mietende Person",
+      "hold": {
+        "requested": "Wartet auf die Genehmigung der mietenden Person",
+        "placed": "Reserviert",
+        "released": "Freigegeben",
+        "captured": "Abgebucht",
+        "none": "Keine Reservierung"
+      }
+    },
+    "rentals": {
+      "search": "Nach mietender Person oder Artikel suchen",
+      "searchHint": "Ein Name, eine E-Mail oder ein Artikel",
+      "emptyTitle": "Noch keine Mieten",
+      "emptyBody": "Mieten werden im Web oder auf der Seite des Verleihs gebucht. Hier erscheinen sie zur Übergabe und Rücknahme.",
+      "noMatchTitle": "Keine Miete passt",
+      "noMatchBody": "Versuchen Sie einen Teil des Namens oder des Artikels.",
+      "renter": "Eine mietende Person",
+      "period": "{start} bis {end}"
+    },
+    "states": {
+      "pending_payment": "Wartet auf den Mietpreis",
+      "booked": "Mietpreis bezahlt",
+      "awaiting_hold": "Wartet auf die Reservierung",
+      "ready": "Bereit zur Übergabe",
+      "out": "Verliehen",
+      "overdue": "Überfällig",
+      "dropped_off": "Abgestellt, zu prüfen",
+      "returned": "Zurückgegeben",
+      "inspecting": "Wird geprüft",
+      "settling": "Wird abgerechnet",
+      "closed": "Abgeschlossen",
+      "cancelled": "Storniert",
+      "abandoned": "Mietpreis nicht bezahlt, aufgegeben",
+      "lapsed": "Zahlungsfrist abgelaufen",
+      "other": "Läuft"
+    },
+    "rental": {
+      "title": "Miete",
+      "when": "Wann",
+      "fee": "Mietpreis",
+      "items": "Artikel",
+      "sample": "Eine Beispielmiete für die Demo. Dafür wird nichts fotografiert, gesendet oder abgebucht.",
+      "readOnly": "Ihre Rolle kann diese Miete sehen, aber an der Theke nicht handeln.",
+      "decidedOnWeb": "Forderungen, Freigaben und Genehmigungen dieser Miete werden im Web entschieden.",
+      "hold": {
+        "title": "Reservierung bei Abholung",
+        "none": "Noch keine Reservierung. Die mietende Person genehmigt sie in PayPal auf ihrem eigenen Telefon.",
+        "placed": "Im PayPal-Konto der mietenden Person reserviert",
+        "requested": "Wartet auf die Genehmigung der mietenden Person",
+        "released": "Freigegeben",
+        "captured": "Nach einer genehmigten Forderung abgebucht",
+        "other": "Reservierung",
+        "assuredUntil": "Am besten abbuchen bis {date}",
+        "ask": "Um die Reservierung bitten",
+        "askHint": "Zeigt einen Code, den die mietende Person scannt, um die Reservierung in PayPal zu genehmigen. Das Bitten bewegt kein Geld."
+      },
+      "link": {
+        "title": "Der Link der mietenden Person",
+        "body": "Hier sieht die mietende Person die Miete, zahlt und genehmigt die Reservierung. Zeigen Sie ihn an der Theke oder schicken Sie ihn.",
+        "show": "Link anzeigen",
+        "send": "Erneut senden",
+        "sentText": "Per SMS an {to} gesendet.",
+        "sentEmail": "Per E-Mail an {to} gesendet."
+      },
+      "handover": {
+        "title": "Übergabe",
+        "body": "Fotografieren Sie jeden Artikel, bevor er geht. Sind alle Artikel versiegelt, ist die Miete unterwegs.",
+        "startItem": "{item} fotografieren",
+        "continueItem": "Übergabe von {item} fortsetzen",
+        "sealed": "Fotografiert und versiegelt"
+      },
+      "return": {
+        "title": "Rückgabe",
+        "body": "Fotografieren Sie jeden Artikel, wenn er zurückkommt. Ein Mensch entscheidet im Web, wie es weitergeht.",
+        "startItem": "Rückgabe von {item} beginnen",
+        "continueItem": "Rückgabe von {item} fortsetzen",
+        "sealed": "Rückgabe fotografiert",
+        "reviewItem": "Notieren, was Sie an {item} gesehen haben"
+      },
+      "item": {
+        "status": "Status",
+        "statusItem": "Status von {item} ändern"
+      },
+      "message": {
+        "title": "Der mietenden Person schreiben"
+      }
+    },
+    "link": {
+      "renter": "Mit dem Telefon der mietenden Person scannen",
+      "renterBody": "Er öffnet die Miete auf dem Telefon der mietenden Person: die Bedingungen, den Mietpreis und die Reservierung.",
+      "hold": "Scannen, um die Reservierung zu genehmigen",
+      "holdBody": "Die mietende Person genehmigt die Reservierung in PayPal auf ihrem eigenen Telefon. Jetzt wird nichts abgebucht.",
+      "condition": "Scannen, um den Zustandsbericht zu sehen",
+      "code": "Ein Code, der {url} öffnet",
+      "making": "Link wird erstellt…",
+      "done": "Fertig"
+    },
+    "dropOffs": {
+      "lead": "Artikel, die ohne jemanden an der Theke zurückgegeben wurden. Sehen Sie zuerst an der Abgabestelle nach. Die Reservierung bleibt, und nichts wird abgebucht, bis ein Mensch den Artikel gesehen hat.",
+      "emptyTitle": "Nichts an der Abgabestelle",
+      "emptyBody": "Gibt eine mietende Person einen Artikel selbst zurück, wartet er hier darauf, dass ein Mensch ihn prüft.",
+      "returned": "Zurückgegeben {when}",
+      "renter": "Eine mietende Person",
+      "here": "Er ist da, Rückgabe prüfen",
+      "notHere": "Er ist nicht da",
+      "confirmTitle": "Festhalten, dass er nicht an der Abgabestelle ist?",
+      "confirmBody": "Hold hält fest, wer wann nachgesehen hat, und schreibt der mietenden Person womöglich eine E-Mail. Die Reservierung bleibt, und nichts wird abgebucht.",
+      "confirm": "Festhalten",
+      "recorded": "Festgehalten. Die Reservierung bleibt bestehen.",
+      "recordedTold": "Festgehalten, und die mietende Person hat eine E-Mail bekommen. Die Reservierung bleibt bestehen."
+    },
+    "capture": {
+      "handover": "Übergabe",
+      "return": "Rückgabe",
+      "progress": "{done} von {total} nötigen Ansichten",
+      "guidanceHandover": "Fotografieren Sie jede Ansicht. Rahmen Sie jede schon vorhandene Spur ein, damit sie dieser mietenden Person nie berechnet wird.",
+      "guidanceReturn": "Nutzen Sie das eingeblendete Übergabefoto, um dieselbe Ansicht aufzunehmen. Halten Sie den Rückgabezustand fest; ein Mensch entscheidet über die nächsten Schritte.",
+      "views": "Ansichten",
+      "needed": "Nötig",
+      "optional": "Freiwillig",
+      "photographed": "Fotografiert",
+      "preparing": "Foto wird vorbereitet…",
+      "uploading": "Wird hochgeladen…",
+      "failed": "Nicht hochgeladen",
+      "retryItem": "{view} erneut hochladen",
+      "retake": "Neu aufnehmen",
+      "photograph": "{view} fotografieren",
+      "retakeView": "{view} neu aufnehmen",
+      "hint": "{position} von {total} · {view}",
+      "close": "Kamera schließen",
+      "marks": "Spuren",
+      "marksItem": "Spuren auf {view}",
+      "marksCount": "{count, plural, =0 {Keine Spuren} one {# Spur} other {# Spuren}}",
+      "toCheck": "{count, plural, one {# bekannte Spur zu prüfen} other {# bekannte Spuren zu prüfen}}",
+      "photo": "Foto von {view}",
+      "upload": {
+        "upload_failed": "Das Foto wurde nicht hochgeladen. Prüfen Sie die Verbindung und versuchen Sie es erneut.",
+        "not_uploaded": "Das Foto ist nicht angekommen. Machen Sie es erneut.",
+        "key_mismatch": "Dieses Foto gehört zu einer anderen Ansicht. Machen Sie es erneut.",
+        "too_large": "Das Foto ist zu groß. Machen Sie es erneut.",
+        "unreadable": "Das Foto konnte auf diesem Telefon nicht gelesen werden. Machen Sie es erneut."
+      },
+      "seal": {
+        "handover": "Fotos versiegeln",
+        "return": "Rückgabefotos versiegeln",
+        "ready": "Jede nötige Ansicht ist fotografiert. Das Versiegeln legt sie fest und verkettet sie mit der Geschichte des Artikels.",
+        "missing": "{count, plural, one {Eine Ansicht braucht} other {# Ansichten brauchen}} noch ein Foto.",
+        "waiting": "Warten Sie, bis alles hochgeladen ist.",
+        "out": "Die Miete ist unterwegs.",
+        "next": "Versiegelt. Fotografieren Sie den nächsten Artikel der Miete.",
+        "emailed": "Die mietende Person hat den Zustandsbericht per E-Mail erhalten. Sie kann auch diesen Code scannen.",
+        "texted": "Die mietende Person hat den Zustandsbericht per SMS erhalten. Sie kann auch diesen Code scannen.",
+        "show": "Zeigen Sie der mietenden Person diesen Code. Er öffnet den Zustandsbericht, den sie innerhalb von 24 Stunden bestätigt oder ergänzt.",
+        "returned": "Rückgabe versiegelt. Die Fotos werden verglichen. Es wurde nichts abgebucht.",
+        "returnedNext": "Rückgabe versiegelt. Fotografieren Sie den nächsten Artikel der Miete.",
+        "review": "Notieren, was Sie gesehen haben",
+        "back": "Zurück zur Miete",
+        "sealedHandover": "Versiegelt. Diese Fotos können sich nicht mehr ändern.",
+        "sealedReturn": "Diese Rückgabefotos sind versiegelt. Es wurde nichts abgebucht."
+      }
+    },
+    "marks": {
+      "title": "Spuren",
+      "lead": "Spuren, die schon bei der Ausgabe da sind, werden dieser mietenden Person nie berechnet.",
+      "known": "Schon am Artikel",
+      "stillThere": "Noch vorhanden",
+      "stillThereItem": "Noch vorhanden: {mark}",
+      "confirmed": "Noch vorhanden",
+      "added": "Gerade hinzugefügt",
+      "add": "Spur hinzufügen",
+      "howTo": "Tippen Sie auf die Spur im Foto, oder ziehen Sie ein Feld um sie.",
+      "box": "Das Feld der neuen Spur",
+      "boxAt": "{x} % von links, {y} % von oben, {width} % breit, {height} % hoch",
+      "description": "Was ist die Spur?",
+      "descriptionHint": "Zum Beispiel: Kratzer am Oberrohr, 2 cm",
+      "save": "Spur speichern",
+      "cancel": "Abbrechen",
+      "saved": "Spur gespeichert.",
+      "noPhoto": "Fotografieren Sie zuerst diese Ansicht, dann rahmen Sie ihre Spuren ein.",
+      "readOnly": "Versiegelt. Diese Spuren gehören zur Geschichte des Artikels."
+    },
+    "review": {
+      "title": "Was Sie gesehen haben",
+      "lead": "Beschreiben Sie Ihre Beobachtung und den Grund. Dies wird mit Ihrem Namen gespeichert und genehmigt keine Abbuchung.",
+      "outcome": "Ergebnis Ihrer Prüfung",
+      "outcomes": {
+        "clean": "Kein neuer Schaden",
+        "findings": "Feststellungen",
+        "deferred": "Menschliche Prüfung nötig"
+      },
+      "notes": "Ihre Prüfnotizen",
+      "record": "Prüfung festhalten",
+      "recorded": "Ihre Prüfung ist festgehalten. Eine Forderung wird, falls nötig, im Web vorbereitet und genehmigt.",
+      "needsNote": "Beschreiben Sie, was Sie beobachtet haben."
+    },
+    "itemStatus": {
+      "title": "Artikelstatus",
+      "lead": "Ein Platten schickt den Artikel in die Reparatur. Er wird nicht vermietet, bis er wieder in Betrieb ist.",
+      "statuses": {
+        "in_service": "In Betrieb",
+        "in_repair": "In Reparatur",
+        "retired": "Ausgemustert"
+      },
+      "note": "Notiz (freiwillig)",
+      "save": "Status speichern",
+      "saved": "Status gespeichert."
+    },
+    "message": {
+      "title": "Der mietenden Person schreiben",
+      "lead": "Eine Antwort zur Forderung. Die mietende Person liest sie über ihren Link und bekommt eine E-Mail.",
+      "body": "Ihre Nachricht",
+      "send": "Senden",
+      "sent": "Gesendet.",
+      "needsText": "Schreiben Sie eine Nachricht mit bis zu 1000 Zeichen."
+    },
+    "refusal": {
+      "web": {
+        "title": "Das wird im Web entschieden",
+        "body": "Entscheidungen über Geld brauchen einen Passkey, in der Web-App von Hold. Von diesem Telefon wurde nichts geändert."
+      },
+      "reasons": {
+        "not_ready": "Die Reservierung muss vor der Übergabe gesetzt sein.",
+        "not_found": "Das gehört nicht mehr zu diesem Verleih.",
+        "storage_unavailable": "Fotos können hier noch nicht gespeichert werden. Fragen Sie die Inhaberin oder den Inhaber.",
+        "sealed": "Diese Fotos sind versiegelt und können sich nicht mehr ändern.",
+        "session_sealed": "Diese Fotos sind versiegelt und können sich nicht mehr ändern.",
+        "unknown_view": "Diese Ansicht steht nicht im Fotoplan des Artikels.",
+        "views_missing": "Einige Ansichten brauchen noch ein Foto.",
+        "region_invalid": "Zeichnen Sie das Feld innerhalb des Fotos.",
+        "description_invalid": "Beschreiben Sie die Spur in bis zu 200 Zeichen.",
+        "no_email": "Diese Buchung hat keine E-Mail-Adresse.",
+        "email_failed": "Die E-Mail konnte nicht gesendet werden. Zeigen Sie stattdessen den Link.",
+        "not_booked": "Der Mietpreis muss bezahlt sein, bevor um die Reservierung gebeten wird.",
+        "not_dropped_off": "Dieser Artikel wartet nicht mehr an der Abgabestelle.",
+        "already_reported": "Er ist schon als nicht gefunden festgehalten.",
+        "role_may_not_retire": "Nur die Inhaberin, der Inhaber oder die Leitung kann einen Artikel ausmustern.",
+        "item_in_use": "Eine mietende Person hat den Artikel, oder seine Rückgabe wird noch geprüft. Ändern Sie ihn, wenn er zurück und geprüft ist.",
+        "message_invalid": "Schreiben Sie eine Nachricht mit bis zu 1000 Zeichen.",
+        "transition_not_allowed": "Die Miete ist nicht an diesem Schritt."
+      }
+    }
+  },
+  "camera": {
+    "permission": {
+      "title": "Hold braucht die Kamera",
+      "body": "Um den Artikel bei der Übergabe und bei der Rückgabe zu fotografieren, damit beide Seiten denselben Nachweis haben. Für nichts anderes.",
+      "allow": "Kamera erlauben",
+      "deniedTitle": "Die Kamera ist für Hold ausgeschaltet",
+      "deniedBody": "Schalten Sie sie in den Einstellungen ein, um die Fotos aufzunehmen. Bis dahin kann der Verleih sie am Tresen aufnehmen.",
+      "openSettings": "Einstellungen öffnen",
+      "checking": "Kamerazugriff wird geprüft…"
+    },
+    "capture": {
+      "shutter": "Foto aufnehmen",
+      "ghostShow": "Früheres Foto einblenden",
+      "ghostHide": "Früheres Foto ausblenden",
+      "alignHint": "Richten Sie den Artikel am blassen Foto von der Übergabe aus.",
+      "retake": "Neu aufnehmen",
+      "use": "Foto verwenden",
+      "preparing": "Foto wird vorbereitet…",
+      "review": "Ist der ganze Artikel scharf und im Bild?",
+      "failed": "Das Foto konnte nicht aufgenommen werden. Versuchen Sie es erneut.",
+      "ghostImage": "Früheres Foto: {view}"
+    }
+  },
+  "code": {
+    "label": "Einmalcode",
+    "hint": "{length} Ziffern, aus der E-Mail oder SMS von Hold."
+  },
+  "loadState": {
+    "offline": {
+      "title": "Keine Verbindung",
+      "body": "Dieses Telefon ist offline. Nichts wurde geändert. Versuchen Sie es erneut, sobald Sie Empfang haben."
+    },
+    "timeout": {
+      "title": "Hold braucht zu lange für eine Antwort",
+      "body": "Nichts wurde geändert. Versuchen Sie es gleich noch einmal."
+    },
+    "unexpected": {
+      "title": "Etwas ist schiefgegangen",
+      "body": "Hold konnte dies nicht anzeigen. Nichts wurde abgebucht und nichts wurde geändert."
+    },
+    "link_invalid": {
+      "title": "Dieser Link ist nicht nutzbar",
+      "body": "Vielleicht wurde er falsch getippt, oder er ist abgelaufen. Bitten Sie den Verleih um einen neuen."
+    },
+    "signed_out": {
+      "title": "Sie sind abgemeldet",
+      "body": "Melden Sie sich erneut an, um weiterzumachen."
+    },
+    "refused": {
+      "title": "Hold hat das nicht ausgeführt",
+      "body": "Nichts wurde abgebucht und nichts wurde geändert."
+    },
+    "scope": {
+      "title": "Dieser Link erlaubt das nicht",
+      "body": "Bitten Sie den Verleih um Hilfe."
+    },
+    "rate_limited": {
+      "title": "Zu viele Versuche",
+      "body": "Warten Sie eine Minute und versuchen Sie es dann erneut."
+    },
+    "invalid": {
+      "title": "Einige Angaben stimmen nicht",
+      "body": "Prüfen Sie Ihre Eingabe und versuchen Sie es erneut."
+    },
+    "no_shop": {
+      "title": "Sie gehören noch zu keinem Verleih",
+      "body": "Bitten Sie die Inhaberin oder den Inhaber, Sie hinzuzufügen."
+    },
+    "role": {
+      "title": "Ihre Rolle erlaubt das nicht",
+      "body": "Fragen Sie eine Inhaberin, einen Inhaber oder die Leitung."
+    },
+    "passkey_needed": {
+      "title": "Mit Ihrem Passkey bestätigen",
+      "body": "Dafür braucht es den Passkey auf diesem Telefon."
+    },
+    "not_found": {
+      "title": "Nicht gefunden",
+      "body": "Vielleicht wurde es entfernt, oder der Link ist falsch getippt."
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "Diesen Bildschirm gibt es nicht",
+      "body": "Der Link ist vielleicht falsch getippt, oder er gehört zu einer neueren Version von Hold.",
+      "home": "Zum Anfang"
+    }
+  },
+  "pay": {
+    "pay": "{amount} mit PayPal bezahlen",
+    "paying": "PayPal wird geöffnet…",
+    "agree": "Mit der Zahlung stimmen Sie der Reservierung und den obigen Preisen zu.",
+    "cancelled": "Sie haben PayPal geschlossen, ohne zu bestätigen. Es wurde nichts belastet.",
+    "walkIn": {
+      "approve": "{fee} bezahlen und Reservierung über {hold} mit PayPal genehmigen",
+      "approving": "PayPal wird geöffnet…",
+      "agree": "Sie genehmigen beides auf einmal in PayPal. Abgebucht wird nur die Gebühr. Die Reservierung wird nicht abgebucht. Mit der Genehmigung stimmen Sie der Reservierung und den Preisen oben zu.",
+      "placed": "Ihre Gebühr über {fee} ist bezahlt und Ihre Reservierung über {hold} ist gesetzt. Abgebucht wurde nur die Gebühr.",
+      "taking": "Ihre Reservierung über {hold} ist gesetzt. PayPal bucht jetzt Ihre Gebühr über {fee} ab.",
+      "done": "Reservierung gesetzt. Abgebucht wird nur Ihre Gebühr."
+    },
+    "hold": {
+      "title": "Reservierung genehmigen",
+      "lead": "{amount} werden während der Miete auf Ihrem PayPal-Konto reserviert. Das ist keine Abbuchung.",
+      "notYet": "Der Laden fragt nach der Reservierung, wenn Sie Ihre Artikel abholen.",
+      "approve": "{amount} mit PayPal genehmigen",
+      "approving": "PayPal wird geöffnet…",
+      "agree": "Mit der Genehmigung stimmen Sie der Reservierung und den Preisen des Ladens auf Ihrer Mietseite zu.",
+      "declined": "PayPal hat die Reservierung abgelehnt. Es wurde nichts reserviert. Sie können sie mit einer anderen Zahlungsart erneut genehmigen.",
+      "placed": "Ihre Reservierung über {amount} ist gesetzt. Es wurde nichts abgebucht.",
+      "validUntil": "Sie endet spätestens am {date} und wird freigegeben, sobald alles im gleichen Zustand zurückkommt.",
+      "back": "Zu Ihrer Miete",
+      "return": {
+        "title": "Ihre Reservierung wird bestätigt",
+        "checking": "Wir fragen bei PayPal nach…",
+        "done": "Reservierung gesetzt. Es wurde nichts abgebucht.",
+        "retry": "Erneut versuchen",
+        "again": "Erneut genehmigen"
+      },
+      "replaceTitle": "Neue Reservierung genehmigen",
+      "replaceLead": "Ihre Reservierung endet am {date}, und Ihre Miete ist noch offen. Genehmigen Sie eine neue Reservierung über {amount}, damit sie abgesichert bleibt. Das ist keine Abbuchung, und die alte Reservierung wird freigegeben, sobald Sie genehmigen."
+    },
+    "paid": {
+      "title": "Ihre Zahlung wird bestätigt",
+      "checking": "Wird bei PayPal geprüft…",
+      "done": "Zahlung bestätigt. Ihre Miete ist gebucht.",
+      "back": "Zu Ihrer Miete",
+      "retry": "Erneut versuchen"
+    },
+    "trustReason": "Ihre Reservierung beträgt {amount} statt {ordinary}, weil Sie in den letzten {months} Monaten {count, plural, one {# Miete} other {# Mieten}} einwandfrei zurückgegeben haben.",
+    "secure": "PayPal öffnet sich in einem sicheren Fenster auf diesem Telefon und bringt Sie direkt hierher zurück.",
+    "openAgain": "PayPal erneut öffnen",
+    "stillWorking": "PayPal bearbeitet es noch. Prüfen Sie es gleich noch einmal.",
+    "checkAgain": "Erneut prüfen"
+  },
+  "condition": {
+    "title": "Wie Ihre Miete übergeben wurde",
+    "lead": "Das sind die Fotos von der Übergabe, mit allen notierten Spuren. Für nichts, was hier zu sehen ist, wird Ihnen je etwas berechnet.",
+    "preparing": "Foto wird vorbereitet…",
+    "photoOf": "{item}: {view}",
+    "noMarks": "Es wurden keine Spuren notiert.",
+    "addedCount": "Sie haben {count, plural, one {ein Foto} other {# Fotos}} hinzugefügt.",
+    "openUntil": "Sie können bis {when} bestätigen oder Übersehenes ergänzen.",
+    "closed": "Die Zeit zum Antworten ist abgelaufen.",
+    "repliedConfirmed": "Sie haben die Fotos bestätigt.",
+    "repliedAdded": "Sie haben Fotos von Übersehenem hinzugefügt. Der Laden sieht sie mit der Übergabe.",
+    "otherLink": "Antworten Sie über den Link, den der Laden Ihnen bei der Übergabe geschickt hat.",
+    "confirm": "Alles ist wie gezeigt",
+    "add": "Foto von etwas Übersehenem hinzufügen",
+    "which": "Welcher Artikel?",
+    "missedView": "Etwas Übersehenes",
+    "send": "Hinzugefügtes senden",
+    "back": "Zu Ihrer Miete",
+    "notHandedOver": "Die Miete wurde noch nicht übergeben.",
+    "photograph": "Übersehenes fotografieren",
+    "cameraHint": "Fotografieren Sie, was das Personal übersehen hat, aus der Nähe und bei gutem Licht.",
+    "addedPhoto": "Ihr Foto {number} von {item}",
+    "added": "Was Sie hinzugefügt haben",
+    "cancelAdd": "Zurück zum Bestätigen"
+  },
+  "extend": {
+    "title": "Länger behalten",
+    "back": "Zurück zu Ihrer Miete",
+    "dueNow": "Rückgabe jetzt fällig",
+    "latest": "Ihre Reservierung deckt eine Rückgabe bis {when}, und der Laden erlaubt bis zu {days, plural, one {# weiteren Tag} other {# weitere Tage}}.",
+    "closed": {
+      "title": "Verlängern geht nur, solange Sie den Artikel haben",
+      "body": "Wenden Sie sich an {shop}, um diese Miete zu ändern."
+    },
+    "off": {
+      "title": "Dieser Laden nimmt keine Verlängerungen per Telefon an",
+      "body": "Wenden Sie sich an {shop}, um länger zu behalten."
+    },
+    "noScope": "Dieser Link zeigt die Miete, kann sie aber nicht verlängern. Verwenden Sie den Link, den der Laden mit Ihrer Buchung geschickt hat.",
+    "refused": {
+      "beyond_hold": "Ihre Reservierung deckt eine Rückgabe bis {when}. Für länger wenden Sie sich an den Laden.",
+      "not_free": "Jemand hat den Artikel ab {when} gebucht. Wählen Sie eine frühere Zeit oder wenden Sie sich an den Laden.",
+      "too_many_days": "Der Laden erlaubt per Telefon bis zu {days, plural, one {# weiteren Tag} other {# weitere Tage}}. Für länger wenden Sie sich an den Laden.",
+      "not_later": "Wählen Sie eine Zeit nach Ihrer jetzigen Rückgabezeit.",
+      "not_out": "Verlängern geht nur, solange Sie den Artikel haben.",
+      "off": "Dieser Laden nimmt keine Verlängerungen per Telefon an.",
+      "no_hold": "Ihre Reservierung besteht nicht, daher muss der Laden das mit Ihnen klären.",
+      "quote_stale": "Die Miete hat sich seit diesem Preis geändert. Wählen Sie die neue Zeit noch einmal."
+    },
+    "quote": {
+      "title": "Ihr Preis",
+      "days": "{count, plural, one {# weiterer Tag} other {# weitere Tage}}",
+      "newEnd": "Neue Rückgabezeit",
+      "paidNow": "Jetzt mit PayPal bezahlt.",
+      "holdUnchanged": "Jetzt mit PayPal bezahlt, getrennt. Ihre Reservierung über {hold} bleibt genau, wie sie ist.",
+      "pay": "{amount} mit PayPal bezahlen",
+      "agree": "Sie genehmigen diese Zahlung bei PayPal. Ihre Rückgabezeit ändert sich, sobald sie genehmigt ist."
+    },
+    "list": {
+      "title": "Ihre Verlängerungen",
+      "paid": "{days, plural, one {# weiterer Tag} other {# weitere Tage}}, bis {when}. {amount} bezahlt.",
+      "capturing": "{days, plural, one {# weiterer Tag} other {# weitere Tage}}, bis {when}. PayPal bucht {amount} ab.",
+      "failed": "{days, plural, one {# weiterer Tag} other {# weitere Tage}}, bis {when}: PayPal hat die Zahlung abgelehnt, Ihre Rückgabezeit bleibt."
+    },
+    "extended": {
+      "title": "Ihre Verlängerung",
+      "checking": "Ihre Zahlung wird bei PayPal geprüft…",
+      "done": "Bezahlt. Ihre neue Rückgabezeit gilt.",
+      "retry": "Erneut versuchen",
+      "back": "Ihre Verlängerungen ansehen",
+      "again": "Zeit erneut wählen",
+      "reviewing": "PayPal prüft Ihre Zahlung, das kann einen Tag oder länger dauern. Ihre neue Rückgabezeit gilt vorerst. Lehnt PayPal die Zahlung ab oder ist bis zu Ihrer früheren Rückgabezeit nicht fertig, gilt wieder Ihre frühere Rückgabezeit."
+    },
+    "form": {
+      "quick": "Wie viel länger?",
+      "days": "{count, plural, one {+# Tag} other {+# Tage}}",
+      "newEnd": "Neue Rückgabezeit",
+      "price": "Preis ansehen",
+      "fewer": "Einen Tag weniger",
+      "more": "Einen Tag mehr"
+    }
+  },
+  "renterAction": {
+    "reasons": {
+      "refused": "Hold hat das nicht ausgeführt. Nichts wurde belastet oder geändert.",
+      "offline": "Dieses Telefon ist offline. Nichts wurde geändert. Versuchen Sie es mit Empfang erneut.",
+      "timeout": "Hold hat zu lange gebraucht. Nichts wurde geändert. Versuchen Sie es gleich noch einmal.",
+      "unexpected": "Etwas ist schiefgegangen. Nichts wurde belastet oder geändert.",
+      "invalid": "Einige Angaben stimmen nicht. Prüfen Sie Ihre Eingaben und versuchen Sie es erneut.",
+      "link_invalid": "Dieser Link ist nicht nutzbar. Bitten Sie den Verleih um einen neuen.",
+      "scope": "Das kann dieser Link nicht.",
+      "rate_limited": "Zu viele Versuche aus diesem Netzwerk. Warten Sie eine Minute und versuchen Sie es erneut.",
+      "not_found": "Hold findet das nicht mehr. Gehen Sie zurück und öffnen Sie es erneut.",
+      "upload_failed": "Das Foto wurde nicht hochgeladen. Versuchen Sie es erneut.",
+      "not_out": "Meldungen sind offen, solange Sie die Artikel haben.",
+      "description_invalid": "Beschreiben Sie, was passiert ist, in höchstens 1000 Zeichen.",
+      "already_sent": "Diese Meldung wurde schon gesendet.",
+      "region_invalid": "Halten Sie den Rahmen auf dem Foto, eng um den Schaden.",
+      "not_agreeable": "Diesem Preis kann jetzt nicht zugestimmt werden. Die Seite zeigt, wo die Meldung steht.",
+      "not_theft": "Diese Angaben gehören zu einem Diebstahl oder Verlust, der auf den Laden wartet.",
+      "already_given": "Diese Angaben wurden schon gemacht.",
+      "no_details": "Machen Sie zuerst die Angaben.",
+      "police_report_invalid": "Geben Sie die Nummer der Anzeige ein.",
+      "storage_unavailable": "Hier können gerade keine Fotos aufgenommen werden.",
+      "key_mismatch": "Dieses Foto gehört nicht zu dieser Meldung.",
+      "not_uploaded": "Das Foto ist nicht angekommen. Nehmen Sie es noch einmal auf.",
+      "sealed": "Diese Meldung wurde gesendet, daher kann kein Foto hinzugefügt werden.",
+      "unknown_view": "Diese Ansicht gehört nicht zu diesem Artikel.",
+      "not_connected": "Mit dieser Miete ist gerade kein Assistent verbunden.",
+      "not_allowed": "Dieser Laden nimmt Rückgaben nur an der Theke an.",
+      "not_ready": "Diese Miete kann hier gerade nicht zurückgegeben werden.",
+      "staff_returning": "Das Personal nimmt diese Rückgabe bereits an der Theke an.",
+      "photo_reused": "Dieses Foto wurde schon einmal verwendet. Machen Sie ein neues vom Artikel, wie er jetzt ist.",
+      "views_missing": "Es fehlen noch Fotos.",
+      "already_replied": "Sie haben bereits geantwortet.",
+      "closed": "Die Zeit zum Antworten ist abgelaufen.",
+      "paypal_unavailable": "PayPal war nicht erreichbar. Es wurde nichts abgebucht. Versuchen Sie es gleich noch einmal."
+    },
+    "code": {
+      "send": "Code senden",
+      "sendAgain": "Neuen Code senden",
+      "sent": "Code gesendet. Er läuft in zehn Minuten ab.",
+      "sentSandbox": "Code an die Kontaktadresse der Buchung gesendet, da dies die PayPal-Sandbox ist. Er läuft in zehn Minuten ab.",
+      "expired": "Dieser Code ist abgelaufen. Fordern Sie einen neuen an.",
+      "wrong": "Dieser Code stimmt nicht. Prüfen Sie ihn und versuchen Sie es erneut.",
+      "recentlySent": "Gerade wurde ein Code gesendet. Warten Sie eine Minute, bevor Sie einen neuen anfordern.",
+      "emailUnavailable": "Der Code konnte nicht gesendet werden. Versuchen Sie es gleich noch einmal.",
+      "sentByText": "Code per SMS an {phone} gesendet. Er läuft in zehn Minuten ab.",
+      "emailInstead": "Lieber an meine PayPal-E-Mail senden",
+      "textUnavailable": "Die SMS konnte nicht gesendet werden.",
+      "shownLabel": "Sandbox: Diese SMS wurde nicht gesendet. So würde sie bei der mietenden Person ankommen.",
+      "useCode": "Code {code} verwenden"
+    },
+    "photo": {
+      "preparing": "Das Foto wird vorbereitet…",
+      "taken": "Aufgenommen",
+      "toTake": "Noch aufzunehmen",
+      "optional": "Optional",
+      "takeHint": "Öffnet die Kamera für diese Ansicht.",
+      "retakeHint": "Öffnet die Kamera, um diese Ansicht neu aufzunehmen.",
+      "close": "Kamera schließen",
+      "uploadFailed": "Das Foto wurde nicht hochgeladen. Versuchen Sie es erneut."
+    }
+  },
+  "incident": {
+    "title": "Etwas ist passiert",
+    "reportScreenTitle": "Ihre Meldung",
+    "lead": "Sagen Sie dem Laden, was mit dem Gemieteten passiert ist. Ihre Meldung wird datiert, gesperrt und zur Geschichte des Artikels gelegt.",
+    "emergencyTitle": "Notfälle zuerst",
+    "emergencyFirst": "Wenn jemand verletzt oder in Gefahr ist, rufen Sie zuerst den Notruf: 112 in Europa, 911 in Nordamerika.",
+    "newReport": "Eine neue Meldung",
+    "closed": "Meldungen sind offen, solange Sie die Artikel haben. Für alles andere wenden Sie sich an den Laden.",
+    "earlier": "Ihre Meldungen",
+    "reportTitle": "Was mit {item} passiert ist",
+    "yourWords": "Was Sie dem Laden gesagt haben",
+    "start": {
+      "which": "Welcher Artikel",
+      "what": "Was passiert ist",
+      "hints": {
+        "damage": "Eine Spur oder ein Schaden, etwa ein Kratzer oder eine Delle",
+        "fault": "Etwas funktioniert nicht mehr",
+        "gone": "Er ist weg: gestohlen oder verloren",
+        "unsafe": "Jemand wurde verletzt, oder er ist vielleicht nicht sicher",
+        "not_sure": "Ich bin nicht sicher"
+      },
+      "describe": "Beschreiben Sie, was passiert ist",
+      "describeHelp": "In Ihren eigenen Worten. Der Laden liest genau, was Sie schreiben.",
+      "describeMissing": "Beschreiben Sie, was passiert ist, in höchstens 1000 Zeichen.",
+      "continue": "Weiter"
+    },
+    "capture": {
+      "title": "Fotos",
+      "guidance": "Fotografieren Sie, was passiert ist, von der Seite, auf der es zu sehen ist. Das Foto von der Übergabe erscheint blass hinter der Kamera, damit Sie den Winkel treffen. Jede Ansicht ist freiwillig.",
+      "sampleTitle": "Beispielfotos",
+      "sampleBody": "Einige Fotos hier sind Beispiele für die Vorführung, kein echter Artikel."
+    },
+    "send": {
+      "noPhotos": "Noch keine Fotos. Sie können die Meldung trotzdem senden, etwa wenn der Artikel weg ist.",
+      "markTitle": "Markieren, wo es ist",
+      "howTo": "Tippen Sie auf Ihrem Foto auf die beschädigte Stelle. Der Rahmen wird zur Markierung, mit der die Rückgabe verglichen wird. Das ist optional.",
+      "whichPhoto": "Foto zum Markieren",
+      "tapToMark": "Tippen Sie auf die beschädigte Stelle: {view}",
+      "marked": "Markiert auf {view}, etwa {x} % von links und {y} % von oben",
+      "tapHint": "Erneut tippen, um den Rahmen zu verschieben.",
+      "removeBox": "Rahmen entfernen",
+      "send": "Meldung senden"
+    },
+    "outcome": {
+      "simulated": "Eingeordnet von einem Ersatz für die Testumgebung, nicht von Claude.",
+      "unsafe": {
+        "title": "Nutzen Sie den Artikel nicht weiter",
+        "stop": "Bitte hören Sie jetzt auf, ihn zu nutzen, und bewahren Sie ihn sicher auf.",
+        "contact": "Der Laden wurde informiert und meldet sich bei Ihnen.",
+        "emergency": "Wenn jemand verletzt oder in Gefahr ist, rufen Sie den Notruf: 112 in Europa, 911 in Nordamerika."
+      },
+      "photographs": {
+        "title": "Noch nicht gesendet",
+        "body": "Fügen Sie wenn möglich Fotos hinzu und senden Sie dann die Meldung."
+      },
+      "stored": {
+        "title": "Ihre Meldung ist gespeichert",
+        "body": "Der Laden wurde informiert und meldet sich bei Ihnen."
+      },
+      "theft": {
+        "title": "Ein Diebstahl oder Verlust",
+        "body": "Der Laden wurde informiert und meldet sich bei Ihnen. Bitte geben Sie jetzt diese Angaben. Eine Anzeigennummer kann später folgen."
+      },
+      "fault": {
+        "title": "Ein Defekt",
+        "body": "Ein Defekt wird Ihnen nicht berechnet. Der Laden wurde informiert und meldet sich wegen eines Tauschs oder einer Abholung."
+      },
+      "pricing": {
+        "title": "Kleiner Schaden",
+        "body": "Der Laden bestätigt, welcher seiner veröffentlichten Preise gilt, und diese Seite zeigt ihn. Jetzt wird nichts abgebucht."
+      },
+      "offer": {
+        "title": "Kleiner Schaden zu einem veröffentlichten Preis",
+        "priceFor": "Der veröffentlichte Preis des Geschäfts für {description}",
+        "body": "Sie können ihm jetzt zustimmen oder es der Rückgabe überlassen. Jetzt wird nichts belastet."
+      },
+      "agreed": {
+        "title": "Zugestimmt",
+        "body": "Sie haben dem veröffentlichten Preis des Geschäfts zugestimmt.",
+        "amountLabel": "Vereinbarter Preis",
+        "notCharged": "Es wurde nichts abgebucht. Bei der Rückgabe bestätigt eine Person vom Personal ihn, nachdem sie den Artikel gesehen hat, und kann ihn nur senken. Er wird einmal mit allen anderen Posten abgebucht, und der Rest Ihrer Reservierung wird freigegeben."
+      },
+      "return": {
+        "title": "Für die Rückgabe gelassen",
+        "body": "Eine Person vom Laden sieht es sich an, wenn Sie den Artikel zurückbringen."
+      },
+      "resolved": {
+        "title": "Erledigt",
+        "body": "Der Laden hat diese Meldung erledigt."
+      }
+    },
+    "agree": {
+      "codeGuidance": "Um diesem Preis zuzustimmen, fordern Sie einen Einmalcode an. Er geht an die E-Mail-Adresse, die PayPal für Sie angegeben hat.",
+      "agree": "Diesem Preis zustimmen",
+      "agreeing": "Sie stimmen zu:",
+      "leaveGuidance": "Oder lassen Sie es für die Rückgabe, wenn eine Person vom Laden es sich ansieht.",
+      "leave": "Für die Rückgabe lassen"
+    },
+    "theft": {
+      "where": "Wo es passiert ist",
+      "when": "Wann es passiert ist",
+      "lockAndKeys": "Schloss und Schlüssel: War er abgeschlossen, und wo sind die Schlüssel?",
+      "policeReport": "Nummer der Anzeige",
+      "policeLater": "Wenn Sie noch keine haben, können Sie sie später ergänzen.",
+      "send": "Diese Angaben senden",
+      "notGiven": "Noch nicht angegeben",
+      "addPolice": "Nummer der Anzeige ergänzen",
+      "required": "Erforderlich."
+    },
+    "states": {
+      "reported": "Gemeldet",
+      "triaged": "Eingeordnet",
+      "agreed": "Von der mietenden Person akzeptiert",
+      "shop_matter": "Sache des Ladens",
+      "awaiting_staff": "Wartet auf eine Person",
+      "claim_opened": "In der Forderung",
+      "resolved": "Erledigt",
+      "withdrawn": "Zurückgezogen"
+    }
+  },
+  "selfReturn": {
+    "title": "Selbst zurückgeben",
+    "unavailable": {
+      "title": "Diese Rückgabe ist hier nicht möglich",
+      "body": "{shop} nimmt diese Rückgabe an der Theke an. Bringen Sie den Artikel während der Öffnungszeiten zurück."
+    },
+    "when": {
+      "open": "Eine Person bei {shop} prüft ihn heute, solange der Laden geöffnet ist.",
+      "later": "Eine Person bei {shop} prüft ihn, wenn der Laden öffnet, {when}.",
+      "unknown": "Eine Person bei {shop} prüft ihn, wenn der Laden das nächste Mal öffnet."
+    },
+    "intro": {
+      "title": "Bevor Sie beginnen",
+      "dropPointLabel": "Hier abstellen",
+      "writtenBy": "In den Worten von {shop}",
+      "nextLabel": "Wie es weitergeht",
+      "nothingCharged": "Jetzt wird nichts abgebucht.",
+      "yourHold": "Ihre Reservierung",
+      "holdStays": "Sie bleibt bis dahin bei PayPal reserviert. Danach wird sie freigegeben, oder Sie erhalten eine Forderung mit Fotos, auf die Sie antworten können.",
+      "how": "Fotografieren Sie jede Ansicht so, wie sie bei der Abholung fotografiert wurde, dann den Abgabeort. Etwa zwei Minuten.",
+      "light": "Suchen Sie gutes Licht. Die Fotos von jetzt belegen, in welchem Zustand Sie den Artikel hinterlassen haben.",
+      "start": "Mit den Fotos beginnen",
+      "noScope": "Dieser Link zeigt die Miete, kann sie aber nicht zurückgeben. Verwenden Sie den Link, den der Laden mit Ihrer Buchung geschickt hat."
+    },
+    "capture": {
+      "title": "Die Rückgabe fotografieren",
+      "guidance": "Das Foto von der Abholung erscheint schwach hinter der Kamera. Treffen Sie seinen Winkel, dann kommt die nächste Ansicht.",
+      "dropPointView": "Wo Sie ihn abgestellt haben",
+      "dropPointGuidance": "Treten Sie zurück, damit Artikel und Abgabeort beide auf dem Foto sind.",
+      "sampleTitle": "Beispielfotos",
+      "sampleBody": "Das sind Beispiele für die Vorführung, keine Fotos Ihrer Miete. Der Nachweis sagt das."
+    },
+    "send": {
+      "ready": "Alle Fotos sind gemacht. Mit dem Senden werden sie versiegelt, und Ihre Rückgabe zählt ab diesem Moment.",
+      "missing": "{count, plural, one {Noch # Foto} other {Noch # Fotos}}",
+      "button": "Rückgabe senden"
+    },
+    "receipt": {
+      "onTime": "Pünktlich zurückgegeben",
+      "late": "Nach Mietende zurückgegeben",
+      "received": "Erhalten",
+      "where": "{date}, am Abgabeort",
+      "missingTitle": "{shop} hat ihn am Abgabeort nicht gefunden",
+      "missingBody": "Geprüft {when}. Bitte melden Sie sich beim Laden. Ihre Fotos von {time} bleiben im Nachweis Ihrer Miete.",
+      "reserved": "Reserviert, nicht abgebucht",
+      "released": "Freigegeben, nichts abgebucht",
+      "charged": "Abgebucht, nachdem eine Person eine Forderung freigegeben hat",
+      "checkedPayPal": "Um {time} bei PayPal geprüft",
+      "fromRecord": "Aus den Unterlagen von Hold. PayPal war gerade nicht erreichbar.",
+      "sample": "Eine Beispielmiete: PayPal wird nicht gefragt.",
+      "dropPointPhoto": "Wo Sie ihn abgestellt haben",
+      "photos": "Ihre Fotos",
+      "photosBody": "Im Moment des Sendens im Nachweis Ihrer Miete versiegelt. Niemand kann sie ändern.",
+      "record": "Den ganzen Nachweis ansehen"
+    },
+    "steps": {
+      "title": "Wie es weitergeht",
+      "returned": "Sie haben ihn zurückgegeben",
+      "returnedDetail": "{count, plural, one {# Foto} other {# Fotos}}, versiegelt um {time}",
+      "check": "Eine Person prüft ihn",
+      "checked": "{shop} hat ihn geprüft",
+      "checkedDetail": "Eine Person hat ihn am Abgabeort gesehen.",
+      "notFound": "Am Abgabeort nicht gefunden",
+      "notFoundDetail": "Bitte melden Sie sich bei {shop}. Solange geklärt wird, wird nichts abgebucht.",
+      "settle": "Reservierung freigegeben, oder eine Forderung, auf die Sie antworten können",
+      "settleDetail": "Ohne Freigabe durch eine Person wird nichts abgebucht.",
+      "released": "Reservierung freigegeben",
+      "releasedDetail": "Es wurde nichts abgebucht.",
+      "charged": "Abgebucht, nachdem eine Person eine Forderung freigegeben hat",
+      "seeClaim": "Die Forderung ansehen"
+    }
+  },
+  "claim": {
+    "title": "Ihre Schadenforderung",
+    "renterTitle": "Ihre Schadenforderung",
+    "none": {
+      "title": "Keine Forderung",
+      "body": "Eine Person im Geschäft genehmigt jede Forderung zuerst. Gibt es nach Ihrer Rückgabe eine, erscheint sie hier mit ihren Fotos, und Sie können darauf antworten."
+    },
+    "record": "Ihre Mietunterlagen",
+    "negotiationLink": "Sehen, was die Vertreter gesagt haben",
+    "states": {
+      "draft": "Entwurf",
+      "awaiting_approval": "Genehmigung ausstehend",
+      "approved": "Genehmigt",
+      "presented": "Ihre Antwort steht aus",
+      "accepted": "Akzeptiert",
+      "contested": "Bestritten — Prüfung ausstehend",
+      "lapsed": "Antwortfrist abgelaufen",
+      "negotiating": "In Verhandlung",
+      "agreed": "Vereinbart",
+      "escalated": "Eskaliert",
+      "decided": "Entscheidung erfasst",
+      "charging": "Abrechnung läuft",
+      "charged": "Belastet",
+      "charge_failed": "Belastung fehlgeschlagen",
+      "adjusted": "Angepasst",
+      "waived": "Forderung erlassen",
+      "closed": "Abgeschlossen"
+    },
+    "settledBody": "PayPal hat die Abrechnung bestätigt. Die Vermietung ist abgeschlossen.",
+    "renterBoundary": "Prüfen Sie Belege und Preise. Stimmen Sie mit einem Bestätigungscode zu oder widersprechen Sie mit Begründung.",
+    "afterReply": "Ihre Antwort ist gespeichert. Belege und Preise stehen weiter unten, und diese Seite zeigt jeden Schritt bis zur Abrechnung.",
+    "pending": "PayPal-Bestätigung ausstehend…",
+    "replyDue": "Antwortfrist: {when}",
+    "summary": "Abrechnungsbeträge",
+    "capture": "Belastung der Kaution",
+    "release": "Freigabe an Mietende",
+    "invoice": "Separate Rechnung",
+    "lines": "{count, plural, one {Der Posten} other {Die Posten}}",
+    "namedBy": "Erfasst von {name}",
+    "staff": "Mitarbeitende Person",
+    "beforeUrl": "Bei Übergabe",
+    "afterUrl": "Bei Rückgabe",
+    "repairedOn": "Repariert {date}",
+    "repairedBody": "Das Geschäft hat repariert, wofür Sie bezahlt haben. Was die Reparatur kostete, bleibt beim Geschäft.",
+    "repairedAlt": "Repariert: {line}",
+    "reviewFirst": "Prüfen Sie die Belege und Preise. Ihre Antwortfrist beginnt mit Ihrer Prüfbestätigung.",
+    "acknowledge": "Ich habe diese Forderung geprüft",
+    "yourReply": "Ihre Antwort",
+    "choose": "Was Sie tun möchten",
+    "codeGuidance": "Wir senden einen Einmalcode an die beim Bezahlen von PayPal bestätigte E-Mail-Adresse.",
+    "comment": "Ihre Erklärung",
+    "commentHint": "Zum Anfechten erforderlich, beim Annehmen optional. Bis zu 1.000 Zeichen.",
+    "accept": "Forderung akzeptieren und abrechnen",
+    "contest": {
+      "title": "Wo die beiden Seiten auseinanderliegen",
+      "count": "Bestritten: {disputed} von {total, plural, one {# Position} other {# Positionen}}",
+      "byClaude": "Geschrieben von Claude",
+      "bySimulated": "Simulierte Zusammenfassung",
+      "neutral": "Ergreift keine Partei und nennt keinen Betrag. Die Fakten unter jeder Position stammen aus Holds Unterlagen. Prüfen Sie die Belege, bevor Sie entscheiden.",
+      "disputed": "Bestritten",
+      "notDisputed": "Nicht bestritten",
+      "shopSays": "Der Laden sagt",
+      "youSaid": "Sie sagten",
+      "records": "Was die Unterlagen zeigen",
+      "before": "Foto bei Abholung: {line}",
+      "after": "Foto bei Rückgabe: {line}",
+      "beforeShort": "Abholung",
+      "afterShort": "Rückgabe",
+      "youWrote": "Sie schrieben",
+      "noWords": "Keine Worte, nur der Widerspruch.",
+      "missing": {
+        "pending": "Es wurde noch keine Zusammenfassung geschrieben. Die Worte des Mieters und die Unterlagen stehen unten.",
+        "refused": "Die Zusammenfassung konnte diesmal nicht geschrieben werden. Die Worte des Mieters und die Unterlagen stehen unten.",
+        "unavailable": "Die Zusammenfassung konnte diesmal nicht geschrieben werden. Die Worte des Mieters und die Unterlagen stehen unten.",
+        "invalid": "Die Zusammenfassung hat Holds Prüfungen nicht bestanden und wird nicht gezeigt. Die Worte des Mieters und die Unterlagen stehen unten.",
+        "dropped": "Die Zusammenfassung nannte eine Zahl, was Hold nicht erlaubt, und wird nicht gezeigt. Die Worte des Mieters und die Unterlagen stehen unten."
+      },
+      "facts": {
+        "confirmedTwice": "Vom Vergleich gefunden und von einer unabhängigen zweiten Prüfung bestätigt.",
+        "foundOnce": "Vom Vergleich gefunden. Die zweite Prüfung hat es nicht bestätigt.",
+        "markNearby": "Eine vor dieser Miete erfasste Markierung liegt nahe derselben Stelle.",
+        "noMarkNearby": "Keine vor dieser Miete erfasste Markierung liegt nahe dieser Stelle.",
+        "agreedDuringRental": "Der Mieter hat diesem Preis zugestimmt, als er es während der Miete meldete.",
+        "addedBy": "Von {name} hinzugefügt, mit schriftlicher Begründung.",
+        "someone": "einer Person des Personals",
+        "conditionConfirmed": "Der Zustandsbericht bei Abholung wurde {when} bestätigt, ohne Ergänzung.",
+        "conditionAdded": "Zum Zustandsbericht bei Abholung wurden Fotos von Übersehenem hinzugefügt.",
+        "conditionNotAnswered": "Der Zustandsbericht bei Abholung wurde nie beantwortet.",
+        "incidentReported": "Während der Miete wurde etwas gemeldet.",
+        "noIncident": "Während der Miete wurde nichts gemeldet.",
+        "renterPhotos": "{count, plural, one {# Foto wurde} other {# Fotos wurden}} dem Widerspruch beigefügt."
+      }
+    },
+    "contestAction": "Dieser Forderung widersprechen",
+    "results": {
+      "over_approval_limit": "Die Forderung überschreitet Ihr Limit. Bitten Sie die Leitung.",
+      "line_without_evidence": "Jeder Posten benötigt Fotos oder eine schriftliche Begründung.",
+      "raised_the_claim": "Eine andere berechtigte Leitung muss über Ihre Forderung entscheiden.",
+      "role_may_not_confirm": "Ihre Rolle darf dies nicht bestätigen.",
+      "code_expired": "Fordern Sie einen neuen Bestätigungscode an.",
+      "wrong_code": "Dieser Code ist falsch.",
+      "code_recently_sent": "Warten Sie eine Minute, bevor Sie einen weiteren Code anfordern.",
+      "reply_expired": "Die Antwortfrist ist abgelaufen. Bitten Sie den Betrieb um Prüfung.",
+      "already_replied": "Diese Forderung wurde bereits beantwortet.",
+      "reason_required": "Geben Sie eine Begründung ein.",
+      "email_unavailable": "Der Code konnte nicht gesendet werden. Versuchen Sie es später erneut.",
+      "decision_recorded": "Eine Entscheidung wurde bereits erfasst. Aktualisieren Sie die Seite, um den Abwicklungsstatus zu sehen.",
+      "incident_not_agreed": "Diese Meldung wurde von der mietenden Person nicht akzeptiert.",
+      "raises_agreed_line": "Ein akzeptierter Posten kann gesenkt, nie erhöht werden.",
+      "empty_line": "Lassen Sie den Posten weg, statt ihn bei null zu behalten.",
+      "owner_decides_after_promise": "Das Geschäft hat das der mietenden Person zugesagte Datum verpasst. Nur die Inhaberin oder der Inhaber kann diese Forderung jetzt entscheiden."
+    },
+    "promise": {
+      "beforeLabel": "Wenn Sie widersprechen",
+      "beforeBody": "{shop} sagt zu, innerhalb von {days, plural, one {# Tag} other {# Tagen}} nach Ihrer Antwort zu entscheiden. Das genaue Datum sehen Sie, sobald Sie sie senden.",
+      "openLabel": "Das Geschäft entscheidet bis",
+      "keptBody": "{shop} hat am {when} entschieden, bis zum zugesagten Datum.",
+      "missedTitle": "Das Geschäft hat sein Datum verpasst",
+      "missedBody": "{shop} hat zugesagt, bis {when} zu entscheiden, und hat es nicht getan. Die Inhaberin oder der Inhaber wurde informiert. Nur sie können jetzt entscheiden und müssen Ihnen eine schriftliche Begründung geben.",
+      "lateTitle": "Nach dem zugesagten Datum entschieden",
+      "lateBody": "{shop} hat zugesagt, bis {when} zu entscheiden, und hat später entschieden. Die Inhaberin oder der Inhaber schrieb:",
+      "waivedTitle": "Erlassen: nicht rechtzeitig entschieden",
+      "waivedBody": "{shop} hat zugesagt, bis {when} zu entscheiden. Das ist nicht geschehen, also wird nach der eigenen Regel des Geschäfts nichts belastet.",
+      "dueNow": "Jetzt fällig"
+    },
+    "messages": {
+      "renterTitle": "Nachrichten mit {shop}",
+      "empty": "Noch keine Nachrichten.",
+      "you": "Sie",
+      "staff": "Personal",
+      "writeRenter": "An das Geschäft schreiben",
+      "send": "Senden",
+      "sent": "Gesendet.",
+      "renterHint": "Das Geschäft erhält eine E-Mail, dass Sie geschrieben haben. Bis zu 1.000 Zeichen."
+    },
+    "messageResults": {
+      "message_invalid": "Schreiben Sie eine Nachricht mit bis zu 1.000 Zeichen.",
+      "rate_limited": "Vorerst zu viele Nachrichten. Versuchen Sie es in einer Stunde erneut.",
+      "not_found": "Diese Forderung ist nicht für Nachrichten offen.",
+      "standing_rule_off": "Sie ist bereits aus."
+    }
+  },
+  "negotiation": {
+    "title": "Ihr Vertreter",
+    "none": {
+      "title": "Noch kein Fürsprecher",
+      "body": "Ein Fürsprecher vertritt eine angefochtene Forderung nur, wenn Sie sie ihm von der Forderung aus übergeben, mit dem Höchstbetrag, den Sie zahlen würden.",
+      "toClaim": "Ihre Schadenforderung"
+    },
+    "yourLimit": "Ihr Höchstbetrag",
+    "onlyYou": "Nur Sie sehen das.",
+    "assistantArgues": "Ihr eigener Assistent vertritt Ihren Widerspruch. Der Vertreter von Hold handelt nicht für Sie, und jeder Zug geht über den Schiedsrichter von Hold.",
+    "simulated": "Simulierte Vertreter: Testumgebung, kein KI-Modell wurde gefragt.",
+    "advocate": {
+      "title": "Einen Vertreter für mich verhandeln lassen",
+      "guidance": "Ein Vertreter liest dieselben Fotos, Markierungen und Preise wie das Geschäft und vertritt jede Position anhand der Beweise. Er sieht nie die Grenzen des Geschäfts, und das Geschäft sieht nie Ihre. Er nutzt den Bestätigungscode, den wir Ihnen senden, wie beim Annehmen oder Widersprechen.",
+      "highest": "Höchstens zahle ich, in {currency}",
+      "comment": "Was Ihr Vertreter wissen sollte (freiwillig)",
+      "start": "Meinen Widerspruch einem Vertreter übergeben",
+      "who": "Wer für mich verhandelt",
+      "hold": "Der Vertreter von Hold",
+      "assistant": "Mein eigener Assistent, {name}. Der Name ist sein eigener und nicht geprüft.",
+      "assistantGuidance": "Ihr Assistent liest über Hold dieselben Beweise und macht jeden Zug über den Schiedsrichter von Hold. Er sieht nie die Grenzen des Geschäfts und kann keinem höheren Betrag zustimmen, als Sie hier schreiben. Jede Einigung bestätigen weiterhin Sie mit einem Code.",
+      "upTo": "Ihr Fürsprecher darf zustimmen, bis zu diesem Betrag zu zahlen:",
+      "asksFirst": "Er fragt Sie, bevor er zustimmt."
+    },
+    "confirm": {
+      "renterTitle": "Den vereinbarten Betrag bestätigen",
+      "agreedLabel": "Die Fürsprecher haben sich geeinigt auf",
+      "renterGuidance": "Nichts wird belastet, bevor Sie bestätigen. Wenn Sie ablehnen, entscheidet der Inhaber.",
+      "lead": "Zum Bestätigen oder Ablehnen fordern Sie einen neuen Einmalcode per E-Mail an.",
+      "confirm": "Bestätigen und abrechnen",
+      "decline": "Ablehnen",
+      "done": "Ihre Antwort ist erfasst.",
+      "waitingShop": "Sie haben bestätigt. Wartet auf die Bestätigung des Geschäfts."
+    },
+    "stop": {
+      "title": "Meinen Vertreter stoppen",
+      "guidance": "Das Stoppen belastet nichts. Dann entscheidet der Inhaber, und Sie sehen hier weiterhin alles.",
+      "button": "Meinen Vertreter stoppen",
+      "done": "Ihr Vertreter ist gestoppt.",
+      "stopped": "Sie haben Ihren Vertreter gestoppt."
+    },
+    "states": {
+      "open": "Die Vertreter tauschen Angebote aus.",
+      "agreed": "Die Fürsprecher haben sich geeinigt. Nichts wird belastet, bevor jede Seite bestätigt.",
+      "settled": "Geeinigt und bestätigt. Die Reservierung wird über PayPal abgerechnet.",
+      "escalated": "Die Vertreter haben sich nicht geeinigt. Der Inhaber entscheidet, mit diesem Verlauf.",
+      "replied": "Der Vertreter des Mieters hat den Widerspruch unten verfasst. Der Inhaber entscheidet."
+    },
+    "agreedAmount": "Vereinbarter Betrag",
+    "ended": {
+      "pass": "Ein Vertreter hat gepasst.",
+      "refused_twice": "Die Züge eines Vertreters wurden zweimal abgelehnt.",
+      "time_limit": "Ein Vertreter hat zu lange gebraucht.",
+      "deadline": "Die Zeit für die Verhandlung ist abgelaufen.",
+      "mandate_ended": "Ein Vertreter wurde gestoppt, oder seine Grenzen sind abgelaufen.",
+      "declined": "Eine Person hat den vereinbarten Betrag abgelehnt.",
+      "nothing_to_charge": "Sie haben sich auf keine Zahlung geeinigt: Der Inhaber verzichtet auf die Forderung.",
+      "promise_missed": "Das zugesagte Datum des Geschäfts ist verstrichen: Die Inhaberin oder der Inhaber entscheidet."
+    },
+    "transcript": {
+      "title": "Was die Vertreter gesagt haben",
+      "noLimits": "Der Verlauf zeigt jedes Angebot und die Beweise, auf denen es beruht. Die Grenzen beider Seiten stehen nicht darin.",
+      "move": "Zug {number}",
+      "side": {
+        "shop": "Der Vertreter des Geschäfts",
+        "renter": "Der Vertreter des Mieters",
+        "renter_assistant": "Der eigene Assistent des Mieters"
+      },
+      "accept": "Nahm das letzte Angebot der anderen Seite an",
+      "pass": "Hat gepasst",
+      "passReasons": {
+        "chose": "Er hat sich entschieden aufzuhören.",
+        "unavailable": "Der Vertreter konnte nicht antworten.",
+        "ceiling": "Der Vertreter hat seine Grenze an Zeit oder Aufrufen erreicht."
+      },
+      "chainVerified": "Die Prüfsummenkette stimmt: Kein Zug wurde geändert, entfernt oder umgestellt.",
+      "chainBroken": "Die Prüfsummenkette stimmt nicht.",
+      "offer": "Angeboten",
+      "instead": "statt"
+    },
+    "grounds": {
+      "known_mark": "Eine Markierung, die schon am Artikel war, liegt daneben",
+      "ordinary_wear": "Die Verschleißregeln decken es ab: {clause}",
+      "uncertain_evidence": "Die Fotos klären es nicht",
+      "renter_photo": "Ein Foto des Mieters betrifft es",
+      "evidence_stands": "Beide Prüfungen haben es bestätigt",
+      "goodwill": "Kulanz, ohne Beweis"
+    },
+    "results": {
+      "amount_invalid": "Geben Sie einen Betrag ein, etwa 30 oder 30,50.",
+      "already_replied": "Diese Forderung wurde bereits beantwortet.",
+      "invalid_limits": "Diese Grenzen sind nicht verwendbar. Prüfen Sie jede.",
+      "not_agreed": "Keine Einigung wartet auf eine Antwort.",
+      "not_found": "Diese Forderung hat keinen Vertreter.",
+      "role_may_not_confirm": "Nur der Inhaber oder eine leitende Person kann das bestätigen.",
+      "raised_the_claim": "Jemand anderes als die Person, die die Forderung erhoben hat, muss bestätigen.",
+      "no_currency": "Veröffentlichen Sie zuerst Ihre Preise.",
+      "code_expired": "Dieser Code ist abgelaufen. Fordern Sie einen neuen an.",
+      "wrong_code": "Dieser Code stimmt nicht. Prüfen Sie ihn und versuchen Sie es erneut.",
+      "code_recently_sent": "Vor weniger als einer Minute wurde ein Code gesendet. Prüfen Sie Ihre E-Mails.",
+      "email_unavailable": "Die E-Mail konnte nicht gesendet werden. Versuchen Sie es gleich noch einmal.",
+      "link_invalid": "Dieser Link kann dafür nicht verwendet werden.",
+      "assistant_not_connected": "Mit dieser Miete ist gerade kein Assistent verbunden. Wählen Sie den Vertreter von Hold."
+    }
+  },
+  "record": {
+    "title": "Ihre Mietunterlagen",
+    "lead": "Bewahren Sie eine versionierte Kopie der Fotos, Feststellungen, Entscheidungen und Abrechnung Ihrer Miete auf. Jede erstellte Version bleibt unverändert.",
+    "prepare": "Aktuelle Unterlagen erstellen",
+    "update": "Aktuelle Unterlagen aktualisieren",
+    "retry": "Erstellung erneut versuchen",
+    "requested": "Ihre Unterlagen werden erstellt. Diese Seite aktualisiert sich automatisch.",
+    "empty": "Es wurden noch keine Unterlagen erstellt.",
+    "version": "Version {number}",
+    "building": "Ihre Unterlagen werden erstellt. Diese Seite aktualisiert sich automatisch.",
+    "buildFailed": "Die Unterlagen konnten nicht erstellt werden. Bitte versuchen Sie es erneut.",
+    "pdfHash": "PDF-Fingerabdruck (SHA-256)",
+    "manifestHash": "Manifest-Fingerabdruck (SHA-256)",
+    "unavailable": "Nicht verfügbar",
+    "unavailableVersion": "Version der Unterlagen nicht verfügbar",
+    "receiptsTitle": "Belege per E-Mail",
+    "receiptsEmpty": "Noch keine Belege per E-Mail.",
+    "receiptKinds": {
+      "capture": "Zahlung erhalten",
+      "release": "Reservierung freigegeben",
+      "refund": "Erstattung bestätigt",
+      "invoice_sent": "Zahlung angefordert",
+      "invoice_paid": "Rechnung bezahlt"
+    },
+    "receiptStates": {
+      "queued": "Wartet auf Versand",
+      "sending": "Wird gesendet",
+      "sent": "Gesendet",
+      "failed": "Versand fehlgeschlagen; ein neuer Versuch folgt."
+    },
+    "created": "Erstellt am {when} UTC",
+    "readyTag": "Bereit",
+    "openPdf": "PDF öffnen",
+    "sharePdf": "PDF teilen",
+    "openManifest": "Manifest öffnen"
+  },
+  "trust": {
+    "title": "Ihre Rückgabebilanz",
+    "lead": "Jede einwandfrei zurückgegebene Miete wird hier gezählt. Die Bilanz enthält keinen Namen, keine E-Mail und keinen Betrag, und Sie entscheiden, ob andere Hold-Läden sie nutzen.",
+    "notYet": "Ihre Bilanz beginnt, sobald PayPal Ihre Zahlung bestätigt hat.",
+    "counts": "Ihre Mieten der letzten {months} Monate",
+    "clean": "Einwandfrei zurückgegeben",
+    "settled": "Forderung beglichen",
+    "unpaid": "Forderung unbezahlt",
+    "open": "Forderung offen",
+    "shops": "Hold-Läden",
+    "neverTakenNone": "Bisher wurde keine Reservierung für Sie freigegeben.",
+    "credential": "Ihre Bilanz zeigen",
+    "credentialLead": "Alle können diesen Code scannen, um Ihre Bilanz mit dem von Hold veröffentlichten Schlüssel zu prüfen. Er zeigt nur die Zahlen oben und gilt bis {time}. Öffnen Sie diese Seite erneut für einen neuen.",
+    "credentialScan": "Scannen, um diese Bilanz zu prüfen",
+    "credentialText": "Oder teilen Sie diesen Nachweis",
+    "credentialUnavailable": "Ihre Bilanz kann gerade nicht signiert werden. Versuchen Sie es gleich noch einmal.",
+    "consentTitle": "Andere Hold-Läden",
+    "consentQuestion": "Meine Bilanz einwandfreier Rückgaben nutzen, um künftige Reservierungen in Hold-Läden zu senken.",
+    "consentYes": "Ja, nutzen",
+    "consentNo": "Nein, danke",
+    "consentIsOn": "Andere Hold-Läden dürfen Ihre Bilanz nutzen, um Ihre Reservierung zu senken.",
+    "consentIsOff": "Jeder Laden nutzt nur seine eigene Bilanz Ihrer Rückgaben.",
+    "turnOn": "Meine Bilanz in anderen Hold-Läden nutzen",
+    "turnOff": "Meine Bilanz in anderen Hold-Läden nicht mehr nutzen",
+    "delete": "Meine Bilanz löschen",
+    "deleteLead": "Ihre Rückgaben werden in allen Hold-Läden gelöscht, und Ihre nächste Reservierung ist die übliche. Eine noch offene Forderung bleibt, bis sie beglichen ist.",
+    "deleteConfirm": "Ich verstehe, dass meine Bilanz in allen Hold-Läden gelöscht wird",
+    "deleted": "Ihre Bilanz ist gelöscht.",
+    "results": {
+      "renter_unknown": "Ihre Bilanz beginnt, sobald PayPal Ihre Zahlung bestätigt hat.",
+      "code_expired": "Dieser Code ist abgelaufen oder wurde schon verwendet. Fordern Sie einen neuen an.",
+      "wrong_code": "Dieser Code stimmt nicht. Prüfen Sie die E-Mail und versuchen Sie es erneut.",
+      "code_recently_sent": "Gerade wurde ein Code gesendet. Warten Sie eine Minute, bevor Sie einen neuen anfordern.",
+      "email_unavailable": "Die E-Mail konnte nicht gesendet werden. Versuchen Sie es gleich noch einmal.",
+      "payer_missing": "Ihre Bilanz beginnt, sobald PayPal Ihre Zahlung bestätigt hat."
+    },
+    "codeLead": "Für Änderungen an Ihrer Bilanz braucht es einen Code, den wir an die Adresse senden, die PayPal für Sie hat, damit niemand sonst mit diesem Link sie ändern kann.",
+    "neverTakenTitle": "Nie einbehaltene Kautionen",
+    "across": "über {count, plural, one {# Miete} other {# Mieten}}",
+    "share": "Diesen Nachweis teilen"
+  },
+  "assistant": {
+    "title": "Ihr Assistent",
+    "noneTitle": "Kein Assistent",
+    "state": {
+      "connected": "Ein Assistent ist mit dieser Miete verbunden",
+      "disconnected": "Der Assistent wurde getrennt",
+      "booked": "Ein Assistent hat diese Buchung gemacht"
+    },
+    "callsItself": "Er nennt sich",
+    "notVerified": "Dieser Name stammt von ihm selbst und ist nicht geprüft.",
+    "unnamed": "ein Assistent ohne Namen",
+    "lead": "Er kann diese Miete, ihre Kaution, ihr Zustandsprotokoll und jede Forderung lesen und eine Antwort für Sie entwerfen. Er kann weder zahlen noch eine Kaution freigeben oder eine Forderung beantworten: Das tun Sie selbst, bei PayPal oder über diesen Link.",
+    "disconnectLead": "Sein Token funktioniert ab seinem nächsten Aufruf nicht mehr. Dieser Link funktioniert weiter wie bisher.",
+    "disconnect": "Assistenten trennen",
+    "disconnected": "Getrennt. Sein nächster Aufruf wird abgelehnt.",
+    "notConnected": "Mit dieser Miete ist gerade kein Assistent verbunden.",
+    "did": "Was er getan hat",
+    "nothing": "Noch nichts.",
+    "outcome": {
+      "refused": "Abgelehnt",
+      "human_confirmation_required": "Hat auf Sie gewartet"
+    },
+    "draft": {
+      "title": "Eine Antwort, die er für Sie entworfen hat",
+      "decision": {
+        "accept": "Forderung annehmen",
+        "contest": "Forderung bestreiten"
+      },
+      "note": "Das sind die Worte des Assistenten, sie entscheiden nichts. Zum Antworten öffnen Sie die Forderung über Ihren Link und bestätigen mit dem Code, den Hold Ihnen per E-Mail schickt."
+    },
+    "tools": {
+      "find_shops": "Hat Verleihe gesucht",
+      "get_shop": "Hat die Angaben des Verleihs gelesen",
+      "check_availability": "Hat geprüft, was frei war",
+      "get_damage_prices": "Hat die Schadenspreise gelesen",
+      "quote_rental": "Hat nach einem Preis gefragt",
+      "create_booking": "Hat diese Buchung gemacht",
+      "get_booking": "Hat geprüft, ob die Gebühr bezahlt war",
+      "get_rental": "Hat die Miete gelesen",
+      "get_hold": "Hat die Kaution gelesen",
+      "get_hold_approval_link": "Hat nach dem Link zur Freigabe der Kaution gefragt",
+      "request_extension": "Hat nach dem Preis weiterer Tage und dem Link zum Bezahlen gefragt",
+      "get_condition_report": "Hat das Zustandsprotokoll gelesen",
+      "get_claim": "Hat die Forderung gelesen",
+      "draft_claim_reply": "Hat eine Antwort auf die Forderung entworfen",
+      "submit_claim_reply": "Wollte die Forderung beantworten",
+      "get_record": "Hat die Beweisakte gelesen",
+      "get_negotiation": "Hat die Verhandlung gelesen",
+      "get_claim_lines": "Hat die Positionen der Forderung und ihre Befunde gelesen",
+      "get_line_photos": "Hat die Fotos einer Position angesehen",
+      "get_price_list": "Hat die vereinbarte Preisliste gelesen",
+      "get_known_marks": "Hat die vor der Miete bekannten Markierungen gelesen",
+      "submit_offer": "Hat als Ihr Vertreter einen Zug gemacht"
+    }
+  },
+  "contact": {
+    "title": "So erreichen wir Sie",
+    "byEmail": "Per E-Mail",
+    "byText": "Per SMS an {phone}",
+    "confirmed": "Bestätigt",
+    "notConfirmed": "Nicht bestätigt",
+    "emailBody": "Links, Erinnerungen und Codes kommen per E-Mail. Keine E-Mail auf diesem Telefon? Wählen Sie SMS.",
+    "textBody": "Links, Erinnerungen und Codes kommen per SMS. Eine Kopie jeder Entscheidung über Geld geht auch an die E-Mail-Adresse, die PayPal von Ihnen hat.",
+    "notConfirmedBody": "Links und Erinnerungen kommen per SMS. Codes kommen per E-Mail, bis Sie diese Nummer bestätigen.",
+    "textInstead": "Lieber per SMS",
+    "emailInstead": "Lieber per E-Mail",
+    "changeNumber": "Nummer ändern",
+    "confirmNumber": "Diese Nummer bestätigen",
+    "phoneLabel": "Ihre Mobilnummer, mit Ländervorwahl",
+    "newPhoneLabel": "Ihre neue Mobilnummer, mit Ländervorwahl",
+    "privacy": "Hold nutzt diese Nummer nur für Links, Erinnerungen und Codes zu dieser Miete.",
+    "sendCode": "Code per SMS senden",
+    "codeLabel": "Der Code, den wir an {phone} geschickt haben",
+    "confirm": "Dieses Telefon bestätigen",
+    "confirmedNow": "SMS zu dieser Miete gehen jetzt an {phone}.",
+    "changeLead": "Um Ihre SMS an ein neues Telefon zu senden, schicken wir zuerst einen Code dorthin, wohin Ihre Codes jetzt gehen.",
+    "sendChangeCode": "Diesen Code senden",
+    "changeCodeLabel": "Der Code, den wir eben geschickt haben",
+    "changeCodeEmailed": "Code an die E-Mail-Adresse gesendet, die PayPal von Ihnen hat. Er läuft in zehn Minuten ab.",
+    "cancel": "Abbrechen",
+    "results": {
+      "phone_invalid": "Schreiben Sie die Nummer mit Ländervorwahl, etwa +41 79 123 45 67.",
+      "country_not_texted": "Hold sendet keine SMS in dieses Land. Ihre Codes kommen per E-Mail.",
+      "code_needed": "Die Reservierung ist platziert. Eine neue Nummer braucht zuerst den Code, der dorthin geht, wohin Ihre Codes jetzt gehen.",
+      "code_recently_sent": "Warten Sie eine Minute, bevor Sie einen neuen Code anfordern.",
+      "code_expired": "Dieser Code ist abgelaufen. Fordern Sie einen neuen an.",
+      "wrong_code": "Dieser Code stimmt nicht.",
+      "text_unavailable": "Die SMS konnte nicht gesendet werden.",
+      "email_unavailable": "Der Code konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.",
+      "payer_missing": "Bezahlen Sie zuerst die Gebühr: Dann sagt PayPal Hold, wohin Ihre Codes gehen."
+    },
+    "open": "SMS oder E-Mail wählen",
+    "unavailable": "Wie wir Sie erreichen, lässt sich über diesen Link nicht ändern."
+  },
+  "push": {
+    "offerTitle": "Diese Miete auf diesem Telefon verfolgen",
+    "offerBody": "Hold kann Ihnen hier sagen, wenn Ihr Zustandsbericht, eine Forderung, eine Nachricht des Geschäfts oder Ihre Quittung bereit ist. Einmalcodes kommen weiterhin nur per SMS oder E-Mail.",
+    "counterOfferTitle": "Den Tresen auf diesem Telefon verfolgen",
+    "counterOfferBody": "Hold kann Ihnen hier sagen, wenn eine Abgabe wartet, ein Mieter schreibt, ein Rückgabevergleich bereit ist oder eine Entscheidung im Web wartet.",
+    "turnOn": "Mitteilungen einschalten",
+    "notNow": "Nicht jetzt",
+    "onTitle": "Mitteilungen an",
+    "onBody": "Dieses Telefon erfährt von dieser Miete.",
+    "counterOnBody": "Dieses Telefon erfährt von {shop}.",
+    "offTitle": "Mitteilungen aus",
+    "offBody": "Dieses Telefon erfährt nichts von dieser Miete. SMS und E-Mails kommen weiterhin.",
+    "counterOffBody": "Dieses Telefon erfährt nichts von {shop}. E-Mails kommen weiterhin.",
+    "turnOff": "Ausschalten",
+    "deniedTitle": "Mitteilungen sind für Hold aus",
+    "deniedBody": "Erlauben Sie sie für Hold in den Einstellungen des Telefons und schalten Sie sie dann hier ein.",
+    "openSettings": "Einstellungen öffnen",
+    "unavailableTitle": "Mitteilungen konnten nicht eingeschaltet werden",
+    "unavailableBody": "Dieses Telefon hat keine Adresse für Mitteilungen erhalten. Bitte später erneut versuchen.",
+    "failedTitle": "Hold konnte nicht benachrichtigt werden",
+    "failedBody": "Nichts wurde eingeschaltet. Bitte erneut versuchen.",
+    "channel": "Mieten und Rückgaben"
+  }
+}

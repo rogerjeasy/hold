@@ -8,6 +8,8 @@ allowBuilds:
   '@parcel/watcher': false
   '@swc/core': false
   esbuild: false
+  # eslint-config-expo's import resolver, for the phone app's lint.
+  unrs-resolver: false
   # Bryntum's trial runs a helper from its companion package on install; the scheduler's bundle does not need it.
   '@bryntum/scheduler-trial': false
   '@bryntum/scheduler-trial-lib': false

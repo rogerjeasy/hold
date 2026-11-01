@@ -20,6 +20,7 @@
   },
   "exclude": [
     "node_modules",
-    "apps/web"
+    "apps/web",
+    "apps/mobile"
   ]
 }
