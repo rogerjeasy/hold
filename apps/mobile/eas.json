@@ -1,0 +1,36 @@
+{
+  "cli": {
+    "version": ">= 24.12.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "base": {
+      "node": "24.19.0",
+      "pnpm": "12.6.0",
+      "env": {
+        "EXPO_PUBLIC_HOLD_API_URL": "https://p99faar3kp.us-east-1.awsapprunner.com"
+      }
+    },
+    "development": {
+      "extends": "base",
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": { "APP_VARIANT": "development" },
+      "android": { "buildType": "apk" },
+      "ios": { "simulator": false }
+    },
+    "preview": {
+      "extends": "base",
+      "distribution": "internal",
+      "autoIncrement": true,
+      "android": { "buildType": "apk" }
+    },
+    "production": {
+      "extends": "base",
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}
