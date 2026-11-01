@@ -5,14 +5,18 @@ import { findPerson, inShop, shopSettings, staffRoleOf, takeRateToken } from '@h
 import type { Person, RateLimit, ShopSettings, Transaction } from '@hold/db'
 import { cache } from 'react'
 import { z } from 'zod'
-import { chosenShopId, readAccessToken, sessionFactor } from '@/features/auth/session-cookies'
+import { chosenShopId, hasSessionCookie, readAccessToken, sessionFactor } from '@/features/auth/session-cookies'
 import type { SignInFactor } from '@/features/auth/session-cookies'
 import { actInScope, failedFields, formObject, Refusal } from './action'
 import { getServices } from './services'
+import { currentBearer } from './staff-bearer'
 
 // The one way into a shop, for every signed-in page and every server function that changes a shop. It does the
 // steps of AGENTS.md section 7 in order: authenticate, resolve the shop and the caller's role, open the transaction
 // with the caller's identity so row-level security applies, validate the input, act, and write the audit line.
+
+// `bearer` is the phone's session (staff-bearer.ts), which is never proven by a passkey.
+export type SessionFactor = SignInFactor | 'bearer'
 
 export type ShopContext = {
   readonly subject: string
@@ -20,8 +24,9 @@ export type ShopContext = {
   readonly shop: ShopSettings
   readonly role: StaffRole
   readonly approvalLimitCents: number
-  readonly factor: SignInFactor
-  // This person must confirm with a passkey before changing the shop, and this session has not.
+  readonly factor: SessionFactor
+  // This person must confirm with a passkey before changing the shop, and this session has not. Always so for the
+  // phone, whose session no passkey proves: every step that asks for one is refused there and done on the web.
   readonly passkeyNeeded: boolean
 }
 
@@ -30,18 +35,24 @@ export type ShopAccess =
   | { readonly kind: 'no_shop'; readonly person: Person | undefined }
   | { readonly kind: 'in_shop'; readonly context: ShopContext }
 
-// Who is asking and in which shop. Pages call this to decide what to show. It changes nothing. Asked once per
-// request: the shop's frame and the page both need it.
-export const shopAccess = cache(async (): Promise<ShopAccess> => {
-  const accessToken = await readAccessToken()
-  if (accessToken === undefined) return { kind: 'signed_out' }
+// What a session presents, from the browser's cookies or the phone's bearer.
+type Credential = {
+  readonly accessToken: string
+  readonly shopId: string | undefined
+  // The browser falls back to the person's first shop; the phone must name one the person has a role in.
+  readonly exactShop: boolean
+  readonly factor: (subject: string) => Promise<SessionFactor>
+}
+
+// The one core both sessions share: the person the token names, their role in the shop, and their approval limit.
+async function accessWith(credential: Credential): Promise<ShopAccess> {
   const { identity, database } = await getServices()
-  const verified = await identity.verifyAccessToken(accessToken)
+  const verified = await identity.verifyAccessToken(credential.accessToken)
   if (!verified.ok) return { kind: 'signed_out' }
   const person = await findPerson(database, verified.value.subject)
   if (person === undefined || person.shops.length === 0) return { kind: 'no_shop', person }
-  const chosen = await chosenShopId()
-  const membership = person.shops.find((shop) => shop.shopId === chosen) ?? person.shops[0]
+  const named = person.shops.find((shop) => shop.shopId === credential.shopId)
+  const membership = credential.exactShop ? named : (named ?? person.shops[0])
   if (membership === undefined) return { kind: 'no_shop', person }
   const scope = { role: 'hold_app', shopId: membership.shopId, userId: person.userId } as const
   const loaded = await inShop(database, scope, async (transaction) => ({
@@ -49,7 +60,7 @@ export const shopAccess = cache(async (): Promise<ShopAccess> => {
     staff: await staffRoleOf(transaction, person.userId),
   }))
   if (loaded.settings === undefined || loaded.staff === undefined) return { kind: 'no_shop', person }
-  const factor = await sessionFactor(verified.value.subject)
+  const factor = await credential.factor(verified.value.subject)
   const threshold = loaded.settings.ownerApprovalThresholdCents
   const currency = loaded.settings.currency ?? 'XXX'
   const strongNeeded = needsStrongSignIn(loaded.staff.role, money(loaded.staff.approvalLimitCents, currency), threshold === null ? undefined : money(threshold, currency))
@@ -62,9 +73,25 @@ export const shopAccess = cache(async (): Promise<ShopAccess> => {
       role: loaded.staff.role,
       approvalLimitCents: loaded.staff.approvalLimitCents,
       factor,
-      passkeyNeeded: strongNeeded && factor !== 'passkey',
+      passkeyNeeded: factor === 'bearer' || (strongNeeded && factor !== 'passkey'),
     },
   }
+}
+
+const bearerFactor = () => Promise.resolve('bearer' as const)
+
+// Who is asking and in which shop. Pages call this to decide what to show. It changes nothing. Asked once per
+// request: the shop's frame and the page both need it. Inside a phone route the bearer is the session, and a request
+// that also carries a browser's session is refused, so one request never mixes two people.
+export const shopAccess = cache(async (): Promise<ShopAccess> => {
+  const bearer = currentBearer()
+  if (bearer !== undefined) {
+    if (await hasSessionCookie()) return { kind: 'signed_out' }
+    return accessWith({ accessToken: bearer.accessToken, shopId: bearer.shopId, exactShop: true, factor: bearerFactor })
+  }
+  const accessToken = await readAccessToken()
+  if (accessToken === undefined) return { kind: 'signed_out' }
+  return accessWith({ accessToken, shopId: await chosenShopId(), exactShop: false, factor: sessionFactor })
 })
 
 export type ShopActionFailure = 'signed_out' | 'no_shop' | 'role' | 'passkey_needed' | 'invalid' | 'rate_limited'
@@ -91,11 +118,17 @@ export type ShopActionSpec<Input, Output = unknown> = {
 // change, so a failure here only waits for the relay; it is never the caller's failure.
 export type AfterCommit<Output> = (context: ShopContext, output: Output) => Promise<void>
 
-// Every server function built here. A test checks that each shop action file exports nothing else.
-const SHOP_ACTIONS = new WeakSet<object>()
+// Every server function built here, with who may call it. A test checks that each shop action file exports nothing
+// else, and that the phone's list holds none that asks for a passkey.
+type ShopActionCheck = Pick<ShopActionSpec<unknown>, 'name' | 'roles' | 'needsPasskey'>
+const SHOP_ACTIONS = new WeakMap<object, ShopActionCheck>()
 
 export function isShopAction(value: unknown): boolean {
   return typeof value === 'function' && SHOP_ACTIONS.has(value)
+}
+
+export function shopActionSpec(value: unknown): ShopActionCheck | undefined {
+  return typeof value === 'function' ? SHOP_ACTIONS.get(value) : undefined
 }
 
 export function shopAction<Input, Output>(
@@ -131,7 +164,7 @@ export function shopAction<Input, Output>(
     }
     return result
   }
-  SHOP_ACTIONS.add(action)
+  SHOP_ACTIONS.set(action, { name: spec.name, roles: spec.roles, needsPasskey: spec.needsPasskey })
   return action
 }
 

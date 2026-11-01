@@ -2,6 +2,7 @@
 
 import { checkSelfReturnSettings } from '@hold/domain'
 import { confirmDropOff as confirmRentalDropOff, reportDropOffMissing as reportRentalDropOffMissing, saveSelfReturnSettings as saveShopSettings } from '@hold/db'
+import { rentalInput } from '@hold/mobile-api'
 import { z } from 'zod'
 import { tellRenterNotFound } from '@/server/drop-off-notice'
 import { CAPTURE_STAFF } from '@/server/staff-photo'
@@ -11,7 +12,6 @@ import { Refusal, shopAction, withLocale } from '@/server/shop-access'
 // drop point makes the rental returned, and the ordinary review follows; saying it is not there is recorded once and the
 // renter is told. Neither moves money, so counter staff may do both.
 
-const rental = { rentalId: z.uuid() }
 const clockTime = z.string().max(5)
 
 // Only the owner decides whether renters may return items with nobody there, and where they leave them.
@@ -27,7 +27,7 @@ export const saveSelfReturnSettings = shopAction(
 )
 
 export const confirmDropOff = shopAction(
-  { name: 'rental.drop_off_confirmed', roles: CAPTURE_STAFF, needsPasskey: false, input: withLocale(rental) },
+  { name: 'rental.drop_off_confirmed', roles: CAPTURE_STAFF, needsPasskey: false, input: rentalInput },
   async (_context, input, transaction) => {
     const confirmed = await confirmRentalDropOff(transaction, input.rentalId)
     return confirmed.ok ? { rentalId: input.rentalId } : new Refusal(confirmed.reason)
@@ -35,7 +35,7 @@ export const confirmDropOff = shopAction(
 )
 
 export const reportDropOffMissing = shopAction(
-  { name: 'rental.drop_off_missing', roles: CAPTURE_STAFF, needsPasskey: false, input: withLocale(rental) },
+  { name: 'rental.drop_off_missing', roles: CAPTURE_STAFF, needsPasskey: false, input: rentalInput },
   async (context, input, transaction) => {
     const now = new Date()
     const reported = await reportRentalDropOffMissing(transaction, input.rentalId, context.person.userId, now)

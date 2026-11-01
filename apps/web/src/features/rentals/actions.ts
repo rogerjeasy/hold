@@ -2,6 +2,7 @@
 
 import { abandonBooking, askForHold as askForRentalHold, BOOKING_LINK_SCOPES, findPayPalAccount, issueRenterLink, rentalDetail, renterContact, renterTrustKey } from '@hold/db'
 import { maskedPhone, phoneNumber, textAllowed } from '@hold/domain'
+import { rentalInput } from '@hold/mobile-api'
 import { trustedHold } from '@hold/trust'
 import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
@@ -51,7 +52,7 @@ export const bookRental = shopAction(
 
 // A new link to the rental, for the renter to scan at the counter. Earlier links keep working.
 export const showRenterLink = shopAction(
-  { name: 'rental.link_shown', roles: STAFF, needsPasskey: false, input: withLocale({ rentalId: z.uuid() }) },
+  { name: 'rental.link_shown', roles: STAFF, needsPasskey: false, input: rentalInput },
   async (context, input, transaction) => {
     const rental = await rentalDetail(transaction, input.rentalId, new Date())
     if (rental === undefined) return new Refusal('not_found')
@@ -64,7 +65,7 @@ export const showRenterLink = shopAction(
 
 // A new link sent the way the renter is reached: by text to their phone, or by email.
 export const sendRenterLinkAgain = shopAction(
-  { name: 'rental.link_sent', roles: STAFF, needsPasskey: false, input: withLocale({ rentalId: z.uuid() }) },
+  { name: 'rental.link_sent', roles: STAFF, needsPasskey: false, input: rentalInput },
   async (context, input, transaction) => {
     const rental = await rentalDetail(transaction, input.rentalId, new Date())
     if (rental === undefined) return new Refusal('not_found')
@@ -82,7 +83,7 @@ export const sendRenterLinkAgain = shopAction(
 // earns it, and a new link opens the page where they approve it in PayPal on their own phone. The payer is known from
 // the fee they paid. Asked again, it shows a new code for the same hold. Requesting moves no money.
 export const askForHold = shopAction(
-  { name: 'rental.hold_asked', roles: STAFF, needsPasskey: false, input: withLocale({ rentalId: z.uuid() }) },
+  { name: 'rental.hold_asked', roles: STAFF, needsPasskey: false, input: rentalInput },
   async (context, input, transaction) => {
     const rental = await rentalDetail(transaction, input.rentalId, new Date())
     if (rental === undefined) return new Refusal('not_found')

@@ -1,36 +1,26 @@
 'use server'
 
-import { randomInt } from 'node:crypto'
 import { DEMO_ACCOUNT_KEYS } from '@hold/auth'
-import { findPerson, takeRateToken } from '@hold/db'
+import { findPerson } from '@hold/db'
 import { z } from 'zod'
 import { redirect } from '@/i18n/navigation'
 import { linkRoutes, routes, shopRoutes } from '@/lib/routes'
-import { callerNetwork } from '@/server/network'
 import { getServices } from '@/server/services'
 import type { Attempt, AttemptPage } from './attempt'
 import type { AuthFormState, CodeFormState, DemoFormState, PasskeyFormState } from './auth-form-state'
 import { parseAuthInput, readText, signInFields, signUpFields, type AuthField } from './auth-input'
 import { parseCode } from './code-input'
 import { continueDemo, startDemo } from './demo-session'
-import type { DemoDependencies, DemoSession } from './demo-session'
+import type { DemoSession } from './demo-session'
+import { demoDependencies, flowDependencies as dependencies, requester } from './flow-dependencies'
 import { readLocale } from './locale-input'
 import { chooseShop, clearAttempt, clearSession, currentAttempt, readAccessToken, readDemoSession, readRefreshToken, sessionFactor, writeAttempt, writeDemoSession, writeSession } from './session-cookies'
 import { answerCode, answerPasskey, beginInvitation, beginPasskey, beginSignIn, beginSignUp, resendCode } from './sign-in-flow'
-import type { Begun, FlowDependencies, ProofOutcome, Requester } from './sign-in-flow'
+import type { Begun, ProofOutcome } from './sign-in-flow'
 import { readTimeZone } from './time-zone-input'
 
 // The server functions behind the sign-in, sign-up and invitation pages. Each checks its input with the same
 // function the browser used, then hands the work to sign-in-flow.ts and keeps the cookies.
-
-async function dependencies(): Promise<FlowDependencies> {
-  const { identity, database } = await getServices()
-  return { identity, database, now: () => new Date(), allow: (limit, subject) => takeRateToken(database, limit, subject) }
-}
-
-async function requester(): Promise<Requester> {
-  return { network: await callerNetwork() }
-}
 
 function pageRoute(attempt: Pick<Attempt, 'page' | 'invitation'>): string {
   if (attempt.page === 'invite' && attempt.invitation !== undefined) return `${linkRoutes.invite}/${attempt.invitation.token}`
@@ -90,9 +80,7 @@ export async function signInWithDemoAccount(_previous: DemoFormState, data: Form
   const key = demoAccountKey.safeParse(data.get('account'))
   const choice = demoChoice.safeParse(data.get('demo'))
   if (!key.success || !choice.success) return { notice: 'unavailable' }
-  const { identity, demoSessions } = await getServices()
-  const { allow } = await dependencies()
-  const demo: DemoDependencies = { identity, allow, sessions: demoSessions, newCode: newDemoCode, now: () => new Date() }
+  const demo = await demoDependencies()
   // A demo this browser no longer holds cannot be continued, so a fresh one starts instead.
   const current = choice.data === 'continue' ? await readDemoSession() : undefined
   let session: DemoSession
@@ -110,13 +98,6 @@ export async function signInWithDemoAccount(_previous: DemoFormState, data: Form
   }
   await chooseShop(session.shopId)
   return goTo(shopRoutes.home, readLocale(data.get('locale')))
-}
-
-// Eight letters and digits a reader cannot confuse, about 10^12 to choose from: a demo's shop address and accounts
-// cannot be guessed.
-const CODE_ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789'
-function newDemoCode(): string {
-  return Array.from({ length: 8 }, () => CODE_ALPHABET[randomInt(CODE_ALPHABET.length)]).join('')
 }
 
 async function finish(outcome: ProofOutcome, attempt: Attempt, factor: 'email_code' | 'passkey'): Promise<CodeFormState> {

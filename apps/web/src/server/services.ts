@@ -13,8 +13,8 @@ import type { DisplayJobDependencies, DocumentStore, EvidenceStore, MemoryEviden
 import { noFaces } from '@hold/vision'
 import { opsAgentMessageSchema, runOperations } from '@hold/ops/run'
 import type { OpsDependencies } from '@hold/ops/run'
-import { createAwsTexter, createLazyMailer, createMemoryMailer, createMemoryTexter, createSmtpMailer, loadSmtpSettings } from '@hold/notify'
-import type { Mailer, Texter } from '@hold/notify'
+import { createAwsTexter, createExpoPushSender, createLazyMailer, createMemoryMailer, createMemoryPushSender, createMemoryTexter, createSmtpMailer, expoAccessTokenFromSecret, loadSmtpSettings } from '@hold/notify'
+import type { Mailer, PushMessage, PushSender, Texter } from '@hold/notify'
 import { createFakePayPal, createMemoryCredentialStore, createPayPalClient, createRestPayPalHolds, createSecretsManagerCredentialStore, credentialReference, DEMO_CREDENTIAL_OWNER, PAYPAL_EVENT_TYPES } from '@hold/paypal'
 import type { CredentialStore, FakePayPal, PayPalCredentials, PayPalHolds } from '@hold/paypal'
 import { applyPayPalEvent, createMemoryScheduler, createSqsSender, executionMessageSchema, paypalEventMessageSchema, runExecution, runUpkeep, upkeepMessageSchema } from '@hold/settle'
@@ -47,6 +47,10 @@ export type Services = {
   // Texts to renters who chose them (architecture.md section 12.3), through AWS End User Messaging. Kept in memory in the
   // test environment.
   readonly texter: Texter
+  // Push notifications to Hold's phone app (architecture.md section 13.9), through Expo's push service.
+  readonly push: PushSender
+  // The test environment's push sender, which keeps what was sent. Absent everywhere else.
+  readonly simulatedPush: { readonly sent: readonly PushMessage[] } | undefined
   readonly paypalCredentials: CredentialStore
   readonly checkPayPalCredentials: (credentials: PayPalCredentials) => Promise<CredentialCheck>
   // PayPal, acting in the shop account whose credentials the reference names.
@@ -182,6 +186,7 @@ async function build(): Promise<Services> {
     const simulatedEvidence = createMemoryEvidenceStore({ baseUrl: `${config.publicUrl}/api/simulated-storage` })
     const documents = createMemoryDocumentStore()
     const mailer = createMemoryMailer()
+    const push = createMemoryPushSender()
     const records = simulatedRecords({ database, documents, evidence: simulatedEvidence, mailer })
     // Schedules are kept, never fired: nothing in the test environment runs long enough to reach them.
     // What the worker would tell people is kept, not sent.
@@ -214,6 +219,8 @@ async function build(): Promise<Services> {
       database,
       mailer,
       texter: createMemoryTexter(),
+      push,
+      simulatedPush: push,
       paypalCredentials: createMemoryCredentialStore(),
       checkPayPalCredentials: (credentials) => Promise.resolve(credentials.clientSecret === TEST_REFUSED_PAYPAL_SECRET ? 'refused' : 'accepted'),
       paypalFor,
@@ -256,6 +263,8 @@ async function build(): Promise<Services> {
     // Through the SMTP account in Secrets Manager, read when the first email is sent.
     mailer: createLazyMailer(async () => createSmtpMailer(await loadSmtpSettings(config.smtpSecret, config.region))),
     texter: createAwsTexter({ region: config.region, ...(config.texts.sender === undefined ? {} : { originationIdentity: config.texts.sender }), ...(config.texts.configurationSet === undefined ? {} : { configurationSet: config.texts.configurationSet }) }),
+    push: createExpoPushSender({ accessToken: expoAccessTokenFromSecret(config.pushSecret, config.region) }),
+    simulatedPush: undefined,
     paypalCredentials,
     checkPayPalCredentials: checkWithPayPal,
     paypalFor,

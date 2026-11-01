@@ -1,7 +1,8 @@
 'use server'
 
-import { checkItemType, ITEM_CATEGORIES, ITEM_STATUSES, parseAmount, VIEW_OUTLINES } from '@hold/domain'
+import { checkItemType, ITEM_CATEGORIES, parseAmount, VIEW_OUTLINES } from '@hold/domain'
 import { addItems as addNewItems, changeStatus, editItem as editOneItem, saveItemType as saveType } from '@hold/db'
+import { itemStatusInput } from '@hold/mobile-api'
 import { z } from 'zod'
 import { list, Refusal, shopAction, withLocale } from '@/server/shop-access'
 
@@ -96,7 +97,7 @@ export const changeItemStatus = shopAction(
     name: 'items.status_changed',
     roles: ['owner', 'manager', 'counter_staff'],
     needsPasskey: false,
-    input: withLocale({ itemId: z.uuid(), status: z.enum(ITEM_STATUSES), note: text(500) }),
+    input: itemStatusInput,
   },
   async (context, input, transaction) => {
     if (input.status === 'retired' && context.role === 'counter_staff') return new Refusal('role_may_not_retire')

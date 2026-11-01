@@ -1,14 +1,13 @@
 'use server'
 
 import { auditLog, captureSession, comparisonReport, rentalDetail, rentalItemFor, rentalReturns, sealSession, startCaptureSession } from '@hold/db'
-import { z } from 'zod'
-import { Refusal, shopAction, withLocale } from '@/server/shop-access'
+import { rentalItemInput, reviewInput, sessionInput } from '@hold/mobile-api'
+import { Refusal, shopAction } from '@/server/shop-access'
 import { CAPTURE_STAFF, staffPhotoActions } from '@/server/staff-photo'
 import { sendComparisons } from '@/server/comparison-queue'
-import { reviewNote } from './review-input'
 
 export const startReturn = shopAction(
-  { name: 'return.started', roles: CAPTURE_STAFF, needsPasskey: false, input: withLocale({ rentalId: z.uuid(), itemId: z.uuid() }) },
+  { name: 'return.started', roles: CAPTURE_STAFF, needsPasskey: false, input: rentalItemInput },
   async (context, input, transaction) => {
     const rentalItemId = await rentalItemFor(transaction, input.rentalId, input.itemId)
     if (rentalItemId === undefined) return new Refusal('not_found')
@@ -22,7 +21,7 @@ export const requestPhotoUpload = photos.request
 export const confirmPhotoUpload = photos.confirm
 
 export const sealReturn = shopAction(
-  { name: 'return.sealed', roles: CAPTURE_STAFF, needsPasskey: false, input: withLocale({ sessionId: z.uuid() }) },
+  { name: 'return.sealed', roles: CAPTURE_STAFF, needsPasskey: false, input: sessionInput },
   async (_context, input, transaction) => {
     const session = await captureSession(transaction, input.sessionId)
     if (session?.kind !== 'return') return new Refusal('not_found')
@@ -38,7 +37,7 @@ export const sealReturn = shopAction(
 // Human observations remain append-only and separate from the model result. This records no approval and moves no
 // rental, claim or money state. It is usable even when the model is unavailable.
 export const recordReview = shopAction(
-  { name: 'comparison.review_recorded', roles: CAPTURE_STAFF, needsPasskey: false, input: withLocale({ comparisonId: z.uuid(), ...reviewNote.shape }) },
+  { name: 'comparison.review_recorded', roles: CAPTURE_STAFF, needsPasskey: false, input: reviewInput },
   async (context, input, transaction) => {
     if (await comparisonReport(transaction, input.comparisonId) === undefined) return new Refusal('not_found')
     await transaction.insert(auditLog).values({ shopId: context.shop.id, actorKind: 'person', actorId: context.person.userId, action: 'comparison.manual_review', subjectKind: 'comparison', subjectId: input.comparisonId, detail: { outcome: input.outcome, reason: input.reason } })

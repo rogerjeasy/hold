@@ -1,3 +1,2 @@
-import { z } from 'zod'
-
-export const reviewNote = z.strictObject({ outcome: z.enum(['clean', 'findings', 'deferred']), reason: z.string().trim().min(1).max(1000) })
+// The note a person writes on a comparison, checked alike on the page, on the phone and on the server.
+export { reviewNote } from '@hold/mobile-api'

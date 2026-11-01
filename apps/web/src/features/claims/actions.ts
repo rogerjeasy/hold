@@ -6,6 +6,7 @@ import { newRenterLink, renterUrl } from '@/server/renter-links'
 import { qrSvg } from '@/server/qr'
 import { Refusal, shopAction, withLocale } from '@/server/shop-access'
 import { writeContestSummary } from '@/server/contest-summary'
+import { pushToRenter } from '@/server/push'
 import { sendSettlement } from '@/server/settlement-queue'
 import { claimLinesInput, claimReason } from './claim-input'
 
@@ -24,7 +25,7 @@ export const approveAndPresent = shopAction({ name: 'claim.approved', roles: STA
   await issueRenterLink(transaction, context.shop.id, rental.id, link, ['view', 'accept', 'contest'])
   const url = `${await renterUrl(link.token, readLocale(rental.language))}/claim`
   return { rentalId: rental.id, url, qr: await qrSvg(url) }
-})
+}, (context, result) => pushToRenter(context.shop.id, result.rentalId, 'claim_ready'))
 export const confirmClean = shopAction({ name: 'return.release_approved', roles: STAFF, needsPasskey: true, input: withLocale({ rentalId: z.uuid(), reason: claimReason }) }, async (context, input, transaction) => {
   const result = await confirmCleanReturn(transaction, input.rentalId, context.person.userId, input.reason, new Date())
   return result.ok ? result : new Refusal(result.reason)
@@ -32,7 +33,13 @@ export const confirmClean = shopAction({ name: 'return.release_approved', roles:
 export const decide = shopAction({ name: 'claim.decided', roles: STAFF, needsPasskey: true, input: withLocale({ claimId: z.uuid(), decision: z.enum(['uphold', 'waive']), reason: claimReason }) }, async (context, input, transaction) => {
   const result = await decideClaim(transaction, input.claimId, context.person.userId, input.decision, input.reason, new Date())
   return result.ok ? result : new Refusal(result.reason)
-}, (context, result) => sendSettlement(context.shop.id, result.rentalId, result.executionId))
+}, async (context, result) => {
+  try {
+    await sendSettlement(context.shop.id, result.rentalId, result.executionId)
+  } finally {
+    await pushToRenter(context.shop.id, result.rentalId, 'claim_decided')
+  }
+})
 
 // Asks for the neutral summary of a contest again, when the model could not write it the first time. Owners and
 // managers decide contested claims, so they may ask; a few times an hour, since each asks a model.

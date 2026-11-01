@@ -1,6 +1,7 @@
 'use server'
 import { grantStandingRule, inShop, liveStandingRule, revokeMandate, saveDecisionPromiseDays, writeClaimMessage } from '@hold/db'
 import { DECISION_PROMISE } from '@hold/domain'
+import { renterMessageInput } from '@hold/mobile-api'
 import { shopMessageEmail, shopMessageText } from '@hold/notify'
 import { z } from 'zod'
 import { Refusal, shopAction, withLocale } from '@/server/shop-access'
@@ -39,7 +40,7 @@ export const revokePromiseWaiver = shopAction({ name: 'shop.promise_waiver_revok
 // An answer to the renter, recorded on the claim and sent to them in the shop's words, by text or email as they chose
 // (architecture.md section 12.3). A message that cannot go leaves the answer on the renter's claim page.
 export const writeToRenter = shopAction(
-  { name: 'claim.message_sent', roles: ['owner', 'manager', 'counter_staff'], needsPasskey: false, input: withLocale({ rentalId: z.uuid(), body: z.string().max(1000) }), rateLimit: { name: 'claim-message-shop', max: 60, windowSeconds: 3600 } },
+  { name: 'claim.message_sent', roles: ['owner', 'manager', 'counter_staff'], needsPasskey: false, input: renterMessageInput, rateLimit: { name: 'claim-message-shop', max: 60, windowSeconds: 3600 } },
   async (context, input, transaction) => {
     const written = await writeClaimMessage(transaction, { rentalId: input.rentalId, author: 'shop', userId: context.person.userId, body: input.body }, new Date())
     return written.ok ? { rentalId: input.rentalId, body: input.body.trim() } : new Refusal(written.reason)

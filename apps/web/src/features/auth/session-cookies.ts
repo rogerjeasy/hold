@@ -60,6 +60,12 @@ export async function readAccessToken(): Promise<string | undefined> {
   return (await cookies()).get(COOKIE_NAMES.access)?.value
 }
 
+// Whether the request carries a browser's session at all. The phone's bearer requests must not.
+export async function hasSessionCookie(): Promise<boolean> {
+  const store = await cookies()
+  return store.get(COOKIE_NAMES.access) !== undefined || store.get(COOKIE_NAMES.refresh) !== undefined
+}
+
 // How the current session was proven, for the person its access token names. An emailed code unless a passkey proved
 // this very session for this very person: a record from another account's session counts for nothing.
 export async function sessionFactor(subject: string): Promise<SignInFactor> {

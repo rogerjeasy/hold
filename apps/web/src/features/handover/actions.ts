@@ -1,10 +1,10 @@
 'use server'
 
 import { addMark, captureSession, confirmMarks, rentalDetail, rentalItemFor, sealSession, startCaptureSession } from '@hold/db'
-import { z } from 'zod'
+import { handoverMarkInput, knownMarksInput, rentalItemInput, sessionInput } from '@hold/mobile-api'
 import { conditionLink } from '@/server/condition-link'
 import { CAPTURE_STAFF, staffPhotoActions } from '@/server/staff-photo'
-import { list, Refusal, shopAction, withLocale } from '@/server/shop-access'
+import { Refusal, shopAction } from '@/server/shop-access'
 
 // Every server function of the guided handover (architecture.md section 11.2). Each is built by shopAction, which
 // checks who is asking and their role before the work below runs, and writes the audit line after it. A test checks
@@ -14,7 +14,7 @@ import { list, Refusal, shopAction, withLocale } from '@/server/shop-access'
 const STAFF = CAPTURE_STAFF
 
 export const startHandover = shopAction(
-  { name: 'handover.started', roles: STAFF, needsPasskey: false, input: withLocale({ rentalId: z.uuid(), itemId: z.uuid() }) },
+  { name: 'handover.started', roles: STAFF, needsPasskey: false, input: rentalItemInput },
   async (context, input, transaction) => {
     const rentalItemId = await rentalItemFor(transaction, input.rentalId, input.itemId)
     if (rentalItemId === undefined) return new Refusal('not_found')
@@ -23,20 +23,16 @@ export const startHandover = shopAction(
   },
 )
 
-const photoFields = { sessionId: z.uuid(), view: z.string().min(1).max(64) }
-
 const photos = staffPhotoActions('handover')
 export const requestPhotoUpload = photos.request
 export const confirmPhotoUpload = photos.confirm
-
-const fraction = z.coerce.number().min(0).max(1)
 
 export const addHandoverMark = shopAction(
   {
     name: 'handover.mark_added',
     roles: STAFF,
     needsPasskey: false,
-    input: withLocale({ ...photoFields, x: fraction, y: fraction, width: fraction, height: fraction, description: z.string().max(200) }),
+    input: handoverMarkInput,
   },
   async (_context, input, transaction) => {
     const session = await captureSession(transaction, input.sessionId)
@@ -48,7 +44,7 @@ export const addHandoverMark = shopAction(
 
 // Staff say the item's known marks are still there.
 export const confirmKnownMarks = shopAction(
-  { name: 'handover.marks_confirmed', roles: STAFF, needsPasskey: false, input: withLocale({ sessionId: z.uuid(), markId: list(z.uuid()) }) },
+  { name: 'handover.marks_confirmed', roles: STAFF, needsPasskey: false, input: knownMarksInput },
   async (_context, input, transaction) => {
     const session = await captureSession(transaction, input.sessionId)
     if (session?.kind !== 'handover') return new Refusal('not_found')
@@ -60,7 +56,7 @@ export const confirmKnownMarks = shopAction(
 // Seals the item's photographs. Once every item is sealed the rental is out, and the renter is sent the condition
 // report, which staff can also show as a code.
 export const sealHandover = shopAction(
-  { name: 'handover.sealed', roles: STAFF, needsPasskey: false, input: withLocale({ sessionId: z.uuid() }) },
+  { name: 'handover.sealed', roles: STAFF, needsPasskey: false, input: sessionInput },
   async (context, input, transaction) => {
     const session = await captureSession(transaction, input.sessionId)
     if (session?.kind !== 'handover') return new Refusal('not_found')
