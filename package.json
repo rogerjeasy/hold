@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "pnpm --filter @hold/web dev",
     "test": "vitest run",
+    "test:ci": "vitest run packages/domain packages/settle packages/db/src/row-level-security.test.ts packages/mcp/src/catalogue.test.ts apps/web/src/server/shop-access.test.ts",
     "test:e2e": "pnpm --filter @hold/web test:e2e",
     "test:e2e:key": "pnpm --filter @hold/web test:e2e:key",
     "lint": "pnpm -r --if-present run typegen && eslint .",
