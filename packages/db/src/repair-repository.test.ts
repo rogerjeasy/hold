@@ -1,13 +1,14 @@
 import { randomUUID } from 'node:crypto'
 import { and, eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { captureSession, recordPhoto } from './capture-repository.ts'
+import { captureSession, recordPhoto, sealSession, startCaptureSession } from './capture-repository.ts'
 import { approveClaim, draftClaim } from './claim-repository.ts'
+import { beginComparison } from './comparison-repository.ts'
 import { evidenceSnapshot } from './evidence-snapshot.ts'
 import { fleetRecords } from './fleet-records.ts'
 import { changeStatus } from './item-repository.ts'
 import { claimRepairs, closeRepair, itemRepairs, repairGuides, openRepairFromMarks, openRepairs, openRepairsForClaim, repairCosts, startRepairCapture } from './repair-repository.ts'
-import { captureSessions, claims, items, marks, paypalAccounts, rentalItems, rentals, repairLines, repairs, staffRoles, users } from './schema/index.ts'
+import { captureSessions, claims, comparisons, items, marks, paypalAccounts, rentalItems, rentals, repairLines, repairs, staffRoles, users } from './schema/index.ts'
 import { inShop } from './scope.ts'
 import type { Transaction } from './scope.ts'
 import { returnedWithFinding } from './testing/found-damage.ts'
@@ -208,5 +209,41 @@ describe('a repair and the renters around it', () => {
     expect(await fresh.act((transaction) => closeRepair(transaction, { repairId: opened.repairId, userId: owner, outcomes: { [lineId]: 'repaired' }, costCents: 0, note: '' }, later(3)))).toMatchObject({ ok: true })
     const snapshot = await fresh.act((transaction) => evidenceSnapshot(transaction, charged.rentalId))
     expect(JSON.stringify(snapshot)).not.toContain(started.ok ? (started.sessionId ?? 'none') : 'none')
+  })
+
+  it('once repaired, no longer excuses new damage in the same place when the next renter returns the item', async () => {
+    const fresh = await readyRentalShop(database, 'repair-next', NOW)
+    await database.insert(paypalAccounts).values({ shopId: fresh.scope.shopId, credentialReference: 'hold/paypal/repair-next', mode: 'sandbox' })
+    const charged = await chargedClaim(fresh)
+    await inShop(database, { role: 'hold_worker', shopId: fresh.scope.shopId }, (transaction) => openRepairsForClaim(transaction, charged.claimId, NOW))
+    const owner = fresh.scope.userId ?? ''
+    const repair = (await fresh.act((transaction) => itemRepairs(transaction, charged.itemId)))[0]
+    const repairedMarkId = repair?.lines[0]?.markId ?? ''
+    // A mark on the same item that nobody repaired, which the next comparison must still set aside.
+    const [returnSession] = await database.select().from(captureSessions).where(and(eq(captureSessions.rentalItemId, charged.rentalItemId), eq(captureSessions.kind, 'return')))
+    const [kept] = await database.insert(marks).values({ shopId: fresh.scope.shopId, itemId: charged.itemId, view: 'right-side', region: { x: 0.5, y: 0.5, width: 0.1, height: 0.1 }, description: 'A scuff on the chain stay.', firstSeenSessionId: returnSession?.id ?? '' }).returning()
+    const started = await fresh.act((transaction) => startRepairCapture(transaction, repair?.id ?? '', owner, later(1)))
+    await photographed(started.ok ? (started.sessionId ?? '') : '', fresh)
+    const outcomes = Object.fromEntries((repair?.lines ?? []).map((line) => [line.id, 'repaired'] as const))
+    expect(await fresh.act((transaction) => closeRepair(transaction, { repairId: repair?.id ?? '', userId: owner, outcomes, costCents: 40_00, note: '' }, later(2)))).toMatchObject({ ok: true })
+
+    // The next renter takes both of the shop's items out, so the repaired one is among them, and brings them back.
+    const next = await fresh.readyRental(2)
+    const photographedSession = async (rentalItemId: string, kind: 'handover' | 'return', at: Date) => {
+      const opened = await fresh.act((transaction) => startCaptureSession(transaction, { rentalId: next.rentalId, rentalItemId, kind, actorUserId: owner }, at))
+      if (!opened.ok) throw new Error(opened.reason)
+      await photographed(opened.sessionId, fresh)
+      await fresh.act((transaction) => sealSession(transaction, opened.sessionId, at))
+      return opened.sessionId
+    }
+    for (const rentalItemId of next.rentalItemIds) await photographedSession(rentalItemId, 'handover', later(21))
+    const returnSessionIds = []
+    for (const rentalItemId of next.rentalItemIds) returnSessionIds.push(await photographedSession(rentalItemId, 'return', later(22)))
+    const returnSessionId = returnSessionIds[next.itemIds.indexOf(charged.itemId)] ?? ''
+    const [comparison] = await database.select().from(comparisons).where(eq(comparisons.returnSessionId, returnSessionId))
+    const lease = await inShop(database, { role: 'hold_worker', shopId: fresh.scope.shopId }, (transaction) => beginComparison(transaction, comparison?.id ?? '', later(23)))
+    const known = lease?.known.map((mark) => mark.id)
+    expect(known).toContain(kept?.id)
+    expect(known).not.toContain(repairedMarkId)
   })
 })
