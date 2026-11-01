@@ -2277,6 +2277,10 @@
         "settlement_declined": "From your phone, you declined the agreement on your claim from {shop}. The shop decides it now.\n\nIf this was not you, contact {shop} at once.",
         "incident_agreed": "From your phone, you agreed the price of what you reported to {shop}.\n\nIf this was not you, contact {shop} at once."
       }
+    },
+    "phoneConfirmed": {
+      "subject": "Texts about your rental at {shop}",
+      "body": "Texts about your rental at {shop}, with its one-time codes, now go to {phone}.\n\nIf this was not you, contact {shop} at once."
     }
   },
   "shell": {

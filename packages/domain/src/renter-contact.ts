@@ -43,7 +43,15 @@ export function phoneNumber(typed: string): string | undefined {
   return /^\+[1-9][0-9]{7,14}$/.test(international) ? international : undefined
 }
 
+// +1 is shared by the United States and Canada with the Caribbean and the US territories, whose numbers are the usual
+// targets of texting fraud. Their area codes are refused, so +1 reaches the two countries Hold texts and no other.
+const NORTH_AMERICA_ELSEWHERE = new Set([
+  '242', '246', '264', '268', '284', '340', '345', '441', '473', '649', '658', '664', '670', '671', '684', '721', '758',
+  '767', '784', '787', '809', '829', '849', '868', '869', '876', '939',
+])
+
 export function textAllowed(phone: string): boolean {
+  if (phone.startsWith('+1')) return phone.length === 12 && !NORTH_AMERICA_ELSEWHERE.has(phone.slice(2, 5))
   return TEXT_CALLING_CODES.some((code) => phone.startsWith(`+${code}`))
 }
 

@@ -4,6 +4,7 @@ import { maskedPhone, phoneNumber, textAllowed } from '@hold/domain'
 import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
 import { Refusal } from '@/server/action'
+import { tellPayerOfPhone } from '@/server/decision-copy'
 import { deliverRenterCode } from '@/server/renter-code-delivery'
 import { renterAction, withToken } from '@/server/renter-access'
 import { newRenterCode, renterCodeDigest } from '@/server/renter-code'
@@ -45,7 +46,9 @@ export const confirmPhone = renterAction(
   async (link, input, inLinkShop) => {
     const hash = await phoneDigest(link.rentalId, input.code)
     const confirmed = await inLinkShop((transaction) => confirmRenterPhone(transaction, link.rentalId, hash, new Date()))
-    return confirmed.ok ? { phone: maskedPhone(confirmed.phone) } : new Refusal(confirmed.reason)
+    if (!confirmed.ok) return new Refusal(confirmed.reason)
+    await tellPayerOfPhone(inLinkShop, link, maskedPhone(confirmed.phone), readLocale(input.locale))
+    return { phone: maskedPhone(confirmed.phone) }
   },
 )
 

@@ -57,6 +57,12 @@ describe('a renter who chooses texts at the counter', () => {
     expect(await scoped((transaction) => textsOf(transaction, rental.rentalId))).toEqual([expect.objectContaining({ purpose: 'phone_code', status: 'sent' })])
   })
 
+  it('tells the email PayPal gave whenever a number is confirmed, so a number someone else set never goes unnoticed', async () => {
+    const before = (await emails()).length
+    await shop.readyRental(1, confirmedAtCounter('+4915100000001'))
+    expect((await emails()).slice(before)).toEqual(expect.arrayContaining([expect.objectContaining({ to: 'renter@fake-paypal.test', text: expect.stringContaining('+49 ••• •• 01') as unknown })]))
+  })
+
   it('gets the money code by text, may ask for it by email instead, and every decision is copied to the email PayPal gave', async () => {
     const claim = await presentedClaimOf(jar, shop, await shop.readyRental(1, confirmedAtCounter('+33612345678')), priceId)
     jar.clear()

@@ -2277,6 +2277,10 @@
         "settlement_declined": "Sie haben auf Ihrem Telefon die Einigung zu Ihrer Forderung von {shop} abgelehnt. Das Geschäft entscheidet jetzt.\n\nWenn das nicht Sie waren, melden Sie sich sofort bei {shop}.",
         "incident_agreed": "Sie haben auf Ihrem Telefon dem Preis für Ihre Meldung an {shop} zugestimmt.\n\nWenn das nicht Sie waren, melden Sie sich sofort bei {shop}."
       }
+    },
+    "phoneConfirmed": {
+      "subject": "SMS zu Ihrer Miete bei {shop}",
+      "body": "SMS zu Ihrer Miete bei {shop}, mit ihren Einmalcodes, gehen jetzt an {phone}.\n\nWenn das nicht Sie waren, melden Sie sich sofort bei {shop}."
     }
   },
   "shell": {

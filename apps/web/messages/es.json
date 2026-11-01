@@ -2277,6 +2277,10 @@
         "settlement_declined": "Desde tu teléfono, rechazaste el acuerdo sobre tu reclamación de {shop}. Ahora decide la tienda.\n\nSi no fuiste tú, contacta con {shop} de inmediato.",
         "incident_agreed": "Desde tu teléfono, aceptaste el precio de lo que comunicaste a {shop}.\n\nSi no fuiste tú, contacta con {shop} de inmediato."
       }
+    },
+    "phoneConfirmed": {
+      "subject": "SMS de tu alquiler en {shop}",
+      "body": "Los SMS de tu alquiler en {shop}, con sus códigos de un solo uso, van ahora al {phone}.\n\nSi no fuiste tú, contacta con {shop} de inmediato."
     }
   },
   "shell": {

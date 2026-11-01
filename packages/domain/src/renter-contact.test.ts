@@ -24,6 +24,15 @@ describe('a phone number a renter types', () => {
     expect(textAllowed('+2341234567890')).toBe(false)
   })
 
+  it('texts +1 only in the United States and Canada, never the Caribbean and territories that share it', () => {
+    expect(textAllowed('+14155550123')).toBe(true)
+    expect(textAllowed('+16045550123')).toBe(true)
+    // Jamaica, the Dominican Republic, the Cayman Islands, Bermuda and Guam: well-known targets of texting fraud.
+    for (const phone of ['+18765550123', '+18095550123', '+13455550123', '+14415550123', '+16715550123']) expect(textAllowed(phone), phone).toBe(false)
+    // A North American number has exactly ten digits after the 1.
+    expect(textAllowed('+141555501234')).toBe(false)
+  })
+
   it('starts with the country code of the phone’s region, for each country Hold texts', () => {
     expect(callingCodeFor('CH')).toBe('41')
     expect(callingCodeFor('pt')).toBe('351')
