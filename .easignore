@@ -1,0 +1,59 @@
+# What EAS leaves out of a phone build's upload. EAS reads this file instead of .gitignore, so it starts with all of it.
+# dependencies
+node_modules/
+
+# build output
+.next/
+next-env.d.ts
+dist/
+cdk.out/
+*.tsbuildinfo
+
+# test output
+coverage/
+playwright-report/
+test-results/
+.playwright-mcp/
+
+# secrets and local settings
+.env
+.env.*
+!.env.example
+CLAUDE.local.md
+.claude/settings.local.json
+# agents' git worktrees
+.claude/worktrees/
+
+# operating system
+.DS_Store
+
+# brainstorm mockups
+.superpowers/
+
+# raw sandbox replies kept by the trials
+packages/paypal/trials/recordings/
+
+# comparison results from the evaluation runs
+eval/results/
+
+# CDK synth output
+infra/cdk.out/
+
+# Bryntum's browser build, copied from node_modules before each build (apps/web/scripts/vendor-bryntum.ts)
+apps/web/public/vendor/
+
+# The gate half's display copies, made from eval/set before each build (apps/web/scripts/copy-eval-photos.ts)
+apps/web/public/eval/
+
+# Firebase and Google credentials for the phone app's push notifications: uploaded to EAS, never committed
+hold-f014d-firebase-adminsdk-fbsvc-546835fd41.json
+google-services-prod.json
+google-services-dev.json
+*firebase-adminsdk*.json
+google-services*.json
+GoogleService-Info*.plist
+
+# Not needed to build the phone app: the evaluation photographs and the docs.
+eval/set/
+eval/raw/
+docs/
