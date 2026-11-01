@@ -33,8 +33,13 @@ test('an owner works through the morning by keyboard: grouped by kind, the late 
   await openBoard(page)
   await expect(page.getByTestId('decisions-brief')).toHaveText(/^7 decisions wait, 7 of them yours\./)
   await expect(dataRows(page)).toHaveCount(7)
-  // The contested claim falls due at the date the shop promised the renter (architecture.md section 6.16), so claims come before the agent's proposals.
-  await expect(groups(page)).toHaveText([/^Holds and returns\s*3 decisions · €335\.00 in all$/, /^Claims\s*2 decisions · €80\.00 in all$/, /^From the agent\s*2 decisions · €300\.00 in all$/])
+  // The late return puts its group first. The other two follow by their nearest date, which the samples set from today:
+  // on the first of a month the sample claims are kept inside it, so the contested claim's promised date moves past the
+  // agent's ending hold. Which of the two comes second is board.test.ts's to check, not this test's.
+  await expect(groups(page)).toHaveCount(3)
+  await expect(groups(page).first()).toHaveText(/^Holds and returns\s*3 decisions · €335\.00 in all$/)
+  await expect(groups(page).filter({ hasText: /^Claims/ })).toHaveText(/^Claims\s*2 decisions · €80\.00 in all$/)
+  await expect(groups(page).filter({ hasText: /^From the agent/ })).toHaveText(/^From the agent\s*2 decisions · €300\.00 in all$/)
   await expect(dataRows(page).first()).toContainText('Lea Fischer is late')
   await expect(dataRows(page).first()).toContainText('Overdue')
 
@@ -116,7 +121,15 @@ test('the board sorts by amount within each group, filters by group and finds a 
   await startDemo(page, 'Tomás, the owner')
   await openBoard(page)
   await grid(page).getByRole('columnheader', { name: 'Amount' }).click()
-  await expect(dataRows(page)).toHaveText([/Repair Hybrid bike 4/, /Check what Chloé Martin dropped off/, /Lea Fischer is late/, /Approve a claim/, /Decide a contested claim/, /Send this answer to PayPal/, /Ask the renter for a new hold/])
+  // Each group in amount order, the groups in the order the board shows them (see the first test).
+  const byGroup: Record<string, RegExp[]> = {
+    'Holds and returns': [/Repair Hybrid bike 4/, /Check what Chloé Martin dropped off/, /Lea Fischer is late/],
+    Claims: [/Approve a claim/, /Decide a contested claim/],
+    'From the agent': [/Send this answer to PayPal/, /Ask the renter for a new hold/],
+  }
+  await expect(groups(page)).toHaveCount(3)
+  const shown = await groups(page).allInnerTexts()
+  await expect(dataRows(page)).toHaveText(shown.flatMap((label) => Object.entries(byGroup).find(([name]) => label.startsWith(name))?.[1] ?? []))
 
   await page.getByRole('button', { name: 'Claims 2' }).click()
   await expect(dataRows(page)).toHaveCount(2)
