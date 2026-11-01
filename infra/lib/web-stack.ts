@@ -7,6 +7,8 @@ import * as iam from 'aws-cdk-lib/aws-iam'
 import type * as s3 from 'aws-cdk-lib/aws-s3'
 import type * as rds from 'aws-cdk-lib/aws-rds'
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
+import { allowTexting, textEnvironment } from './texts.ts'
+import type { TextSettings } from './texts.ts'
 import { ACCOUNT, CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES, CREDENTIAL_KEY_ALIAS, DATABASE_NAME, name, PREFIX, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
 import type * as sqs from 'aws-cdk-lib/aws-sqs'
 
@@ -24,6 +26,7 @@ export type WebResources = {
 }
 
 export type WebStackProps = StackProps & {
+  readonly texts: TextSettings
   readonly evidenceBucket: s3.IBucket
   readonly displayBucket: s3.IBucket
   readonly repository: ecr.IRepository
@@ -97,6 +100,8 @@ function instanceRole(stack: Stack, props: WebStackProps, licences: readonly sec
   // Mantle authorizes by model condition rather than model ARN, as for the comparison worker.
   role.addToPolicy(new iam.PolicyStatement({ actions: ['bedrock-mantle:CreateInference'], resources: ['*'], conditions: { StringEquals: { 'aws:RequestedRegion': REGION, 'bedrock-mantle:Model': ['anthropic.claude-opus-5-5', 'anthropic.claude-opus-4-8'] } } }))
   role.addToPolicy(new iam.PolicyStatement({ actions: CLAUDE_INVOKE_ACTIONS, resources: CLAUDE_INVOKE_RESOURCES }))
+  // Links, notices and one-time codes to a renter who chose texts (architecture.md section 12.3).
+  allowTexting(role)
   return role
 }
 
@@ -125,6 +130,7 @@ function settings(props: WebStackProps): apprunner.CfnService.KeyValuePairProper
     HOLD_EVIDENCE_BUCKET: props.evidenceBucket.bucketName,
     HOLD_DISPLAY_BUCKET: props.displayBucket.bucketName,
     ...(props.publicUrl === undefined ? {} : { HOLD_PUBLIC_URL: props.publicUrl }),
+    ...textEnvironment(props.texts),
   }
   return Object.entries(values).map(([key, value]) => ({ name: key, value }))
 }

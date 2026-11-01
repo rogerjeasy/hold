@@ -11,6 +11,8 @@ import * as scheduler from 'aws-cdk-lib/aws-scheduler'
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 import type * as sqs from 'aws-cdk-lib/aws-sqs'
 import { ACCOUNT, DATABASE_NAME, name, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
+import { allowTexting, textEnvironment } from './texts.ts'
+import type { TextSettings } from './texts.ts'
 
 // The worker (architecture.md section 14.4): Lambda functions fed by SQS, which App Runner cannot be, since it throttles
 // between requests. One applies PayPal's events, one carries out executions, one keeps placed holds watched, and one
@@ -34,6 +36,7 @@ export type WorkerProps = {
   readonly renterLinkKey: secretsmanager.ISecret
   readonly evidenceBucket: s3.IBucket
   readonly displayBucket: s3.IBucket
+  readonly texts: TextSettings
 }
 
 function workerRole(stack: Stack, props: WorkerProps): iam.Role {
@@ -82,6 +85,8 @@ function workerRole(stack: Stack, props: WorkerProps): iam.Role {
   role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:PutObject'], resources: [props.displayBucket.arnForObjects('*')] }))
   // DetectFaces names no resource.
   role.addToPolicy(new iam.PolicyStatement({ actions: ['rekognition:DetectFaces'], resources: ['*'] }))
+  // Tells the renter the way they chose: the request for a new hold, a missed promise.
+  allowTexting(role)
   for (const queueName of ['paypal-events', 'executions', 'upkeep', 'comparisons', 'media', 'evidence', 'messages', 'ops-agent', 'ops-execute', 'negotiations']) {
     const queue = props.queues.get(queueName)
     if (queue === undefined) throw new Error(`No ${queueName} queue.`)
@@ -139,6 +144,7 @@ export function createWorker(stack: Stack, props: WorkerProps): void {
     HOLD_RENTER_LINK_KEY_SECRET_ARN: props.renterLinkKey.secretArn,
     HOLD_EVIDENCE_BUCKET: props.evidenceBucket.bucketName,
     HOLD_DISPLAY_BUCKET: props.displayBucket.bucketName,
+    ...textEnvironment(props.texts),
   }
 
   const events = workerFunction(stack, 'PayPalEventsWorker', name('worker', 'paypal', 'events'), 'paypal-events-lambda.ts', role, environment)

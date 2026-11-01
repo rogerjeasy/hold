@@ -22,5 +22,12 @@ if (webPublicUrl !== undefined && (typeof webPublicUrl !== 'string' || !webPubli
   throw new Error('"webPublicUrl" in cdk.json is the web app\'s https:// address.')
 }
 
-createHoldApp(app, { senderEmail, webImageTag, webPublicUrl })
+// Texts to renters (architecture.md section 12.3), in cdk.json: "textSender", the account's registered number or
+// sender name once an administrator has one, and "textReports": "on" once HoldDelivery lets CloudFormation make the
+// configuration set that reports each text's delivery.
+const textSender: unknown = app.node.tryGetContext('textSender')
+if (textSender !== undefined && (typeof textSender !== 'string' || textSender === '')) throw new Error('"textSender" in cdk.json is the sender name or number texts come from.')
+const textReports: unknown = app.node.tryGetContext('textReports')
+
+createHoldApp(app, { senderEmail, webImageTag, webPublicUrl, textSender, textReports: textReports === 'on' })
 app.synth()

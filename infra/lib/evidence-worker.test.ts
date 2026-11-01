@@ -53,10 +53,10 @@ describe('evidence and receipt workers', () => {
     expect(conditions).toContain('DisplayBucket')
   })
 
-  it('lets receipts read only their database, SMTP and link-key secrets and consume messages', () => {
+  it('lets receipts read only their database, SMTP and link-key secrets, consume messages and text a renter who chose texts', () => {
     const policy = statements('ReceiptRole')
     const actions = new Set(policy.flatMap((entry) => [entry.Action].flat()))
-    expect(actions).toEqual(new Set(['rds-data:ExecuteStatement', 'rds-data:BatchExecuteStatement', 'rds-data:BeginTransaction', 'rds-data:CommitTransaction', 'rds-data:RollbackTransaction', 'secretsmanager:GetSecretValue', 'secretsmanager:DescribeSecret', 'logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents', 'sqs:ReceiveMessage', 'sqs:DeleteMessage', 'sqs:ChangeMessageVisibility', 'sqs:GetQueueUrl', 'sqs:GetQueueAttributes']))
+    expect(actions).toEqual(new Set(['rds-data:ExecuteStatement', 'rds-data:BatchExecuteStatement', 'rds-data:BeginTransaction', 'rds-data:CommitTransaction', 'rds-data:RollbackTransaction', 'secretsmanager:GetSecretValue', 'secretsmanager:DescribeSecret', 'logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents', 'sqs:ReceiveMessage', 'sqs:DeleteMessage', 'sqs:ChangeMessageVisibility', 'sqs:GetQueueUrl', 'sqs:GetQueueAttributes', 'sms-voice:SendTextMessage']))
     const encoded = JSON.stringify(policy)
     for (const expected of ['WorkerUserSecret', 'RenterLinkKey', 'hold/email/smtp']) expect(encoded).toContain(expected)
     expect(encoded).not.toMatch(/paypal|s3:|kms:|sqs:SendMessage|scheduler:/)

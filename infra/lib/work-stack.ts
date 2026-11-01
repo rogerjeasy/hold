@@ -13,6 +13,8 @@ import { createComparisonWorker } from './comparison-worker.ts'
 import { createNegotiationWorker } from './negotiation-worker.ts'
 import { createEvidenceWorkers } from './evidence-worker.ts'
 import { createOperationsWorker } from './ops-worker.ts'
+import { createTextReports } from './texts.ts'
+import type { TextSettings } from './texts.ts'
 
 // Background work (architecture.md section 14.7): the spine's queues, each with a dead-letter queue and an alarm on
 // it, and the group the worker's schedules live in. The extensions add their queues when they arrive.
@@ -43,6 +45,8 @@ export const QUEUES: readonly QueueSpec[] = [
   // The advocates' turns on a contested claim (extensions.md section 9), one negotiation at a time per rental. Longer
   // than the negotiation worker may run (negotiation-worker.ts).
   { name: 'negotiations', orderedPerRental: true, visibilityTimeout: Duration.minutes(12) },
+  // Delivery reports of renters' texts (texts.ts), fed by SNS once reports are on.
+  { name: 'text-reports', orderedPerRental: false, visibilityTimeout: Duration.minutes(6) },
 ]
 
 // After this many failed attempts a message moves to its dead-letter queue, where the alarm sees it.
@@ -101,6 +105,7 @@ export type WorkStackProps = StackProps & {
   readonly publicUrl: string
   readonly evidenceBucket: s3.IBucket
   readonly displayBucket: s3.IBucket
+  readonly texts: TextSettings
 }
 
 export function createWorkStack(app: App, props: WorkStackProps): WorkResources {
@@ -119,12 +124,13 @@ export function createWorkStack(app: App, props: WorkStackProps): WorkResources 
   })
   for (const queue of queues.values()) queue.grantSendMessages(schedulerRole)
 
-  const workerProps = { cluster: props.cluster, workerUserSecret: props.workerUserSecret, queues, scheduleGroup, schedulerRole, publicUrl: props.publicUrl, renterLinkKey: props.renterLinkKey, evidenceBucket: props.evidenceBucket, displayBucket: props.displayBucket }
+  const workerProps = { cluster: props.cluster, workerUserSecret: props.workerUserSecret, queues, scheduleGroup, schedulerRole, publicUrl: props.publicUrl, renterLinkKey: props.renterLinkKey, evidenceBucket: props.evidenceBucket, displayBucket: props.displayBucket, texts: props.texts }
   createWorker(stack, workerProps)
   createComparisonWorker(stack, workerProps)
   createNegotiationWorker(stack, workerProps)
   createEvidenceWorkers(stack, workerProps)
   createOperationsWorker(stack, workerProps)
+  if (props.texts.reports) createTextReports(stack, workerProps)
 
   for (const [queueName, queue] of queues) {
     new CfnOutput(stack, `QueueUrl-${queueName}`, { value: queue.queueUrl })

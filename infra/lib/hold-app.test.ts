@@ -345,7 +345,7 @@ describe('the worker', () => {
     expect(JSON.stringify(data.findResources('AWS::SecretsManager::Secret'))).toContain('\\"username\\":\\"hold_worker\\"')
   })
 
-  it('may only query the database, read its login and the shops’ PayPal credentials, use its queues and write its logs', () => {
+  it('may only query the database, read its login and the shops’ PayPal credentials, use its queues, text a renter and write its logs', () => {
     const actions = new Set(workerPolicy().flatMap((statement) => [statement.Action].flat()))
     expect(actions).toEqual(
       new Set([
@@ -368,6 +368,7 @@ describe('the worker', () => {
         's3:GetObject',
         's3:PutObject',
         'rekognition:DetectFaces',
+        'sms-voice:SendTextMessage',
         'logs:CreateLogGroup',
         'logs:CreateLogStream',
         'logs:PutLogEvents',
@@ -517,7 +518,7 @@ describe('the web app', () => {
     }
   })
 
-  it('may do only what the web app does: query the database, read its secrets, keep PayPal credentials, hand work to the worker, sort an incident, put a person in a group and create a demo’s users', () => {
+  it('may do only what the web app does: query the database, read its secrets, keep PayPal credentials, hand work to the worker, sort an incident, put a person in a group, create a demo’s users and text a renter', () => {
     const statements = Object.entries(web.findResources('AWS::IAM::Policy'))
       .filter(([key]) => key.startsWith('InstanceRole'))
       .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: { Action: unknown }[] } } }).Properties.PolicyDocument.Statement)
@@ -536,6 +537,7 @@ describe('the web app', () => {
         'secretsmanager:TagResource',
         'cognito-idp:AdminAddUserToGroup',
         'cognito-idp:AdminCreateUser',
+        'sms-voice:SendTextMessage',
         'sqs:SendMessage',
         'sqs:GetQueueAttributes',
         'sqs:GetQueueUrl',
@@ -761,7 +763,7 @@ describe('delivery', () => {
       .filter((statement) => [statement['Action']].flat().includes('iam:PassRole'))
     const allowed = passing.filter((statement) => statement['Effect'] === 'Allow' && JSON.stringify(statement).includes('role/hold-web'))
     expect(allowed).toHaveLength(1)
-    expect(new Set([allowed[0]?.['Resource']].flat())).toEqual(new Set(['role/hold-web', 'role/hold-web-access', 'role/hold-code-sender', 'role/hold-worker', 'role/hold-comparison', 'role/hold-negotiation', 'role/hold-evidence', 'role/hold-receipts', 'role/hold-operations', 'role/hold-scheduler'].map((role) => `arn:aws:iam::707938860881:${role}`)))
+    expect(new Set([allowed[0]?.['Resource']].flat())).toEqual(new Set(['role/hold-web', 'role/hold-web-access', 'role/hold-code-sender', 'role/hold-worker', 'role/hold-comparison', 'role/hold-negotiation', 'role/hold-evidence', 'role/hold-receipts', 'role/hold-operations', 'role/hold-scheduler', 'role/hold-texts'].map((role) => `arn:aws:iam::707938860881:${role}`)))
     // App Runner checks the pass with a service name of its own choosing, so none is named here. Both roles trust App
     // Runner alone, so no other service could use them.
     expect(allowed[0]?.['Condition']).toBeUndefined()

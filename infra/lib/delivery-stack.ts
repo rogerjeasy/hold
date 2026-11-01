@@ -57,7 +57,7 @@ const at = {
 }
 // The only roles CloudFormation may hand on: the web app's two (infra/lib/web-stack.ts), which trust App Runner alone,
 // and the code sender's (infra/lib/code-sender.ts), which trusts Lambda alone.
-const PASSED_ROLES = [name('web'), name('web', 'access'), name('code', 'sender'), name('worker'), name('comparison'), name('negotiation'), name('evidence'), name('receipts'), name('operations'), name('scheduler')]
+const PASSED_ROLES = [name('web'), name('web', 'access'), name('code', 'sender'), name('worker'), name('comparison'), name('negotiation'), name('evidence'), name('receipts'), name('operations'), name('scheduler'), name('texts')]
 const HOLD_TAG = { 'aws:ResourceTag/project': PREFIX }
 const HOLD_REQUEST_TAG = { 'aws:RequestTag/project': PREFIX }
 
@@ -83,6 +83,9 @@ function permissionsBoundary(stack: Stack): iam.ManagedPolicy {
       statement(['s3:ListBucket'], [at.buckets]),
       // Finding faces to blur in a display copy. The call names no resource.
       statement(['rekognition:DetectFaces'], ['*']),
+      // A text to a renter who chose texts (architecture.md section 12.3), and nothing else of AWS End User Messaging. A
+      // text names a sender and an opt-out list AWS may choose, so no resource is named.
+      statement(['sms-voice:SendTextMessage'], ['*']),
       statement(['secretsmanager:GetSecretValue', 'secretsmanager:DescribeSecret'], [at.secrets('*')]),
       statement(['secretsmanager:CreateSecret', 'secretsmanager:PutSecretValue', 'secretsmanager:TagResource'], [at.secrets('paypal/*')]),
       statement(['rds-data:ExecuteStatement', 'rds-data:BatchExecuteStatement', 'rds-data:BeginTransaction', 'rds-data:CommitTransaction', 'rds-data:RollbackTransaction'], [at.cluster]),
@@ -157,6 +160,21 @@ function computePolicy(stack: Stack): iam.ManagedPolicy {
   add(statement(['lambda:GetEventSourceMapping', 'lambda:ListEventSourceMappings', 'lambda:ListTags'], ['*']))
   add(statement(['scheduler:CreateSchedule', 'scheduler:UpdateSchedule', 'scheduler:DeleteSchedule', 'scheduler:GetSchedule'], [at.schedules]))
   return policy
+}
+
+// What CloudFormation needs for renters' texts (infra/lib/texts.ts): Hold's configuration set, which reports each text's
+// delivery, and the topic it reports to, with the queue that topic feeds. Nothing of another project's.
+function textsPolicy(stack: Stack): iam.ManagedPolicy {
+  return new iam.ManagedPolicy(stack, 'TextsPolicy', {
+    managedPolicyName: name('cloudformation', 'texts'),
+    description: "What CloudFormation needs for Hold's text delivery reports, and nothing of other projects",
+    statements: [
+      statement(['sms-voice:CreateConfigurationSet', 'sms-voice:DeleteConfigurationSet', 'sms-voice:CreateEventDestination', 'sms-voice:UpdateEventDestination', 'sms-voice:DeleteEventDestination', 'sms-voice:TagResource', 'sms-voice:UntagResource', 'sms-voice:ListTagsForResource'], [`arn:aws:sms-voice:${REGION}:${ACCOUNT}:configuration-set/${PREFIX}-*`]),
+      // Listing names no resource.
+      statement(['sms-voice:DescribeConfigurationSets'], ['*']),
+      statement(['sns:CreateTopic', 'sns:DeleteTopic', 'sns:GetTopicAttributes', 'sns:SetTopicAttributes', 'sns:Subscribe', 'sns:Unsubscribe', 'sns:GetSubscriptionAttributes', 'sns:SetSubscriptionAttributes', 'sns:TagResource', 'sns:UntagResource', 'sns:ListTagsForResource'], [`arn:aws:sns:${REGION}:${ACCOUNT}:${PREFIX}-*`]),
+    ],
+  })
 }
 
 function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineRoles: readonly string[]): iam.Role {
@@ -248,6 +266,7 @@ function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineR
   // The pipeline's own roles, and the boundary, change only by an administrator's hand.
   add(deny(['iam:*'], [...pipelineRoles.map(at.role), boundary.managedPolicyArn]))
   role.addManagedPolicy(computePolicy(stack))
+  role.addManagedPolicy(textsPolicy(stack))
   return role
 }
 

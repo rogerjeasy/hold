@@ -14,6 +14,10 @@ export type HoldAppOptions = {
   readonly webImageTag: string
   // The web app's own address, once App Runner has given it one.
   readonly webPublicUrl: string | undefined
+  // Texts to renters (architecture.md section 12.3): the account's sender, once an administrator has one, and whether
+  // delivery reports are on, which needs HoldDelivery deployed with the permissions to make them.
+  readonly textSender?: string | undefined
+  readonly textReports?: boolean
 }
 
 // A browser offers a passkey only on the domain it was made for, so passkeys are made for the web app's own host.
@@ -32,6 +36,7 @@ export function createHoldApp(app: App, options: HoldAppOptions) {
 
   // Before App Runner has given the web app an address, links and uploads point at a developer's machine.
   const publicUrl = options.webPublicUrl ?? 'http://localhost:3000'
+  const texts = { sender: options.textSender, reports: options.textReports ?? false }
   const data = createDataStack(app, { env, synthesizer: synthesizer(), publicUrl })
   const identity = createIdentityStack(app, { env, synthesizer: synthesizer(), senderEmail: options.senderEmail, passkeyRelyingPartyId: passkeyDomain(options.webPublicUrl) })
   const registry = createRegistryStack(app, { env, synthesizer: synthesizer() })
@@ -44,6 +49,7 @@ export function createHoldApp(app: App, options: HoldAppOptions) {
     publicUrl,
     evidenceBucket: data.evidenceBucket,
     displayBucket: data.displayBucket,
+    texts,
   })
   const stacks = {
     data,
@@ -66,6 +72,7 @@ export function createHoldApp(app: App, options: HoldAppOptions) {
       evidenceBucket: data.evidenceBucket,
       displayBucket: data.displayBucket,
       queues: work.queues,
+      texts,
     }),
     delivery: createDeliveryStack(app, { env, synthesizer: synthesizer() }),
   }

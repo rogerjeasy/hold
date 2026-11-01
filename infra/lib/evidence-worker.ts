@@ -3,6 +3,7 @@ import * as iam from 'aws-cdk-lib/aws-iam'
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources'
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 import { ACCOUNT, DATABASE_NAME, name, REGION, SMTP_SECRET_NAME } from './settings.ts'
+import { allowTexting, textEnvironment } from './texts.ts'
 import { workerFunction } from './worker.ts'
 import type { WorkerProps } from './worker.ts'
 
@@ -31,6 +32,7 @@ export function createEvidenceWorkers(stack: Stack, props: WorkerProps): void {
   const receiptRole = databaseRole(stack, props, 'ReceiptRole', 'receipts')
   props.renterLinkKey.grantRead(receiptRole)
   secretsmanager.Secret.fromSecretNameV2(stack, 'ReceiptSmtpLogin', SMTP_SECRET_NAME).grantRead(receiptRole)
-  const receipts = workerFunction(stack, 'ReceiptWorker', name('worker', 'receipts'), 'receipt-lambda.ts', receiptRole, { ...environment, HOLD_SMTP_SECRET: SMTP_SECRET_NAME, HOLD_PUBLIC_URL: props.publicUrl, HOLD_RENTER_LINK_KEY_SECRET_ARN: props.renterLinkKey.secretArn })
+  allowTexting(receiptRole)
+  const receipts = workerFunction(stack, 'ReceiptWorker', name('worker', 'receipts'), 'receipt-lambda.ts', receiptRole, { ...environment, HOLD_SMTP_SECRET: SMTP_SECRET_NAME, HOLD_PUBLIC_URL: props.publicUrl, HOLD_RENTER_LINK_KEY_SECRET_ARN: props.renterLinkKey.secretArn, ...textEnvironment(props.texts) })
   receipts.addEventSource(new SqsEventSource(messagesQueue, { batchSize: 1, reportBatchItemFailures: true }))
 }
