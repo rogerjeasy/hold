@@ -1,0 +1,10 @@
+{
+  "name": "@hold/design-tokens",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Hold's colours, type and sizes, the one source for the web app's stylesheet check and the phone app's theme.",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}
