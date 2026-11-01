@@ -24,6 +24,9 @@ function renew(api: ApiClient, session: StaffSession, clock: Clock): Promise<Ans
       if (answer.failure === 'signed_out') await staffSession.clear();
       return answer;
     }
+    // The person may have signed out, or in again, while Hold answered: a renewal never brings back a session that is
+    // no longer the one on the phone.
+    if ((await staffSession.read())?.refreshToken !== session.refreshToken) return { ok: false, failure: 'signed_out' };
     const renewed = { ...session, accessToken: answer.value.accessToken, expiresAt: expiresAt(clock(), answer.value.expiresInSeconds) };
     await staffSession.write(renewed);
     return { ok: true, value: renewed };
@@ -31,6 +34,11 @@ function renew(api: ApiClient, session: StaffSession, clock: Clock): Promise<Ans
     renewing = undefined;
   });
   return renewing;
+}
+
+// Waits for a renewal in flight, so signing out clears the session after it rather than before it is written back.
+export async function renewalSettled(): Promise<void> {
+  await renewing;
 }
 
 // Runs `call` with a live session: the one call that needs the person's token, in the shop or before choosing one.

@@ -63,6 +63,24 @@ describe('a staff request', () => {
   });
 });
 
+describe('a refresh still running when the person signs out', () => {
+  it('does not bring the session back once it finishes', async () => {
+    await signedIn('2026-11-01T09:00:30.000Z');
+    let finish: (answer: { ok: true; value: { accessToken: string; expiresInSeconds: number } }) => void = () => undefined;
+    const api = createFakeApi({
+      'session/refresh': () => new Promise((resolve) => { finish = resolve; }),
+      'shop/today': { ok: true, value: TODAY },
+    });
+    const reading = staffRead(api, 'shop/today', todaySchema, clock);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await staffSession.clear();
+    finish({ ok: true, value: { accessToken: 'new-access', expiresInSeconds: 3600 } });
+    await expect(reading).resolves.toEqual({ ok: false, failure: 'signed_out' });
+    await expect(staffSession.read()).resolves.toBeUndefined();
+    expect(api.calls.map((call) => call.path)).toEqual(['session/refresh']);
+  });
+});
+
 describe('a counter action', () => {
   it('posts its input with the language, and reads the answer with the contract', async () => {
     await signedIn('2026-11-01T10:00:00.000Z');
