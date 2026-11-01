@@ -39,7 +39,7 @@ export async function handedOverAndReturned(page: Page, returnSample = 'Use the 
 // On the renter's claim page: the renter accepts with their emailed code, and PayPal settles.
 export async function acceptClaim(renter: Page): Promise<void> {
   await renter.getByRole('button', { name: 'I have reviewed this claim' }).click()
-  await renter.getByRole('button', { name: 'Email me a verification code' }).click()
+  await renter.getByRole('button', { name: 'Send me a verification code' }).click()
   await expect(renter.getByText('Verification code sent. It expires in ten minutes.')).toBeVisible()
   await renter.getByLabel('Verification code', { exact: true }).fill(TEST_CODE)
   await renter.getByRole('button', { name: 'Accept claim and settle', exact: true }).click()

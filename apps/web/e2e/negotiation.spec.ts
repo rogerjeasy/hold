@@ -35,7 +35,7 @@ async function claimPresented(page: Page, claimPage: string): Promise<string> {
 
 // Both final taps: the renter's, with a fresh code, then the owner's. Then the spine captures the agreed amount.
 async function bothConfirm(page: Page, renter: Page): Promise<void> {
-  await renter.getByRole('button', { name: 'Email me a verification code' }).click()
+  await renter.getByRole('button', { name: 'Send me a verification code' }).click()
   await expect(renter.getByText('Verification code sent. It expires in ten minutes.')).toBeVisible()
   await renter.getByLabel('Verification code', { exact: true }).fill(TEST_CODE)
   await renter.getByRole('button', { name: 'Confirm and settle' }).click()
@@ -65,7 +65,7 @@ test('two advocates settle a contested claim, both people confirm, and only the 
   // No assistant is connected to this rental, so Hold's advocate argues it.
   await expect(renter.getByRole('group', { name: 'Who argues it for me' })).toHaveCount(0)
   await expectFitsEveryWidth(renter)
-  await renter.getByRole('button', { name: 'Email me a verification code' }).click()
+  await renter.getByRole('button', { name: 'Send me a verification code' }).click()
   await expect(renter.getByText('Verification code sent. It expires in ten minutes.')).toBeVisible()
   await renter.getByLabel('Verification code, for your advocate').fill(TEST_CODE)
   await renter.getByLabel('The most I will pay, in EUR').fill('30')
@@ -122,7 +122,7 @@ test('the renter’s own assistant argues the contest over MCP, held to the rent
   await expect(choice).toBeVisible()
   await expectFitsEveryWidth(renter)
   await choice.getByRole('radio', { name: /My own assistant, Trip planner/ }).check()
-  await renter.getByRole('button', { name: 'Email me a verification code' }).click()
+  await renter.getByRole('button', { name: 'Send me a verification code' }).click()
   await expect(renter.getByText('Verification code sent. It expires in ten minutes.')).toBeVisible()
   await renter.getByLabel('Verification code, for your advocate').fill(TEST_CODE)
   await renter.getByLabel('The most I will pay, in EUR').fill('30')

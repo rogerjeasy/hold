@@ -1,5 +1,7 @@
-# Lint, type-check, every unit test and the key end-to-end flows, on every pull request and every push to main. Deploy (deploy.yml) runs only
-# after this passes on main. It needs no AWS access and no secret: the tests run against in-process fakes.
+# Type-check, the key unit tests and the key end-to-end flows, on every pull request and every push to main. Deploy
+# (deploy.yml) runs only after this passes on main. It needs no AWS access and no secret: the tests run against
+# in-process fakes. Kept light so it stays quick: lint and every other test run locally in `pnpm check` before a change
+# is done (AGENTS.md section 2).
 name: CI
 
 on:
@@ -16,7 +18,7 @@ concurrency:
 
 jobs:
   check:
-    name: Lint, types and tests
+    name: Types and key tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -27,10 +29,13 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      # Type-aware linting reads every package at once and passes Node's default heap of about 2 GB on the runner.
-      - run: pnpm check
+      # Type-checking reads every package at once and can pass Node's default heap of about 2 GB on the runner.
+      - run: pnpm typecheck
         env:
           NODE_OPTIONS: --max-old-space-size=4096
+      # The rules a change must never break: money and state in the domain, settling with PayPal, one shop never
+      # reading another's rows, every route behind the one access wrapper, and no agent tool that moves money.
+      - run: pnpm test:ci
 
   e2e:
     name: End to end
@@ -46,8 +51,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Install Chromium for Playwright
         run: pnpm --filter @hold/web exec playwright install --with-deps chromium
-      # The flows that sign people in, move money or guard access. The full suite, with every page at every width,
-      # runs locally with pnpm test:e2e (AGENTS.md section 2).
+      # Signing in, and money from booking through the hold to a captured claim. The full suite, with every page at
+      # every width, runs locally with pnpm test:e2e (AGENTS.md section 2).
       - run: pnpm test:e2e:key
         # Without their keys AG Grid and AG Studio write a licence notice to the console, which fails every test of them.
         env:

@@ -69,7 +69,7 @@ test('a scratch reported during the rental is priced by staff, agreed with a cod
   // The renter agrees with the one-time code. Nothing is charged.
   await renter.reload()
   await expect(renter.getByRole('heading', { name: 'Small damage at a published price' })).toBeVisible()
-  await renter.getByRole('button', { name: 'Email me a code' }).click()
+  await renter.getByRole('button', { name: 'Send me a code' }).click()
   await expect(renter.getByText('Code sent. It expires in ten minutes.')).toBeVisible()
   await renter.getByLabel('One-time code').fill(TEST_CODE)
   await renter.getByRole('button', { name: 'Agree €35.00' }).click()
@@ -118,7 +118,7 @@ test('a report that could bear on safety shows only the fixed message and reache
   await expect(renter.getByRole('heading', { name: 'Stop using the item' })).toBeVisible()
   await expect(renter.getByText('The shop has been told and will contact you.')).toBeVisible()
   await expect(renter.getByText(/€/)).toHaveCount(0)
-  await expect(renter.getByRole('button', { name: 'Email me a code' })).toHaveCount(0)
+  await expect(renter.getByRole('button', { name: 'Send me a code' })).toHaveCount(0)
   await expectFitsEveryWidth(renter)
   await renter.context().close()
   await page.getByRole('navigation', { name: 'Shop pages' }).getByRole('link', { name: 'Incidents' }).click()
