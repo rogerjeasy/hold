@@ -81,7 +81,7 @@ describe("an item's handover photographs", () => {
     const asked = view.api.calls.filter((call) => call.path.startsWith('shop/actions/'));
     expect(asked.map((call) => call.path)).toEqual(['shop/actions/request-handover-photo', 'shop/actions/record-handover-photo']);
     expect(asked[0]?.options.body).toEqual({ sessionId: SESSION_ID, view: 'frame_left', sha256: 'a'.repeat(64), bytes: 2048, locale: 'en' });
-    expect(asked[1]?.options.body).toEqual({ sessionId: SESSION_ID, view: 'frame_left', key: LINK.key, sharpness: 0, shadows: 0, highlights: 0, filled: 0, locale: 'en' });
+    expect(asked[1]?.options.body).toEqual({ sessionId: SESSION_ID, view: 'frame_left', key: LINK.key, sharpness: 0, shadows: 0, highlights: 0, filled: 0, source: 'camera', locale: 'en' });
     await fireEvent.press(screen.getByRole('button', { name: 'Close the camera' }));
     expect(screen.getByText('Photographed')).toBeOnTheScreen();
   });

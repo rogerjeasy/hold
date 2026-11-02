@@ -54,7 +54,7 @@ describe('writing a report', () => {
     await act(() => fireEvent.press(screen.getByRole('button', { name: 'Use photograph' })));
     await waitFor(() => expect(screen.getByRole('button', { name: 'Left side, Taken' })).toBeOnTheScreen());
     expect(bodyOf(view.api, 'renter/actions/request-incident-upload')).toEqual({ incidentId: INCIDENT, view: 'left', sha256: 'ab'.repeat(32), bytes: 2048 });
-    expect(bodyOf(view.api, 'renter/actions/confirm-incident-upload')).toEqual({ incidentId: INCIDENT, view: 'left', key: 'evidence/left', sharpness: 0, shadows: 0, highlights: 0, filled: 0 });
+    expect(bodyOf(view.api, 'renter/actions/confirm-incident-upload')).toEqual({ incidentId: INCIDENT, view: 'left', key: 'evidence/left', sharpness: 0, shadows: 0, highlights: 0, filled: 0, source: 'camera' });
     expect(globalThis.fetch).toHaveBeenCalledWith('https://store.example/put', expect.objectContaining({ method: 'PUT' }));
     expect(screen.queryByRole('button', { name: 'Take photograph' })).toBeNull();
   });

@@ -1,6 +1,7 @@
 import { fail, ok } from '@hold/domain'
 import type { CleanRecord, Result } from '@hold/domain'
 import { credentialClaims, credentialHeader, decodePart, fromBase64url, toSeconds } from './credential-format.ts'
+import { signatureHolds } from './jws-signature.ts'
 
 // Checking a Clean Record credential with a published public key alone, through Web Crypto, so a browser can check one
 // without asking Hold, and the server checks it the same way. Nothing in the token is believed before its signature.
@@ -14,15 +15,6 @@ export type VerificationKey = { readonly kid: string; readonly kty: string; read
 const CLOCK_LEEWAY_SECONDS = 60
 const LONGEST_TOKEN = 2000
 const SEGMENT = /^[A-Za-z0-9_-]+$/
-
-async function signatureHolds(key: VerificationKey, signingInput: string, signature: Uint8Array): Promise<boolean> {
-  try {
-    const imported = await crypto.subtle.importKey('jwk', { kty: key.kty, crv: key.crv, x: key.x, y: key.y }, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify'])
-    return await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, imported, new Uint8Array(signature), new TextEncoder().encode(signingInput))
-  } catch {
-    return false
-  }
-}
 
 export async function verifyCredential(token: string, publicKeys: readonly VerificationKey[], now: Date): Promise<Result<VerifiedCredential, CredentialProblem>> {
   const parts = token.length > LONGEST_TOKEN ? [] : token.trim().split('.')

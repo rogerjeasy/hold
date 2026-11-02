@@ -38,7 +38,7 @@ export function staffPhotoActions(kind: 'handover' | 'return' | 'repair') {
       const stored = await evidence.stored(input.key)
       if (stored === undefined) return new Refusal('not_uploaded')
       if (stored.bytes > MAX_PHOTO_BYTES) return new Refusal('too_large')
-      const recorded = await recordPhoto(transaction, input.sessionId, { view: input.view, evidenceKey: input.key, sha256: stored.sha256, quality: { sharpness: input.sharpness, shadows: input.shadows, highlights: input.highlights, filled: input.filled } }, new Date())
+      const recorded = await recordPhoto(transaction, input.sessionId, { view: input.view, evidenceKey: input.key, sha256: stored.sha256, source: input.source, quality: { sharpness: input.sharpness, shadows: input.shadows, highlights: input.highlights, filled: input.filled } }, new Date())
       return recorded.ok ? { photoId: recorded.photoId, sessionId: input.sessionId } : new Refusal(recorded.reason)
     }, (context, output) => sendMediaMessage(context.shop.id, output.sessionId, output.photoId))
   return { request, confirm }

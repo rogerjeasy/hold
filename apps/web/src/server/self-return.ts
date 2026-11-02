@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { captureSession, photoRepeatsEvidence, recordPhoto, rentalReturns, sendSelfReturn, startSelfReturn } from '@hold/db'
 import type { RenterLink, Transaction } from '@hold/db'
 import { isSamplePhoto } from '@hold/domain'
-import type { PhotoMeasures } from '@hold/domain'
+import type { DeclaredPhotoSource, PhotoMeasures } from '@hold/domain'
 import { MAX_PHOTO_BYTES } from '@hold/evidence'
 import { Refusal } from './action'
 import { sendComparisons } from './comparison-queue'
@@ -42,7 +42,7 @@ export async function requestReturnPhoto(link: RenterLink, inLinkShop: InLinkSho
 // One that repeats this item's evidence is refused while the renter can still take another. One of the demonstration's
 // own sample files, known by its fingerprint and never by what the phone says, proves nothing either way: it is marked
 // as a sample on screen and in the record, and not checked.
-export async function confirmReturnPhoto(link: RenterLink, inLinkShop: InLinkShop, input: { readonly sessionId: string; readonly view: string; readonly key: string; readonly measures: PhotoMeasures }) {
+export async function confirmReturnPhoto(link: RenterLink, inLinkShop: InLinkShop, input: { readonly sessionId: string; readonly view: string; readonly key: string; readonly measures: PhotoMeasures; readonly source?: DeclaredPhotoSource | undefined }) {
   const { evidence } = await getServices()
   if (evidence === undefined) return new Refusal('storage_unavailable')
   if (!input.key.startsWith(`${link.shopId}/${input.sessionId}/${input.view}/`)) return new Refusal('key_mismatch')
@@ -53,7 +53,7 @@ export async function confirmReturnPhoto(link: RenterLink, inLinkShop: InLinkSho
     const refused = await openSession(transaction, link, input.sessionId)
     if (refused !== undefined) return refused
     if (!isSamplePhoto(stored.sha256) && await photoRepeatsEvidence(transaction, input.sessionId, stored.sha256)) return new Refusal('photo_reused')
-    const photo = await recordPhoto(transaction, input.sessionId, { view: input.view, evidenceKey: input.key, sha256: stored.sha256, quality: input.measures }, new Date())
+    const photo = await recordPhoto(transaction, input.sessionId, { view: input.view, evidenceKey: input.key, sha256: stored.sha256, source: input.source, quality: input.measures }, new Date())
     return photo.ok ? photo : new Refusal(photo.reason)
   })
   if (recorded instanceof Refusal) return recorded

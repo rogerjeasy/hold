@@ -1,4 +1,4 @@
-import { INCIDENT_HINTS, INCIDENT_LIMITS, INCIDENT_STATES, MAX_PHOTO_BYTES, MISSED_VIEWS } from '@hold/domain'
+import { DECLARED_PHOTO_SOURCES, INCIDENT_HINTS, INCIDENT_LIMITS, INCIDENT_STATES, MAX_PHOTO_BYTES, MISSED_VIEWS } from '@hold/domain'
 import { z } from 'zod'
 import { pushRegistration, pushTokenSchema } from './push'
 import { RETURN_TO } from './renter-paypal'
@@ -20,7 +20,8 @@ const fraction = z.coerce.number().min(0).max(1)
 const theftField = z.string().trim().max(300)
 // What the phone measured of a photograph before it uploaded it (architecture.md section 9.4).
 const measures = { sharpness: z.coerce.number().min(0).max(1_000_000), shadows: z.coerce.number().min(0).max(255), highlights: z.coerce.number().min(0).max(255), filled: fraction }
-const uploaded = { key: z.string().min(1).max(300), ...measures }
+// The live camera or a chosen file, as the capture screen reports it. Optional, so an older phone still uploads.
+const uploaded = { key: z.string().min(1).max(300), ...measures, source: z.enum(DECLARED_PHOTO_SOURCES).optional() }
 
 // An amount in whole units with at most two decimals. It becomes cents by the currency's rules where it is used.
 export const amountText = z.string().trim().regex(/^\d{1,7}(?:[.,]\d{1,2})?$/)
@@ -104,6 +105,8 @@ export const renterActions = {
   'disconnect-assistant': action({}, nothing),
   'build-renter-record': action({}, z.object({ packId: z.string() })),
   'download-renter-record': action({ packId: z.uuid(), kind: z.enum(['pdf', 'manifest']) }, z.object({ url: z.url(), filename: z.string() })),
+  // A statement Hold signs about one item's sealed evidence, and the /verify address that checks it in the browser.
+  'check-evidence': action({ itemId: z.uuid() }, z.object({ url: z.url() })),
 
   // Push notifications to this phone for this rental (section 13.9). The language is the request's own.
   'register-push': action(pushRegistration, z.object({ reference: z.string() })),

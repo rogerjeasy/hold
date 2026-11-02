@@ -59,6 +59,8 @@ export { blocksItem, BOOKING_LIMITS, bookingTerms, checkBooking, paymentLapsed, 
 export type { BookingDraft, BookingLine, BookingProblem, BookingTerms, Period } from './booking.ts'
 export { CAPTURE_SESSION_KINDS, checkPhotoQuality, checkRegion, CONDITION_REPLIES, CONDITION_REPLY_HOURS, conditionReplyOpen, isSamplePhoto, manifestText, MAX_PHOTO_BYTES, MISSED_VIEWS, missingViews, PHOTO_QUALITY, SAMPLE_PHOTO_SHA256 } from './capture-session.ts'
 export type { CaptureSessionKind, ConditionReply, PhotoMeasures, PhotoProblem, Region, SealedSession } from './capture-session.ts'
+export { DECLARED_PHOTO_SOURCES, PHOTO_SOURCES, photoSource, photoTakenBy, shortSeal } from './photo-provenance.ts'
+export type { DeclaredPhotoSource, PhotoSource, PhotoTaker } from './photo-provenance.ts'
 export { checkReportedRegion, INSPECTION_LIMITS, inspectFindings, regionOverlap, unaccountedCandidates } from './inspection.ts'
 export type { InspectionClass, InspectionFinding } from './inspection.ts'
 

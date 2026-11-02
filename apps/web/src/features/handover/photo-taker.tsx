@@ -1,7 +1,7 @@
 'use client'
 
 import { checkPhotoQuality } from '@hold/domain'
-import type { PhotoMeasures, PhotoProblem, ViewOutline } from '@hold/domain'
+import type { DeclaredPhotoSource, PhotoMeasures, PhotoProblem, ViewOutline } from '@hold/domain'
 import { Camera, FlaskConical, ImageUp, LoaderCircle } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
@@ -28,7 +28,7 @@ const RETURN_SAMPLES = [
 ] as const
 
 // Puts a checked photograph where it belongs: staff's handover, or what a renter adds to the condition report.
-export type UploadTaken = (blob: Blob, measures: PhotoMeasures, onProgress: (share: number) => void) => Promise<{ readonly ok: true } | { readonly ok: false; readonly reason: string }>
+export type UploadTaken = (blob: Blob, measures: PhotoMeasures, source: DeclaredPhotoSource, onProgress: (share: number) => void) => Promise<{ readonly ok: true } | { readonly ok: false; readonly reason: string }>
 
 // Takes one view's photograph (architecture.md section 9.1): the camera with the view's outline, a file when there is no
 // camera, or a sample. The phone checks it at once and asks for a retake before anything uploads. At a return, guide is
@@ -44,7 +44,7 @@ export function PhotoTaker({ view, upload, onTaken, guide, returnSamples = false
   const [ghostStrength, setGhostStrength] = useState<number>(GHOST_STRENGTH.initial)
   const noCamera = camera.state === 'unavailable'
 
-  const take = async (read: () => Promise<ReadImage>) => {
+  const take = async (read: () => Promise<ReadImage>, source: DeclaredPhotoSource) => {
     setStep({ kind: 'checking' })
     const image = await read()
     const measures = await check(image.pixels)
@@ -54,7 +54,7 @@ export function PhotoTaker({ view, upload, onTaken, guide, returnSamples = false
       return
     }
     setStep({ kind: 'uploading', share: 0 })
-    const uploaded = await upload(image.blob, measures ?? UNMEASURED, (share) => {
+    const uploaded = await upload(image.blob, measures ?? UNMEASURED, source, (share) => {
       setStep({ kind: 'uploading', share })
     })
     if (uploaded.ok) {
@@ -62,8 +62,8 @@ export function PhotoTaker({ view, upload, onTaken, guide, returnSamples = false
       onTaken()
     } else setStep({ kind: 'failed', reason: uploaded.reason })
   }
-  // A sample uploads byte for byte, so the server knows it by its fingerprint and marks it as one.
-  const takeSample = (source: string) => { void take(async () => readImage(await (await fetch(source)).blob())) }
+  // A sample uploads byte for byte as a file, so the server knows it by its fingerprint and marks it as one.
+  const takeSample = (source: string) => { void take(async () => readImage(await (await fetch(source)).blob()), 'file') }
   const busy = step.kind === 'checking' || step.kind === 'uploading'
 
   return (
@@ -77,7 +77,7 @@ export function PhotoTaker({ view, upload, onTaken, guide, returnSamples = false
       {guide !== undefined && noCamera ? <div className="grid gap-1 text-sm"><p>{t('noCamera')}</p><p className="text-muted-foreground">{t('guideNoCamera')}</p></div> : null}
       {guide !== undefined && camera.state === 'live' ? <GhostControls shown={ghostShown} onShown={setGhostShown} strength={ghostStrength} onStrength={setGhostStrength} /> : null}
       <div className="flex flex-wrap gap-2">
-        <Button type="button" className="min-h-12" disabled={busy || camera.state !== 'live'} onClick={() => { const video = camera.video.current; if (video !== null) void take(() => readFrame(video)) }}>
+        <Button type="button" className="min-h-12" disabled={busy || camera.state !== 'live'} onClick={() => { const video = camera.video.current; if (video !== null) void take(() => readFrame(video), 'camera') }}>
           <Camera aria-hidden="true" />
           {t('take')}
         </Button>
@@ -85,7 +85,7 @@ export function PhotoTaker({ view, upload, onTaken, guide, returnSamples = false
           <label>
             <ImageUp aria-hidden="true" />
             {t('file')}
-            <input type="file" accept="image/jpeg" capture="environment" className="sr-only" disabled={busy} onChange={(event) => { const file = event.target.files?.[0]; if (file !== undefined) void take(() => readImage(file)) }} />
+            <input type="file" accept="image/jpeg" capture="environment" className="sr-only" disabled={busy} onChange={(event) => { const file = event.target.files?.[0]; if (file !== undefined) void take(() => readImage(file), 'file') }} />
           </label>
         </Button>
         <Button type="button" variant="ghost" className="min-h-12" disabled={busy} onClick={() => { takeSample(sample) }}>

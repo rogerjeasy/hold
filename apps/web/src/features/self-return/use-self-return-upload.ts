@@ -9,5 +9,5 @@ import { confirmSelfReturnUpload, requestSelfReturnUpload } from './renter-actio
 // Uploads a photograph of the returned item, through the renter's own link, into their return's locked session.
 export function useSelfReturnUpload(token: string, sessionId: string, view: string): UploadTaken {
   const locale = useLocale()
-  return (blob, measures, onProgress) => uploadPhoto({ target: { token, sessionId }, view, blob, measures, locale, onProgress }, { request: requestSelfReturnUpload, confirm: confirmSelfReturnUpload, put: putWithProgress, wait })
+  return (blob, measures, source, onProgress) => uploadPhoto({ target: { token, sessionId }, view, blob, measures, source, locale, onProgress }, { request: requestSelfReturnUpload, confirm: confirmSelfReturnUpload, put: putWithProgress, wait })
 }

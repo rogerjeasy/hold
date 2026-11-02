@@ -9,8 +9,11 @@ const upload = vi.fn()
 vi.mock('./use-quality-check', () => ({ useQualityCheck: () => check }))
 // jsdom has no camera: unless a test turns it on, the screen is as on a device without one.
 const camera = { state: 'unavailable' as 'live' | 'unavailable' }
-vi.mock('./use-camera', () => ({ useCamera: () => ({ video: { current: null }, state: camera.state }) }))
-vi.mock('./read-image', () => ({ readImage: () => Promise.resolve({ blob: new Blob(['jpeg'], { type: 'image/jpeg' }), pixels: { data: new Uint8ClampedArray(4), width: 1, height: 1 } }) }))
+vi.mock('./use-camera', () => ({ useCamera: () => ({ video: { current: camera.state === 'live' ? document.createElement('video') : null }, state: camera.state }) }))
+vi.mock('./read-image', () => {
+  const read = () => Promise.resolve({ blob: new Blob(['jpeg'], { type: 'image/jpeg' }), pixels: { data: new Uint8ClampedArray(4), width: 1, height: 1 } })
+  return { readImage: read, readFrame: read }
+})
 
 beforeEach(() => {
   vi.stubGlobal('fetch', vi.fn(() => Promise.resolve(new Response(new Blob(['jpeg'], { type: 'image/jpeg' })))))
@@ -36,8 +39,33 @@ describe('taking a view’s photograph', () => {
       expect(taken).toHaveBeenCalled()
     })
     expect(upload.mock.calls[0]?.[1]).toMatchObject({ sharpness: 150 })
-    // The phone claims nothing about a sample: the server knows one by its fingerprint.
-    expect(upload.mock.calls[0]).toHaveLength(3)
+    // The phone never claims a sample: it says a file was used, and the server knows a sample by its fingerprint.
+    expect(upload.mock.calls[0]?.[2]).toBe('file')
+  })
+
+  it('says the live camera took a photograph taken with the camera button', async () => {
+    camera.state = 'live'
+    check.mockResolvedValue({ sharpness: 150, shadows: 20, highlights: 220, filled: 0.6 })
+    upload.mockResolvedValue({ ok: true, photoId: 'photo-1' })
+    const taken = vi.fn()
+    renderWithIntl(<PhotoTaker view={view} upload={upload} onTaken={taken} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Take the photograph' }))
+    await waitFor(() => {
+      expect(taken).toHaveBeenCalled()
+    })
+    expect(upload.mock.calls[0]?.[2]).toBe('camera')
+  })
+
+  it('says a file was chosen when one was', async () => {
+    check.mockResolvedValue({ sharpness: 150, shadows: 20, highlights: 220, filled: 0.6 })
+    upload.mockResolvedValue({ ok: true, photoId: 'photo-1' })
+    const taken = vi.fn()
+    renderWithIntl(<PhotoTaker view={view} upload={upload} onTaken={taken} />)
+    fireEvent.change(screen.getByLabelText('Choose a photograph'), { target: { files: [new File(['jpeg'], 'bike.jpg', { type: 'image/jpeg' })] } })
+    await waitFor(() => {
+      expect(taken).toHaveBeenCalled()
+    })
+    expect(upload.mock.calls[0]?.[2]).toBe('file')
   })
 
   // The return offers two more samples of the same frame: one with a chip in the paint, to show damage, and one where the
@@ -58,7 +86,7 @@ describe('taking a view’s photograph', () => {
       expect(taken).toHaveBeenCalled()
     })
     expect(vi.mocked(fetch)).toHaveBeenCalledWith(source)
-    expect(upload.mock.calls[0]).toHaveLength(3)
+    expect(upload.mock.calls[0]?.[2]).toBe('file')
   })
 
   it('asks for a retake of a blurred or dark photograph, says why, and uploads nothing', async () => {

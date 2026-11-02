@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { createHash } from 'node:crypto'
 import sharp from 'sharp'
-import { conditionReport, inShop, rentalDetail } from '@hold/db'
+import { conditionReport, inShop, photoProvenance, rentalDetail } from '@hold/db'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 process.env['HOLD_ENVIRONMENT'] = 'test'
@@ -78,11 +78,13 @@ describe('the renter’s condition report', () => {
     const link = await renter.requestMissedUpload(null, form({ token, itemId, view: 'missed-1', sha256: sha(body), bytes: String(body.length), locale: 'en' }))
     if (!link.ok) throw new Error(JSON.stringify(link))
     ;(await getServices()).simulatedEvidence?.receive(link.value.key, body, link.value.headers['x-amz-checksum-sha256'] ?? '')
-    expect(await renter.confirmMissedUpload(null, form({ token, itemId, view: 'missed-1', key: link.value.key, ...QUALITY, locale: 'en' }))).toMatchObject({ ok: true })
+    expect(await renter.confirmMissedUpload(null, form({ token, itemId, view: 'missed-1', key: link.value.key, ...QUALITY, source: 'camera', locale: 'en' }))).toMatchObject({ ok: true })
     expect(await renter.sendMissed(null, form({ token, locale: 'en' }))).toEqual({ ok: true, value: {} })
     const report = await inThisShop((transaction) => conditionReport(transaction, rentalId, new Date()))
     expect(report?.reply).toBe('added')
     expect(report?.items[0]?.added.map((photo) => photo.view)).toEqual(['missed-1'])
+    const key = report?.items[0]?.added[0]?.displayKey ?? ''
+    expect((await inThisShop((transaction) => photoProvenance(transaction, [key]))).get(key)).toMatchObject({ takenBy: 'renter', source: 'camera' })
   })
 
   it('cannot be answered from the booking link, which may only view and pay', async () => {

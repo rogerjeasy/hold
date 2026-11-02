@@ -2,7 +2,7 @@ import 'server-only'
 import { randomUUID } from 'node:crypto'
 import { openConditionSessions, recordPhoto, rentalItemFor, replyToCondition, sealSession, startCaptureSession } from '@hold/db'
 import type { RenterLink } from '@hold/db'
-import type { PhotoMeasures } from '@hold/domain'
+import type { DeclaredPhotoSource, PhotoMeasures } from '@hold/domain'
 import { Refusal } from './action'
 import { sendMediaMessage } from './media'
 import type { InLinkShop } from './renter-access'
@@ -36,7 +36,7 @@ export async function requestMissedPhoto(link: RenterLink, inLinkShop: InLinkSho
   return { key, url: upload.url, headers: upload.headers }
 }
 
-export async function confirmMissedPhoto(link: RenterLink, inLinkShop: InLinkShop, input: { readonly itemId: string; readonly view: string; readonly key: string; readonly measures: PhotoMeasures }) {
+export async function confirmMissedPhoto(link: RenterLink, inLinkShop: InLinkShop, input: { readonly itemId: string; readonly view: string; readonly key: string; readonly measures: PhotoMeasures; readonly source?: DeclaredPhotoSource | undefined }) {
   const { evidence } = await getServices()
   if (evidence === undefined) return new Refusal('storage_unavailable')
   const sessionId = await conditionSession(link, inLinkShop, input.itemId)
@@ -44,7 +44,7 @@ export async function confirmMissedPhoto(link: RenterLink, inLinkShop: InLinkSho
   if (!input.key.startsWith(`${link.shopId}/${sessionId}/${input.view}/`)) return new Refusal('key_mismatch')
   const stored = await evidence.stored(input.key)
   if (stored === undefined) return new Refusal('not_uploaded')
-  const recorded = await inLinkShop((transaction) => recordPhoto(transaction, sessionId, { view: input.view, evidenceKey: input.key, sha256: stored.sha256, quality: input.measures }, new Date()))
+  const recorded = await inLinkShop((transaction) => recordPhoto(transaction, sessionId, { view: input.view, evidenceKey: input.key, sha256: stored.sha256, source: input.source, quality: input.measures }, new Date()))
   if (!recorded.ok) return new Refusal(recorded.reason)
   try {
     await sendMediaMessage(link.shopId, sessionId, recorded.photoId)

@@ -91,8 +91,8 @@
       "description": "La précision mesurée de la comparaison des photographies, chaque chiffre avec son effectif."
     },
     "verify": {
-      "title": "Vérifier un historique de retours",
-      "description": "Vérifiez l'historique des locations rendues en bon état d'un client, avec la clé publiée par Hold."
+      "title": "Vérifier ce que Hold a signé",
+      "description": "Vérifiez l’historique de retours d’un client, ou les photos scellées d’une location, avec la clé publiée par Hold."
     },
     "assistant": {
       "title": "Louer par un assistant",
@@ -3277,20 +3277,64 @@
       "code": "Votre code"
     },
     "verify": {
-      "title": "Vérifier un historique de retours",
-      "lead": "Un client peut vous montrer son historique de locations rendues en bon état. Hold le signe, et cette page vérifie la signature avec la clé publiée par Hold, ici dans votre navigateur.",
-      "paste": "Attestation",
-      "pasteHelp": "Scannez le code sur le téléphone du client, ou collez l'attestation qu'il a partagée.",
+      "title": "Vérifier ce que Hold a signé",
+      "lead": "Hold signe deux choses : l’historique de retours d’un client, et les photos scellées d’une location. Cette page vérifie la signature avec la clé publiée par Hold, ici dans votre navigateur. Rien de ce que vous collez ou choisissez n’est envoyé.",
+      "paste": "Attestation ou déclaration de preuves",
+      "pasteHelp": "Scannez le code sur le téléphone du client, choisissez « Vérifier ces preuves » sous les photos d’une location, ou collez ce qui vous a été partagé.",
       "check": "Vérifier",
       "valid": "Signée par Hold. Valable jusqu'à {time}.",
       "counts": "Locations des {months} derniers mois",
       "key": "Clé publique de Hold",
       "problems": {
-        "malformed": "Ce n'est pas une attestation d'historique de retours.",
+        "malformed": "Ce n’est ni une attestation ni une déclaration de preuves signée par Hold.",
         "unknown_key": "Cette attestation n'a pas été signée avec la clé de Hold.",
         "bad_signature": "Cette attestation a été modifiée après sa signature par Hold.",
         "expired": "Cette attestation a expiré. Demandez au client de rouvrir son historique.",
         "not_yet_valid": "Cette attestation n'est pas encore valable. Vérifiez l'horloge de cet appareil."
+      },
+      "evidence": {
+        "problems": {
+          "malformed": "Ce n’est pas une déclaration de preuves signée par Hold.",
+          "unknown_key": "Cette déclaration n’a pas été signée avec la clé de Hold.",
+          "bad_signature": "Cette déclaration a été modifiée après sa signature par Hold.",
+          "not_yet_valid": "Cette déclaration n’est pas encore valable. Vérifiez l’horloge de cet appareil."
+        },
+        "intact": "Signée par Hold le {day} à {time}. Chaque sceau a été recalculé ici et correspond.",
+        "broken": "Signée par Hold le {day} à {time}, mais un sceau recalculé ici ne correspond pas à sa liste de photos. Interrogez la boutique sur ce dossier avant de vous y fier.",
+        "simulated": "Données d’exemple pour une démonstration. Rien dans ce dossier n’a eu lieu.",
+        "heading": "{item} chez {shop}",
+        "confirmed": "Le client a confirmé les photos du départ le {day} à {time}.",
+        "added": "Le client a ajouté des photos de ce que le personnel avait manqué le {day} à {time}.",
+        "notAnswered": "Le client n’avait pas encore répondu aux photos du départ au moment de la signature.",
+        "kinds": {
+          "handover": "Départ",
+          "return": "Retour",
+          "packing": "Emballage",
+          "unboxing": "Déballage",
+          "send_back": "Renvoyé",
+          "condition": "Ajouté par le client après le départ",
+          "incident": "Signalé par le client pendant la location",
+          "repair": "Réparation"
+        },
+        "seal": "Sceau",
+        "sealHolds": "Recalculé ici : correspond",
+        "sealBroken": "Recalculé ici : ne correspond pas",
+        "chain": "Sa place dans le dossier de l’article",
+        "links": {
+          "first": "Suit le dossier précédent de l’article {seal}",
+          "firstEver": "Le premier dossier de l’article",
+          "linked": "Nomme le dossier précédent, si bien qu’aucun ne peut être remplacé ni retiré",
+          "gap": "Un autre dossier de cet article, non affiché ici, a été scellé entre les deux"
+        },
+        "views": {
+          "missed": "Quelque chose de manqué ({number})",
+          "dropPoint": "Où il a été laissé"
+        },
+        "file": "Vérifier une photo originale",
+        "fileHelp": "Choisissez le fichier original, fourni par la boutique ou un tribunal. Votre navigateur calcule son empreinte et la cherche dans ce dossier. Le fichier n’est pas envoyé.",
+        "fileMatch": "Ce fichier est dans le dossier : {view}, {kind}, reçue le {day} à {time}.",
+        "fileNoMatch": "Ce fichier n’est pas dans ce dossier. Les photos des pages de Hold sont des copies aux visages floutés : seul le fichier original correspond.",
+        "zone": "Les heures sont l’heure locale de la boutique ({zone})."
       }
     }
   },
@@ -4443,5 +4487,31 @@
       "email_unavailable": "Le code n'a pas pu être envoyé. Réessayez plus tard.",
       "payer_missing": "Payez d'abord les frais : PayPal indique alors à Hold où envoyer vos codes."
     }
+  },
+  "provenance": {
+    "received": "Reçue",
+    "takenBy": "Prise par",
+    "source": "Prise avec",
+    "fingerprint": "Empreinte",
+    "fingerprintLabel": "Empreinte SHA-256 commençant par {seal}",
+    "sealed": "Scellée",
+    "notSealed": "Pas encore scellée",
+    "takers": {
+      "owner": "Le propriétaire",
+      "manager": "Un responsable",
+      "counter_staff": "Le personnel du comptoir",
+      "read_only": "Un membre en lecture seule",
+      "renter": "Le client",
+      "staff": "Le personnel de la boutique"
+    },
+    "sources": {
+      "camera": "L’appareil photo de Hold, dans l’app",
+      "file": "Un fichier choisi, envoyé dans l’app",
+      "sample": "Une photo d’exemple pour la démonstration"
+    },
+    "check": "Vérifier ces preuves",
+    "checkFailed": "Les preuves n’ont pas pu être vérifiées pour le moment. Réessayez dans une minute.",
+    "confirmed": "Vous avez confirmé les photos du départ le {day} à {time}.",
+    "added": "Vous avez ajouté des photos de ce que le personnel avait manqué le {day} à {time}."
   }
 }

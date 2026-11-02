@@ -15,7 +15,7 @@ describe('uploading a photograph from the phone', () => {
     const put = vi.fn(() => Promise.resolve(true))
     const confirm = vi.fn(() => Promise.resolve({ ok: true as const, value: { photoId: 'photo-1', sessionId: 'session-1' } }))
     const progress: number[] = []
-    const result = await uploadPhoto({ target: { sessionId: 'session-1' }, view: 'left-side', blob, measures, locale: 'en', onProgress: (share) => progress.push(share) }, { request, put, confirm, wait: () => Promise.resolve() })
+    const result = await uploadPhoto({ target: { sessionId: 'session-1' }, view: 'left-side', blob, measures, source: 'camera', locale: 'en', onProgress: (share) => progress.push(share) }, { request, put, confirm, wait: () => Promise.resolve() })
     expect(result).toEqual({ ok: true, photoId: 'photo-1' })
     const asked = request.mock.calls[0] as unknown as [null, FormData]
     expect([asked[1].get('sessionId'), asked[1].get('sha256'), asked[1].get('bytes'), asked[1].get('view')]).toEqual(['session-1', sha, String(bytes.length), 'left-side'])
@@ -24,19 +24,28 @@ describe('uploading a photograph from the phone', () => {
     expect([confirmed[1].get('key'), confirmed[1].get('sharpness')]).toEqual([linked.value.key, '120'])
   })
 
+  it('tells the server whether the live camera took the photograph or a file was chosen', async () => {
+    for (const source of ['camera', 'file'] as const) {
+      const confirm = vi.fn(() => Promise.resolve({ ok: true as const, value: { photoId: 'photo-3', sessionId: 'session-1' } }))
+      await uploadPhoto({ target: { sessionId: 's' }, view: 'v', blob, measures, source, locale: 'en' }, { request: () => Promise.resolve(linked), put: () => Promise.resolve(true), confirm, wait: () => Promise.resolve() })
+      const confirmed = confirm.mock.calls[0] as unknown as [null, FormData]
+      expect(confirmed[1].get('source')).toBe(source)
+    }
+  })
+
   it('tries the upload again on weak wifi, and gives up after three tries', async () => {
     const put = vi.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(true)
     const confirm = vi.fn(() => Promise.resolve({ ok: true as const, value: { photoId: 'photo-2', sessionId: 'session-1' } }))
-    expect(await uploadPhoto({ target: { sessionId: 's' }, view: 'v', blob, measures, locale: 'en' }, { request: () => Promise.resolve(linked), put, confirm, wait: () => Promise.resolve() })).toEqual({ ok: true, photoId: 'photo-2' })
+    expect(await uploadPhoto({ target: { sessionId: 's' }, view: 'v', blob, measures, source: 'camera', locale: 'en' }, { request: () => Promise.resolve(linked), put, confirm, wait: () => Promise.resolve() })).toEqual({ ok: true, photoId: 'photo-2' })
     expect(put).toHaveBeenCalledTimes(2)
 
     const failing = vi.fn(() => Promise.resolve(false))
-    expect(await uploadPhoto({ target: { sessionId: 's' }, view: 'v', blob, measures, locale: 'en' }, { request: () => Promise.resolve(linked), put: failing, confirm, wait: () => Promise.resolve() })).toEqual({ ok: false, reason: 'upload_failed' })
+    expect(await uploadPhoto({ target: { sessionId: 's' }, view: 'v', blob, measures, source: 'camera', locale: 'en' }, { request: () => Promise.resolve(linked), put: failing, confirm, wait: () => Promise.resolve() })).toEqual({ ok: false, reason: 'upload_failed' })
     expect(failing).toHaveBeenCalledTimes(3)
   })
 
   it('says why the server refused', async () => {
     const refused = { ok: false as const, failure: 'refused' as const, reason: 'sealed' }
-    expect(await uploadPhoto({ target: { sessionId: 's' }, view: 'v', blob, measures, locale: 'en' }, { request: () => Promise.resolve(refused), put: vi.fn(), confirm: vi.fn(), wait: () => Promise.resolve() })).toEqual({ ok: false, reason: 'sealed' })
+    expect(await uploadPhoto({ target: { sessionId: 's' }, view: 'v', blob, measures, source: 'camera', locale: 'en' }, { request: () => Promise.resolve(refused), put: vi.fn(), confirm: vi.fn(), wait: () => Promise.resolve() })).toEqual({ ok: false, reason: 'sealed' })
   })
 })

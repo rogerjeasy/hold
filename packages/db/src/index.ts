@@ -49,6 +49,8 @@ export { confirmAuthorizationReleased, expireHold, holdUpkeep, saveReplacementOr
 export type { ExpireResult, ReleasedResult, ReplacementResult, ShopOwner, UpkeepTarget } from './hold-upkeep-repository.ts'
 export { addMark, captureSession, conditionReport, confirmMarks, markPhotoMessageSent, MEDIA_QUEUE, openConditionSessions, photoForDisplay, recordDisplayCopy, recordPhoto, rentalHandovers, rentalItemFor, replyToCondition, sealSession, startCaptureSession } from './capture-repository.ts'
 export type { AddMarkResult, CaptureSession, ConditionReport, RentalHandover, NewPhoto, RecordPhotoResult, ReplyResult, SealResult, SessionMark, SessionPhoto, StartResult } from './capture-repository.ts'
+export { conditionConfirmation, evidenceStatementSource, photoProvenance } from './provenance-repository.ts'
+export type { ConditionConfirmation, EvidenceStatementSource, PhotoProvenance, StatementSession } from './provenance-repository.ts'
 export { COMPARISONS_QUEUE, rentalReturns, returnBaseline } from './return-repository.ts'
 export type { RentalReturn } from './return-repository.ts'
 export { contestRecord, latestContestSummary, recordContestSummary } from './contest-repository.ts'

@@ -20,7 +20,7 @@ export const confirmSelfReturnUpload = renterAction(
     scope: 'return_item',
     input: renterInput('confirm-self-return-upload'),
   },
-  (link, input, inLinkShop) => confirmReturnPhoto(link, inLinkShop, { sessionId: input.sessionId, view: input.view, key: input.key, measures: { sharpness: input.sharpness, shadows: input.shadows, highlights: input.highlights, filled: input.filled } }),
+  (link, input, inLinkShop) => confirmReturnPhoto(link, inLinkShop, { sessionId: input.sessionId, view: input.view, key: input.key, measures: { sharpness: input.sharpness, shadows: input.shadows, highlights: input.highlights, filled: input.filled }, source: input.source }),
 )
 
 export const sendSelfReturn = renterAction({ name: 'renter.self_return_sent', scope: 'return_item', input: renterInput('send-self-return') }, (link, _input, inLinkShop) => sendRenterReturn(link, inLinkShop))

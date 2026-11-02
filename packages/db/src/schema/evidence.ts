@@ -6,7 +6,7 @@ import { shopIsolation } from './access.ts'
 import { items, photoPlans, priceEntries } from './catalog.ts'
 import { at, createdAt, id, reference } from './columns.ts'
 import { incidents } from './incidents.ts'
-import { allowed, CAPTURE_SESSION_KINDS, captureSessionKind, COMPARISON_STATES, comparisonState, FINDING_CLASSES, findingClass, MARK_STATUSES, markStatus } from './enums.ts'
+import { allowed, CAPTURE_SESSION_KINDS, captureSessionKind, COMPARISON_STATES, comparisonState, FINDING_CLASSES, findingClass, MARK_STATUSES, markStatus, PHOTO_SOURCES, photoSource } from './enums.ts'
 import { rentalItems, rentals } from './rentals.ts'
 import { shopReference, users } from './shops.ts'
 
@@ -60,10 +60,13 @@ export const photos = pgTable(
     // When the server received it, not the phone's clock.
     receivedAt: at().notNull(),
     quality: jsonb().$type<Readonly<Record<string, number>>>(),
+    // How it was taken: Hold's live camera or a chosen file, as the capture screen reported, or one of the
+    // demonstration's samples, known by fingerprint. Null for photographs recorded before sources were kept.
+    source: photoSource(),
     // Set when a retake before sealing took this photograph's place. The photograph itself stays locked and on record.
     supersededAt: at(),
   },
-  (table) => [uniqueIndex('photos_current_view_unique').on(table.sessionId, table.view).where(sql`${table.supersededAt} is null`), shopIsolation(table.shopId)],
+  (table) => [uniqueIndex('photos_current_view_unique').on(table.sessionId, table.view).where(sql`${table.supersededAt} is null`), allowed(table.source, PHOTO_SOURCES), shopIsolation(table.shopId)],
 )
 
 export const marks = pgTable(

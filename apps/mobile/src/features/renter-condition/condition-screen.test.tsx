@@ -108,7 +108,7 @@ describe('the condition report from the handover', () => {
     await act(() => fireEvent.press(screen.getByRole('button', { name: 'Use photograph' })));
     await waitFor(() => expect(bodyOf(view.api, 'renter/actions/confirm-missed-upload')).toBeDefined());
     expect(bodyOf(view.api, 'renter/actions/request-missed-upload')).toEqual({ itemId: ITEM, view: 'missed-1', sha256: 'ab'.repeat(32), bytes: 2048 });
-    expect(bodyOf(view.api, 'renter/actions/confirm-missed-upload')).toEqual({ itemId: ITEM, view: 'missed-1', key: 'evidence/missed-1', sharpness: 0, shadows: 0, highlights: 0, filled: 0 });
+    expect(bodyOf(view.api, 'renter/actions/confirm-missed-upload')).toEqual({ itemId: ITEM, view: 'missed-1', key: 'evidence/missed-1', sharpness: 0, shadows: 0, highlights: 0, filled: 0, source: 'camera' });
     expect(await screen.findByLabelText('Your photograph 1 of City e-bike #4')).toBeOnTheScreen();
     await fireEvent.press(screen.getByRole('button', { name: 'Send what I added' }));
     expect(await screen.findByText('You added photographs of what was missed. The shop sees them with the handover.')).toBeOnTheScreen();

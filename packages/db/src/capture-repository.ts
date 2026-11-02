@@ -1,8 +1,8 @@
 import { reserveEvidencePack } from './evidence-repository.ts'
 import { repairSessionViews } from './repair-repository.ts'
 import { createHash } from 'node:crypto'
-import { checkRegion, conditionReplyOpen, isSamplePhoto, CONDITION_REPLY_HOURS, manifestText, mayHandOver, MISSED_VIEWS, missingViews, RENTAL_TRANSITIONS, selfReturnViews, transition } from '@hold/domain'
-import type { CaptureSessionKind, ConditionReply, PhotoMeasures, Region } from '@hold/domain'
+import { checkRegion, conditionReplyOpen, isSamplePhoto, CONDITION_REPLY_HOURS, manifestText, mayHandOver, MISSED_VIEWS, missingViews, photoSource, RENTAL_TRANSITIONS, selfReturnViews, transition } from '@hold/domain'
+import type { CaptureSessionKind, ConditionReply, DeclaredPhotoSource, PhotoMeasures, Region } from '@hold/domain'
 import { and, asc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
 import type { PhotoPlanView } from './schema/catalog.ts'
 import { captureSessions, holds, incidents, items, itemTypes, marks, outbox, photoPlans, photos, rentalItems, rentals } from './schema/index.ts'
@@ -206,7 +206,8 @@ async function openSession(transaction: Transaction, sessionId: string): Promise
   return row
 }
 
-export type NewPhoto = { readonly view: string; readonly evidenceKey: string; readonly sha256: string; readonly quality: PhotoMeasures }
+// source: what Hold's capture screen reported, when it did.
+export type NewPhoto = { readonly view: string; readonly evidenceKey: string; readonly sha256: string; readonly quality: PhotoMeasures; readonly source?: DeclaredPhotoSource | undefined }
 
 export type RecordPhotoResult = { readonly ok: true; readonly photoId: string } | Refused<'not_found' | 'sealed' | 'unknown_view'>
 
@@ -219,7 +220,7 @@ export async function recordPhoto(transaction: Transaction, sessionId: string, p
   await transaction.update(photos).set({ supersededAt: now }).where(and(eq(photos.sessionId, sessionId), eq(photos.view, photo.view), isNull(photos.supersededAt)))
   const [created] = await transaction
     .insert(photos)
-    .values({ shopId: session.shopId, sessionId, view: photo.view, evidenceKey: photo.evidenceKey, sha256: photo.sha256, receivedAt: now, quality: { ...photo.quality, ...(isSamplePhoto(photo.sha256) ? { simulated: 1 } : {}) } })
+    .values({ shopId: session.shopId, sessionId, view: photo.view, evidenceKey: photo.evidenceKey, sha256: photo.sha256, receivedAt: now, source: photoSource(photo.source, photo.sha256), quality: { ...photo.quality, ...(isSamplePhoto(photo.sha256) ? { simulated: 1 } : {}) } })
     .returning({ id: photos.id })
   if (created === undefined) throw new Error('The photograph was not recorded.')
   await transaction.insert(outbox).values({ shopId: session.shopId, queue: MEDIA_QUEUE, messageGroup: sessionId, payload: { photoId: created.id }, createdAt: now })

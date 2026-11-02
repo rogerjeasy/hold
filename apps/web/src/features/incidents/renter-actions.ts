@@ -29,7 +29,7 @@ export const confirmIncidentUpload = renterAction(
     scope: 'report_incident',
     input: renterInput('confirm-incident-upload'),
   },
-  (link, input, inLinkShop) => confirmIncidentPhoto(link, inLinkShop, { incidentId: input.incidentId, view: input.view, key: input.key, measures: { sharpness: input.sharpness, shadows: input.shadows, highlights: input.highlights, filled: input.filled } }),
+  (link, input, inLinkShop) => confirmIncidentPhoto(link, inLinkShop, { incidentId: input.incidentId, view: input.view, key: input.key, measures: { sharpness: input.sharpness, shadows: input.shadows, highlights: input.highlights, filled: input.filled }, source: input.source }),
 )
 
 // The box is optional: a theft has nothing to box. When given, all of it is given.

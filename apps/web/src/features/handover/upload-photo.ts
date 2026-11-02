@@ -1,4 +1,4 @@
-import type { PhotoMeasures } from '@hold/domain'
+import type { DeclaredPhotoSource, PhotoMeasures } from '@hold/domain'
 
 // One photograph from the phone to the locked evidence store (architecture.md section 9.1): its fingerprint is
 // computed here and signed into the upload link, so the store refuses any other file; the upload is tried again on
@@ -21,6 +21,8 @@ export type UploadRequest = {
   readonly view: string
   readonly blob: Blob
   readonly measures: PhotoMeasures
+  // The live camera or a chosen file, kept under the photograph (architecture.md section 9.7).
+  readonly source: DeclaredPhotoSource
   readonly locale: string
   readonly onProgress?: (share: number) => void
 }
@@ -49,7 +51,7 @@ export async function uploadPhoto(request: UploadRequest, steps: UploadSteps): P
   if (!stored) return { ok: false, reason: 'upload_failed' }
   const { sharpness, shadows, highlights, filled } = request.measures
   const measured = { sharpness: String(sharpness), shadows: String(shadows), highlights: String(highlights), filled: String(filled) }
-  const confirmed = await steps.confirm(null, fields({ ...request.target, view: request.view, key: link.value.key, ...measured, locale: request.locale }))
+  const confirmed = await steps.confirm(null, fields({ ...request.target, view: request.view, key: link.value.key, ...measured, source: request.source, locale: request.locale }))
   return confirmed.ok ? { ok: true, photoId: confirmed.value.photoId } : { ok: false, reason: reasonOf(confirmed) }
 }
 

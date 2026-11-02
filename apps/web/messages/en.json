@@ -91,8 +91,8 @@
       "description": "The measured accuracy of the photograph comparison, every figure with its count."
     },
     "verify": {
-      "title": "Check a Clean Record",
-      "description": "Check a renter's record of rentals returned in good condition, with Hold's published key."
+      "title": "Check what Hold signed",
+      "description": "Check a renter’s Clean Record, or the sealed photographs of a rental, with Hold’s published key."
     },
     "assistant": {
       "title": "Rent through an assistant",
@@ -3277,20 +3277,64 @@
       "code": "Your code"
     },
     "verify": {
-      "title": "Check a Clean Record",
-      "lead": "A renter can show you their record of rentals returned in good condition. Hold signs it, and this page checks the signature with Hold's published key, here in your browser.",
-      "paste": "Credential",
-      "pasteHelp": "Scan the code on the renter’s phone, or paste the credential they shared.",
+      "title": "Check what Hold signed",
+      "lead": "Hold signs two things: a renter’s Clean Record, and the sealed photographs of a rental. This page checks the signature with Hold’s published key, here in your browser. Nothing you paste or choose is sent anywhere.",
+      "paste": "Credential or evidence statement",
+      "pasteHelp": "Scan the code on the renter’s phone, choose “Check this evidence” under a rental’s photographs, or paste what was shared with you.",
       "check": "Check",
       "valid": "Signed by Hold. Valid until {time}.",
       "counts": "Rentals in the last {months} months",
       "key": "Hold's public key",
       "problems": {
-        "malformed": "This is not a Clean Record credential.",
+        "malformed": "This is not a credential or evidence statement Hold signed.",
         "unknown_key": "This credential was not signed with Hold's key.",
         "bad_signature": "This credential was changed after Hold signed it.",
         "expired": "This credential has expired. Ask the renter to open their record again.",
         "not_yet_valid": "This credential is not valid yet. Check the clock on this device."
+      },
+      "evidence": {
+        "problems": {
+          "malformed": "This is not an evidence statement Hold signed.",
+          "unknown_key": "This statement was not signed with Hold’s key.",
+          "bad_signature": "This statement was changed after Hold signed it.",
+          "not_yet_valid": "This statement is not valid yet. Check the clock on this device."
+        },
+        "intact": "Signed by Hold on {day} at {time}. Every seal was recomputed here and matches.",
+        "broken": "Signed by Hold on {day} at {time}, but a seal recomputed here does not match its list of photographs. Ask the shop about this record before relying on it.",
+        "simulated": "Sample data for a demonstration. Nothing in this record happened.",
+        "heading": "{item} at {shop}",
+        "confirmed": "The renter confirmed the handover photographs on {day} at {time}.",
+        "added": "The renter added photographs of what staff missed on {day} at {time}.",
+        "notAnswered": "The renter had not answered the handover photographs when this was signed.",
+        "kinds": {
+          "handover": "Handover",
+          "return": "Return",
+          "packing": "Packing",
+          "unboxing": "Unboxing",
+          "send_back": "Sent back",
+          "condition": "Added by the renter after handover",
+          "incident": "Reported by the renter during the rental",
+          "repair": "Repair"
+        },
+        "seal": "Seal",
+        "sealHolds": "Recomputed here: it matches",
+        "sealBroken": "Recomputed here: it does not match",
+        "links": {
+          "first": "Follows the item’s earlier record {seal}",
+          "firstEver": "The item’s first record",
+          "linked": "Names the record before it, so neither can be swapped or removed",
+          "gap": "Another record of this item, not shown here, was sealed in between"
+        },
+        "views": {
+          "missed": "Something staff missed ({number})",
+          "dropPoint": "Where it was left"
+        },
+        "file": "Check an original photograph",
+        "fileHelp": "Choose the original file, from the shop or a tribunal. Your browser computes its fingerprint and looks for it in this record. The file is not uploaded.",
+        "fileMatch": "This file is in the record: {view}, {kind}, received {day} at {time}.",
+        "fileNoMatch": "This file is not in this record. The photographs on Hold’s pages are copies with faces blurred, so only the original file matches.",
+        "chain": "Its place in the item’s record",
+        "zone": "Times are the shop’s local time ({zone})."
       }
     }
   },
@@ -4443,5 +4487,31 @@
       "email_unavailable": "The code could not be sent. Please try again later.",
       "payer_missing": "Pay the fee first: PayPal then tells Hold where to send your codes."
     }
+  },
+  "provenance": {
+    "received": "Received",
+    "takenBy": "Taken by",
+    "source": "Taken with",
+    "fingerprint": "Fingerprint",
+    "fingerprintLabel": "SHA-256 fingerprint beginning {seal}",
+    "sealed": "Sealed",
+    "notSealed": "Not sealed yet",
+    "takers": {
+      "owner": "The owner",
+      "manager": "A manager",
+      "counter_staff": "Counter staff",
+      "read_only": "A read-only member",
+      "renter": "The renter",
+      "staff": "The shop’s staff"
+    },
+    "sources": {
+      "camera": "Hold’s camera, in the app",
+      "file": "A chosen file, uploaded in the app",
+      "sample": "A demonstration sample photograph"
+    },
+    "check": "Check this evidence",
+    "checkFailed": "The evidence could not be checked just now. Try again in a minute.",
+    "confirmed": "You confirmed the handover photographs on {day} at {time}.",
+    "added": "You added photographs of what staff missed on {day} at {time}."
   }
 }

@@ -33,6 +33,12 @@ describe('uploadPhoto', () => {
     expect(taken.put).toHaveBeenCalledWith(link, file);
   });
 
+  it('says the live camera took it, the only way the phone takes an evidence photograph', async () => {
+    const taken = steps();
+    await uploadPhoto({ file, view: 'front', measures }, taken);
+    expect(taken.confirm).toHaveBeenCalledWith(expect.objectContaining({ source: 'camera' }));
+  });
+
   it('tries the store three times on a weak signal, waiting longer each time', async () => {
     const put = jest.fn().mockResolvedValueOnce(false).mockResolvedValueOnce(false).mockResolvedValueOnce(true);
     const taken = steps({ put });

@@ -64,6 +64,7 @@ export const MOBILE_RENTER_ACTIONS: Readonly<Record<RenterActionName, RenterForm
   'disconnect-assistant': assistant.disconnectAssistant,
   'build-renter-record': records.buildRenterRecord,
   'download-renter-record': records.downloadRenterRecord,
+  'check-evidence': records.checkEvidence,
   'register-push': push.registerPush,
   'unregister-push': push.unregisterPush,
 }

@@ -1,3 +1,4 @@
+import { DECLARED_PHOTO_SOURCES } from '@hold/domain'
 import { z } from 'zod'
 import { answerSchema } from './envelope'
 import type { Failed } from './envelope'
@@ -49,6 +50,8 @@ export const photoRecordInput = withLocale({
   shadows: z.coerce.number().min(0).max(255),
   highlights: z.coerce.number().min(0).max(255),
   filled: z.coerce.number().min(0).max(1),
+  // The live camera or a chosen file, as the capture screen reports it. Optional, so an older phone still uploads.
+  source: z.enum(DECLARED_PHOTO_SOURCES).optional(),
 })
 export const handoverMarkInput = withLocale({ ...photoFields, x: fraction, y: fraction, width: fraction, height: fraction, description: z.string().max(200) })
 export const knownMarksInput = withLocale({ sessionId: z.uuid(), markId: list(z.uuid()) })

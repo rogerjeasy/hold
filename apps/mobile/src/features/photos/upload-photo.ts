@@ -1,4 +1,4 @@
-import type { PhotoMeasures } from '@hold/domain';
+import type { DeclaredPhotoSource, PhotoMeasures } from '@hold/domain';
 import type { Answer } from '@/api/client';
 
 // One photograph from the phone to the locked evidence store, the way the web app sends it (architecture.md section
@@ -13,7 +13,7 @@ export type PhotoUploadSteps = {
   request(fields: { readonly view: string; readonly sha256: string; readonly bytes: number }): Promise<Answer<UploadLink>>;
   // True once the store took the photograph.
   put(link: UploadLink, file: PhotoFile): Promise<boolean>;
-  confirm(fields: { readonly view: string; readonly key: string } & PhotoMeasures): Promise<Answer<{ readonly photoId: string }>>;
+  confirm(fields: { readonly view: string; readonly key: string; readonly source: DeclaredPhotoSource } & PhotoMeasures): Promise<Answer<{ readonly photoId: string }>>;
   wait(milliseconds: number): Promise<void>;
 };
 
@@ -33,6 +33,7 @@ export async function uploadPhoto({ file, view, measures }: PhotoUpload, steps: 
     if (!stored && attempt < TRIES) await steps.wait(attempt * 1000);
   }
   if (!stored) return { ok: false, reason: 'upload_failed' };
-  const confirmed = await steps.confirm({ view, key: link.value.key, ...measures });
+  // The phone takes evidence with its live camera only, never from the photo library.
+  const confirmed = await steps.confirm({ view, key: link.value.key, source: 'camera', ...measures });
   return confirmed.ok ? { ok: true, photoId: confirmed.value.photoId } : { ok: false, reason: reasonOf(confirmed) };
 }

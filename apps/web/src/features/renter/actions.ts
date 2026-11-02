@@ -40,7 +40,7 @@ export const confirmMissedUpload = renterAction(
     scope: 'confirm_condition',
     input: renterInput('confirm-missed-upload'),
   },
-  (link, input, inLinkShop) => confirmMissedPhoto(link, inLinkShop, { itemId: input.itemId, view: input.view, key: input.key, measures: { sharpness: input.sharpness, shadows: input.shadows, highlights: input.highlights, filled: input.filled } }),
+  (link, input, inLinkShop) => confirmMissedPhoto(link, inLinkShop, { itemId: input.itemId, view: input.view, key: input.key, measures: { sharpness: input.sharpness, shadows: input.shadows, highlights: input.highlights, filled: input.filled }, source: input.source }),
 )
 
 export const sendMissed = renterAction({ name: 'renter.condition_added', scope: 'confirm_condition', input: renterInput('send-missed') }, (link, _input, inLinkShop) => sendMissedPhotos(link, inLinkShop))

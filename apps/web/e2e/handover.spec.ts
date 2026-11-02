@@ -52,7 +52,18 @@ test('at handover, staff photograph each view, box a mark and seal it, and the r
   await renter.getByRole('button', { name: 'Use the sample photograph' }).click()
   await expect(renter.getByRole('button', { name: 'Send what I added' })).toBeEnabled({ timeout: 30_000 })
   await renter.getByRole('button', { name: 'Send what I added' }).click()
-  await expect(renter.getByText('You added photographs of what was missed.', { exact: false })).toBeVisible()
+  await expect(renter.getByText('You added photographs of what staff missed on', { exact: false })).toBeVisible()
+  await expectFitsEveryWidth(renter)
+
+  // Under each photograph, where it came from and its seal; then a check anyone the renter shows it to can run.
+  await expect(renter.getByText('A demonstration sample photograph').first()).toBeVisible()
+  await expect(renter.getByText('Fingerprint').first()).toBeVisible()
+  await renter.getByRole('button', { name: 'Check this evidence' }).click()
+  await expect(renter).toHaveURL(/\/verify#/)
+  await expect(renter.getByText(/Every seal was recomputed here and matches\./)).toBeVisible()
+  await expect(renter.getByRole('heading', { name: 'Handover', exact: true })).toBeVisible()
+  await expect(renter.getByRole('heading', { name: 'Added by the renter after handover' })).toBeVisible()
+  await expect(renter.getByText('The renter added photographs of what staff missed on', { exact: false })).toBeVisible()
   await expectFitsEveryWidth(renter)
   await renter.context().close()
 

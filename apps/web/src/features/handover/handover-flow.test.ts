@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { createHash } from 'node:crypto'
 import sharp from 'sharp'
-import { acceptInvitation, captureSession, createInvitation, inShop, listStaff, rentalDetail } from '@hold/db'
+import { acceptInvitation, captureSession, createInvitation, inShop, listStaff, photoProvenance, rentalDetail } from '@hold/db'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
 process.env['HOLD_ENVIRONMENT'] = 'test'
@@ -46,13 +46,13 @@ async function started(count = 1) {
 }
 
 // What the phone does for one view: asks for a link, puts the photograph there, then says it is done.
-async function photograph(sessionId: string, view: string, given?: Buffer) {
+async function photograph(sessionId: string, view: string, given?: Buffer, source = 'camera') {
   const body = given ?? (await jpeg())
   const link = await handover.requestPhotoUpload(null, form({ sessionId, view, sha256: sha(body), bytes: String(body.length), locale: 'en' }))
   if (!link.ok) throw new Error(JSON.stringify(link))
   const store = (await getServices()).simulatedEvidence
   expect(store?.receive(link.value.key, body, link.value.headers['x-amz-checksum-sha256'] ?? '')).toBe('stored')
-  return handover.confirmPhotoUpload(null, form({ sessionId, view, key: link.value.key, ...QUALITY, locale: 'en' }))
+  return handover.confirmPhotoUpload(null, form({ sessionId, view, key: link.value.key, ...QUALITY, source, locale: 'en' }))
 }
 
 beforeAll(async () => {
@@ -93,6 +93,20 @@ describe('the guided handover', () => {
     const sent = (mailer as unknown as { sent: { to: string; text: string }[] }).sent.at(-1)
     expect(sent?.to).toBe('priya@renter.example')
     expect(sent?.text).toContain('/condition')
+  })
+
+  it('keeps, under each photograph, whether Hold’s camera took it or a file was chosen', async () => {
+    const { sessionId } = await started()
+    expect(await photograph(sessionId, 'left-side', undefined, 'camera')).toMatchObject({ ok: true })
+    expect(await photograph(sessionId, 'right-side', undefined, 'file')).toMatchObject({ ok: true })
+    const { database } = await getServices()
+    const sources = await inShop(database, { role: 'hold_app', shopId: shop.shopId }, async (transaction) => {
+      const session = await captureSession(transaction, sessionId)
+      const keys = session?.photos.map((photo) => photo.displayKey ?? '') ?? []
+      const found = await photoProvenance(transaction, keys)
+      return keys.map((key) => found.get(key)?.source)
+    })
+    expect(sources).toEqual(['camera', 'file'])
   })
 
   it('refuses a photograph that never reached the store', async () => {

@@ -91,8 +91,8 @@
       "description": "Die gemessene Genauigkeit des Fotovergleichs, jede Zahl mit ihrer Anzahl."
     },
     "verify": {
-      "title": "Rückgabebilanz prüfen",
-      "description": "Prüfen Sie die Bilanz einwandfrei zurückgegebener Mieten mit dem von Hold veröffentlichten Schlüssel."
+      "title": "Prüfen, was Hold signiert hat",
+      "description": "Prüfen Sie die Rückgabebilanz von Mietenden oder die versiegelten Fotos einer Miete mit dem von Hold veröffentlichten Schlüssel."
     },
     "assistant": {
       "title": "Über einen Assistenten mieten",
@@ -3277,20 +3277,64 @@
       "code": "Ihr Code"
     },
     "verify": {
-      "title": "Rückgabebilanz prüfen",
-      "lead": "Mietende können Ihnen ihre Bilanz einwandfrei zurückgegebener Mieten zeigen. Hold signiert sie, und diese Seite prüft die Signatur mit dem veröffentlichten Schlüssel von Hold, hier in Ihrem Browser.",
-      "paste": "Nachweis",
-      "pasteHelp": "Scannen Sie den Code auf dem Telefon der Mietenden, oder fügen Sie den geteilten Nachweis ein.",
+      "title": "Prüfen, was Hold signiert hat",
+      "lead": "Hold signiert zweierlei: die Rückgabebilanz von Mietenden und die versiegelten Fotos einer Miete. Diese Seite prüft die Signatur mit dem veröffentlichten Schlüssel von Hold, hier in Ihrem Browser. Nichts, was Sie einfügen oder wählen, wird irgendwohin gesendet.",
+      "paste": "Nachweis oder Beweiserklärung",
+      "pasteHelp": "Scannen Sie den Code auf dem Telefon der Mietenden, wählen Sie „Diese Beweise prüfen“ unter den Fotos einer Miete, oder fügen Sie ein, was mit Ihnen geteilt wurde.",
       "check": "Prüfen",
       "valid": "Von Hold signiert. Gültig bis {time}.",
       "counts": "Mieten der letzten {months} Monate",
       "key": "Öffentlicher Schlüssel von Hold",
       "problems": {
-        "malformed": "Das ist kein Nachweis einer Rückgabebilanz.",
+        "malformed": "Das ist weder ein Nachweis noch eine Beweiserklärung von Hold.",
         "unknown_key": "Dieser Nachweis wurde nicht mit dem Schlüssel von Hold signiert.",
         "bad_signature": "Dieser Nachweis wurde nach der Signatur durch Hold verändert.",
         "expired": "Dieser Nachweis ist abgelaufen. Bitten Sie die Mietenden, ihre Bilanz erneut zu öffnen.",
         "not_yet_valid": "Dieser Nachweis ist noch nicht gültig. Prüfen Sie die Uhr dieses Geräts."
+      },
+      "evidence": {
+        "problems": {
+          "malformed": "Das ist keine von Hold signierte Beweiserklärung.",
+          "unknown_key": "Diese Erklärung wurde nicht mit dem Schlüssel von Hold signiert.",
+          "bad_signature": "Diese Erklärung wurde nach der Signatur durch Hold verändert.",
+          "not_yet_valid": "Diese Erklärung ist noch nicht gültig. Prüfen Sie die Uhr dieses Geräts."
+        },
+        "intact": "Von Hold am {day} um {time} signiert. Jedes Siegel wurde hier neu berechnet und stimmt.",
+        "broken": "Von Hold am {day} um {time} signiert, aber ein hier neu berechnetes Siegel passt nicht zu seiner Fotoliste. Fragen Sie das Geschäft nach diesem Beleg, bevor Sie sich darauf verlassen.",
+        "simulated": "Beispieldaten zur Vorführung. Nichts in diesem Beleg ist geschehen.",
+        "heading": "{item} bei {shop}",
+        "confirmed": "Die Mietenden haben die Übergabefotos am {day} um {time} bestätigt.",
+        "added": "Die Mietenden haben am {day} um {time} Fotos von Übersehenem hinzugefügt.",
+        "notAnswered": "Die Mietenden hatten bei der Signatur noch nicht auf die Übergabefotos geantwortet.",
+        "kinds": {
+          "handover": "Übergabe",
+          "return": "Rückgabe",
+          "packing": "Verpacken",
+          "unboxing": "Auspacken",
+          "send_back": "Zurückgesandt",
+          "condition": "Nach der Übergabe von den Mietenden ergänzt",
+          "incident": "Während der Miete von den Mietenden gemeldet",
+          "repair": "Reparatur"
+        },
+        "seal": "Siegel",
+        "sealHolds": "Hier neu berechnet: stimmt",
+        "sealBroken": "Hier neu berechnet: stimmt nicht",
+        "chain": "Sein Platz im Beleg des Artikels",
+        "links": {
+          "first": "Folgt dem früheren Beleg des Artikels {seal}",
+          "firstEver": "Der erste Beleg des Artikels",
+          "linked": "Nennt den Beleg davor, sodass keiner ausgetauscht oder entfernt werden kann",
+          "gap": "Dazwischen wurde ein weiterer Beleg dieses Artikels versiegelt, der hier nicht gezeigt wird"
+        },
+        "views": {
+          "missed": "Etwas Übersehenes ({number})",
+          "dropPoint": "Wo es abgestellt wurde"
+        },
+        "file": "Ein Originalfoto prüfen",
+        "fileHelp": "Wählen Sie die Originaldatei, vom Geschäft oder einem Gericht. Ihr Browser berechnet ihren Fingerabdruck und sucht ihn in diesem Beleg. Die Datei wird nicht hochgeladen.",
+        "fileMatch": "Diese Datei ist im Beleg: {view}, {kind}, eingegangen am {day} um {time}.",
+        "fileNoMatch": "Diese Datei ist nicht in diesem Beleg. Die Fotos auf den Seiten von Hold sind Kopien mit unkenntlich gemachten Gesichtern, daher passt nur die Originaldatei.",
+        "zone": "Die Zeiten sind Ortszeit des Geschäfts ({zone})."
       }
     }
   },
@@ -4443,5 +4487,31 @@
       "email_unavailable": "Der Code konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.",
       "payer_missing": "Bezahlen Sie zuerst die Gebühr: Dann sagt PayPal Hold, wohin Ihre Codes gehen."
     }
+  },
+  "provenance": {
+    "received": "Eingegangen",
+    "takenBy": "Aufgenommen von",
+    "source": "Aufgenommen mit",
+    "fingerprint": "Fingerabdruck",
+    "fingerprintLabel": "SHA-256-Fingerabdruck, beginnend mit {seal}",
+    "sealed": "Versiegelt",
+    "notSealed": "Noch nicht versiegelt",
+    "takers": {
+      "owner": "Der Inhaber",
+      "manager": "Eine Leitung",
+      "counter_staff": "Thekenpersonal",
+      "read_only": "Ein Mitglied mit Lesezugriff",
+      "renter": "Die Mietenden",
+      "staff": "Das Personal des Geschäfts"
+    },
+    "sources": {
+      "camera": "Holds Kamera, in der App",
+      "file": "Eine gewählte Datei, in der App hochgeladen",
+      "sample": "Ein Beispielfoto zur Vorführung"
+    },
+    "check": "Diese Beweise prüfen",
+    "checkFailed": "Die Beweise konnten gerade nicht geprüft werden. Versuchen Sie es in einer Minute erneut.",
+    "confirmed": "Sie haben die Übergabefotos am {day} um {time} bestätigt.",
+    "added": "Sie haben am {day} um {time} Fotos von Übersehenem hinzugefügt."
   }
 }

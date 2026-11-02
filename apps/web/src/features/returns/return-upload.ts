@@ -8,5 +8,5 @@ import { confirmPhotoUpload, requestPhotoUpload } from './actions'
 
 export function useReturnUpload(sessionId: string, view: string): UploadTaken {
   const locale = useLocale()
-  return (blob, measures, onProgress) => uploadPhoto({ target: { sessionId }, view, blob, measures, locale, onProgress }, { request: requestPhotoUpload, confirm: confirmPhotoUpload, put: putWithProgress, wait })
+  return (blob, measures, source, onProgress) => uploadPhoto({ target: { sessionId }, view, blob, measures, source, locale, onProgress }, { request: requestPhotoUpload, confirm: confirmPhotoUpload, put: putWithProgress, wait })
 }

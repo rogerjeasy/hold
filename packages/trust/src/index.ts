@@ -1,5 +1,7 @@
 export { CREDENTIAL_MINUTES, CREDENTIAL_TYPE, issueCredential } from './credential.ts'
 export { verifyCredential } from './verify.ts'
+export { EVIDENCE_TYPE } from './evidence-format.ts'
+export { issueEvidenceStatement } from './evidence-statement.ts'
 export type { CredentialProblem, VerificationKey, VerifiedCredential } from './verify.ts'
 export { createKmsSigner, kmsCalls } from './kms-signer.ts'
 export type { KmsCalls } from './kms-signer.ts'

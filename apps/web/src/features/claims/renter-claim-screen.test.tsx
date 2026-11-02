@@ -86,3 +86,17 @@ it('shows the renter who paid that the shop repaired what they paid for, with th
   expect(screen.getByRole('img', { name: 'Repaired: Frame scratch, top tube' })).toHaveAttribute('src', '/repaired.jpg')
   expect(screen.getByText('The shop repaired what you paid for. What the repair cost stays with the shop.')).toBeInTheDocument()
 })
+
+vi.mock('@/features/records/renter-actions', () => ({ checkEvidence: vi.fn() }))
+
+it('says under the before and after photographs where each came from, offers to check the evidence, and shows the renter’s own confirmation of the handover', () => {
+  const before = { takenAt: new Date('2026-10-16T09:14:00Z'), takenBy: 'counter_staff' as const, source: 'camera' as const, sha256: '7ac39badb505d60e5c4c92018f9ae4410ffb80912d2c7fbbc9cd9202990e8080', sealedAt: new Date('2026-10-16T09:20:00Z') }
+  const after = { ...before, takenBy: 'manager' as const, source: 'file' as const, sha256: '74072fc7d4f92e0398252661a83c83eb2427a99039f8ffcac9cc62a66a41cd39' }
+  renderWithIntl(<RenterClaimScreen token="token" data={{ shopName: 'Ribeira Bikes', currency: 'EUR', state: 'presented', totalCents: 3500, captureCents: 3500, releaseCents: 26500, invoiceCents: 0, replyDueAt: new Date('2026-10-22'), holdState: 'placed', canReply: false, timeZone: 'UTC', confirmed: { reply: 'confirmed', at: new Date('2026-10-16T10:44:00Z') }, lines: [{ id: 'line', description: 'Scratch', reason: 'Fresh scratch.', amountCents: 3500, actorName: 'Ana', beforeUrl: '/before.jpg', afterUrl: '/after.jpg', itemId: 'item-1', beforeProvenance: before, afterProvenance: after }] }} />)
+  expect(screen.getByText('You confirmed the handover photographs on Oct 16 at 10:44 AM.')).toBeInTheDocument()
+  expect(screen.getByText('7ac3 9bad b505 d60e')).toBeInTheDocument()
+  expect(screen.getByText('7407 2fc7 d4f9 2e03')).toBeInTheDocument()
+  expect(screen.getByText('A manager')).toBeInTheDocument()
+  expect(screen.getByText('A chosen file, uploaded in the app')).toBeInTheDocument()
+  expect(screen.getByRole('button', { name: 'Check this evidence' })).toBeInTheDocument()
+})

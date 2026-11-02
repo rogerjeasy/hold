@@ -1,5 +1,5 @@
 import 'server-only'
-import { captureSession, conditionReport, extensionMaxDays, inShop, rentalAssistant, rentalHold, rentalRenterKey, renterView, selfReturnFor, trustConsent } from '@hold/db'
+import { captureSession, conditionConfirmation, conditionReport, extensionMaxDays, inShop, photoProvenance, rentalAssistant, rentalHold, rentalRenterKey, renterView, selfReturnFor, trustConsent } from '@hold/db'
 import type { RentalHold, RenterView } from '@hold/db'
 import { maySelfReturn, shopOpening } from '@hold/domain'
 import type { Metadata } from 'next'
@@ -84,7 +84,8 @@ export async function conditionPage(token: string): Promise<ConditionPage> {
     const report = await conditionReport(transaction, rentalId, now)
     const view = await renterView(transaction, rentalId, now)
     const sessions = report === undefined ? [] : await Promise.all(report.items.map((item) => captureSession(transaction, item.sessionId)))
-    return { report, view, sessions }
+    const keys = (report?.items ?? []).flatMap((item) => item.photos.flatMap((photo) => (photo.displayKey === null ? [] : [photo.displayKey])))
+    return { report, view, sessions, provenance: await photoProvenance(transaction, keys), confirmed: await conditionConfirmation(transaction, rentalId) }
   })
   if (loaded.report === undefined || loaded.view === undefined) return { ok: false, failure: 'not_handed_over' }
   const link = async (key: string | null) => (key === null || evidence === undefined ? null : evidence.displayLink(key))
@@ -98,7 +99,7 @@ export async function conditionPage(token: string): Promise<ConditionPage> {
         photos: await Promise.all(
           [...item.photos]
             .sort((first, second) => plan.findIndex((each) => each.key === first.view) - plan.findIndex((each) => each.key === second.view))
-            .map(async (photo) => ({ view: photo.view, label: plan.find((each) => each.key === photo.view)?.label ?? photo.view, url: await link(photo.displayKey) })),
+            .map(async (photo) => ({ view: photo.view, label: plan.find((each) => each.key === photo.view)?.label ?? photo.view, url: await link(photo.displayKey), provenance: (photo.displayKey === null ? undefined : loaded.provenance.get(photo.displayKey)) ?? null })),
         ),
         marks: item.marks.map((mark) => ({ id: mark.id, view: mark.view, region: mark.region, description: mark.description })),
         added: await Promise.all(item.added.map(async (photo) => ({ view: photo.view, url: await link(photo.displayKey) }))),
@@ -107,6 +108,6 @@ export async function conditionPage(token: string): Promise<ConditionPage> {
   )
   return {
     ok: true,
-    report: { shopName: loaded.view.shopName, timeZone: loaded.view.timeZone, open: loaded.report.open, reply: loaded.report.reply, closesAt: loaded.report.closesAt, canReply: access.link.scopes.includes('confirm_condition'), items },
+    report: { shopName: loaded.view.shopName, timeZone: loaded.view.timeZone, open: loaded.report.open, reply: loaded.report.reply, closesAt: loaded.report.closesAt, canReply: access.link.scopes.includes('confirm_condition'), confirmed: loaded.confirmed, items },
   }
 }

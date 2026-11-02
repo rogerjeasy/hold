@@ -1,5 +1,5 @@
 import 'server-only'
-import { claimMessages, claimRepairs, claimWorkspace, inShop, promiseFor, rentalAssistant, renterNegotiation, renterView } from '@hold/db'
+import { claimMessages, claimRepairs, claimWorkspace, conditionConfirmation, inShop, photoProvenance, promiseFor, rentalAssistant, renterNegotiation, renterView } from '@hold/db'
 import { claimReplyAllowed } from '@hold/domain'
 import { getTranslations } from 'next-intl/server'
 import { readLocale } from '@/features/auth/locale-input'
@@ -17,7 +17,13 @@ export async function renterClaimPage(token: string, locale: string): Promise<Re
   const access = await renterAccess(token, 'view', now)
   if (!access.ok) return access
   const { database, evidence } = await getServices()
-  const loaded = await inShop(database, { role: 'hold_app', shopId: access.link.shopId }, async (transaction) => ({ workspace: await claimWorkspace(transaction, access.link.rentalId), rental: await renterView(transaction, access.link.rentalId, now), negotiation: await renterNegotiation(transaction, access.link.rentalId), assistant: await rentalAssistant(transaction, access.link.rentalId), contest: await contestViewFor(transaction, access.link.rentalId, 'renter'), promise: await promiseFor(transaction, access.link.rentalId, now), messages: await claimMessages(transaction, access.link.rentalId), repairs: await claimRepairs(transaction, access.link.rentalId) }))
+  const loaded = await inShop(database, { role: 'hold_app', shopId: access.link.shopId }, async (transaction) => {
+    const workspace = await claimWorkspace(transaction, access.link.rentalId)
+    // Where each photograph came from, for the line under it.
+    const keys = (workspace?.lines ?? []).flatMap((line) => [line.beforeKey, line.afterKey]).filter((key): key is string => key !== null)
+    return { workspace, provenance: await photoProvenance(transaction, keys), rental: await renterView(transaction, access.link.rentalId, now), negotiation: await renterNegotiation(transaction, access.link.rentalId), assistant: await rentalAssistant(transaction, access.link.rentalId), contest: await contestViewFor(transaction, access.link.rentalId, 'renter'), promise: await promiseFor(transaction, access.link.rentalId, now), messages: await claimMessages(transaction, access.link.rentalId), repairs: await claimRepairs(transaction, access.link.rentalId), confirmed: await conditionConfirmation(transaction, access.link.rentalId) }
+  })
+  const provenanceOf = (key: string | null) => (key === null ? null : (loaded.provenance.get(key) ?? null))
   // The renter's own assistant may argue the contest while it is connected; its name is its own, not verified.
   const assistantName = loaded.assistant?.connected === true ? (loaded.assistant.clientLabel === '' ? (await getTranslations({ locale: readLocale(locale), namespace: 'renter.assistant' }))('unnamed') : loaded.assistant.clientLabel) : null
   const data = loaded.workspace
@@ -28,7 +34,7 @@ export async function renterClaimPage(token: string, locale: string): Promise<Re
     const repaired = loaded.repairs.find((each) => each.claimLineId === lineId && each.outcome === 'repaired' && each.repairedAt !== null)
     return repaired?.repairedAt == null ? null : { repairedAt: repaired.repairedAt, url: await display(repaired.displayKey) }
   }
-  const lines = await Promise.all(data.lines.map(async (line) => ({ id: line.id, description: line.description, reason: line.reason ?? line.findingDescription ?? '', amountCents: line.amountCents, actorName: line.actorName, beforeUrl: await display(line.beforeKey), afterUrl: await display(line.afterKey), region: line.region, repair: await repairOf(line.id) })))
+  const lines = await Promise.all(data.lines.map(async (line) => ({ id: line.id, description: line.description, reason: line.reason ?? line.findingDescription ?? '', amountCents: line.amountCents, actorName: line.actorName, beforeUrl: await display(line.beforeKey), afterUrl: await display(line.afterKey), region: line.region, repair: await repairOf(line.id), beforeProvenance: provenanceOf(line.beforeKey), afterProvenance: provenanceOf(line.afterKey), itemId: (provenanceOf(line.afterKey) ?? provenanceOf(line.beforeKey))?.itemId ?? null })))
   const canReply = access.link.scopes.includes('accept') && access.link.scopes.includes('contest') && claimReplyAllowed(data.claim.state, data.claim.replyDueAt, now, data.protectedReply, data.replies.length > 0)
-  return { ok: true, data: { shopName: loaded.rental.shopName, currency: data.currency, state: data.claim.state, totalCents: data.claim.totalCents, captureCents: data.amounts.capture.cents, releaseCents: data.amounts.release.cents, invoiceCents: data.amounts.invoice.cents, replyDueAt: data.claim.replyDueAt, holdState: data.holdState, pendingSettlement: data.execution !== null && ['pending', 'submitted'].includes(data.execution.state), canAcknowledge: data.claim.state === 'approved' && access.link.scopes.includes('accept'), canReply, canAdvocate: canReply && data.claim.state === 'presented' && loaded.negotiation === undefined, assistantName, negotiation: loaded.negotiation !== undefined, lines, timeZone: loaded.rental.timeZone, contest: loaded.contest, promise: loaded.promise ?? null, messages: loaded.messages, canWrite: access.link.scopes.includes('contest') && data.claim.state !== 'closed', now } }
+  return { ok: true, data: { shopName: loaded.rental.shopName, currency: data.currency, state: data.claim.state, totalCents: data.claim.totalCents, captureCents: data.amounts.capture.cents, releaseCents: data.amounts.release.cents, invoiceCents: data.amounts.invoice.cents, replyDueAt: data.claim.replyDueAt, holdState: data.holdState, pendingSettlement: data.execution !== null && ['pending', 'submitted'].includes(data.execution.state), canAcknowledge: data.claim.state === 'approved' && access.link.scopes.includes('accept'), canReply, canAdvocate: canReply && data.claim.state === 'presented' && loaded.negotiation === undefined, assistantName, negotiation: loaded.negotiation !== undefined, lines, timeZone: loaded.rental.timeZone, contest: loaded.contest, promise: loaded.promise ?? null, messages: loaded.messages, canWrite: access.link.scopes.includes('contest') && data.claim.state !== 'closed', now, confirmed: loaded.confirmed } }
 }

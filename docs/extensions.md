@@ -652,7 +652,7 @@ Inside Hold, a shop reads the record directly. The credential is how the record 
 | X2.1 | Passes against the simulated PayPal: two shops, consent through a code, the authorization PayPal reports is the ladder's amount, the reason shows, the rental keeps version and rung. Two real sandbox shops not yet run. | `trust-flow.test.ts`, `record.test.ts`, `hold-screen.test.tsx` |
 | X2.2 | Passes | `trust-flow.test.ts`, `record.test.ts` |
 | X2.3 | Passes | `trust-ladder.test.ts`, `clean-record.test.ts`, `ladder-simulation.test.ts`, `trust-repository.test.ts` |
-| X2.4 | Passes with the in-process key and a stand-in for KMS; the KMS key itself is not yet made | `credential.test.ts`, `kms-signer.test.ts`, `credential-check.test.tsx`, `trust.spec.ts` |
+| X2.4 | Passes with the in-process key and a stand-in for KMS; the KMS key itself is not yet made | `credential.test.ts`, `kms-signer.test.ts`, `signed-check.test.tsx`, `trust.spec.ts` |
 | X2.5 | Passes | `credential.test.ts` |
 | X2.6 | Passes | `trust-flow.test.ts`, `record.test.ts` |
 | X2.7 | Passes | `clean-record.test.ts` (in `packages/settle`), `record.test.ts` |

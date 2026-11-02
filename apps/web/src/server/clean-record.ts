@@ -3,9 +3,9 @@ import { inShop, rentalRenterKey, renterView } from '@hold/db'
 import { DEFAULT_WINDOW_MONTHS } from '@hold/domain'
 import { CREDENTIAL_MINUTES, issueCredential, renterRecord } from '@hold/trust'
 import type { PublicJwk, RenterRecord } from '@hold/trust'
-import { routes } from '@/lib/routes'
 import { qrSvg } from './qr'
 import { renterAccess } from './renter-access'
+import { verifyUrl } from './verify-url'
 import { getServices } from './services'
 
 // The renter's Clean Record through their link (extensions.md section 7.6): the counts, the deposits never taken, their
@@ -23,11 +23,6 @@ export type CleanRecordView = {
 }
 
 export type CleanRecordPage = { readonly ok: true; readonly view: CleanRecordView } | { readonly ok: false; readonly failure: 'link_invalid' | 'scope' | 'rate_limited' }
-
-// The address that checks a credential, with the credential after the #, so it never reaches a server or its logs.
-function verifyUrl(publicUrl: string, locale: string, token: string): string {
-  return `${publicUrl}${locale === 'en' ? '' : `/${locale}`}${routes.verify}#${token}`
-}
 
 async function credentialFor(renterKey: string, own: RenterRecord, locale: string, now: Date): Promise<CleanRecordCredential | undefined> {
   const { trust, config } = await getServices()

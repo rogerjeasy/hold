@@ -15,6 +15,8 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./verify": "./src/verify.ts"
+    "./verify": "./src/verify.ts",
+    "./evidence-verify": "./src/evidence-verify.ts",
+    "./check-signed": "./src/check-signed.ts"
   }
 }
