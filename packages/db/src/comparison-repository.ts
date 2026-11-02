@@ -74,7 +74,10 @@ export async function comparisonReport(transaction: Transaction, comparisonId: s
   const displayPhotos = async (sessionId: string) => (await sessionPhotos(transaction, sessionId)).map(({ view, displayKey }) => ({ view, displayKey }))
   const reviews = await transaction.select({ actorName: users.name, at: auditLog.at, detail: auditLog.detail }).from(auditLog)
     .leftJoin(users, sql`${users.id}::text = ${auditLog.actorId}`).where(and(eq(auditLog.subjectKind, 'comparison'), eq(auditLog.subjectId, comparisonId), eq(auditLog.action, 'comparison.manual_review'))).orderBy(asc(auditLog.at))
-  return { id: comparison.id, ...session, state: comparison.state, model: comparison.model, promptVersion: comparison.promptVersion, deferredReason: comparison.deferredReason, simulated: comparison.simulated, before: await displayPhotos(comparison.handoverSessionId), after: await displayPhotos(comparison.returnSessionId), findings: observed, reviews }
+  return { id: comparison.id, ...session, state: comparison.state, model: comparison.model, promptVersion: comparison.promptVersion, deferredReason: comparison.deferredReason, simulated: comparison.simulated,
+    // Whether a model answered at all: only an answer spends input tokens. A seeded sample or the stand-in never does.
+    modelAnswered: (comparison.alignment?.['inputTokens'] ?? 0) > 0,
+    before: await displayPhotos(comparison.handoverSessionId), after: await displayPhotos(comparison.returnSessionId), findings: observed, reviews }
 }
 
 export type ComparisonReport = NonNullable<Awaited<ReturnType<typeof comparisonReport>>>

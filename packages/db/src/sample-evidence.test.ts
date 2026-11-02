@@ -56,7 +56,7 @@ describe('the sample claim awaiting approval', () => {
     const rentalId = await rentalOf('Priya Natarajan')
     const [returned] = await inShop(database, shop, (transaction) => rentalReturns(transaction, rentalId))
     const report = await inShop(database, shop, (transaction) => comparisonReport(transaction, returned?.comparisonId ?? ''))
-    expect(report).toMatchObject({ rentalId, state: 'findings', simulated: true })
+    expect(report).toMatchObject({ rentalId, state: 'findings', simulated: true, modelAnswered: false })
     expect(report?.before.map((photo) => photo.displayKey)).toEqual([SAMPLE_PHOTOS.handover])
     expect(report?.after.map((photo) => photo.displayKey)).toEqual([SAMPLE_PHOTOS.damage])
     expect(report?.findings.map((finding) => [finding.class, finding.secondLookConfirmed])).toEqual(

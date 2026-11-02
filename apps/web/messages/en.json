@@ -2033,8 +2033,6 @@
     "comparison": {
       "title": "Comparison",
       "back": "Back to the rental",
-      "simulated": "Simulated comparison",
-      "simulatedBody": "This result uses demonstration photographs or a simulated model. It is not an accuracy measurement.",
       "pending": "Comparing photographs… You can inspect the item and record your own observations while you wait.",
       "outcomes": {
         "clean": "Clean",
@@ -2079,7 +2077,17 @@
       "reportedAgreed": "The renter reported it during the rental and agreed {amount}.",
       "reportedNotAgreed": "The renter reported it during the rental. Nothing was agreed, so a person decides.",
       "reportedLink": "See the agreed line",
-      "claimLink": "Open the claim"
+      "claimLink": "Open the claim",
+      "notices": {
+        "simulated": {
+          "title": "Simulated comparison",
+          "body": "No model answered here: these are demonstration photographs with a prepared or stand-in result. It is not an accuracy measurement."
+        },
+        "demonstration_photographs": {
+          "title": "Demonstration photographs, real comparison",
+          "body": "Code and Claude compared these photographs for real. They are samples, not this item, so the result shows how the comparison works and is left out of every accuracy figure."
+        }
+      }
     },
     "incidents": {
       "title": "Incidents",

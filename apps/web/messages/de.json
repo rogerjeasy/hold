@@ -2033,8 +2033,6 @@
     "comparison": {
       "title": "Vergleich",
       "back": "Zurück zur Vermietung",
-      "simulated": "Simulierter Vergleich",
-      "simulatedBody": "Dieses Ergebnis verwendet Beispielfotos oder ein simuliertes Modell. Es ist keine Genauigkeitsmessung.",
       "pending": "Fotos werden verglichen… In der Zwischenzeit können Sie den Artikel prüfen und Ihre Beobachtungen festhalten.",
       "outcomes": {
         "clean": "Kein neuer Schaden",
@@ -2079,7 +2077,17 @@
       "reportedAgreed": "Die mietende Person hat es während der Miete gemeldet und {amount} zugestimmt.",
       "reportedNotAgreed": "Die mietende Person hat es während der Miete gemeldet. Es wurde nichts vereinbart, daher entscheidet eine Person.",
       "reportedLink": "Den akzeptierten Posten ansehen",
-      "claimLink": "Forderung öffnen"
+      "claimLink": "Forderung öffnen",
+      "notices": {
+        "simulated": {
+          "title": "Simulierter Vergleich",
+          "body": "Hier hat kein Modell geantwortet: Es sind Demonstrationsfotos mit einem vorbereiteten oder ersetzten Ergebnis. Das ist keine Messung der Genauigkeit."
+        },
+        "demonstration_photographs": {
+          "title": "Demonstrationsfotos, echter Vergleich",
+          "body": "Code und Claude haben diese Fotos wirklich verglichen. Es sind Beispiele, nicht dieser Gegenstand. Das Ergebnis zeigt also, wie der Vergleich arbeitet, und zählt in keiner Genauigkeitszahl."
+        }
+      }
     },
     "incidents": {
       "title": "Vorfälle",

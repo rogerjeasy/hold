@@ -2033,8 +2033,6 @@
     "comparison": {
       "title": "Comparación",
       "back": "Volver al alquiler",
-      "simulated": "Comparación simulada",
-      "simulatedBody": "Este resultado usa fotografías de demostración o un modelo simulado. No mide la precisión.",
       "pending": "Comparando fotografías… Puedes inspeccionar el artículo y registrar tus observaciones mientras esperas.",
       "outcomes": {
         "clean": "Sin daños nuevos",
@@ -2079,7 +2077,17 @@
       "reportedAgreed": "Quien alquila lo informó durante el alquiler y aceptó {amount}.",
       "reportedNotAgreed": "Quien alquila lo informó durante el alquiler. No se aceptó nada, así que decide una persona.",
       "reportedLink": "Ver la línea aceptada",
-      "claimLink": "Abrir la reclamación"
+      "claimLink": "Abrir la reclamación",
+      "notices": {
+        "simulated": {
+          "title": "Comparación simulada",
+          "body": "Aquí no respondió ningún modelo: son fotografías de demostración con un resultado preparado o sustituto. No es una medida de precisión."
+        },
+        "demonstration_photographs": {
+          "title": "Fotografías de demostración, comparación real",
+          "body": "El código y Claude compararon de verdad estas fotografías. Son muestras, no este artículo, así que el resultado muestra cómo funciona la comparación y queda fuera de toda cifra de precisión."
+        }
+      }
     },
     "incidents": {
       "title": "Incidentes",

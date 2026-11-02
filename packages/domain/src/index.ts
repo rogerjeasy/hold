@@ -61,6 +61,8 @@ export { CAPTURE_SESSION_KINDS, checkPhotoQuality, checkRegion, CONDITION_REPLIE
 export type { CaptureSessionKind, ConditionReply, PhotoMeasures, PhotoProblem, Region, SealedSession } from './capture-session.ts'
 export { DECLARED_PHOTO_SOURCES, PHOTO_SOURCES, photoSource, photoTakenBy, shortSeal } from './photo-provenance.ts'
 export type { DeclaredPhotoSource, PhotoSource, PhotoTaker } from './photo-provenance.ts'
+export { comparisonNotice } from './comparison-notice.ts'
+export type { ComparisonNotice } from './comparison-notice.ts'
 export { checkReportedRegion, INSPECTION_LIMITS, inspectFindings, regionOverlap, unaccountedCandidates } from './inspection.ts'
 export type { InspectionClass, InspectionFinding } from './inspection.ts'
 

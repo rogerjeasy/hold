@@ -5,7 +5,7 @@ import { ComparisonScreen } from './comparison-screen'
 
 vi.mock('./actions', () => ({ recordReview: vi.fn() }))
 vi.mock('@/hooks/use-look-again', () => ({ useLookAgain: () => undefined }))
-const report = { id: 'comparison', rentalId: 'rental', label: 'City e-bike', state: 'clean' as const, model: 'recorded', promptVersion: 'inspection-1', simulated: false, before: [{ view: 'left-side', url: '/before.jpg' }], after: [{ view: 'left-side', url: '/after.jpg' }], findings: [], reviews: [], deferredReason: null }
+const report = { id: 'comparison', rentalId: 'rental', label: 'City e-bike', state: 'clean' as const, model: 'recorded', promptVersion: 'inspection-1', simulated: false, modelAnswered: true, before: [{ view: 'left-side', url: '/before.jpg' }], after: [{ view: 'left-side', url: '/after.jpg' }], findings: [], reviews: [], deferredReason: null }
 
 describe('the comparison review screen', () => {
   it.each([['clean', 'Clean'], ['findings', 'Findings'], ['deferred', 'Needs a person']] as const)('shows the %s outcome with human review and no charge control', (state, title) => {
@@ -15,10 +15,15 @@ describe('the comparison review screen', () => {
     expect(screen.getByLabelText('Your inspection notes')).toBeInTheDocument()
   })
   it('shows simulation and preparation explicitly and leaves read-only members no form', () => {
-    renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={{ ...report, simulated: true, state: 'pending' }} canAct={false} />)
+    renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={{ ...report, simulated: true, modelAnswered: false, state: 'pending' }} canAct={false} />)
     expect(screen.getByText('Simulated comparison')).toBeInTheDocument()
     expect(screen.getByRole('status')).toHaveTextContent('Comparing photographs')
     expect(screen.queryByLabelText('Your inspection notes')).not.toBeInTheDocument()
+  })
+  it('says the photographs are demonstration samples, not that the comparison was simulated, when Claude compared them', () => {
+    renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={{ ...report, simulated: true, modelAnswered: true }} canAct />)
+    expect(screen.getByText('Demonstration photographs, real comparison')).toBeInTheDocument()
+    expect(screen.queryByText('Simulated comparison')).not.toBeInTheDocument()
   })
 })
 

@@ -1,7 +1,7 @@
 'use client'
 
 import type { ComparisonReport } from '@hold/db'
-import { confidenceLevel, DROP_POINT_VIEW, formatMoney, money } from '@hold/domain'
+import { comparisonNotice, confidenceLevel, DROP_POINT_VIEW, formatMoney, money } from '@hold/domain'
 import type { ConfidenceLevel, Share } from '@hold/domain'
 import { useLocale, useTranslations } from 'next-intl'
 import { PhotoWithMarks } from '@/components/photo-with-marks'
@@ -28,6 +28,7 @@ export function ComparisonScreen({ shopName, report, canAct, calibration }: { sh
     return measured === undefined || measured.total === 0 ? scorecard('findingLevel', { level: scorecard(`levels.${level}`) }) : scorecard('findingAccuracy', { level: scorecard(`levels.${level}`), ...measured })
   }
   const locale = useLocale()
+  const notice = comparisonNotice(report)
   const pending = report.state === 'pending' || report.state === 'running'
   useLookAgain(pending || [...report.before, ...report.after].some((photo) => photo.url === null), { forMs: 180_000 })
   const outcome = report.state === 'clean' ? 'clean' : report.state === 'findings' ? 'findings' : 'deferred'
@@ -36,7 +37,7 @@ export function ComparisonScreen({ shopName, report, canAct, calibration }: { sh
   const dropPoint = report.after.find((photo) => photo.view === DROP_POINT_VIEW)
   return <ShopFrame shopName={shopName} title={report.label}><div className="grid gap-6">
     <Link className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4" href={rentalRoutes.rental(report.rentalId)}>{t('back')}</Link>
-    {report.simulated ? <Notice title={t('simulated')} body={t('simulatedBody')} /> : null}
+    {notice === 'none' ? null : <Notice title={t(`notices.${notice}.title`)} body={t(`notices.${notice}.body`)} />}
     {pending ? <p role="status">{t('pending')}</p> : <Panel title={t(`outcomes.${outcome}`)}><div className="grid gap-3 px-4 py-4 md:px-5"><p>{t(`bodies.${outcome}`)}</p><p className="text-muted-foreground">{t('boundary')}</p>
       {report.deferredReason === 'reused_photo' ? <p>{t('reused')}</p> : null}
       {report.deferredReason === 'processing_failed' ? <p>{t('unavailable')}</p> : null}
