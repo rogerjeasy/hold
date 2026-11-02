@@ -1,4 +1,4 @@
-import { acceptedEvalRun, fieldRecord, inShop } from '@hold/db'
+import { acceptedEvalRun, fieldRecord, inShop, withdrawnEvalRun } from '@hold/db'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { ScorecardScreen } from '@/features/scorecard/scorecard-screen'
@@ -13,6 +13,6 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Page() {
   const context = await requireShop()
   const { database } = await getServices()
-  const { run, months } = await inShop(database, { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId }, async (transaction) => ({ run: await acceptedEvalRun(transaction), months: await fieldRecord(transaction) }))
-  return <ScorecardScreen shopName={context.shop.name} run={scorecardRun(run)} months={months} />
+  const { run, withdrawn, months } = await inShop(database, { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId }, async (transaction) => ({ run: await acceptedEvalRun(transaction), withdrawn: await withdrawnEvalRun(transaction), months: await fieldRecord(transaction) }))
+  return <ScorecardScreen shopName={context.shop.name} run={scorecardRun(run)} months={months} withdrawn={run === undefined ? withdrawn : undefined} />
 }

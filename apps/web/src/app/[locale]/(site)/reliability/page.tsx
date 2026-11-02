@@ -1,4 +1,4 @@
-import { acceptedEvalRun, gateRunHistory, outsideShop } from '@hold/db'
+import { acceptedEvalRun, gateRunHistory, outsideShop, withdrawnEvalRun } from '@hold/db'
 import { GridLicence } from '@/components/grid/grid-licence'
 import { pageMetadata } from '@/features/marketing/page-metadata'
 import { ReliabilityScreen } from '@/features/marketing/screens/reliability-screen'
@@ -14,10 +14,11 @@ export default async function Page() {
   const { config, database } = await getServices()
   const run = await outsideShop(database, acceptedEvalRun)
   const history = await outsideShop(database, gateRunHistory)
+  const withdrawn = run === undefined ? await outsideShop(database, withdrawnEvalRun) : undefined
   return (
     <>
       <GridLicence licenceKey={config.gridLicenceKey} />
-      <ReliabilityScreen run={scorecardRun(run)} cases={run?.cases ?? []} history={history} />
+      <ReliabilityScreen run={scorecardRun(run)} cases={run?.cases ?? []} history={history} withdrawn={withdrawn} />
     </>
   )
 }

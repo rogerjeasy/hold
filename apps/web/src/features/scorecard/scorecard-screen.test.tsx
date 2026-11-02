@@ -30,6 +30,11 @@ describe('how reliable the comparison is, for the owner', () => {
     expect(screen.getByRole('link', { name: 'Every pair, case by case' })).toHaveAttribute('href', '/reliability')
   })
 
+  it('tells the owner a withdrawn run is no longer counted', () => {
+    renderWithIntl(<ScorecardScreen shopName="Ribeira Bikes" run={undefined} months={[]} withdrawn={{ completedAt: new Date('2026-10-29T14:35:00Z'), withdrawnAt: new Date('2026-11-03T09:00:00Z'), reason: 'model_not_asked' }} />)
+    expect(screen.getByText(/The run accepted on Oct 29, 2026 was withdrawn on Nov 3, 2026/)).toBeInTheDocument()
+  })
+
   it('claims no accuracy before a run is accepted', () => {
     renderWithIntl(<ScorecardScreen shopName="Ribeira Bikes" run={undefined} months={[]} />)
     expect(screen.getByText('Not measured yet')).toBeInTheDocument()

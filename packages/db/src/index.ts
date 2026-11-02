@@ -95,7 +95,7 @@ export { reserveEvidencePack, evidencePackFor, evidenceVersions, publishedEviden
 export type { EvidenceVersion } from './evidence-repository.ts'
 export { queueSettlementReceipts, receiptDeliveriesFor, leaseReceipt, finishReceipt } from './receipt-repository.ts'
 export type { ReceiptDeliverySummary } from './receipt-repository.ts'
-export { acceptedEvalRun, acceptedEvalRunAsOwner, fieldRecord, gateRunHistory, recordEvalRun, recordFindingOutcomes } from './scorecard-repository.ts'
+export { acceptedEvalRun, acceptedEvalRunAsOwner, fieldRecord, gateRunHistory, recordEvalRun, recordFindingOutcomes, withdrawnEvalRun } from './scorecard-repository.ts'
 export type { EvalRunRecord, FieldRecordMonth } from './scorecard-repository.ts'
 export { auditAgentCall, beginOpsRun, completeOpsRun, decideProposal, exceptionFacts, finishProposal, OPS_AGENT_QUEUE, OPS_EXECUTE_QUEUE, proposalAmount, proposalToCarryOut, queueOperationsCheck, recentDecisions, holdsToReconcile, rentalsForCaptures, morningQueue, pendingProposals, recordExceptions, shopSnapshot, shopsForOperations, writeProposal } from './ops-repository.ts'
 export type { AgentCallLine, DecisionInput, DecisionResult, ProposalInput, QueueEntry, RecordedException, RunUsage, WriteResult } from './ops-repository.ts'

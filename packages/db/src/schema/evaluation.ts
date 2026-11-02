@@ -1,10 +1,10 @@
 import { FINDING_VERDICTS } from '@hold/domain'
 import type { EvaluatedCase, GateLimits, Measures } from '@hold/domain'
 import { sql } from 'drizzle-orm'
-import { boolean, integer, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
+import { boolean, check, integer, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
 import { appRole, evalRole, shopIsolation, workerRole } from './access.ts'
 import { at, createdAt, id, reference } from './columns.ts'
-import { allowed, EVALUATION_HALVES, evaluationHalf, findingVerdict } from './enums.ts'
+import { allowed, EVAL_WITHDRAWAL_REASONS, EVALUATION_HALVES, evalWithdrawalReason, evaluationHalf, findingVerdict } from './enums.ts'
 import { claims } from './claims.ts'
 import { findings } from './evidence.ts'
 import { rentals } from './rentals.ts'
@@ -37,11 +37,15 @@ export const evalRuns = pgTable(
     gateReasons: jsonb().$type<readonly string[]>().notNull().default([]),
     // An accepted run is the one the next run is compared against, and the one the scorecard shows.
     accepted: boolean().notNull().default(false),
+    // Set by the owner, in a migration, when an accepted run turns out to measure nothing: the scorecard then shows no
+    // run and says so, and the next run is not measured against it. The run itself stays on record.
+    withdrawnAt: at(),
+    withdrawnReason: evalWithdrawalReason(),
     resultsKey: text().notNull(),
     startedAt: at().notNull(),
     completedAt: createdAt(),
   },
-  (table) => [allowed(table.half, EVALUATION_HALVES), pgPolicy('eval_runs_readable', { for: 'select', to: [appRole, workerRole, evalRole], using: sql`true` }), pgPolicy('eval_runs_recorded', { for: 'insert', to: [evalRole], withCheck: sql`not ${table.accepted}` })],
+  (table) => [allowed(table.half, EVALUATION_HALVES), allowed(table.withdrawnReason, EVAL_WITHDRAWAL_REASONS), check('eval_runs_withdrawn_with_reason', sql`(${table.withdrawnAt} is null) = (${table.withdrawnReason} is null)`), pgPolicy('eval_runs_readable', { for: 'select', to: [appRole, workerRole, evalRole], using: sql`true` }), pgPolicy('eval_runs_recorded', { for: 'insert', to: [evalRole], withCheck: sql`not ${table.accepted}` })],
 )
 
 // What a person finally did with each finding the comparison raised: the field record (section 5.7). Append-only.

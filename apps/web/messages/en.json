@@ -3017,7 +3017,12 @@
     },
     "empty": {
       "title": "Not measured yet",
-      "body": "No run over the evaluation set has been accepted yet. Until one is, Hold claims no accuracy for the comparison."
+      "body": "No run over the evaluation set has been accepted yet. Until one is, Hold claims no accuracy for the comparison.",
+      "withdrawn": "The run accepted on {accepted} was withdrawn on {withdrawn}.",
+      "reasons": {
+        "model_not_asked": "Claude answered too few of its pairs for it to measure the comparison: most never got past the alignment step."
+      },
+      "refreshed": "A threshold was then set after looking at a run on the gate half, so the gate half was rebuilt with new pairs. The next accepted run is measured only on pairs that shaped no choice."
     },
     "field": {
       "title": "In your shop",

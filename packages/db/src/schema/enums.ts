@@ -88,6 +88,11 @@ export const bookingChannel = oneOf(BOOKING_CHANNELS)
 // Which half of the evaluation set a run measured: the tuning half, or the gate half that is never tuned on.
 export const EVALUATION_HALVES = ['tuning', 'gate'] as const
 export const evaluationHalf = oneOf(EVALUATION_HALVES)
+// Why an accepted run stopped counting. model_not_asked: the code passed too few pairs to the model for the run to
+// measure the comparison at all.
+export const EVAL_WITHDRAWAL_REASONS = ['model_not_asked'] as const
+export type EvalWithdrawalReason = (typeof EVAL_WITHDRAWAL_REASONS)[number]
+export const evalWithdrawalReason = oneOf(EVAL_WITHDRAWAL_REASONS)
 export const findingVerdict = oneOf(FINDING_VERDICTS)
 
 // The operations agent and the mandates behind it (extensions.md sections 4 and 6).

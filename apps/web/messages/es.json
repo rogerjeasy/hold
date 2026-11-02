@@ -3017,7 +3017,12 @@
     },
     "empty": {
       "title": "Aún sin medir",
-      "body": "Todavía no se ha aceptado ninguna ejecución sobre el conjunto de evaluación. Hasta entonces, Hold no afirma ninguna precisión."
+      "body": "Todavía no se ha aceptado ninguna ejecución sobre el conjunto de evaluación. Hasta entonces, Hold no afirma ninguna precisión.",
+      "withdrawn": "La ejecución aceptada el {accepted} se retiró el {withdrawn}.",
+      "reasons": {
+        "model_not_asked": "Claude respondió muy pocos de sus pares para que midiera la comparación: la mayoría nunca pasó del paso de alineación."
+      },
+      "refreshed": "Después se fijó un umbral tras ver una ejecución sobre la mitad de control, así que la mitad de control se reconstruyó con pares nuevos. La próxima ejecución aceptada se mide solo con pares que no influyeron en ninguna decisión."
     },
     "field": {
       "title": "En tu tienda",

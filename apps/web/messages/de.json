@@ -3017,7 +3017,12 @@
     },
     "empty": {
       "title": "Noch nicht gemessen",
-      "body": "Bisher wurde kein Lauf über den Bewertungssatz angenommen. Bis dahin behauptet Hold keine Genauigkeit für den Vergleich."
+      "body": "Bisher wurde kein Lauf über den Bewertungssatz angenommen. Bis dahin behauptet Hold keine Genauigkeit für den Vergleich.",
+      "withdrawn": "Der am {accepted} angenommene Lauf wurde am {withdrawn} zurückgezogen.",
+      "reasons": {
+        "model_not_asked": "Claude hat zu wenige seiner Paare beantwortet, als dass er den Vergleich messen könnte: Die meisten kamen nie über die Ausrichtung hinaus."
+      },
+      "refreshed": "Danach wurde ein Schwellenwert nach einem Lauf auf der Prüfhälfte festgelegt. Deshalb wurde die Prüfhälfte mit neuen Paaren neu gebaut. Der nächste angenommene Lauf wird nur an Paaren gemessen, die keine Entscheidung beeinflusst haben."
     },
     "field": {
       "title": "In Ihrem Geschäft",

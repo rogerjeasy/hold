@@ -3017,7 +3017,12 @@
     },
     "empty": {
       "title": "Pas encore mesuré",
-      "body": "Aucune exécution sur le jeu d’évaluation n’a encore été acceptée. D’ici là, Hold n’annonce aucune précision pour la comparaison."
+      "body": "Aucune exécution sur le jeu d’évaluation n’a encore été acceptée. D’ici là, Hold n’annonce aucune précision pour la comparaison.",
+      "withdrawn": "L’exécution acceptée le {accepted} a été retirée le {withdrawn}.",
+      "reasons": {
+        "model_not_asked": "Claude a répondu à trop peu de ses paires pour qu’elle mesure la comparaison : la plupart ne sont jamais allées au-delà de l’alignement."
+      },
+      "refreshed": "Un seuil a ensuite été fixé après une exécution sur la moitié de contrôle, si bien que cette moitié a été reconstruite avec de nouvelles paires. La prochaine exécution acceptée n’est mesurée que sur des paires qui n’ont guidé aucun choix."
     },
     "field": {
       "title": "Dans votre boutique",

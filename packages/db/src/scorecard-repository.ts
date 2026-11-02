@@ -1,5 +1,5 @@
 import { verdictForFinding } from '@hold/domain'
-import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
 import { approvals, captureSessions, claimLines, claimReplies, claims, comparisons, evalRuns, findingOutcomes, findings, priceEntries, rentalItems } from './schema/index.ts'
 import type { Database, Transaction } from './scope.ts'
 
@@ -39,10 +39,20 @@ export async function fieldRecord(transaction: Transaction): Promise<readonly Fi
   return rows.map((row) => ({ month: row.month, removed: Number(row.removed), total: Number(row.total) }))
 }
 
-// The run the scorecard shows and the next run is measured against: the last accepted run of the gate half.
+// An accepted run of the gate half that has not been withdrawn.
+const standing = and(eq(evalRuns.half, 'gate'), eq(evalRuns.accepted, true), isNull(evalRuns.withdrawnAt))
+
+// The run the scorecard shows and the next run is measured against: the last standing accepted run of the gate half.
 export async function acceptedEvalRun(transaction: Transaction) {
-  const [run] = await transaction.select().from(evalRuns).where(and(eq(evalRuns.half, 'gate'), eq(evalRuns.accepted, true))).orderBy(desc(evalRuns.completedAt)).limit(1)
+  const [run] = await transaction.select().from(evalRuns).where(standing).orderBy(desc(evalRuns.completedAt)).limit(1)
   return run
+}
+
+// The last accepted run that was withdrawn, so a scorecard with nothing to show can say what it no longer shows.
+export async function withdrawnEvalRun(transaction: Transaction) {
+  const [run] = await transaction.select({ completedAt: evalRuns.completedAt, withdrawnAt: evalRuns.withdrawnAt, reason: evalRuns.withdrawnReason })
+    .from(evalRuns).where(and(eq(evalRuns.half, 'gate'), eq(evalRuns.accepted, true), isNotNull(evalRuns.withdrawnAt))).orderBy(desc(evalRuns.withdrawnAt)).limit(1)
+  return run === undefined || run.withdrawnAt === null || run.reason === null ? undefined : { completedAt: run.completedAt, withdrawnAt: run.withdrawnAt, reason: run.reason }
 }
 
 // Every run of the gate half, oldest first, as run against run shows them with the lines their gate drew. Their pairs
@@ -65,6 +75,6 @@ export async function recordEvalRun(database: Database, run: EvalRunRecord): Pro
 }
 
 export async function acceptedEvalRunAsOwner(database: Database) {
-  const [run] = await database.select().from(evalRuns).where(and(eq(evalRuns.half, 'gate'), eq(evalRuns.accepted, true))).orderBy(desc(evalRuns.completedAt)).limit(1)
+  const [run] = await database.select().from(evalRuns).where(standing).orderBy(desc(evalRuns.completedAt)).limit(1)
   return run
 }

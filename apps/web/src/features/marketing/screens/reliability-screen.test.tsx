@@ -24,4 +24,13 @@ describe('the public scorecard', () => {
     expect(screen.getByText('Not measured yet')).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Every pair, case by case' })).not.toBeInTheDocument()
   })
+
+  it('says which accepted run was withdrawn and why, and that the pairs were refreshed, instead of showing it', () => {
+    const withdrawn = { completedAt: new Date('2026-10-29T14:35:00Z'), withdrawnAt: new Date('2026-11-03T09:00:00Z'), reason: 'model_not_asked' as const }
+    renderWithIntl(<ReliabilityScreen run={undefined} cases={[]} history={[]} withdrawn={withdrawn} />)
+    expect(screen.getByText('Not measured yet')).toBeInTheDocument()
+    expect(screen.getByText('The run accepted on Oct 29, 2026 was withdrawn on Nov 3, 2026. Claude answered too few of its pairs for it to measure the comparison: most never got past the alignment step.')).toBeInTheDocument()
+    expect(screen.getByText(/the gate half was rebuilt with new pairs/)).toBeInTheDocument()
+    expect(screen.queryByText(/ of 42/)).not.toBeInTheDocument()
+  })
 })

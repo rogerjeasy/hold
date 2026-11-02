@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { eq, sql } from 'drizzle-orm'
 import { authorizations, beginComparison, evalRuns, captureSession, claims, comparisons, completeComparison, draftClaim, findingOutcomes, holds, priceEntries, recordPhoto, rentals, sealSession, startCaptureSession } from './index.ts'
 import { closeSettledRental } from './settlement-repository.ts'
-import { acceptedEvalRun, fieldRecord, gateRunHistory, recordEvalRun, recordFindingOutcomes } from './scorecard-repository.ts'
+import { acceptedEvalRun, acceptedEvalRunAsOwner, fieldRecord, gateRunHistory, recordEvalRun, recordFindingOutcomes, withdrawnEvalRun } from './scorecard-repository.ts'
 import { measureEvaluation } from '@hold/domain'
 import { createTestDatabase } from './testing/test-database.ts'
 import type { TestDatabase } from './testing/test-database.ts'
@@ -100,5 +100,20 @@ describe('the scorecard\'s runs', () => {
 
   it('lets no service write a run', async () => {
     await expect(shop.act((transaction) => transaction.insert(evalRuns).values(run(true, now)))).rejects.toThrow()
+  })
+
+  it('stops showing a withdrawn run or measuring the next run against it, and says when it was withdrawn and why', async () => {
+    const id = await recordEvalRun(database, run(true, new Date('2026-10-30T10:00:00Z')))
+    expect((await other.act((transaction) => acceptedEvalRun(transaction)))?.id).toBe(id)
+    await database.update(evalRuns).set({ withdrawnAt: new Date('2026-11-03T09:00:00Z'), withdrawnReason: 'model_not_asked' }).where(eq(evalRuns.id, id))
+    expect((await other.act((transaction) => acceptedEvalRun(transaction)))?.id).not.toBe(id)
+    expect((await acceptedEvalRunAsOwner(database))?.id).not.toBe(id)
+    expect(await other.act((transaction) => withdrawnEvalRun(transaction))).toEqual({ completedAt: new Date('2026-10-30T10:00:00Z'), withdrawnAt: new Date('2026-11-03T09:00:00Z'), reason: 'model_not_asked' })
+  })
+
+  it('never records a withdrawal without its reason', async () => {
+    const id = await recordEvalRun(database, run(false, new Date('2026-10-31T10:00:00Z')))
+    await expect(database.update(evalRuns).set({ withdrawnAt: now }).where(eq(evalRuns.id, id))).rejects.toThrow()
+    await expect(database.update(evalRuns).set({ withdrawnAt: now, withdrawnReason: sql`'because'` }).where(eq(evalRuns.id, id))).rejects.toThrow()
   })
 })
