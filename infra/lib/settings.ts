@@ -20,11 +20,11 @@ export const TAGS: Readonly<Record<string, string>> = {
   managed_by: 'cdk',
 }
 
-// Object Lock keeps an evidence photograph from being changed or deleted for this long after it is written.
-// PayPal accepts a dispute for up to 180 days after a payment. The retention a shop states may lengthen it
-// (architecture.md section 22.2). Governance mode, so a mistake during the hackathon can still be undone by an
-// administrator. Compliance mode cannot be undone by anyone, the account's root user included.
-export const EVIDENCE_RETENTION_DAYS = 180
+// Object Lock keeps an evidence photograph from being changed or deleted for EVIDENCE_LOCK_DAYS after it is written,
+// and a lifecycle rule deletes it after EVIDENCE_KEPT_DAYS. Both come from the domain, where the privacy notice reads
+// the same period. Governance mode, so a mistake during the hackathon can still be undone by an administrator.
+// Compliance mode cannot be undone by anyone, the account's root user included.
+export { EVIDENCE_KEPT_DAYS, EVIDENCE_LOCK_DAYS } from '@hold/domain'
 
 // Aurora capacity units. Zero lets the cluster pause when idle. Set the minimum to 0.5 for the judging weeks, 1 to 15
 // December 2026, and back to zero on 16 December, so a judge's first visit does not wait for the database to resume
