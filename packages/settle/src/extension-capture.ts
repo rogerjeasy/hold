@@ -18,7 +18,7 @@ export async function requestExtensionCapture(dependencies: RequestDependencies,
 }
 
 // PayPal has nothing for the renter: the capture was refused, or never went through.
-const NOT_TAKEN: ReadonlySet<string> = new Set(['declined', 'failed', 'refunded'])
+const NOT_TAKEN: ReadonlySet<string> = new Set(['declined', 'failed', 'refunded', 'reversed'])
 
 // Throws while PayPal cannot be reached, so the queue tries again. When PayPal refuses, nothing was taken and the
 // rental's old end comes back. A capture PayPal reports as pending is read back, never made again: when PayPal's event

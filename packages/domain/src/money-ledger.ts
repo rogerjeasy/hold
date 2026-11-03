@@ -5,8 +5,14 @@ import type { HoldState } from './hold.ts'
 // here moves money or decides anything, it only reads the lines back.
 
 // extension_captured: extra days a renter paid for from their phone (architecture.md section 6.14), never from the hold.
-export const MONEY_EVENT_KINDS = ['fee_captured', 'hold_placed', 'hold_renewed', 'hold_released', 'hold_captured', 'refunded', 'invoice_sent', 'invoice_paid', 'extension_captured'] as const
+// refunded_in_paypal: money PayPal returned to the renter from a capture Hold made, without Hold: a refund from PayPal's
+// own pages or a reversal, such as after a lost dispute (architecture.md section 8.7). refunded is a refund Hold made.
+export const MONEY_EVENT_KINDS = ['fee_captured', 'hold_placed', 'hold_renewed', 'hold_released', 'hold_captured', 'refunded', 'invoice_sent', 'invoice_paid', 'extension_captured', 'refunded_in_paypal'] as const
 export type MoneyEventKind = (typeof MONEY_EVENT_KINDS)[number]
+
+// Every kind of money that went back to the renter after it was taken, whoever sent it back. What a shop kept is what
+// it took less these.
+export const REFUND_KINDS: readonly MoneyEventKind[] = ['refunded', 'refunded_in_paypal']
 
 // A line of one rental's money log, in the order the log holds them: when it happened, then when it was written.
 export type LedgerLine = { readonly kind: MoneyEventKind; readonly amountCents: number; readonly occurredAt: Date }
@@ -24,6 +30,7 @@ const FIXED_FLOWS: Readonly<Record<Exclude<MoneyEventKind, 'hold_released'>, Lin
   hold_captured: 'to_shop',
   invoice_paid: 'to_shop',
   refunded: 'to_renter',
+  refunded_in_paypal: 'to_renter',
   hold_placed: 'held',
   hold_renewed: 'renewed',
   invoice_sent: 'invoiced',
@@ -77,7 +84,7 @@ export function rentalMoney(lines: readonly LedgerLine[], facts: RentalMoneyFact
   const flows = lineFlows(lines, facts.holdState)
   const flowing = (flow: LineFlow) => lines.filter((_, index) => flows[index] === flow).reduce((total, line) => total + line.amountCents, 0)
   const captured = sum(lines, 'hold_captured')
-  const refunded = sum(lines, 'refunded')
+  const refunded = REFUND_KINDS.reduce((total, kind) => total + sum(lines, kind), 0)
   const invoicePaid = sum(lines, 'invoice_paid')
   const released = lines.filter((line, index) => line.kind === 'hold_released' && flows[index] === 'to_renter').reduce((total, line) => total + line.amountCents, 0)
   const heldNowCents = facts.reservedCents !== null && facts.holdState !== null && HOLDING.includes(facts.holdState) ? facts.reservedCents : 0

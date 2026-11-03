@@ -61,6 +61,13 @@ describe('where a rental’s money stands', () => {
     expect(rentalMoney([line('hold_placed', 250_00, 1), line('hold_captured', 35_00, 5), line('hold_released', 215_00, 5), line('refunded', 40_00, 8)], facts()).checks).toEqual(['refunded_above_taken'])
   })
 
+  it('counts money PayPal returned without Hold as back with the renter, beside Hold\'s own refunds', () => {
+    const lines = [line('hold_placed', 250_00, 1), line('hold_captured', 35_00, 5), line('hold_released', 215_00, 5), line('refunded', 10_00, 7), line('refunded_in_paypal', 20_00, 8)]
+    expect(lineFlows(lines, 'captured').at(-1)).toBe('to_renter')
+    expect(rentalMoney(lines, facts())).toMatchObject({ backCents: 215_00 + 10_00 + 20_00, checks: [] })
+    expect(rentalMoney([...lines, line('refunded_in_paypal', 10_00, 9)], facts()).checks).toEqual(['refunded_above_taken'])
+  })
+
   it('flags a rental whose hold PayPal records differently, as the operations agent found', () => {
     expect(rentalMoney([line('hold_placed', 250_00, 1)], facts({ holdState: 'placed', claimCents: null, paypalDiffers: true }))).toMatchObject({ where: 'held', checks: ['paypal_differs'] })
   })

@@ -59,7 +59,7 @@ export const authorizationSchema = z.object({
 
 export const captureSchema = z.object({
   id: z.string().min(1),
-  status: z.enum(['COMPLETED', 'DECLINED', 'PARTIALLY_REFUNDED', 'PENDING', 'REFUNDED', 'FAILED']),
+  status: z.enum(['COMPLETED', 'DECLINED', 'PARTIALLY_REFUNDED', 'PENDING', 'REFUNDED', 'FAILED', 'REVERSED']),
   amount: amountSchema,
   final_capture: z.boolean(),
   create_time: timeSchema,

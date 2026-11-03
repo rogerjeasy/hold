@@ -3,6 +3,7 @@ import { and, count, eq, inArray, notInArray, sql } from 'drizzle-orm'
 import { captureSessions, claimLines, claims, comparisons, findings, items, marks, moneyEvents, rentalItems, rentals } from './schema/index.ts'
 import { repairCosts } from './repair-repository.ts'
 import type { Transaction } from './scope.ts'
+import { REFUND_KINDS } from '@hold/domain'
 
 // What the fleet passport reads (extensions.md section 12.5): for every item, each rental that went out with the damage
 // the comparison found on the item at the return, the claim lines about the item (those priced from its findings, or
@@ -57,10 +58,10 @@ export async function fleetRecords(transaction: Transaction): Promise<FleetItemR
   const collected = rentalIds.length === 0 ? [] : await transaction
     .select({
       rentalId: moneyEvents.rentalId,
-      cents: sql<number>`coalesce(sum(case when ${moneyEvents.kind} = 'refunded' then -${moneyEvents.amountCents} else ${moneyEvents.amountCents} end), 0)::bigint`.mapWith(Number),
+      cents: sql<number>`coalesce(sum(case when ${inArray(moneyEvents.kind, [...REFUND_KINDS])} then -${moneyEvents.amountCents} else ${moneyEvents.amountCents} end), 0)::bigint`.mapWith(Number),
     })
     .from(moneyEvents)
-    .where(and(inArray(moneyEvents.kind, ['hold_captured', 'invoice_paid', 'refunded']), inArray(moneyEvents.rentalId, rentalIds)))
+    .where(and(inArray(moneyEvents.kind, ['hold_captured', 'invoice_paid', ...REFUND_KINDS]), inArray(moneyEvents.rentalId, rentalIds)))
     .groupBy(moneyEvents.rentalId)
   const open = await transaction.select({ itemId: marks.itemId, count: count(marks.id) }).from(marks).where(eq(marks.status, 'open')).groupBy(marks.itemId)
 

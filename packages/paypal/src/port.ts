@@ -25,7 +25,8 @@ export type Authorization = {
   readonly expiresAt: Date
 }
 
-export type CaptureStatus = 'completed' | 'pending' | 'declined' | 'failed' | 'partially_refunded' | 'refunded'
+// reversed: PayPal took the money back, such as after a chargeback or a lost dispute.
+export type CaptureStatus = 'completed' | 'pending' | 'declined' | 'failed' | 'partially_refunded' | 'refunded' | 'reversed'
 
 export type Capture = {
   readonly captureId: string
@@ -133,6 +134,8 @@ export const PAYPAL_EVENT_TYPES = [
   'PAYMENT.CAPTURE.COMPLETED',
   'PAYMENT.CAPTURE.DENIED',
   'PAYMENT.CAPTURE.REFUNDED',
+  // Money PayPal took back from a capture, such as after a chargeback or a lost dispute.
+  'PAYMENT.CAPTURE.REVERSED',
   'PAYMENT.AUTHORIZATION.CREATED',
   'PAYMENT.AUTHORIZATION.VOIDED',
   'INVOICING.INVOICE.PAID',

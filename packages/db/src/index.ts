@@ -45,6 +45,8 @@ export { chooseEmail, confirmPhone, decisionCopyRecipient, issueContactChangeCod
 export type { RentalText } from './renter-contact-repository.ts'
 export type { RenterLink, RenterView } from './renter-repository.ts'
 export { executionsToRecheck } from './execution-rechecks.ts'
+export { recordReturnedInPayPal } from './returned-in-paypal.ts'
+export type { ReturnedInPayPal } from './returned-in-paypal.ts'
 export type { ExecutionToRecheck } from './execution-rechecks.ts'
 export { feeRentalByOrder, markOutboxSent, outboxWrittenAt, markPayPalEvent, PAYPAL_EVENTS_QUEUE, payPalEvent, pendingOutbox, recordPayPalEvent } from './paypal-event-repository.ts'
 export type { Delivery, OutboxMessage, RecordResult, StoredEvent } from './paypal-event-repository.ts'

@@ -59,13 +59,17 @@ const SHAPES: Record<MoneyEventKind, Shape> = {
   invoice_sent: { status: 'SENT', actions: ['invoice'], id: 'invoice', events: [] },
   invoice_paid: { status: 'PAID', actions: ['invoice'], id: 'invoice', events: ['INVOICING.INVOICE.PAID'] },
   extension_captured: { ...CAPTURED, actions: ['extension_capture'] },
+  // Money PayPal returned without Hold: no call of Hold's leads to it, and PayPal's refund names it.
+  refunded_in_paypal: { status: 'COMPLETED', actions: [], id: 'refund', events: ['PAYMENT.CAPTURE.REFUNDED'] },
 }
 // A final capture releases the rest of the hold in the same call; the authorization then reads captured.
 const REMAINDER: Shape = { status: 'CAPTURED', actions: ['capture'], id: 'authorization', events: [] }
-const shapeOf = (kind: MoneyEventKind, reference: string) => (kind === 'hold_released' && reference.endsWith(':remainder') ? REMAINDER : SHAPES[kind])
+// A reversal is PayPal taking a capture back: the line names the capture, which PayPal then reads reversed.
+const REVERSED: Shape = { status: 'REVERSED', actions: [], id: 'capture', events: ['PAYMENT.CAPTURE.REVERSED'] }
+const shapeOf = (kind: MoneyEventKind, reference: string) => (kind === 'hold_released' && reference.endsWith(':remainder') ? REMAINDER : kind === 'refunded_in_paypal' && reference.endsWith(':reversed') ? REVERSED : SHAPES[kind])
 
 // Lines written in one moment keep the order money moves in, and a call not yet confirmed comes after them.
-const ORDER: readonly MoneyEventKind[] = ['fee_captured', 'hold_placed', 'hold_renewed', 'hold_captured', 'hold_released', 'invoice_sent', 'invoice_paid', 'refunded', 'extension_captured']
+const ORDER: readonly MoneyEventKind[] = ['fee_captured', 'hold_placed', 'hold_renewed', 'hold_captured', 'hold_released', 'invoice_sent', 'invoice_paid', 'refunded', 'refunded_in_paypal', 'extension_captured']
 const rank = (line: PayPalRecordLine) => (line.kind === null ? ORDER.length : ORDER.indexOf(line.kind))
 
 const paypalIds = (resources: Readonly<Record<string, string>>): PayPalIds => Object.fromEntries(CALL_IDS.flatMap((key) => (resources[key] === undefined ? [] : [[key, resources[key]]])))

@@ -1,4 +1,4 @@
-import { addDays, closedOutcome, countsTowardRecord, INVOICE_DUE_DAYS, money, outcomeNow } from '@hold/domain'
+import { addDays, closedOutcome, countsTowardRecord, INVOICE_DUE_DAYS, money, outcomeNow, REFUND_KINDS } from '@hold/domain'
 import type { ItemCategory, ItemHold, MoneyLogLine, OutcomeClass, OutcomeRow, PastRental, StoredOutcome, TrustLadder } from '@hold/domain'
 import { asc, desc, eq, inArray, sql } from 'drizzle-orm'
 import { items, itemTypes, moneyEvents, rentalItems, rentalOutcomes, rentals, renters, shops, trustLadders, trustRungs } from './schema/index.ts'
@@ -165,7 +165,7 @@ async function outcomeFacts(transaction: Transaction, rentalId: string) {
 // Captured from the hold, plus an invoice paid, less what was refunded.
 function takenFor(events: readonly { readonly kind: string; readonly cents: number }[]): number {
   const sum = (kind: string) => events.filter((event) => event.kind === kind).reduce((total, event) => total + event.cents, 0)
-  return Math.max(0, sum('hold_captured') + sum('invoice_paid') - sum('refunded'))
+  return Math.max(0, sum('hold_captured') + sum('invoice_paid') - REFUND_KINDS.reduce((total, kind) => total + sum(kind), 0))
 }
 
 // Written in the transaction that closes the rental. An open outcome written while its invoice waited becomes settled.

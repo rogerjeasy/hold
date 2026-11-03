@@ -1,4 +1,4 @@
-import { money, settle } from '@hold/domain'
+import { money, REFUND_KINDS, settle } from '@hold/domain'
 import { and, asc, desc, eq, isNull, sql } from 'drizzle-orm'
 import { approvals, captureSessions, claimLines, claimReplies, claims, comparisons, executions, findings, holds, incidents, invoices, items, marks, moneyEvents, photos, priceEntries, rentalItems, rentals, users } from './schema/index.ts'
 import { shopPayPalMode } from './paypal-mode.ts'
@@ -36,7 +36,7 @@ export async function claimWorkspace(transaction: Transaction, rentalId: string)
   const [execution] = await transaction.select({ state: executions.state, action: executions.action, lastError: executions.lastError }).from(executions).where(and(eq(executions.rentalId, rentalId), eq(executions.holdId, hold.id))).orderBy(desc(executions.createdAt), desc(sql`case ${executions.action} when 'refund' then 5 when 'invoice' then 4 when 'capture' then 3 when 'release' then 2 else 1 end`), desc(executions.updatedAt)).limit(1)
   const replies = claim === undefined ? [] : await transaction.select({ decision: claimReplies.decision, comment: claimReplies.comment }).from(claimReplies).where(eq(claimReplies.claimId, claim.id)).orderBy(asc(claimReplies.createdAt))
   const decisions = claim === undefined ? [] : await transaction.select({ decision: approvals.decision, name: users.name }).from(approvals).leftJoin(users, eq(users.id, approvals.decidedByUserId)).where(eq(approvals.subjectId, claim.id)).orderBy(asc(approvals.createdAt))
-  const refundedCents = payments.filter((payment) => payment.kind === 'refunded').reduce((sum, payment) => sum + payment.amountCents, 0)
+  const refundedCents = payments.filter((payment) => REFUND_KINDS.includes(payment.kind)).reduce((sum, payment) => sum + payment.amountCents, 0)
   const effectiveTotal = claim?.state === 'waived' || hold.state === 'released' || decisions.some((decision) => decision.decision === 'waived') ? 0 : Math.max(0, (claim?.totalCents ?? 0) - refundedCents)
   const amounts = hold.state === 'invoiced' || (hold.state === 'expired' && bills.length > 0) ? { capture: money(0, rental.currency), release: money(hold.reservedCents, rental.currency), invoice: money(effectiveTotal, rental.currency) } : settle(money(effectiveTotal, rental.currency), money(hold.reservedCents, hold.currency))
   return { protectedReply, agreedIncidents, rentalId, rentalState: rental.state, currency: rental.currency, simulated: rental.simulated, reservedCents: hold.reservedCents, holdState: hold.state, claim: claim === undefined ? null : { id: claim.id, state: claim.state, totalCents: claim.totalCents, raisedByUserId: claim.raisedByUserId, replyDueAt: claim.replyDueAt }, prices, possibleFindings, lines, payments, invoices: bills, execution: execution ?? null, replies, decisions, amounts }

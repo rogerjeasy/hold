@@ -4534,7 +4534,7 @@
       "checkConstraints": {
         "kind_allowed": {
           "name": "kind_allowed",
-          "value": "\"money_events\".\"kind\" in ('fee_captured', 'hold_placed', 'hold_renewed', 'hold_released', 'hold_captured', 'refunded', 'invoice_sent', 'invoice_paid', 'extension_captured')"
+          "value": "\"money_events\".\"kind\" in ('fee_captured', 'hold_placed', 'hold_renewed', 'hold_released', 'hold_captured', 'refunded', 'invoice_sent', 'invoice_paid', 'extension_captured', 'refunded_in_paypal')"
         }
       },
       "isRLSEnabled": false

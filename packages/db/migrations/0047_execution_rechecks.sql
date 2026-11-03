@@ -15,3 +15,9 @@ LANGUAGE sql VOLATILE SECURITY DEFINER SET search_path = public, pg_temp AS $$
 $$;--> statement-breakpoint
 REVOKE EXECUTE ON FUNCTION hold_executions_to_recheck(timestamptz, timestamptz, integer) FROM PUBLIC;--> statement-breakpoint
 GRANT EXECUTE ON FUNCTION hold_executions_to_recheck(timestamptz, timestamptz, integer) TO hold_worker;
+--> statement-breakpoint
+
+-- Money PayPal returned to the renter from a capture Hold made, without Hold: a refund made in PayPal, or a reversal
+-- (architecture.md section 8.7). A kind of its own, so it is never taken for a refund Hold made.
+ALTER TABLE "money_events" DROP CONSTRAINT "kind_allowed";--> statement-breakpoint
+ALTER TABLE "money_events" ADD CONSTRAINT "kind_allowed" CHECK ("money_events"."kind" in ('fee_captured', 'hold_placed', 'hold_renewed', 'hold_released', 'hold_captured', 'refunded', 'invoice_sent', 'invoice_paid', 'extension_captured', 'refunded_in_paypal'));

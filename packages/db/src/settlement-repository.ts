@@ -1,4 +1,4 @@
-import { CLAIM_TRANSITIONS, HOLD_TRANSITIONS, mayCapture, mayCloseRental, money, RENTAL_TRANSITIONS, settle, transition } from '@hold/domain'
+import { CLAIM_TRANSITIONS, HOLD_TRANSITIONS, mayCapture, mayCloseRental, money, REFUND_KINDS, RENTAL_TRANSITIONS, settle, transition } from '@hold/domain'
 import { closeRentalIncidents } from './incident-closing.ts'
 import { and, eq } from 'drizzle-orm'
 import { reserveEvidencePack } from './evidence-repository.ts'
@@ -99,7 +99,7 @@ export async function mayExecuteSettlement(transaction: Transaction, executionId
   if (execution.action === 'refund' && claim !== undefined) {
     const approved = await transaction.select().from(approvals).where(and(eq(approvals.subject, 'refund'), eq(approvals.subjectId, claim.id), eq(approvals.decision, 'approved')))
     const events = await transaction.select().from(moneyEvents).where(eq(moneyEvents.rentalId, claim.rentalId))
-    const refundable = events.filter((event) => event.kind === 'hold_captured').reduce((sum, event) => sum + event.amountCents, 0) - events.filter((event) => event.kind === 'refunded').reduce((sum, event) => sum + event.amountCents, 0)
+    const refundable = events.filter((event) => event.kind === 'hold_captured').reduce((sum, event) => sum + event.amountCents, 0) - events.filter((event) => REFUND_KINDS.includes(event.kind)).reduce((sum, event) => sum + event.amountCents, 0)
     return claim.state === 'charged' && execution.amountCents <= refundable && approved.some((approval) => approval.changes.some((change) => change['totalCents'] === execution.amountCents && change['captureId'] === execution.paypalResourceIds['capture']))
   }
   return false
