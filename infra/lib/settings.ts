@@ -24,7 +24,7 @@ export const TAGS: Readonly<Record<string, string>> = {
 // and a lifecycle rule deletes it after EVIDENCE_KEPT_DAYS. Both come from the domain, where the privacy notice reads
 // the same period. Governance mode, so a mistake during the hackathon can still be undone by an administrator.
 // Compliance mode cannot be undone by anyone, the account's root user included.
-export { EVIDENCE_KEPT_DAYS, EVIDENCE_LOCK_DAYS } from '@hold/domain'
+export { BACKUP_KEPT_DAYS, EVIDENCE_KEPT_DAYS, EVIDENCE_LOCK_DAYS } from '@hold/domain'
 
 // Aurora capacity units. Zero lets the cluster pause when idle. Set the minimum to 0.5 for the judging weeks, 1 to 15
 // December 2026, and back to zero on 16 December, so a judge's first visit does not wait for the database to resume

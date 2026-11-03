@@ -1031,7 +1031,7 @@
           },
           "backups": {
             "title": "Copias de seguridad",
-            "body": "Se guardan 7 días, así que un borrado ha salido de las copias en una semana."
+            "body": "Se guardan {backupDays} días, así que un borrado ha salido de las copias {backupDays} días después."
           },
           "links": {
             "title": "Tu enlace de alquiler",

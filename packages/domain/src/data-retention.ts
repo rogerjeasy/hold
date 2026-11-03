@@ -11,3 +11,6 @@ export const EVIDENCE_LOCK_DAYS = PAYPAL_DISPUTE_DAYS
 // Then they are deleted, with the face-blurred copies made from them: one year after they were written. The year covers
 // the lock, the longest a hold lets a charge come after the handover, and the dispute window after that charge.
 export const EVIDENCE_KEPT_DAYS = 365
+
+// The database's automated backups are kept this long, so an erased renter's details leave them this many days later.
+export const BACKUP_KEPT_DAYS = 7

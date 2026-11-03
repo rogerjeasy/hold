@@ -1031,7 +1031,7 @@
           },
           "backups": {
             "title": "Datenbanksicherungen",
-            "body": "7 Tage lang aufbewahrt, eine Löschung ist also nach einer Woche auch aus den Sicherungen verschwunden."
+            "body": "{backupDays} Tage lang aufbewahrt, eine Löschung ist also {backupDays} Tage danach auch aus den Sicherungen verschwunden."
           },
           "links": {
             "title": "Ihr Mietlink",

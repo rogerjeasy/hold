@@ -1031,7 +1031,7 @@
           },
           "backups": {
             "title": "Database backups",
-            "body": "Kept for 7 days, so an erasure has left the backups within a week."
+            "body": "Kept for {backupDays} days, so an erasure has left the backups {backupDays} days after it."
           },
           "links": {
             "title": "Your rental link",

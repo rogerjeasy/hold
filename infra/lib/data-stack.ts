@@ -12,6 +12,7 @@ import {
   DATABASE_MAX_CAPACITY,
   DATABASE_MIN_CAPACITY,
   DATABASE_NAME,
+  BACKUP_KEPT_DAYS,
   EVIDENCE_KEPT_DAYS,
   EVIDENCE_LOCK_DAYS,
   name,
@@ -54,7 +55,7 @@ function createDatabase(stack: Stack) {
     vpcSubnets: { subnetType: ec2.SubnetType.PUBLIC },
     securityGroups: [securityGroup],
     storageEncrypted: true,
-    backup: { retention: Duration.days(7) },
+    backup: { retention: Duration.days(BACKUP_KEPT_DAYS) },
     deletionProtection: true,
     removalPolicy: RemovalPolicy.RETAIN,
   })

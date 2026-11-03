@@ -1,4 +1,4 @@
-import { EVIDENCE_KEPT_DAYS, EVIDENCE_LOCK_DAYS } from '@hold/domain'
+import { BACKUP_KEPT_DAYS, EVIDENCE_KEPT_DAYS, EVIDENCE_LOCK_DAYS } from '@hold/domain'
 import { useTranslations } from 'next-intl'
 import { routes } from '@/lib/routes'
 import { FeatureGrid } from '../feature-grid'
@@ -15,7 +15,7 @@ const erasureKeys = ['ask', 'owner', 'kept', 'payer', 'record'] as const
 // lifecycle rules are built from, so the page and the storage say the same thing.
 export function PrivacyScreen() {
   const t = useTranslations('pages.privacy')
-  const periods = { lockDays: EVIDENCE_LOCK_DAYS, keptDays: EVIDENCE_KEPT_DAYS }
+  const periods = { lockDays: EVIDENCE_LOCK_DAYS, keptDays: EVIDENCE_KEPT_DAYS, backupDays: BACKUP_KEPT_DAYS }
 
   return (
     <>

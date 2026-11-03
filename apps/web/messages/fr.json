@@ -1031,7 +1031,7 @@
           },
           "backups": {
             "title": "Sauvegardes de la base",
-            "body": "Gardées 7 jours : un effacement a donc quitté les sauvegardes en une semaine."
+            "body": "Gardées {backupDays} jours : un effacement a donc quitté les sauvegardes {backupDays} jours après."
           },
           "links": {
             "title": "Votre lien de location",

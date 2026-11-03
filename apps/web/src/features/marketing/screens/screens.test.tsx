@@ -1,7 +1,7 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactElement } from 'react'
-import { EVIDENCE_KEPT_DAYS, EVIDENCE_LOCK_DAYS } from '@hold/domain'
+import { BACKUP_KEPT_DAYS, EVIDENCE_KEPT_DAYS, EVIDENCE_LOCK_DAYS } from '@hold/domain'
 import { describe, expect, it } from 'vitest'
 import { renderWithIntl } from '@/test/render'
 import { AiScreen } from './ai-screen'
@@ -281,6 +281,7 @@ describe('PrivacyScreen', () => {
   it('states the periods the evidence bucket keeps, from the same constants', () => {
     renderWithIntl(<PrivacyScreen />)
     expect(screen.getByText(new RegExp(`for ${String(EVIDENCE_LOCK_DAYS)} days.*deleted ${String(EVIDENCE_KEPT_DAYS)} days after they were taken`))).toBeInTheDocument()
+    expect(screen.getByText(`Kept for ${String(BACKUP_KEPT_DAYS)} days, so an erasure has left the backups ${String(BACKUP_KEPT_DAYS)} days after it.`)).toBeInTheDocument()
   })
 
   it('names everyone who handles the details for Hold', () => {
