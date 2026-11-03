@@ -46,11 +46,15 @@
     "tagline": "La caution qui ne quitte jamais votre compte.",
     "home": {
       "title": "Hold : la caution qui ne quitte jamais votre compte",
-      "description": "Hold réserve la caution d'une location avec PayPal et ne débite rien. Au retour, les photographies de la remise sont comparées à celles du retour, et une personne approuve chaque débit."
+      "description": "Une autorisation PayPal au lieu d'une caution. Du code trouve ce qui a changé, Claude l'explique, une personne approuve chaque centime d'après une liste de prix publiée, et deux défenseurs encadrés règlent une réclamation contestée."
     },
     "howItWorks": {
       "title": "Comment fonctionne Hold",
       "description": "Une location en quatre moments : réserver, remettre, rendre et régler."
+    },
+    "advocates": {
+      "title": "Les deux défenseurs",
+      "description": "Quand un client conteste une réclamation, Claude défend chaque partie dans une limite fixée par sa propre personne, du code classique arbitre chaque offre, et les deux personnes confirment."
     },
     "forShops": {
       "title": "Hold pour les loueurs",
@@ -111,6 +115,7 @@
     "main": "Principale",
     "home": "Hold, page d'accueil",
     "howItWorks": "Fonctionnement",
+    "advocates": "Défenseurs",
     "forShops": "Pour les loueurs",
     "forRenters": "Pour les clients",
     "ai": "L'IA",
@@ -149,7 +154,7 @@
   },
   "hero": {
     "title": "Une photo règle tout.",
-    "lead": "Hold réserve la caution avec PayPal et ne débite rien. Au retour, il compare chaque photographie à celle prise à la remise. Le loueur et le client voient le même résultat, et une personne approuve chaque débit."
+    "lead": "Hold réserve la caution avec PayPal et ne débite rien. Au retour, du code trouve ce qui a changé entre deux photographies avant que Claude ne l'explique, une personne nommée approuve chaque centime d'après une liste de prix publiée, et le client voit les mêmes preuves. Quand les deux parties ne sont pas d'accord, deux défenseurs en débattent dans les limites fixées par chacune."
   },
   "evidence": {
     "handover": "Remise",
@@ -216,6 +221,53 @@
       "reserved": "Réservé",
       "taken": "Prélevé",
       "released": "Libéré"
+    }
+  },
+  "advocatesBand": {
+    "title": "En cas de désaccord, deux défenseurs en débattent.",
+    "lead": "Claude défend la boutique et le client dans des appels séparés, chacun dans une limite fixée par sa propre personne. Du code classique arbitre chaque offre, et rien n'est débité avant que les deux personnes ne confirment.",
+    "caption": "Une exécution en direct sur la réclamation d'exemple de la démo, enregistrée le {date}",
+    "rules": {
+      "limits": {
+        "title": "Deux limites, jamais dans le même appel",
+        "body": "Le propriétaire fixe jusqu'où peut aller le défenseur de la boutique. Le client fixe le maximum qu'il paiera. Aucun défenseur ne voit jamais la limite de l'autre partie."
+      },
+      "referee": {
+        "title": "Un arbitre en code classique",
+        "body": "Aucune ligne ajoutée, aucune au-dessus de son prix publié, chaque réduction fondée sur les preuves, et l'écart entre les deux parties ne peut que se réduire."
+      },
+      "people": {
+        "title": "Des personnes tranchent",
+        "body": "Un accord ne peut que réduire une réclamation qu'une personne a déjà approuvée. Le propriétaire confirme, le client confirme avec un code à usage unique, et alors seulement PayPal prélève."
+      }
+    },
+    "action": "Lire toute l'exécution enregistrée",
+    "pointer": "Voir l'exécution enregistrée des défenseurs"
+  },
+  "joined": {
+    "title": "Ce que Hold joint à l'autorisation.",
+    "lead": "Les autorisations par carte, la comparaison de photos et une personne qui approuve existent chacune de leur côté. Hold en fait une seule décision, et ajoute ce qui la rend juste pour les deux parties.",
+    "items": {
+      "detect": {
+        "title": "Le code trouve, le modèle explique",
+        "body": "Du code classique aligne les deux photographies et trouve chaque changement avant de solliciter Claude. Chaque constat de dommage reçoit un second regard indépendant. Si le modèle est indisponible, rien n'est manqué : le changement attend une personne.",
+        "action": "Comment fonctionne la comparaison"
+      },
+      "operations": {
+        "title": "Un agent qui lit PayPal et ne peut pas débiter",
+        "body": "La nuit, un agent d'exploitation vérifie chaque autorisation et chaque réclamation auprès de PayPal, via le propre serveur MCP de PayPal et en lecture seule, et laisse une courte liste qu'une personne tranche.",
+        "action": "Ce que les agents peuvent faire"
+      },
+      "evidence": {
+        "title": "Des preuves que chacun peut vérifier",
+        "body": "Les photographies de la remise sont scellées et signées. Quiconque reçoit la déclaration peut la vérifier avec la clé publiée de Hold, sans le croire sur parole.",
+        "action": "Vérifier une déclaration signée"
+      },
+      "measured": {
+        "title": "Une précision comptée, pas proclamée",
+        "body": "La comparaison est mesurée sur des photographies sur lesquelles elle n'est jamais réglée, paire par paire, avec les chiffres et chaque paire publiés. Tant qu'aucune exécution n'est acceptée, la page le dit.",
+        "action": "Voir la page de fiabilité"
+      }
     }
   },
   "steps": {
@@ -365,9 +417,13 @@
             "title": "Le client répond sur le même écran",
             "body": "Il dit ce qu'il conteste et peut ajouter ses propres photographies."
           },
+          "advocates": {
+            "title": "Ou deux défenseurs en débattent",
+            "body": "Le client peut confier la contestation à un défenseur. Le défenseur de la boutique répond dans les limites du propriétaire, du code classique vérifie chaque offre, et les deux personnes confirment tout accord."
+          },
           "owner": {
             "title": "Le propriétaire décide",
-            "body": "Hold présente les deux positions côte à côte. Une personne nommée prend la décision finale et peut réduire ou annuler le débit."
+            "body": "Sans défenseurs, ou sans accord, Hold présente les deux positions côte à côte. Une personne nommée prend la décision finale et peut réduire ou annuler le débit."
           },
           "record": {
             "title": "Le dossier est déjà complet",
@@ -466,6 +522,85 @@
       "faq": {
         "title": "Les questions du comptoir.",
         "lead": "Des réponses courtes aux premières questions du personnel et des clients."
+      }
+    },
+    "advocates": {
+      "title": "Deux défenseurs en débattent. Le code arbitre. Des personnes décident.",
+      "lead": "Quand un client conteste une réclamation, Claude défend chaque partie dans son propre appel, dans une limite fixée par la personne de cette partie. Chaque offre passe par un arbitre écrit en code classique, et rien n'est débité avant que les deux personnes ne confirment.",
+      "action": "Les lancer en direct dans une boutique de démo",
+      "secondary": "Comment l'IA est encadrée",
+      "run": {
+        "title": "Une exécution, coup par coup.",
+        "lead": "Les deux défenseurs sur la réclamation d'exemple de la démo, enregistrés en direct depuis Amazon Bedrock. La cliente et sa limite sont inventées, et rien n'a été prélevé. Dans une boutique de démo à vous, la même réclamation tourne en direct.",
+        "caption": "Comment les deux parties ont réduit l'écart, enregistré le {date}",
+        "noneTitle": "Aucune exécution enregistrée pour l'instant",
+        "noneBody": "Ouvrez une boutique de démo à vous et lancez les défenseurs en direct sur sa réclamation d'exemple."
+      },
+      "referee": {
+        "title": "Ce que l'arbitre refuse.",
+        "lead": "L'arbitre est du code classique, pas un modèle, et lui seul décide si un coup est valable. Il ne lit jamais les mots d'un défenseur : seulement les montants, les motifs et les enregistrements de cette location qu'ils citent.",
+        "items": {
+          "lines": {
+            "title": "Aucune ligne ajoutée ni retirée",
+            "body": "Chaque offre couvre exactement les lignes de la réclamation qu'une personne a approuvée. Rien de nouveau ne peut y être glissé."
+          },
+          "price": {
+            "title": "Jamais au-dessus du prix publié",
+            "body": "Chaque ligne reste entre zéro et son prix sur la liste que le client a acceptée à la réservation."
+          },
+          "ground": {
+            "title": "Chaque réduction donne son motif",
+            "body": "Une marque déjà enregistrée, les règles d'usure, la photo du client lui-même, ou des photos qui ne permettent pas de trancher. Un motif fondé sur un enregistrement doit le nommer."
+          },
+          "gap": {
+            "title": "L'écart ne fait que se réduire",
+            "body": "Les offres de la boutique ne montent jamais et celles du client ne baissent jamais. Une offre qui croiserait celle de l'autre partie est refusée : il faut l'accepter."
+          },
+          "limit": {
+            "title": "Dans la limite de sa propre partie",
+            "body": "Une offre ou une acceptation hors de la limite de cette partie est refusée, et seule cette partie apprend pourquoi."
+          },
+          "time": {
+            "title": "Borné en coups et en temps",
+            "body": "Chaque partie a un nombre fixe d'offres et une échéance. Deux coups refusés de suite, un passage ou un défenseur arrêté y mettent fin, et le propriétaire tranche."
+          }
+        }
+      },
+      "limits": {
+        "title": "Deux limites, jamais dans le même appel.",
+        "lead": "Chaque défenseur est son propre appel à Claude, avec la limite de sa partie et rien de celle de l'autre. Ce qui passe entre eux est la formulation de chaque coup par Hold, pas celle du modèle.",
+        "items": {
+          "shop": {
+            "title": "La limite de la boutique",
+            "body": "Le propriétaire fixe la part minimale d'une réclamation que le défenseur de la boutique peut accepter, la plus grosse réclamation qu'il prend en charge, combien d'offres il peut faire et quand ses limites prennent fin."
+          },
+          "renter": {
+            "title": "La limite du client",
+            "body": "Le client écrit le maximum qu'il paiera. Lui seul le voit. Son défenseur ne peut pas accepter davantage et le consulte avant tout accord."
+          },
+          "words": {
+            "title": "Des coups, pas des messages",
+            "body": "Un coup porte des montants, des motifs et les identifiants des enregistrements de cette location. Le texte libre d'une partie n'atteint jamais l'autre, si bien qu'aucune ne peut circonvenir le défenseur d'en face."
+          }
+        }
+      },
+      "after": {
+        "title": "Seules des personnes tranchent.",
+        "lead": "Un accord reste une proposition tant que les deux personnes ne l'ont pas confirmé. PayPal prélève alors le montant convenu sur l'autorisation et libère le reste, et Hold relit le résultat auprès de PayPal.",
+        "items": {
+          "lower": {
+            "title": "Il ne peut que réduire un débit",
+            "body": "Au plus, un accord atteint la réclamation qu'une personne a déjà approuvée, ligne par ligne."
+          },
+          "confirm": {
+            "title": "Les deux personnes confirment",
+            "body": "Le propriétaire ou un responsable confirme pour la boutique. Le client confirme avec un code à usage unique. Si l'un refuse, le propriétaire tranche."
+          },
+          "chain": {
+            "title": "Chaque coup est chaîné",
+            "body": "L'empreinte de chaque coup couvre la précédente, si bien qu'un coup modifié, retiré ou déplacé rompt la chaîne. La transcription rejoint les preuves que reçoivent les deux parties."
+          }
+        }
       }
     },
     "forShops": {
@@ -686,7 +821,7 @@
       }
     },
     "ai": {
-      "title": "L'IA compare. Une personne décide.",
+      "title": "Le code trouve. L'IA explique. Une personne décide.",
       "lead": "La facturation automatique des dommages a mis les clients en colère parce qu'il n'y avait personne à qui s'adresser. Hold est construit à l'inverse : l'IA rassemble et compare, une personne décide, et le client voit tout.",
       "listsHeading": "Ce que fait l'IA, et ce qu'elle ne fait jamais",
       "limits": {
@@ -708,7 +843,7 @@
         }
       },
       "pipeline": {
-        "title": "Sept étapes. Le modèle en a une.",
+        "title": "Huit étapes. Le modèle en a deux.",
         "lead": "La méthode fiable la moins coûteuse passe en premier. Tout ce qui ne doit pas être manqué est détecté par du code classique, et fonctionne encore quand le modèle est indisponible.",
         "actors": {
           "code": "Code classique",
@@ -735,6 +870,10 @@
           "judge": {
             "title": "Juger",
             "body": "Le modèle regarde les deux photographies et un gros plan de chaque zone. Il répond aucun changement, usure ou dommage, et dit à quel point il en est sûr."
+          },
+          "second": {
+            "title": "Regarder à nouveau",
+            "body": "Chaque constat de dommage reçoit un second regard indépendant, sur un cadrage plus large, dans un appel distinct. Si les deux regards divergent, le retour attend une personne."
           },
           "price": {
             "title": "Chiffrer",
@@ -796,6 +935,28 @@
           "title": "Chaque chiffre est publié avec son effectif.",
           "body": "La page de fiabilité montre la dernière exécution acceptée sur le jeu d’évaluation, ou dit clairement qu’aucune ne l’a encore été."
         }
+      },
+      "operations": {
+        "title": "Un agent d'exploitation qui lit PayPal et ne peut pas débiter.",
+        "lead": "Pendant que la boutique est fermée, un agent vérifie chaque autorisation, réclamation et litige auprès du propre registre de PayPal. Le matin, le propriétaire trouve quelques lignes à approuver, refuser ou reporter.",
+        "items": {
+          "read": {
+            "title": "En lecture seule dans PayPal",
+            "body": "Il lit commandes, autorisations et litiges via le serveur MCP de PayPal avec des outils en lecture seule. Il n'a aucun outil qui prélève, annule ou rembourse."
+          },
+          "propose": {
+            "title": "Il propose, une personne décide",
+            "body": "Libérer cette autorisation, en demander une nouvelle, répondre à ce litige avec le dossier de preuves. Chaque ligne donne son motif et la référence PayPal qui la fonde."
+          },
+          "never": {
+            "title": "Il ne propose jamais de débit",
+            "body": "Un débit ne peut venir que d'une réclamation qu'une personne a approuvée. Les propositions de l'agent n'ont aucun type qui prend de l'argent."
+          }
+        }
+      },
+      "queue": {
+        "title": "La liste d'une nuit, telle que l'agent l'a écrite.",
+        "lead": "Le code a trouvé ce qui demande une décision. L'agent a lu PayPal pour chaque point et proposé quoi faire. Rien n'a été exécuté : dans une boutique, une personne approuve, refuse ou reporte chaque ligne."
       },
       "agents": {
         "title": "Un agent n'agit que dans les limites écrites par une personne.",
@@ -908,6 +1069,10 @@
             "body": "Une ligne permanente dans le journal des fonds, liée à l'événement PayPal qui l'a confirmée."
           }
         }
+      },
+      "agreement": {
+        "title": "Quand les deux parties ne sont pas d'accord, la même autorisation règle tout.",
+        "lead": "Deux défenseurs débattent d'une réclamation contestée dans la limite de chaque partie. Dès que les deux personnes confirment, PayPal prélève le montant convenu sur la même autorisation par une capture finale et libère le reste, et Hold relit le résultat auprès de PayPal."
       }
     },
     "demo": {
@@ -3949,6 +4114,16 @@
         "body": "Claude Opus 4.6 sur Amazon Bedrock a défendu les deux parties de la réclamation d’exemple de la démonstration le {date}. Voici cette exécution telle qu’elle a été enregistrée, et non la réclamation de cette démo, pour voir les défenseurs à l’œuvre quand il ne reste plus d’exécution réelle.",
         "details": "Modèle {model} · prompt {promptVersion} · {calls, plural, one {# appel} other {# appels}} · {tokens} jetons"
       }
+    },
+    "ladder": {
+      "opening": "Ouvre avec la réclamation",
+      "offer": "Propose",
+      "accept": "Accepte",
+      "pass": "Passe",
+      "agreed": "Accord : {amount}",
+      "agreedNote": "Sur une réclamation de {amount}. Rien n'est débité avant que les deux personnes ne confirment.",
+      "escalated": "Pas d'accord : le propriétaire tranche, avec la transcription.",
+      "open": "Les défenseurs échangent encore des offres."
     }
   },
   "operations": {
@@ -4129,7 +4304,16 @@
       "notAnswered": "Claude n’a pas répondu à {at}, les entrées d’exemple restent donc telles quelles.",
       "stalled": "L’examen lancé à {at} ne s’est pas terminé. Vous pouvez le relancer."
     },
-    "allClear": "Tout est à jour"
+    "allClear": "Tout est à jour",
+    "recorded": {
+      "title": "Une exécution enregistrée de l'agent d'exploitation",
+      "body": "{model} a examiné la liste d'exemple de la démo le {date}. Les outils de lecture de PayPal ont répondu à partir des propres enregistrements des exemples, simulés, car les références d'un exemple n'ont jamais été chez PayPal.",
+      "details": "Prompt {promptVersion} · {calls, plural, one {# lecture PayPal} other {# lectures PayPal}} · {tokens} jetons",
+      "tools": "Outils PayPal appelés, tous en lecture seule",
+      "found": "Ce que le code a trouvé",
+      "wrote": "Ce que l'agent a écrit",
+      "decides": "Une simple proposition. Une personne l'approuve, la refuse ou la reporte."
+    }
   },
   "decisions": {
     "title": "Décisions",

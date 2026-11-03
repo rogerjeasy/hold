@@ -7,6 +7,9 @@
     ".": "./src/index.ts",
     "./run": "./src/run.ts"
   },
+  "scripts": {
+    "record:sample": "node --env-file-if-exists=../../.env scripts/record-sample-investigation.ts"
+  },
   "dependencies": {
     "@anthropic-ai/bedrock-sdk": "^0.34.4",
     "@anthropic-ai/sdk": "^0.133.0",

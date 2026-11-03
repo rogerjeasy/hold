@@ -20,6 +20,7 @@ describe('MobileMenu', () => {
     const menu = await openMenu()
     expect(menu.getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual([
       '/how-it-works',
+      '/advocates',
       '/for-shops',
       '/for-renters',
       '/ai',

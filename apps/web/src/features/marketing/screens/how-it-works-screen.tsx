@@ -1,5 +1,6 @@
-import { FolderCheck, MessageSquareReply, Scale } from 'lucide-react'
+import { FolderCheck, MessageSquareReply, MessagesSquare, Scale } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { AdvocatesPointer } from '../advocates-pointer'
 import { ClosingCall } from '../closing-call'
 import { exampleRental } from '../example-rental'
 import { Faq, type FaqKey } from '../faq'
@@ -12,6 +13,7 @@ import { useExampleMoney } from '../use-example-money'
 
 const contested = [
   { key: 'reply', icon: MessageSquareReply },
+  { key: 'advocates', icon: MessagesSquare },
   { key: 'owner', icon: Scale },
   { key: 'record', icon: FolderCheck },
 ] as const
@@ -38,14 +40,18 @@ export function HowItWorksScreen() {
         <MomentList />
       </UntitledSection>
       <TitledSection title={t('contested.title')} lead={t('contested.lead')} tone="band">
-        <FeatureGrid
-          tone="band"
-          items={contested.map(({ key, icon }) => ({
-            title: t(`contested.items.${key}.title`),
-            body: t(`contested.items.${key}.body`),
-            icon,
-          }))}
-        />
+        <div className="grid gap-6">
+          <FeatureGrid
+            tone="band"
+            columns="four"
+            items={contested.map(({ key, icon }) => ({
+              title: t(`contested.items.${key}.title`),
+              body: t(`contested.items.${key}.body`),
+              icon,
+            }))}
+          />
+          <AdvocatesPointer tone="band" />
+        </div>
       </TitledSection>
       <Faq title={t('faq.title')} lead={t('faq.lead')} questions={questions} />
       <ClosingCall />

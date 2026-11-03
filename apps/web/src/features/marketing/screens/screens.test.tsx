@@ -4,6 +4,7 @@ import type { ReactElement } from 'react'
 import { BACKUP_KEPT_DAYS, EVIDENCE_KEPT_DAYS, EVIDENCE_LOCK_DAYS } from '@hold/domain'
 import { describe, expect, it } from 'vitest'
 import { renderWithIntl } from '@/test/render'
+import { AdvocatesScreen } from './advocates-screen'
 import { AiScreen } from './ai-screen'
 import { DemoScreen } from './demo-screen'
 import { ForRentersScreen } from './for-renters-screen'
@@ -17,9 +18,10 @@ import { TermsScreen } from './terms-screen'
 const screens: [string, ReactElement, string][] = [
   ['home', <HomeScreen key="home" />, 'One photograph settles it.'],
   ['how it works', <HowItWorksScreen key="how" />, 'One rental, four moments.'],
+  ['advocates', <AdvocatesScreen key="advocates" />, 'Two advocates argue it. Code referees. People decide.'],
   ['for shops', <ForShopsScreen key="shops" />, 'Protect every item without charging the people who bring it back.'],
   ['for renters', <ForRentersScreen key="renters" />, 'Keep your money while you rent.'],
-  ['the AI', <AiScreen key="ai" />, 'The AI compares. A person decides.'],
+  ['the AI', <AiScreen key="ai" />, 'Code finds. The AI explains. A person decides.'],
   ['PayPal', <PaypalScreen key="paypal" />, 'Reserved is not charged. PayPal makes that real.'],
   ['demo', <DemoScreen key="demo" />, 'Try a return yourself.'],
   ['privacy', <PrivacyScreen key="privacy" />, 'Privacy notice'],
@@ -60,19 +62,32 @@ describe.each(screens)('the %s screen', (_name, element, title) => {
 })
 
 describe('HomeScreen', () => {
-  it('puts the two phones straight after the photograph', () => {
+  it('leads with the advocates and what Hold joins to the hold, then the two phones', () => {
     renderWithIntl(<HomeScreen />)
     const sections = screen.getAllByRole('heading', { level: 2 }).map((heading) => heading.textContent)
-    expect(sections[0]).toBe('The shop and the renter look at the same thing.')
     expect(sections).toEqual([
+      'When they disagree, two advocates argue it.',
+      'What Hold joins to the hold.',
       'The shop and the renter look at the same thing.',
       'One rental, four moments.',
       'Protect every item without charging the people who bring it back.',
       'Keep your money while you rent.',
-      'The AI compares. A person decides.',
       'Reserved is not charged. PayPal makes that real.',
       'Try a return yourself.',
     ])
+  })
+
+  it('shows the recorded run closing from the claim to the agreement, and links to all of it', () => {
+    renderWithIntl(<HomeScreen />)
+    const ladder = within(screen.getByRole('figure', { name: /A live run on the demonstration's sample claim/ }))
+    expect(ladder.getByText('Agreed: €25.00')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Read the whole recorded run' })).toHaveAttribute('href', '/advocates')
+  })
+
+  it('sends each part Hold joins to the hold to the page where it runs', () => {
+    renderWithIntl(<HomeScreen />)
+    const joined = within(screen.getByRole('region', { name: 'What Hold joins to the hold.' }))
+    expect(joined.getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(['/ai', '/ai', '/verify', '/reliability'])
   })
 
   it('shows five PayPal capabilities and leaves the rest to the PayPal page', () => {
@@ -121,6 +136,12 @@ describe('HowItWorksScreen', () => {
     renderWithIntl(<HowItWorksScreen />)
     expect(screen.getByRole('heading', { level: 3, name: 'Is a hold a charge?' })).toBeInTheDocument()
     expect(screen.getByText(/Nothing is taken unless a person approves a claim\./)).toBeInTheDocument()
+  })
+
+  it('lets two advocates argue a contest, and links to their recorded run', () => {
+    renderWithIntl(<HowItWorksScreen />)
+    expect(screen.getByRole('heading', { level: 3, name: 'Or two advocates argue it' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'See the advocates’ recorded run' })).toHaveAttribute('href', '/advocates')
   })
 
   it('explains what happens when the renter disagrees', () => {
@@ -196,15 +217,32 @@ describe('AiScreen', () => {
     renderWithIntl(<AiScreen />)
     expect(screen.getByRole('heading', { level: 3, name: 'It defers to a person' })).toBeInTheDocument()
   })
+
+  it('shows the operations agent reading PayPal without the power to charge', () => {
+    renderWithIntl(<AiScreen />)
+    expect(screen.getByRole('heading', { level: 2, name: 'An operations agent that reads PayPal and cannot charge.' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 3, name: 'Read-only in PayPal' })).toBeInTheDocument()
+  })
+
+  it('shows a night’s queue as the operations agent wrote it, from a recorded run', () => {
+    renderWithIntl(<AiScreen />)
+    expect(screen.getByRole('heading', { level: 2, name: 'One night’s queue, as the agent wrote it.' })).toBeInTheDocument()
+    expect(screen.getByRole('article', { name: 'Send this answer to PayPal on the dispute' })).toBeInTheDocument()
+  })
+
+  it('gives every damage finding an independent second look', () => {
+    renderWithIntl(<AiScreen />)
+    expect(screen.getByRole('heading', { level: 3, name: 'Look again' })).toBeInTheDocument()
+  })
 })
 
 describe('AiScreen pipeline', () => {
-  it('gives the model one step of seven, and a person the last', () => {
+  it('gives the model two steps of eight, a first look and a second, and a person the last', () => {
     renderWithIntl(<AiScreen />)
     const steps = within(screen.getAllByRole('list')[0] ?? document.body).getAllByRole('listitem')
-    expect(steps).toHaveLength(7)
-    expect(steps.filter((step) => within(step).queryByText('The AI model') !== null)).toHaveLength(1)
-    expect(within(steps[6] ?? document.body).getByText('A person')).toBeInTheDocument()
+    expect(steps).toHaveLength(8)
+    expect(steps.filter((step) => within(step).queryByText('The AI model') !== null)).toHaveLength(2)
+    expect(within(steps[7] ?? document.body).getByText('A person')).toBeInTheDocument()
   })
 
   it('lists no tier that charges', () => {
@@ -214,7 +252,7 @@ describe('AiScreen pipeline', () => {
 
   it('sends the reader to the published scorecard, with its counts', () => {
     renderWithIntl(<AiScreen />)
-    expect(within(screen.getByRole('note')).getByText('Every figure is published with its count.')).toBeInTheDocument()
+    expect(screen.getAllByRole('note').filter((note) => within(note).queryByText('Every figure is published with its count.') !== null)).toHaveLength(1)
     expect(screen.getByRole('link', { name: 'See the measured accuracy' })).toHaveAttribute('href', '/reliability')
   })
 })
@@ -321,5 +359,34 @@ describe('the promise about photographs', () => {
   it('states the period the evidence is kept, on the renters’ page', () => {
     renderWithIntl(<ForRentersScreen />)
     expect(screen.getByText(new RegExp(`Photographs are deleted ${String(EVIDENCE_KEPT_DAYS)} days after they are taken`))).toBeInTheDocument()
+  })
+})
+
+describe('AdvocatesScreen', () => {
+  it('shows the recorded live run, move by move, with its chain of fingerprints', () => {
+    renderWithIntl(<AdvocatesScreen />)
+    expect(screen.getByRole('heading', { name: 'What the advocates said' })).toBeInTheDocument()
+    expect(screen.getByText('Opened with the claim as presented: €50.00')).toBeInTheDocument()
+    expect(screen.getByText(/no move was changed, removed or reordered/)).toBeInTheDocument()
+  })
+
+  it('names what the referee refuses, in plain code', () => {
+    renderWithIntl(<AdvocatesScreen />)
+    for (const name of ['No line added or dropped', 'Never above the published price', 'Every reduction names its ground', 'The gap only closes', 'Inside its own side’s limit', 'Bounded in moves and time']) {
+      expect(screen.getByRole('heading', { level: 3, name })).toBeInTheDocument()
+    }
+  })
+
+  it('offers a live run in a demo shop of the reader’s own', () => {
+    renderWithIntl(<AdvocatesScreen />)
+    expect(screen.getAllByRole('link', { name: 'Run them live in a demo shop' })[0]).toHaveAttribute('href', '/demo')
+  })
+})
+
+describe('PaypalScreen', () => {
+  it('shows the same hold settling an agreement, and links to the advocates', () => {
+    renderWithIntl(<PaypalScreen />)
+    expect(screen.getByRole('heading', { level: 2, name: 'When the two sides disagree, the same hold settles it.' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'See the advocates’ recorded run' })).toHaveAttribute('href', '/advocates')
   })
 })

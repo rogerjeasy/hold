@@ -46,11 +46,15 @@
     "tagline": "The deposit that never leaves your account.",
     "home": {
       "title": "Hold: the deposit that never leaves your account",
-      "description": "Hold reserves a rental deposit with PayPal and charges nothing. At return, photographs taken at handover and at return are compared, and a person approves every charge."
+      "description": "A PayPal hold instead of a deposit. Code finds what changed, Claude explains it, a person approves every cent from a published price list, and two bounded advocates settle a contested claim."
     },
     "howItWorks": {
       "title": "How Hold works",
       "description": "One rental in four moments: reserve, hand over, return and settle."
+    },
+    "advocates": {
+      "title": "The two advocates",
+      "description": "When a renter contests a claim, Claude argues each side inside a limit its own person set, plain code referees every offer, and both people confirm."
     },
     "forShops": {
       "title": "Hold for rental shops",
@@ -111,6 +115,7 @@
     "main": "Main",
     "home": "Hold, home page",
     "howItWorks": "How it works",
+    "advocates": "Advocates",
     "forShops": "For shops",
     "forRenters": "For renters",
     "ai": "The AI",
@@ -149,7 +154,7 @@
   },
   "hero": {
     "title": "One photograph settles it.",
-    "lead": "Hold reserves the deposit with PayPal and charges nothing. At return it compares each photograph with the one taken at handover. The shop and the renter see the same result, and a person approves every charge."
+    "lead": "Hold reserves the deposit with PayPal and charges nothing. At return, code finds what changed between two photographs before Claude explains it, a named person approves every cent from a published price list, and the renter sees the same evidence. When the two sides disagree, two advocates argue it inside limits each side set."
   },
   "evidence": {
     "handover": "Handover",
@@ -216,6 +221,53 @@
       "reserved": "Reserved",
       "taken": "Taken",
       "released": "Released"
+    }
+  },
+  "advocatesBand": {
+    "title": "When they disagree, two advocates argue it.",
+    "lead": "Claude argues the shop's side and the renter's side in separate calls, each inside a limit its own person set. Plain code referees every offer, and nothing is taken until both people confirm.",
+    "caption": "A live run on the demonstration's sample claim, recorded on {date}",
+    "rules": {
+      "limits": {
+        "title": "Two limits, never in one call",
+        "body": "The owner sets how far the shop's advocate may go. The renter sets the most they will pay. Neither advocate is ever shown the other side's limit."
+      },
+      "referee": {
+        "title": "A referee in plain code",
+        "body": "No line added, none above its published price, every reduction tied to the evidence, and the gap between the two sides can only close."
+      },
+      "people": {
+        "title": "People settle it",
+        "body": "An agreement can only lower a claim a person already approved. The owner confirms, the renter confirms with a one-time code, and only then does PayPal take it."
+      }
+    },
+    "action": "Read the whole recorded run",
+    "pointer": "See the advocates’ recorded run"
+  },
+  "joined": {
+    "title": "What Hold joins to the hold.",
+    "lead": "Card holds, photo comparison and a person who approves each exist on their own. Hold makes them one decision, and adds the parts that keep that decision fair to both sides.",
+    "items": {
+      "detect": {
+        "title": "Code finds, the model explains",
+        "body": "Plain code aligns the two photographs and finds every change before Claude is asked. Each damage finding gets an independent second look. With the model down, nothing is missed: the change waits for a person.",
+        "action": "How the comparison works"
+      },
+      "operations": {
+        "title": "An agent that reads PayPal and cannot charge",
+        "body": "Overnight, an operations agent checks every hold and claim against PayPal through PayPal's own MCP server, read-only, and leaves a short queue a person decides.",
+        "action": "What the agents may do"
+      },
+      "evidence": {
+        "title": "Evidence anyone can check",
+        "body": "Handover photographs are sealed and signed. Anyone given the statement can check it against Hold's published key, without trusting Hold's word.",
+        "action": "Check a signed statement"
+      },
+      "measured": {
+        "title": "Accuracy counted, not claimed",
+        "body": "The comparison is scored on photographs it is never tuned on, pair by pair, with the counts and every pair published. Until a run is accepted, the page says so.",
+        "action": "See the reliability page"
+      }
     }
   },
   "steps": {
@@ -365,9 +417,13 @@
             "title": "The renter replies on the same screen",
             "body": "They say what they disagree with and can add their own photographs."
           },
+          "advocates": {
+            "title": "Or two advocates argue it",
+            "body": "The renter may hand the contest to an advocate. The shop's advocate answers within the owner's limits, plain code checks every offer, and both people confirm any agreement."
+          },
           "owner": {
             "title": "The owner decides",
-            "body": "Hold sets out both positions side by side. A named person makes the final decision and can lower or drop the charge."
+            "body": "Without advocates, or without an agreement, Hold sets out both positions side by side. A named person makes the final decision and can lower or drop the charge."
           },
           "record": {
             "title": "The record is already complete",
@@ -466,6 +522,85 @@
       "faq": {
         "title": "Asked at the counter.",
         "lead": "Short answers to what staff and renters ask first."
+      }
+    },
+    "advocates": {
+      "title": "Two advocates argue it. Code referees. People decide.",
+      "lead": "When a renter contests a claim, Claude argues each side in its own call, inside a limit that side's person set. Every offer passes a referee written in plain code, and nothing is charged until both people confirm.",
+      "action": "Run them live in a demo shop",
+      "secondary": "How the AI is bounded",
+      "run": {
+        "title": "One run, move by move.",
+        "lead": "The two advocates on the demonstration's sample claim, recorded live from Amazon Bedrock. The renter and her limit are made up, and nothing was taken. In a demo shop of your own, the same claim runs live.",
+        "caption": "How the two sides closed the gap, recorded on {date}",
+        "noneTitle": "No run recorded yet",
+        "noneBody": "Start a demo shop of your own and run the advocates live on its sample claim."
+      },
+      "referee": {
+        "title": "What the referee refuses.",
+        "lead": "The referee is plain code, not a model, and it alone decides whether a move stands. It never reads an advocate's words: only amounts, grounds and the records of this rental they cite.",
+        "items": {
+          "lines": {
+            "title": "No line added or dropped",
+            "body": "Every offer covers exactly the lines of the claim a person approved. Nothing new can be argued into it."
+          },
+          "price": {
+            "title": "Never above the published price",
+            "body": "Each line stays between nothing and its price on the list the renter accepted at booking."
+          },
+          "ground": {
+            "title": "Every reduction names its ground",
+            "body": "A mark already on record, the wear policy, the renter's own photograph, or photographs that do not settle it. A ground that rests on a record must name that record."
+          },
+          "gap": {
+            "title": "The gap only closes",
+            "body": "The shop's offers never rise and the renter's never fall. An offer that would cross the other side's is refused: accept it instead."
+          },
+          "limit": {
+            "title": "Inside its own side’s limit",
+            "body": "An offer or an acceptance outside that side's limit is refused, and only that side is told why."
+          },
+          "time": {
+            "title": "Bounded in moves and time",
+            "body": "Each side has a set number of offers and a deadline. Two refused moves in a row, a pass or a stopped advocate end it, and the owner decides."
+          }
+        }
+      },
+      "limits": {
+        "title": "Two limits, never in one call.",
+        "lead": "Each advocate is its own call to Claude, given its own side's limit and nothing of the other's. What crosses between them is Hold's wording of each move, not the model's.",
+        "items": {
+          "shop": {
+            "title": "The shop's limit",
+            "body": "The owner sets the lowest share of a claim the shop's advocate may agree to, the largest claim it takes on, how many offers it may make, and when its limits end."
+          },
+          "renter": {
+            "title": "The renter's limit",
+            "body": "The renter writes the most they will pay. Only they see it. Their advocate may not agree to more, and asks before agreeing."
+          },
+          "words": {
+            "title": "Moves, not messages",
+            "body": "A move carries amounts, grounds and the ids of this rental's records. Free text from one side never reaches the other, so neither can talk the other's advocate round."
+          }
+        }
+      },
+      "after": {
+        "title": "Only people settle it.",
+        "lead": "An agreement is a proposal until both people confirm it. Then PayPal takes the agreed amount from the hold and releases the rest, and Hold reads the result back from PayPal.",
+        "items": {
+          "lower": {
+            "title": "It can only lower a charge",
+            "body": "The most an agreement can reach is the claim a person already approved, line by line."
+          },
+          "confirm": {
+            "title": "Both people confirm",
+            "body": "The owner or a manager confirms for the shop. The renter confirms with a one-time code. Either may decline, and the owner decides."
+          },
+          "chain": {
+            "title": "Every move is chained",
+            "body": "Each move's fingerprint covers the one before it, so a move changed, removed or reordered breaks the chain. The transcript joins the evidence both sides receive."
+          }
+        }
       }
     },
     "forShops": {
@@ -686,7 +821,7 @@
       }
     },
     "ai": {
-      "title": "The AI compares. A person decides.",
+      "title": "Code finds. The AI explains. A person decides.",
       "lead": "Automated damage charging made rental customers angry because nobody could be asked. Hold is built the other way round: the AI gathers and compares, a person decides, and the renter sees everything.",
       "listsHeading": "What the AI does, and what it never does",
       "limits": {
@@ -708,7 +843,7 @@
         }
       },
       "pipeline": {
-        "title": "Seven steps. The model gets one.",
+        "title": "Eight steps. The model gets two.",
         "lead": "The cheapest reliable method goes first. Anything that must not be missed is found by plain code, and still works when the model is down.",
         "actors": {
           "code": "Plain code",
@@ -735,6 +870,10 @@
           "judge": {
             "title": "Judge",
             "body": "The model looks at both photographs and a close crop of each area. It answers no change, wear or damage, and says how sure it is."
+          },
+          "second": {
+            "title": "Look again",
+            "body": "Each damage finding gets an independent second look, on a wider crop, in a separate call. When the two looks disagree, the return waits for a person."
           },
           "price": {
             "title": "Price",
@@ -796,6 +935,28 @@
           "title": "Every figure is published with its count.",
           "body": "The reliability page shows the latest accepted run over the evaluation set, or says plainly that none has been accepted yet."
         }
+      },
+      "operations": {
+        "title": "An operations agent that reads PayPal and cannot charge.",
+        "lead": "While the shop is closed, an agent checks every hold, claim and dispute against PayPal's own record. In the morning the owner finds a few lines to approve, reject or postpone.",
+        "items": {
+          "read": {
+            "title": "Read-only in PayPal",
+            "body": "It reads orders, authorizations and disputes through PayPal's MCP server with read-only tools. It has no tool that captures, voids or refunds."
+          },
+          "propose": {
+            "title": "It proposes, a person decides",
+            "body": "Release this hold, ask for a fresh one, answer this dispute with the evidence pack. Each line gives its reason and the PayPal reference behind it."
+          },
+          "never": {
+            "title": "It never proposes a charge",
+            "body": "A charge can only come from a claim a person approved. The agent's proposals have no kind that takes money."
+          }
+        }
+      },
+      "queue": {
+        "title": "One night’s queue, as the agent wrote it.",
+        "lead": "Code found what needs a decision. The agent read PayPal about each one and proposed what to do. Nothing here was carried out: in a shop, a person approves, rejects or postpones each line."
       },
       "agents": {
         "title": "An agent acts only inside limits a person wrote.",
@@ -908,6 +1069,10 @@
             "body": "One permanent line in the money log, linked to the PayPal event that confirmed it."
           }
         }
+      },
+      "agreement": {
+        "title": "When the two sides disagree, the same hold settles it.",
+        "lead": "Two advocates argue a contested claim inside each side's limit. Once both people confirm, PayPal captures the agreed amount from the same hold with a final capture and releases the rest, and Hold reads the result back from PayPal."
       }
     },
     "demo": {
@@ -3949,6 +4114,16 @@
         "body": "Claude Opus 4.6 on Amazon Bedrock argued both sides of the demonstration's sample claim on {date}. This is that run as it was recorded, not this demo's claim, so the advocates can be seen at work when no live run is left.",
         "details": "Model {model} · prompt {promptVersion} · {calls, plural, one {# call} other {# calls}} · {tokens} tokens"
       }
+    },
+    "ladder": {
+      "opening": "Opens with the claim",
+      "offer": "Offers",
+      "accept": "Accepts",
+      "pass": "Passes",
+      "agreed": "Agreed: {amount}",
+      "agreedNote": "Of a claim of {amount}. Nothing is taken until both people confirm.",
+      "escalated": "No agreement: the owner decides, with the transcript.",
+      "open": "The advocates are still exchanging offers."
     }
   },
   "operations": {
@@ -4129,7 +4304,16 @@
       "notAnswered": "Claude did not answer at {at}, so the sample entries stay as they were.",
       "stalled": "The investigation started at {at} did not finish. You can start it again."
     },
-    "allClear": "All clear"
+    "allClear": "All clear",
+    "recorded": {
+      "title": "A recorded run of the operations agent",
+      "body": "{model} investigated the demonstration's sample queue on {date}. PayPal's read tools answered from the samples' own records, simulated, since a sample's references were never on PayPal.",
+      "details": "Prompt {promptVersion} · {calls, plural, one {# PayPal read} other {# PayPal reads}} · {tokens} tokens",
+      "tools": "PayPal tools it called, all read-only",
+      "found": "What code found",
+      "wrote": "What the agent wrote",
+      "decides": "A proposal only. A person approves, rejects or postpones it."
+    }
   },
   "decisions": {
     "title": "Decisions",

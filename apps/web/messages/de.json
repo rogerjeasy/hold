@@ -46,11 +46,15 @@
     "tagline": "Die Kaution, die Ihr Konto nie verlässt.",
     "home": {
       "title": "Hold: die Kaution, die Ihr Konto nie verlässt",
-      "description": "Hold reserviert die Kaution einer Miete über PayPal und bucht nichts ab. Bei der Rückgabe werden die Fotos der Übergabe mit denen der Rückgabe verglichen, und ein Mensch genehmigt jede Abbuchung."
+      "description": "Ein PayPal-Hold statt einer Kaution. Code findet, was sich verändert hat, Claude erklärt es, ein Mensch genehmigt jeden Cent aus einer veröffentlichten Preisliste, und zwei begrenzte Fürsprecher klären eine bestrittene Forderung."
     },
     "howItWorks": {
       "title": "So funktioniert Hold",
       "description": "Eine Miete in vier Momenten: reservieren, übergeben, zurückgeben und abrechnen."
+    },
+    "advocates": {
+      "title": "Die zwei Fürsprecher",
+      "description": "Bestreitet ein Mieter eine Forderung, vertritt Claude jede Seite innerhalb eines Limits, das deren eigene Person gesetzt hat. Einfacher Code prüft jedes Angebot, und beide Personen bestätigen."
     },
     "forShops": {
       "title": "Hold für Verleihe",
@@ -111,6 +115,7 @@
     "main": "Hauptnavigation",
     "home": "Hold, Startseite",
     "howItWorks": "So funktioniert es",
+    "advocates": "Fürsprecher",
     "forShops": "Für Verleihe",
     "forRenters": "Für Mietende",
     "ai": "Die KI",
@@ -149,7 +154,7 @@
   },
   "hero": {
     "title": "Ein Foto klärt es.",
-    "lead": "Hold reserviert die Kaution über PayPal und bucht nichts ab. Bei der Rückgabe vergleicht es jedes Foto mit dem von der Übergabe. Verleih und Mietende sehen dasselbe Ergebnis, und ein Mensch genehmigt jede Abbuchung."
+    "lead": "Hold reserviert die Kaution über PayPal und bucht nichts ab. Bei der Rückgabe findet Code, was sich zwischen zwei Fotos verändert hat, bevor Claude es erklärt. Ein namentlich genannter Mensch genehmigt jeden Cent aus einer veröffentlichten Preisliste, und der Mieter sieht dieselben Belege. Sind sich beide Seiten uneinig, verhandeln zwei Fürsprecher innerhalb der Limits, die jede Seite gesetzt hat."
   },
   "evidence": {
     "handover": "Übergabe",
@@ -216,6 +221,53 @@
       "reserved": "Reserviert",
       "taken": "Abgebucht",
       "released": "Freigegeben"
+    }
+  },
+  "advocatesBand": {
+    "title": "Sind sie sich uneinig, verhandeln zwei Fürsprecher.",
+    "lead": "Claude vertritt die Seite des Verleihs und die des Mieters in getrennten Aufrufen, jede innerhalb eines Limits, das ihre eigene Person gesetzt hat. Einfacher Code prüft jedes Angebot, und nichts wird abgebucht, bevor beide Personen bestätigen.",
+    "caption": "Ein Live-Lauf über die Beispielforderung der Demo, aufgezeichnet am {date}",
+    "rules": {
+      "limits": {
+        "title": "Zwei Limits, nie in einem Aufruf",
+        "body": "Der Inhaber legt fest, wie weit der Fürsprecher des Verleihs gehen darf. Der Mieter legt fest, wie viel er höchstens zahlt. Keiner der Fürsprecher sieht je das Limit der anderen Seite."
+      },
+      "referee": {
+        "title": "Ein Schiedsrichter aus einfachem Code",
+        "body": "Keine Position kommt hinzu, keine liegt über ihrem veröffentlichten Preis, jede Senkung stützt sich auf die Belege, und der Abstand zwischen beiden Seiten kann nur schrumpfen."
+      },
+      "people": {
+        "title": "Menschen entscheiden",
+        "body": "Eine Einigung kann eine bereits genehmigte Forderung nur senken. Der Inhaber bestätigt, der Mieter bestätigt mit einem Einmalcode, und erst dann bucht PayPal ab."
+      }
+    },
+    "action": "Den ganzen aufgezeichneten Lauf lesen",
+    "pointer": "Den aufgezeichneten Lauf der Fürsprecher ansehen"
+  },
+  "joined": {
+    "title": "Was Hold mit dem Hold verbindet.",
+    "lead": "Kartenreservierungen, Fotovergleiche und ein Mensch, der genehmigt, gibt es jeweils für sich. Hold macht daraus eine Entscheidung und fügt hinzu, was sie für beide Seiten fair hält.",
+    "items": {
+      "detect": {
+        "title": "Code findet, das Modell erklärt",
+        "body": "Einfacher Code richtet beide Fotos aus und findet jede Änderung, bevor Claude gefragt wird. Jeder Schadensbefund bekommt einen unabhängigen zweiten Blick. Fällt das Modell aus, geht nichts verloren: Die Änderung wartet auf einen Menschen.",
+        "action": "Wie der Vergleich funktioniert"
+      },
+      "operations": {
+        "title": "Ein Agent, der PayPal liest und nicht abbuchen kann",
+        "body": "Nachts prüft ein Betriebsagent jeden Hold und jede Forderung gegen PayPal, über PayPals eigenen MCP-Server und nur lesend, und hinterlässt eine kurze Liste, über die ein Mensch entscheidet.",
+        "action": "Was die Agenten dürfen"
+      },
+      "evidence": {
+        "title": "Belege, die jeder prüfen kann",
+        "body": "Die Fotos der Übergabe werden versiegelt und signiert. Wer die Erklärung erhält, kann sie mit Holds veröffentlichtem Schlüssel prüfen, ohne Hold beim Wort zu nehmen.",
+        "action": "Eine signierte Erklärung prüfen"
+      },
+      "measured": {
+        "title": "Genauigkeit gezählt, nicht behauptet",
+        "body": "Der Vergleich wird an Fotos gemessen, auf die er nie abgestimmt wird, Paar für Paar, mit den Zahlen und jedem Paar veröffentlicht. Solange kein Lauf angenommen ist, sagt die Seite das.",
+        "action": "Zur Seite über die Zuverlässigkeit"
+      }
     }
   },
   "steps": {
@@ -365,9 +417,13 @@
             "title": "Die Antwort erfolgt auf demselben Bildschirm",
             "body": "Die mietende Person sagt, womit sie nicht einverstanden ist, und kann eigene Fotos hinzufügen."
           },
+          "advocates": {
+            "title": "Oder zwei Fürsprecher verhandeln",
+            "body": "Der Mieter kann den Widerspruch einem Fürsprecher übergeben. Der Fürsprecher des Verleihs antwortet innerhalb der Limits des Inhabers, einfacher Code prüft jedes Angebot, und beide Personen bestätigen eine Einigung."
+          },
           "owner": {
             "title": "Die Inhaberin oder der Inhaber entscheidet",
-            "body": "Hold stellt beide Positionen nebeneinander. Eine namentlich genannte Person trifft die endgültige Entscheidung und kann die Abbuchung senken oder streichen."
+            "body": "Ohne Fürsprecher oder ohne Einigung stellt Hold beide Positionen nebeneinander. Ein namentlich genannter Mensch entscheidet endgültig und kann die Abbuchung senken oder streichen."
           },
           "record": {
             "title": "Die Akte ist schon vollständig",
@@ -466,6 +522,85 @@
       "faq": {
         "title": "Am Tresen gefragt.",
         "lead": "Kurze Antworten auf das, was Personal und Mietende zuerst fragen."
+      }
+    },
+    "advocates": {
+      "title": "Zwei Fürsprecher verhandeln. Code ist Schiedsrichter. Menschen entscheiden.",
+      "lead": "Bestreitet ein Mieter eine Forderung, vertritt Claude jede Seite in einem eigenen Aufruf, innerhalb eines Limits, das die Person dieser Seite gesetzt hat. Jedes Angebot durchläuft einen Schiedsrichter aus einfachem Code, und nichts wird abgebucht, bevor beide Personen bestätigen.",
+      "action": "Live in einem Demo-Geschäft ausführen",
+      "secondary": "Wie die KI begrenzt ist",
+      "run": {
+        "title": "Ein Lauf, Zug um Zug.",
+        "lead": "Die zwei Fürsprecher über die Beispielforderung der Demo, live aus Amazon Bedrock aufgezeichnet. Die Mieterin und ihr Limit sind erfunden, und nichts wurde abgebucht. In einem eigenen Demo-Geschäft läuft dieselbe Forderung live.",
+        "caption": "Wie die zwei Seiten den Abstand geschlossen haben, aufgezeichnet am {date}",
+        "noneTitle": "Noch kein Lauf aufgezeichnet",
+        "noneBody": "Starten Sie ein eigenes Demo-Geschäft und lassen Sie die Fürsprecher live über dessen Beispielforderung verhandeln."
+      },
+      "referee": {
+        "title": "Was der Schiedsrichter ablehnt.",
+        "lead": "Der Schiedsrichter ist einfacher Code, kein Modell, und er allein entscheidet, ob ein Zug gilt. Er liest nie die Worte eines Fürsprechers: nur Beträge, Gründe und die Aufzeichnungen dieser Miete, auf die sie sich berufen.",
+        "items": {
+          "lines": {
+            "title": "Keine Position hinzu oder weg",
+            "body": "Jedes Angebot umfasst genau die Positionen der Forderung, die ein Mensch genehmigt hat. Nichts Neues kann hineinverhandelt werden."
+          },
+          "price": {
+            "title": "Nie über dem veröffentlichten Preis",
+            "body": "Jede Position bleibt zwischen null und ihrem Preis auf der Liste, die der Mieter bei der Buchung akzeptiert hat."
+          },
+          "ground": {
+            "title": "Jede Senkung nennt ihren Grund",
+            "body": "Eine bereits erfasste Markierung, die Verschleißregeln, das eigene Foto des Mieters oder Fotos, die es nicht klären. Ein Grund, der auf einer Aufzeichnung beruht, muss sie nennen."
+          },
+          "gap": {
+            "title": "Der Abstand schrumpft nur",
+            "body": "Die Angebote des Verleihs steigen nie, die des Mieters sinken nie. Ein Angebot, das das der anderen Seite überholen würde, wird abgelehnt: Dann wird angenommen."
+          },
+          "limit": {
+            "title": "Innerhalb des Limits der eigenen Seite",
+            "body": "Ein Angebot oder eine Annahme außerhalb des Limits dieser Seite wird abgelehnt, und nur diese Seite erfährt, warum."
+          },
+          "time": {
+            "title": "Begrenzt in Zügen und Zeit",
+            "body": "Jede Seite hat eine feste Zahl an Angeboten und eine Frist. Zwei abgelehnte Züge in Folge, ein Passen oder ein gestoppter Fürsprecher beenden es, und der Inhaber entscheidet."
+          }
+        }
+      },
+      "limits": {
+        "title": "Zwei Limits, nie in einem Aufruf.",
+        "lead": "Jeder Fürsprecher ist ein eigener Aufruf an Claude und erhält das Limit seiner Seite und nichts von dem der anderen. Was zwischen ihnen wechselt, ist Holds Formulierung jedes Zugs, nicht die des Modells.",
+        "items": {
+          "shop": {
+            "title": "Das Limit des Verleihs",
+            "body": "Der Inhaber legt den kleinsten Anteil einer Forderung fest, dem der Fürsprecher des Verleihs zustimmen darf, die größte Forderung, die er übernimmt, wie viele Angebote er machen darf und wann seine Limits enden."
+          },
+          "renter": {
+            "title": "Das Limit des Mieters",
+            "body": "Der Mieter schreibt, wie viel er höchstens zahlt. Nur er sieht es. Sein Fürsprecher darf nicht mehr zusagen und fragt vor einer Einigung nach."
+          },
+          "words": {
+            "title": "Züge, keine Nachrichten",
+            "body": "Ein Zug enthält Beträge, Gründe und die Kennungen der Aufzeichnungen dieser Miete. Freier Text einer Seite erreicht die andere nie, also kann keine den Fürsprecher der anderen überreden."
+          }
+        }
+      },
+      "after": {
+        "title": "Nur Menschen entscheiden.",
+        "lead": "Eine Einigung ist ein Vorschlag, bis beide Personen sie bestätigen. Dann bucht PayPal den vereinbarten Betrag vom Hold ab und gibt den Rest frei, und Hold liest das Ergebnis bei PayPal nach.",
+        "items": {
+          "lower": {
+            "title": "Sie kann eine Abbuchung nur senken",
+            "body": "Höchstens erreicht eine Einigung die Forderung, die ein Mensch bereits genehmigt hat, Position für Position."
+          },
+          "confirm": {
+            "title": "Beide Personen bestätigen",
+            "body": "Der Inhaber oder eine Leitung bestätigt für den Verleih. Der Mieter bestätigt mit einem Einmalcode. Lehnt einer ab, entscheidet der Inhaber."
+          },
+          "chain": {
+            "title": "Jeder Zug ist verkettet",
+            "body": "Die Prüfsumme jedes Zugs umfasst die des vorigen, sodass ein geänderter, entfernter oder umgestellter Zug die Kette bricht. Das Protokoll gehört zu den Belegen, die beide Seiten erhalten."
+          }
+        }
       }
     },
     "forShops": {
@@ -686,7 +821,7 @@
       }
     },
     "ai": {
-      "title": "Die KI vergleicht. Ein Mensch entscheidet.",
+      "title": "Code findet. Die KI erklärt. Ein Mensch entscheidet.",
       "lead": "Automatische Schadensabbuchungen haben Mietkunden verärgert, weil niemand ansprechbar war. Hold ist umgekehrt gebaut: Die KI sammelt und vergleicht, ein Mensch entscheidet, und die mietende Person sieht alles.",
       "listsHeading": "Was die KI tut und was sie nie tut",
       "limits": {
@@ -708,7 +843,7 @@
         }
       },
       "pipeline": {
-        "title": "Sieben Schritte. Das Modell bekommt einen.",
+        "title": "Acht Schritte. Das Modell bekommt zwei.",
         "lead": "Die günstigste zuverlässige Methode kommt zuerst. Was nicht übersehen werden darf, findet einfacher Code, und das funktioniert auch, wenn das Modell ausfällt.",
         "actors": {
           "code": "Einfacher Code",
@@ -735,6 +870,10 @@
           "judge": {
             "title": "Beurteilen",
             "body": "Das Modell sieht sich beide Fotos und einen engen Ausschnitt jedes Bereichs an. Es antwortet mit keine Änderung, Abnutzung oder Schaden und sagt, wie sicher es ist."
+          },
+          "second": {
+            "title": "Noch einmal hinsehen",
+            "body": "Jeder Schadensbefund bekommt einen unabhängigen zweiten Blick, auf einen weiteren Ausschnitt, in einem eigenen Aufruf. Sind sich beide Blicke uneinig, wartet die Rückgabe auf einen Menschen."
           },
           "price": {
             "title": "Bepreisen",
@@ -796,6 +935,28 @@
           "title": "Jede Zahl wird mit ihrer Anzahl veröffentlicht.",
           "body": "Die Seite zur Zuverlässigkeit zeigt den zuletzt angenommenen Lauf über den Bewertungssatz oder sagt klar, dass noch keiner angenommen wurde."
         }
+      },
+      "operations": {
+        "title": "Ein Betriebsagent, der PayPal liest und nicht abbuchen kann.",
+        "lead": "Während das Geschäft geschlossen ist, prüft ein Agent jeden Hold, jede Forderung und jeden Konflikt gegen PayPals eigene Aufzeichnung. Am Morgen findet der Inhaber ein paar Zeilen zum Genehmigen, Ablehnen oder Verschieben.",
+        "items": {
+          "read": {
+            "title": "In PayPal nur lesend",
+            "body": "Er liest Bestellungen, Autorisierungen und Konflikte über PayPals MCP-Server mit Werkzeugen, die nur lesen. Er hat kein Werkzeug, das abbucht, storniert oder erstattet."
+          },
+          "propose": {
+            "title": "Er schlägt vor, ein Mensch entscheidet",
+            "body": "Diesen Hold freigeben, um einen neuen bitten, diesen Konflikt mit dem Belegpaket beantworten. Jede Zeile nennt ihren Grund und die PayPal-Referenz dahinter."
+          },
+          "never": {
+            "title": "Er schlägt nie eine Abbuchung vor",
+            "body": "Eine Abbuchung kann nur aus einer Forderung kommen, die ein Mensch genehmigt hat. Die Vorschläge des Agenten haben keine Art, die Geld nimmt."
+          }
+        }
+      },
+      "queue": {
+        "title": "Die Liste einer Nacht, wie der Agent sie geschrieben hat.",
+        "lead": "Code hat gefunden, was eine Entscheidung braucht. Der Agent hat zu jedem Punkt PayPal gelesen und vorgeschlagen, was zu tun ist. Nichts davon wurde ausgeführt: In einem Geschäft genehmigt, verwirft oder verschiebt ein Mensch jede Zeile."
       },
       "agents": {
         "title": "Ein Agent handelt nur in Grenzen, die ein Mensch geschrieben hat.",
@@ -908,6 +1069,10 @@
             "body": "Eine dauerhafte Zeile im Geldprotokoll, verknüpft mit dem PayPal-Ereignis, das sie bestätigt hat."
           }
         }
+      },
+      "agreement": {
+        "title": "Sind sich beide Seiten uneinig, klärt es derselbe Hold.",
+        "lead": "Zwei Fürsprecher verhandeln eine bestrittene Forderung innerhalb der Limits jeder Seite. Sobald beide Personen bestätigen, bucht PayPal den vereinbarten Betrag mit einer abschließenden Abbuchung vom selben Hold ab und gibt den Rest frei, und Hold liest das Ergebnis bei PayPal nach."
       }
     },
     "demo": {
@@ -3949,6 +4114,16 @@
         "body": "Claude Opus 4.6 auf Amazon Bedrock hat am {date} beide Seiten der Beispielforderung der Vorführung vertreten. Dies ist dieser Lauf, wie er aufgezeichnet wurde, nicht die Forderung dieser Demo, damit die Fürsprecher bei der Arbeit zu sehen sind, wenn kein Live-Lauf mehr übrig ist.",
         "details": "Modell {model} · Prompt {promptVersion} · {calls, plural, one {# Aufruf} other {# Aufrufe}} · {tokens} Token"
       }
+    },
+    "ladder": {
+      "opening": "Eröffnet mit der Forderung",
+      "offer": "Bietet",
+      "accept": "Nimmt an",
+      "pass": "Passt",
+      "agreed": "Geeinigt: {amount}",
+      "agreedNote": "Bei einer Forderung von {amount}. Nichts wird abgebucht, bevor beide Personen bestätigen.",
+      "escalated": "Keine Einigung: Der Inhaber entscheidet, mit dem Protokoll.",
+      "open": "Die Fürsprecher tauschen noch Angebote aus."
     }
   },
   "operations": {
@@ -4129,7 +4304,16 @@
       "notAnswered": "Claude hat um {at} nicht geantwortet, die Beispieleinträge bleiben, wie sie waren.",
       "stalled": "Die um {at} gestartete Prüfung wurde nicht beendet. Sie können sie erneut starten."
     },
-    "allClear": "Alles erledigt"
+    "allClear": "Alles erledigt",
+    "recorded": {
+      "title": "Ein aufgezeichneter Lauf des Betriebsagenten",
+      "body": "{model} hat die Beispielliste der Demo am {date} untersucht. PayPals Lesewerkzeuge haben aus den eigenen Aufzeichnungen der Beispiele geantwortet, simuliert, da die Referenzen eines Beispiels nie bei PayPal waren.",
+      "details": "Prompt {promptVersion} · {calls, plural, one {# PayPal-Abfrage} other {# PayPal-Abfragen}} · {tokens} Tokens",
+      "tools": "Aufgerufene PayPal-Werkzeuge, alle nur lesend",
+      "found": "Was Code gefunden hat",
+      "wrote": "Was der Agent geschrieben hat",
+      "decides": "Nur ein Vorschlag. Ein Mensch genehmigt, verwirft oder verschiebt ihn."
+    }
   },
   "decisions": {
     "title": "Entscheidungen",

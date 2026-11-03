@@ -12,7 +12,14 @@ describe('SiteFooter', () => {
         .getAllByRole('link')
         .map((link) => link.getAttribute('href'))
         .sort(),
-    ).toEqual(['/ai', '/for-renters', '/for-shops', '/how-it-works', '/paypal', '/privacy', '/reliability', '/terms'])
+    ).toEqual(['/advocates', '/ai', '/for-renters', '/for-shops', '/how-it-works', '/paypal', '/privacy', '/reliability', '/terms'])
+  })
+
+  it('keeps the advocates with the product pages, and the two audiences apart', () => {
+    renderWithIntl(<SiteFooter year={2026} />)
+    const group = (name: string) => within(screen.getByRole('heading', { level: 2, name }).parentElement ?? document.body).getAllByRole('link').map((link) => link.getAttribute('href'))
+    expect(group('Product')).toEqual(['/how-it-works', '/advocates', '/ai', '/paypal', '/reliability'])
+    expect(group('For you')).toEqual(['/for-shops', '/for-renters'])
   })
 
   it('links to the privacy notice and the terms of use', () => {

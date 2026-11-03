@@ -5,7 +5,7 @@ import { LegalLinks } from './legal-links'
 import { Logo } from './logo'
 import { navItems, type NavItem } from './nav-items'
 
-const productKeys: readonly NavItem['key'][] = ['howItWorks', 'ai', 'paypal']
+const productKeys: readonly NavItem['key'][] = ['howItWorks', 'advocates', 'ai', 'paypal']
 
 function FooterLinks({ title, items }: { title: string; items: readonly NavItem[] }) {
   const t = useTranslations('nav')

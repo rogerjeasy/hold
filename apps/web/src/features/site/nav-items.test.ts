@@ -3,9 +3,10 @@ import { routes } from '@/lib/routes'
 import { navItems } from './nav-items'
 
 describe('navItems', () => {
-  it('lists the five header pages in reading order', () => {
+  it('lists the six header pages in reading order, the advocates straight after how it works', () => {
     expect(navItems.map((item) => item.href)).toEqual([
       routes.howItWorks,
+      routes.advocates,
       routes.forShops,
       routes.forRenters,
       routes.ai,

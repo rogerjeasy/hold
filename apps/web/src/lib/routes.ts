@@ -1,6 +1,8 @@
 export const routes = {
   home: '/',
   howItWorks: '/how-it-works',
+  // The two advocates of a contested claim, with a recorded live run anyone can read (extensions.md section 9).
+  advocates: '/advocates',
   forShops: '/for-shops',
   forRenters: '/for-renters',
   ai: '/ai',

@@ -1,13 +1,14 @@
 import { cn } from 'cn'
 import { useTranslations } from 'next-intl'
 
-// The seven steps of docs/tech-stack.md section 6.1, and who carries each one out.
+// The steps of docs/tech-stack.md section 6.1, the second look among them, and who carries each one out.
 const steps = [
   { key: 'quality', actor: 'code' },
   { key: 'normalize', actor: 'code' },
   { key: 'align', actor: 'code' },
   { key: 'regions', actor: 'code' },
   { key: 'judge', actor: 'model' },
+  { key: 'second', actor: 'model' },
   { key: 'price', actor: 'code' },
   { key: 'decide', actor: 'person' },
 ] as const

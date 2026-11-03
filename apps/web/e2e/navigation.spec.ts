@@ -2,9 +2,10 @@ import { expect, test } from './support/test'
 
 const headerPages = [
   ['How it works', '/how-it-works', 'One rental, four moments.'],
+  ['Advocates', '/advocates', 'Two advocates argue it. Code referees. People decide.'],
   ['For shops', '/for-shops', 'Protect every item without charging the people who bring it back.'],
   ['For renters', '/for-renters', 'Keep your money while you rent.'],
-  ['The AI', '/ai', 'The AI compares. A person decides.'],
+  ['The AI', '/ai', 'Code finds. The AI explains. A person decides.'],
   ['PayPal', '/paypal', 'Reserved is not charged. PayPal makes that real.'],
 ] as const
 

@@ -1,6 +1,7 @@
 import { BadgeCheck, BookCheck, RefreshCw } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { CapabilityTable, capabilityKeys } from '../capability-table'
+import { AdvocatesPointer } from '../advocates-pointer'
 import { ClosingCall } from '../closing-call'
 import { FeatureGrid } from '../feature-grid'
 import { HoldLength } from '../hold-length'
@@ -45,6 +46,9 @@ export function PaypalScreen() {
             icon,
           }))}
         />
+      </TitledSection>
+      <TitledSection title={t('agreement.title')} lead={t('agreement.lead')}>
+        <AdvocatesPointer />
       </TitledSection>
       <ClosingCall />
     </>

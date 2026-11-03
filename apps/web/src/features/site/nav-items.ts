@@ -7,6 +7,7 @@ export type NavItem = {
 
 export const navItems: readonly NavItem[] = [
   { key: 'howItWorks', href: routes.howItWorks },
+  { key: 'advocates', href: routes.advocates },
   { key: 'forShops', href: routes.forShops },
   { key: 'forRenters', href: routes.forRenters },
   { key: 'ai', href: routes.ai },

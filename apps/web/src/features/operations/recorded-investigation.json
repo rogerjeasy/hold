@@ -1,0 +1,36 @@
+{
+  "recording": {
+    "recordedAt": "2026-11-03T23:00:55.541Z",
+    "model": "claude-opus-4-5-20251101",
+    "promptVersion": "ops-1",
+    "toolCalls": 4,
+    "tokens": 13950,
+    "tools": [
+      "paypal.get_order",
+      "paypal.list_transactions",
+      "paypal.get_dispute"
+    ],
+    "entries": [
+      {
+        "kind": "request_replacement_hold",
+        "exceptionKind": "hold_ending",
+        "reason": "The €300.00 hold expires 2026-11-06 and the rental is marked returned; request a replacement authorization if you still need deposit protection for damage inspection.",
+        "references": [
+          "SIMULATED-4a45b8c9-c926-45bd-9ef6-703bf3a851af-authorization",
+          "SIMULATED-4a45b8c9-c926-45bd-9ef6-703bf3a851af-placed"
+        ],
+        "draft": null
+      },
+      {
+        "kind": "respond_to_dispute",
+        "exceptionKind": "dispute_open",
+        "reason": "Customer disputes the €35.00 deposit capture; respond with evidence showing the rental period (Oct 26-28) and the legitimate damage/loss claim that justified the charge.",
+        "references": [
+          "SIMULATED-e36e06fe-8c49-44dc-8585-19ae5f81f044-dispute",
+          "SIMULATED-e36e06fe-8c49-44dc-8585-19ae5f81f044-captured"
+        ],
+        "draft": null
+      }
+    ]
+  }
+}
