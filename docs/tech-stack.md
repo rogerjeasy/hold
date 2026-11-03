@@ -181,23 +181,25 @@ Built means in the code and its tests; planned means designed here and not in th
 
 ## 6. AI
 
-- **Model: Claude Opus 5.5 on Amazon Bedrock, model ID `anthropic.claude-opus-5-5`.** Used to compare photographs, classify differences, write claims, summarize contested claims and run the owner's assistant.
+**As deployed, 3 November 2026.** Seven adapters reach Claude, each the only code in its package that does: the photograph comparison (`packages/compare/src/bedrock-model.ts`), the contest summary and the incident sort (`packages/compare`), the two advocates (`packages/negotiate`), the operations investigator (`packages/ops`), the hosted assistant (`packages/mcp/src/hosted`) and the insights agent (`packages/agent`). All seven call `us.anthropic.claude-opus-4-6-v1` through the `AnthropicBedrock` client (bedrock-runtime), signed with the function's IAM role. Effort is set on every call: high for the comparison's two looks, medium everywhere else. The comparison, the contest summary and the incident sort answer in structured output checked against a zod schema, with no tools; the investigator calls read-only PayPal and Hold tools through the gated tools and then answers in structured output; the advocates move by tool calls that the gateway and the referee check; the hosted assistant and the insights agent use tools with automatic tool choice. Adaptive thinking is on for the comparison, the advocates and the investigator. Nothing streams, and there is no refusal fallback. Every adapter checks the stop reason, treats a refusal as an outcome, and stores the model and prompt version with what it wrote.
+
+- **Model as designed: Claude Opus 5.5 on Amazon Bedrock, model ID `anthropic.claude-opus-5-5`.** Used to compare photographs, classify differences, summarize contested claims and argue claims. Not deployed: see the next point.
 - **Running through judging: Claude Opus 4.6, through its US inference profile `us.anthropic.claude-opus-4-6-v1` and the `AnthropicBedrock` client (bedrock-runtime).** On 27 October 2026 AWS held this account's quota for Opus 5.5 and Opus 4.8 at zero tokens a minute, and only a support case can lift it (section 16, item 14). The same day the participant decided that judging runs on Opus 4.6, verified live, rather than wait on the case. Every adapter sends adaptive thinking where it thinks, effort, structured output and strict tools as before; there is no refusal fallback, since Opus 4.8 is under the same quota. Tools are not sent in strict mode on this path: Bedrock refused the hosted assistant's fifteen strict schemas together (a 496 MB grammar against its 300 MB limit, after up to 107 seconds), and three strict advocate tools cost about 18 seconds a move against 3 without. Hold's gateway and the negotiation referee check every argument on the server, so strict mode was a guard on the model's writing, not an access control. Each role may invoke that profile and the model in the three regions it routes to (`CLAUDE_INVOKE_RESOURCES` in `infra/lib/settings.ts`); the Mantle grants for Opus 5.5 stay, so going back is a change to the five model constants and adapters only.
-- **Access: Amazon Bedrock**, through the `AnthropicBedrockMantle` client in `@anthropic-ai/bedrock-sdk`. It serves the same Messages API as Anthropic's own, so `@anthropic-ai/sdk` supplies the types, the zod structured-output helper and the tool runner. Bedrock model IDs carry the `anthropic.` prefix. Calls are signed with the task's IAM role, so there is no Claude key to store.
+- **Access as designed: Amazon Bedrock**, through the `AnthropicBedrockMantle` client in `@anthropic-ai/bedrock-sdk`; as deployed, the `AnthropicBedrock` client, since Opus 4.6 is not served through Mantle. It serves the same Messages API as Anthropic's own, so `@anthropic-ai/sdk` supplies the types, the zod structured-output helper and the tool runner. Bedrock model IDs carry the `anthropic.` prefix. Calls are signed with the task's IAM role, so there is no Claude key to store.
 - **Structured outputs** for every comparison, so each finding is a record with a view, a location, a class, a confidence and a matched price-list entry.
-- **Streaming** for the owner's assistant.
+- **Streaming** for the owner's assistant, which is planned and not built (`architecture.md` section 10.5). Nothing deployed streams.
 
 **Settings to get right from the start**
 
-- Set the effort level explicitly. Its default on this model is medium. Use high for photograph comparison, where accuracy matters most, and low to medium for messages and the assistant.
+- Set the effort level explicitly. Its default on this model is medium. Use high for photograph comparison, where accuracy matters most, and medium for the rest, as deployed.
 - Do not force a specific tool call. Opus 5.5 rejects forced tool choice. Use automatic tool choice with strict tool schemas.
-- Check the stop reason on every response and handle a refusal cleanly. Bedrock has no server-side fallbacks, so register the SDK's client-side `betaRefusalFallbackMiddleware`, falling back to `anthropic.claude-opus-4-8`.
+- Check the stop reason on every response and handle a refusal cleanly. Bedrock has no server-side fallbacks. The design registers the SDK's client-side `betaRefusalFallbackMiddleware`, falling back to `anthropic.claude-opus-4-8`; as deployed there is none, since Opus 4.8 has the same zero quota.
 
 ### 6.1 The comparison pipeline
 
 **Implementation status, 20 October 2026.** Guided staff returns and the comparison worker are implemented through staff review, including a separate named manual inspection record. The current deterministic aligner supports small translations and defers when it cannot align reliably. Accuracy has not yet been measured on the project's tuning/gate photographs; the bare trial and the evaluation/scorecard release work remain open. See architecture sections 9.1 and 10.3 for implemented boundaries and budgets.
 
-The worker uses the Bedrock SDK's Mantle client. Its role needs `bedrock-mantle:CreateInference`, constrained by `bedrock-mantle:Model` to the configured primary and fallback models and by `aws:RequestedRegion`. AWS documents this model condition in [Security and IAM roles](https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-managed-agents-openai-security.html). The permission is also added to Hold's permissions boundary. Applying that boundary requires an administrator to deploy `HoldDelivery`; the ordinary pipeline cannot change its own boundary. No infrastructure is deployed by implementing this feature.
+As deployed the worker calls `us.anthropic.claude-opus-4-6-v1` through bedrock-runtime, and its role may invoke that profile and the model in the three regions it routes to (section 6). The Mantle design follows. The worker uses the Bedrock SDK's Mantle client. Its role needs `bedrock-mantle:CreateInference`, constrained by `bedrock-mantle:Model` to the configured primary and fallback models and by `aws:RequestedRegion`. AWS documents this model condition in [Security and IAM roles](https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-managed-agents-openai-security.html). The permission is also added to Hold's permissions boundary. Applying that boundary requires an administrator to deploy `HoldDelivery`; the ordinary pipeline cannot change its own boundary. No infrastructure is deployed by implementing this feature.
 
 Comparing two photographs for a small scratch is the hardest technical problem in Hold. No single tool should be trusted with it alone. The recommended approach uses the cheapest reliable method first and the model for judgment.
 
@@ -207,7 +209,7 @@ Comparing two photographs for a small scratch is the hardest technical problem i
 | 2. Normalize | Worker | sharp | Correct orientation, size and exposure |
 | 3. Align | Worker | OpenCV.js | Line the return photograph up with the handover photograph |
 | 4. Find candidate regions | Worker | OpenCV.js | Mark areas that changed, as hints |
-| 5. Judge | Worker | Claude Opus 5.5 | Look at both full images and close crops of each region. Decide no change, wear or damage, with confidence |
+| 5. Judge | Worker | Claude (Opus 4.6 as deployed) | Look at both full images and close crops of each region. Decide no change, wear or damage, with confidence |
 | 6. Price | Worker | Plain code | Match each finding to the shop's published price list |
 | 7. Decide | A person | The approval screen | Accept, reduce, remove or add |
 
@@ -221,17 +223,17 @@ Comparing two photographs for a small scratch is the hardest technical problem i
 
 ### 6.2 Agents
 
-The extensions add four agents to the owner's assistant. All that run inside Hold use `claude-opus-5-5` and the same tool gateway.
+The extensions add four agents beside the owner's assistant, which is planned and not built. All that run inside Hold use `us.anthropic.claude-opus-4-6-v1` as deployed and the same tool gateway.
 
 | Agent | Runs in | Tools | Acts on money |
 |---|---|---|---|
-| Owner's assistant | web | Hold's read tools, PayPal's read tools, proposals | Only through a proposal the owner approves |
+| Owner's assistant (planned, not built) | web | Hold's read tools, PayPal's read tools, proposals | Only through a proposal the owner approves |
 | Operations agent | worker, each night | The same read tools, proposals, template reminders | Only through a proposal the owner approves, or a standing rule the owner set |
 | Shop's advocate | worker | Three moves: offer, accept, pass | Only inside the owner's settlement limits |
 | Renter's advocate | worker | The same three moves | Only inside the renter's limit |
 | A renter's own assistant | Outside Hold | Hold's MCP server | Never. The renter approves in PayPal. |
 
-- **Effort:** high for the advocates and for the operations agent's investigation, low for reminders.
+- **Effort:** medium for the advocates and for the operations agent's investigation, as deployed; reminders are templates and call no model.
 - **Structured output** for every proposal and every offer.
 - **Each advocate runs in its own context.** One side's limits are never sent in a call made for the other side.
 - **Every run has a ceiling** on tool calls, tokens and elapsed time.

@@ -1196,7 +1196,7 @@ The owner can ask questions and give instructions in plain language.
 - Model Claude Opus 5.5 on Amazon Bedrock, `anthropic.claude-opus-5-5`, with a client-side refusal fallback to `anthropic.claude-opus-4-8`. The account's quota for Opus 5.5 is zero, so Opus 4.6 runs in its place through `us.anthropic.claude-opus-4-6-v1`, without a fallback, through judging (`tech-stack.md` section 6).
 - Effort is set explicitly on every call: high for both looks, medium for summaries and for sorting an incident report, low for short messages.
 - Structured output for all findings.
-- The stop reason is checked on every response. A refusal is handled as a normal outcome, and server-side fallbacks are enabled.
+- The stop reason is checked on every response. A refusal is handled as a normal outcome. Bedrock has no server-side fallback and the deployed build registers no client-side one.
 - The model and prompt version used are stored with each comparison, so a result can be explained later.
 
 ### 10.8 Measuring the comparison
@@ -1531,7 +1531,7 @@ Served by `web`. All routes require a Cognito token.
 | `/api/claims` | Read, edit, approve, waive, decide |
 | `/api/disputes` | Read, confirm the response |
 | `/api/reports` | The insights dashboard's rows: money held, captured and released, damage and recovery, staff consistency |
-| `/api/assistant` | Conversation with the owner's assistant, streamed |
+| `/api/assistant` | Conversation with the owner's assistant, streamed. Planned, not built (section 10.5) |
 | `/api/paypal/connect` | Connect the shop's PayPal account |
 | `/api/proposals` | The morning queue: read, approve, reject, postpone. Built as the page `/shop/queue` and its POST server functions (`approveProposals`, `rejectProposal`, `postponeProposal`, `checkNow`, `confirmRule`, `discardRule`), not a separate API route |
 | `/api/mandates` | Standing rules and settlement limits. The operations standing rule is `grantStandingRule` and `revokeStandingRule` on `/shop/queue` |
