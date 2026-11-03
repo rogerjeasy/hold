@@ -1,12 +1,15 @@
+import { buttonVariants } from '@/components/ui/button'
+
 // Small pieces an opened record shares, wherever it opens: a labelled fact, a section's heading and a link onward.
 
-export const detailLinkClass = 'inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4'
+// A link onward reads as a quiet button, so it is a large target and never mistaken for the record's own words.
+export const detailLinkClass = buttonVariants({ variant: 'outline', className: 'justify-self-start' })
 
 export function Fact({ label, value, testId }: { label: string; value: string; testId?: string }) {
   return (
-    <div className="grid min-w-0 gap-0.5">
+    <div className="grid min-w-0 content-start gap-1 rounded-xl border border-border/70 bg-card px-3.5 py-2.5">
       <dt className="label text-xs text-muted-foreground">{label}</dt>
-      <dd className="figures wrap-long-words" data-testid={testId}>{value}</dd>
+      <dd className="figures font-semibold wrap-long-words" data-testid={testId}>{value}</dd>
     </div>
   )
 }

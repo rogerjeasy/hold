@@ -2609,7 +2609,8 @@
       "heldNote": "{count, plural, =0 {No holds} one {# hold} other {# holds}}",
       "claims": "Claims to decide",
       "claimsNote": "{amount} in total",
-      "claimsNoteNone": "None waiting"
+      "claimsNoteNone": "None waiting",
+      "urgent": "Needs you"
     },
     "renter": "A renter",
     "decisions": {
@@ -2638,7 +2639,14 @@
         "title": "{renter} contested a claim of {amount}",
         "quote": "The renter wrote"
       },
-      "openBoard": "Open the decision board"
+      "openBoard": "Open the decision board",
+      "kinds": {
+        "dropped_off": "Dropped off",
+        "claim": "To approve",
+        "hold_ending": "Hold ending",
+        "late": "Late",
+        "contested": "Contested"
+      }
     },
     "counter": {
       "title": "Today at the counter",
@@ -2663,7 +2671,8 @@
         "released": "Released",
         "captured": "Captured",
         "other": "{amount}"
-      }
+      },
+      "emptyBody": "Handovers and returns booked for today appear here, in the order they happen."
     },
     "holds": {
       "title": "Holds on PayPal",
@@ -2731,7 +2740,8 @@
       "needsPrices": "Publish a price list first. The sample claims use its prices."
     },
     "setup": {
-      "progress": "{done} of {total} done"
+      "progress": "{done} of {total} done",
+      "lead": "A few steps, and the shop is ready to take its first hold."
     }
   },
   "sample": {
@@ -4017,7 +4027,8 @@
       "investigated": "{model} investigated {count, plural, one {# sample entry} other {# sample entries}} at {at}. They are on the queue below.",
       "notAnswered": "Claude did not answer at {at}, so the sample entries stay as they were.",
       "stalled": "The investigation started at {at} did not finish. You can start it again."
-    }
+    },
+    "allClear": "All clear"
   },
   "decisions": {
     "title": "Decisions",
@@ -4145,7 +4156,13 @@
         }
       },
       "repairBody": "Photograph the repaired views and record what the repair cost, from the item’s passport. Marks repaired leave the passport.",
-      "openPassport": "Open the item’s passport"
+      "openPassport": "Open the item’s passport",
+      "notYours": {
+        "senior": "Only an owner or manager can decide this.",
+        "another_senior": "You raised this claim, so another owner or manager decides it.",
+        "owner": "Only the owner can decide this now: the date promised to the renter has passed.",
+        "staff": "Your role can read this decision, not take it."
+      }
     },
     "together": {
       "label": "Releases chosen",
@@ -4168,7 +4185,8 @@
     "repairLine": {
       "claim": "From {renter}’s charged claim",
       "opened": "Opened from the passport"
-    }
+    },
+    "allClear": "All clear"
   },
   "money": {
     "title": "Money",
@@ -4281,7 +4299,8 @@
       "audit": "Audit trail",
       "noAudit": "Nothing recorded about this rental yet.",
       "openRental": "Open the rental"
-    }
+    },
+    "emptyTitle": "Nothing in the log yet"
   },
   "insights": {
     "title": "Insights",
@@ -4393,7 +4412,11 @@
     "saving": "Saving your dashboard…",
     "saved": "Your dashboard is saved for your next visit.",
     "saveFailed": "Your dashboard could not be saved. Your changes stay on this page.",
-    "reset": "Back to the first dashboard"
+    "reset": "Back to the first dashboard",
+    "onlyDecidersBody": "Ask an owner or manager for these figures. The Money page, which every staff member reads, shows each payment as PayPal recorded it.",
+    "openMoney": "Open the Money page",
+    "emptyTitle": "No figures yet",
+    "live": "Built from your records, as of now."
   },
   "selfReturn": {
     "card": {

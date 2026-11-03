@@ -66,15 +66,17 @@ export function createMasterDetail<Row>() {
     }, [node])
     if (data === undefined) return null
     return (
-      <button
-        type="button"
-        aria-expanded={open}
-        aria-label={toggleLabel(data, open)}
-        onClick={() => { toggle(node) }}
-        className="grid size-11 place-items-center text-muted-foreground hover:bg-muted hover:text-foreground"
-      >
-        <ChevronRight aria-hidden="true" className={open ? 'size-4 rotate-90 transition-transform motion-reduce:transition-none' : 'size-4 transition-transform motion-reduce:transition-none'} />
-      </button>
+      <span className="flex h-full items-center">
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-label={toggleLabel(data, open)}
+          onClick={() => { toggle(node) }}
+          className={open ? 'grid size-11 place-items-center rounded-xl bg-primary/10 text-primary transition-colors' : 'grid size-11 place-items-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground'}
+        >
+          <ChevronRight aria-hidden="true" className={open ? 'size-4 rotate-90 transition-transform duration-300 ease-spring motion-reduce:transition-none' : 'size-4 transition-transform duration-300 ease-spring motion-reduce:transition-none'} />
+        </button>
+      </span>
     )
   }
 
@@ -91,8 +93,9 @@ export function createMasterDetail<Row>() {
     if (data === undefined) return null
     return (
       <div role="gridcell" className="min-w-0">
-        <section aria-label={nameOf(data)} className="@container min-w-0 border-l-4 border-primary bg-background px-5 py-6 whitespace-normal text-foreground md:px-8">
-          <div className="max-w-5xl">{renderDetail(data, { ref: heading })}</div>
+        <section aria-label={nameOf(data)} className="@container relative min-w-0 bg-[color-mix(in_oklab,var(--muted)_45%,var(--card))] px-5 py-6 whitespace-normal text-foreground md:px-8 md:py-7">
+          <span aria-hidden="true" className="absolute inset-y-3 left-0 w-1 rounded-r-full bg-primary" />
+          <div className="max-w-5xl animate-fade">{renderDetail(data, { ref: heading })}</div>
         </section>
       </div>
     )

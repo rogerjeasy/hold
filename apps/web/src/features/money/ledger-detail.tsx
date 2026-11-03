@@ -1,3 +1,4 @@
+import { ArrowRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { Ref } from 'react'
 import { SampleTag } from '@/components/ui/sample-tag'
@@ -26,7 +27,7 @@ export function LedgerDetail({ row, text, headingRef }: LedgerDetailProps) {
         <h2 ref={headingRef} tabIndex={-1} className="text-[1.3125rem] leading-tight font-extrabold tracking-tight text-balance wrap-long-words focus:outline-none">{text.lineName(row)}</h2>
         {row.rental.simulated ? <SampleTag /> : null}
       </div>
-      <dl className="grid grid-cols-2 gap-3 @md:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-2.5 @md:grid-cols-4">
         <Fact label={t('rental')} value={`${text.renter(row.rental)} · ${text.period(row.rental)}`} />
         <Fact label={t('occurred')} value={text.moment(row.occurredAt)} />
         <Fact label={t('flow')} value={text.flow(row.flow)} />
@@ -36,7 +37,7 @@ export function LedgerDetail({ row, text, headingRef }: LedgerDetailProps) {
       <section className="grid gap-2" aria-label={t('confirmed')}>
         <SubHeading>{t('confirmed')}</SubHeading>
         <p>{t('readBack', { when: text.moment(row.recordedAt) })}</p>
-        <p className="font-mono text-sm wrap-long-words">{row.paypalReference}</p>
+        <p className="w-fit max-w-full rounded-lg border border-border/70 bg-card px-2.5 py-1 font-mono text-sm wrap-long-words">{row.paypalReference}</p>
         <p className="text-sm">
           {row.event === null
             ? t('noEvent')
@@ -49,9 +50,9 @@ export function LedgerDetail({ row, text, headingRef }: LedgerDetailProps) {
       <section className="grid gap-2" aria-label={t('audit')}>
         <SubHeading>{t('audit')}</SubHeading>
         {row.rental.audit.length === 0 ? <p className="text-sm">{t('noAudit')}</p> : (
-          <ul aria-label={t('audit')} className="grid divide-y border">
+          <ul aria-label={t('audit')} className="grid divide-y divide-border/70 overflow-clip rounded-xl border border-border/70 bg-card">
             {row.rental.audit.map((line, index) => (
-              <li key={`${line.action}-${String(index)}`} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 px-3 py-2 text-sm">
+              <li key={`${line.action}-${String(index)}`} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-0.5 px-4 py-2.5 text-sm">
                 <span className="font-mono wrap-long-words">{line.action}</span>
                 <span className="text-muted-foreground">{`${isActor(line.actorKind) ? actors(line.actorKind) : line.actorKind} · ${text.moment(line.at)}`}</span>
               </li>
@@ -59,7 +60,7 @@ export function LedgerDetail({ row, text, headingRef }: LedgerDetailProps) {
           </ul>
         )}
       </section>
-      <Link href={rentalRoutes.rental(row.rentalId)} className={detailLinkClass}>{t('openRental')}</Link>
+      <Link href={rentalRoutes.rental(row.rentalId)} className={detailLinkClass}>{t('openRental')}<ArrowRight aria-hidden="true" /></Link>
     </div>
   )
 }

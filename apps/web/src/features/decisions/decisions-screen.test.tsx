@@ -159,6 +159,44 @@ describe('the decision board', () => {
     expect(within(chosen).getByText('Another owner or manager decides: you raised it.')).toBeInTheDocument()
   })
 
+  // JW-M4: a decision the viewer may not take is never offered as theirs. Who may decide is the domain's rule
+  // (mayConfirm, through boardRows), the same one the server checks.
+  it('offers counter staff no way to decide a contested claim, and says who may', async () => {
+    const user = userEvent.setup()
+    renderWithIntl(<DecisionsScreen {...props(counter)} />)
+    await user.click(screen.getByRole('button', { name: 'Open claim:claim-2' }))
+    const chosen = panel()
+    expect(within(chosen).getByText('Only an owner or manager can decide this.')).toBeInTheDocument()
+    expect(within(chosen).queryByRole('link', { name: 'Decide on the claim page' })).not.toBeInTheDocument()
+    expect(within(chosen).getByRole('link', { name: 'Open the claim page' })).toHaveAttribute('href', '/shop/rentals/00000000-0000-4000-8000-000000000002/claim')
+  })
+
+  it('offers counter staff no approval of a claim above their limit, and says who may', async () => {
+    const user = userEvent.setup()
+    const rows = boardRows(records({ claims: [claim({ totalCents: 400_00 })] }), counter, NOW)
+    renderWithIntl(<DecisionsScreen {...props(counter, { rows })} />)
+    await user.click(screen.getByRole('button', { name: 'Open claim:claim-1' }))
+    expect(within(panel()).getByText('Only an owner or manager can decide this.')).toBeInTheDocument()
+    expect(within(panel()).queryByRole('link', { name: 'Review and approve on the claim page' })).not.toBeInTheDocument()
+  })
+
+  it('tells the owner who raised a contested claim that another owner or manager decides it', async () => {
+    const user = userEvent.setup()
+    renderWithIntl(<DecisionsScreen {...props(owner)} />)
+    await user.click(screen.getByRole('button', { name: 'Open claim:claim-2' }))
+    expect(within(panel()).getByText('You raised this claim, so another owner or manager decides it.')).toBeInTheDocument()
+    expect(within(panel()).queryByRole('link', { name: 'Decide on the claim page' })).not.toBeInTheDocument()
+  })
+
+  it('leads an owner who may decide a contested claim to where it is decided, with no refusal', async () => {
+    const user = userEvent.setup()
+    const rows = boardRows(records({ claims: [claim({ claimId: 'claim-3', state: 'contested', raisedByUserId: 'staff-1' })] }), owner, NOW)
+    renderWithIntl(<DecisionsScreen {...props(owner, { rows })} />)
+    await user.click(screen.getByRole('button', { name: 'Open claim:claim-3' }))
+    expect(within(panel()).getByRole('link', { name: 'Decide on the claim page' })).toBeInTheDocument()
+    expect(within(panel()).queryByText(/can decide this|decides it\./)).not.toBeInTheDocument()
+  })
+
   it('opens a contested claim on the neutral summary of where the two sides differ', async () => {
     const user = userEvent.setup()
     renderWithIntl(<DecisionsScreen {...props(owner, { rows: boardRows(records(), owner, NOW, { 'claim-2': contest }) })} />)

@@ -6,6 +6,7 @@ import { RotateCcw } from 'lucide-react'
 import { useLocale, useMessages, useTranslations } from 'next-intl'
 import { useTheme } from 'next-themes'
 import { useEffect, useRef, useState } from 'react'
+import './insights-studio.css'
 import { Button } from '@/components/ui/button'
 import { useShopFormat } from '@/hooks/use-shop-format'
 import { askInsights, saveInsightsDashboard } from './actions'
@@ -28,7 +29,8 @@ const holdTheme = (studio: AgStudioGlobal) =>
     textColor: 'var(--card-foreground)',
     subtleTextColor: 'var(--muted-foreground)',
     borderColor: 'var(--border)',
-    borderRadius: 0,
+    // Its widgets and controls take the smaller of Hold's radii, so the canvas sits in its card like Hold's own panels.
+    borderRadius: 8,
     fontFamily: 'var(--font-sans)',
     // The first series in Hold's accent and the second in its muted ink, as on the rest of Hold's pages.
     chartPaletteFills1Color: 'var(--primary)',
@@ -43,6 +45,8 @@ const holdTheme = (studio: AgStudioGlobal) =>
     studioPanelHeaderHeight: 44,
     pickerFieldHeight: 44,
     listItemHeight: 44,
+    // A widget's toolbar, inside its border, with buttons 44 pixels tall; insights-studio.css widens them to match.
+    studioWidgetToolbarHeight: 46,
   })
 
 // A change is saved this long after the last one, so a burst of edits is one save.
@@ -156,18 +160,40 @@ export function InsightsStudio({ tables, saved, currency, licenceKey }: Insights
   }
 
   return (
-    <div className="grid min-w-0 gap-2">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p role="status" className="min-h-6 text-sm text-muted-foreground">
-          {state === 'loading' ? t('loading') : saving === 'saving' ? t('saving') : saving === 'saved' ? t('saved') : saving === 'failed' ? t('saveFailed') : ''}
+    // Studio draws its own canvas and panels; Hold frames it as one of its cards, with the save state and the way back to
+    // the first dashboard in the card's own bar, and leaves what is inside to Studio.
+    <div className="surface grid min-w-0 overflow-clip">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/70 px-4 py-3 md:px-5">
+        <p role="status" className="flex min-h-6 min-w-0 items-center gap-2.5 text-sm text-muted-foreground">
+          <span
+            aria-hidden="true"
+            className={
+              state === 'loading' || saving === 'saving'
+                ? 'size-2 shrink-0 animate-pulse-ring rounded-full bg-primary text-primary'
+                : state === 'failed' || saving === 'failed'
+                  ? 'size-2 shrink-0 rounded-full bg-destructive'
+                  : 'size-2 shrink-0 rounded-full bg-success'
+            }
+          />
+          {state === 'loading' ? t('loading') : saving === 'saving' ? t('saving') : saving === 'saved' ? t('saved') : saving === 'failed' ? t('saveFailed') : t('live')}
         </p>
-        <Button type="button" variant="outline" className="min-h-11" disabled={state !== 'ready'} onClick={reset}>
+        <Button type="button" variant="ghost" className="min-h-11" disabled={state !== 'ready'} onClick={reset}>
           <RotateCcw aria-hidden="true" />
           {t('reset')}
         </Button>
       </div>
-      {state === 'failed' ? <p role="alert" className="font-semibold text-destructive">{t('loadFailed')}</p> : null}
-      <div ref={host} role="region" aria-label={t('region')} className="hold-studio h-[calc(100dvh-12rem)] min-h-[44rem] min-w-0 border" />
+      {state === 'failed' ? <p role="alert" className="m-4 rounded-xl border border-destructive/30 bg-destructive/6 px-4 py-3 font-semibold text-destructive">{t('loadFailed')}</p> : null}
+      <div className="relative min-w-0">
+        {state === 'loading' ? (
+          <div aria-hidden="true" className="absolute inset-0 grid grid-cols-3 content-start gap-4 p-5">
+            <div className="col-span-2 h-56 skeleton" />
+            <div className="h-56 skeleton" />
+            <div className="h-40 skeleton" />
+            <div className="col-span-2 h-40 skeleton" />
+          </div>
+        ) : null}
+        <div ref={host} role="region" aria-label={t('region')} className="hold-studio h-[calc(100dvh-14rem)] min-h-[44rem] min-w-0" />
+      </div>
     </div>
   )
 }

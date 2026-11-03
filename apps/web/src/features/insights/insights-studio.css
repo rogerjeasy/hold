@@ -1,0 +1,7 @@
+/* A widget's own toolbar (duplicate, delete) appears under the pointer or a finger. Studio resets its buttons to a
+ * 32 by 22 pixel box and gives no width to set, so they are widened here, outside any layer, to the 44 pixels every
+ * control in Hold has (AGENTS.md section 9). The toolbar's height is Studio's own setting (insights-studio.tsx). */
+.hold-studio .ag-studio-widget-toolbar-button {
+  box-sizing: border-box;
+  min-width: 2.75rem;
+}

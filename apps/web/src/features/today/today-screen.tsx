@@ -36,7 +36,7 @@ export function TodayScreen({ firstName, shop, now, part, setup, today, samples 
   const setupComplete = Object.values(setupDone(setup)).every(Boolean)
 
   return (
-    <div className="mx-auto grid w-full max-w-app gap-6 px-4 pt-7 pb-14 md:gap-7 md:px-8 md:pt-10 lg:px-10">
+    <div className="mx-auto grid w-full max-w-app stagger gap-6 px-4 pt-6 pb-14 md:gap-8 md:px-8 md:pt-9 lg:px-10">
       <TodayHeader name={firstName} part={part} now={now} clock={clock} decisions={decisions.length} dueBack={today.dueBackToday} />
       {today.rentals.simulated > 0 ? <Notice title={t('noticeTitle')} body={t('noticeBody')} /> : null}
       {samples === 'none' ? null : <SampleOffer needsPrices={samples === 'needs_prices'} />}
@@ -47,7 +47,7 @@ export function TodayScreen({ firstName, shop, now, part, setup, today, samples 
           <DecisionList decisions={decisions} clock={clock} />
           <CounterList visits={today.counter} now={now} day={day} clock={clock} />
         </div>
-        <div className="grid min-w-0 gap-6 md:grid-cols-2 md:gap-7 xl:grid-cols-1">
+        <div className="grid min-w-0 items-start gap-6 md:grid-cols-2 md:gap-7 xl:grid-cols-1">
           <HoldsPanel holds={holds} clock={clock} />
           <MonthPanel month={today.month} routine={today.routine} now={now} clock={clock} />
           <div className="md:col-span-2 xl:col-span-1">

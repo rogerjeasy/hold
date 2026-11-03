@@ -1,5 +1,5 @@
 import { HOLD_VALIDITY_DAYS } from '@hold/domain'
-import { ShieldAlert } from 'lucide-react'
+import { ArrowRight, ShieldAlert } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { Ref } from 'react'
 import { SampleTag } from '@/components/ui/sample-tag'
@@ -12,29 +12,29 @@ import { ClaimDetail } from './claim-detail'
 import { DropOffDetail } from './drop-off-detail'
 import { ExtensionPaymentDetail } from './extension-payment-detail'
 import { detailLinkClass, Fact, SubHeading } from '@/components/detail-parts'
-import { RenterWords } from './detail-parts'
+import { DeciderNote, RenterWords } from './detail-parts'
 import type { RowText } from './use-row-text'
 
 function ProposalDetail({ row, text, passkeyNeeded }: { row: ProposalRow; text: RowText; passkeyNeeded: boolean }) {
   const t = useTranslations('operations')
   return (
     <>
-      <div className="grid gap-1">
+      <div className="grid gap-1.5">
         <SubHeading>{t('why')}</SubHeading>
-        <p className="whitespace-pre-wrap wrap-long-words">{text.reason(row)}</p>
+        <p className="max-w-prose whitespace-pre-wrap text-pretty wrap-long-words">{text.reason(row)}</p>
       </div>
-      <div className="grid gap-1">
+      <div className="grid gap-1.5">
         <SubHeading>{t('references')}</SubHeading>
         {row.references.length === 0 ? <p className="text-sm">{t('noReferences')}</p> : (
           <ul className="flex flex-wrap gap-2">
-            {row.references.map((reference) => <li key={reference} className="min-w-0 border px-2 py-0.5 font-mono text-sm wrap-long-words">{reference}</li>)}
+            {row.references.map((reference) => <li key={reference} className="min-w-0 rounded-lg border border-border/70 bg-card px-2.5 py-1 font-mono text-sm wrap-long-words">{reference}</li>)}
           </ul>
         )}
       </div>
       {row.draft === null ? null : (
-        <div className="grid gap-1">
+        <div className="grid gap-1.5">
           <SubHeading>{t('draft')}</SubHeading>
-          <blockquote className="min-w-0 border-l-2 pl-3 whitespace-pre-wrap wrap-long-words">{row.draft}</blockquote>
+          <blockquote className="min-w-0 rounded-xl border border-border/70 bg-card px-4 py-3 whitespace-pre-wrap wrap-long-words">{row.draft}</blockquote>
         </div>
       )}
       <EntryMarkList marks={row.marks} model={row.model} />
@@ -48,14 +48,14 @@ function IncidentDetail({ row }: { row: IncidentRow }) {
   return (
     <>
       {row.safety ? (
-        <p className="flex gap-2 border border-border-strong p-3 font-semibold">
-          <ShieldAlert aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-primary" />
+        <p className="flex gap-2.5 rounded-xl border border-warning/30 bg-warning/8 p-3.5 font-semibold">
+          <ShieldAlert aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-warning" />
           {t('safety')}
         </p>
       ) : null}
       <RenterWords words={row.description} />
       {row.suggestion === null ? null : <p className="text-sm wrap-long-words">{t('suggested', { line: row.suggestion })}</p>}
-      <Link href={shopRoutes.incidents} className={detailLinkClass}>{t('openIncidents')}</Link>
+      <Link href={shopRoutes.incidents} className={detailLinkClass}>{t('openIncidents')}<ArrowRight aria-hidden="true" /></Link>
     </>
   )
 }
@@ -82,22 +82,22 @@ export function DecisionDetail({ row, text, photoUrls, passkeyNeeded, heading }:
           {row.simulated ? <SampleTag /> : null}
         </div>
       )}
-      <dl className="grid grid-cols-2 gap-3 @md:grid-cols-3">
+      <dl className="grid grid-cols-2 gap-2.5 @md:grid-cols-3">
         <Fact label={t('due')} value={text.due(row)} />
         {row.amountCents === null ? null : <Fact label={t('amount')} value={text.money(row.amountCents)} />}
         <Fact label={t('decider')} value={text.decider(row)} />
       </dl>
-      <p className="font-semibold">{text.deciderLine(row)}</p>
+      <DeciderNote row={row} text={text} />
       {row.waitingSince === null || row.kind === 'late' ? null : <p className="text-sm text-muted-foreground">{t('waiting', { when: text.moment(row.waitingSince) })}</p>}
       {row.kind === 'claim' || row.kind === 'contested' || row.kind === 'escalated' ? <ClaimDetail row={row} text={text} photoUrls={photoUrls} /> : null}
       {row.kind === 'proposal' ? <ProposalDetail row={row} text={text} passkeyNeeded={passkeyNeeded} /> : null}
       {row.kind === 'incident' ? <IncidentDetail row={row} /> : null}
       {row.kind === 'hold_ending' ? (
-        <div className="grid gap-2">
+        <div className="grid gap-2.5">
           <p>{t('holdBody')}</p>
           <div className="flex items-center gap-3">
-            <span aria-hidden="true" className="relative h-1.5 max-w-64 flex-1 bg-muted">
-              <span className="absolute inset-y-0 left-0 bg-foreground" style={{ width: `${String((row.day / HOLD_VALIDITY_DAYS) * 100)}%` }} />
+            <span aria-hidden="true" className="relative h-1.5 max-w-64 flex-1 overflow-hidden rounded-full bg-muted">
+              <span className="absolute inset-y-0 left-0 rounded-full bg-warning" style={{ width: `${String((row.day / HOLD_VALIDITY_DAYS) * 100)}%` }} />
             </span>
             <span className="figures text-xs">{text.subject(row)}</span>
           </div>
@@ -108,11 +108,11 @@ export function DecisionDetail({ row, text, photoUrls, passkeyNeeded, heading }:
       {row.kind === 'extension_payment' ? <ExtensionPaymentDetail row={row} text={text} /> : null}
       {row.kind === 'repair' ? (
         <>
-          <p className="text-pretty">{t('repairBody')}</p>
-          <Link href={itemRoutes.item(row.itemId)} className={detailLinkClass}>{t('openPassport')}</Link>
+          <p className="max-w-prose text-pretty">{t('repairBody')}</p>
+          <Link href={itemRoutes.item(row.itemId)} className={detailLinkClass}>{t('openPassport')}<ArrowRight aria-hidden="true" /></Link>
         </>
       ) : null}
-      {row.rentalId === null ? null : <Link href={rentalRoutes.rental(row.rentalId)} className={detailLinkClass}>{t('openRental')}</Link>}
+      {row.rentalId === null ? null : <Link href={rentalRoutes.rental(row.rentalId)} className={detailLinkClass}>{t('openRental')}<ArrowRight aria-hidden="true" /></Link>}
     </div>
   )
 }

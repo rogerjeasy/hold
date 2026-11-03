@@ -2609,7 +2609,8 @@
       "heldNote": "{count, plural, =0 {Aucune empreinte} one {# empreinte} other {# empreintes}}",
       "claims": "Réclamations à trancher",
       "claimsNote": "{amount} au total",
-      "claimsNoteNone": "Aucune en attente"
+      "claimsNoteNone": "Aucune en attente",
+      "urgent": "Vous attend"
     },
     "renter": "Un client",
     "decisions": {
@@ -2638,7 +2639,14 @@
         "title": "{renter} a contesté une réclamation de {amount}",
         "quote": "Le client a écrit"
       },
-      "openBoard": "Ouvrir toutes les décisions"
+      "openBoard": "Ouvrir toutes les décisions",
+      "kinds": {
+        "dropped_off": "Déposé",
+        "claim": "À approuver",
+        "hold_ending": "Empreinte bientôt finie",
+        "late": "En retard",
+        "contested": "Contesté"
+      }
     },
     "counter": {
       "title": "Aujourd’hui au comptoir",
@@ -2663,7 +2671,8 @@
         "released": "Libérée",
         "captured": "Encaissée",
         "other": "{amount}"
-      }
+      },
+      "emptyBody": "Les remises et retours prévus aujourd’hui apparaissent ici, dans l’ordre où ils arrivent."
     },
     "holds": {
       "title": "Empreintes sur PayPal",
@@ -2731,7 +2740,8 @@
       "needsPrices": "Publiez d’abord une grille tarifaire. Les réclamations d’exemple utilisent ses prix."
     },
     "setup": {
-      "progress": "{done} sur {total} faits"
+      "progress": "{done} sur {total} faits",
+      "lead": "Quelques étapes, et la boutique est prête pour sa première empreinte."
     }
   },
   "sample": {
@@ -4017,7 +4027,8 @@
       "investigated": "{model} a examiné {count, plural, one {# entrée d’exemple} other {# entrées d’exemple}} à {at}. Elles sont dans la file ci-dessous.",
       "notAnswered": "Claude n’a pas répondu à {at}, les entrées d’exemple restent donc telles quelles.",
       "stalled": "L’examen lancé à {at} ne s’est pas terminé. Vous pouvez le relancer."
-    }
+    },
+    "allClear": "Tout est à jour"
   },
   "decisions": {
     "title": "Décisions",
@@ -4145,7 +4156,13 @@
         }
       },
       "repairBody": "Photographiez les vues réparées et notez le coût de la réparation depuis le passeport de l’article. Les marques réparées quittent le passeport.",
-      "openPassport": "Ouvrir le passeport de l’article"
+      "openPassport": "Ouvrir le passeport de l’article",
+      "notYours": {
+        "senior": "Seul un propriétaire ou un responsable peut trancher.",
+        "another_senior": "Vous avez émis cette réclamation : un autre propriétaire ou responsable la tranche.",
+        "owner": "Seul le propriétaire peut trancher maintenant : la date promise au locataire est passée.",
+        "staff": "Votre rôle permet de lire cette décision, pas de la prendre."
+      }
     },
     "together": {
       "label": "Libérations choisies",
@@ -4168,7 +4185,8 @@
     "repairLine": {
       "claim": "Issue de la réclamation débitée à {renter}",
       "opened": "Ouverte depuis le passeport"
-    }
+    },
+    "allClear": "Tout est à jour"
   },
   "money": {
     "title": "Argent",
@@ -4281,7 +4299,8 @@
       "audit": "Journal d’audit",
       "noAudit": "Rien n’est encore inscrit pour cette location.",
       "openRental": "Ouvrir la location"
-    }
+    },
+    "emptyTitle": "Rien dans le registre pour l’instant"
   },
   "insights": {
     "title": "Analyses",
@@ -4393,7 +4412,11 @@
     "saving": "Enregistrement de votre tableau de bord…",
     "saved": "Votre tableau de bord est enregistré pour votre prochaine visite.",
     "saveFailed": "Votre tableau de bord n’a pas pu être enregistré. Vos changements restent sur cette page.",
-    "reset": "Revenir au premier tableau de bord"
+    "reset": "Revenir au premier tableau de bord",
+    "onlyDecidersBody": "Demandez ces chiffres à un propriétaire ou un responsable. La page Argent, que tout le personnel peut lire, montre chaque paiement tel que PayPal l’a enregistré.",
+    "openMoney": "Ouvrir la page Argent",
+    "emptyTitle": "Pas encore de chiffres",
+    "live": "Établi à partir de vos données, à l’instant."
   },
   "selfReturn": {
     "card": {

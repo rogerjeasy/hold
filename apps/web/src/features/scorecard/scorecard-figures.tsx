@@ -48,15 +48,15 @@ export function ScorecardFigures({ run }: { run: ScorecardRun }) {
     <div className="grid gap-4">
       <p className="text-muted-foreground wrap-long-words">{t('measuredOn', { date: format.dateTime(run.completedAt, { dateStyle: 'medium' }), pairs: run.caseCount, real: run.caseCount - run.syntheticCount, synthetic: run.syntheticCount, pipeline: run.pipelineVersion, model: run.model })}</p>
       <Panel title={t('title')}>
-        <div className="hidden grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)] gap-4 border-b px-4 py-2 text-sm text-muted-foreground md:grid md:px-5">
+        <div className="hidden grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)] gap-4 border-b border-border/70 bg-muted/40 px-4 py-2.5 text-[0.8125rem] font-semibold text-muted-foreground md:grid md:px-5">
           <span>{t('columns.measure')}</span><span>{t('columns.all')}</span><span>{t('columns.real')}</span>
         </div>
-        <dl className="divide-y">
+        <dl className="divide-y divide-border/70">
           {rows.map((row) => (
-            <div key={row.key} className="grid min-w-0 gap-2 px-4 py-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)] md:gap-4 md:px-5">
+            <div key={row.key} className="grid min-w-0 gap-2 px-4 py-3.5 transition-colors hover:bg-muted/35 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)] md:gap-4 md:px-5">
               <dt className="min-w-0"><span className="font-semibold wrap-long-words">{row.name}</span><span className="mt-1 block text-sm text-muted-foreground wrap-long-words">{row.help}</span></dt>
-              <dd className="figures min-w-0 wrap-long-words"><span className="label text-xs text-muted-foreground md:hidden">{t('columns.all')} · </span>{row.figure(run.measures)}</dd>
-              <dd className="figures min-w-0 wrap-long-words"><span className="label text-xs text-muted-foreground md:hidden">{t('columns.real')} · </span>{row.figure(run.realMeasures)}</dd>
+              <dd className="figures min-w-0 font-semibold wrap-long-words"><span className="label text-xs text-muted-foreground md:hidden">{t('columns.all')} · </span>{row.figure(run.measures)}</dd>
+              <dd className="figures min-w-0 font-semibold wrap-long-words"><span className="label text-xs text-muted-foreground md:hidden">{t('columns.real')} · </span>{row.figure(run.realMeasures)}</dd>
             </div>
           ))}
         </dl>

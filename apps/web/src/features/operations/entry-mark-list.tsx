@@ -16,9 +16,9 @@ export function EntryMarkList({ marks, model }: { marks: readonly EntryMark[]; m
       {marks.map((mark) => {
         const Icon = ICONS[mark]
         return (
-          <li key={mark} className="inline-flex items-center gap-1.5 border border-border-strong px-2 py-1 text-sm">
-            <Icon aria-hidden="true" className="size-4 shrink-0" />
-            {t(mark, { model: named })}
+          <li key={mark} className="inline-flex max-w-full min-w-0 items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-sm">
+            <Icon aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+            <span className="min-w-0 wrap-long-words">{t(mark, { model: named })}</span>
           </li>
         )
       })}

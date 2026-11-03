@@ -17,11 +17,14 @@ export function SampleOffer({ needsPrices }: { needsPrices: boolean }) {
   const [result, add, pending] = useActionState(addSampleRentals, null)
 
   return (
-    <section className="grid gap-4 border border-dashed border-border-strong bg-card p-4 text-card-foreground md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:gap-5 md:p-5">
-      <Sparkles aria-hidden="true" className="size-6 text-primary" />
+    <section className="surface relative isolate grid gap-4 overflow-clip p-5 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:gap-5 md:p-6">
+      <div aria-hidden="true" className="absolute inset-0 -z-10 dot-grid mask-l-from-0% mask-l-to-60% opacity-60" />
+      <span aria-hidden="true" className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
+        <Sparkles className="size-5" />
+      </span>
       <div className="min-w-0">
-        <h2 className="font-bold">{t('offerTitle')}</h2>
-        <p className="mt-1 text-[0.9375rem] text-muted-foreground">{needsPrices ? t('needsPrices') : t('offerBody')}</p>
+        <h2 className="text-[1.0625rem] font-extrabold tracking-tight">{t('offerTitle')}</h2>
+        <p className="mt-1 max-w-prose text-[0.9375rem] text-muted-foreground">{needsPrices ? t('needsPrices') : t('offerBody')}</p>
         <div className="mt-2 empty:hidden">
           <ActionMessage result={result} success={t('added')} />
         </div>

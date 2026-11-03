@@ -2609,7 +2609,8 @@
       "heldNote": "{count, plural, =0 {Keine Reservierungen} one {# Reservierung} other {# Reservierungen}}",
       "claims": "Offene Forderungen",
       "claimsNote": "{amount} insgesamt",
-      "claimsNoteNone": "Keine offen"
+      "claimsNoteNone": "Keine offen",
+      "urgent": "Wartet auf Sie"
     },
     "renter": "Ein Kunde",
     "decisions": {
@@ -2638,7 +2639,14 @@
         "title": "{renter} hat eine Forderung über {amount} bestritten",
         "quote": "Der Kunde schrieb"
       },
-      "openBoard": "Alle Entscheidungen öffnen"
+      "openBoard": "Alle Entscheidungen öffnen",
+      "kinds": {
+        "dropped_off": "Abgegeben",
+        "claim": "Freizugeben",
+        "hold_ending": "Reservierung endet",
+        "late": "Verspätet",
+        "contested": "Bestritten"
+      }
     },
     "counter": {
       "title": "Heute an der Theke",
@@ -2663,7 +2671,8 @@
         "released": "Freigegeben",
         "captured": "Eingezogen",
         "other": "{amount}"
-      }
+      },
+      "emptyBody": "Für heute gebuchte Übergaben und Rückgaben erscheinen hier, in der Reihenfolge, in der sie anstehen."
     },
     "holds": {
       "title": "Reservierungen bei PayPal",
@@ -2731,7 +2740,8 @@
       "needsPrices": "Veröffentlichen Sie zuerst eine Preisliste. Die Beispielforderungen verwenden ihre Preise."
     },
     "setup": {
-      "progress": "{done} von {total} erledigt"
+      "progress": "{done} von {total} erledigt",
+      "lead": "Ein paar Schritte, dann kann Ihr Laden seine erste Reservierung annehmen."
     }
   },
   "sample": {
@@ -4017,7 +4027,8 @@
       "investigated": "{model} hat um {at} {count, plural, one {# Beispieleintrag} other {# Beispieleinträge}} geprüft. Sie stehen unten in der Liste.",
       "notAnswered": "Claude hat um {at} nicht geantwortet, die Beispieleinträge bleiben, wie sie waren.",
       "stalled": "Die um {at} gestartete Prüfung wurde nicht beendet. Sie können sie erneut starten."
-    }
+    },
+    "allClear": "Alles erledigt"
   },
   "decisions": {
     "title": "Entscheidungen",
@@ -4145,7 +4156,13 @@
         }
       },
       "repairBody": "Fotografieren Sie die reparierten Ansichten und erfassen Sie die Reparaturkosten im Pass des Artikels. Reparierte Spuren verlassen den Pass.",
-      "openPassport": "Pass des Artikels öffnen"
+      "openPassport": "Pass des Artikels öffnen",
+      "notYours": {
+        "senior": "Nur Inhaber oder Leitung können das entscheiden.",
+        "another_senior": "Du hast diese Forderung erhoben, darum entscheiden andere Inhaber oder Leitung.",
+        "owner": "Nur die Inhaberin oder der Inhaber kann das jetzt entscheiden: Das dem Mieter zugesagte Datum ist verstrichen.",
+        "staff": "Deine Rolle kann diese Entscheidung lesen, aber nicht treffen."
+      }
     },
     "together": {
       "label": "Gewählte Freigaben",
@@ -4168,7 +4185,8 @@
     "repairLine": {
       "claim": "Aus der belasteten Forderung an {renter}",
       "opened": "Aus dem Pass eröffnet"
-    }
+    },
+    "allClear": "Alles erledigt"
   },
   "money": {
     "title": "Geld",
@@ -4281,7 +4299,8 @@
       "audit": "Prüfprotokoll",
       "noAudit": "Zu dieser Miete ist noch nichts eingetragen.",
       "openRental": "Miete öffnen"
-    }
+    },
+    "emptyTitle": "Noch keine Buchungen"
   },
   "insights": {
     "title": "Einblicke",
@@ -4393,7 +4412,11 @@
     "saving": "Dein Dashboard wird gespeichert…",
     "saved": "Dein Dashboard ist für deinen nächsten Besuch gespeichert.",
     "saveFailed": "Dein Dashboard konnte nicht gespeichert werden. Deine Änderungen bleiben auf dieser Seite.",
-    "reset": "Zurück zum ersten Dashboard"
+    "reset": "Zurück zum ersten Dashboard",
+    "onlyDecidersBody": "Fragen Sie Inhaber oder Leitung nach diesen Zahlen. Die Seite Geld, die alle im Team lesen, zeigt jede Zahlung so, wie PayPal sie verbucht hat.",
+    "openMoney": "Seite Geld öffnen",
+    "emptyTitle": "Noch keine Zahlen",
+    "live": "Aus Ihren Aufzeichnungen, Stand jetzt."
   },
   "selfReturn": {
     "card": {

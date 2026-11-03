@@ -1,4 +1,5 @@
 import type { ShopToday } from '@hold/db'
+import { CalendarRange, Timer } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Panel } from '@/components/ui/panel'
 import type { ShopClock } from '@/hooks/use-shop-format'
@@ -17,22 +18,31 @@ export function MonthPanel({ month, routine, now, clock }: { month: ShopToday['m
   const title = t('title', { month: format.month(now) })
 
   return (
-    <Panel title={title.charAt(0).toUpperCase() + title.slice(1)}>
-      <dl className="grid grid-cols-2">
+    <Panel title={title.charAt(0).toUpperCase() + title.slice(1)} icon={CalendarRange}>
+      <dl className="grid grid-cols-2 gap-2 p-3 md:p-4">
         {figures.map((key) => (
-          <div key={key} className="min-w-0 px-4 py-3.5 odd:border-r nth-[-n+2]:border-b md:px-5">
-            <dt className="text-[0.8125rem] text-muted-foreground">{t(key)}</dt>
-            <dd className="mt-1 text-xl font-extrabold tracking-tight wrap-long-words">{format.money(cents[key])}</dd>
+          <div key={key} className="min-w-0 rounded-xl bg-muted/55 px-3.5 py-3">
+            <dt className="text-[0.8125rem] text-muted-foreground wrap-long-words">{t(key)}</dt>
+            <dd className="mt-1 text-xl font-extrabold tracking-tight tabular-nums wrap-long-words">{format.money(cents[key])}</dd>
           </div>
         ))}
       </dl>
-      <ul className="grid gap-1 border-t px-4 py-3.5 text-[0.9375rem] md:px-5">
+      <ul className="grid gap-1.5 border-t border-border/70 px-4 py-3.5 text-[0.9375rem] md:px-5">
         {routine.handover.medianSeconds === null && routine.return.medianSeconds === null ? (
-          <li className="text-muted-foreground">{t('routineNone')}</li>
+          <li className="flex gap-2 text-muted-foreground">
+            <Timer aria-hidden="true" className="mt-1 size-4 shrink-0" />
+            {t('routineNone')}
+          </li>
         ) : (
           <>
-            <li>{routine.handover.medianSeconds === null ? t('routineHandoverNone') : t('routineHandover', { time: clockTime(routine.handover.medianSeconds), count: routine.handover.count })}</li>
-            <li>{routine.return.medianSeconds === null ? t('routineReturnNone') : t('routineReturn', { time: clockTime(routine.return.medianSeconds), count: routine.return.count })}</li>
+            <li className="flex gap-2">
+              <Timer aria-hidden="true" className="mt-1 size-4 shrink-0 text-muted-foreground" />
+              {routine.handover.medianSeconds === null ? t('routineHandoverNone') : t('routineHandover', { time: clockTime(routine.handover.medianSeconds), count: routine.handover.count })}
+            </li>
+            <li className="flex gap-2">
+              <Timer aria-hidden="true" className="mt-1 size-4 shrink-0 text-muted-foreground" />
+              {routine.return.medianSeconds === null ? t('routineReturnNone') : t('routineReturn', { time: clockTime(routine.return.medianSeconds), count: routine.return.count })}
+            </li>
           </>
         )}
       </ul>

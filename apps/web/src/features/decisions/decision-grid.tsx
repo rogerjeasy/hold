@@ -6,6 +6,7 @@ import { AgGridReact } from 'ag-grid-react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
+import { CONTROL_COLUMN } from '@/components/grid/control-column'
 import { registerGridModules } from '@/components/grid/grid-modules'
 import { holdGridTheme } from '@/components/grid/grid-theme'
 import { createMasterDetail, useRowToggle } from '@/components/grid/master-detail'
@@ -67,8 +68,8 @@ export function DecisionGrid({ rows, text, grouped, selectedIds, onSelect, rende
 
   const columns = useMemo<ColDef<BoardRow>[]>(() => [
     { colId: 'group', valueGetter: ({ data }) => data?.group, rowGroup: grouped, hide: true },
-    { colId: 'open', headerName: t('columns.open'), cellRenderer: OpenRowCell, width: 64, maxWidth: 64, sortable: false, suppressHeaderMenuButton: true },
-    { colId: 'choose', headerName: t('columns.choose'), cellRenderer: ChooseCell, width: 64, maxWidth: 64, sortable: false, hide: !selectable, suppressHeaderMenuButton: true },
+    { colId: 'open', headerName: t('columns.open'), cellRenderer: OpenRowCell, ...CONTROL_COLUMN },
+    { colId: 'choose', headerName: t('columns.choose'), cellRenderer: ChooseCell, ...CONTROL_COLUMN, hide: !selectable },
     { colId: 'decision', headerName: t('columns.decision'), cellRenderer: DecisionCell, flex: 3, minWidth: 260, sortable: false },
     { colId: 'due', headerName: t('columns.due'), cellRenderer: DueCell, valueGetter: ({ data }) => data?.due?.getTime() ?? null, comparator: lastWhenMissing, flex: 1, minWidth: 170 },
     { colId: 'amount', headerName: t('columns.amount'), cellRenderer: AmountCell, valueGetter: ({ data }) => data?.amountCents ?? null, aggFunc: amountTotal, comparator: lastWhenMissing, width: 132, minWidth: 116, type: 'rightAligned' },
@@ -118,6 +119,8 @@ export function DecisionGrid({ rows, text, grouped, selectedIds, onSelect, rende
             rowData={rowData}
             columnDefs={columns}
             getRowId={getRowId}
+            // Three lines a decision: what, about whom, and who decides.
+            rowHeight={84}
             getRowHeight={getRowHeight}
             domLayout="autoHeight"
             ensureDomOrder
