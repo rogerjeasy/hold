@@ -1,4 +1,5 @@
 import { EyeOff, HandCoins, MessageSquareReply, ReceiptText, Scale, ScrollText } from 'lucide-react'
+import { EVIDENCE_KEPT_DAYS } from '@hold/domain'
 import { useTranslations } from 'next-intl'
 import { routes } from '@/lib/routes'
 import { audienceImages, renterPointKeys } from '../audience-points'
@@ -64,7 +65,7 @@ export function ForRentersScreen() {
           tone="band"
           items={assurances.map(({ key, icon }) => ({
             title: t(`assurances.items.${key}.title`),
-            body: t(`assurances.items.${key}.body`),
+            body: t(`assurances.items.${key}.body`, { days: EVIDENCE_KEPT_DAYS }),
             icon,
           }))}
         />

@@ -4,7 +4,7 @@ import { App } from 'aws-cdk-lib'
 import { Match, Template } from 'aws-cdk-lib/assertions'
 import { describe, expect, it } from 'vitest'
 import { createHoldApp } from './hold-app.ts'
-import { CODE_KEY_ARN, CREDENTIAL_KEY_ALIAS, DATABASE_NAME, EVIDENCE_RETENTION_DAYS, PREFIX } from './settings.ts'
+import { CODE_KEY_ARN, CREDENTIAL_KEY_ALIAS, DATABASE_NAME, EVIDENCE_KEPT_DAYS, EVIDENCE_LOCK_DAYS, PREFIX } from './settings.ts'
 import { QUEUES } from './work-stack.ts'
 
 // The default VPC lookup recorded by the first synth, so the tests build the same app with no AWS access.
@@ -110,9 +110,29 @@ describe('the evidence bucket', () => {
   it('locks every photograph against change or deletion', () => {
     data.hasResourceProperties('AWS::S3::Bucket', {
       ObjectLockEnabled: true,
-      ObjectLockConfiguration: { ObjectLockEnabled: 'Enabled', Rule: { DefaultRetention: { Mode: 'GOVERNANCE', Days: EVIDENCE_RETENTION_DAYS } } },
+      ObjectLockConfiguration: { ObjectLockEnabled: 'Enabled', Rule: { DefaultRetention: { Mode: 'GOVERNANCE', Days: EVIDENCE_LOCK_DAYS } } },
       VersioningConfiguration: { Status: 'Enabled' },
     })
+  })
+
+  // The period the privacy notice states. On a versioned bucket the day's rule hides the photograph behind a delete
+  // marker and the next removes the version itself; S3 removes no version while its Object Lock retention runs.
+  it('deletes each photograph, manifest and pack a year after it was written, never before its lock ends', () => {
+    expect(EVIDENCE_KEPT_DAYS).toBeGreaterThanOrEqual(EVIDENCE_LOCK_DAYS)
+    data.hasResourceProperties('AWS::S3::Bucket', {
+      ObjectLockEnabled: true,
+      LifecycleConfiguration: {
+        Rules: Match.arrayWith([
+          Match.objectLike({ Status: 'Enabled', ExpirationInDays: EVIDENCE_KEPT_DAYS, NoncurrentVersionExpiration: { NoncurrentDays: 1 } }),
+          Match.objectLike({ Status: 'Enabled', ExpiredObjectDeleteMarker: true }),
+        ]),
+      },
+    })
+  })
+
+  it('deletes the face-blurred copies when it deletes the photographs they were made from', () => {
+    const display = resourcesOfType(data, 'AWS::S3::Bucket').find((bucket) => bucket.Properties?.['ObjectLockEnabled'] === undefined)
+    expect(JSON.stringify(display?.Properties?.['LifecycleConfiguration'])).toContain(`"ExpirationInDays":${String(EVIDENCE_KEPT_DAYS)}`)
   })
 
   it('is private, encrypted and reachable only over TLS, like the display bucket', () => {

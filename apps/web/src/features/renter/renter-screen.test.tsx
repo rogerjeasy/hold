@@ -1,5 +1,6 @@
 import type { RenterView } from '@hold/db'
 import { screen, waitFor, within } from '@testing-library/react'
+import { EVIDENCE_KEPT_DAYS } from '@hold/domain'
 import { describe, expect, it, vi } from 'vitest'
 import { renderWithIntl } from '@/test/render'
 import { RenterScreen } from './renter-screen'
@@ -36,6 +37,21 @@ const view: RenterView = {
 const fakePayPal = () => Object.assign(window, { paypal: { createInstance: () => Promise.resolve({ findEligibleMethods: () => Promise.resolve({ isEligible: () => true }), createPayPalOneTimePaymentSession: () => Promise.resolve({ start: () => Promise.resolve() }) }) } })
 
 describe('the renter’s page', () => {
+  it('says, before the renter pays, that the photographs are kept as evidence and for how long, linking the privacy notice', () => {
+    for (const walkIn of [false, true]) {
+      const { unmount } = renderWithIntl(<RenterScreen token="t" view={{ ...view, walkIn }} />)
+      const notice = screen.getByText(new RegExp(`kept as evidence for ${String(EVIDENCE_KEPT_DAYS)} days, then deleted`))
+      expect(within(notice).getByRole('link', { name: 'How Hold handles your details' })).toHaveAttribute('href', '/privacy')
+      expect(notice.compareDocumentPosition(screen.getByRole('button', { name: /with PayPal/ })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+      unmount()
+    }
+  })
+
+  it('says it no more once the fee is paid', () => {
+    renderWithIntl(<RenterScreen token="t" view={{ ...view, state: 'booked' }} />)
+    expect(screen.queryByText(/kept as evidence for/)).not.toBeInTheDocument()
+  })
+
   it('pays the fee with PayPal’s own button when the shop’s PayPal app is known', async () => {
     fakePayPal()
     const { container } = renderWithIntl(<RenterScreen token="t" view={view} checkout={{ clientId: 'shop-client-id', environment: 'sandbox' }} />)

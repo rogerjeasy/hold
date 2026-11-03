@@ -97,6 +97,14 @@
     "assistant": {
       "title": "Louer par un assistant",
       "description": "Parlez à un assistant qui loue un vélo électrique via le serveur MCP de Hold, comme le ferait l'assistant d'un voyageur."
+    },
+    "privacy": {
+      "title": "Avis de confidentialité",
+      "description": "Ce que Hold enregistre, pourquoi, pour combien de temps, qui le traite, et comment faire effacer vos données."
+    },
+    "terms": {
+      "title": "Conditions d'utilisation",
+      "description": "Les conditions d'utilisation de Hold, un projet de hackathon qui fonctionne dans le bac à sable de PayPal."
     }
   },
   "nav": {
@@ -114,7 +122,9 @@
     "skip": "Aller au contenu",
     "signIn": "Connexion",
     "yourShop": "Votre boutique",
-    "reliability": "Fiabilité"
+    "reliability": "Fiabilité",
+    "privacy": "Avis de confidentialité",
+    "terms": "Conditions d'utilisation"
   },
   "language": {
     "label": "Langue",
@@ -335,7 +345,8 @@
     "about": "À propos de cette version",
     "aboutBody": "Conçu pour le PayPal AI Hackathon 2026. Hold n'est pas un assureur et ne détient pas l'argent des clients. Les fonds restent sur le compte du client jusqu'à l'approbation d'une réclamation.",
     "rights": "© {year} Hold",
-    "credits": "Photographies Unsplash de Florian, Nuno Alves et Krzysztof Kowalik. Les marques sur le cadre sont illustratives."
+    "credits": "Photographies Unsplash de Florian, Nuno Alves et Krzysztof Kowalik. Les marques sur le cadre sont illustratives.",
+    "legal": "Confidentialité et conditions"
   },
   "pages": {
     "howItWorks": {
@@ -629,7 +640,7 @@
           },
           "privacy": {
             "title": "Des photos d'objets, pas de personnes",
-            "body": "Les visages sont floutés. Les dossiers ne sont conservés que le temps nécessaire."
+            "body": "Les visages sont floutés. Les photos sont supprimées {days} jours après la prise de vue, et le loueur peut effacer vos données sur demande."
           },
           "notInsurer": {
             "title": "Votre argent reste le vôtre",
@@ -966,6 +977,151 @@
           }
         }
       }
+    },
+    "privacy": {
+      "title": "Avis de confidentialité",
+      "lead": "Hold est un projet conçu pour le PayPal AI Hackathon 2026. Il fonctionne dans le bac à sable de PayPal, donc aucun argent réel ne circule, et ce n'est pas une entreprise immatriculée. Cette page dit clairement ce qu'il enregistre, pourquoi, pour combien de temps, qui le traite pour Hold, et comment faire effacer vos données.",
+      "action": "Lire les conditions d'utilisation",
+      "updated": "Dernière mise à jour le 3 novembre 2026.",
+      "recorded": {
+        "title": "Ce que Hold enregistre, et pourquoi",
+        "lead": "Seulement ce dont une location a besoin. Aucune donnée de carte ni de banque : c'est PayPal qui les garde.",
+        "items": {
+          "booking": {
+            "title": "Votre réservation",
+            "body": "Le nom, l'e-mail et le téléphone avec lesquels le loueur vous a réservé, votre langue, les dates et les articles. Pour vous envoyer votre lien, vous joindre au sujet de la location et montrer au loueur qui a quoi."
+          },
+          "payer": {
+            "title": "Votre paiement PayPal",
+            "body": "Le nom, l'e-mail et le numéro de compte que PayPal donne pour le payeur, les montants du prix, de l'empreinte et de tout prélèvement, et les messages de PayPal à leur sujet. Pour l'argent, l'enregistrement de PayPal fait foi : ils sont donc gardés comme journal de l'argent."
+          },
+          "photographs": {
+            "title": "Photos de l'article",
+            "body": "Prises à la remise et au retour, et celles que vous envoyez s'il se passe quelque chose. Elles prouvent l'état de l'article. Les visages sont floutés dans chaque copie que des personnes voient ; les originaux restent verrouillés dans le stockage."
+          },
+          "words": {
+            "title": "Ce que vous écrivez",
+            "body": "Votre réponse à un état des lieux ou à une réclamation, vos messages au loueur et ce que vous signalez pendant la location. Gardé avec la réclamation ou la location à laquelle il se rapporte."
+          },
+          "phone": {
+            "title": "Les SMS et l'application",
+            "body": "Si vous choisissez les SMS : votre numéro, quels SMS ont été envoyés et s'ils sont arrivés. Si vous utilisez l'application : une adresse pour ses notifications, pour cette location seulement."
+          },
+          "record": {
+            "title": "Votre historique de retours",
+            "body": "Si chaque location s'est terminée sans problème, sous une clé qui ne vous nomme pas. Partagé avec d'autres loueurs Hold seulement si vous l'activez, et vous pouvez le supprimer vous-même depuis votre lien."
+          },
+          "staff": {
+            "title": "Gérants et personnel des loueurs",
+            "body": "Nom, e-mail, rôle et connexion par Amazon Cognito, et une ligne d'audit pour tout ce qu'ils font chez le loueur."
+          }
+        }
+      },
+      "kept": {
+        "title": "Combien de temps il est gardé",
+        "lead": "Les preuves sont gardées pendant une durée fixe, puis le stockage les supprime lui-même. Les enregistrements d'argent restent, sans les données personnelles une fois celles-ci effacées.",
+        "items": {
+          "photographs": {
+            "title": "Photos et dossiers de preuves",
+            "body": "Verrouillés contre toute modification ou suppression pendant {lockDays} jours, le délai pendant lequel PayPal accepte un litige après un paiement, puis supprimés {keptDays} jours après la prise de vue, avec leurs copies floutées."
+          },
+          "records": {
+            "title": "Locations, argent et approbations",
+            "body": "Gardés tant que le loueur utilise Hold, car ce sont ses comptes et ils ne peuvent pas être réécrits. Le nom, l'e-mail et le téléphone qu'ils contiennent peuvent être effacés une fois la location terminée."
+          },
+          "backups": {
+            "title": "Sauvegardes de la base",
+            "body": "Gardées 7 jours : un effacement a donc quitté les sauvegardes en une semaine."
+          },
+          "links": {
+            "title": "Votre lien de location",
+            "body": "Cesse de fonctionner à son expiration, et le loueur peut le retirer plus tôt."
+          }
+        }
+      },
+      "processors": {
+        "title": "Qui le traite pour Hold",
+        "lead": "Hold fonctionne sur Amazon Web Services aux États-Unis, dans la région us-east-1. Ces services ne traitent vos données que pour la tâche indiquée.",
+        "items": {
+          "aws": {
+            "title": "Amazon Web Services",
+            "body": "Hébergement, base de données, stockage des photos, files d'attente, connexion du personnel par Amazon Cognito, clés et journaux. Les journaux ne contiennent ni coordonnées ni contenu de photo."
+          },
+          "paypal": {
+            "title": "PayPal",
+            "body": "Encaisse le prix, place et libère l'empreinte, et prélève ce qu'une personne a approuvé. PayPal traite votre paiement selon sa propre déclaration de confidentialité."
+          },
+          "claude": {
+            "title": "Claude d'Anthropic, via Amazon Bedrock",
+            "body": "Compare les photos de la remise et du retour, rédige des résumés et fait fonctionner les assistants. Il reçoit des photos de l'article et le moins de texte possible, jamais vos coordonnées. Une requête peut s'exécuter dans us-east-1, us-east-2 ou us-west-2."
+          },
+          "rekognition": {
+            "title": "Amazon Rekognition",
+            "body": "Trouve les visages sur les photos pour pouvoir les flouter."
+          },
+          "email": {
+            "title": "Google, via Gmail",
+            "body": "Envoie les e-mails de Hold, depuis un compte Gmail."
+          },
+          "texts": {
+            "title": "AWS End User Messaging",
+            "body": "Envoie les SMS, si vous les avez choisis."
+          },
+          "push": {
+            "title": "Expo",
+            "body": "Livre les notifications à l'application de Hold, via Apple et Google."
+          }
+        }
+      },
+      "erasure": {
+        "title": "Faire effacer vos données",
+        "lead": "Demandez au loueur chez qui vous avez loué. La location est son enregistrement, et Hold donne à son gérant le moyen de vous en effacer.",
+        "points": {
+          "ask": "Demandez au loueur, ou répondez à n'importe quel e-mail que Hold vous a envoyé au sujet de la location.",
+          "owner": "Une fois toutes vos locations chez ce loueur terminées, son gérant efface votre nom, votre e-mail et votre téléphone de toutes. C'est irréversible.",
+          "kept": "Le journal de l'argent, les approbations, la piste d'audit et les photos restent tels quels : ils sont la trace de ce qui s'est passé et ne peuvent pas être réécrits. Les photos sont tout de même supprimées à leur date.",
+          "payer": "Le nom et l'e-mail donnés par PayPal disparaissent dès qu'aucun loueur Hold ne garde une location de vous qu'il n'a pas effacée.",
+          "record": "Vous pouvez supprimer vous-même votre historique de retours, depuis votre lien de location."
+        }
+      }
+    },
+    "terms": {
+      "title": "Conditions d'utilisation",
+      "lead": "Hold est un projet de hackathon, pas une entreprise immatriculée. Il fonctionne dans le bac à sable de PayPal : aucun argent réel ne circule, et rien ici n'est un contrat pour une vraie location.",
+      "action": "Lire l'avis de confidentialité",
+      "updated": "Dernière mise à jour le 3 novembre 2026.",
+      "sectionTitle": "Utiliser Hold",
+      "sectionLead": "Ce que vous pouvez attendre de cette version, et ce qu'elle attend de vous.",
+      "items": {
+        "what": {
+          "title": "Ce qu'est Hold",
+          "body": "Une démonstration de la façon dont une empreinte PayPal peut remplacer une caution en espèces, avec des photos comparées au retour et une personne qui approuve chaque prélèvement."
+        },
+        "sandbox": {
+          "title": "Bac à sable uniquement",
+          "body": "Chaque paiement, empreinte et prélèvement a lieu dans le bac à sable de PayPal, avec des comptes de test. Ne saisissez pas de vraies données de carte, et attendez-vous à ce que les données d'exemple soient réinitialisées."
+        },
+        "photographs": {
+          "title": "Les photos que vous envoyez",
+          "body": "Photographiez l'article, pas des personnes, et n'envoyez rien que vous n'avez pas le droit de partager. Les photos sont gardées comme le dit l'avis de confidentialité."
+        },
+        "ai": {
+          "title": "L'IA peut se tromper",
+          "body": "Claude compare des photos et propose des constats. Il ne prélève jamais personne : une personne décide, et le client peut répondre."
+        },
+        "shops": {
+          "title": "Pour les loueurs",
+          "body": "Un loueur fixe ses propres prix et sa politique d'usure, les communique à ses clients et répond à leurs demandes, y compris d'effacement."
+        },
+        "warranty": {
+          "title": "Aucune garantie",
+          "body": "Hold est proposé tel quel, pour évaluation, sans promesse qu'il soit disponible, exact ou adapté à un usage."
+        },
+        "changes": {
+          "title": "Modifications",
+          "body": "Ces conditions peuvent changer avec le projet. La date ci-dessus indique leur dernière modification."
+        }
+      }
     }
   },
   "errors": {
@@ -1035,7 +1191,7 @@
       },
       "photographs": {
         "q": "Que deviennent les photographies ?",
-        "a": "Elles montrent l'article, pas vous. Les visages sont floutés, et les dossiers ne sont conservés que le temps exigé par la politique du loueur et par la loi."
+        "a": "Elles montrent l'article, pas vous. Les visages sont floutés, les photos sont supprimées {days} jours après la prise de vue, et le loueur peut effacer vos données une fois votre location terminée."
       }
     }
   },
@@ -1485,7 +1641,8 @@
         "done": "Fait",
         "toDo": "Pas encore",
         "lapsedNote": "Le délai de paiement est dépassé, donc les articles ne sont plus gardés. Le client peut encore régler tant que personne d'autre ne les a réservés.",
-        "assistant": "Par l'assistant du locataire"
+        "assistant": "Par l'assistant du locataire",
+        "erasedRenter": "Données personnelles effacées"
       },
       "link": {
         "title": "Le lien du client",
@@ -2241,6 +2398,22 @@
       },
       "download": "Télécharger pour un tableur",
       "sheet": "Prix"
+    },
+    "erasure": {
+      "title": "Effacer les données personnelles du client",
+      "body": "À la demande du client, une fois toutes ses locations ici terminées. Son nom, son e-mail et son téléphone sont remplacés dans toutes ses locations chez ce loueur. Les paiements, les approbations, la piste d'audit et les photos restent tels quels. C'est irréversible.",
+      "action": "Effacer les données personnelles",
+      "understood": "Je comprends que c'est irréversible.",
+      "confirm": "Effacer définitivement",
+      "cancel": "Les garder",
+      "erasing": "Effacement…",
+      "done": "Données personnelles effacées.",
+      "erasedOn": "Les données personnelles du client ont été effacées le {date}.",
+      "results": {
+        "not_found": "Cette location n'appartient pas à ce loueur.",
+        "rental_open": "Une location de ce client est encore ouverte ici. Effacez une fois qu'elle est terminée.",
+        "already_erased": "Les données personnelles de ce client sont déjà effacées."
+      }
     }
   },
   "emails": {
@@ -2818,7 +2991,8 @@
       "placed": "Vos frais de {fee} sont réglés et votre empreinte de {hold} est posée. Seuls les frais ont été prélevés.",
       "taking": "Votre empreinte de {hold} est posée. PayPal prélève vos frais de {fee}.",
       "done": "Empreinte posée. Seuls vos frais sont prélevés."
-    }
+    },
+    "evidenceNotice": "Les photos de l'article à la remise et au retour sont gardées comme preuve pendant {days} jours, puis supprimées. <link>Comment Hold traite vos données</link>"
   },
   "shopPage": {
     "label": "Réserver en ligne",

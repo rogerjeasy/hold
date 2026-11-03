@@ -1,4 +1,4 @@
-import { CONTACT_CHANNELS, EXTENSION_STATES, HOLD_STATES, RENTAL_STATES } from '@hold/domain'
+import { CONTACT_CHANNELS, EXTENSION_STATES, HOLD_STATES, RENTAL_ENDED_STATES, RENTAL_STATES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
 import { boolean, check, integer, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
 import type { AnyPgColumn } from 'drizzle-orm/pg-core'
@@ -26,11 +26,11 @@ export const renters = pgTable(
     createdAt: createdAt(),
   },
   (table) => [
-    // A shop sees only the renters who rented from it.
+    // A shop sees only the renters who rented from it, and no longer one whose details it erased (section 15.2).
     pgPolicy('renter_of_shop', {
       for: 'select',
       to: [appRole, workerRole],
-      using: sql`exists (select 1 from rentals where rentals.renter_id = ${table.id})`,
+      using: sql`exists (select 1 from rentals where rentals.renter_id = ${table.id} and rentals.renter_erased_at is null)`,
     }),
   ],
 )
@@ -86,10 +86,14 @@ export const rentals = pgTable(
     // ordinary hold applied with no ladder published.
     trustLadderId: reference().references((): AnyPgColumn => trustLadders.id),
     trustRung: integer(),
+    // When the owner erased the renter's personal details on this ended rental, on their request (architecture.md
+    // section 15.2). A trigger keeps it, and the details it replaced, from changing again.
+    renterErasedAt: at(),
     createdAt: createdAt(),
   },
   (table) => [
     allowed(table.state, RENTAL_STATES),
+    check('erased_only_when_ended', sql`${table.renterErasedAt} is null or ${table.state} in (${sql.raw(RENTAL_ENDED_STATES.map((state) => `'${state}'`).join(', '))})`),
     allowed(table.bookedThrough, BOOKING_CHANNELS),
     allowed(table.conditionReply, CONDITION_REPLIES),
     allowed(table.contactChannel, CONTACT_CHANNELS),

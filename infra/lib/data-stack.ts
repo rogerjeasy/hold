@@ -12,7 +12,8 @@ import {
   DATABASE_MAX_CAPACITY,
   DATABASE_MIN_CAPACITY,
   DATABASE_NAME,
-  EVIDENCE_RETENTION_DAYS,
+  EVIDENCE_KEPT_DAYS,
+  EVIDENCE_LOCK_DAYS,
   name,
   secretName,
 } from './settings.ts'
@@ -93,13 +94,19 @@ function createEvidenceBucket(stack: Stack, publicUrl: string): s3.Bucket {
   return new s3.Bucket(stack, 'EvidenceBucket', {
     bucketName: name('evidence', ACCOUNT),
     objectLockEnabled: true,
-    objectLockDefaultRetention: s3.ObjectLockRetention.governance(Duration.days(EVIDENCE_RETENTION_DAYS)),
+    objectLockDefaultRetention: s3.ObjectLockRetention.governance(Duration.days(EVIDENCE_LOCK_DAYS)),
     versioned: true,
     encryption: s3.BucketEncryption.KMS_MANAGED,
     bucketKeyEnabled: true,
     blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
     enforceSSL: true,
-    lifecycleRules: [{ id: 'abort-incomplete-uploads', abortIncompleteMultipartUploadAfter: Duration.days(7) }],
+    lifecycleRules: [
+      { id: 'abort-incomplete-uploads', abortIncompleteMultipartUploadAfter: Duration.days(7) },
+      // The period the privacy notice states. The day's rule hides each object behind a delete marker; the next removes
+      // the version itself. S3 removes no version while its Object Lock retention runs, so nothing goes before the lock ends.
+      { id: 'delete-after-retention', expiration: Duration.days(EVIDENCE_KEPT_DAYS), noncurrentVersionExpiration: Duration.days(1) },
+      { id: 'remove-expired-delete-markers', expiredObjectDeleteMarker: true },
+    ],
     // The phone puts each photograph here itself, through a signed link, from the web app's own pages only.
     cors: [{ allowedMethods: [s3.HttpMethods.PUT], allowedOrigins: [publicUrl], allowedHeaders: ['content-type', 'x-amz-checksum-sha256'], maxAge: 300 }],
     removalPolicy: RemovalPolicy.RETAIN,
@@ -114,7 +121,11 @@ function createDisplayBucket(stack: Stack): s3.Bucket {
     bucketKeyEnabled: true,
     blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
     enforceSSL: true,
-    lifecycleRules: [{ id: 'abort-incomplete-uploads', abortIncompleteMultipartUploadAfter: Duration.days(7) }],
+    lifecycleRules: [
+      { id: 'abort-incomplete-uploads', abortIncompleteMultipartUploadAfter: Duration.days(7) },
+      // Gone with the photographs they were made from.
+      { id: 'delete-after-retention', expiration: Duration.days(EVIDENCE_KEPT_DAYS) },
+    ],
     removalPolicy: RemovalPolicy.RETAIN,
   })
 }

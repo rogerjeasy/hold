@@ -293,7 +293,7 @@ Every table except `users`, `renters` and `eval_runs` carries a `shop_id`.
 | `price_entries` | Code, description, amount, category |
 | `wear_policies` | Version, rules |
 | `renters` | PayPal payer ID, email, name, language, and the renter key once a hold is asked for (section 6.8) |
-| `rentals` | Renter, period, fee, agreed hold, agreed price list and wear policy versions, state, the contact staff booked for and the renter's language, whether it was booked by staff or on the shop's page, whether it is a simulated sample, the trust ladder version and rung its hold was placed under |
+| `rentals` | Renter, period, fee, agreed hold, agreed price list and wear policy versions, state, the contact staff booked for and the renter's language, whether it was booked by staff or on the shop's page, whether it is a simulated sample, the trust ladder version and rung its hold was placed under, and when the owner erased the renter's personal details from it (section 15.2) |
 | `rental_items` | Rental, item, the day rate and hold agreed for it at booking, accessories out, accessories back |
 | `holds` | Rental, reserved amount, the ordinary amount agreed at booking, the trust ladder version, rung and clean returns that lowered it, placement strategy, state, current authorization |
 | `authorizations` | Hold, PayPal authorization ID, amount, created, assured until, valid until, state |
@@ -1618,6 +1618,8 @@ Every call takes one path (`callTool` in `dispatch.ts`): the actor is resolved (
 | `/accuracy` | The comparison's measured accuracy, with counts |
 | `/verify` | Checks what Hold signed, in the browser, with the published key: a Clean Record credential, or an evidence statement about a rental's sealed photographs (section 9.7). The token comes after the `#`, so it never reaches a server. |
 | `/.well-known/jwks.json` | The public key that credentials are signed with, as a JSON Web Key Set. Reads nothing from the request. |
+| `/privacy` | The privacy notice: what Hold records and why, how long each kind is kept (the evidence periods read from `EVIDENCE_LOCK_DAYS` and `EVIDENCE_KEPT_DAYS` in `packages/domain`, the constants the evidence bucket is built from), who handles it for Hold, and how a renter has their details erased (section 15.2). It says that Hold is a hackathon build in PayPal's sandbox and not a registered business. |
+| `/terms` | The terms of use of the hackathon build: sandbox only, photographs of items not people, the AI can be wrong and never charges, no warranty. |
 | `/assistant` | A demonstration: chat with the hosted assistant, which rents through Hold's MCP server as any outside assistant would, and the `/mcp` address for connecting one's own. Labelled as a demonstration, and its stand-in as simulated. |
 | `/mcp` | Hold's MCP server for renters' assistants, over streamable HTTP with no sign-in (section 13.4). |
 
@@ -1643,7 +1645,7 @@ Served by `web` under `/shop`. Each page asks `shopAccess` itself; the frame aro
 | `/shop/rentals` | Every rental, newest first: who, items, period, fee, hold and where it stands, filtered by part of its life (`?show=`). The address of the shop's own page. |
 | `/shop/calendar` | Bryntum Scheduler: each item a row, each rental a bar marked by where its PayPal hold stands, from a week back to three ahead, opening where the earliest rental still out began. Read only; a bar opens its rental. Below `md`, the same rentals as a list by item. |
 | `/shop/rentals/new` | Booking at the counter or on the phone: dates on the shop's clock in the address, then a counter per item type up to what is free, the fee and hold as they add up, and an optional contact who is emailed the link. Needs PayPal connected and items. |
-| `/shop/rentals/{id}` | One rental: its progress from booking to settlement, its terms, the hold at pickup, the handover of each item, the renter's link as a QR code or by email, and letting go of an unpaid booking. On a phone, what staff act on comes before the terms. |
+| `/shop/rentals/{id}` | One rental: its progress from booking to settlement, its terms, the hold at pickup, the handover of each item, the renter's link as a QR code or by email, and letting go of an unpaid booking. On a phone, what staff act on comes before the terms. Once the rental has ended, the owner alone sees a labelled section to erase the renter's personal details, which asks again with a box to tick (section 15.2). |
 | `/shop/rentals/{id}/handover/{session}` | One item's guided handover: each view photographed and checked on the phone, its marks confirmed or boxed, then sealed; the condition report's code once the rental is out. |
 | `/shop/rentals/{id}/return/{session}` | One item's guided return, using the handover's saved plan and faint display-photo overlay. Required views must be present before sealing. Read-only members see evidence without capture controls. |
 | `/shop/rentals/{id}/comparison/{comparison}` | Comparison progress, paired display photographs, findings and model/prompt identity. Staff can append a named manual inspection; read-only members cannot. A different shop's record or a different rental binding answers 404. |
@@ -1833,8 +1835,8 @@ The worker's compute is added with its code. The web app's address is known only
 
 | Bucket | Contents | Protection |
 |---|---|---|
-| **Evidence**, `hold-evidence-707938860881` | Original photographs, manifests, evidence packs | Object Lock in governance mode with 180 days' retention by default, versioning, KMS encryption, no public access, TLS only. Object Lock is switched on when the bucket is created. |
-| **Display**, `hold-display-707938860881` | Smaller, face-blurred copies | KMS encryption, no public access, TLS only, served through short-lived signed links |
+| **Evidence**, `hold-evidence-707938860881` | Original photographs, manifests, evidence packs | Object Lock in governance mode with 180 days' retention by default (`EVIDENCE_LOCK_DAYS`), versioning, KMS encryption, no public access, TLS only. Object Lock is switched on when the bucket is created. A lifecycle rule expires each object 365 days after it was written (`EVIDENCE_KEPT_DAYS`), removes the version a day later and clears the delete markers left behind; S3 removes no version while its lock runs. |
+| **Display**, `hold-display-707938860881` | Smaller, face-blurred copies | KMS encryption, no public access, TLS only, served through short-lived signed links. Expired after `EVIDENCE_KEPT_DAYS`, with the photographs they were made from. |
 
 ### 14.7 Queues and schedules
 
@@ -1974,6 +1976,7 @@ The outbox relay carries evidence and receipt identities without tokens or conta
 | **A push reaches a phone after its link was revoked, or after its person signed out** (section 13.9) | A renter's phone is reached only through a live link, read at each push; signing out with the bearer ends the phone's staff registrations, and a sign-out without one changes nothing; Expo's `DeviceNotRegistered` revokes the row. Tested in `mobile-push.test.ts` and `push-device-repository.test.ts`. |
 | **A push carries a secret through Expo, Apple or Google, or onto a locked screen** (section 13.9) | Fixed words name only the shop and what happened; the data holds a random reference, a page or a counter screen. A test builds every push in every language and fails on a link, a code, an amount, an email or a phone; another scans every push sent in a flow for the renter's link tokens, email and the shop's words. Tested in `push-notices.test.ts` and `mobile-push.test.ts`. |
 | **A forged push opens a screen or a link in the app** (section 13.9) | The app reads a push's data through the contract's schema and opens only a page of a rental saved on this phone with notifications on, or a counter screen of a fixed shape. Once the Expo access token is set, only Hold can push to its phones. Tested in `push-route.test.ts` and `push-responder.test.tsx`. |
+| **A renter's personal details are erased by the wrong person, or the erasure hides a charge** (section 15.2) | Only an owner, proven by a passkey, through the shared shop wrapper (`eraseRenter`, role `owner`, `needsPasskey`), and only once every rental of that renter in the shop has ended (`checkRenterErasure`). Erasure changes the rental's contact columns and a text's number and words only; the money log, approvals, the audit trail and photographs have no update grant and are untouched. A check allows `renter_erased_at` only on an ended rental, a trigger refuses any later change to an erased rental's details, and the shared PayPal identity changes only through `hold_erase_renter_identity`, which acts only for the asking shop's erased rentals and answers nothing about other shops. Tested in `renter-erasure-repository.test.ts` (wrong shop, open rental, second erasure, undoing, direct writes) and `erasure-flow.test.ts` (manager, counter staff, read-only, no passkey, signed out, unknown fields). |
 | **A forged delivery report changes a text's status** (section 12.3) | Reports reach the worker only through the SNS topic that AWS End User Messaging in this account alone may publish to; the worker validates each report and records it inside the shop it names, where only that shop's text can match. Tested in `text-report.test.ts` and `texts.test.ts`. |
 | **A model writes a number past the guard in another form** (security review of extensions 4 and 5) | `guardNumbers` refuses digits of any other script, Roman numerals, a share sign, and number words in English, French, Spanish and German, also when spaced or hyphenated; property tests write any amount in many forms. Tested in `number-guard.test.ts`. |
 
@@ -1985,7 +1988,8 @@ The outbox relay carries evidence and receipt identities without tokens or conta
 - **Faces:** blurred in every copy people see.
 - **Logs:** no tokens, no credentials, no photograph contents. Personal details are masked.
 - **Model calls:** photographs of items and the minimum text needed. No renter contact details.
-- **Retention:** photographs are kept for the shop's stated period and the period a dispute could arise, then removed. Object Lock retention is set to match.
+- **Retention:** evidence photographs, manifests and evidence packs are locked for `EVIDENCE_LOCK_DAYS` (180, the period PayPal accepts a dispute after a payment) and deleted by the evidence bucket's lifecycle rule `EVIDENCE_KEPT_DAYS` (365) after they were written, with their face-blurred copies in the display bucket. Both constants live in `packages/domain/src/data-retention.ts`, which `infra/lib/settings.ts` and the privacy notice both read, so the storage and the page cannot disagree. A test there keeps the deletion after the lock and after the longest dispute window a hold allows. Rentals, the money log, approvals and the audit trail are the shop's accounts and are kept while it uses Hold; database backups last 7 days. A shop's own retention period is not built.
+- **Erasure:** on a renter's request, a shop's owner erases them from the rental page once every rental of theirs in the shop has ended (`eraseRenter` in `apps/web/src/features/erasure`, `eraseRenter` in `packages/db`, migration 0043). The name, email and phone the shop booked with become `[erased]` (`ERASED`), the phone and its codes are cleared, the shop's texts to them keep their status but not the number or words, and a renter phone's push registration is revoked. The rental is stamped `renter_erased_at`, after which the shop no longer sees the renter's PayPal name and email (the `renter_of_shop` policy). Those are shared by every shop the renter paid, so `hold_erase_renter_identity` replaces them only once no shop holds an unerased rental of theirs; PayPal gives them again on a later payment. The money log, approvals, the audit trail, PayPal's event bodies, the renter's own words in claims and incidents, and photographs are kept: they are append-only, and the photographs go on their date. The PayPal payer ID stays, since the money log refers to it. An audit line `renter.erased` names the rental and the count, nobody's details. It cannot be undone. The Clean Record has its own deletion, by the renter (extensions.md section 7).
 
 ---
 
@@ -2078,7 +2082,7 @@ These are targets, not measured results.
 | Large photographs on slow wifi | Direct upload to S3 with retry. Display copies generated later. |
 | Model cost per comparison | Candidate regions limit what is sent as close crops. The second look runs only on damage findings. |
 | Many shops | Every table is scoped by shop. Queues are ordered per rental, not per shop. |
-| Photograph storage growth | Lifecycle rules move older evidence to cheaper storage and remove it at the end of retention |
+| Photograph storage growth | A lifecycle rule removes evidence and its display copies `EVIDENCE_KEPT_DAYS` after they were written (section 14.6). Moving older evidence to cheaper storage first is not built |
 
 ---
 
@@ -2237,7 +2241,7 @@ The first two are confirmed by short trials on day one. The third is confirmed o
 | **Will shops be approved for saved payment methods?** | The "saved method" strategy needs it in production. | No, it is optional |
 | **How are rentals longer than 29 days protected?** | They need a replacement hold, which needs the renter or a saved method. | No, but the design covers it |
 | **What do consumer protection rules require** for holds, damage charges and the right to reply, in each country? | Decides reply periods and wording. | No |
-| **How long may photographs be kept?** | Sets Object Lock retention. | No |
+| **How long may photographs be kept?** | Settled for the hackathon on 3 November 2026: locked for 180 days and deleted after 365 (section 15.2). A shop's own longer period, and what each country requires, stay open. | No |
 | **Is Pay Later offered on these orders?** | It may not be available when an order authorizes first. | No, it is optional |
 
 ### 22.3 Risks

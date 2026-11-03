@@ -46,7 +46,9 @@ export function RentalTerms({ rental, clock }: { rental: RentalDetail; clock: Sh
         <Term label={t('hold')}>{amount(rental.holdCents)}</Term>
         <Term label={t('prices')}>{t('pricesVersion', { version: rental.priceListVersion })}</Term>
         <Term label={t('bookedThrough')}>{t(CHANNEL_LABELS[rental.bookedThrough])}</Term>
-        {rental.contactName === null && rental.contactEmail === null ? null : (
+        {rental.renterErasedAt !== null ? (
+          <Term label={t('contact')}>{t('erasedRenter')}</Term>
+        ) : rental.contactName === null && rental.contactEmail === null ? null : (
           <Term label={t('contact')}>{[rental.contactName, rental.contactEmail].filter((part) => part !== null && part !== '').join(' · ')}</Term>
         )}
         {rental.renterName === null ? null : <Term label={t('renter')}>{rental.renterName}</Term>}

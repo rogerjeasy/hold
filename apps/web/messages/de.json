@@ -97,6 +97,14 @@
     "assistant": {
       "title": "Über einen Assistenten mieten",
       "description": "Sprechen Sie mit einem Assistenten, der über Holds MCP-Server ein E-Bike mietet, so wie es der eigene Assistent eines Reisenden täte."
+    },
+    "privacy": {
+      "title": "Datenschutzhinweis",
+      "description": "Was Hold speichert, warum, wie lange, wer es verarbeitet und wie Sie Ihre Daten löschen lassen."
+    },
+    "terms": {
+      "title": "Nutzungsbedingungen",
+      "description": "Die Bedingungen für die Nutzung von Hold, einem Hackathon-Projekt, das in der Sandbox von PayPal läuft."
     }
   },
   "nav": {
@@ -114,7 +122,9 @@
     "skip": "Zum Inhalt springen",
     "signIn": "Anmelden",
     "yourShop": "Ihr Verleih",
-    "reliability": "Zuverlässigkeit"
+    "reliability": "Zuverlässigkeit",
+    "privacy": "Datenschutzhinweis",
+    "terms": "Nutzungsbedingungen"
   },
   "language": {
     "label": "Sprache",
@@ -335,7 +345,8 @@
     "about": "Über diese Version",
     "aboutBody": "Entwickelt für den PayPal AI Hackathon 2026. Hold ist kein Versicherer und verwahrt kein Kundengeld. Das Geld bleibt auf dem eigenen Konto der mietenden Person, bis eine Forderung genehmigt ist.",
     "rights": "© {year} Hold",
-    "credits": "Fotos von Unsplash: Florian, Nuno Alves und Krzysztof Kowalik. Die Spuren am Rahmen dienen der Veranschaulichung."
+    "credits": "Fotos von Unsplash: Florian, Nuno Alves und Krzysztof Kowalik. Die Spuren am Rahmen dienen der Veranschaulichung.",
+    "legal": "Datenschutz und Bedingungen"
   },
   "pages": {
     "howItWorks": {
@@ -629,7 +640,7 @@
           },
           "privacy": {
             "title": "Fotos von Gegenständen, nicht von Menschen",
-            "body": "Gesichter werden unkenntlich gemacht. Aufzeichnungen bleiben nur so lange wie nötig."
+            "body": "Gesichter werden unkenntlich gemacht. Fotos werden {days} Tage nach der Aufnahme gelöscht, und der Verleih kann Ihre Daten auf Wunsch löschen."
           },
           "notInsurer": {
             "title": "Ihr Geld bleibt Ihres",
@@ -966,6 +977,151 @@
           }
         }
       }
+    },
+    "privacy": {
+      "title": "Datenschutzhinweis",
+      "lead": "Hold ist ein Projekt für den PayPal AI Hackathon 2026. Es läuft in der Sandbox von PayPal, es fließt also kein echtes Geld, und es ist kein eingetragenes Unternehmen. Diese Seite sagt klar, was Hold speichert, warum, wie lange, wer es für Hold verarbeitet und wie Sie Ihre Daten löschen lassen.",
+      "action": "Nutzungsbedingungen lesen",
+      "updated": "Zuletzt geändert am 3. November 2026.",
+      "recorded": {
+        "title": "Was Hold speichert, und warum",
+        "lead": "Nur, was eine Miete braucht. Keine Karten- oder Bankdaten: Die bewahrt PayPal auf.",
+        "items": {
+          "booking": {
+            "title": "Ihre Buchung",
+            "body": "Name, E-Mail-Adresse und Telefonnummer, mit denen der Verleih Sie gebucht hat, Ihre Sprache, die Daten und die Artikel. Damit Ihr Link Sie erreicht, der Verleih Sie zur Miete erreichen kann und weiß, wer was hat."
+          },
+          "payer": {
+            "title": "Ihre PayPal-Zahlung",
+            "body": "Name, E-Mail-Adresse und Kontonummer, die PayPal für die zahlende Person nennt, die Beträge von Mietpreis, Reservierung und jeder Belastung sowie die Nachrichten von PayPal dazu. Beim Geld ist die Aufzeichnung von PayPal maßgeblich, deshalb bleiben sie als Geldprotokoll erhalten."
+          },
+          "photographs": {
+            "title": "Fotos des Artikels",
+            "body": "Bei der Übergabe und bei der Rückgabe aufgenommen, dazu alle, die Sie senden, wenn etwas passiert. Sie belegen den Zustand des Artikels. Gesichter werden in jeder Kopie, die Menschen sehen, unkenntlich gemacht; die Originale bleiben gesperrt im Speicher."
+          },
+          "words": {
+            "title": "Was Sie schreiben",
+            "body": "Ihre Antwort auf einen Zustandsbericht oder eine Forderung, Ihre Nachrichten an den Verleih und was Sie während der Miete melden. Aufbewahrt mit der Forderung oder Miete, zu der es gehört."
+          },
+          "phone": {
+            "title": "SMS und die App",
+            "body": "Wenn Sie SMS wählen: Ihre Nummer, welche SMS gesendet wurden und ob sie ankamen. Wenn Sie die App nutzen: eine Adresse für ihre Benachrichtigungen, nur für diese Miete."
+          },
+          "record": {
+            "title": "Ihre Rückgabebilanz",
+            "body": "Ob jede Miete sauber endete, unter einem Schlüssel, der Sie nicht nennt. Nur mit anderen Hold-Verleihen geteilt, wenn Sie das einschalten, und Sie können sie über Ihren Link selbst löschen."
+          },
+          "staff": {
+            "title": "Inhaber und Personal der Verleihe",
+            "body": "Name, E-Mail-Adresse, Rolle und Anmeldung über Amazon Cognito sowie ein Protokolleintrag für alles, was sie im Verleih tun."
+          }
+        }
+      },
+      "kept": {
+        "title": "Wie lange es aufbewahrt wird",
+        "lead": "Belege werden für eine feste Zeit aufbewahrt, dann löscht der Speicher sie selbst. Aufzeichnungen über Geld bleiben, ohne die persönlichen Daten, sobald diese gelöscht sind.",
+        "items": {
+          "photographs": {
+            "title": "Fotos und Belegpakete",
+            "body": "{lockDays} Tage lang gegen Änderung und Löschung gesperrt, so lange nimmt PayPal nach einer Zahlung einen Konflikt an, und {keptDays} Tage nach der Aufnahme gelöscht, zusammen mit ihren unkenntlich gemachten Kopien."
+          },
+          "records": {
+            "title": "Mieten, Geld und Genehmigungen",
+            "body": "Aufbewahrt, solange der Verleih Hold nutzt, denn sie sind seine Buchhaltung und können nicht umgeschrieben werden. Name, E-Mail-Adresse und Telefonnummer darin können gelöscht werden, sobald die Miete beendet ist."
+          },
+          "backups": {
+            "title": "Datenbanksicherungen",
+            "body": "7 Tage lang aufbewahrt, eine Löschung ist also nach einer Woche auch aus den Sicherungen verschwunden."
+          },
+          "links": {
+            "title": "Ihr Mietlink",
+            "body": "Funktioniert nicht mehr, wenn er abläuft, und der Verleih kann ihn früher zurückziehen."
+          }
+        }
+      },
+      "processors": {
+        "title": "Wer es für Hold verarbeitet",
+        "lead": "Hold läuft bei Amazon Web Services in den Vereinigten Staaten, in der Region us-east-1. Diese Dienste verarbeiten Ihre Daten nur für die hier genannte Aufgabe.",
+        "items": {
+          "aws": {
+            "title": "Amazon Web Services",
+            "body": "Hosting, die Datenbank, der Fotospeicher, Warteschlangen, die Anmeldung des Personals über Amazon Cognito, Schlüssel und Protokolle. Protokolle enthalten keine Kontaktdaten und keine Fotoinhalte."
+          },
+          "paypal": {
+            "title": "PayPal",
+            "body": "Zieht den Mietpreis ein, setzt die Reservierung und gibt sie frei und belastet, was eine Person genehmigt hat. PayPal verarbeitet Ihre Zahlung nach seiner eigenen Datenschutzerklärung."
+          },
+          "claude": {
+            "title": "Claude von Anthropic, über Amazon Bedrock",
+            "body": "Vergleicht die Fotos von Übergabe und Rückgabe, schreibt Zusammenfassungen und betreibt die Assistenten. Es erhält Fotos des Artikels und so wenig Text wie nötig, nie Ihre Kontaktdaten. Eine Anfrage kann in us-east-1, us-east-2 oder us-west-2 laufen."
+          },
+          "rekognition": {
+            "title": "Amazon Rekognition",
+            "body": "Findet Gesichter auf Fotos, damit sie unkenntlich gemacht werden können."
+          },
+          "email": {
+            "title": "Google, über Gmail",
+            "body": "Versendet die E-Mails von Hold, von einem Gmail-Konto."
+          },
+          "texts": {
+            "title": "AWS End User Messaging",
+            "body": "Versendet SMS, wenn Sie sie gewählt haben."
+          },
+          "push": {
+            "title": "Expo",
+            "body": "Stellt Benachrichtigungen an die App von Hold zu, über Apple und Google."
+          }
+        }
+      },
+      "erasure": {
+        "title": "Ihre Daten löschen lassen",
+        "lead": "Fragen Sie den Verleih, bei dem Sie gemietet haben. Die Miete ist seine Aufzeichnung, und Hold gibt seinem Inhaber die Möglichkeit, Sie daraus zu löschen.",
+        "points": {
+          "ask": "Fragen Sie den Verleih, oder antworten Sie auf eine E-Mail, die Hold Ihnen zur Miete geschickt hat.",
+          "owner": "Sobald alle Ihre Mieten bei diesem Verleih beendet sind, löscht sein Inhaber Ihren Namen, Ihre E-Mail-Adresse und Ihre Telefonnummer aus allen. Das lässt sich nicht rückgängig machen.",
+          "kept": "Das Geldprotokoll, die Genehmigungen, das Prüfprotokoll und die Fotos bleiben, wie sie waren: Sie belegen, was geschehen ist, und können nicht umgeschrieben werden. Die Fotos werden trotzdem an ihrem Datum gelöscht.",
+          "payer": "Name und E-Mail-Adresse von PayPal verschwinden, sobald kein Hold-Verleih mehr eine Miete von Ihnen hat, die er nicht gelöscht hat.",
+          "record": "Ihre Rückgabebilanz können Sie selbst über Ihren Mietlink löschen."
+        }
+      }
+    },
+    "terms": {
+      "title": "Nutzungsbedingungen",
+      "lead": "Hold ist ein Hackathon-Projekt, kein eingetragenes Unternehmen. Es läuft in der Sandbox von PayPal: Es fließt kein echtes Geld, und nichts hier ist ein Vertrag über eine echte Miete.",
+      "action": "Datenschutzhinweis lesen",
+      "updated": "Zuletzt geändert am 3. November 2026.",
+      "sectionTitle": "Hold nutzen",
+      "sectionLead": "Was Sie von dieser Version erwarten können, und was sie von Ihnen erwartet.",
+      "items": {
+        "what": {
+          "title": "Was Hold ist",
+          "body": "Eine Vorführung, wie eine PayPal-Reservierung eine Barkaution ersetzen kann: Fotos werden bei der Rückgabe verglichen, und jede Belastung genehmigt eine Person."
+        },
+        "sandbox": {
+          "title": "Nur Sandbox",
+          "body": "Jede Zahlung, Reservierung und Belastung geschieht in der Sandbox von PayPal, mit Testkonten. Geben Sie keine echten Kartendaten ein, und rechnen Sie damit, dass Beispieldaten zurückgesetzt werden."
+        },
+        "photographs": {
+          "title": "Fotos, die Sie senden",
+          "body": "Fotografieren Sie den Artikel, nicht Menschen, und senden Sie nichts, was Sie nicht teilen dürfen. Fotos werden aufbewahrt, wie der Datenschutzhinweis es sagt."
+        },
+        "ai": {
+          "title": "Die KI kann sich irren",
+          "body": "Claude vergleicht Fotos und schlägt Befunde vor. Es belastet nie jemanden: Eine Person entscheidet, und die mietende Person kann antworten."
+        },
+        "shops": {
+          "title": "Für Verleihe",
+          "body": "Ein Verleih legt seine eigenen Preise und Verschleißregeln fest, teilt sie seinen Mietenden mit und beantwortet ihre Anfragen, auch zur Löschung."
+        },
+        "warranty": {
+          "title": "Keine Gewährleistung",
+          "body": "Hold wird so angeboten, wie es ist, zur Bewertung, ohne Zusage, dass es verfügbar, fehlerfrei oder für einen Zweck geeignet ist."
+        },
+        "changes": {
+          "title": "Änderungen",
+          "body": "Diese Bedingungen können sich mit dem Projekt ändern. Das Datum oben sagt, wann das zuletzt geschah."
+        }
+      }
     }
   },
   "errors": {
@@ -1035,7 +1191,7 @@
       },
       "photographs": {
         "q": "Was geschieht mit den Fotos?",
-        "a": "Sie zeigen den Artikel, nicht Sie. Gesichter werden unkenntlich gemacht, und Aufzeichnungen bleiben nur so lange, wie die Regeln des Verleihs und das Gesetz es verlangen."
+        "a": "Sie zeigen den Artikel, nicht Sie. Gesichter werden unkenntlich gemacht, die Fotos werden {days} Tage nach der Aufnahme gelöscht, und der Verleih kann Ihre Daten löschen, sobald Ihre Miete beendet ist."
       }
     }
   },
@@ -1485,7 +1641,8 @@
         "done": "Erledigt",
         "toDo": "Noch nicht",
         "lapsedNote": "Die Zahlungsfrist ist abgelaufen, deshalb werden die Artikel nicht mehr freigehalten. Die mietende Person kann noch bezahlen, solange niemand sonst sie gebucht hat.",
-        "assistant": "Durch den eigenen Assistenten des Mieters"
+        "assistant": "Durch den eigenen Assistenten des Mieters",
+        "erasedRenter": "Persönliche Daten gelöscht"
       },
       "link": {
         "title": "Der Link der mietenden Person",
@@ -2241,6 +2398,22 @@
       },
       "download": "Für eine Tabelle herunterladen",
       "sheet": "Preise"
+    },
+    "erasure": {
+      "title": "Persönliche Daten der mietenden Person löschen",
+      "body": "Auf Wunsch der mietenden Person, sobald alle ihre Mieten hier beendet sind. Name, E-Mail-Adresse und Telefonnummer werden in allen ihren Mieten bei diesem Verleih ersetzt. Zahlungen, Genehmigungen, das Prüfprotokoll und die Fotos bleiben, wie sie sind. Das lässt sich nicht rückgängig machen.",
+      "action": "Persönliche Daten löschen",
+      "understood": "Ich verstehe, dass sich das nicht rückgängig machen lässt.",
+      "confirm": "Endgültig löschen",
+      "cancel": "Behalten",
+      "erasing": "Wird gelöscht…",
+      "done": "Persönliche Daten gelöscht.",
+      "erasedOn": "Die persönlichen Daten der mietenden Person wurden am {date} gelöscht.",
+      "results": {
+        "not_found": "Diese Miete gehört nicht zu diesem Verleih.",
+        "rental_open": "Eine Miete dieser Person ist hier noch offen. Löschen Sie, sobald sie beendet ist.",
+        "already_erased": "Die persönlichen Daten dieser Person sind bereits gelöscht."
+      }
     }
   },
   "emails": {
@@ -2818,7 +2991,8 @@
       "placed": "Ihre Gebühr über {fee} ist bezahlt und Ihre Reservierung über {hold} ist gesetzt. Abgebucht wurde nur die Gebühr.",
       "taking": "Ihre Reservierung über {hold} ist gesetzt. PayPal bucht jetzt Ihre Gebühr über {fee} ab.",
       "done": "Reservierung gesetzt. Abgebucht wird nur Ihre Gebühr."
-    }
+    },
+    "evidenceNotice": "Fotos des Artikels bei Übergabe und Rückgabe werden {days} Tage lang als Beleg aufbewahrt und dann gelöscht. <link>Wie Hold mit Ihren Daten umgeht</link>"
   },
   "shopPage": {
     "label": "Online buchen",

@@ -4,7 +4,7 @@ import { renderWithIntl } from '@/test/render'
 import { SiteFooter } from './site-footer'
 
 describe('SiteFooter', () => {
-  it('links to every header page, and to the published scorecard', () => {
+  it('links to every header page, the published scorecard, the privacy notice and the terms', () => {
     renderWithIntl(<SiteFooter year={2026} />)
     const footer = within(screen.getByRole('contentinfo'))
     expect(
@@ -12,7 +12,14 @@ describe('SiteFooter', () => {
         .getAllByRole('link')
         .map((link) => link.getAttribute('href'))
         .sort(),
-    ).toEqual(['/ai', '/for-renters', '/for-shops', '/how-it-works', '/paypal', '/reliability'])
+    ).toEqual(['/ai', '/for-renters', '/for-shops', '/how-it-works', '/paypal', '/privacy', '/reliability', '/terms'])
+  })
+
+  it('links to the privacy notice and the terms of use', () => {
+    renderWithIntl(<SiteFooter year={2026} />)
+    const legal = within(screen.getByRole('navigation', { name: 'Privacy and terms' }))
+    expect(legal.getByRole('link', { name: 'Privacy notice' })).toHaveAttribute('href', '/privacy')
+    expect(legal.getByRole('link', { name: 'Terms of use' })).toHaveAttribute('href', '/terms')
   })
 
   it('says plainly that Hold is not an insurer', () => {

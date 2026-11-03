@@ -7,6 +7,7 @@ import { linkRoutes } from '@/lib/routes'
 import { ContactPanel } from '@/features/contact/contact-panel'
 import type { RenterContactView } from '@/features/contact/contact-view'
 import { HoldReason } from '@/features/trust/hold-reason'
+import { EvidenceNotice } from './evidence-notice'
 import { HoldButton } from './hold-button'
 import { WalkInButton } from './walk-in-button'
 import type { PayPalCheckout } from './paypal-sdk'
@@ -48,6 +49,7 @@ export function HoldScreen({ token, view, hold, checkout, contact }: HoldScreenP
               {t('declined')}
             </p>
           )}
+          <EvidenceNotice />
           {hold.strategy === 'combined' && hold.state === 'requested' ? <WalkInButton token={token} fee={format.money(view.feeCents)} hold={amount} checkout={checkout} /> : <HoldButton token={token} amount={amount} checkout={checkout} />}
         </div>
       ) : (

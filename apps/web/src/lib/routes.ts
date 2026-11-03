@@ -13,6 +13,9 @@ export const routes = {
   verify: '/verify',
   // A demonstration: an assistant that rents through Hold's MCP server (extensions.md section 8.10).
   assistant: '/assistant',
+  // What Hold records, why, for how long, who handles it, and how to have it erased (architecture.md section 15.2).
+  privacy: '/privacy',
+  terms: '/terms',
 } as const
 
 export type RouteKey = keyof typeof routes

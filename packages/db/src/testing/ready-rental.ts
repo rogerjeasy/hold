@@ -6,10 +6,9 @@ import { beginFeeCapture, confirmFeeCapture, saveFeeOrder } from '../fee-reposit
 import { askForHold, beginHoldPlacement, confirmHoldPlaced, saveHoldOrder } from '../hold-repository.ts'
 import { addItems, saveItemType } from '../item-repository.ts'
 import { publishPriceList } from '../price-list-repository.ts'
-import { rentalItems } from '../schema/index.ts'
+import { rentalItems, rentals } from '../schema/index.ts'
 import { inShop } from '../scope.ts'
-import type { Scope, Transaction } from '../scope.ts'
-import type { TestDatabase } from './test-database.ts'
+import type { Database, Scope, Transaction } from '../scope.ts'
 
 // A shop with an e-bike type of two required views and one optional one, and rentals of its items that are ready for
 // handover: the fee paid and the hold placed. For the repository tests.
@@ -25,9 +24,11 @@ export type ReadyRentalShop = {
   readyRental(itemCount?: number): Promise<{ readonly rentalId: string; readonly rentalItemIds: readonly string[]; readonly itemIds: readonly string[] }>
   // A rental of one item whose fee the given PayPal payer paid: booked, and waiting for its hold.
   paidRental(payerId: string): Promise<string>
+  // The same, moved straight to closed, for tests of what may happen once a rental has ended.
+  endedRental(payerId: string): Promise<string>
 }
 
-export async function readyRentalShop(database: TestDatabase, subject: string, now: Date): Promise<ReadyRentalShop> {
+export async function readyRentalShop(database: Database, subject: string, now: Date): Promise<ReadyRentalShop> {
   const registered = await registerOwner(database, { subject, email: `${subject}@shop.example`, name: 'Ana', language: 'en', shop: { name: `Shop ${subject}`, timeZone: 'UTC' } })
   const scope: Scope = { role: 'hold_app', shopId: registered.shopId, userId: registered.userId }
   const act = <Result>(work: (transaction: Transaction) => Promise<Result>) => inShop(database, scope, work)
@@ -74,6 +75,11 @@ export async function readyRentalShop(database: TestDatabase, subject: string, n
     typeId,
     act,
     paidRental: (payerId) => paid(1, () => payerId),
+    async endedRental(payerId) {
+      const rentalId = await paid(1, () => payerId)
+      await act((transaction) => transaction.update(rentals).set({ state: 'closed' }).where(eq(rentals.id, rentalId)))
+      return rentalId
+    },
     async readyRental(itemCount = 1) {
       const rentalId = await paid(itemCount, (id) => `PAYER-${id}`)
       await act((transaction) => askForHold(transaction, rentalId, now))

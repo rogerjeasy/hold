@@ -1,4 +1,5 @@
 import type { RentalDetail, RentalExtension, RentalHandover, RentalHold, RentalReturn, RentalText } from '@hold/db'
+import { RENTAL_ENDED_STATES } from '@hold/domain'
 import { ArrowLeft } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { SampleTag } from '@/components/ui/sample-tag'
@@ -11,6 +12,7 @@ import { HandoverPanel } from '@/features/handover/handover-panel'
 import { ReturnPanel } from '@/features/returns/return-panel'
 import { StaffExtensions } from '@/features/extension/staff-extensions'
 import { DropOffCard } from '@/features/self-return/drop-off-card'
+import { EraseRenter } from '@/features/erasure/erase-renter'
 import type { DropOffEntry } from '@/features/self-return/drop-off-card'
 import { HoldPanel } from './hold-panel'
 import { LetGo } from './let-go'
@@ -20,10 +22,11 @@ import { RentalStateBadge } from './rental-state-badge'
 import { RentalTerms } from './rental-terms'
 
 // dropOff: the item a renter left at the drop point, while nobody has checked it (architecture.md section 6.13).
-type RentalScreenProps = { shopName: string; clock: ShopClock; rental: RentalDetail; hold: RentalHold | undefined; handovers: readonly RentalHandover[]; returns?: readonly RentalReturn[]; dropOff?: DropOffEntry | undefined; extensions?: readonly RentalExtension[]; texts?: readonly RentalText[]; canAct: boolean }
+// canErase: the owner, who alone may erase the renter's personal details once the rental has ended (section 15.2).
+type RentalScreenProps = { shopName: string; clock: ShopClock; rental: RentalDetail; hold: RentalHold | undefined; handovers: readonly RentalHandover[]; returns?: readonly RentalReturn[]; dropOff?: DropOffEntry | undefined; extensions?: readonly RentalExtension[]; texts?: readonly RentalText[]; canAct: boolean; canErase?: boolean }
 
 // One rental: where it stands, what was agreed, the renter's link and the hold at pickup.
-export function RentalScreen({ shopName, clock, rental, hold, handovers, returns = [], dropOff, extensions = [], texts = [], canAct }: RentalScreenProps) {
+export function RentalScreen({ shopName, clock, rental, hold, handovers, returns = [], dropOff, extensions = [], texts = [], canAct, canErase = false }: RentalScreenProps) {
   const t = useTranslations('shop.rentals')
   const claim = useTranslations('claim')
   const records = useTranslations('records')
@@ -34,7 +37,7 @@ export function RentalScreen({ shopName, clock, rental, hold, handovers, returns
   // Once the hold is placed, staff photograph each item; the panel stays to show what was sealed.
   const handingOver = canAct && live && (rental.state === 'ready' || rental.state === 'out')
   return (
-    <ShopFrame shopName={shopName} title={rental.who ?? t('notKnown')}>
+    <ShopFrame shopName={shopName} title={rental.renterErasedAt !== null ? t('detail.erasedRenter') : (rental.who ?? t('notKnown'))}>
       <div className="grid gap-8">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <Link href={shopRoutes.rentals} className="inline-flex min-h-11 items-center gap-1.5 font-semibold text-muted-foreground hover:text-foreground">
@@ -64,6 +67,7 @@ export function RentalScreen({ shopName, clock, rental, hold, handovers, returns
             {canAct && live ? <LinkPanel rentalId={rental.id} contact={rental.contactChannel === 'text' && rental.contactPhone !== null ? { channel: 'text', to: rental.contactPhone } : rental.contactEmail === null ? null : { channel: 'email', to: rental.contactEmail }} paid={!waiting} walkIn={waiting && hold?.strategy === 'combined'} /> : null}
             {canAct && waiting ? <LetGo rentalId={rental.id} /> : null}
             {texts.length > 0 ? <TextsPanel texts={texts} clock={clock} /> : null}
+            {canErase && RENTAL_ENDED_STATES.includes(rental.state) ? <EraseRenter rentalId={rental.id} erasedAt={rental.renterErasedAt} clock={clock} /> : null}
           </div>
         </div>
       </div>

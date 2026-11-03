@@ -1,3 +1,4 @@
+import { EVIDENCE_KEPT_DAYS } from '@hold/domain'
 import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Section } from './section'
@@ -10,7 +11,7 @@ type FaqProps = {
   questions: readonly FaqKey[]
 }
 
-// Questions open in place. The browser's own disclosure element works by keyboard and without scripts.
+// Questions open in place. An answer may state how long photographs are kept, read from the evidence bucket's period. The browser's own disclosure element works by keyboard and without scripts.
 export function Faq({ title, lead, questions }: FaqProps) {
   const t = useTranslations('faq.items')
 
@@ -28,7 +29,7 @@ export function Faq({ title, lead, questions }: FaqProps) {
                 <h3 className="text-xl leading-tight font-bold tracking-tight wrap-long-words">{t(`${key}.q`)}</h3>
                 <Plus aria-hidden="true" className="size-5 shrink-0 text-primary transition-transform group-open:rotate-45" />
               </summary>
-              <p className="max-w-prose pb-6 text-muted-foreground">{t(`${key}.a`)}</p>
+              <p className="max-w-prose pb-6 text-muted-foreground">{t(`${key}.a`, { days: EVIDENCE_KEPT_DAYS })}</p>
             </details>
           ))}
         </div>

@@ -37,5 +37,8 @@ export const RENTAL_TRANSITIONS: Transitions<RentalState> = {
   abandoned: [],
 }
 
+// The states a rental ends in. Nothing more happens to it, and nobody needs to reach its renter about it.
+export const RENTAL_ENDED_STATES: readonly RentalState[] = ['closed', 'cancelled', 'abandoned']
+
 // A booking keeps its item this long while the fee is unpaid.
 export const PENDING_PAYMENT_MINUTES = 15

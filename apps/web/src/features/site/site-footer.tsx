@@ -1,6 +1,7 @@
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { routes } from '@/lib/routes'
+import { LegalLinks } from './legal-links'
 import { Logo } from './logo'
 import { navItems, type NavItem } from './nav-items'
 
@@ -46,8 +47,9 @@ export function SiteFooter({ year }: { year: number }) {
             <p className="mt-2 text-[0.9375rem] text-muted-foreground">{t('aboutBody')}</p>
           </div>
         </div>
-        <div className="mt-10 flex flex-col gap-2 border-t pt-4 text-sm text-muted-foreground lg:flex-row lg:justify-between lg:gap-6">
+        <div className="mt-10 flex flex-col gap-2 border-t pt-4 text-sm text-muted-foreground lg:flex-row lg:items-center lg:justify-between lg:gap-6">
           <p>{t('rights', { year: String(year) })}</p>
+          <LegalLinks />
           <p>{t('credits')}</p>
         </div>
       </div>

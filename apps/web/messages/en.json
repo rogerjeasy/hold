@@ -97,6 +97,14 @@
     "assistant": {
       "title": "Rent through an assistant",
       "description": "Talk to an assistant that rents an e-bike through Hold's MCP server, the way a traveller's own assistant would."
+    },
+    "privacy": {
+      "title": "Privacy notice",
+      "description": "What Hold records, why, for how long, who handles it, and how to have your details erased."
+    },
+    "terms": {
+      "title": "Terms of use",
+      "description": "The terms for using Hold, a hackathon project that runs in PayPal's sandbox."
     }
   },
   "nav": {
@@ -114,7 +122,9 @@
     "skip": "Skip to content",
     "signIn": "Sign in",
     "yourShop": "Your shop",
-    "reliability": "Reliability"
+    "reliability": "Reliability",
+    "privacy": "Privacy notice",
+    "terms": "Terms of use"
   },
   "language": {
     "label": "Language",
@@ -335,7 +345,8 @@
     "about": "About this build",
     "aboutBody": "Built for the PayPal AI Hackathon 2026. Hold is not an insurer and does not hold customers' money. Funds stay in the renter's own account until a claim is approved.",
     "rights": "© {year} Hold",
-    "credits": "Photographs from Unsplash by Florian, Nuno Alves and Krzysztof Kowalik. The marks on the frame are illustrative."
+    "credits": "Photographs from Unsplash by Florian, Nuno Alves and Krzysztof Kowalik. The marks on the frame are illustrative.",
+    "legal": "Privacy and terms"
   },
   "pages": {
     "howItWorks": {
@@ -629,7 +640,7 @@
           },
           "privacy": {
             "title": "Photographs of items, not people",
-            "body": "Faces are blurred. Records are kept only as long as needed."
+            "body": "Faces are blurred. Photographs are deleted {days} days after they are taken, and the shop can erase your details on request."
           },
           "notInsurer": {
             "title": "Your money stays yours",
@@ -966,6 +977,151 @@
           }
         }
       }
+    },
+    "privacy": {
+      "title": "Privacy notice",
+      "lead": "Hold is a project built for the PayPal AI Hackathon 2026. It runs in PayPal's sandbox, so no real money moves, and it is not a registered business. This page says plainly what it records, why, for how long, who handles it for Hold, and how to have your details erased.",
+      "action": "Read the terms of use",
+      "updated": "Last updated on 3 November 2026.",
+      "recorded": {
+        "title": "What Hold records, and why",
+        "lead": "Only what a rental needs. No card or bank details: PayPal keeps those.",
+        "items": {
+          "booking": {
+            "title": "Your booking",
+            "body": "The name, email and phone number the shop booked you with, your language, the dates and the items. To send you your link, reach you about the rental and show the shop who has what."
+          },
+          "payer": {
+            "title": "Your PayPal payment",
+            "body": "The name, email and account number PayPal gives for the payer, the amounts of the fee, the hold and any charge, and PayPal's own messages about them. PayPal's record is the truth about money, so these are kept as the money log."
+          },
+          "photographs": {
+            "title": "Photographs of the item",
+            "body": "Taken at handover and at return, and any you send if something happens. They are the evidence of the item’s condition. Faces are blurred in every copy people see; the originals stay locked in storage."
+          },
+          "words": {
+            "title": "What you write",
+            "body": "Your answer to a condition report or a claim, your messages to the shop, and what you report during the rental. Kept with the claim or rental they belong to."
+          },
+          "phone": {
+            "title": "Texts and the phone app",
+            "body": "If you choose texts: your number, which texts were sent and whether they arrived. If you use the phone app: an address for its notifications, for that rental only."
+          },
+          "record": {
+            "title": "Your Clean Record",
+            "body": "Whether each rental ended clean, under a key that does not name you. Shared with other Hold shops only if you turn that on, and you can delete it yourself from your link."
+          },
+          "staff": {
+            "title": "Shop owners and staff",
+            "body": "Name, email, role and sign-in through Amazon Cognito, and an audit line for everything they do in the shop."
+          }
+        }
+      },
+      "kept": {
+        "title": "How long it is kept",
+        "lead": "Evidence is kept for a set period, then the storage deletes it itself. Records of money are kept, without the personal details once these are erased.",
+        "items": {
+          "photographs": {
+            "title": "Photographs and evidence packs",
+            "body": "Locked against change or deletion for {lockDays} days, the time PayPal accepts a dispute after a payment, then deleted {keptDays} days after they were taken, with their face-blurred copies."
+          },
+          "records": {
+            "title": "Rentals, money and approvals",
+            "body": "Kept while the shop uses Hold, because they are the shop's accounts and cannot be rewritten. The name, email and phone number in them can be erased once the rental has ended."
+          },
+          "backups": {
+            "title": "Database backups",
+            "body": "Kept for 7 days, so an erasure has left the backups within a week."
+          },
+          "links": {
+            "title": "Your rental link",
+            "body": "Stops working when it expires, and the shop can withdraw it sooner."
+          }
+        }
+      },
+      "processors": {
+        "title": "Who handles it for Hold",
+        "lead": "Hold runs on Amazon Web Services in the United States, in the us-east-1 region. These services handle your details only to do the job named here.",
+        "items": {
+          "aws": {
+            "title": "Amazon Web Services",
+            "body": "Hosting, the database, photograph storage, queues, staff sign-in through Amazon Cognito, keys and logs. Logs carry no contact details and no photograph contents."
+          },
+          "paypal": {
+            "title": "PayPal",
+            "body": "Takes the fee, places and releases the hold, and takes any charge a person approved. PayPal handles your payment under its own privacy statement."
+          },
+          "claude": {
+            "title": "Anthropic’s Claude, through Amazon Bedrock",
+            "body": "Compares the handover and return photographs, writes summaries and runs the assistants. It is sent photographs of the item and the least text needed, never your contact details. A request may run in us-east-1, us-east-2 or us-west-2."
+          },
+          "rekognition": {
+            "title": "Amazon Rekognition",
+            "body": "Finds faces in photographs so that they can be blurred."
+          },
+          "email": {
+            "title": "Google, through Gmail",
+            "body": "Sends Hold’s emails, from a Gmail account."
+          },
+          "texts": {
+            "title": "AWS End User Messaging",
+            "body": "Sends texts, if you chose them."
+          },
+          "push": {
+            "title": "Expo",
+            "body": "Delivers notifications to Hold’s phone app, through Apple and Google."
+          }
+        }
+      },
+      "erasure": {
+        "title": "Having your details erased",
+        "lead": "Ask the shop you rented from. The rental is the shop’s record, and Hold gives its owner the means to erase you from it.",
+        "points": {
+          "ask": "Ask the shop, or reply to any email Hold sent you about the rental.",
+          "owner": "Once every rental of yours at that shop has ended, its owner erases your name, email and phone number from all of them. It cannot be undone.",
+          "kept": "The money log, approvals, the audit trail and the photographs stay as they were: they are the record of what happened and cannot be rewritten. The photographs are still deleted on their date.",
+          "payer": "The name and email PayPal gave go once no Hold shop still holds a rental of yours it has not erased.",
+          "record": "You can delete your Clean Record yourself, from your rental link."
+        }
+      }
+    },
+    "terms": {
+      "title": "Terms of use",
+      "lead": "Hold is a hackathon project, not a registered business. It runs in PayPal's sandbox: no real money moves, and nothing here is a contract for a real rental.",
+      "action": "Read the privacy notice",
+      "updated": "Last updated on 3 November 2026.",
+      "sectionTitle": "Using Hold",
+      "sectionLead": "What you can expect from this build, and what it expects of you.",
+      "items": {
+        "what": {
+          "title": "What Hold is",
+          "body": "A demonstration of how a PayPal hold can replace a cash deposit, with photographs compared at return and a person approving every charge."
+        },
+        "sandbox": {
+          "title": "Sandbox only",
+          "body": "Every payment, hold and charge happens in PayPal's sandbox, with test accounts. Do not enter real card details, and expect sample data to be reset."
+        },
+        "photographs": {
+          "title": "Photographs you send",
+          "body": "Photograph the item, not people, and send nothing you have no right to share. Photographs are kept as the privacy notice says."
+        },
+        "ai": {
+          "title": "The AI can be wrong",
+          "body": "Claude compares photographs and suggests findings. It never charges anyone: a person decides, and the renter can reply."
+        },
+        "shops": {
+          "title": "For shops",
+          "body": "A shop sets its own prices and wear policy, tells its renters about them, and answers their requests, erasure included."
+        },
+        "warranty": {
+          "title": "No warranty",
+          "body": "Hold is offered as it is, for evaluation, with no promise that it is available, correct or fit for any purpose."
+        },
+        "changes": {
+          "title": "Changes",
+          "body": "These terms may change as the project does. The date above says when they last did."
+        }
+      }
     }
   },
   "errors": {
@@ -1035,7 +1191,7 @@
       },
       "photographs": {
         "q": "What happens to the photographs?",
-        "a": "They show the item, not you. Faces are blurred, and records are kept only as long as the shop's policy and the law require."
+        "a": "They show the item, not you. Faces are blurred, the photographs are deleted {days} days after they are taken, and the shop can erase your details once your rental has ended."
       }
     }
   },
@@ -1485,7 +1641,8 @@
         "done": "Done",
         "toDo": "Not yet",
         "lapsedNote": "The time to pay ran out, so the items are no longer kept. The renter can still pay while nobody else has booked them.",
-        "assistant": "By the renter's own assistant"
+        "assistant": "By the renter's own assistant",
+        "erasedRenter": "Personal details erased"
       },
       "link": {
         "title": "The renter's link",
@@ -2241,6 +2398,22 @@
       },
       "download": "Download for a spreadsheet",
       "sheet": "Prices"
+    },
+    "erasure": {
+      "title": "Erase the renter’s personal details",
+      "body": "On the renter’s request, once every rental of theirs here has ended. Their name, email and phone number are replaced on all their rentals in this shop. Payments, approvals, the audit trail and the photographs stay as they are. This cannot be undone.",
+      "action": "Erase personal details",
+      "understood": "I understand this cannot be undone.",
+      "confirm": "Erase for good",
+      "cancel": "Keep them",
+      "erasing": "Erasing…",
+      "done": "Personal details erased.",
+      "erasedOn": "The renter’s personal details were erased on {date}.",
+      "results": {
+        "not_found": "That rental is not in this shop.",
+        "rental_open": "A rental of this renter’s is still open here. Erase once it has ended.",
+        "already_erased": "This renter’s personal details are already erased."
+      }
     }
   },
   "emails": {
@@ -2818,7 +2991,8 @@
       "placed": "Your fee of {fee} is paid and your hold of {hold} is placed. Only the fee was charged.",
       "taking": "Your hold of {hold} is placed. PayPal is taking your fee of {fee}.",
       "done": "Hold placed. Only your fee is charged."
-    }
+    },
+    "evidenceNotice": "Photographs of the item at handover and return are kept as evidence for {days} days, then deleted. <link>How Hold handles your details</link>"
   },
   "shopPage": {
     "label": "Book online",

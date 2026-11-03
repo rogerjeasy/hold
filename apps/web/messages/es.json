@@ -97,6 +97,14 @@
     "assistant": {
       "title": "Alquilar con un asistente",
       "description": "Habla con un asistente que alquila una bici eléctrica a través del servidor MCP de Hold, como lo haría el asistente de un viajero."
+    },
+    "privacy": {
+      "title": "Aviso de privacidad",
+      "description": "Qué guarda Hold, por qué, durante cuánto tiempo, quién lo trata y cómo pedir que se borren tus datos."
+    },
+    "terms": {
+      "title": "Condiciones de uso",
+      "description": "Las condiciones para usar Hold, un proyecto de hackathon que funciona en el sandbox de PayPal."
     }
   },
   "nav": {
@@ -114,7 +122,9 @@
     "skip": "Ir al contenido",
     "signIn": "Entrar",
     "yourShop": "Tu tienda",
-    "reliability": "Fiabilidad"
+    "reliability": "Fiabilidad",
+    "privacy": "Aviso de privacidad",
+    "terms": "Condiciones de uso"
   },
   "language": {
     "label": "Idioma",
@@ -335,7 +345,8 @@
     "about": "Sobre esta versión",
     "aboutBody": "Creado para el PayPal AI Hackathon 2026. Hold no es una aseguradora y no guarda el dinero de los clientes. Los fondos permanecen en la cuenta del cliente hasta que se aprueba una reclamación.",
     "rights": "© {year} Hold",
-    "credits": "Fotografías de Unsplash, de Florian, Nuno Alves y Krzysztof Kowalik. Las marcas del cuadro son ilustrativas."
+    "credits": "Fotografías de Unsplash, de Florian, Nuno Alves y Krzysztof Kowalik. Las marcas del cuadro son ilustrativas.",
+    "legal": "Privacidad y condiciones"
   },
   "pages": {
     "howItWorks": {
@@ -629,7 +640,7 @@
           },
           "privacy": {
             "title": "Fotografías de objetos, no de personas",
-            "body": "Las caras se difuminan. Los registros se guardan solo el tiempo necesario."
+            "body": "Las caras se difuminan. Las fotos se borran {days} días después de tomarse, y la tienda puede borrar tus datos si lo pides."
           },
           "notInsurer": {
             "title": "Tu dinero sigue siendo tuyo",
@@ -966,6 +977,151 @@
           }
         }
       }
+    },
+    "privacy": {
+      "title": "Aviso de privacidad",
+      "lead": "Hold es un proyecto creado para el PayPal AI Hackathon 2026. Funciona en el sandbox de PayPal, así que no se mueve dinero real, y no es una empresa registrada. Esta página dice con claridad qué guarda, por qué, durante cuánto tiempo, quién lo trata por cuenta de Hold y cómo pedir que se borren tus datos.",
+      "action": "Leer las condiciones de uso",
+      "updated": "Última actualización: 3 de noviembre de 2026.",
+      "recorded": {
+        "title": "Qué guarda Hold, y por qué",
+        "lead": "Solo lo que necesita un alquiler. Ningún dato de tarjeta ni de banco: esos los guarda PayPal.",
+        "items": {
+          "booking": {
+            "title": "Tu reserva",
+            "body": "El nombre, el correo y el teléfono con los que la tienda te reservó, tu idioma, las fechas y los artículos. Para enviarte tu enlace, avisarte sobre el alquiler y que la tienda sepa quién tiene qué."
+          },
+          "payer": {
+            "title": "Tu pago con PayPal",
+            "body": "El nombre, el correo y el número de cuenta que PayPal da del pagador, los importes del precio, la retención y cualquier cargo, y los propios mensajes de PayPal sobre ellos. En el dinero manda el registro de PayPal, así que se guardan como el registro de dinero."
+          },
+          "photographs": {
+            "title": "Fotos del artículo",
+            "body": "Tomadas en la entrega y en la devolución, y las que envíes si pasa algo. Son la prueba del estado del artículo. Las caras se difuminan en cada copia que ven las personas; los originales quedan bloqueados en el almacenamiento."
+          },
+          "words": {
+            "title": "Lo que escribes",
+            "body": "Tu respuesta a un informe de estado o a una reclamación, tus mensajes a la tienda y lo que comunicas durante el alquiler. Se guarda con la reclamación o el alquiler al que pertenece."
+          },
+          "phone": {
+            "title": "SMS y la app",
+            "body": "Si eliges SMS: tu número, qué mensajes se enviaron y si llegaron. Si usas la app: una dirección para sus avisos, solo para ese alquiler."
+          },
+          "record": {
+            "title": "Tu historial limpio",
+            "body": "Si cada alquiler terminó limpio, bajo una clave que no te nombra. Solo se comparte con otras tiendas de Hold si lo activas, y puedes borrarlo tú desde tu enlace."
+          },
+          "staff": {
+            "title": "Dueños y personal de las tiendas",
+            "body": "Nombre, correo, rol e inicio de sesión con Amazon Cognito, y una línea de auditoría por cada cosa que hacen en la tienda."
+          }
+        }
+      },
+      "kept": {
+        "title": "Cuánto tiempo se guarda",
+        "lead": "Las pruebas se guardan durante un plazo fijo y luego el propio almacenamiento las borra. Los registros de dinero se conservan, sin los datos personales una vez borrados.",
+        "items": {
+          "photographs": {
+            "title": "Fotos y paquetes de pruebas",
+            "body": "Bloqueadas contra cambios o borrado durante {lockDays} días, el plazo en que PayPal acepta una disputa tras un pago, y borradas {keptDays} días después de tomarse, junto con sus copias difuminadas."
+          },
+          "records": {
+            "title": "Alquileres, dinero y aprobaciones",
+            "body": "Se conservan mientras la tienda use Hold, porque son sus cuentas y no se pueden reescribir. El nombre, el correo y el teléfono que contienen se pueden borrar cuando el alquiler ha terminado."
+          },
+          "backups": {
+            "title": "Copias de seguridad",
+            "body": "Se guardan 7 días, así que un borrado ha salido de las copias en una semana."
+          },
+          "links": {
+            "title": "Tu enlace de alquiler",
+            "body": "Deja de funcionar cuando caduca, y la tienda puede retirarlo antes."
+          }
+        }
+      },
+      "processors": {
+        "title": "Quién lo trata por cuenta de Hold",
+        "lead": "Hold funciona en Amazon Web Services en Estados Unidos, en la región us-east-1. Estos servicios tratan tus datos solo para la tarea que se indica.",
+        "items": {
+          "aws": {
+            "title": "Amazon Web Services",
+            "body": "Alojamiento, la base de datos, el almacenamiento de fotos, colas, el inicio de sesión del personal con Amazon Cognito, claves y registros. Los registros no llevan datos de contacto ni el contenido de las fotos."
+          },
+          "paypal": {
+            "title": "PayPal",
+            "body": "Cobra el precio, coloca y libera la retención, y cobra cualquier cargo que una persona aprobó. PayPal trata tu pago según su propia declaración de privacidad."
+          },
+          "claude": {
+            "title": "Claude de Anthropic, a través de Amazon Bedrock",
+            "body": "Compara las fotos de la entrega y la devolución, escribe resúmenes y hace funcionar los asistentes. Recibe fotos del artículo y el mínimo texto necesario, nunca tus datos de contacto. Una petición puede ejecutarse en us-east-1, us-east-2 o us-west-2."
+          },
+          "rekognition": {
+            "title": "Amazon Rekognition",
+            "body": "Encuentra las caras en las fotos para poder difuminarlas."
+          },
+          "email": {
+            "title": "Google, a través de Gmail",
+            "body": "Envía los correos de Hold, desde una cuenta de Gmail."
+          },
+          "texts": {
+            "title": "AWS End User Messaging",
+            "body": "Envía los SMS, si los elegiste."
+          },
+          "push": {
+            "title": "Expo",
+            "body": "Entrega los avisos a la app de Hold, a través de Apple y Google."
+          }
+        }
+      },
+      "erasure": {
+        "title": "Pedir que se borren tus datos",
+        "lead": "Pídelo a la tienda donde alquilaste. El alquiler es un registro de la tienda, y Hold da a su dueño la forma de borrarte de él.",
+        "points": {
+          "ask": "Pídelo a la tienda, o responde a cualquier correo que Hold te envió sobre el alquiler.",
+          "owner": "Cuando todos tus alquileres en esa tienda han terminado, su dueño borra tu nombre, tu correo y tu teléfono de todos ellos. No se puede deshacer.",
+          "kept": "El registro de dinero, las aprobaciones, el registro de auditoría y las fotos se quedan como estaban: son el registro de lo que pasó y no se pueden reescribir. Las fotos se borran igualmente en su fecha.",
+          "payer": "El nombre y el correo que dio PayPal desaparecen cuando ninguna tienda de Hold conserva un alquiler tuyo sin borrar.",
+          "record": "Puedes borrar tu historial limpio tú mismo, desde tu enlace de alquiler."
+        }
+      }
+    },
+    "terms": {
+      "title": "Condiciones de uso",
+      "lead": "Hold es un proyecto de hackathon, no una empresa registrada. Funciona en el sandbox de PayPal: no se mueve dinero real y nada aquí es un contrato de alquiler real.",
+      "action": "Leer el aviso de privacidad",
+      "updated": "Última actualización: 3 de noviembre de 2026.",
+      "sectionTitle": "Usar Hold",
+      "sectionLead": "Qué puedes esperar de esta versión, y qué espera ella de ti.",
+      "items": {
+        "what": {
+          "title": "Qué es Hold",
+          "body": "Una demostración de cómo una retención de PayPal puede sustituir una fianza en efectivo, con fotos comparadas en la devolución y una persona que aprueba cada cargo."
+        },
+        "sandbox": {
+          "title": "Solo sandbox",
+          "body": "Cada pago, retención y cargo ocurre en el sandbox de PayPal, con cuentas de prueba. No introduzcas datos reales de tarjeta, y cuenta con que los datos de ejemplo se reinician."
+        },
+        "photographs": {
+          "title": "Las fotos que envías",
+          "body": "Fotografía el artículo, no a personas, y no envíes nada que no tengas derecho a compartir. Las fotos se guardan como dice el aviso de privacidad."
+        },
+        "ai": {
+          "title": "La IA puede equivocarse",
+          "body": "Claude compara fotos y propone hallazgos. Nunca cobra a nadie: decide una persona, y el cliente puede responder."
+        },
+        "shops": {
+          "title": "Para tiendas",
+          "body": "Una tienda fija sus propios precios y su política de desgaste, se los comunica a sus clientes y atiende sus peticiones, también las de borrado."
+        },
+        "warranty": {
+          "title": "Sin garantía",
+          "body": "Hold se ofrece tal cual, para su evaluación, sin promesa de que esté disponible, sea correcto o sirva para un fin."
+        },
+        "changes": {
+          "title": "Cambios",
+          "body": "Estas condiciones pueden cambiar con el proyecto. La fecha de arriba dice cuándo cambiaron por última vez."
+        }
+      }
     }
   },
   "errors": {
@@ -1035,7 +1191,7 @@
       },
       "photographs": {
         "q": "¿Qué pasa con las fotografías?",
-        "a": "Muestran el artículo, no a ti. Las caras se difuminan y los registros se guardan solo el tiempo que exigen la política de la tienda y la ley."
+        "a": "Muestran el artículo, no a ti. Las caras se difuminan, las fotos se borran {days} días después de tomarse y la tienda puede borrar tus datos cuando tu alquiler ha terminado."
       }
     }
   },
@@ -1485,7 +1641,8 @@
         "done": "Hecho",
         "toDo": "Aún no",
         "lapsedNote": "El plazo de pago se agotó, así que los artículos ya no se guardan. El cliente aún puede pagar mientras nadie más los haya reservado.",
-        "assistant": "Por el asistente del propio cliente"
+        "assistant": "Por el asistente del propio cliente",
+        "erasedRenter": "Datos personales borrados"
       },
       "link": {
         "title": "El enlace del cliente",
@@ -2241,6 +2398,22 @@
       },
       "download": "Descargar para una hoja de cálculo",
       "sheet": "Precios"
+    },
+    "erasure": {
+      "title": "Borrar los datos personales del cliente",
+      "body": "A petición del cliente, cuando todos sus alquileres aquí han terminado. Su nombre, su correo y su teléfono se sustituyen en todos sus alquileres de esta tienda. Los pagos, las aprobaciones, el registro de auditoría y las fotos se quedan como están. No se puede deshacer.",
+      "action": "Borrar los datos personales",
+      "understood": "Entiendo que no se puede deshacer.",
+      "confirm": "Borrar para siempre",
+      "cancel": "Conservarlos",
+      "erasing": "Borrando…",
+      "done": "Datos personales borrados.",
+      "erasedOn": "Los datos personales del cliente se borraron el {date}.",
+      "results": {
+        "not_found": "Ese alquiler no es de esta tienda.",
+        "rental_open": "Un alquiler de este cliente sigue abierto aquí. Borra cuando haya terminado.",
+        "already_erased": "Los datos personales de este cliente ya están borrados."
+      }
     }
   },
   "emails": {
@@ -2818,7 +2991,8 @@
       "placed": "Tu tarifa de {fee} está pagada y tu retención de {hold} está hecha. Solo se cobró la tarifa.",
       "taking": "Tu retención de {hold} está hecha. PayPal está cobrando tu tarifa de {fee}.",
       "done": "Retención hecha. Solo se cobra tu tarifa."
-    }
+    },
+    "evidenceNotice": "Las fotos del artículo en la entrega y la devolución se guardan como prueba durante {days} días y luego se borran. <link>Cómo trata Hold tus datos</link>"
   },
   "shopPage": {
     "label": "Reservar en línea",
