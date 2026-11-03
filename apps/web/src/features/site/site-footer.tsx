@@ -61,7 +61,8 @@ export function SiteFooter({ year }: { year: number }) {
           aria-hidden="true"
           className="pointer-events-none mt-2 -mb-6 h-[0.62em] overflow-clip text-[calc((min(100vw,80rem)-2rem)/2.08)] leading-none opacity-[0.07] select-none md:text-[calc((min(100vw,80rem)-4rem)/2.08)] lg:mt-0 lg:text-[calc((min(100vw,80rem)-5rem)/2.08)] dark:opacity-[0.1]"
         >
-          <Logo className="block text-[1em]" />
+          {/* As wide as its letters, with room for the last one's tight tracking, so nothing in it overflows its own box. */}
+          <Logo className="block w-max pe-[0.06em] text-[1em]" />
         </div>
       </div>
     </footer>

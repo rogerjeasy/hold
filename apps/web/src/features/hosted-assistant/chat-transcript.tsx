@@ -30,7 +30,7 @@ export function ChatTranscript({ conversation, simulated }: { conversation: Conv
           </li>
         ) : (
           <li key={line.key} className={`grid min-w-0 max-w-prose gap-1.5 rounded-md border px-3 py-2 ${line.kind === 'person' ? 'justify-self-end bg-muted' : 'w-full justify-self-start'}`}>
-            <span className="flex items-center gap-1.5 text-[0.8125rem] font-semibold text-muted-foreground">
+            <span className="flex min-w-0 flex-wrap items-center gap-1.5 text-[0.8125rem] font-semibold text-muted-foreground">
               {line.kind === 'person' ? <User aria-hidden="true" className="size-3.5" /> : <Bot aria-hidden="true" className="size-3.5" />}
               {line.kind === 'person' ? t('you') : t('assistant')}
               {line.kind === 'assistant' && simulated ? <SampleTag label={t('simulated')} /> : null}

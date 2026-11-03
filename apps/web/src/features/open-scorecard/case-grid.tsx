@@ -15,6 +15,7 @@ import { usePopupParent } from '@/components/grid/use-popup-parent'
 import type { DetailHeading } from '@/components/grid/master-detail'
 import { AlignmentCell, CaseGroupLabel, ClaimCell, OutcomeCell, PairCell, SecondLookCell, VerdictCell } from './case-cells'
 import type { CaseRow } from './case-rows'
+import { CONTROL_COLUMN } from '@/components/grid/control-column'
 
 registerGridModules()
 
@@ -63,7 +64,7 @@ export function CaseGrid({ rows, grouped, renderDetail }: CaseGridProps) {
     const setFilter = { filter: 'agSetColumnFilter', suppressHeaderMenuButton: true }
     return [
       { colId: 'group', headerName: t('columns.group'), valueGetter: ({ data }) => data?.group, ...wordsFor((group: CaseRow['group']) => t(`groups.${group}`)), rowGroup: grouped, hide: true },
-      { colId: 'open', headerName: t('columns.open'), cellRenderer: OpenRowCell, width: 64, maxWidth: 64, sortable: false, suppressHeaderMenuButton: true },
+      { colId: 'open', headerName: t('columns.open'), cellRenderer: OpenRowCell, ...CONTROL_COLUMN },
       { colId: 'pair', headerName: t('columns.pair'), cellRenderer: PairCell, valueGetter: ({ data }) => data?.id ?? '', flex: 2, minWidth: 180 },
       { colId: 'expected', headerName: t('columns.expected'), field: 'expected', cellRenderer: OutcomeCell, ...wordsFor((outcome: CaseRow['expected']) => t(`outcomes.${outcome}`)), ...setFilter, flex: 1, minWidth: 116 },
       { colId: 'actual', headerName: t('columns.actual'), field: 'actual', cellRenderer: OutcomeCell, ...wordsFor((outcome: CaseRow['actual']) => t(`outcomes.${outcome}`)), ...setFilter, flex: 1, minWidth: 116 },
