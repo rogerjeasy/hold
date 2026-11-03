@@ -7,6 +7,7 @@ import type { DeclaredPhotoSource, PhotoMeasures } from '@hold/domain'
 import { incidentAlertEmail } from '@hold/notify'
 import { shopRoutes } from '@/lib/routes'
 import { Refusal } from './action'
+import { mayEmail } from './email-allowance'
 import { sendMediaMessage } from './media'
 import { pushToStaff } from './push'
 import type { InLinkShop } from './renter-access'
@@ -78,7 +79,8 @@ export async function alertStaff(shopId: string, incidentId: string): Promise<vo
     const alert = await inShop(database, scope, (transaction) => incidentAlert(transaction, incidentId))
     if (alert === undefined) return
     const facts = { shopName: alert.shopName, itemLabel: alert.itemLabel, kind: alert.kind, incidentsUrl: `${config.publicUrl}${shopRoutes.incidents}` }
-    const sent = await Promise.all(alert.recipients.map((recipient) => mailer.send(incidentAlertEmail(recipient.email, recipient.language, facts))))
+    const allowed = await inShop(database, scope, async (transaction) => { const each: boolean[] = []; for (const recipient of alert.recipients) each.push(await mayEmail(transaction, { shopId, rentalId: alert.rentalId, to: recipient.email })); return each })
+    const sent = await Promise.all(alert.recipients.map((recipient, index) => (allowed[index] === true ? mailer.send(incidentAlertEmail(recipient.email, recipient.language, facts)) : Promise.resolve(false))))
     if (sent.some(Boolean)) await inShop(database, scope, (transaction) => markIncidentAlerted(transaction, incidentId, new Date()))
     await pushToStaff(shopId, 'decision_waiting', { to: 'rental', id: alert.rentalId })
   } catch {

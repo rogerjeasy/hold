@@ -12,8 +12,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t('label'), robots: { index: false, follow: false } }
 }
 
-export default async function Page({ params }: { params: Promise<{ rentalId: string }> }) {
+export default async function Page({ params, searchParams }: { params: Promise<{ rentalId: string }>; searchParams: Promise<{ link?: string | string[] }> }) {
   const { rentalId } = await params
+  // Set by the booking form when the day's email allowance held the renter's link.
+  const linkHeld = (await searchParams).link === 'held'
   const context = await requireShop()
   const { database } = await getServices()
   const scope = { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId } as const
@@ -25,5 +27,5 @@ export default async function Page({ params }: { params: Promise<{ rentalId: str
   })
   // Another shop's rental and a made-up address read the same.
   if (rental === undefined) notFound()
-  return <RentalScreen shopName={context.shop.name} clock={{ timeZone: context.shop.timeZone, currency: context.shop.currency }} rental={rental} hold={hold} handovers={handovers} returns={returns} dropOff={(await dropOffEntries(dropOffs))[0]} extensions={extensions} texts={texts} paypal={paypal} canAct={context.role !== 'read_only'} canErase={context.role === 'owner'} />
+  return <RentalScreen shopName={context.shop.name} clock={{ timeZone: context.shop.timeZone, currency: context.shop.currency }} rental={rental} hold={hold} handovers={handovers} returns={returns} dropOff={(await dropOffEntries(dropOffs))[0]} extensions={extensions} texts={texts} paypal={paypal} canAct={context.role !== 'read_only'} canErase={context.role === 'owner'} linkHeld={linkHeld} />
 }

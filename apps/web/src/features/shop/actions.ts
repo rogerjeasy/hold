@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server'
 import { z } from 'zod'
 import { readLocale } from '@/features/auth/locale-input'
 import { linkRoutes } from '@/lib/routes'
+import { mayEmail } from '@/server/email-allowance'
 import { subscribeToPayPal } from '@/server/paypal-subscription'
 import { getServices } from '@/server/services'
 import { list, Refusal, shopAction, withLocale } from '@/server/shop-access'
@@ -41,6 +42,8 @@ export const inviteStaff = shopAction(
       { shopId: context.shop.id, invitedByUserId: context.person.userId, email: input.email, role: input.role, approvalLimitCents, language },
       new Date(),
     )
+    // Counted with every other email someone asked for, so the demo's invitations cannot be used to send mail at will.
+    if (!(await mayEmail(transaction, { shopId: context.shop.id, rentalId: null, to: input.email }))) return new Refusal('email_daily_cap')
     const { config, mailer } = await getServices()
     const t = await getTranslations({ locale: language, namespace: 'emails.invitation' })
     const roles = await getTranslations({ locale: language, namespace: 'shop.staff.roles' })

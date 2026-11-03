@@ -43,6 +43,13 @@ describe('a rental', () => {
     expect(screen.queryByRole('button', { name: 'Ask for the hold' })).not.toBeInTheDocument()
   })
 
+  it('says when the link was not emailed because the day’s emails are spent, and offers it to show instead', () => {
+    renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ contactEmail: 'priya@example.com' })} hold={undefined} handovers={[]} canAct linkHeld />)
+    expect(screen.getByText('The link was not emailed')).toBeInTheDocument()
+    expect(screen.getByText(/Today’s emails are used for this renter or this shop/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Show the link' })).toBeInTheDocument()
+  })
+
   it('offers to text the link to a renter who chose texts, showing only enough of the number to recognise it', () => {
     renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ contactChannel: 'text', contactPhone: '+41 ••• •• 67', contactEmail: 'priya@example.com' })} hold={undefined} handovers={[]} canAct />)
     expect(screen.getByRole('button', { name: 'Text it to +41 ••• •• 67' })).toBeInTheDocument()

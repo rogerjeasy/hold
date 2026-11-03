@@ -1480,7 +1480,8 @@
       "no_price_list": "Veröffentlichen Sie zuerst eine Preisliste. Die Beispielforderungen verwenden ihre Preise.",
       "has_rentals": "Dieser Laden hat schon Vermietungen, daher wurden keine Beispiele hinzugefügt.",
       "notifications_failed": "PayPal hat das Abonnement nicht angenommen. Prüfen Sie die Zugangsdaten der App und versuchen Sie es erneut.",
-      "rate_limited": "Zu oft angefragt. Warten Sie ein paar Minuten und versuchen Sie es erneut."
+      "rate_limited": "Zu oft angefragt. Warten Sie ein paar Minuten und versuchen Sie es erneut.",
+      "email_daily_cap": "Die heutigen E-Mails dieses Shops sind aufgebraucht, daher wurde die Einladung nicht gesendet und nichts gespeichert. Versuchen Sie es morgen wieder."
     },
     "security": {
       "title": "Sicherheit",
@@ -1666,7 +1667,9 @@
         "paid": "Der Mietpreis ist bezahlt. Derselbe Link zeigt die Miete und fragt bei der Abholung nach der Reservierung.",
         "walkIn": "Laufkundschaft: Gebühr und Reservierung werden zusammen mit einer PayPal-Genehmigung genehmigt, danach ist das Rad bereit zur Übergabe.",
         "text": "Per SMS an {phone} senden",
-        "texted": "Per SMS an {phone} gesendet."
+        "texted": "Per SMS an {phone} gesendet.",
+        "heldTitle": "Der Link wurde nicht gemailt",
+        "heldBody": "Die heutigen E-Mails für diese Mieterin oder diesen Shop sind aufgebraucht, daher hat Hold ihn nicht gesendet. Zeigen Sie den Link, damit die Mieterin ihn scannt oder kopiert. E-Mails sind innerhalb eines Tages wieder möglich."
       },
       "letGo": {
         "title": "Diese Buchung aufgeben",
@@ -1696,7 +1699,8 @@
         "rows_mismatched": "Jede Zeile braucht einen Artikel und eine Zahl.",
         "not_booked": "Der Mietpreis muss bezahlt sein, bevor nach der Reservierung gefragt wird.",
         "phone_invalid": "Schreiben Sie die Nummer mit Ländervorwahl, etwa +41 79 123 45 67.",
-        "country_not_texted": "Hold sendet keine SMS in dieses Land. Nutzen Sie eine E-Mail-Adresse."
+        "country_not_texted": "Hold sendet keine SMS in dieses Land. Nutzen Sie eine E-Mail-Adresse.",
+        "email_daily_cap": "Die heutigen E-Mails für diese Mieterin oder diesen Shop sind aufgebraucht, daher wurde diese nicht gesendet. Zeigen Sie stattdessen den Link; E-Mails sind innerhalb eines Tages wieder möglich."
       },
       "hold": {
         "title": "Reservierung bei der Abholung",

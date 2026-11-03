@@ -27,7 +27,8 @@ export function BookingForm({ types, currency, days, from, to, startsToday = fal
   const [result, book, pending] = useActionState(bookRental, null)
 
   useEffect(() => {
-    if (result?.ok === true) router.push(rentalRoutes.rental(result.value.rentalId))
+    // A link the day's email allowance held is shown on the rental page instead, which says why.
+    if (result?.ok === true) router.push(result.value.sent === 'held' ? `${rentalRoutes.rental(result.value.rentalId)}?link=held` : rentalRoutes.rental(result.value.rentalId))
   }, [result, router])
 
   return (

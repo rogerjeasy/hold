@@ -45,7 +45,8 @@ export async function placeBooking(
 // Sends the renter their link, in their language, by text or email as they are reached (architecture.md section 12.3).
 // The email goes to the address given at booking, as every link does. Says how it went, or null when it reached
 // nobody: the booking still stands, and staff can show the link.
-export async function sendRenterLink(transaction: Transaction, rentalId: string, token: string, language: Locale, shopName: string, contactEmail: string | null): Promise<'text' | 'email' | null> {
+// 'held' when the day's emails are spent: the link was not emailed, and staff show it to the renter instead.
+export async function sendRenterLink(transaction: Transaction, rentalId: string, token: string, language: Locale, shopName: string, contactEmail: string | null): Promise<'text' | 'email' | 'held' | null> {
   const emails = await getTranslations({ locale: language, namespace: 'emails.renterLink' })
   const texts = await getTranslations({ locale: language, namespace: 'texts' })
   const link = await renterUrl(token, language)
@@ -54,5 +55,6 @@ export async function sendRenterLink(transaction: Transaction, rentalId: string,
     email: contactEmail === null ? null : { to: contactEmail, subject: emails('subject', { shop: shopName }), text: emails('body', { shop: shopName, link }) },
     text: texts('renterLink', { shop: shopName, link }),
   }))
+  if (reached?.emailHeld === true) return 'held'
   return reached === undefined || reached.via === 'none' ? null : reached.via
 }
