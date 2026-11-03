@@ -36,14 +36,21 @@ describe('the comparison review screen', () => {
 
 describe('the demo’s sample return, waiting for its comparison', () => {
   const waiting = { ...report, state: 'pending' as const, simulated: true, modelAnswered: false, model: null, promptVersion: null, waitsForStart: true, usage: { calls: 0, inputTokens: 0, outputTokens: 0 } }
-  it('offers staff the real comparison instead of saying it is comparing', () => {
-    renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={waiting} canAct />)
+  it('offers staff the real comparison instead of saying it is comparing, with the runs left today', () => {
+    renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={waiting} canAct sampleAllowance={{ left: 2, refusal: null }} />)
     expect(screen.getByRole('button', { name: 'Run the real comparison on this sample' })).toBeInTheDocument()
+    expect(screen.getByText(/2 real comparisons left today from your network/)).toBeInTheDocument()
     expect(screen.getByText(/Claude Opus 4.6 compares these demonstration photographs/)).toBeInTheDocument()
     expect(screen.queryByText(/Comparing photographs/)).not.toBeInTheDocument()
   })
+  it('offers no button once none is left today, and says which share is spent and when it starts again', () => {
+    renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={waiting} canAct sampleAllowance={{ left: 0, refusal: 'daily_cap_network' }} />)
+    expect(screen.queryByRole('button', { name: 'Run the real comparison on this sample' })).not.toBeInTheDocument()
+    expect(screen.getByText('No real comparison left today')).toBeInTheDocument()
+    expect(screen.getByText(/Your network has used its real comparisons on samples for today. They start again at midnight UTC/)).toBeInTheDocument()
+  })
   it('explains it to a read-only member without the button', () => {
-    renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={waiting} canAct={false} />)
+    renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={waiting} canAct={false} sampleAllowance={{ left: 2, refusal: null }} />)
     expect(screen.queryByRole('button', { name: 'Run the real comparison on this sample' })).not.toBeInTheDocument()
     expect(screen.getByText(/Claude Opus 4.6 compares these demonstration photographs/)).toBeInTheDocument()
   })

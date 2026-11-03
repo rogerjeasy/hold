@@ -5,14 +5,15 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 process.env['HOLD_ENVIRONMENT'] = 'test'
 process.env['HOLD_COOKIE_KEY'] = Buffer.alloc(32, 13).toString('base64')
 const jar = new Map<string, string>()
-vi.mock('next/headers', () => ({ cookies: () => Promise.resolve({ get: (name: string) => jar.has(name) ? { name, value: jar.get(name) } : undefined, set: (name: string, value: string) => jar.set(name, value), delete: (name: string) => jar.delete(name) }), headers: () => Promise.resolve(new Headers()) }))
+const network: { value: string | undefined } = { value: undefined }
+vi.mock('next/headers', () => ({ cookies: () => Promise.resolve({ get: (name: string) => jar.has(name) ? { name, value: jar.get(name) } : undefined, set: (name: string, value: string) => jar.set(name, value), delete: (name: string) => jar.delete(name) }), headers: () => Promise.resolve(new Headers(network.value === undefined ? {} : { 'x-forwarded-for': network.value })) }))
 vi.mock('next/cache', () => ({ revalidatePath: () => undefined }))
 vi.mock('next-intl/server', () => ({ getTranslations: () => Promise.resolve((key: string) => key) }))
 vi.setConfig({ testTimeout: 60_000 })
 const actions = await import('./actions')
 const { getServices } = await import('@/server/services')
 const { form, signIn } = await import('@/test/shop-session')
-const { SAMPLE_COMPARISON_LIMITS } = await import('./limits')
+const { SAMPLE_COMPARISON_LIMITS, sampleComparisonAllowance } = await import('./limits')
 
 // A judge has Claude compare the demonstration's own photographs on the sample return that waits for its comparison,
 // with no PayPal login (architecture.md section 20.3). In the test environment the model is the stand-in, which never
@@ -36,7 +37,7 @@ async function demo(slug: string) {
   return { staff: `jonas@${slug}.example`, rentalId: await rentalOf('Marco Rossi') }
 }
 
-beforeEach(() => { jar.clear() })
+beforeEach(() => { jar.clear(); network.value = undefined })
 
 describe('the real comparison on the demo’s sample return', () => {
   let started: Awaited<ReturnType<typeof demo>>
@@ -58,11 +59,26 @@ describe('the real comparison on the demo’s sample return', () => {
     expect(await actions.compareSample(null, form({ rentalId: started.rentalId, locale: 'en' }))).toMatchObject({ ok: false, reason: 'nothing_to_compare' })
   })
 
+  it('says how many runs a network has left today before anyone asks, and which share is spent once none is', async () => {
+    network.value = '198.51.100.23'
+    expect(await sampleComparisonAllowance()).toEqual({ left: SAMPLE_COMPARISON_LIMITS.perNetwork.max, refusal: null })
+    for (let run = 0; run < SAMPLE_COMPARISON_LIMITS.perNetwork.max; run += 1) {
+      const each = await demo(`samplecmpnetwork${String(run)}`)
+      await signIn(jar, each.staff, 'email_code')
+      expect(await actions.compareSample(null, form({ rentalId: each.rentalId, locale: 'en' }))).toMatchObject({ ok: true })
+    }
+    expect(await sampleComparisonAllowance()).toEqual({ left: 0, refusal: 'daily_cap_network' })
+    const refused = await demo('samplecmpnetworkrefused')
+    await signIn(jar, refused.staff, 'email_code')
+    expect(await actions.compareSample(null, form({ rentalId: refused.rentalId, locale: 'en' }))).toMatchObject({ ok: false, reason: 'daily_cap_network' })
+  })
+
   it('stops once the day’s sample comparisons are spent, and leaves the comparison waiting', async () => {
     const { database } = await getServices()
     while (await takeRateToken(database, SAMPLE_COMPARISON_LIMITS.perDay, utcDay(new Date()))) { /* spend the day */ }
     const capped = await demo('samplecmpcap')
     await signIn(jar, capped.staff, 'email_code')
+    expect(await sampleComparisonAllowance()).toEqual({ left: 0, refusal: 'daily_cap' })
     expect(await actions.compareSample(null, form({ rentalId: capped.rentalId, locale: 'en' }))).toMatchObject({ ok: false, reason: 'daily_cap' })
     expect(await comparisonOf(capped.rentalId)).toMatchObject({ state: 'pending', waitsForStart: true })
   })

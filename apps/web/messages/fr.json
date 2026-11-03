@@ -2246,10 +2246,11 @@
         "views_missing": "Certaines vues attendent encore une photo.",
         "region_invalid": "Tracez le cadre à l'intérieur de la photo.",
         "description_invalid": "Décrivez la marque en 200 caractères au plus.",
-        "daily_cap": "Les vraies comparaisons d'exemples du jour sont toutes prises. Chacune consomme le quota quotidien Claude du compte, réessayez donc demain ; les photos attendent ici.",
+        "daily_cap": "Toutes les vraies comparaisons d’exemples du jour, sur toutes les démos, sont prises. Elles reprennent à minuit UTC ; les photos attendent ici.",
         "already_started": "Cette comparaison a déjà commencé.",
         "nothing_to_compare": "Aucune comparaison n'attend pour cet exemple.",
-        "not_a_sample": "Seule la comparaison d'un exemple se lance à la main. Un vrai retour est comparé dès que ses photos sont scellées."
+        "not_a_sample": "Seule la comparaison d'un exemple se lance à la main. Un vrai retour est comparé dès que ses photos sont scellées.",
+        "daily_cap_network": "Votre réseau a utilisé ses vraies comparaisons d’exemples pour aujourd’hui. Elles reprennent à minuit UTC ; les photos attendent ici."
       },
       "sampleTitle": "Photographies de démonstration",
       "sampleBody": "Ces photographies servent à la démonstration. Le dossier d’inspection est signalé comme simulé."
@@ -2321,7 +2322,9 @@
         "body": "La comparaison de ce retour d'exemple n'a pas encore été lancée. Lancez-la et Claude Opus 4.6 compare réellement ces photos de démonstration : le code trouve d'abord ce qui a changé, Claude explique chaque changement, et un second regard indépendant vérifie tout dommage. Cela prend environ une minute, aucune connexion PayPal n'est nécessaire et rien n'est débité. Chaque lancement consomme le quota quotidien Claude du compte, donc quelques-uns seulement par jour.",
         "start": "Lancer la vraie comparaison sur cet exemple",
         "starting": "Lancement de la comparaison…",
-        "started": "La comparaison a commencé."
+        "started": "La comparaison a commencé.",
+        "left": "{count, plural, one {# vraie comparaison restante aujourd’hui depuis votre réseau} other {# vraies comparaisons restantes aujourd’hui depuis votre réseau}}. Chacune consomme une part de l’allocation quotidienne de Claude du compte.",
+        "noneTitle": "Plus de vraie comparaison aujourd’hui"
       }
     },
     "incidents": {

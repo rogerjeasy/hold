@@ -1,10 +1,11 @@
 'use server'
-import { confirmAgreement, grantShopSettlement, openSampleAdvocates, revokeShopSettlement, takeRateTokenIn } from '@hold/db'
+import { confirmAgreement, grantShopSettlement, openSampleAdvocates, revokeShopSettlement } from '@hold/db'
 import { parseAmount } from '@hold/domain'
 import { z } from 'zod'
 import { Refusal, shopAction, withLocale } from '@/server/shop-access'
 import { writeContestSummary } from '@/server/contest-summary'
 import { sendNegotiation } from '@/server/negotiation-queue'
+import { takeDailyShares } from '@/server/daily-shares'
 import { getServices } from '@/server/services'
 import { sendSettlement } from '@/server/settlement-queue'
 import { sampleAdvocateNetwork, sampleAdvocateShares } from './limits'
@@ -40,12 +41,8 @@ type SampleOpened = { readonly kind: 'negotiation' | 'reply'; readonly rentalId:
 export const argueSampleClaim = shopAction({ name: 'settlement.sample_argued', roles: ['owner', 'manager'], needsPasskey: false, input: withLocale({ rentalId: z.uuid() }) }, async (context, input, transaction): Promise<SampleOpened | Refusal> => {
   const { config } = await getServices()
   // Taken in this transaction: no model is called in it, so a refused or failed opening rolls back and spends nothing.
-  for (const each of sampleAdvocateShares(context.shop.id, await sampleAdvocateNetwork(), new Date())) {
-    if (await takeRateTokenIn(transaction, each.limit, each.subject)) continue
-    // Logged so an operator can see a judge refused; the shop is named, never the network.
-    console.info(JSON.stringify({ event: 'sample_advocates_refused', share: each.share, shopId: context.shop.id }))
-    return new Refusal(each.refusal)
-  }
+  const refused = await takeDailyShares(transaction, sampleAdvocateShares(context.shop.id, await sampleAdvocateNetwork(), new Date()), { event: 'sample_advocates_refused', shopId: context.shop.id })
+  if (refused !== null) return new Refusal(refused.refusal)
   const opened = await openSampleAdvocates(transaction, input.rentalId, { simulated: config.services === 'fake' }, new Date())
   return opened.ok ? { kind: opened.kind, rentalId: opened.rentalId, negotiationId: opened.negotiationId, outboxId: opened.outboxId } : new Refusal(opened.reason)
 }, async (context, result: SampleOpened) => {

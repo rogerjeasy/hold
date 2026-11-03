@@ -2246,10 +2246,11 @@
         "views_missing": "Some views still need a photograph.",
         "region_invalid": "Draw the box inside the photograph.",
         "description_invalid": "Describe the mark in up to 200 characters.",
-        "daily_cap": "Today's real comparisons on samples are all taken. Each spends the account's daily Claude allowance, so try again tomorrow; the photographs wait here.",
+        "daily_cap": "All of today's real comparisons on samples, across every demo, are used. They start again at midnight UTC; the photographs wait here.",
         "already_started": "This comparison has already started.",
         "nothing_to_compare": "This sample has no comparison waiting to run.",
-        "not_a_sample": "Only a sample's comparison is started by hand. A real return is compared once its photographs are sealed."
+        "not_a_sample": "Only a sample's comparison is started by hand. A real return is compared once its photographs are sealed.",
+        "daily_cap_network": "Your network has used its real comparisons on samples for today. They start again at midnight UTC; the photographs wait here."
       },
       "sampleTitle": "Sample photographs",
       "sampleBody": "These photographs are for demonstration. The inspection record is marked as simulated."
@@ -2321,7 +2322,9 @@
         "body": "This sample return's comparison has not run yet. Start it and Claude Opus 4.6 compares these demonstration photographs for real: code first finds what changed, Claude explains each change, and an independent second look checks any damage. It takes about a minute, no PayPal login is needed, and nothing is charged. Each run spends the account's daily Claude allowance, so a few run each day.",
         "start": "Run the real comparison on this sample",
         "starting": "Starting the comparison…",
-        "started": "The comparison has started."
+        "started": "The comparison has started.",
+        "left": "{count, plural, one {# real comparison left today from your network} other {# real comparisons left today from your network}}. Each spends part of the account's daily Claude allowance.",
+        "noneTitle": "No real comparison left today"
       }
     },
     "incidents": {

@@ -1,14 +1,13 @@
 'use server'
 
-import { auditLog, captureSession, comparisonReport, rentalDetail, rentalItemFor, rentalReturns, sealSession, startCaptureSession, startSampleComparison, takeRateTokenIn } from '@hold/db'
-import { utcDay } from '@hold/domain'
+import { auditLog, captureSession, comparisonReport, rentalDetail, rentalItemFor, rentalReturns, sealSession, startCaptureSession, startSampleComparison } from '@hold/db'
 import { rentalItemInput, reviewInput, sessionInput } from '@hold/mobile-api'
 import { z } from 'zod'
-import { callerNetwork } from '@/server/network'
+import { takeDailyShares } from '@/server/daily-shares'
 import { Refusal, shopAction, withLocale } from '@/server/shop-access'
 import { CAPTURE_STAFF, staffPhotoActions } from '@/server/staff-photo'
 import { sendComparisons } from '@/server/comparison-queue'
-import { SAMPLE_COMPARISON_LIMITS } from './limits'
+import { sampleComparisonNetwork, sampleComparisonShares } from './limits'
 
 export const startReturn = shopAction(
   { name: 'return.started', roles: CAPTURE_STAFF, needsPasskey: false, input: rentalItemInput },
@@ -54,9 +53,9 @@ export const recordReview = shopAction(
 // The day's shares are taken in this transaction, where no model is called, so a refused start spends nothing.
 export const compareSample = shopAction(
   { name: 'comparison.sample_started', roles: CAPTURE_STAFF, needsPasskey: false, input: withLocale({ rentalId: z.uuid() }) },
-  async (_context, input, transaction) => {
-    if (!(await takeRateTokenIn(transaction, SAMPLE_COMPARISON_LIMITS.perNetwork, (await callerNetwork()) ?? 'unknown'))) return new Refusal('daily_cap')
-    if (!(await takeRateTokenIn(transaction, SAMPLE_COMPARISON_LIMITS.perDay, utcDay(new Date())))) return new Refusal('daily_cap')
+  async (context, input, transaction) => {
+    const refused = await takeDailyShares(transaction, sampleComparisonShares(await sampleComparisonNetwork(), new Date()), { event: 'sample_comparison_refused', shopId: context.shop.id })
+    if (refused !== null) return new Refusal(refused.refusal)
     const started = await startSampleComparison(transaction, input.rentalId, new Date())
     return started.ok ? { rentalId: started.rentalId, comparisonId: started.comparisonId } : new Refusal(started.reason)
   },

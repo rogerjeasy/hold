@@ -2246,10 +2246,11 @@
         "views_missing": "Einige Ansichten brauchen noch ein Foto.",
         "region_invalid": "Zeichnen Sie das Feld innerhalb des Fotos.",
         "description_invalid": "Beschreiben Sie die Spur in bis zu 200 Zeichen.",
-        "daily_cap": "Die heutigen echten Vergleiche mit Beispielen sind alle vergeben. Jeder verbraucht das tägliche Claude-Kontingent des Kontos, versuchen Sie es also morgen wieder; die Fotos warten hier.",
+        "daily_cap": "Alle heutigen echten Vergleiche mit Beispielen, über alle Demos, sind vergeben. Sie beginnen um Mitternacht UTC neu; die Fotos warten hier.",
         "already_started": "Dieser Vergleich hat bereits begonnen.",
         "nothing_to_compare": "Für dieses Beispiel wartet kein Vergleich.",
-        "not_a_sample": "Nur der Vergleich eines Beispiels wird von Hand gestartet. Eine echte Rückgabe wird verglichen, sobald ihre Fotos versiegelt sind."
+        "not_a_sample": "Nur der Vergleich eines Beispiels wird von Hand gestartet. Eine echte Rückgabe wird verglichen, sobald ihre Fotos versiegelt sind.",
+        "daily_cap_network": "Ihr Netzwerk hat seine heutigen echten Vergleiche mit Beispielen verbraucht. Sie beginnen um Mitternacht UTC neu; die Fotos warten hier."
       },
       "sampleTitle": "Beispielfotos",
       "sampleBody": "Diese Fotos dienen der Demonstration. Der Prüfbericht ist als simuliert gekennzeichnet."
@@ -2321,7 +2322,9 @@
         "body": "Der Vergleich dieser Beispielrückgabe ist noch nicht gelaufen. Starten Sie ihn, und Claude Opus 4.6 vergleicht diese Demonstrationsfotos wirklich: Zuerst findet Code, was sich verändert hat, Claude erklärt jede Veränderung, und ein unabhängiger zweiter Blick prüft jeden Schaden. Es dauert etwa eine Minute, kein PayPal-Login ist nötig, und nichts wird belastet. Jeder Lauf verbraucht das tägliche Claude-Kontingent des Kontos, daher laufen nur wenige pro Tag.",
         "start": "Den echten Vergleich mit diesem Beispiel ausführen",
         "starting": "Der Vergleich wird gestartet…",
-        "started": "Der Vergleich hat begonnen."
+        "started": "Der Vergleich hat begonnen.",
+        "left": "{count, plural, one {# echter Vergleich heute aus Ihrem Netzwerk übrig} other {# echte Vergleiche heute aus Ihrem Netzwerk übrig}}. Jeder verbraucht einen Teil des täglichen Claude-Kontingents des Kontos.",
+        "noneTitle": "Heute kein echter Vergleich mehr"
       }
     },
     "incidents": {

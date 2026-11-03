@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import { ComparisonScreen } from '@/features/returns/comparison-screen'
+import { sampleComparisonAllowance } from '@/features/returns/limits'
 import { reviewNote } from '@/features/returns/review-input'
 import { getServices } from '@/server/services'
 import { requireShop } from '@/server/shop-page'
@@ -20,5 +21,6 @@ export default async function Page({ params }: { params: Promise<{ rentalId: str
   if (report === undefined || report.rentalId !== rentalId) notFound()
   const display = async (photo: { view: string; displayKey: string | null }) => ({ view: photo.view, url: photo.displayKey === null || evidence === undefined ? null : await evidence.displayLink(photo.displayKey) })
   const reviews = report.reviews.map((review) => ({ actorName: review.actorName, ...reviewNote.parse(review.detail) }))
-  return <ComparisonScreen shopName={context.shop.name} report={{ ...report, reviews, before: await Promise.all(report.before.map(display)), after: await Promise.all(report.after.map(display)) }} canAct={context.role !== 'read_only'} calibration={run?.measures.confidence} />
+  const sampleAllowance = report.waitsForStart ? await sampleComparisonAllowance() : undefined
+  return <ComparisonScreen shopName={context.shop.name} report={{ ...report, reviews, before: await Promise.all(report.before.map(display)), after: await Promise.all(report.after.map(display)) }} canAct={context.role !== 'read_only'} calibration={run?.measures.confidence} sampleAllowance={sampleAllowance} />
 }

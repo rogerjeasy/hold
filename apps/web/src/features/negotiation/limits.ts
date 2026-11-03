@@ -1,9 +1,9 @@
 import 'server-only'
-import { rateTokensLeft } from '@hold/db'
 import type { RateLimit } from '@hold/db'
 import { SAMPLE_ADVOCATE_RUNS_PER_DAY, SAMPLE_ADVOCATE_RUNS_PER_NETWORK, SAMPLE_ADVOCATE_RUNS_PER_SHOP, utcDay } from '@hold/domain'
 import { callerNetwork } from '@/server/network'
-import { getServices } from '@/server/services'
+import { dailyAllowance } from '@/server/daily-shares'
+import type { DailyAllowance, DailyShare } from '@/server/daily-shares'
 
 const DAY = 24 * 60 * 60
 
@@ -25,7 +25,7 @@ export function sampleAdvocateShares(shopId: string, network: string, now: Date)
     { share: 'shop', limit: SAMPLE_ADVOCATE_LIMITS.perShop, subject: `${shopId}\u0000${day}`, refusal: 'daily_cap_shop' },
     { share: 'network', limit: SAMPLE_ADVOCATE_LIMITS.perNetwork, subject: `${network}\u0000${day}`, refusal: 'daily_cap_network' },
     { share: 'day', limit: SAMPLE_ADVOCATE_LIMITS.perDay, subject: day, refusal: 'daily_cap' },
-  ] as const satisfies readonly { share: SampleAdvocateShare; limit: RateLimit; subject: string; refusal: string }[]
+  ] as const satisfies readonly (DailyShare<string> & { share: SampleAdvocateShare })[]
 }
 
 // The network a run is counted against. A caller with no address counts as one unnamed network.
@@ -33,13 +33,9 @@ export async function sampleAdvocateNetwork(): Promise<string> {
   return (await callerNetwork()) ?? 'unknown'
 }
 
-export type SampleAdvocatesAllowance = { readonly left: number; readonly refusal: ReturnType<typeof sampleAdvocateShares>[number]['refusal'] | null }
+export type SampleAdvocatesAllowance = DailyAllowance<ReturnType<typeof sampleAdvocateShares>[number]['refusal']>
 
-// How many live runs this demo may still start today, and the refusal a run would get now from the first share with
-// none left, read without taking any, so the page says it before anyone asks and again after a reload.
+// How many live runs this demo may still start today, and why none is left when none is.
 export async function sampleAdvocatesAllowance(shopId: string): Promise<SampleAdvocatesAllowance> {
-  const { database } = await getServices()
-  const shares = sampleAdvocateShares(shopId, await sampleAdvocateNetwork(), new Date())
-  const left = await Promise.all(shares.map((each) => rateTokensLeft(database, each.limit, each.subject)))
-  return { left: Math.min(...left), refusal: shares.find((_, index) => left[index] === 0)?.refusal ?? null }
+  return dailyAllowance(sampleAdvocateShares(shopId, await sampleAdvocateNetwork(), new Date()))
 }

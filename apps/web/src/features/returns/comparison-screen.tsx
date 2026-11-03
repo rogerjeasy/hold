@@ -12,6 +12,7 @@ import { useLookAgain } from '@/hooks/use-look-again'
 import { Link } from '@/i18n/navigation'
 import { rentalRoutes } from '@/lib/routes'
 import { ReviewForm } from './review-form'
+import type { SampleComparisonAllowance } from './limits'
 import { SampleComparisonForm } from './sample-comparison-form'
 
 // What a comparison records when no model answered it (packages/compare pipeline.ts).
@@ -23,7 +24,8 @@ export type ComparisonView = Omit<ComparisonReport, 'before' | 'after' | 'review
 // How often findings at each confidence level were correct in the accepted evaluation run, when one exists.
 export type Calibration = Readonly<Record<ConfidenceLevel, Share>>
 
-export function ComparisonScreen({ shopName, report, canAct, calibration }: { shopName: string; report: ComparisonView; canAct: boolean; calibration?: Calibration | undefined }) {
+// sampleAllowance: the real comparisons on samples left today, read by the server while the sample return waits.
+export function ComparisonScreen({ shopName, report, canAct, calibration, sampleAllowance }: { shopName: string; report: ComparisonView; canAct: boolean; calibration?: Calibration | undefined; sampleAllowance?: SampleComparisonAllowance | undefined }) {
   const t = useTranslations('shop.comparison')
   const scorecard = useTranslations('scorecard')
   const accuracy = (confidence: number) => {
@@ -45,7 +47,7 @@ export function ComparisonScreen({ shopName, report, canAct, calibration }: { sh
   return <ShopFrame shopName={shopName} title={report.label}><div className="grid gap-6">
     <Link className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4" href={rentalRoutes.rental(report.rentalId)}>{t('back')}</Link>
     {notice === 'none' ? null : <Notice title={t(`notices.${notice}.title`)} body={t(`notices.${notice}.body`)} />}
-    {waiting ? <Panel title={t('sample.title')}><div className="grid gap-3 px-4 py-4 md:px-5"><p className="max-w-prose">{t('sample.body')}</p><p className="text-muted-foreground">{t('boundary')}</p>{canAct ? <SampleComparisonForm rentalId={report.rentalId} /> : null}</div></Panel>
+    {waiting ? <Panel title={t('sample.title')}><div className="grid gap-3 px-4 py-4 md:px-5"><p className="max-w-prose">{t('sample.body')}</p><p className="text-muted-foreground">{t('boundary')}</p>{canAct && sampleAllowance !== undefined ? <SampleComparisonForm rentalId={report.rentalId} allowance={sampleAllowance} /> : null}</div></Panel>
       : pending ? <p role="status">{t('pending')} {t('updatesItself')}</p> : <Panel title={t(`outcomes.${outcome}`)}><div className="grid gap-3 px-4 py-4 md:px-5"><p>{report.deferredReason === 'model_unavailable' ? t('modelUnavailable') : t(`bodies.${outcome}`)}</p><p className="text-muted-foreground">{t('boundary')}</p>
       {report.deferredReason === 'reused_photo' ? <p>{t('reused')}</p> : null}
       {report.deferredReason === 'processing_failed' ? <p>{t('unavailable')}</p> : null}
