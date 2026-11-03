@@ -316,6 +316,13 @@
       "when": 1793664500000,
       "tag": "0044_demo_retirement",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "7",
+      "when": 1793665100000,
+      "tag": "0045_rate_tokens_left",
+      "breakpoints": true
     }
   ]
 }
