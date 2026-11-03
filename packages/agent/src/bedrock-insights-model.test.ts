@@ -17,7 +17,7 @@ const request: InsightsModelRequest = {
 }
 
 describe('the insights agent’s Bedrock adapter', () => {
-  it('sends Opus 4.6 the turn with its tool choice, explicit effort, no thinking and no strict tools, and returns the reply', async () => {
+  it('sends Opus 4.5 the turn with its tool choice, explicit effort, no thinking and no strict tools, and returns the reply', async () => {
     let sent: Record<string, unknown> = {}
     let url = ''
     const model = createBedrockInsightsModel({
@@ -31,8 +31,8 @@ describe('the insights agent’s Bedrock adapter', () => {
       },
     })
     expect(await model.reply(request)).toEqual({ kind: 'reply', reply: { id: 'msg_recorded', model: 'claude-opus-4-6', stopReason: 'tool_use', usage: { inputTokens: 1500, outputTokens: 70 }, content: [{ type: 'text', text: 'Adding it.' }, { type: 'tool_use', id: 'toolu_1', name: 'add_widget', input: { type: 'grid' } }] } })
-    expect(url).toContain('/model/us.anthropic.claude-opus-4-6-v1/invoke')
-    expect(sent).toMatchObject({ max_tokens: 4096, system: 'You are the insights agent.', tool_choice: { type: 'tool', name: 'add_widget' }, output_config: { effort: 'medium' } })
+    expect(url).toContain('/model/us.anthropic.claude-opus-4-5-20251101-v1')
+    expect(sent).toMatchObject({ anthropic_beta: ['effort-2025-11-24'], max_tokens: 4096, system: 'You are the insights agent.', tool_choice: { type: 'tool', name: 'add_widget' }, output_config: { effort: 'medium' } })
     expect(sent).not.toHaveProperty('thinking')
     expect(sent).not.toHaveProperty('temperature')
     const [tool] = sent['tools'] as Record<string, unknown>[]

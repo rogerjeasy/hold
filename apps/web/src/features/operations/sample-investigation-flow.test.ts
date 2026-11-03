@@ -1,5 +1,6 @@
 // @vitest-environment node
 import { inShop, openDemoSession, outbox } from '@hold/db'
+import { SAMPLE_INVESTIGATIONS_PER_NETWORK } from '@hold/domain'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 process.env['HOLD_ENVIRONMENT'] = 'test'
 process.env['HOLD_COOKIE_KEY'] = Buffer.alloc(32, 17).toString('base64')
@@ -52,9 +53,15 @@ describe('investigating the demo\'s samples', () => {
     expect(await operations.investigateSamples(null, form(locale))).toEqual({ ok: false, failure: 'refused', reason: 'samples_daily_cap' })
   })
 
-  it('lets one network ask once a day, whichever demos it starts', async () => {
-    const second = await demo('second')
-    await signIn(jar, second.owner, 'email_code')
+  it('lets one network ask only its share of the day, whichever demos it starts', async () => {
+    // The first demo from this network already asked.
+    for (let asked = 1; asked < SAMPLE_INVESTIGATIONS_PER_NETWORK; asked += 1) {
+      const next = await demo(`more-${String(asked)}`)
+      await signIn(jar, next.owner, 'email_code')
+      expect(await operations.investigateSamples(null, form(locale))).toMatchObject({ ok: true })
+    }
+    const refused = await demo('refused')
+    await signIn(jar, refused.owner, 'email_code')
     expect(await operations.investigateSamples(null, form(locale))).toEqual({ ok: false, failure: 'refused', reason: 'samples_daily_cap' })
   })
 })

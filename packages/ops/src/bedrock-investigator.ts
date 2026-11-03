@@ -3,6 +3,7 @@ import type { ClientOptions } from '@anthropic-ai/bedrock-sdk'
 import { APIConnectionError, APIError, APIUserAbortError } from '@anthropic-ai/sdk'
 import type { Anthropic } from '@anthropic-ai/sdk'
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod'
+import { AGENT_MODEL_BETAS, AGENT_THINKING_TOKENS } from '@hold/domain'
 import { investigationSchema, OPS_MODEL, OPS_PROMPT } from './investigator.ts'
 import type { Investigation, Investigator, InvestigationRequest } from './investigator.ts'
 
@@ -34,11 +35,12 @@ export function createBedrockInvestigator(options: Pick<ClientOptions, 'awsRegio
         for (let turn = 0; turn <= limits.toolCalls + 1; turn += 1) {
           const response = await client.beta.messages.create({
             model: OPS_MODEL,
+            betas: AGENT_MODEL_BETAS,
             max_tokens: 4000,
             system: OPS_PROMPT,
             messages,
             ...(definitions.length === 0 ? {} : { tools: definitions, tool_choice: { type: 'auto' as const } }),
-            thinking: { type: 'adaptive' },
+            thinking: { type: 'enabled', budget_tokens: AGENT_THINKING_TOKENS },
             output_config: { effort: 'medium', format: betaZodOutputFormat(investigationSchema) },
           }, { signal: limits.signal })
           inputTokens += response.usage.input_tokens

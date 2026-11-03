@@ -1,6 +1,7 @@
 import { AnthropicBedrock } from '@anthropic-ai/bedrock-sdk'
 import type { ClientOptions } from '@anthropic-ai/bedrock-sdk'
 import { APIConnectionError, APIError, APIUserAbortError } from '@anthropic-ai/sdk'
+import { AGENT_MODEL_BETAS } from '@hold/domain'
 import { z } from 'zod'
 import { INSIGHTS_MODEL } from './insights-model.ts'
 import type { InsightsModel } from './insights-model.ts'
@@ -33,6 +34,7 @@ export function createBedrockInsightsModel(options: Pick<ClientOptions, 'awsRegi
         const response = await client.beta.messages.create(
           {
             model: INSIGHTS_MODEL,
+            betas: AGENT_MODEL_BETAS,
             max_tokens: request.maxTokens,
             system: request.system,
             messages: request.messages.map((message) => ({ role: message.role, content: [...message.content] })),

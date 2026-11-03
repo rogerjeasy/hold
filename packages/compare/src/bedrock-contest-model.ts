@@ -2,7 +2,7 @@ import { AnthropicBedrock } from '@anthropic-ai/bedrock-sdk'
 import type { ClientOptions } from '@anthropic-ai/bedrock-sdk'
 import { APIConnectionError, APIError, APIUserAbortError } from '@anthropic-ai/sdk'
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod'
-import { CONTEST_SUMMARY_LIMITS } from '@hold/domain'
+import { AGENT_MODEL_BETAS, CONTEST_SUMMARY_LIMITS } from '@hold/domain'
 import { CONTEST_MODEL, CONTEST_PROMPT, contestSummarySchema } from './contest-model.ts'
 import type { ContestModel } from './contest-model.ts'
 
@@ -15,6 +15,7 @@ export function createBedrockContestModel(options: Pick<ClientOptions, 'awsRegio
       try {
         const response = await client.beta.messages.create({
           model: CONTEST_MODEL,
+          betas: AGENT_MODEL_BETAS,
           max_tokens: CONTEST_SUMMARY_LIMITS.maxTokens,
           output_config: { effort: 'medium', format: betaZodOutputFormat(contestSummarySchema) },
           system: CONTEST_PROMPT,

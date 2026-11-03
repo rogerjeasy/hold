@@ -326,7 +326,7 @@ For the hackathon, all of this runs in the PayPal sandbox with test money.
 
 ## 8. What AI does in Hold, and what it does not
 
-**The model.** Claude Opus 4.6 on Amazon Bedrock does every AI step: comparing photographs and taking an independent second look, writing a contested claim's summary, sorting a renter's incident report, the operations agent's overnight checks, the hosted assistant that books through Hold's MCP server, and the two advocates. Plain code does the rest. OpenCV aligns photographs and finds what changed before the model is asked, and checks photo quality on the phone. Amazon Rekognition finds faces so they can be blurred.
+**The model.** Claude on Amazon Bedrock does every AI step: Opus 4.6 compares photographs and takes an independent second look; Opus 4.5, whose daily allowance in the account is about seven times larger, writes a contested claim's summary, sorting a renter's incident report, the operations agent's overnight checks, the hosted assistant that books through Hold's MCP server, and the two advocates. Plain code does the rest. OpenCV aligns photographs and finds what changed before the model is asked, and checks photo quality on the phone. Amazon Rekognition finds faces so they can be blurred.
 
 **AI does the work that needs perception and language:**
 

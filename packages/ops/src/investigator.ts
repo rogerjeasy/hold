@@ -1,10 +1,10 @@
-import { PROPOSAL_KINDS } from '@hold/domain'
+import { AGENT_MODEL_PROFILE, PROPOSAL_KINDS } from '@hold/domain'
 import type { DetectorKind, OwnerRule, ProposalKind } from '@hold/domain'
 import { z } from 'zod'
 import type { PayPalTool } from './paypal-reader.ts'
 
-// Opus 4.6 through its US inference profile until AWS lifts the account's zero quota for Opus 5.5 (tech-stack.md section 16).
-export const OPS_MODEL = 'us.anthropic.claude-opus-4-6-v1'
+// Opus 4.5, as every agent runs: its daily token limit is the larger (packages/domain claude-models.ts).
+export const OPS_MODEL = AGENT_MODEL_PROFILE
 export const OPS_PROMPT_VERSION = 'ops-1'
 
 // A whole run's ceilings (extensions.md section 6.7). An exception left when one is reached goes to the queue with a

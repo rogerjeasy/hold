@@ -1,3 +1,4 @@
+import { AGENT_MODEL_PROFILE, COMPARISON_MODEL_PROFILE } from '@hold/domain'
 // The one place that says where Hold runs and what its resources are called. Hold shares an AWS account with
 // other projects (Wick, CareCircle), so every name starts with this prefix, every resource carries the project tag,
 // and nothing here refers to another project's resources.
@@ -5,15 +6,16 @@
 export const PREFIX = 'hold'
 export const ACCOUNT = '707938860881'
 export const REGION = 'us-east-1'
-// Claude Opus 4.6 through its US inference profile, while AWS holds this account's Opus 5.5 quota at zero
-// (tech-stack.md section 16). The profile may send a call to any of these regions, so a role needs the model in each.
-const CLAUDE_PROFILE = 'us.anthropic.claude-opus-4-6-v1'
+// The two Claude models Hold calls, each through its US inference profile (packages/domain claude-models.ts): Opus 4.6
+// for the comparison, Opus 4.5 for every agent. A profile may send a call to any of these regions, so a role needs the
+// model in each. The model's own name is the profile's without its "us." prefix.
+const CLAUDE_PROFILES = [COMPARISON_MODEL_PROFILE, AGENT_MODEL_PROFILE] as const
 const CLAUDE_PROFILE_REGIONS = ['us-east-1', 'us-east-2', 'us-west-2'] as const
 export const CLAUDE_INVOKE_ACTIONS = ['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream']
-export const CLAUDE_INVOKE_RESOURCES = [
-  `arn:aws:bedrock:${REGION}:${ACCOUNT}:inference-profile/${CLAUDE_PROFILE}`,
-  ...CLAUDE_PROFILE_REGIONS.map((region) => `arn:aws:bedrock:${region}::foundation-model/anthropic.claude-opus-4-6-v1`),
-]
+export const CLAUDE_INVOKE_RESOURCES = CLAUDE_PROFILES.flatMap((profile) => [
+  `arn:aws:bedrock:${REGION}:${ACCOUNT}:inference-profile/${profile}`,
+  ...CLAUDE_PROFILE_REGIONS.map((region) => `arn:aws:bedrock:${region}::foundation-model/${profile.slice('us.'.length)}`),
+])
 
 export const TAGS: Readonly<Record<string, string>> = {
   project: PREFIX,

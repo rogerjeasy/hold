@@ -21,8 +21,9 @@ describe('the advocate model adapter', () => {
     const content = [{ type: 'thinking', thinking: 'Read the lines first.', signature: 'sig' }, { type: 'tool_use', id: 'toolu_1', name: 'get_claim_lines', input: {} }]
     const model = recorded({ content, stop_reason: 'tool_use' }, seen, urls)
     expect(await model.next(request, signal())).toEqual({ kind: 'calls', calls: [{ id: 'toolu_1', name: 'get_claim_lines', input: {} }], raw: content, model: 'claude-opus-4-6', inputTokens: 900, outputTokens: 120 })
-    expect(urls[0]).toContain('/model/us.anthropic.claude-opus-4-6-v1/invoke')
-    expect(seen[0]).toMatchObject({ thinking: { type: 'adaptive' }, tool_choice: { type: 'auto' }, output_config: { effort: 'medium' }, system: request.system, messages: [{ role: 'user', content: [{ type: 'text', text: 'It is your move.' }] }] })
+    // Opus 4.5, whose day is larger: effort under its beta, and a fixed thinking budget, since it has no adaptive thinking.
+    expect(urls[0]).toContain('/model/us.anthropic.claude-opus-4-5-20251101-v1')
+    expect(seen[0]).toMatchObject({ anthropic_beta: ['effort-2025-11-24'], thinking: { type: 'enabled', budget_tokens: 2048 }, tool_choice: { type: 'auto' }, output_config: { effort: 'medium' }, system: request.system, messages: [{ role: 'user', content: [{ type: 'text', text: 'It is your move.' }] }] })
     // Strict mode costs Opus 4.6 on Bedrock many seconds a move to compile; the referee checks every argument anyway.
     const tools = (seen[0] as { readonly tools: readonly { readonly name: string; readonly strict?: boolean; readonly input_schema: { readonly additionalProperties: boolean } }[] }).tools
     expect(tools.map((tool) => [tool.name, tool.strict ?? false, tool.input_schema.additionalProperties])).toEqual(

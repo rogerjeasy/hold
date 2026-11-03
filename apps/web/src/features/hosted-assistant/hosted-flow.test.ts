@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { auditLog, inShop, itemCatalog, openDemoSession, registerOwner, retireDemoSession, takeRateToken } from '@hold/db'
-import { utcDay } from '@hold/domain'
+import { hostedQuestionsPerDay, utcDay } from '@hold/domain'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 
 process.env['HOLD_ENVIRONMENT'] = 'test'
@@ -133,7 +133,7 @@ describe('the hosted assistant’s page', () => {
   it('says plainly once the day’s questions from every network are spent', async () => {
     forwarded.value = '198.51.100.201'
     const { database } = await getServices()
-    expect(HOSTED_QUESTION_LIMITS.perDay).toEqual({ name: 'hosted-assistant-day', max: 15, windowSeconds: 24 * 60 * 60 })
+    expect(HOSTED_QUESTION_LIMITS.perDay).toEqual({ name: 'hosted-assistant-day', max: hostedQuestionsPerDay(30_000), windowSeconds: 24 * 60 * 60 })
     for (let index = 0; index < HOSTED_QUESTION_LIMITS.perDay.max; index += 1) await takeRateToken(database, HOSTED_QUESTION_LIMITS.perDay, utcDay(new Date()))
 
     expect(await ask([], 'Book me an e-bike.')).toEqual({ ok: false, failure: 'daily_cap' })

@@ -2,7 +2,7 @@ import { AnthropicBedrock } from '@anthropic-ai/bedrock-sdk'
 import type { ClientOptions } from '@anthropic-ai/bedrock-sdk'
 import { APIConnectionError, APIError, APIUserAbortError } from '@anthropic-ai/sdk'
 import { betaZodOutputFormat } from '@anthropic-ai/sdk/helpers/beta/zod'
-import { INCIDENT_LIMITS } from '@hold/domain'
+import { AGENT_MODEL_BETAS, INCIDENT_LIMITS } from '@hold/domain'
 import { INCIDENT_MODEL, INCIDENT_PROMPT, incidentSortSchema } from './incident-model.ts'
 import type { IncidentModel } from './incident-model.ts'
 
@@ -15,6 +15,7 @@ export function createBedrockIncidentModel(options: Pick<ClientOptions, 'awsRegi
       try {
         const response = await client.beta.messages.create({
           model: INCIDENT_MODEL,
+          betas: AGENT_MODEL_BETAS,
           max_tokens: INCIDENT_LIMITS.maxTokens,
           output_config: { effort: 'medium', format: betaZodOutputFormat(incidentSortSchema) },
           system: INCIDENT_PROMPT,

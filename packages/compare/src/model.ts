@@ -1,4 +1,4 @@
-import { INSPECTION_LIMITS } from '@hold/domain'
+import { COMPARISON_MODEL_PROFILE, INSPECTION_LIMITS } from '@hold/domain'
 import { z } from 'zod'
 
 const fraction = z.number().min(0).max(1)
@@ -24,8 +24,8 @@ export type LookReply = { readonly kind: 'result'; readonly data: unknown; reado
 export type ComparisonModel = { look(request: LookRequest, signal: AbortSignal): Promise<LookReply> }
 export type ModelFinding = z.infer<typeof lookSchema>['findings'][number]
 
-// Opus 4.6 through its US inference profile until AWS lifts the account's zero quota for Opus 5.5 (tech-stack.md section 16).
-export const COMPARISON_MODEL = 'us.anthropic.claude-opus-4-6-v1'
+// Opus 4.6, which reads photographs best (packages/domain claude-models.ts).
+export const COMPARISON_MODEL = COMPARISON_MODEL_PROFILE
 // inspection-2: the second look's crops keep a tenth of the photograph around the finding (pipeline.ts).
 // inspection-3: the first look accounts for every candidate area, by a finding over it or a dismissal with its reason.
 export const PROMPT_VERSION = 'inspection-3'

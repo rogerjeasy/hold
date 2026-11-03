@@ -29,8 +29,8 @@ describe('the operations investigator adapter', () => {
     const result = await investigator.investigate(request, tools(calls), { toolCalls: 6, signal: new AbortController().signal })
     expect(result).toEqual({ kind: 'result', data: ANSWER, model: 'claude-opus-4-6', inputTokens: 400, outputTokens: 80 })
     expect(calls).toEqual(['get_order {"id":"HOLD-1"}'])
-    expect(urls[0]).toContain('/model/us.anthropic.claude-opus-4-6-v1/invoke')
-    expect(sent[0]).toMatchObject({ thinking: { type: 'adaptive' }, tool_choice: { type: 'auto' }, output_config: { effort: 'medium', format: { type: 'json_schema' } }, tools: [{ name: 'get_order' }] })
+    expect(urls[0]).toContain('/model/us.anthropic.claude-opus-4-5-20251101-v1')
+    expect(sent[0]).toMatchObject({ anthropic_beta: ['effort-2025-11-24'], thinking: { type: 'enabled', budget_tokens: 2048 }, tool_choice: { type: 'auto' }, output_config: { effort: 'medium', format: { type: 'json_schema' } }, tools: [{ name: 'get_order' }] })
     expect(JSON.stringify(sent[1]?.messages.at(-1)?.content)).toContain('tool_result')
   })
 

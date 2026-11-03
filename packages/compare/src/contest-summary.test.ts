@@ -1,5 +1,6 @@
 import type { ContestRecord } from '@hold/db'
 import { describe, expect, it } from 'vitest'
+import { createBedrockContestModel } from './bedrock-contest-model.ts'
 import { CONTEST_PROMPT_VERSION } from './contest-model.ts'
 import type { ContestModel } from './contest-model.ts'
 import { createSimulatedContestModel, summarizeContest } from './contest-summary.ts'
@@ -58,5 +59,23 @@ describe('writing a neutral summary of a contest', () => {
     const stored = await summarizeContest(record, createSimulatedContestModel())
     expect(stored).toMatchObject({ outcome: 'answered', simulated: true })
     expect(stored.summary?.forShop.lines.map((line) => line.lineId).sort()).toEqual(['line-light', 'line-scratch'])
+  })
+})
+
+describe('the Bedrock adapter for contest summaries', () => {
+  it('asks Opus 4.5 for structured output with effort under its beta, and offers no tools', async () => {
+    let sent: unknown
+    let url = ''
+    const answer = { forShop: 'shop', forRenter: 'renter' }
+    const model = createBedrockContestModel({ awsRegion: 'us-east-1', skipAuth: true, fetch: (to, options) => {
+      url = (to instanceof Request ? to.url : to.toString())
+      if (typeof options?.body !== 'string') throw new Error('Expected a JSON request body')
+      sent = JSON.parse(options.body) as unknown
+      return Promise.resolve(new Response(JSON.stringify({ id: 'msg_recorded', type: 'message', role: 'assistant', model: 'claude-opus-4-5-20251101', content: [{ type: 'text', text: JSON.stringify(answer) }], stop_reason: 'end_turn', stop_sequence: null, usage: { input_tokens: 300, output_tokens: 60 } }), { headers: { 'content-type': 'application/json' } }))
+    } })
+    expect(await model.summarize({ quoted: '{}' }, new AbortController().signal)).toEqual({ kind: 'result', data: answer, model: 'claude-opus-4-5-20251101' })
+    expect(url).toContain('/model/us.anthropic.claude-opus-4-5-20251101-v1')
+    expect(sent).toMatchObject({ anthropic_beta: ['effort-2025-11-24'], output_config: { effort: 'medium', format: { type: 'json_schema' } } })
+    expect(sent).not.toHaveProperty('tools')
   })
 })

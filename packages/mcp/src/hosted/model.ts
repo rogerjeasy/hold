@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { AGENT_MODEL_PROFILE } from '@hold/domain'
 
 // The hosted assistant (extensions.md section 8.10): a client of Hold's MCP server that a judge can talk to on a public
 // page. Its model is reached only through this port: Claude on Bedrock when deployed, a scripted stand-in that says it
@@ -31,8 +32,8 @@ export type AssistantModel = {
   reply(request: ModelRequest, signal: AbortSignal): Promise<ModelReply>
 }
 
-// Opus 4.6 through its US inference profile until AWS lifts the account's zero quota for Opus 5.5 (tech-stack.md section 16).
-export const HOSTED_MODEL = 'us.anthropic.claude-opus-4-6-v1'
+// Opus 4.5, as every agent runs: its daily token limit is the larger (packages/domain claude-models.ts).
+export const HOSTED_MODEL = AGENT_MODEL_PROFILE
 export const HOSTED_PROMPT_VERSION = 'hosted-assistant-2'
 
 // The hosted assistant's instructions. Hold's tool results carry no instructions of their own; the shop's words come in

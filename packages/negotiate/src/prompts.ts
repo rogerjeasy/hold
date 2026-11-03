@@ -1,9 +1,10 @@
+import { AGENT_MODEL_PROFILE } from '@hold/domain'
 // The advocates' instructions (extensions.md section 9.11). Both are published here, in the open repository, with the
 // referee and its tests. The renter's advocate's instructions are the ones a renter may want to read before trusting
 // it: they say whose side it is on and what it may never do.
 
-// Opus 4.6 through its US inference profile until AWS lifts the account's zero quota for Opus 5.5 (tech-stack.md section 16).
-export const ADVOCATE_MODEL = 'us.anthropic.claude-opus-4-6-v1'
+// Opus 4.5, as every agent runs: its daily token limit is the larger (packages/domain claude-models.ts).
+export const ADVOCATE_MODEL = AGENT_MODEL_PROFILE
 // advocate-2: the advocate reads the evidence through read-only tools before its one move.
 export const ADVOCATE_PROMPT_VERSION = 'advocate-2'
 

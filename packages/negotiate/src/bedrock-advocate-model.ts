@@ -2,6 +2,7 @@ import { AnthropicBedrock } from '@anthropic-ai/bedrock-sdk'
 import type { ClientOptions } from '@anthropic-ai/bedrock-sdk'
 import { APIConnectionError, APIError, APIUserAbortError } from '@anthropic-ai/sdk'
 import type { Anthropic } from '@anthropic-ai/sdk'
+import { AGENT_MODEL_BETAS, AGENT_THINKING_TOKENS } from '@hold/domain'
 import { ADVOCATE_TOOLS } from './advocate-model.ts'
 import type { AdvocateMessage, AdvocateModel, ToolResultPart } from './advocate-model.ts'
 import { ADVOCATE_MODEL } from './prompts.ts'
@@ -34,8 +35,9 @@ export function createBedrockAdvocateModel(options: Pick<ClientOptions, 'awsRegi
       try {
         const response = await client.beta.messages.create({
           model: ADVOCATE_MODEL,
+          betas: AGENT_MODEL_BETAS,
           max_tokens: 4096,
-          thinking: { type: 'adaptive' },
+          thinking: { type: 'enabled', budget_tokens: AGENT_THINKING_TOKENS },
           output_config: { effort: 'medium' },
           tools: ADVOCATE_TOOLS.map((tool) => ({ ...tool, input_schema: { ...tool.input_schema } })),
           tool_choice: { type: 'auto' },

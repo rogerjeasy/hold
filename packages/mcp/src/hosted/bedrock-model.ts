@@ -2,6 +2,7 @@ import { AnthropicBedrock } from '@anthropic-ai/bedrock-sdk'
 import type { ClientOptions } from '@anthropic-ai/bedrock-sdk'
 import { APIConnectionError, APIError, APIUserAbortError } from '@anthropic-ai/sdk'
 import { transformJSONSchema } from '@anthropic-ai/sdk/lib/transform-json-schema'
+import { AGENT_MODEL_BETAS } from '@hold/domain'
 import { HOSTED_MODEL } from './model.ts'
 import type { AssistantModel, Block } from './model.ts'
 
@@ -18,6 +19,7 @@ export function createBedrockAssistantModel(options: Pick<ClientOptions, 'awsReg
         const response = await client.beta.messages.create(
           {
             model: HOSTED_MODEL,
+            betas: AGENT_MODEL_BETAS,
             max_tokens: request.maxTokens,
             system: request.system,
             messages: request.messages.map((message) => ({ role: message.role, content: [...message.content] })),

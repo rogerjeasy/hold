@@ -1,9 +1,11 @@
 import type { InsightsReply, InsightsRequest } from './insights-protocol.ts'
+import { AGENT_MODEL_PROFILE } from '@hold/domain'
 
 // The insights agent's model (extensions.md section 12.5): Claude Opus 4.6 on Bedrock through judging (AGENTS.md
 // section 8), reached only through this port. In the test environment a script answers, and says it is simulated.
 
-export const INSIGHTS_MODEL = 'us.anthropic.claude-opus-4-6-v1'
+// Opus 4.5, as every agent runs: its daily token limit is the larger (packages/domain claude-models.ts).
+export const INSIGHTS_MODEL = AGENT_MODEL_PROFILE
 export const INSIGHTS_PROMPT_VERSION = 'insights-3'
 // One turn's ceiling. AG Studio's loop asks for many short turns: reading the schema, a query, placing a widget.
 export const INSIGHTS_MAX_TOKENS = 4096

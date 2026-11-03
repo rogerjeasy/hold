@@ -11,7 +11,7 @@ vi.setConfig({ testTimeout: 60_000 })
 const actions = await import('./actions')
 const { getServices } = await import('@/server/services')
 const { form, signIn } = await import('@/test/shop-session')
-const { sampleAdvocateShares, sampleAdvocatesAllowance } = await import('./limits')
+const { SAMPLE_ADVOCATE_LIMITS, sampleAdvocateShares, sampleAdvocatesAllowance } = await import('./limits')
 const info = vi.spyOn(console, 'info').mockImplementation(() => undefined)
 
 // A judge watches the two advocates argue the demo's sample claim that waits for a reply (extensions.md section 9).
@@ -86,7 +86,7 @@ describe('the advocates on the demo’s sample claim', () => {
   it('says before anyone asks how many live runs are left, and which share runs out first', async () => {
     await openSample('sample-allowance')
     // One run went to the first demo from this network; this demo still has its own.
-    expect(await sampleAdvocatesAllowance(shopId)).toEqual({ left: 1, refusal: null })
+    expect(await sampleAdvocatesAllowance(shopId)).toEqual({ left: Math.min(SAMPLE_ADVOCATE_LIMITS.perShop.max, SAMPLE_ADVOCATE_LIMITS.perNetwork.max - 1), refusal: null })
   })
 
   it('stops once the day’s sample runs are spent, says so on reload, and a refused attempt spends nothing', async () => {
@@ -98,7 +98,7 @@ describe('the advocates on the demo’s sample claim', () => {
     // The shop's and the network's shares taken before the day refused were given back with the transaction.
     const { database } = await getServices()
     const network = sampleAdvocateShares(shopId, 'unknown', new Date()).find((each) => each.share === 'network')
-    expect(network === undefined ? 0 : await rateTokensLeft(database, network.limit, network.subject)).toBe(1)
+    expect(network === undefined ? 0 : await rateTokensLeft(database, network.limit, network.subject)).toBe(SAMPLE_ADVOCATE_LIMITS.perNetwork.max - 1)
     expect(info).toHaveBeenCalledWith(JSON.stringify({ event: 'sample_advocates_refused', share: 'day', shopId }))
   })
 

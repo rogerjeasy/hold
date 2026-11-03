@@ -57,8 +57,8 @@ describe('the Bedrock adapter for sorting', () => {
       return Promise.resolve(new Response(JSON.stringify({ id: 'msg_recorded', type: 'message', role: 'assistant', model: 'claude-opus-4-6', content: [{ type: 'text', text: JSON.stringify(answer) }], stop_reason: 'end_turn', stop_sequence: null, usage: { input_tokens: 300, output_tokens: 60 } }), { headers: { 'content-type': 'application/json' } }))
     } })
     expect(await model.sort({ quoted: '{}' }, new AbortController().signal)).toEqual({ kind: 'result', data: answer, model: 'claude-opus-4-6' })
-    expect(url).toContain('/model/us.anthropic.claude-opus-4-6-v1/invoke')
-    expect(sent).toMatchObject({ max_tokens: 1024, output_config: { effort: 'medium', format: { type: 'json_schema' } } })
+    expect(url).toContain('/model/us.anthropic.claude-opus-4-5-20251101-v1')
+    expect(sent).toMatchObject({ anthropic_beta: ['effort-2025-11-24'], max_tokens: 1024, output_config: { effort: 'medium', format: { type: 'json_schema' } } })
     expect(sent).not.toHaveProperty('tools')
   })
 

@@ -27,8 +27,8 @@ describe('the hosted assistant’s Bedrock adapter', () => {
       },
     })
     expect(await model.reply(request, new AbortController().signal)).toEqual({ kind: 'reply', content: [{ type: 'tool_use', id: 'toolu_1', name: 'quote_rental', input: { shop: 'ribeira-bikes' } }], stopReason: 'tool_use', tokens: 960, model: 'claude-opus-4-6' })
-    expect(url).toContain('/model/us.anthropic.claude-opus-4-6-v1/invoke')
-    expect(sent).toMatchObject({ max_tokens: 1500, tool_choice: { type: 'auto' }, output_config: { effort: 'medium' }, system: 'You are a demonstration assistant.' })
+    expect(url).toContain('/model/us.anthropic.claude-opus-4-5-20251101-v1')
+    expect(sent).toMatchObject({ anthropic_beta: ['effort-2025-11-24'], max_tokens: 1500, tool_choice: { type: 'auto' }, output_config: { effort: 'medium' }, system: 'You are a demonstration assistant.' })
     const [tool] = sent['tools'] as Record<string, unknown>[]
     // Fifteen strict schemas compile past Bedrock's grammar limit for Opus 4.6, so none is strict; Hold's server checks
     // every argument, and constraints a strict schema could not carry are kept as words for the model.

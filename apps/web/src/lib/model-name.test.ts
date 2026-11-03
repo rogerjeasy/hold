@@ -5,6 +5,8 @@ describe('a model\'s name as a person reads it', () => {
   it('names a Claude model by its family and version, whatever inference profile it ran through', () => {
     expect(modelName('us.anthropic.claude-opus-4-6-v1')).toBe('Claude Opus 4.6')
     expect(modelName('anthropic.claude-sonnet-4-5-20250929-v1:0')).toBe('Claude Sonnet 4.5')
+    expect(modelName('us.anthropic.claude-opus-4-5-20251101-v1:0')).toBe('Claude Opus 4.5')
+    expect(modelName('claude-opus-4-5-20251101')).toBe('Claude Opus 4.5')
   })
 
   it('shows any other model as it was stored', () => {
