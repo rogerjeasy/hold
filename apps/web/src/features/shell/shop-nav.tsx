@@ -4,16 +4,17 @@ import { cn } from 'cn'
 import { useTranslations } from 'next-intl'
 import { Link, usePathname } from '@/i18n/navigation'
 import { shopRoutes } from '@/lib/routes'
-import { shopNavGroups } from './shop-nav-items'
+import type { StaffRole } from '@hold/domain'
+import { navGroupsFor } from './shop-nav-items'
 
 // The shop's menu, in the dark band: every page by its name and icon, the current one lit with the accent.
-export function ShopNav({ onNavigate, className }: { onNavigate?: () => void; className?: string }) {
+export function ShopNav({ role, onNavigate, className }: { role: StaffRole; onNavigate?: () => void; className?: string }) {
   const t = useTranslations('shop.nav')
   const pathname = usePathname()
 
   return (
     <nav aria-label={t('label')} className={className}>
-      {shopNavGroups.map((group) => (
+      {navGroupsFor(role).map((group) => (
         <div key={group.label ?? 'work'} className="not-first:mt-6">
           {group.label === null ? null : <p className="label mb-2 px-3 text-[0.6875rem] text-band-muted">{t(group.label)}</p>}
           <ul className="grid gap-0.5">

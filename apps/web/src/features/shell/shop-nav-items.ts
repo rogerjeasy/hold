@@ -1,4 +1,5 @@
 import { BadgeCheck, Banknote, Bike, ChartColumn, CalendarDays, CalendarRange, Gauge, Handshake, Inbox, LayoutDashboard, ListChecks, MapPin, ShieldCheck, Siren, Tag, Users, Wallet } from 'lucide-react'
+import type { StaffRole } from '@hold/domain'
 import type { LucideIcon } from 'lucide-react'
 import { shopRoutes } from '@/lib/routes'
 
@@ -7,7 +8,8 @@ export type ShopNavKey = keyof typeof shopRoutes
 export type ShopNavGroup = {
   // Unnamed for the day's work, named for the settings below it.
   readonly label: 'settings' | null
-  readonly items: readonly { readonly key: ShopNavKey; readonly icon: LucideIcon }[]
+  // A page only some roles may open names them; the page still checks on the server.
+  readonly items: readonly { readonly key: ShopNavKey; readonly icon: LucideIcon; readonly roles?: readonly StaffRole[] }[]
 }
 
 // The shop's pages, in menu order. Holds and claims join the first group, after rentals, as their pages are built.
@@ -21,7 +23,7 @@ export const shopNavGroups: readonly ShopNavGroup[] = [
       { key: 'rentals', icon: CalendarRange },
       { key: 'calendar', icon: CalendarDays },
       { key: 'money', icon: Banknote },
-      { key: 'insights', icon: ChartColumn },
+      { key: 'insights', icon: ChartColumn, roles: ['owner', 'manager'] },
       { key: 'items', icon: Bike },
       { key: 'incidents', icon: Siren },
       { key: 'scorecard', icon: Gauge },
@@ -40,3 +42,8 @@ export const shopNavGroups: readonly ShopNavGroup[] = [
     ],
   },
 ]
+
+// The menu as one person sees it: without the pages their role does not open.
+export function navGroupsFor(role: StaffRole): readonly ShopNavGroup[] {
+  return shopNavGroups.map((group) => ({ ...group, items: group.items.filter((item) => item.roles === undefined || item.roles.includes(role)) }))
+}

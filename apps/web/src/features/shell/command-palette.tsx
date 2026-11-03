@@ -9,7 +9,7 @@ import { Dialog } from 'radix-ui'
 import { useEffect, useId, useRef, useState } from 'react'
 import { Link } from '@/i18n/navigation'
 import { rentalRoutes, shopRoutes } from '@/lib/routes'
-import { shopNavGroups } from './shop-nav-items'
+import { navGroupsFor } from './shop-nav-items'
 
 type Choice = { readonly id: string; readonly group: 'actions' | 'pages'; readonly label: string; readonly href: string; readonly icon: LucideIcon }
 
@@ -44,7 +44,7 @@ export function CommandPalette({ role, className }: { role: StaffRole; className
 
   const choices: Choice[] = [
     ...(role === 'read_only' ? [] : [{ id: 'new-rental', group: 'actions' as const, label: t('newRental'), href: rentalRoutes.new, icon: Plus }]),
-    ...shopNavGroups.flatMap((group) => group.items.map(({ key, icon }) => ({ id: key, group: 'pages' as const, label: nav(key), href: shopRoutes[key], icon }))),
+    ...navGroupsFor(role).flatMap((group) => group.items.map(({ key, icon }) => ({ id: key, group: 'pages' as const, label: nav(key), href: shopRoutes[key], icon }))),
   ]
   const shown = choices.filter((choice) => folded(choice.label).includes(folded(query.trim())))
   const current = shown[Math.min(active, shown.length - 1)]

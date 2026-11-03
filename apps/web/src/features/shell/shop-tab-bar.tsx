@@ -63,6 +63,7 @@ export function ShopTabBar({ person, shop, role, paypalConnected }: ShellProps) 
           <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-3 pt-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
             <ShopSwitcher person={person} shop={shop} role={role} />
             <ShopNav
+              role={role}
               className="flex-1"
               onNavigate={() => {
                 setOpen(false)

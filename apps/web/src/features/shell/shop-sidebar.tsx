@@ -17,7 +17,7 @@ export function ShopSidebar({ person, shop, role, paypalConnected }: ShellProps)
         <Logo />
       </Link>
       <ShopSwitcher person={person} shop={shop} role={role} />
-      <ShopNav className="flex-1" />
+      <ShopNav role={role} className="flex-1" />
       <ShellTools person={person} paypalConnected={paypalConnected} />
     </aside>
   )

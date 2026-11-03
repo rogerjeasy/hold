@@ -15,7 +15,7 @@ const person = {
   ],
 }
 
-function shell(paypalConnected = true, role: 'owner' | 'read_only' = 'owner') {
+function shell(paypalConnected = true, role: 'owner' | 'counter_staff' | 'read_only' = 'owner') {
   return renderWithIntl(
     <ShopShell person={person} shop={{ id: 'shop-1', name: 'Ribeira Bikes' }} role={role} paypalConnected={paypalConnected}>
       <p>The page</p>
@@ -114,5 +114,13 @@ describe('the shop shell', () => {
     shell(true, 'read_only')
     const tabs = screen.getByRole('navigation', { name: 'Quick links' })
     expect(within(tabs).queryByRole('link', { name: 'New rental' })).not.toBeInTheDocument()
+  })
+
+  it('lists Insights only for the owner and managers, who are the only ones it opens for', () => {
+    shell(true, 'counter_staff')
+    const menu = screen.getAllByRole('navigation', { name: 'Shop pages' })[0]
+    if (menu === undefined) throw new Error('No shop menu.')
+    expect(within(menu).queryByRole('link', { name: 'Insights' })).not.toBeInTheDocument()
+    expect(within(menu).getByRole('link', { name: 'Money' })).toBeInTheDocument()
   })
 })
