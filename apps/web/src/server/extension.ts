@@ -65,6 +65,7 @@ export async function startExtensionPayment(link: RenterLink, inLinkShop: InLink
   const created = await paypal.createFeeOrder({
     amount: { cents: extension.amountCents, currency: extension.currency },
     rentalReference: link.rentalId,
+    brandName: view.shopName,
     description: t('orderDescription', { shop: view.shopName, days: extension.extraDays }).slice(0, 127),
     ...back,
     idempotencyKey: `extension-order-${extension.id}`,

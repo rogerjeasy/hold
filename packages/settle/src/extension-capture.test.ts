@@ -37,7 +37,7 @@ async function approvedExtension() {
   const endsAt = (await fixture.inShop((transaction) => rentalDetail(transaction, rentalId, new Date())))?.endsAt ?? new Date()
   const quoted = await fixture.inShop((transaction) => quoteExtension(transaction, rentalId, new Date(endsAt.getTime() + 86_400_000), 'link', new Date()))
   if (!quoted.ok) throw new Error(quoted.problem.kind)
-  const order = await fixture.fake.createFeeOrder({ amount: eur(FEE), rentalReference: rentalId, description: 'One more day', returnUrl: 'https://hold.test/extended', cancelUrl: 'https://hold.test/r', idempotencyKey: `extension-order-${quoted.extensionId}` })
+  const order = await fixture.fake.createFeeOrder({ amount: eur(FEE), rentalReference: rentalId, description: 'One more day', brandName: 'Ribeira Bikes', returnUrl: 'https://hold.test/extended', cancelUrl: 'https://hold.test/r', idempotencyKey: `extension-order-${quoted.extensionId}` })
   if (!order.ok) throw new Error(order.error.kind)
   await fixture.inShop((transaction) => saveExtensionOrder(transaction, quoted.extensionId, order.value.orderId))
   fixture.fake.approveOrder(order.value.orderId)

@@ -40,6 +40,7 @@ export async function startHoldApproval(link: RenterLink, inLinkShop: InLinkShop
     amount: money(holdOrderCents({ ...hold, feeCents: view.feeCents }), hold.currency),
     rentalReference: link.rentalId,
     // What the renter reads in PayPal, in their language. The worker words a replacement the same way.
+    brandName: view.shopName,
     description: hold.strategy === 'combined' && hold.state === 'requested' ? walkInOrderDescription(language, view.shopName) : holdOrderDescription(language, view.shopName),
     ...back,
     idempotencyKey: hold.orderId === null ? `hold-order-${hold.id}` : `hold-order-${hold.id}-after-${hold.orderId}`,

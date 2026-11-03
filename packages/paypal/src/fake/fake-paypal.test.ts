@@ -37,6 +37,7 @@ async function placeHold(amount: Money = DEPOSIT): Promise<Authorization> {
       amount,
       rentalReference: 'rental-1',
       description: 'Refundable hold',
+      brandName: 'Ribeira Bikes',
       returnUrl: 'https://hold.test/approved',
       cancelUrl: 'https://hold.test/cancelled',
       idempotencyKey: key(),
@@ -62,6 +63,7 @@ describe('placing a hold', () => {
         amount: DEPOSIT,
         rentalReference: 'rental-1',
         description: 'Refundable hold',
+        brandName: 'Ribeira Bikes',
         returnUrl: 'https://hold.test/approved',
         cancelUrl: 'https://hold.test/cancelled',
         idempotencyKey: key(),
@@ -86,6 +88,7 @@ describe('placing a hold', () => {
         amount: DEPOSIT,
         rentalReference: 'rental-1',
         description: 'Refundable hold',
+        brandName: 'Ribeira Bikes',
         returnUrl: 'https://hold.test/approved',
         cancelUrl: 'https://hold.test/cancelled',
         idempotencyKey: key(),
@@ -106,6 +109,7 @@ describe('placing a hold', () => {
         amount: DEPOSIT,
         rentalReference: 'rental-1',
         description: 'Refundable hold',
+        brandName: 'Ribeira Bikes',
         returnUrl: 'https://hold.test/approved',
         cancelUrl: 'https://hold.test/cancelled',
         idempotencyKey: key(),
@@ -323,7 +327,7 @@ describe('releasing a hold', () => {
 describe('a rental fee in the fake', () => {
   const FEE: Money = { cents: 120_00, currency: 'EUR' }
   const order = (fake: FakePayPal) =>
-    fake.createFeeOrder({ amount: FEE, rentalReference: 'rental-1', description: 'Rental fee', returnUrl: 'https://hold.test/paid', cancelUrl: 'https://hold.test/r', idempotencyKey: key() })
+    fake.createFeeOrder({ amount: FEE, rentalReference: 'rental-1', description: 'Rental fee', brandName: 'Ribeira Bikes', returnUrl: 'https://hold.test/paid', cancelUrl: 'https://hold.test/r', idempotencyKey: key() })
 
   it('cannot be captured before the renter approves it', async () => {
     const created = valueOf(await order(paypal))
@@ -378,7 +382,7 @@ describe('a rental fee in the fake', () => {
 
   it('remembers where the order sends the renter back, and what it is for', async () => {
     const created = valueOf(await order(paypal))
-    expect(paypal.orderLinks(created.orderId)).toEqual({ returnUrl: 'https://hold.test/paid', cancelUrl: 'https://hold.test/r', amount: FEE, description: 'Rental fee', underReview: false })
+    expect(paypal.orderLinks(created.orderId)).toEqual({ returnUrl: 'https://hold.test/paid', cancelUrl: 'https://hold.test/r', amount: FEE, description: 'Rental fee', brandName: 'Ribeira Bikes', underReview: false })
     expect(paypal.orderLinks('FAKE-ORDER-9999')).toBeUndefined()
   })
 

@@ -9,7 +9,7 @@ const { getServices } = await import('@/server/services')
 
 async function feeOrder(): Promise<string> {
   const paypal = (await getServices()).simulatedPayPal
-  const order = await paypal?.createFeeOrder({ amount: { cents: 80_00, currency: 'EUR' }, rentalReference: 'rental-1', description: 'Rental fee', returnUrl: 'http://localhost/r/token/paid', cancelUrl: 'http://localhost/r/token', idempotencyKey: crypto.randomUUID() })
+  const order = await paypal?.createFeeOrder({ amount: { cents: 80_00, currency: 'EUR' }, rentalReference: 'rental-1', description: 'Rental fee', brandName: 'Ribeira Bikes', returnUrl: 'http://localhost/r/token/paid', cancelUrl: 'http://localhost/r/token', idempotencyKey: crypto.randomUUID() })
   if (order === undefined || !order.ok) throw new Error('No order.')
   return order.value.orderId
 }

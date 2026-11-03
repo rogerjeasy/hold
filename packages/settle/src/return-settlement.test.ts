@@ -374,7 +374,7 @@ it('fences settlement against a late replacement approval and waits for both its
   const rental = await acceptedClaim(async (rentalId) => {
     const [hold] = await act((transaction) => transaction.select().from(holds).where(eq(holds.rentalId, rentalId)))
     if (hold?.currentAuthorizationId == null) throw new Error('No hold')
-    const order = await fixture.fake.createHoldOrder({ amount: { cents: 30000, currency: 'EUR' }, rentalReference: rentalId, description: 'Replacement', returnUrl: 'https://hold.test/return', cancelUrl: 'https://hold.test/cancel', idempotencyKey: `replacement-${rentalId}` })
+    const order = await fixture.fake.createHoldOrder({ amount: { cents: 30000, currency: 'EUR' }, rentalReference: rentalId, description: 'Replacement', brandName: 'Ribeira Bikes', returnUrl: 'https://hold.test/return', cancelUrl: 'https://hold.test/cancel', idempotencyKey: `replacement-${rentalId}` })
     if (!order.ok) throw new Error(order.error.kind)
     orderId = order.value.orderId
     fixture.fake.approveOrder(orderId)

@@ -18,7 +18,7 @@ export function createRenterAsk(database: Database): RenterAsk {
         await issueRenterLink(transaction, shopId, rentalId, issued, BOOKING_LINK_SCOPES)
         return { token: issued.token, language: rental.language, shopName: shop.name }
       })
-      return { url: `${await renterUrl(link.token, link.language)}/pay`, orderDescription: holdOrderDescription(link.language, link.shopName) }
+      return { url: `${await renterUrl(link.token, link.language)}/pay`, orderDescription: holdOrderDescription(link.language, link.shopName), shopName: link.shopName }
     },
   }
 }

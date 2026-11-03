@@ -31,7 +31,7 @@ export type FakePayPal = PayPalHolds & {
   // Stands in for the renter's funding source refusing the hold when it is authorized.
   declineFunding(orderId: string): void
   // Where an order sends the renter back, and what it is for: what a simulated approval page needs.
-  orderLinks(orderId: string): { readonly returnUrl: string; readonly cancelUrl: string; readonly amount: Money; readonly description: string; readonly underReview: boolean } | undefined
+  orderLinks(orderId: string): { readonly returnUrl: string; readonly cancelUrl: string; readonly amount: Money; readonly description: string; readonly brandName: string; readonly underReview: boolean } | undefined
   // Stands in for a renter opening a dispute with PayPal.
   openDispute(dispute: OpenDispute): void
   // The evidence the shop gave on each dispute, in order: its notes and the name of the document it attached.
@@ -54,6 +54,7 @@ type FakeOrder = {
   readonly returnUrl: string
   readonly cancelUrl: string
   readonly description: string
+  readonly brandName: string
   // Set when a fee order is captured.
   payment: FeePayment | undefined
   // The renter will dispute the payment once it is captured.
@@ -187,7 +188,7 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
 
     createHoldOrder(input) {
       const order = once('create', input.idempotencyKey, () => {
-        const created: FakeOrder = { orderId: nextId('FAKE-ORDER'), amount: input.amount, status: 'awaiting_approval', returnUrl: input.returnUrl, cancelUrl: input.cancelUrl, description: input.description, payment: undefined, thenDispute: false, capture: 'normal' }
+        const created: FakeOrder = { orderId: nextId('FAKE-ORDER'), amount: input.amount, status: 'awaiting_approval', returnUrl: input.returnUrl, cancelUrl: input.cancelUrl, description: input.description, brandName: input.brandName, payment: undefined, thenDispute: false, capture: 'normal' }
         orders.set(created.orderId, created)
         return created
       })
@@ -207,12 +208,12 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
 
     orderLinks(orderId) {
       const order = orders.get(orderId)
-      return order === undefined ? undefined : { returnUrl: order.returnUrl, cancelUrl: order.cancelUrl, amount: order.amount, description: order.description, underReview: order.payment?.status === 'pending' }
+      return order === undefined ? undefined : { returnUrl: order.returnUrl, cancelUrl: order.cancelUrl, amount: order.amount, description: order.description, brandName: order.brandName, underReview: order.payment?.status === 'pending' }
     },
 
     createFeeOrder(input) {
       const order = once('create', input.idempotencyKey, () => {
-        const created: FakeOrder = { orderId: nextId('FAKE-ORDER'), amount: input.amount, status: 'awaiting_approval', returnUrl: input.returnUrl, cancelUrl: input.cancelUrl, description: input.description, payment: undefined, thenDispute: false, capture: 'normal' }
+        const created: FakeOrder = { orderId: nextId('FAKE-ORDER'), amount: input.amount, status: 'awaiting_approval', returnUrl: input.returnUrl, cancelUrl: input.cancelUrl, description: input.description, brandName: input.brandName, payment: undefined, thenDispute: false, capture: 'normal' }
         orders.set(created.orderId, created)
         return created
       })

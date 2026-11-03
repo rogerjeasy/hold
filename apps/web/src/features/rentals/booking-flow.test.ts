@@ -167,6 +167,8 @@ describe('the renter’s link', () => {
     expect(simulatedPayPal?.orderLinks(orderId)?.amount).toEqual({ cents: 3 * 40_00, currency: 'EUR' })
     // What the renter reads in PayPal names what they rent, not a bare count.
     expect(simulatedPayPal?.orderLinks(orderId)?.description).toContain('1 × City e-bike')
+    // PayPal's page names the shop, not the PayPal account's business name.
+    expect(simulatedPayPal?.orderLinks(orderId)?.brandName).toBe('Porto Rentals')
 
     // Before the renter approves, nothing is captured.
     expect(await renter.confirmFee(null, form({ token, orderId, locale: 'en' }))).toEqual({ ok: false, failure: 'refused', reason: 'not_approved' })

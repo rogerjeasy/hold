@@ -24,7 +24,7 @@ const dependencies = (): SettleDependencies => ({
   },
   scheduler,
   notifier: { tell: (notice) => tell(notice) },
-  renterAsk: { approval: (_shopId, rentalId) => Promise.resolve({ url: `https://hold.test/r/link-${rentalId}/pay`, orderDescription: 'Refundable hold' }) },
+  renterAsk: { approval: (_shopId, rentalId) => Promise.resolve({ url: `https://hold.test/r/link-${rentalId}/pay`, orderDescription: 'Refundable hold', shopName: 'Ribeira Bikes' }) },
   now: () => clock,
 })
 
@@ -102,7 +102,7 @@ describe('replacing a hold before it ends', () => {
     const hold = await fixture.inShop((transaction) => rentalHold(transaction, rentalId))
     expect(hold?.state).toBe('placed')
     expect(hold?.orderId).toMatch(/^FAKE-ORDER-/)
-    expect(fixture.fake.orderLinks(hold?.orderId ?? '')).toMatchObject({ amount: { cents: 300_00, currency: 'EUR' }, returnUrl: `https://hold.test/r/link-${rentalId}/pay`, description: 'Refundable hold' })
+    expect(fixture.fake.orderLinks(hold?.orderId ?? '')).toMatchObject({ amount: { cents: 300_00, currency: 'EUR' }, returnUrl: `https://hold.test/r/link-${rentalId}/pay`, description: 'Refundable hold', brandName: 'Ribeira Bikes' })
     expect(notices).toEqual([{ kind: 'hold_replacement', shopId: fixture.shopId, rentalId, approveUrl: `https://hold.test/r/link-${rentalId}/pay`, holdEndsAt: expiry.at }])
   })
 

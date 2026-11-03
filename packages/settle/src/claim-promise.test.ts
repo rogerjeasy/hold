@@ -22,7 +22,7 @@ const dependencies = (): SettleDependencies => ({
   },
   scheduler,
   notifier: { tell: (notice) => Promise.resolve(void notices.push(notice)) },
-  renterAsk: { approval: () => Promise.resolve({ url: 'https://hold.test/r/link/pay', orderDescription: 'Refundable hold' }) },
+  renterAsk: { approval: () => Promise.resolve({ url: 'https://hold.test/r/link/pay', orderDescription: 'Refundable hold', shopName: 'Ribeira Bikes' }) },
   now: () => now,
 })
 const act = <Result>(work: Parameters<typeof fixture.inShop<Result>>[0]) => inShop(fixture.database, { role: 'hold_app', shopId: fixture.shopId, userId }, work)

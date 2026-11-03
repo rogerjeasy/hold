@@ -26,6 +26,7 @@ describe('asking a renter for a new hold, from the worker', () => {
     const asked = await createWorkerRenterAsk({ database, publicUrl: 'https://hold.test', linkKey: () => Promise.resolve(LINK_SECRET) }).approval(owner.shopId, rentalId)
 
     expect(asked.url).toMatch(/^https:\/\/hold\.test\/de\/r\/[A-Za-z0-9_-]{65}\/pay$/)
+    expect(asked.shopName).toBe('Ribeira Bikes')
     expect(asked.orderDescription).toBe('Rückzahlbare Reservierung für Ihre Miete bei Ribeira Bikes. Keine Abbuchung.')
     const token = asked.url.split('/r/')[1]?.replace('/pay', '') ?? ''
     const read = readRenterToken(renterLinkKey(LINK_SECRET), token)

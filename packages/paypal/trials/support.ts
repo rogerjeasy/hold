@@ -141,6 +141,7 @@ export function startTrial(name: string): Trial {
             amount: request.amount,
             rentalReference: `trial-${name}-${randomUUID()}`,
             description: `Hold trial. ${request.label}`,
+            brandName: 'Hold trial',
             returnUrl: RETURN_URL,
             cancelUrl: CANCEL_URL,
             idempotencyKey: randomUUID(),

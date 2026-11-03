@@ -77,6 +77,8 @@ export type CreateHoldOrderInput = {
   // Hold's own identifier for the rental, carried on the order so events can be matched back.
   readonly rentalReference: string
   readonly description: string
+  // The shop's name, which PayPal shows on its own pages in place of the account's business name.
+  readonly brandName: string
   readonly returnUrl: string
   readonly cancelUrl: string
   readonly idempotencyKey: string

@@ -73,7 +73,7 @@ export async function createSettleFixture(now: () => Date = () => new Date()): P
       ),
     )
     if (!booked.ok) throw new Error(booked.reason)
-    const order = await fake.createFeeOrder({ amount: eur(FEE), rentalReference: booked.rentalId, description: 'Fee', returnUrl: 'https://hold.test/paid', cancelUrl: 'https://hold.test/r', idempotencyKey: `fee-order-${booked.rentalId}` })
+    const order = await fake.createFeeOrder({ amount: eur(FEE), rentalReference: booked.rentalId, description: 'Fee', brandName: 'Ribeira Bikes', returnUrl: 'https://hold.test/paid', cancelUrl: 'https://hold.test/r', idempotencyKey: `fee-order-${booked.rentalId}` })
     if (!order.ok) throw new Error(order.error.kind)
     await inThisShop((transaction) => saveFeeOrder(transaction, booked.rentalId, order.value.orderId))
     if (approved) fake.approveOrder(order.value.orderId)
@@ -92,7 +92,7 @@ export async function createSettleFixture(now: () => Date = () => new Date()): P
       if (!fee.ok) throw new Error(fee.reason)
       await runExecution(dependencies, { shopId, executionId: fee.executionId })
       await inThisShop((transaction) => askForHold(transaction, rentalId, now()))
-      const order = await fake.createHoldOrder({ amount: eur(HOLD), rentalReference: rentalId, description: 'Hold', returnUrl: 'https://hold.test/pay', cancelUrl: 'https://hold.test/r', idempotencyKey: `hold-order-${rentalId}` })
+      const order = await fake.createHoldOrder({ amount: eur(HOLD), rentalReference: rentalId, description: 'Hold', brandName: 'Ribeira Bikes', returnUrl: 'https://hold.test/pay', cancelUrl: 'https://hold.test/r', idempotencyKey: `hold-order-${rentalId}` })
       if (!order.ok) throw new Error(order.error.kind)
       await inThisShop((transaction) => saveHoldOrder(transaction, rentalId, order.value.orderId))
       if (options.approve !== false) fake.approveOrder(order.value.orderId)
@@ -110,7 +110,7 @@ export async function createSettleFixture(now: () => Date = () => new Date()): P
         ),
       )
       if (!booked.ok) throw new Error(booked.reason)
-      const order = await fake.createHoldOrder({ amount: eur(FEE + HOLD), rentalReference: booked.rentalId, description: 'Fee and hold', returnUrl: 'https://hold.test/pay', cancelUrl: 'https://hold.test/r', idempotencyKey: `walk-in-order-${booked.rentalId}` })
+      const order = await fake.createHoldOrder({ amount: eur(FEE + HOLD), rentalReference: booked.rentalId, description: 'Fee and hold', brandName: 'Ribeira Bikes', returnUrl: 'https://hold.test/pay', cancelUrl: 'https://hold.test/r', idempotencyKey: `walk-in-order-${booked.rentalId}` })
       if (!order.ok) throw new Error(order.error.kind)
       await inThisShop((transaction) => saveHoldOrder(transaction, booked.rentalId, order.value.orderId))
       fake.approveOrder(order.value.orderId)

@@ -30,6 +30,7 @@ describe('createHoldOrder', () => {
     amount: DEPOSIT,
     rentalReference: 'rental-1',
     description: 'Refundable hold for one e-bike',
+    brandName: 'Ribeira Bikes',
     returnUrl: 'https://hold.test/approved',
     cancelUrl: 'https://hold.test/cancelled',
     idempotencyKey: 'execution-1',
@@ -66,7 +67,17 @@ describe('createHoldOrder', () => {
     expect(call?.body).toMatchObject({
       intent: 'AUTHORIZE',
       purchase_units: [{ custom_id: 'rental-1', amount: { currency_code: 'EUR', value: '150.00' } }],
+      payment_source: { paypal: { experience_context: { brand_name: 'Ribeira Bikes' } } },
     })
+  })
+
+  // PayPal shows the brand name on its own pages in place of the sandbox account's "Test Store", and takes at most 127
+  // characters of it.
+  it('names the shop on PayPal\'s pages, cut to the 127 characters PayPal takes', async () => {
+    const { holds, server } = holdsAgainst([{ status: 200, body: { id: 'ORDER-2', status: 'PAYER_ACTION_REQUIRED', links: [] } }])
+    await holds.createHoldOrder({ ...input, brandName: `  ${'B'.repeat(130)}  ` })
+    const [call] = server.apiCalls()
+    expect(call?.body).toMatchObject({ payment_source: { paypal: { experience_context: { brand_name: 'B'.repeat(127) } } } })
   })
 
   // A walk-in's one order is how Hold learns who the renter is, as no fee order names them (architecture.md section 8.2).
