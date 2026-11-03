@@ -2,10 +2,10 @@ import type { MoneyEventKind } from '@hold/domain'
 import { and, eq, inArray, like, or } from 'drizzle-orm'
 import type { LedgerEvent } from './money-ledger-records.ts'
 import { eventResourceId, resourceOf } from './paypal-resources.ts'
-import { authorizations, executions, holds, moneyEvents, paypalEvents, rentals } from './schema/index.ts'
+import { authorizations, executions, holds, invoices, moneyEvents, paypalEvents, rentals } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
-// The PayPal record on a rental's page (architecture.md section 11.8): what PayPal confirmed for the rental, from the
+// The PayPal record on a rental's page (architecture.md section 11.9): what PayPal confirmed for the rental, from the
 // money log, each with the call that asked for it and the verified event about it; and the calls PayPal has not
 // confirmed yet. Plain rows, worded on the screen. Nothing here is a PayPal event's body or Hold's own reference.
 
@@ -13,9 +13,10 @@ type Action = typeof executions.$inferSelect.action
 type CallState = typeof executions.$inferSelect.state
 type AuthorizationState = typeof authorizations.$inferSelect.state
 
-// PayPal's own ids for a call, under the names PayPal gives them.
-const PAYPAL_IDS = ['order', 'authorization', 'capture', 'refund', 'invoice'] as const
-type PayPalIds = Partial<Record<(typeof PAYPAL_IDS)[number], string>>
+// PayPal's own ids for a call, under the names PayPal gives them. A call to invoice keeps Hold's own invoice record
+// under "invoice", so PayPal's invoice id comes only from the money log.
+const CALL_IDS = ['order', 'authorization', 'capture', 'refund'] as const
+type PayPalIds = Partial<Record<(typeof CALL_IDS)[number] | 'invoice', string>>
 
 export type PayPalRecordLine = {
   // What PayPal confirmed, as the money log names it; null for a call it has not confirmed yet.
@@ -67,7 +68,7 @@ const shapeOf = (kind: MoneyEventKind, reference: string) => (kind === 'hold_rel
 const ORDER: readonly MoneyEventKind[] = ['fee_captured', 'hold_placed', 'hold_renewed', 'hold_captured', 'hold_released', 'invoice_sent', 'invoice_paid', 'refunded', 'extension_captured']
 const rank = (line: PayPalRecordLine) => (line.kind === null ? ORDER.length : ORDER.indexOf(line.kind))
 
-const paypalIds = (resources: Readonly<Record<string, string>>): PayPalIds => Object.fromEntries(PAYPAL_IDS.flatMap((key) => (resources[key] === undefined ? [] : [[key, resources[key]]])))
+const paypalIds = (resources: Readonly<Record<string, string>>): PayPalIds => Object.fromEntries(CALL_IDS.flatMap((key) => (resources[key] === undefined ? [] : [[key, resources[key]]])))
 
 export async function rentalPayPalRecord(transaction: Transaction, rentalId: string): Promise<PayPalRecord | undefined> {
   const [rental] = await transaction.select({ simulated: rentals.simulated }).from(rentals).where(eq(rentals.id, rentalId))
@@ -75,6 +76,7 @@ export async function rentalPayPalRecord(transaction: Transaction, rentalId: str
   const logged = await transaction.select().from(moneyEvents).where(eq(moneyEvents.rentalId, rentalId))
   const calls = await transaction.select().from(executions).where(eq(executions.rentalId, rentalId))
   const held = await transaction.select({ paypalId: authorizations.paypalAuthorizationId, state: authorizations.state, id: authorizations.id, renewedFromId: authorizations.renewedFromId }).from(authorizations).innerJoin(holds, eq(holds.id, authorizations.holdId)).where(eq(holds.rentalId, rentalId))
+  const bills = await transaction.select({ id: invoices.id, paypalId: invoices.paypalInvoiceId }).from(invoices).where(eq(invoices.rentalId, rentalId))
   const resources = new Set(logged.map((line) => resourceOf(line.paypalReference)))
   // Only an event whose signature was verified, or the demonstration's own, confirms anything. An event is stored before
   // Hold knows its rental, so it is found by the resource its body names, then read properly below.
@@ -90,7 +92,8 @@ export async function rentalPayPalRecord(transaction: Transaction, rentalId: str
     const resource = resourceOf(line.paypalReference)
     // A renewal is asked for on the authorization it renews, and PayPal answers with a new one.
     const renewed = held.find((each) => each.paypalId === resource)?.renewedFromId
-    const asked = [resource, ...(line.kind === 'hold_renewed' ? held.filter((each) => each.id === renewed).map((each) => each.paypalId) : [])]
+    // An invoice is asked for by Hold's own record of it, which PayPal's invoice id names.
+    const asked = [resource, ...(line.kind === 'hold_renewed' ? held.filter((each) => each.id === renewed).map((each) => each.paypalId) : []), ...(shape.id === 'invoice' ? bills.filter((bill) => bill.paypalId === resource).map((bill) => bill.id) : [])]
     const call = calls.find((each) => shape.actions.includes(each.action) && Object.values(each.paypalResourceIds).some((id) => asked.includes(id)))
     if (call !== undefined) matched.add(call.id)
     const event = events.find((each) => each.resource === resource && shape.events.includes(each.type))

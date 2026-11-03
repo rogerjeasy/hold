@@ -3,9 +3,11 @@ import { eq } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { applyPayPalEvent, createMemoryScheduler, requestHoldPlacement, runExecution } from './index.ts'
 import type { SettleDependencies } from './index.ts'
+import { fail } from '@hold/domain'
+import { invoices } from '@hold/db'
 import { createSettleFixture, FEE, HOLD } from './testing/settle-fixture.ts'
 
-// The PayPal record on a rental's page (architecture.md section 11.8): every call Hold made to PayPal for the rental,
+// The PayPal record on a rental's page (architecture.md section 11.9): every call Hold made to PayPal for the rental,
 // with PayPal's own ids and status, the PayPal-Request-Id it was sent with, and what confirmed it.
 
 const NOW = new Date('2026-10-20T09:00:00Z')
@@ -24,7 +26,7 @@ async function placed() {
   return rental
 }
 
-async function charged(rentalId: string) {
+async function charged(rentalId: string, paypal: SettleDependencies['paypalFor'] = () => fixture.fake) {
   await fixture.database.update(rentals).set({ state: 'inspecting' }).where(eq(rentals.id, rentalId))
   const price = (await act((transaction) => claimWorkspace(transaction, rentalId)))?.prices[0]?.id ?? ''
   const drafted = await act((transaction) => draftClaim(transaction, rentalId, userId, [{ priceEntryId: price, reason: 'Scratch confirmed in person.' }], NOW))
@@ -33,7 +35,7 @@ async function charged(rentalId: string) {
   await act((transaction) => presentClaim(transaction, drafted.claimId, userId, NOW))
   const accepted = await act((transaction) => replyToClaim(transaction, rentalId, 'accept', '', NOW))
   if (!accepted.ok || accepted.executionId === null) throw new Error('No capture requested')
-  await runExecution(dependencies(), { shopId: fixture.shopId, executionId: accepted.executionId })
+  await runExecution({ ...dependencies(), paypalFor: paypal }, { shopId: fixture.shopId, executionId: accepted.executionId })
 }
 
 beforeAll(async () => {
@@ -92,6 +94,16 @@ describe('the PayPal record of a rental', () => {
     expect(Object.keys(shown?.lines.at(-1)?.ids ?? {})).toEqual(['authorization'])
     await runExecution(dependencies(), { shopId: fixture.shopId, executionId: requested.executionId })
     expect((await record(rentalId))?.lines.at(-1)).toMatchObject({ kind: 'hold_released', action: 'release', paypalStatus: 'VOIDED', callState: 'confirmed', requestId: release?.idempotencyKey })
+  })
+
+  it('names a fallback invoice by PayPal’s invoice id, never by Hold’s own record of it', async () => {
+    const { rentalId } = await placed()
+    await charged(rentalId, () => ({ ...fixture.fake, captureFromHold: () => Promise.resolve(fail({ kind: 'declined' as const, issue: undefined, description: undefined, debugId: undefined })) }))
+    const [bill] = await act((transaction) => transaction.select().from(invoices).where(eq(invoices.rentalId, rentalId)))
+    const sentLine = (await record(rentalId))?.lines.find((line) => line.kind === 'invoice_sent')
+    expect(sentLine?.ids.invoice).toBe(bill?.paypalInvoiceId)
+    expect(sentLine?.ids.invoice).not.toBe(bill?.id)
+    expect(sentLine?.requestId).toBe((await sent(rentalId, 'invoice'))?.idempotencyKey)
   })
 
   it('marks a sample rental’s whole record simulated, and shows another shop nothing', async () => {
