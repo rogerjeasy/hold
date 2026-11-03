@@ -2,6 +2,7 @@ import type { HoldState, RentalState } from '@hold/domain'
 import { and, asc, eq, gt, inArray, lt, ne, notInArray } from 'drizzle-orm'
 import { holds, items, itemTypes, rentalItems, rentals, renters } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
+import { rentalName } from './rental-name.ts'
 
 // The shop's calendar (extensions.md section 12.5): every item it still rents out as a row, and every rental that
 // overlaps the window as a bar on each item it took, with where its PayPal hold stands. Read inside one shop.
@@ -32,7 +33,7 @@ export async function shopCalendar(transaction: Transaction, window: { readonly 
     .orderBy(asc(itemTypes.name), asc(items.label))
   if (rows.length === 0) return { items: [], bookings: [] }
   const bookings = await transaction
-    .select({ rentalId: rentals.id, itemId: rentalItems.itemId, startsAt: rentals.startsAt, endsAt: rentals.endsAt, renterName: renters.name, rentalState: rentals.state, holdState: holds.state, simulated: rentals.simulated })
+    .select({ rentalId: rentals.id, itemId: rentalItems.itemId, startsAt: rentals.startsAt, endsAt: rentals.endsAt, renterName: rentalName, rentalState: rentals.state, holdState: holds.state, simulated: rentals.simulated })
     .from(rentalItems)
     .innerJoin(rentals, eq(rentals.id, rentalItems.rentalId))
     .leftJoin(holds, eq(holds.rentalId, rentals.id))

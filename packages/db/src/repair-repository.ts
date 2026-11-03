@@ -7,6 +7,7 @@ import { claimStaff } from './claim-access.ts'
 import { changeStatus } from './item-repository.ts'
 import { auditLog, captureSessions, claimLines, claims, comparisons, findings, incidents, items, itemTypes, marks, photos, priceEntries, rentalItems, rentals, renters, repairLines, repairs, users } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
+import { rentalName } from './rental-name.ts'
 
 // Repair closes the loop (architecture.md section 9.6). A charge confirmed by PayPal puts the damage it was for on the
 // item's passport as known marks and opens a repair for each item; staff may also open one from an item's open marks.
@@ -169,7 +170,7 @@ const closer = alias(users, 'closer')
 // An item's repairs, newest first, each with its lines and whether its photographs are sealed.
 export async function itemRepairs(transaction: Transaction, itemId: string) {
   const rows = await transaction
-    .select({ id: repairs.id, state: repairs.state, claimId: repairs.claimId, currency: repairs.currency, costCents: repairs.costCents, note: repairs.note, createdAt: repairs.createdAt, closedAt: repairs.closedAt, sessionId: repairs.sessionId, sessionSealed: sql<boolean>`${captureSessions.sealedAt} is not null`, opener: opener.name, closer: closer.name, renterName: renters.name })
+    .select({ id: repairs.id, state: repairs.state, claimId: repairs.claimId, currency: repairs.currency, costCents: repairs.costCents, note: repairs.note, createdAt: repairs.createdAt, closedAt: repairs.closedAt, sessionId: repairs.sessionId, sessionSealed: sql<boolean>`${captureSessions.sealedAt} is not null`, opener: opener.name, closer: closer.name, renterName: rentalName })
     .from(repairs).leftJoin(captureSessions, eq(captureSessions.id, repairs.sessionId)).leftJoin(claims, eq(claims.id, repairs.claimId)).leftJoin(rentals, eq(rentals.id, claims.rentalId)).leftJoin(renters, eq(renters.id, rentals.renterId)).leftJoin(opener, eq(opener.id, repairs.openedByUserId)).leftJoin(closer, eq(closer.id, repairs.closedByUserId))
     .where(eq(repairs.itemId, itemId)).orderBy(desc(repairs.createdAt), desc(repairs.id))
   const lines = await linesOf(transaction, rows.map((row) => row.id))
@@ -181,7 +182,7 @@ export type ItemRepair = Awaited<ReturnType<typeof itemRepairs>>[number]
 // Every open repair, oldest first: the decision board's rows.
 export async function openRepairs(transaction: Transaction) {
   return transaction
-    .select({ id: repairs.id, itemId: repairs.itemId, itemLabel: items.label, claimId: repairs.claimId, currency: repairs.currency, createdAt: repairs.createdAt, renterName: renters.name, claimedCents: sql<number>`coalesce((select sum(${repairLines.claimedCents}) from ${repairLines} where ${repairLines.repairId} = ${repairs.id}), 0)::bigint`.mapWith(Number), simulated: items.simulated })
+    .select({ id: repairs.id, itemId: repairs.itemId, itemLabel: items.label, claimId: repairs.claimId, currency: repairs.currency, createdAt: repairs.createdAt, renterName: rentalName, claimedCents: sql<number>`coalesce((select sum(${repairLines.claimedCents}) from ${repairLines} where ${repairLines.repairId} = ${repairs.id}), 0)::bigint`.mapWith(Number), simulated: items.simulated })
     .from(repairs).innerJoin(items, eq(items.id, repairs.itemId)).leftJoin(claims, eq(claims.id, repairs.claimId)).leftJoin(rentals, eq(rentals.id, claims.rentalId)).leftJoin(renters, eq(renters.id, rentals.renterId))
     .where(eq(repairs.state, 'open')).orderBy(asc(repairs.createdAt), asc(repairs.id))
 }

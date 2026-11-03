@@ -19,6 +19,7 @@ import {
   users,
 } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
+import { rentalName } from './rental-name.ts'
 
 // What the Today page reads. Plain counts and rows: where a hold stands and what needs a decision are worked out by
 // the domain from them, so the rules live in one place.
@@ -120,7 +121,7 @@ export async function activeHolds(transaction: Transaction): Promise<ActiveHold[
   return transaction
     .select({
       rentalId: holds.rentalId,
-      renterName: renters.name,
+      renterName: rentalName,
       reservedCents: holds.reservedCents,
       createdAt: authorizations.createdAt,
       assuredUntil: authorizations.assuredUntil,
@@ -153,7 +154,7 @@ async function claimsWaiting(transaction: Transaction): Promise<ClaimWaiting[]> 
     .select({
       claimId: claims.id,
       rentalId: claims.rentalId,
-      renterName: renters.name,
+      renterName: rentalName,
       state: claims.state,
       totalCents: claims.totalCents,
       firstLine: sql<string | null>`(${firstLine})`,
@@ -170,7 +171,7 @@ async function claimsWaiting(transaction: Transaction): Promise<ClaimWaiting[]> 
 
 async function droppedOff(transaction: Transaction): Promise<DroppedOff[]> {
   const rows = await transaction
-    .select({ rentalId: rentals.id, renterName: renters.name, droppedOffAt: rentals.droppedOffAt, simulated: rentals.simulated })
+    .select({ rentalId: rentals.id, renterName: rentalName, droppedOffAt: rentals.droppedOffAt, simulated: rentals.simulated })
     .from(rentals)
     .leftJoin(renters, eq(renters.id, rentals.renterId))
     .where(eq(rentals.state, 'dropped_off'))
@@ -181,7 +182,7 @@ async function droppedOff(transaction: Transaction): Promise<DroppedOff[]> {
 // Rentals past their return time and not back. The decision board reads it too.
 export async function lateRentals(transaction: Transaction, now: Date): Promise<LateRental[]> {
   return transaction
-    .select({ rentalId: rentals.id, renterName: renters.name, endsAt: rentals.endsAt, simulated: rentals.simulated })
+    .select({ rentalId: rentals.id, renterName: rentalName, endsAt: rentals.endsAt, simulated: rentals.simulated })
     .from(rentals)
     .leftJoin(renters, eq(renters.id, rentals.renterId))
     .where(or(eq(rentals.state, 'overdue'), and(eq(rentals.state, 'out'), lt(rentals.endsAt, now))))
@@ -198,7 +199,7 @@ async function counter(transaction: Transaction, window: TodayWindow): Promise<C
       state: rentals.state,
       startsAt: rentals.startsAt,
       endsAt: rentals.endsAt,
-      renterName: renters.name,
+      renterName: rentalName,
       simulated: rentals.simulated,
       reservedCents: holds.reservedCents,
       holdState: holds.state,
@@ -271,7 +272,7 @@ async function activity(transaction: Transaction): Promise<ActivityLine[]> {
       at: auditLog.at,
       action: auditLog.action,
       actorName: users.name,
-      renterName: renters.name,
+      renterName: rentalName,
       simulated: sql<boolean>`coalesce(${rentals.simulated}, (${auditLog.detail} ->> 'simulated')::boolean, false)`,
     })
     .from(auditLog)

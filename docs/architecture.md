@@ -1447,6 +1447,7 @@ it, read-only included: it holds PayPal's ids and Hold's keys, never a payer's d
 | PayPal's status: `CREATED`, `COMPLETED`, `VOIDED`, `CAPTURED`, `SENT`, `PAID` | The status the read-back required before the line was written |
 | `final_capture` | `true` on a charge from the hold, which always releases the rest; `false` on a walk-in's fee captured from the hold |
 | Authorization now | `authorizations.state`, as Hold last read it |
+| Released by | On the rest of a hold that a final capture released in the same call: that capture's id, once, and the words "No separate call was made". The line carries no ids, status or `PayPal-Request-Id` of its own. A release with no charge is a void, its own call, shown with its own ids |
 | `PayPal-Request-Id` | `executions.idempotency_key` of the call that asked for it |
 | Confirmed | When Hold read it back from PayPal, and the PayPal event of the matching type whose signature was verified |
 

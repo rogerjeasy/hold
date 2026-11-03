@@ -1377,7 +1377,11 @@
         "action": "Lancer une nouvelle démo",
         "hint": "Une nouvelle boutique et de nouveaux comptes, en tant que Tomás. Votre démonstration actuelle reste telle quelle."
       },
-      "note": "Une étape qui déplace de l’argent demande une clé d’accès sur votre propre appareil, que vous pouvez ajouter sur la page Sécurité. PayPal fonctionne dans son bac à sable : aucun argent réel ne circule. Ce navigateur garde votre démonstration, pour passer de Tomás à Jonas."
+      "note": "Une étape qui déplace de l’argent demande une clé d’accès sur votre propre appareil, que vous pouvez ajouter sur la page Sécurité. PayPal fonctionne dans son bac à sable : aucun argent réel ne circule. Ce navigateur garde votre démonstration, pour passer de Tomás à Jonas.",
+      "pending": {
+        "start": "Préparation de votre magasin, de ses deux comptes et de ses locations d’exemple. Cela prend environ 20 secondes.",
+        "continue": "Connexion à votre démo…"
+      }
     }
   },
   "shop": {
@@ -1795,7 +1799,8 @@
           "submitted": "Envoyé, en attente de la confirmation de PayPal",
           "confirmed": "Confirmé par PayPal",
           "failed": "PayPal ne l'a pas mené à bien"
-        }
+        },
+        "releasedBy": "Libéré par la capture finale {capture}, dans le même appel à PayPal. Aucun appel distinct n’a été fait."
       }
     },
     "items": {
@@ -2259,7 +2264,8 @@
         "daily_cap_network": "Votre réseau a utilisé ses vraies comparaisons d’exemples pour aujourd’hui. Elles reprennent à minuit UTC ; les photos attendent ici."
       },
       "sampleTitle": "Photographies de démonstration",
-      "sampleBody": "Ces photographies servent à la démonstration. Le dossier d’inspection est signalé comme simulé."
+      "sampleBody": "Ces photographies servent à la démonstration. Le dossier d’inspection est signalé comme simulé.",
+      "opening": "Ouverture des photographies du retour…"
     },
     "comparison": {
       "title": "Comparaison",
@@ -3219,7 +3225,26 @@
     },
     "repairedOn": "Réparé {date}",
     "repairedBody": "La boutique a réparé ce que vous avez payé. Le coût de la réparation reste à la charge de la boutique.",
-    "repairedAlt": "Réparé : {line}"
+    "repairedAlt": "Réparé : {line}",
+    "renterStates": {
+      "draft": "En préparation",
+      "awaiting_approval": "En cours d’examen par le magasin",
+      "approved": "Une réclamation à examiner",
+      "presented": "En attente de votre réponse",
+      "accepted": "Vous avez accepté cette réclamation",
+      "contested": "Vous avez contesté cette réclamation : le magasin l’examine",
+      "lapsed": "Votre délai de réponse est écoulé",
+      "negotiating": "En négociation",
+      "agreed": "Un accord a été trouvé",
+      "escalated": "Transmise au propriétaire du magasin pour décision",
+      "decided": "Le magasin a décidé",
+      "charging": "Règlement en cours",
+      "charged": "Débité",
+      "charge_failed": "Le débit n’a pas abouti",
+      "adjusted": "Ajustée",
+      "waived": "Le magasin a renoncé à cette réclamation",
+      "closed": "Clôturée"
+    }
   },
   "scorecard": {
     "title": "Quelle est la fiabilité de la comparaison",

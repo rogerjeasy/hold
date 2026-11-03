@@ -1377,7 +1377,11 @@
         "action": "Neue Demo starten",
         "hint": "Ein neuer Laden und neue Konten, als Tomás. Ihre jetzige Demo bleibt, wie sie ist."
       },
-      "note": "Ein Schritt, der Geld bewegt, verlangt einen Passkey auf Ihrem eigenen Gerät, den Sie auf der Seite Sicherheit hinzufügen können. PayPal läuft in seiner Sandbox, es fließt also kein echtes Geld. Dieser Browser behält Ihre Demo, damit Sie zwischen Tomás und Jonas wechseln können."
+      "note": "Ein Schritt, der Geld bewegt, verlangt einen Passkey auf Ihrem eigenen Gerät, den Sie auf der Seite Sicherheit hinzufügen können. PayPal läuft in seiner Sandbox, es fließt also kein echtes Geld. Dieser Browser behält Ihre Demo, damit Sie zwischen Tomás und Jonas wechseln können.",
+      "pending": {
+        "start": "Ihr Geschäft, seine zwei Konten und seine Beispielvermietungen werden eingerichtet. Das dauert etwa 20 Sekunden.",
+        "continue": "Sie werden bei Ihrer Demo angemeldet…"
+      }
     }
   },
   "shop": {
@@ -1795,7 +1799,8 @@
           "submitted": "Gesendet, wartet auf die Bestätigung von PayPal",
           "confirmed": "Von PayPal bestätigt",
           "failed": "PayPal hat ihn nicht ausgeführt"
-        }
+        },
+        "releasedBy": "Durch die finale Erfassung {capture} im selben PayPal-Aufruf freigegeben. Es gab keinen eigenen Aufruf."
       }
     },
     "items": {
@@ -2259,7 +2264,8 @@
         "daily_cap_network": "Ihr Netzwerk hat seine heutigen echten Vergleiche mit Beispielen verbraucht. Sie beginnen um Mitternacht UTC neu; die Fotos warten hier."
       },
       "sampleTitle": "Beispielfotos",
-      "sampleBody": "Diese Fotos dienen der Demonstration. Der Prüfbericht ist als simuliert gekennzeichnet."
+      "sampleBody": "Diese Fotos dienen der Demonstration. Der Prüfbericht ist als simuliert gekennzeichnet.",
+      "opening": "Die Rückgabefotos werden geöffnet…"
     },
     "comparison": {
       "title": "Vergleich",
@@ -3219,7 +3225,26 @@
     },
     "repairedOn": "Repariert {date}",
     "repairedBody": "Das Geschäft hat repariert, wofür Sie bezahlt haben. Was die Reparatur kostete, bleibt beim Geschäft.",
-    "repairedAlt": "Repariert: {line}"
+    "repairedAlt": "Repariert: {line}",
+    "renterStates": {
+      "draft": "Wird vorbereitet",
+      "awaiting_approval": "Wird vom Geschäft geprüft",
+      "approved": "Eine Forderung zu Ihrer Prüfung",
+      "presented": "Wartet auf Ihre Antwort",
+      "accepted": "Sie haben diese Forderung angenommen",
+      "contested": "Sie haben diese Forderung bestritten – das Geschäft prüft sie",
+      "lapsed": "Ihre Antwortfrist ist abgelaufen",
+      "negotiating": "Wird verhandelt",
+      "agreed": "Eine Einigung wurde erzielt",
+      "escalated": "An den Inhaber zur Entscheidung übergeben",
+      "decided": "Das Geschäft hat entschieden",
+      "charging": "Abrechnung läuft",
+      "charged": "Belastet",
+      "charge_failed": "Die Belastung ist nicht durchgegangen",
+      "adjusted": "Angepasst",
+      "waived": "Das Geschäft verzichtet auf diese Forderung",
+      "closed": "Abgeschlossen"
+    }
   },
   "scorecard": {
     "title": "Wie zuverlässig ist der Vergleich",

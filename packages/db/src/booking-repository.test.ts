@@ -232,6 +232,17 @@ describe('paying the fee', () => {
     expect(await database.select({ state: executions.state }).from(executions).where(eq(executions.rentalId, rentalId))).toEqual([{ state: 'confirmed' }])
   })
 
+  it('keeps the name the rental was booked under once a PayPal account with another name pays', async () => {
+    const rentalId = await pending()
+    const begun = await act({ role: 'hold_app', shopId }, (transaction) => beginFeeCapture(transaction, rentalId, NOW))
+    if (!begun.ok) throw new Error(begun.reason)
+    const paidByAna = { ...payment(rentalId), payer: { payerId: `PAYER-ANA-${rentalId}`, email: 'ana@example.com', name: 'Ana Doe' } }
+    expect(await act({ role: 'hold_app', shopId }, (transaction) => confirmFeeCapture(transaction, begun.execution.id, paidByAna, NOW))).toEqual({ ok: true })
+    const listed = (await act(owner, (transaction) => rentalList(transaction, NOW))).find((each) => each.id === rentalId)
+    expect(listed?.who).toBe('Priya Natarajan')
+    expect(await act(owner, (transaction) => rentalDetail(transaction, rentalId, NOW))).toMatchObject({ who: 'Priya Natarajan', renterName: 'Ana Doe' })
+  })
+
   it('refuses a payment for another amount, and leaves the rental waiting', async () => {
     const rentalId = await pending()
     const begun = await act({ role: 'hold_app', shopId }, (transaction) => beginFeeCapture(transaction, rentalId, NOW))
@@ -260,9 +271,10 @@ describe('paying the fee', () => {
 
 describe('cancelling a booking', () => {
   it('lets go of an unpaid booking and its items, and nothing else', async () => {
-    const rentalId = await book([{ itemTypeId: seatTypeId, count: 1 }], at(600), at(610))
+    // Far after every slot the fee tests book, so another test's rental never shares its period.
+    const rentalId = await book([{ itemTypeId: seatTypeId, count: 1 }], at(5000), at(5010))
     expect(await act(owner, (transaction) => abandonBooking(transaction, rentalId))).toEqual({ ok: true })
     expect(await act(owner, (transaction) => abandonBooking(transaction, rentalId))).toEqual({ ok: false, reason: 'transition_not_allowed' })
-    expect((await act(owner, (transaction) => bookableTypes(transaction, { startsAt: at(600), endsAt: at(610) }, NOW))).find((each) => each.id === seatTypeId)?.available).toBe(1)
+    expect((await act(owner, (transaction) => bookableTypes(transaction, { startsAt: at(5000), endsAt: at(5010) }, NOW))).find((each) => each.id === seatTypeId)?.available).toBe(1)
   })
 })

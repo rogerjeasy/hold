@@ -6,6 +6,7 @@ import type { SessionPhoto } from './capture-repository.ts'
 import type { PhotoPlanView } from './schema/catalog.ts'
 import { captureSessions, comparisons, findings, holds, items, photoPlans, photos, rentalItems, rentals, renters, shops, users } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
+import { rentalName } from './rental-name.ts'
 
 // A return with nobody at the counter (architecture.md section 6.13). The renter photographs each item through their
 // link and leaves it at the shop's drop point; the comparison runs overnight; a person who sees the item makes the
@@ -181,7 +182,7 @@ export type WaitingDropOff = {
 // Every item renters dropped off that nobody has checked yet, oldest first: the morning's first job.
 export async function dropOffsWaiting(transaction: Transaction): Promise<readonly WaitingDropOff[]> {
   const rows = await transaction
-    .select({ rentalId: rentals.id, renterName: renters.name, droppedOffAt: rentals.droppedOffAt, endsAt: rentals.endsAt, missingAt: rentals.dropOffMissingAt, missingBy: users.name, holdCents: holds.reservedCents, currency: rentals.currency, simulated: rentals.simulated })
+    .select({ rentalId: rentals.id, renterName: rentalName, droppedOffAt: rentals.droppedOffAt, endsAt: rentals.endsAt, missingAt: rentals.dropOffMissingAt, missingBy: users.name, holdCents: holds.reservedCents, currency: rentals.currency, simulated: rentals.simulated })
     .from(rentals).leftJoin(renters, eq(renters.id, rentals.renterId)).leftJoin(holds, eq(holds.rentalId, rentals.id)).leftJoin(users, eq(users.id, rentals.dropOffMissingByUserId))
     .where(and(eq(rentals.state, 'dropped_off'), isNotNull(rentals.droppedOffAt))).orderBy(asc(rentals.droppedOffAt))
   const waiting: WaitingDropOff[] = []

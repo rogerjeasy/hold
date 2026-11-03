@@ -1377,7 +1377,11 @@
         "action": "Start a fresh demo",
         "hint": "A new shop and new accounts, as Tomás. The demo you have now stays as it is."
       },
-      "note": "A step that moves money asks for a passkey on your own device, which you can add on the Security page. PayPal runs in its sandbox, so no real money moves. This browser keeps your demo, so you can switch between Tomás and Jonas."
+      "note": "A step that moves money asks for a passkey on your own device, which you can add on the Security page. PayPal runs in its sandbox, so no real money moves. This browser keeps your demo, so you can switch between Tomás and Jonas.",
+      "pending": {
+        "start": "Setting up your shop, its two accounts and its sample rentals. This takes about 20 seconds.",
+        "continue": "Signing you in to your demo…"
+      }
     }
   },
   "shop": {
@@ -1795,7 +1799,8 @@
           "submitted": "Sent, waiting for PayPal to confirm",
           "confirmed": "Confirmed by PayPal",
           "failed": "PayPal did not complete it"
-        }
+        },
+        "releasedBy": "Released by the final capture {capture}, in the same PayPal call. No separate call was made."
       }
     },
     "items": {
@@ -2259,7 +2264,8 @@
         "daily_cap_network": "Your network has used its real comparisons on samples for today. They start again at midnight UTC; the photographs wait here."
       },
       "sampleTitle": "Sample photographs",
-      "sampleBody": "These photographs are for demonstration. The inspection record is marked as simulated."
+      "sampleBody": "These photographs are for demonstration. The inspection record is marked as simulated.",
+      "opening": "Opening the return photographs…"
     },
     "comparison": {
       "title": "Comparison",
@@ -3219,7 +3225,26 @@
     },
     "repairedOn": "Repaired {date}",
     "repairedBody": "The shop repaired what you paid for. What the repair cost stays with the shop.",
-    "repairedAlt": "Repaired: {line}"
+    "repairedAlt": "Repaired: {line}",
+    "renterStates": {
+      "draft": "Being prepared",
+      "awaiting_approval": "Being reviewed by the shop",
+      "approved": "A claim for you to review",
+      "presented": "Waiting for your reply",
+      "accepted": "You accepted this claim",
+      "contested": "You contested this claim — the shop is reviewing it",
+      "lapsed": "Your reply period has ended",
+      "negotiating": "Being negotiated",
+      "agreed": "An agreement was reached",
+      "escalated": "Passed to the shop owner to decide",
+      "decided": "The shop has decided",
+      "charging": "Settlement in progress",
+      "charged": "Charged",
+      "charge_failed": "The charge did not go through",
+      "adjusted": "Adjusted",
+      "waived": "The shop waived this claim",
+      "closed": "Closed"
+    }
   },
   "scorecard": {
     "title": "How reliable is the comparison",

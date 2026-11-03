@@ -4,6 +4,7 @@ import { and, asc, desc, eq, inArray, isNotNull, ne, sql } from 'drizzle-orm'
 import { holds, items, itemTypes, priceLists, rentalItems, rentals, renterLinks, renters, shops, wearPolicies } from './schema/index.ts'
 import type { BookingChannel } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
+import { nameOfRental } from './rental-name.ts'
 
 // Bookings, made by staff or by a renter on the shop's page (architecture.md section 6.5). A booking waits for its
 // fee, keeping its items for fifteen minutes. Amounts come from the item types, never from whoever books.
@@ -230,7 +231,7 @@ function toSummary(row: SummaryRow, now: Date): RentalSummary {
     state: row.state,
     startsAt: row.startsAt,
     endsAt: row.endsAt,
-    who: row.renterName ?? row.contactName,
+    who: nameOfRental(row.contactName, row.renterName),
     items: row.items === '' ? [] : row.items.split(ITEM_SEPARATOR),
     feeCents: row.feeCents,
     holdCents: row.holdCents,

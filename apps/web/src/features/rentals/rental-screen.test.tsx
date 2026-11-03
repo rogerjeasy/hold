@@ -71,7 +71,7 @@ describe('a rental', () => {
   })
 
   it('shows even read-only staff the PayPal record, with PayPal’s ids and the PayPal-Request-Id', () => {
-    const paypal = { simulated: false, lines: [{ kind: 'hold_placed' as const, action: 'authorize' as const, currency: 'EUR', amountCents: 300_00, ids: { authorization: 'AUTH-77' }, paypalStatus: 'CREATED', finalCapture: null, requestId: 'hold-placement-1', callState: 'confirmed' as const, at: new Date('2026-10-16T10:00:00Z'), readBackAt: new Date('2026-10-16T10:00:04Z'), event: null, authorizationState: 'created' as const }] }
+    const paypal = { simulated: false, lines: [{ kind: 'hold_placed' as const, action: 'authorize' as const, currency: 'EUR', amountCents: 300_00, ids: { authorization: 'AUTH-77' }, paypalStatus: 'CREATED', finalCapture: null, requestId: 'hold-placement-1', callState: 'confirmed' as const, at: new Date('2026-10-16T10:00:00Z'), readBackAt: new Date('2026-10-16T10:00:04Z'), event: null, authorizationState: 'created' as const, releasedBy: null }] }
     renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail()} hold={undefined} handovers={[]} paypal={paypal} canAct={false} />)
     const panel = screen.getByRole('region', { name: 'PayPal record' })
     expect(panel).toHaveTextContent('AUTH-77')

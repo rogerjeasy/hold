@@ -166,7 +166,8 @@ describe('a person checking an item a renter dropped off', () => {
   it('lists it for the morning with when it came back, its views and what the comparison found', async () => {
     const rental = await droppedOff()
     const waiting = await shop.act((transaction) => dropOffsWaiting(transaction))
-    expect(waiting.find((each) => each.rentalId === rental.rentalId)).toMatchObject({ droppedOffAt: NOW, onTime: true, renterName: 'Priya Natarajan', missingAt: null, holdCents: 300_00, currency: 'EUR', items: [{ views: 2, findings: 0, comparison: 'pending', viewLabel: 'Left side', before: { view: 'left-side', displayKey: null }, after: { view: 'left-side', displayKey: null }, dropPoint: { view: DROP_POINT_VIEW, displayKey: null }, region: null }] })
+    // Named as staff booked it ("Priya"), not as PayPal names the payer.
+    expect(waiting.find((each) => each.rentalId === rental.rentalId)).toMatchObject({ droppedOffAt: NOW, onTime: true, renterName: 'Priya', missingAt: null, holdCents: 300_00, currency: 'EUR', items: [{ views: 2, findings: 0, comparison: 'pending', viewLabel: 'Left side', before: { view: 'left-side', displayKey: null }, after: { view: 'left-side', displayKey: null }, dropPoint: { view: DROP_POINT_VIEW, displayKey: null }, region: null }] })
     expect(await other.act((transaction) => dropOffsWaiting(transaction))).toEqual([])
   })
 

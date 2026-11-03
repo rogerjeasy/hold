@@ -1377,7 +1377,11 @@
         "action": "Empezar una demo nueva",
         "hint": "Una tienda nueva y cuentas nuevas, como Tomás. La demostración que tienes ahora se queda como está."
       },
-      "note": "Un paso que mueve dinero pide una llave de acceso en tu propio dispositivo, que puedes añadir en la página Seguridad. PayPal funciona en su entorno de pruebas, así que no se mueve dinero real. Este navegador guarda tu demostración, para pasar de Tomás a Jonas."
+      "note": "Un paso que mueve dinero pide una llave de acceso en tu propio dispositivo, que puedes añadir en la página Seguridad. PayPal funciona en su entorno de pruebas, así que no se mueve dinero real. Este navegador guarda tu demostración, para pasar de Tomás a Jonas.",
+      "pending": {
+        "start": "Preparando su tienda, sus dos cuentas y sus alquileres de ejemplo. Tarda unos 20 segundos.",
+        "continue": "Iniciando sesión en su demo…"
+      }
     }
   },
   "shop": {
@@ -1795,7 +1799,8 @@
           "submitted": "Enviada, esperando la confirmación de PayPal",
           "confirmed": "Confirmada por PayPal",
           "failed": "PayPal no la completó"
-        }
+        },
+        "releasedBy": "Liberado por la captura final {capture}, en la misma llamada a PayPal. No se hizo ninguna llamada aparte."
       }
     },
     "items": {
@@ -2259,7 +2264,8 @@
         "daily_cap_network": "Su red ya ha usado sus comparaciones reales de ejemplos de hoy. Vuelven a empezar a medianoche UTC; las fotos esperan aquí."
       },
       "sampleTitle": "Fotografías de demostración",
-      "sampleBody": "Estas fotografías son de demostración. El registro de inspección está marcado como simulado."
+      "sampleBody": "Estas fotografías son de demostración. El registro de inspección está marcado como simulado.",
+      "opening": "Abriendo las fotografías de la devolución…"
     },
     "comparison": {
       "title": "Comparación",
@@ -3219,7 +3225,26 @@
     },
     "repairedOn": "Reparado {date}",
     "repairedBody": "La tienda reparó lo que usted pagó. Lo que costó la reparación lo asume la tienda.",
-    "repairedAlt": "Reparado: {line}"
+    "repairedAlt": "Reparado: {line}",
+    "renterStates": {
+      "draft": "En preparación",
+      "awaiting_approval": "En revisión por la tienda",
+      "approved": "Una reclamación para que la revise",
+      "presented": "Esperando su respuesta",
+      "accepted": "Ha aceptado esta reclamación",
+      "contested": "Ha impugnado esta reclamación: la tienda la está revisando",
+      "lapsed": "Su plazo de respuesta ha terminado",
+      "negotiating": "En negociación",
+      "agreed": "Se ha llegado a un acuerdo",
+      "escalated": "Pasada al propietario de la tienda para que decida",
+      "decided": "La tienda ha decidido",
+      "charging": "Liquidación en curso",
+      "charged": "Cobrado",
+      "charge_failed": "El cobro no se ha realizado",
+      "adjusted": "Ajustada",
+      "waived": "La tienda ha renunciado a esta reclamación",
+      "closed": "Cerrada"
+    }
   },
   "scorecard": {
     "title": "Qué tan fiable es la comparación",

@@ -53,6 +53,7 @@ function RecordLine({ line, simulated, clock }: { line: PayPalRecordLine; simula
         {line.authorizationState === null ? null : <Row label={t('authorizationNow')} value={t(`authorizationStates.${line.authorizationState}`)} />}
         {line.requestId === null ? null : <Row label={t('requestId')} value={line.requestId} code />}
       </dl>
+      {line.releasedBy === null ? null : <p className="text-sm wrap-long-words">{t('releasedBy', { capture: line.releasedBy.capture })}</p>}
       <div className="grid gap-0.5 text-sm text-muted-foreground">
         {line.readBackAt === null ? line.callState === null ? null : <p>{t(`callStates.${line.callState}`)}</p> : simulated ? null : <p>{t('readBack', { when: format.deadline(line.readBackAt) })}</p>}
         {line.event === null ? null : <p className="wrap-long-words">{t(line.event.simulated ? 'simulatedEvent' : 'event', { type: line.event.type, when: format.deadline(line.event.receivedAt) })}</p>}

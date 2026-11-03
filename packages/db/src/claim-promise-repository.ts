@@ -8,6 +8,7 @@ import { escalateNegotiation } from './negotiation-ending.ts'
 import { liveStandingRule, mandateForUse } from './ops-settings-repository.ts'
 import { approvals, auditLog, authorizations, claimMessages as messages, claims, holds, negotiations, outbox, renters, rentals, shops, staffRoles, users } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
+import { rentalName } from './rental-name.ts'
 
 // The shop's promise to decide a contested claim, and the words between renter and shop (architecture.md section 6.16).
 
@@ -128,7 +129,7 @@ export async function writeClaimMessage(transaction: Transaction, input: Message
 
 // Who hears that a renter wrote: the shop's owners and managers, each in their language, and the renter's name.
 export async function claimMessageRecipients(transaction: Transaction, rentalId: string) {
-  const [rental] = await transaction.select({ renter: sql<string | null>`coalesce(${renters.name}, ${rentals.contactName})`, shopName: shops.name }).from(rentals).innerJoin(shops, eq(shops.id, rentals.shopId)).leftJoin(renters, eq(renters.id, rentals.renterId)).where(eq(rentals.id, rentalId))
+  const [rental] = await transaction.select({ renter: rentalName, shopName: shops.name }).from(rentals).innerJoin(shops, eq(shops.id, rentals.shopId)).leftJoin(renters, eq(renters.id, rentals.renterId)).where(eq(rentals.id, rentalId))
   if (rental === undefined) return undefined
   const recipients = await transaction.select({ email: users.email, language: users.language }).from(staffRoles).innerJoin(users, eq(users.id, staffRoles.userId)).where(inArray(staffRoles.role, ['owner', 'manager']))
   return { renter: rental.renter ?? '—', shopName: rental.shopName, recipients }
