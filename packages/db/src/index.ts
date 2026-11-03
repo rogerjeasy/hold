@@ -140,6 +140,7 @@ export type { AgentSessionRow, AssistantBookingInput, AssistantBookingResult, Bo
 export { claimRepairs, closeRepair, itemRepairs, openRepairFromMarks, repairGuides, openRepairs, openRepairsForClaim, repairCosts, startRepairCapture } from './repair-repository.ts'
 export type { ItemRepair, OpenRepair } from './repair-repository.ts'
 export { takeEmailAllowance } from './email-allowance.ts'
+export type { EmailTarget } from './email-allowance.ts'
 export { takeTextAllowance } from './text-allowance.ts'
 export { recordPushDelivery, registerRenterPush, registerStaffPush, renterPushTargets, staffPushTargets, unregisterRenterPush, unregisterStaffPush } from './push-device-repository.ts'
 export type { PushRegistration } from './push-device-repository.ts'

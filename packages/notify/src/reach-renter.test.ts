@@ -100,7 +100,7 @@ describe('reaching a renter', () => {
     const spent = { ...reach, allowEmail: (target: unknown) => { asked.push(target); return Promise.resolve(false) } }
     expect(await reachRenter(spent, { ...texting, channel: 'email' }, message)).toEqual({ via: 'none', simulated: false, fellBack: null, emailHeld: true })
     expect(mailer.sent).toEqual([])
-    expect(asked).toEqual([{ shopId: 'shop-1', rentalId: 'rental-1', to: 'priya@example.org' }])
+    expect(asked).toEqual([{ shopId: 'shop-1', rentalId: 'rental-1', to: 'priya@example.org', purpose: 'renter_link' }])
     // A text is counted by its own allowance, never by the emails'.
     expect(await reachRenter(spent, texting, message)).toEqual({ via: 'text', simulated: false, fellBack: null })
   })

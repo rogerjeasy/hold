@@ -23,7 +23,7 @@ export type ReachDependencies = {
   readonly allowText: (target: { readonly shopId: string; readonly rentalId: string; readonly phone: string }) => Promise<boolean>
   // False once the day's emails to this rental, this address or this shop, or from every shop, are spent. Absent, every
   // email goes: the worker's reminders are not asked for by anyone, so they are not counted.
-  readonly allowEmail?: (target: { readonly shopId: string; readonly rentalId: string; readonly to: string }) => Promise<boolean>
+  readonly allowEmail?: (target: { readonly shopId: string; readonly rentalId: string; readonly to: string; readonly purpose: TextPurpose }) => Promise<boolean>
   // The number replied STOP: the rental goes back to email.
   readonly stopTexts: (rentalId: string) => Promise<void>
   // Pushes the event to the rental's registered phones (architecture.md section 13.9). Absent, nothing is pushed.
@@ -68,7 +68,7 @@ async function byChoice(dependencies: ReachDependencies, target: ReachTarget, me
 }
 
 async function byEmail(dependencies: ReachDependencies, target: ReachTarget, message: RenterMessage, fellBack: Reached['fellBack']): Promise<Reached> {
-  if (message.email !== null && dependencies.allowEmail !== undefined && !(await dependencies.allowEmail({ shopId: target.shopId, rentalId: target.rentalId, to: message.email.to }))) return { via: 'none', simulated: false, fellBack, emailHeld: true }
+  if (message.email !== null && dependencies.allowEmail !== undefined && !(await dependencies.allowEmail({ shopId: target.shopId, rentalId: target.rentalId, to: message.email.to, purpose: message.purpose }))) return { via: 'none', simulated: false, fellBack, emailHeld: true }
   const sent = message.email !== null && (await dependencies.mailer.send(message.email))
   return { via: sent ? 'email' : 'none', simulated: false, fellBack }
 }

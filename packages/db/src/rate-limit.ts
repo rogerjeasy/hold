@@ -25,9 +25,14 @@ export async function takeRateTokenIn(transaction: Transaction, limit: RateLimit
 
 // How many requests a subject may still make within a limit, read without counting one, so a screen can say so.
 export async function rateTokensLeft(database: Database, limit: RateLimit, subject: string): Promise<number> {
-  const [row] = await outsideShop(database, (transaction) => transaction
+  return outsideShop(database, (transaction) => rateTokensLeftIn(transaction, limit, subject))
+}
+
+// The same, inside a transaction the caller has open, so a caller can check several limits before taking any.
+export async function rateTokensLeftIn(transaction: Transaction, limit: RateLimit, subject: string): Promise<number> {
+  const [row] = await transaction
     .select({ left: sql<number | string>`left_count` })
-    .from(sql`hold_rate_tokens_left(${bucketOf(limit, subject)}, ${limit.max}::integer, ${limit.windowSeconds}::integer) as tokens(left_count)`))
+    .from(sql`hold_rate_tokens_left(${bucketOf(limit, subject)}, ${limit.max}::integer, ${limit.windowSeconds}::integer) as tokens(left_count)`)
   // The RDS Data API may answer an integer as text.
   return Number(row?.left ?? 0)
 }
