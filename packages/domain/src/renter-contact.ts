@@ -20,6 +20,13 @@ export type TextStatus = (typeof TEXT_STATUSES)[number]
 // At most this many texts a day to one rental, one number and one shop, so nobody can run up the shop's bill by asking.
 export const TEXT_LIMITS = { perRentalPerDay: 12, perNumberPerDay: 12, perShopPerDay: 400 } as const
 
+// At most this many emails a day that someone asked Hold to send: to one rental's renter, to one address, from one
+// shop, and from every shop together. Every email leaves through one sending account, which also carries Cognito's
+// sign-in codes and allows about 500 a day, so the public demo must never become a relay. A judge's demo in full sends
+// about fifteen (the renter's link, a few codes, messages and an invitation), so none of these is met in normal use,
+// and the day's total leaves room for sign-in codes and the worker's reminders.
+export const EMAIL_LIMITS = { perRentalPerDay: 15, perAddressPerDay: 30, perShopPerDay: 60, perDay: 300 } as const
+
 // The countries Hold texts, by region, with their calling codes: Europe, North America, Australia, New Zealand and
 // Japan. A number anywhere else is reached by email, which keeps premium-rate and high-fraud destinations out of reach.
 const TEXT_COUNTRIES: Readonly<Record<string, string>> = {
