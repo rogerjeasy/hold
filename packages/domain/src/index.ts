@@ -126,3 +126,6 @@ export { counterRoutine } from './counter-routine.ts'
 export type { RoutineSession, RoutineTime } from './counter-routine.ts'
 export { checkRepairClose, priceRepairStanding, REPAIR_LIMITS, REPAIR_OUTCOMES, REPAIR_STATES, REPAIR_TRANSITIONS, repairViews } from './repair.ts'
 export type { RepairClose, RepairCloseProblem, RepairOutcome, RepairState } from './repair.ts'
+
+// What a log may carry (AGENTS.md section 7).
+export { errorForLog, redactForLog } from './log-redaction.ts'

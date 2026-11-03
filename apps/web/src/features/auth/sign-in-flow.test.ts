@@ -102,6 +102,23 @@ describe('signing up', () => {
     expect(await answerCode(broken, attempt, identity.lastCodeFor('later@shop.example') ?? '', from())).toEqual({ kind: 'failed', failure: 'unavailable' })
     expect(begun(await beginSignUp(flow, { ...TOMAS, email: 'later@shop.example' }, from())).step).toBe('answer_sign_in')
   })
+
+  it('logs why the database refused, with its stack, and without the person’s details', async () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined)
+    const refused = new Error('Failed query: select hold_register_owner($1, $2)\nparams: Tomás,logged@shop.example')
+    refused.name = 'DrizzleQueryError'
+    const broken = { ...flow, database: { transaction: () => Promise.reject(refused) } as unknown as Database }
+    const attempt = begun(await beginSignUp(flow, { ...TOMAS, email: 'logged@shop.example' }, from()))
+
+    await answerCode(broken, attempt, identity.lastCodeFor('logged@shop.example') ?? '', from())
+    const line = JSON.parse(String(logged.mock.calls.at(-1)?.[0])) as { event: string; error: string }
+    logged.mockRestore()
+    expect(line.event).toBe('membership_failed')
+    expect(line.error).toContain('DrizzleQueryError: Failed query: select hold_register_owner($1, $2)')
+    expect(line.error).toMatch(/\n\s+at /)
+    expect(line.error).not.toContain('logged@shop.example')
+    expect(line.error).not.toContain('Tomás')
+  })
 })
 
 describe('signing in', () => {

@@ -3,6 +3,7 @@ import { randomBytes } from 'node:crypto'
 import type { Identity, IdentityFailure, Tokens } from '@hold/auth'
 import { acceptInvitation, findInvitation, registerOwner } from '@hold/db'
 import type { Database, RateLimit } from '@hold/db'
+import { errorForLog } from '@hold/domain'
 import { attemptExpiry } from './attempt'
 import type { Attempt } from './attempt'
 
@@ -204,8 +205,9 @@ async function afterProof(dependencies: FlowDependencies, attempt: Attempt, toke
       if (!accepted.ok) return { kind: 'failed', failure: 'invitation_closed' }
     }
   } catch (error) {
-    // The account exists and is confirmed. Trying again reaches this step by a sign-in code.
-    console.error(JSON.stringify({ event: 'membership_failed', error: error instanceof Error ? error.name : 'unknown' }))
+    // The account exists and is confirmed. Trying again reaches this step by a sign-in code. Redacted: a failed
+    // query's text carries the person's details.
+    console.error(JSON.stringify({ event: 'membership_failed', error: errorForLog(error) }))
     return { kind: 'failed', failure: 'unavailable' }
   }
   // The group is the account type checked at the edge. The role is already safe in the database, so a failure here

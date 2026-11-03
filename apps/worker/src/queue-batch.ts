@@ -1,3 +1,4 @@
+import { errorForLog } from '@hold/domain'
 import type { z } from 'zod'
 
 // An SQS batch as Lambda delivers it, and the answer that names the messages to try again.
@@ -21,8 +22,8 @@ export function createQueueHandler<Message>(options: { readonly schema: z.ZodTyp
       try {
         await options.handle(message)
       } catch (error) {
-        // Only the kind of error: a failed query's text carries its values, which can be a renter's details.
-        console.error(`Message ${record.messageId} failed and will be tried again: ${error instanceof Error ? error.name : 'unknown error'}`)
+        // Redacted: a failed query's text carries its values, which can be a renter's details.
+        console.error(`Message ${record.messageId} failed and will be tried again: ${errorForLog(error)}`)
         failures.push({ itemIdentifier: record.messageId })
       }
     }
