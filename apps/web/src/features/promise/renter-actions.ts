@@ -22,7 +22,7 @@ export const writeToShop = renterAction({ name: 'renter.claim_message_sent', sco
     const told = await inLinkShop((transaction) => claimMessageRecipients(transaction, link.rentalId))
     const claimUrl = `${services.config.publicUrl}${rentalRoutes.claim(link.rentalId)}`
     for (const recipient of told?.recipients ?? []) {
-      if (!(await inLinkShop((transaction) => mayEmail(transaction, { shopId: link.shopId, rentalId: link.rentalId, to: recipient.email })))) continue
+      if (!(await inLinkShop((transaction) => mayEmail(transaction, { shopId: link.shopId, rentalId: link.rentalId, to: recipient.email, essential: false })))) continue
       await services.mailer.send(renterWroteEmail(recipient.email, recipient.language, { shopName: told?.shopName ?? '', renter: told?.renter ?? '—', claimUrl }))
     }
   } catch {

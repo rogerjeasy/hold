@@ -43,7 +43,7 @@ export const inviteStaff = shopAction(
       new Date(),
     )
     // Counted with every other email someone asked for, so the demo's invitations cannot be used to send mail at will.
-    if (!(await mayEmail(transaction, { shopId: context.shop.id, rentalId: null, to: input.email }))) return new Refusal('email_daily_cap')
+    if (!(await mayEmail(transaction, { shopId: context.shop.id, rentalId: null, to: input.email, essential: false }))) return new Refusal('email_daily_cap')
     const { config, mailer } = await getServices()
     const t = await getTranslations({ locale: language, namespace: 'emails.invitation' })
     const roles = await getTranslations({ locale: language, namespace: 'shop.staff.roles' })

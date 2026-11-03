@@ -1,6 +1,7 @@
 import 'server-only'
 import { chooseEmail, recordText, renterContact, takeTextAllowance } from '@hold/db'
 import type { RenterContact, Transaction } from '@hold/db'
+import { emailIsEssential } from '@hold/domain'
 import type { RenterCodeRecipient } from '@hold/domain'
 import { reachRenter } from '@hold/notify'
 import type { Reached, RenterMessage } from '@hold/notify'
@@ -23,7 +24,7 @@ export async function reachRenterIn(transaction: Transaction, rentalId: string, 
       texter,
       recordText: (record) => recordText(transaction, record, new Date()),
       allowText: (target) => takeTextAllowance(transaction, target),
-      allowEmail: (target) => mayEmail(transaction, target),
+      allowEmail: ({ purpose, ...target }) => mayEmail(transaction, { ...target, essential: emailIsEssential(purpose) }),
       stopTexts: (stopped) => chooseEmail(transaction, stopped),
       push: (event) => pushToRenterIn(transaction, rentalId, event),
     },

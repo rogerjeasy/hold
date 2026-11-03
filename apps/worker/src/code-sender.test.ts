@@ -29,11 +29,12 @@ describe('the code sender Cognito hands each code to', () => {
 
   // The day's email allowance counts what visitors ask Hold to send (packages/domain EMAIL_LIMITS); a person signing in
   // must never be locked out by it, so the code sender has no allowance to consult.
-  it('sends every sign-in code, more in a day than the whole email allowance, to the same person', async () => {
+  it('sends every sign-in code, more in a day than any email limit allows, to the same person', async () => {
     const mailer = createMemoryMailer()
     const send = createCodeSender({ decrypt, mailer })
-    for (let sent = 0; sent <= EMAIL_LIMITS.perDay; sent += 1) await send(event('CustomEmailSender_Authentication'))
-    expect(mailer.sent).toHaveLength(EMAIL_LIMITS.perDay + 1)
+    const moreThanAnyLimit = Math.max(...Object.values(EMAIL_LIMITS)) + 1
+    for (let sent = 0; sent < moreThanAnyLimit; sent += 1) await send(event('CustomEmailSender_Authentication'))
+    expect(mailer.sent).toHaveLength(moreThanAnyLimit)
   })
 
   it('never logs the code or the address', async () => {

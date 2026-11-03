@@ -45,11 +45,11 @@ const booking = (contactEmail: string) => {
 
 const sentTo = async (address: string) => ((await getServices()).mailer as unknown as { sent: { to: string }[] }).sent.filter((email) => email.to === address).length
 
-// Spends one share of the day's emails, as earlier requests would have.
-async function spend(target: { readonly rentalId: string | null; readonly to: string; readonly shopId?: string }) {
+// Spends one share of this shop's emails for the day, as earlier requests would have.
+async function spend(target: { readonly rentalId: string | null; readonly to: string }) {
   const { database } = await getServices()
-  const scope = { role: 'hold_app', shopId: target.shopId ?? shopId } as const
-  while (await inShop(database, scope, (transaction) => takeEmailAllowance(transaction, { shopId: target.shopId ?? shopId, rentalId: target.rentalId, to: target.to }))) { /* spend it */ }
+  const scope = { role: 'hold_app', shopId } as const
+  while (await inShop(database, scope, (transaction) => takeEmailAllowance(transaction, { shopId, rentalId: target.rentalId, to: target.to, essential: true, network: '203.0.113.90' }))) { /* spend it */ }
 }
 
 beforeAll(async () => {
@@ -73,7 +73,7 @@ beforeEach(() => {
 describe('the renter’s link, once the day’s emails to an address are spent', () => {
   it('still books, holds the email, says so, and logs it without the address', async () => {
     const address = 'spent@email-allowance.example'
-    await spend({ rentalId: null, to: address, shopId: crypto.randomUUID() })
+    await spend({ rentalId: null, to: address })
     await signIn(jar, OWNER, 'email_code')
     const booked = await rentals.bookRental(null, form(booking(address)))
     expect(booked).toMatchObject({ ok: true, value: { sent: 'held' } })
