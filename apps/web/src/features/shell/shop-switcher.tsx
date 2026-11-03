@@ -19,16 +19,16 @@ export function ShopSwitcher({ person, shop, role }: { person: Person; shop: { i
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label={t('switchShop', { shop: shop.name })}
-        className="flex min-h-13 w-full min-w-0 items-center gap-3 rounded-lg border border-band-border px-2.5 py-2 text-left transition-colors hover:border-band-muted hover:bg-band-hover md:max-lg:justify-center md:max-lg:border-transparent md:max-lg:px-0"
+        className="flex min-h-13 w-full min-w-0 items-center gap-3 rounded-xl border border-band-border bg-band-hover/50 px-2.5 py-2 text-left transition-colors hover:border-band-muted hover:bg-band-hover"
       >
         <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-lg bg-band-active text-xs font-extrabold tracking-tight">
           {initials(shop.name)}
         </span>
-        <span className="min-w-0 flex-1 md:max-lg:sr-only">
+        <span className="min-w-0 flex-1">
           <span className="block truncate text-[0.9375rem] leading-tight font-bold">{shop.name}</span>
           <span className="block truncate text-xs text-band-muted">{roles(role)}</span>
         </span>
-        <ChevronsUpDown aria-hidden="true" className="size-4 shrink-0 text-band-muted md:max-lg:hidden" />
+        <ChevronsUpDown aria-hidden="true" className="size-4 shrink-0 text-band-muted" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64">
         <DropdownMenuLabel className="label text-xs text-muted-foreground">{t('shops')}</DropdownMenuLabel>

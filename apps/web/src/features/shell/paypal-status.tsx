@@ -11,10 +11,10 @@ export function PayPalStatus({ connected }: { connected: boolean }) {
     <Link
       href={shopRoutes.paypal}
       title={label}
-      className="flex min-h-11 items-center gap-2.5 rounded-lg px-3 text-xs text-band-muted transition-colors hover:bg-band-hover hover:text-band-foreground md:max-lg:justify-center md:max-lg:px-0"
+      className="flex min-h-11 items-center gap-2.5 rounded-xl px-3 text-xs text-band-muted transition-colors hover:bg-band-hover hover:text-band-foreground"
     >
       <span aria-hidden="true" className={connected ? 'size-2 shrink-0 rounded-full bg-band-success' : 'size-2 shrink-0 rounded-full border border-band-muted'} />
-      <span className="min-w-0 truncate md:max-lg:sr-only">{label}</span>
+      <span className="min-w-0 truncate">{label}</span>
     </Link>
   )
 }

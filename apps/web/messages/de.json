@@ -2570,7 +2570,19 @@
     "paypal": {
       "connected": "PayPal verbunden · Sandbox",
       "notConnected": "PayPal nicht verbunden"
-    }
+    },
+    "jump": {
+      "trigger": "Springen zu…",
+      "title": "Zu einer Seite springen",
+      "placeholder": "Seiten und Aktionen suchen",
+      "empty": "Nichts passt zu „{query}“.",
+      "pages": "Seiten",
+      "actions": "Aktionen",
+      "hint": "Pfeiltasten zum Wählen, Enter zum Öffnen, Esc zum Schließen"
+    },
+    "quickLinks": "Schnellzugriff",
+    "more": "Menü",
+    "newRental": "Neue Vermietung"
   },
   "today": {
     "greeting": {
@@ -4853,5 +4865,8 @@
     "checkFailed": "Die Beweise konnten gerade nicht geprüft werden. Versuchen Sie es in einer Minute erneut.",
     "confirmed": "Sie haben die Übergabefotos am {day} um {time} bestätigt.",
     "added": "Sie haben am {day} um {time} Fotos von Übersehenem hinzugefügt."
+  },
+  "loading": {
+    "page": "Die Seite wird geladen…"
   }
 }

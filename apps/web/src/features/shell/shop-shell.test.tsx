@@ -15,9 +15,9 @@ const person = {
   ],
 }
 
-function shell(paypalConnected = true) {
+function shell(paypalConnected = true, role: 'owner' | 'read_only' = 'owner') {
   return renderWithIntl(
-    <ShopShell person={person} shop={{ id: 'shop-1', name: 'Ribeira Bikes' }} role="owner" paypalConnected={paypalConnected}>
+    <ShopShell person={person} shop={{ id: 'shop-1', name: 'Ribeira Bikes' }} role={role} paypalConnected={paypalConnected}>
       <p>The page</p>
     </ShopShell>,
   )
@@ -97,5 +97,22 @@ describe('the shop shell', () => {
   it('says plainly when PayPal is not connected', () => {
     shell(false)
     expect(screen.getAllByRole('link', { name: 'PayPal not connected' })[0]).toBeInTheDocument()
+  })
+
+  it('keeps the day’s work and a new rental within thumb reach on a phone or a tablet', () => {
+    navigation.pathname = '/shop/rentals'
+    shell()
+    const tabs = screen.getByRole('navigation', { name: 'Quick links' })
+    expect(within(tabs).getByRole('link', { name: 'Today' })).toHaveAttribute('href', '/shop')
+    expect(within(tabs).getByRole('link', { name: 'Decisions' })).toHaveAttribute('href', '/shop/decisions')
+    expect(within(tabs).getByRole('link', { name: 'Rentals' })).toHaveAttribute('aria-current', 'page')
+    expect(within(tabs).getByRole('link', { name: 'New rental' })).toHaveAttribute('href', '/shop/rentals/new')
+    expect(within(tabs).getByRole('button', { name: 'Open the shop menu' })).toBeInTheDocument()
+  })
+
+  it('offers read-only staff no new rental in the quick links', () => {
+    shell(true, 'read_only')
+    const tabs = screen.getByRole('navigation', { name: 'Quick links' })
+    expect(within(tabs).queryByRole('link', { name: 'New rental' })).not.toBeInTheDocument()
   })
 })

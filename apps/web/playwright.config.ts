@@ -22,7 +22,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: process.env.CI !== undefined,
   reporter: [['list']],
-  use: { baseURL, trace: 'retain-on-failure' },
+  // Pages arrive with motion; the tests ask for less, so a contrast check never meets a card half faded in.
+  use: { baseURL, trace: 'retain-on-failure', contextOptions: { reducedMotion: 'reduce' } },
   // The signed-in pages run on one PostgreSQL in WebAssembly, inside the one test server, which answers slowly while
   // many tests run at once. Two browsers at a time keep it responsive.
   workers: 2,

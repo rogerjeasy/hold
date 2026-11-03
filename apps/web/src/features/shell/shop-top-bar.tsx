@@ -1,51 +1,32 @@
-'use client'
-
-import { Menu } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Logo } from '@/features/site/logo'
 import { Link } from '@/i18n/navigation'
 import { shopRoutes } from '@/lib/routes'
-import { ShellTools } from './shell-tools'
+import { CommandPalette } from './command-palette'
 import type { ShellProps } from './shell-props'
-import { ShopNav } from './shop-nav'
-import { ShopSwitcher } from './shop-switcher'
+import { NewRentalLink } from './new-rental-link'
 
-// The shop's frame on a phone: the logo and the shop's name, and the whole menu behind one button.
-export function ShopTopBar({ person, shop, role, paypalConnected }: ShellProps) {
+// The bar over every shop page. Below lg it carries the logo and the shop's name on the dark band; from lg it sits on
+// the page's own sheet, frosted, with the jump-to search and a new rental at hand. One palette serves both, so its
+// keyboard shortcut is heard once.
+export function ShopTopBar({ shop, role }: ShellProps) {
   const t = useTranslations('shell')
-  const [open, setOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-40 flex min-h-14 items-center gap-2 bg-band pr-1.5 pl-4 text-band-foreground md:hidden">
-      <Link href={shopRoutes.home} aria-label={t('home', { shop: shop.name })} className="inline-flex min-h-11 items-center">
+    <header className="sticky top-0 z-40 flex min-h-14 items-center gap-2 bg-band pr-2 pl-4 text-band-foreground lg:glass lg:min-h-16 lg:rounded-t-2xl lg:border-b lg:border-border/60 lg:px-8 lg:text-foreground xl:px-10">
+      <Link href={shopRoutes.home} aria-label={t('home', { shop: shop.name })} className="inline-flex min-h-11 items-center lg:hidden">
         <Logo />
       </Link>
-      <p className="ml-2 min-w-0 flex-1 truncate text-sm font-semibold text-band-foreground/75">{shop.name}</p>
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" aria-label={t('openMenu')} className="text-band-foreground hover:bg-band-hover hover:text-band-foreground">
-            <Menu aria-hidden="true" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="right" closeLabel={t('closeMenu')} className="w-full gap-0 border-band-border bg-band text-band-foreground sm:max-w-sm [&>button]:text-band-foreground">
-          <SheetHeader className="border-b border-band-border">
-            <SheetTitle className="label text-band-muted">{t('menuTitle')}</SheetTitle>
-          </SheetHeader>
-          <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-3 pt-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-            <ShopSwitcher person={person} shop={shop} role={role} />
-            <ShopNav
-              className="flex-1"
-              onNavigate={() => {
-                setOpen(false)
-              }}
-            />
-            <ShellTools person={person} paypalConnected={paypalConnected} />
-          </div>
-        </SheetContent>
-      </Sheet>
+      <p className="ml-1 min-w-0 flex-1 truncate text-sm font-semibold text-band-foreground/70 lg:hidden">{shop.name}</p>
+      <CommandPalette
+        role={role}
+        className="max-lg:border-band-border max-lg:bg-band-hover max-lg:text-band-foreground max-lg:shadow-none max-lg:hover:border-band-muted max-sm:w-11 max-sm:justify-center max-sm:px-0 sm:w-56 lg:w-full lg:max-w-sm [&>span]:max-sm:sr-only"
+      />
+      {role === 'read_only' ? null : (
+        <div className="ml-auto hidden lg:block">
+          <NewRentalLink />
+        </div>
+      )}
     </header>
   )
 }

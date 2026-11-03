@@ -7,13 +7,13 @@ import type { ShellProps } from './shell-props'
 import { ShopNav } from './shop-nav'
 import { ShopSwitcher } from './shop-switcher'
 
-// The shop's menu from the md breakpoint: a rail of icons on a tablet, the full menu from lg.
+// The shop's menu from the lg breakpoint, in the dark band, every page named. Below lg it is behind the tab bar.
 export function ShopSidebar({ person, shop, role, paypalConnected }: ShellProps) {
   const t = useTranslations('shell')
 
   return (
-    <aside className="sticky top-0 hidden h-dvh flex-col gap-5 overflow-y-auto border-r border-band-border bg-band px-3 pt-5 pb-3 text-band-foreground md:flex">
-      <Link href={shopRoutes.home} aria-label={t('home', { shop: shop.name })} className="inline-flex min-h-11 items-center px-3 md:max-lg:justify-center md:max-lg:px-0">
+    <aside className="sticky top-0 hidden h-dvh flex-col gap-5 overflow-y-auto overscroll-contain px-3 pt-5 pb-3 text-band-foreground [scrollbar-color:var(--band-border)_transparent] lg:flex">
+      <Link href={shopRoutes.home} aria-label={t('home', { shop: shop.name })} className="inline-flex min-h-11 items-center self-start rounded-lg px-3 transition-opacity hover:opacity-85">
         <Logo />
       </Link>
       <ShopSwitcher person={person} shop={shop} role={role} />

@@ -2570,7 +2570,19 @@
     "paypal": {
       "connected": "PayPal conectado · sandbox",
       "notConnected": "PayPal sin conectar"
-    }
+    },
+    "jump": {
+      "trigger": "Ir a…",
+      "title": "Ir a una página",
+      "placeholder": "Buscar páginas y acciones",
+      "empty": "Nada coincide con «{query}».",
+      "pages": "Páginas",
+      "actions": "Acciones",
+      "hint": "Flechas para elegir, Intro para abrir, Esc para cerrar"
+    },
+    "quickLinks": "Accesos rápidos",
+    "more": "Menú",
+    "newRental": "Nuevo alquiler"
   },
   "today": {
     "greeting": {
@@ -4853,5 +4865,8 @@
     "checkFailed": "No se pudieron comprobar las pruebas ahora mismo. Vuelve a intentarlo en un minuto.",
     "confirmed": "Confirmaste las fotos de la entrega el {day} a las {time}.",
     "added": "Añadiste fotos de lo que el personal pasó por alto el {day} a las {time}."
+  },
+  "loading": {
+    "page": "Cargando la página…"
   }
 }

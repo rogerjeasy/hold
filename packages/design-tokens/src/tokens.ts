@@ -1,9 +1,9 @@
-// Hold's look, "Evidence": near-black ink on warm paper, one orange accent, photographs first. The web app's stylesheet
+// Hold's look, "Evidence": near-black ink on warm paper, one orange accent, photographs first, on soft rounded cards. The web app's stylesheet
 // (apps/web/src/app/globals.css) decided every value here; tokens.test.ts fails when the two drift apart. The phone
 // app reads only this file, never a hex value of its own.
 
 const light = {
-  background: '#f2f0ea',
+  background: '#f4f2ed',
   foreground: '#141412',
   card: '#ffffff',
   cardForeground: '#141412',
@@ -11,21 +11,21 @@ const light = {
   popoverForeground: '#141412',
   primary: '#b93f08',
   primaryForeground: '#ffffff',
-  secondary: '#e6e3da',
+  secondary: '#ebe8e0',
   secondaryForeground: '#141412',
-  muted: '#e9e6dd',
+  muted: '#eeebe4',
   mutedForeground: '#5c5952',
-  accent: '#e6e3da',
+  accent: '#ebe8e0',
   accentForeground: '#141412',
   destructive: '#a32a1a',
   success: '#1b6b45',
-  border: '#d8d4ca',
+  border: '#e2ded5',
   borderStrong: '#b4afa3',
   input: '#b4afa3',
   ring: '#b93f08',
   // An ink-coloured surface that flips with the theme.
   contrast: '#141412',
-  contrastForeground: '#f2f0ea',
+  contrastForeground: '#f4f2ed',
   // The dark band stays dark in both themes.
   band: '#141412',
   bandForeground: '#f2efe8',
@@ -51,9 +51,9 @@ const dark: Palette = {
   ...light,
   background: '#0e0e0d',
   foreground: '#f2efe8',
-  card: '#181816',
+  card: '#171715',
   cardForeground: '#f2efe8',
-  popover: '#181816',
+  popover: '#1b1b19',
   popoverForeground: '#f2efe8',
   primary: '#ff6a2b',
   primaryForeground: '#1c0d04',
@@ -65,7 +65,7 @@ const dark: Palette = {
   accentForeground: '#f2efe8',
   destructive: '#ff8a75',
   success: '#6fcf9d',
-  border: '#2a2a27',
+  border: '#292926',
   borderStrong: '#47473f',
   input: '#47473f',
   ring: '#ff6a2b',
@@ -138,15 +138,15 @@ export type TypeToken = keyof typeof type
 // The web's `label` utility.
 export const label = type.label
 
-// Corner radii in points, from the stylesheet's --radius (0.125rem): Evidence is nearly square.
+// Corner radii in points, from the stylesheet's --radius (0.625rem): soft, never pill-round except where a part says so.
 export const radius = {
-  sm: 1.2,
-  md: 1.6,
-  lg: 2,
-  xl: 2.8,
-  '2xl': 3.6,
-  '3xl': 4.4,
-  '4xl': 5.2,
+  sm: 6,
+  md: 8,
+  lg: 10,
+  xl: 14,
+  '2xl': 18,
+  '3xl': 22,
+  '4xl': 26,
 } as const
 
 // Photograph frames, width over height.

@@ -4,5 +4,10 @@ import { useTranslations } from 'next-intl'
 // such as the hosted assistant's scripted stand-in, may name itself its own way.
 export function SampleTag({ label }: { label?: string }) {
   const t = useTranslations('sample')
-  return <span className="label shrink-0 border border-border-strong px-1.5 py-px text-[0.625rem] leading-normal text-muted-foreground">{label ?? t('label')}</span>
+  return (
+    <span className="label inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border-strong/70 bg-muted px-2 py-0.5 text-[0.6875rem] leading-normal text-foreground/80">
+      <span aria-hidden="true" className="size-1.5 rounded-full bg-warning" />
+      {label ?? t('label')}
+    </span>
+  )
 }

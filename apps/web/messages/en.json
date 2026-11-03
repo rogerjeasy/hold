@@ -2570,7 +2570,19 @@
     "paypal": {
       "connected": "PayPal connected · sandbox",
       "notConnected": "PayPal not connected"
-    }
+    },
+    "jump": {
+      "trigger": "Jump to…",
+      "title": "Jump to a page",
+      "placeholder": "Search pages and actions",
+      "empty": "Nothing matches “{query}”.",
+      "pages": "Pages",
+      "actions": "Actions",
+      "hint": "Arrow keys to choose, Enter to open, Esc to close"
+    },
+    "quickLinks": "Quick links",
+    "more": "Menu",
+    "newRental": "New rental"
   },
   "today": {
     "greeting": {
@@ -4853,5 +4865,8 @@
     "checkFailed": "The evidence could not be checked just now. Try again in a minute.",
     "confirmed": "You confirmed the handover photographs on {day} at {time}.",
     "added": "You added photographs of what staff missed on {day} at {time}."
+  },
+  "loading": {
+    "page": "Loading the page…"
   }
 }

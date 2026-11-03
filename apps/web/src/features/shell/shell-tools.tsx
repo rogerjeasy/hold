@@ -11,7 +11,7 @@ export function ShellTools({ person, paypalConnected }: Pick<ShellProps, 'person
   return (
     <div className="grid gap-1.5 border-t border-band-border pt-3">
       <PayPalStatus connected={paypalConnected} />
-      <div className="flex items-center gap-1 px-1 md:max-lg:flex-col">
+      <div className="flex items-center gap-1 px-1">
         <LanguageSwitcher className={onBand} />
         <ThemeToggle className={onBand} />
       </div>

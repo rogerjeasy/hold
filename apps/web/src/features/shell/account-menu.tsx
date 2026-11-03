@@ -20,12 +20,12 @@ export function AccountMenu({ person }: { person: Person }) {
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label={t('account', { name })}
-        className="flex min-h-12 w-full min-w-0 items-center gap-3 rounded-lg px-2.5 text-left transition-colors hover:bg-band-hover md:max-lg:justify-center md:max-lg:px-0"
+        className="flex min-h-12 w-full min-w-0 items-center gap-3 rounded-xl px-2.5 text-left transition-colors hover:bg-band-hover"
       >
         <span aria-hidden="true" className="grid size-8 shrink-0 place-items-center rounded-full bg-band-active text-xs font-bold">
           {initials(name)}
         </span>
-        <span className="min-w-0 flex-1 md:max-lg:sr-only">
+        <span className="min-w-0 flex-1">
           <span className="block truncate text-sm leading-tight font-semibold">{name}</span>
           <span className="block truncate text-xs text-band-muted">{person.email}</span>
         </span>

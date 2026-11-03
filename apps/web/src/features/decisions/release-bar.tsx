@@ -22,7 +22,7 @@ export function ReleaseBar({ releases, text, passkeyNeeded, approve, pending, on
   const locale = useLocale()
   const backCents = releases.reduce((sum, row) => sum + (row.amountCents ?? 0), 0)
   return (
-    <section aria-label={t('label')} className="sticky bottom-[max(1rem,env(safe-area-inset-bottom))] z-10 grid gap-3 border border-foreground bg-card p-4 text-card-foreground shadow-lg md:p-5">
+    <section aria-label={t('label')} className="sticky bottom-[calc(var(--shop-bottom-inset,0px)+1rem)] z-10 grid animate-rise gap-3 rounded-2xl border border-foreground/80 bg-card p-4 text-card-foreground shadow-overlay md:p-5">
       <p className="font-semibold">{t('summary', { count: releases.length, amount: text.money(backCents) })}</p>
       <div className="flex flex-wrap items-center gap-3">
         {passkeyNeeded ? (
