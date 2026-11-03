@@ -1,4 +1,4 @@
-import { beginOpsRun, completeOpsRun, confirmedRules, decideProposal, exceptionFacts, inShop, liveStandingRule, recordExceptions, recordReminder, shopSnapshot, writeProposal } from '@hold/db'
+import { beginOpsRun, completeOpsRun, confirmedRules, decideProposal, exceptionFacts, exceptionsAwaitingOwner, inShop, liveStandingRule, recordExceptions, recordReminder, shopSnapshot, writeProposal } from '@hold/db'
 import type { Database, RecordedException, Transaction } from '@hold/db'
 import { detectExceptions, guardNumbers, money, orderQueue, suppressedByRule } from '@hold/domain'
 import type { DetectorKind, OwnerRule, ProposalKind, ReminderKind } from '@hold/domain'
@@ -93,14 +93,18 @@ export async function runOperations(dependencies: OpsDependencies, input: z.infe
     }
   }
 
-  const opened = dependencies.investigator === undefined || reads === undefined ? undefined : await reads.openReader().catch(() => undefined)
+  // An exception whose proposal still waits for the owner was asked about already: asking again spends the model's
+  // tokens on an answer the queue holds. PayPal's server is opened only when something is left to investigate.
+  const awaiting = await asWorker((transaction) => exceptionsAwaitingOwner(transaction, recorded.map((each) => each.id)))
+  const toDecide = orderQueue(recorded.filter((each) => each.allowed.length > 0 && !awaiting.has(each.id)))
+  const opened = dependencies.investigator === undefined || reads === undefined || toDecide.length === 0 ? undefined : await reads.openReader().catch(() => undefined)
   const reader = opened?.ok === true ? opened.reader : undefined
   const budget: RunBudget = { toolCalls: 0, tokens: 0 }
   const usage = { inputTokens: 0, outputTokens: 0, model: null as string | null }
   const stopAt = Date.now() + limits.maxMilliseconds
   let proposals = 0
   try {
-    for (const exception of orderQueue(recorded.filter((each) => each.allowed.length > 0))) {
+    for (const exception of toDecide) {
       const candidates = exception.allowed.filter((kind) => !suppressedByRule(rules, { proposalKind: kind, moneyCents: exception.moneyCents }))
       const [first] = candidates
       if (first === undefined) continue

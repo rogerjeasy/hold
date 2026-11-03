@@ -405,7 +405,7 @@ flowchart LR
 | Incident waiting | An incident from Extension 5 has waited for staff longer than the shop's set time | `note` |
 | Decision promised | A contested claim the shop promised to decide within a day (architecture.md section 6.16) | `send_message`, `note` |
 | Promise missed | A contested claim not decided by the date the shop promised; only the owner may decide it | `note` |
-| Reconciliation difference | The nightly comparison with PayPal found a difference it could not apply | `note` |
+| Reconciliation difference | The nightly comparison with PayPal found a difference it could not apply. A walk-in hold, placed with the fee and the fee captured from it at once, reads `PARTIALLY_CAPTURED` for its whole life and is no difference | `note` |
 
 Section 12.5 adds one more detector, a booking blocked by an overdue or damaged item, with the rental calendar.
 
@@ -470,6 +470,8 @@ PayPal's write tools, such as `create_invoice`, `create_refund` and `accept_disp
 **The reach of a run that has been manipulated.** Memos on PayPal transactions, dispute notes and renter comments are text from outside. If one of them steered the agent completely, the worst it could do is write a proposal of an allowed kind for a real exception, which a person must still approve, or send one rate-capped template reminder. It has no other tool.
 
 **Run limits.** Each run has a ceiling on tool calls, tokens and elapsed time. If a ceiling is reached, the remaining exceptions go to the queue with a fixed reason that says they were not investigated.
+
+**What a run spends the model on.** Only what is new. An exception whose proposal still waits for the owner is not asked about again, and PayPal's MCP server is not opened when nothing is left to investigate. A sample rental's records are left out of the detectors' snapshot and of the nightly read-back, since its renter and PayPal references were made up (`shopSnapshot` and `holdsToReconcile` in `packages/db`). Until 3 November 2026 they were not: every demo shop's sample claims tripped the claim detectors, and the nightly run of 1 November asked Claude about them in shop after shop, about 600,000 tokens over some 130 calls, two thirds of the account's day, by the account's Bedrock metrics (`run-operations.test.ts` now runs the samples through thirty nights and asks nothing).
 
 **Dispute notes pass the number guard.** A drafted dispute response is checked like any message about money. Every amount in it must match the claim record.
 

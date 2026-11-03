@@ -1,4 +1,4 @@
-import { auditLog, authorizations, captureSessions, comparisons, decideProposal, decideRule, draftRule, grantStandingRule, holds, inShop, itemTypes, opsRuns, proposals, rentalItems, rentals, shopExceptions } from '@hold/db'
+import { addSampleRentals, auditLog, authorizations, captureSessions, comparisons, decideProposal, decideRule, draftRule, grantStandingRule, holds, inShop, itemTypes, opsRuns, proposals, rentalItems, rentals, shopExceptions } from '@hold/db'
 import { createTestDatabase } from '@hold/db/testing'
 import type { TestDatabase } from '@hold/db/testing'
 import { readyRentalShop } from '@hold/db/testing/ready-rental'
@@ -156,6 +156,42 @@ describe('a nightly run', () => {
     expect(investigator.toolAnswers[1]).toMatch(/not offered/i)
     const lines = await inShop(database, { role: 'hold_worker', shopId: shop.scope.shopId }, (transaction) => transaction.select().from(auditLog).where(eq(auditLog.source, runId)))
     expect(lines.map((line) => [line.action, line.actorKind, (line.detail as { outcome: string }).outcome])).toEqual([['agent.tool.paypal.get_order', 'shop_agent', 'ok'], ['agent.tool.paypal.create_refund', 'shop_agent', 'refused']])
+  })
+})
+
+describe('what a run spends Claude on', () => {
+  it('never investigates, reminds about or reads back from PayPal a demo shop\'s sample rentals', async () => {
+    await shop.act((transaction) => addSampleRentals(transaction, { shopId: shop.scope.shopId, userId: shop.scope.userId ?? '', timeZone: 'UTC', now }))
+    let investigated = 0
+    let reads = 0
+    const investigator: Investigator = { investigate: () => { investigated += 1; return Promise.resolve({ kind: 'refused', model: 'counting', inputTokens: 0, outputTokens: 0 }) } }
+    const before = sent.length
+    const counting = paypal({ authorization: () => { reads += 1; return Promise.resolve('created') } })
+    // That night and the nights after, as the samples' replies, promises and holds come due.
+    for (const days of [0, 1, 2, 3, 5, 8, 30]) await run({ investigator, now: () => new Date(now.getTime() + days * 24 * HOUR), paypal: () => Promise.resolve(counting) })
+    expect({ investigated, reads, reminders: sent.length - before }).toEqual({ investigated: 0, reads: 0, reminders: 0 })
+  })
+
+  it('does not ask the model again about an exception whose proposal still waits for the owner, nor open PayPal for it', async () => {
+    await holdEnding()
+    let asked = 0
+    let opened = 0
+    const investigator = scripted(() => { asked += 1; return { answer: answer({ proposalKind: 'request_replacement_hold' }) } })
+    const reads = paypal({ openReader: () => { opened += 1; return Promise.resolve(reader()) } })
+    await run({ investigator, paypal: () => Promise.resolve(reads) })
+    await run({ investigator, paypal: () => Promise.resolve(reads) })
+    expect({ asked, opened }).toEqual({ asked: 1, opened: 1 })
+  })
+})
+
+describe('reading holds back from PayPal', () => {
+  it('counts a walk-in hold PayPal reads as partly captured as expected, since its fee was taken from it, and any other as a difference', async () => {
+    const walkIn = await shop.readyRental()
+    const atCounter = await shop.readyRental()
+    await database.update(holds).set({ strategy: 'combined' }).where(eq(holds.rentalId, walkIn.rentalId))
+    await run({ paypal: () => Promise.resolve(paypal({ authorization: () => Promise.resolve('partially_captured') })) })
+    const differences = (await inShopExceptions()).filter((each) => each.kind === 'reconciliation_difference').map((each) => each.rentalId)
+    expect(differences).toEqual([atCounter.rentalId])
   })
 })
 
