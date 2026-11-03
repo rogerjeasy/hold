@@ -86,14 +86,21 @@ describe('changing the number texts go to', () => {
 
 describe('the day’s emails Hold may be asked to send', () => {
   it('keep every pool together under the sending account’s day, with room left for sign-in codes', () => {
-    // The pools are disjoint: all demo mail, real shops' essential mail, and real shops' discretionary mail.
-    expect(EMAIL_LIMITS.demoPerDay + EMAIL_LIMITS.shopsEssentialPerDay + EMAIL_LIMITS.shopsDiscretionaryPerDay).toBeLessThanOrEqual(SENDING_ACCOUNT.perDay - SENDING_ACCOUNT.signInHeadroom)
+    // The pools are disjoint: demos' essential mail, demos' discretionary mail, real shops' essential mail, and real
+    // shops' discretionary mail.
+    const pools = EMAIL_LIMITS.demoEssentialPerDay + EMAIL_LIMITS.demoDiscretionaryPerDay + EMAIL_LIMITS.shopsEssentialPerDay + EMAIL_LIMITS.shopsDiscretionaryPerDay
+    expect(pools).toBeLessThanOrEqual(SENDING_ACCOUNT.perDay - SENDING_ACCOUNT.signInHeadroom)
   })
 
-  it('let one network, and one address across demos, have only a share of the demos’ day', () => {
-    expect(EMAIL_LIMITS.demoEssentialPerNetworkPerDay * 4).toBeLessThanOrEqual(EMAIL_LIMITS.demoPerDay)
-    expect(EMAIL_LIMITS.demoPerAddressPerDay * 4).toBeLessThanOrEqual(EMAIL_LIMITS.demoPerDay)
-    expect(EMAIL_LIMITS.discretionaryPerAddressPerDay).toBeLessThan(EMAIL_LIMITS.demoPerAddressPerDay)
+  it('let one network, and one address across demos, have only a share of each of the demos’ pools', () => {
+    expect(EMAIL_LIMITS.demoEssentialPerNetworkPerDay * 3).toBeLessThanOrEqual(EMAIL_LIMITS.demoEssentialPerDay)
+    expect(EMAIL_LIMITS.demoDiscretionaryPerNetworkPerDay * 3).toBeLessThanOrEqual(EMAIL_LIMITS.demoDiscretionaryPerDay)
+    expect(EMAIL_LIMITS.demoPerAddressPerDay * 3).toBeLessThanOrEqual(EMAIL_LIMITS.demoEssentialPerDay + EMAIL_LIMITS.demoDiscretionaryPerDay)
+  })
+
+  it('let no single real shop use up the real shops’ essential pool', () => {
+    expect(EMAIL_LIMITS.perShopEssentialPerDay * 3).toBeLessThanOrEqual(EMAIL_LIMITS.shopsEssentialPerDay)
+    expect(EMAIL_LIMITS.shopsDiscretionaryPerAddressPerDay * 3).toBeLessThanOrEqual(EMAIL_LIMITS.shopsDiscretionaryPerDay)
   })
 
   it('name as essential only what a renter needs to act on their own money', () => {

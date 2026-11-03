@@ -14,29 +14,26 @@ const share = (name: string, max: number, subject: string): Share => ({ limit: {
 export type EmailTarget = { readonly shopId: string; readonly rentalId: string | null; readonly to: string; readonly essential: boolean; readonly network: string }
 
 // The limits one email counts against (packages/domain EMAIL_LIMITS). Every email: its rental, its address in its shop,
-// its shop. Then exactly one of three pools that never overlap: every demo's mail; real shops' essential mail, which no
-// demo counts against; real shops' discretionary mail. A demo's essential mail also counts by network, all demo mail by
-// address across demos, and all discretionary mail by address across every shop. A real shop's essential mail to its own
-// renter counts against nothing another shop sends.
+// its shop. Then exactly one of four pools that never overlap: demos' essential mail; demos' discretionary mail; real
+// shops' essential mail, which no demo counts against and of which one shop may take only its share; real shops'
+// discretionary mail. Each demo pool also counts by the caller's network, and all demo mail by address across demos.
+// Real shops' discretionary mail counts by address across real shops, under a key no demo touches. A real shop's
+// essential mail to its own renter counts against nothing another shop or a demo sends.
 function sharesOf(target: EmailTarget, demo: boolean): Share[] {
   const each = [
     ...(target.rentalId === null ? [] : [share('email-rental', EMAIL_LIMITS.perRentalPerDay, target.rentalId)]),
     share('email-address-in-shop', EMAIL_LIMITS.perAddressPerShopPerDay, `${target.shopId}\u0000${target.to}`),
     share('email-shop', EMAIL_LIMITS.perShopPerDay, target.shopId),
   ]
-  const discretionary = target.essential ? [] : [share('email-discretionary-address', EMAIL_LIMITS.discretionaryPerAddressPerDay, target.to)]
   if (demo) {
-    return [
-      ...each,
-      ...discretionary,
-      ...(target.essential ? [share('email-demo-essential-network', EMAIL_LIMITS.demoEssentialPerNetworkPerDay, target.network)] : []),
-      share('email-demo-address', EMAIL_LIMITS.demoPerAddressPerDay, target.to),
-      share('email-demo-day', EMAIL_LIMITS.demoPerDay, 'every demo'),
-    ]
+    const pool = target.essential
+      ? [share('email-demo-essential-network', EMAIL_LIMITS.demoEssentialPerNetworkPerDay, target.network), share('email-demo-essential-day', EMAIL_LIMITS.demoEssentialPerDay, 'every demo')]
+      : [share('email-demo-discretionary-network', EMAIL_LIMITS.demoDiscretionaryPerNetworkPerDay, target.network), share('email-demo-discretionary-day', EMAIL_LIMITS.demoDiscretionaryPerDay, 'every demo')]
+    return [...each, share('email-demo-address', EMAIL_LIMITS.demoPerAddressPerDay, target.to), ...pool]
   }
   return target.essential
-    ? [...each, share('email-shops-essential-day', EMAIL_LIMITS.shopsEssentialPerDay, 'every shop')]
-    : [...each, ...discretionary, share('email-shops-discretionary-day', EMAIL_LIMITS.shopsDiscretionaryPerDay, 'every shop')]
+    ? [...each, share('email-shop-essential', EMAIL_LIMITS.perShopEssentialPerDay, target.shopId), share('email-shops-essential-day', EMAIL_LIMITS.shopsEssentialPerDay, 'every shop')]
+    : [...each, share('email-shops-discretionary-address', EMAIL_LIMITS.shopsDiscretionaryPerAddressPerDay, target.to), share('email-shops-discretionary-day', EMAIL_LIMITS.shopsDiscretionaryPerDay, 'every shop')]
 }
 
 // One more email someone asked Hold to send today (architecture.md section 15), within every limit that applies to it.
