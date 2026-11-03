@@ -236,6 +236,9 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
         if (order.status !== 'approved') return failure('order_not_approved', 'The renter has not approved the order.')
         const amount = order.capture === 'other_amount' ? { ...order.amount, cents: order.amount.cents + 1_00 } : order.amount
         order.payment = { orderId: order.orderId, captureId: nextId('FAKE-CAPTURE'), status: order.capture === 'review' ? 'pending' : 'completed', amount, payer: FAKE_PAYER }
+        // A capture like any other, which PayPal can refund or reverse. It was paid on its own order, so no
+        // authorization stands behind it.
+        captures.set(order.payment.captureId, { captureId: order.payment.captureId, status: order.payment.status === 'pending' ? 'pending' : 'completed', amount, finalCapture: true, createdAt: options.now(), authorizationId: '' })
         order.status = 'completed'
         if (order.thenDispute) disputes.push({ id: nextId('FAKE-DISPUTE'), open: true, amount: order.amount, responseDueAt: addDays(options.now(), 10), captureIds: [order.payment.captureId] })
         return ok(order.payment)

@@ -1751,7 +1751,8 @@
           "invoice_sent": "Factura enviada",
           "invoice_paid": "Factura pagada",
           "extension_captured": "Ampliación cobrada",
-          "refunded_in_paypal": "Devuelto en PayPal, no por Hold"
+          "refunded_in_paypal": "Devuelto en PayPal, no por Hold",
+          "fee_refunded_in_paypal": "Pago del alquiler devuelto en PayPal"
         },
         "calls": {
           "authorize": "Realizando la retención",
@@ -4186,7 +4187,8 @@
       "refunded": "Reembolsado al cliente",
       "invoice_sent": "Facturado al cliente",
       "invoice_paid": "Factura pagada",
-      "refunded_in_paypal": "Devuelto al cliente en PayPal, no por Hold"
+      "refunded_in_paypal": "Devuelto al cliente en PayPal, no por Hold",
+      "fee_refunded_in_paypal": "Pago del alquiler devuelto en PayPal, no por Hold"
     },
     "flows": {
       "to_shop": "Para la tienda",

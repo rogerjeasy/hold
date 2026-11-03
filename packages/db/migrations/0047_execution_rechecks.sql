@@ -18,6 +18,8 @@ GRANT EXECUTE ON FUNCTION hold_executions_to_recheck(timestamptz, timestamptz, i
 --> statement-breakpoint
 
 -- Money PayPal returned to the renter from a capture Hold made, without Hold: a refund made in PayPal, or a reversal
--- (architecture.md section 8.7). A kind of its own, so it is never taken for a refund Hold made.
+-- (architecture.md section 8.7). A kind of its own, so it is never taken for a refund Hold made, and another for money
+-- back from the rental's fee or extra days, which no claim counts. Each such line names the capture it came back from.
+ALTER TABLE "money_events" ADD COLUMN "returned_from" text;--> statement-breakpoint
 ALTER TABLE "money_events" DROP CONSTRAINT "kind_allowed";--> statement-breakpoint
-ALTER TABLE "money_events" ADD CONSTRAINT "kind_allowed" CHECK ("money_events"."kind" in ('fee_captured', 'hold_placed', 'hold_renewed', 'hold_released', 'hold_captured', 'refunded', 'invoice_sent', 'invoice_paid', 'extension_captured', 'refunded_in_paypal'));
+ALTER TABLE "money_events" ADD CONSTRAINT "kind_allowed" CHECK ("money_events"."kind" in ('fee_captured', 'hold_placed', 'hold_renewed', 'hold_released', 'hold_captured', 'refunded', 'invoice_sent', 'invoice_paid', 'extension_captured', 'refunded_in_paypal', 'fee_refunded_in_paypal'));

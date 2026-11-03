@@ -1751,7 +1751,8 @@
           "invoice_sent": "Invoice sent",
           "invoice_paid": "Invoice paid",
           "extension_captured": "Extension captured",
-          "refunded_in_paypal": "Returned in PayPal, not by Hold"
+          "refunded_in_paypal": "Returned in PayPal, not by Hold",
+          "fee_refunded_in_paypal": "Rental payment returned in PayPal"
         },
         "calls": {
           "authorize": "Placing the hold",
@@ -4186,7 +4187,8 @@
       "refunded": "Refunded to the renter",
       "invoice_sent": "Invoiced to the renter",
       "invoice_paid": "Invoice paid",
-      "refunded_in_paypal": "Returned to the renter in PayPal, not by Hold"
+      "refunded_in_paypal": "Returned to the renter in PayPal, not by Hold",
+      "fee_refunded_in_paypal": "Rental payment returned in PayPal, not by Hold"
     },
     "flows": {
       "to_shop": "To the shop",
