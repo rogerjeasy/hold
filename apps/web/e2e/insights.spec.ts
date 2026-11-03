@@ -12,7 +12,9 @@ async function openInsights(page: Page, as: 'Tomás, the owner' | 'Jonas, at the
   await page.goto('/sign-in')
   await page.getByRole('region', { name: 'Try the demo shop' }).getByRole('button', { name: `Start a demo as ${as}` }).click()
   await expectInShop(page, 'Ribeira Bikes')
-  await page.getByRole('navigation', { name: 'Shop pages' }).getByRole('link', { name: 'Insights' }).click()
+  // The menu lists Insights only for those it opens for; counter staff can still follow a link to it.
+  if (as === 'Tomás, the owner') await page.getByRole('navigation', { name: 'Shop pages' }).getByRole('link', { name: 'Insights' }).click()
+  else await page.goto('/shop/insights')
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Insights')
 }
 
@@ -68,8 +70,9 @@ test('the owner asks the insights agent, whose turn goes through Hold’s server
   await expect(dashboard(page).getByText(/^Simulated answer: in this test environment no model is asked/)).toBeVisible()
 })
 
-test('counter staff are told only the owner or a manager opens it', async ({ page }) => {
+test('counter staff are not offered Insights in the menu, and are told only the owner or a manager opens it', async ({ page }) => {
   await openInsights(page, 'Jonas, at the counter')
+  await expect(page.getByRole('navigation', { name: 'Shop pages' }).getByRole('link', { name: 'Insights' })).toHaveCount(0)
   await expect(page.getByText('Only the owner or a manager opens the insights dashboard.')).toBeVisible()
   await expect(dashboard(page)).toHaveCount(0)
 })

@@ -112,8 +112,10 @@ test('at pickup, staff ask for the hold, the renter approves it on their own pho
   await expect(hold.getByRole('status')).toContainText('Waiting for the renter to approve')
   // On a phone at the counter, what staff act on comes before the terms.
   await page.setViewportSize({ width: 390, height: 844 })
-  const holdTop = (await hold.boundingBox())?.y ?? Infinity
-  const termsTop = (await page.getByRole('region', { name: 'Terms' }).boundingBox())?.y ?? 0
+  // Both read at once, against the page rather than the window, so a scroll between two reads cannot swap them.
+  const terms = page.getByRole('region', { name: 'Terms' })
+  const holdTop = await hold.evaluate((element) => element.getBoundingClientRect().top + window.scrollY)
+  const termsTop = await terms.evaluate((element) => element.getBoundingClientRect().top + window.scrollY)
   expect(holdTop).toBeLessThan(termsTop)
   await expectFitsEveryWidth(page)
   const holdLink = (await hold.getByTestId('renter-link').textContent()) ?? ''
