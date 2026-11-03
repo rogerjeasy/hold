@@ -46,7 +46,7 @@ export function ComparisonScreen({ shopName, report, canAct, calibration, sample
   const dropPoint = report.after.find((photo) => photo.view === DROP_POINT_VIEW)
   return <ShopFrame shopName={shopName} title={report.label}><div className="grid gap-6">
     <Link className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4" href={rentalRoutes.rental(report.rentalId)}>{t('back')}</Link>
-    {notice === 'none' ? null : <Notice title={t(`notices.${notice}.title`)} body={t(`notices.${notice}.body`)} />}
+    {notice === 'none' || waiting ? null : <Notice title={t(`notices.${notice}.title`)} body={t(`notices.${notice}.body`)} />}
     {waiting ? <Panel title={t('sample.title')}><div className="grid gap-3 px-4 py-4 md:px-5"><p className="max-w-prose">{t('sample.body')}</p><p className="text-muted-foreground">{t('boundary')}</p>{canAct && sampleAllowance !== undefined ? <SampleComparisonForm rentalId={report.rentalId} allowance={sampleAllowance} /> : null}</div></Panel>
       : pending ? <p role="status">{t('pending')} {t('updatesItself')}</p> : <Panel title={t(`outcomes.${outcome}`)}><div className="grid gap-3 px-4 py-4 md:px-5"><p>{report.deferredReason === 'model_unavailable' ? t('modelUnavailable') : t(`bodies.${outcome}`)}</p><p className="text-muted-foreground">{t('boundary')}</p>
       {report.deferredReason === 'reused_photo' ? <p>{t('reused')}</p> : null}

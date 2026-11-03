@@ -42,6 +42,8 @@ describe('the demo’s sample return, waiting for its comparison', () => {
     expect(screen.getByText(/2 real comparisons left today from your network/)).toBeInTheDocument()
     expect(screen.getByText(/Claude Opus 4.6 compares these demonstration photographs/)).toBeInTheDocument()
     expect(screen.queryByText(/Comparing photographs/)).not.toBeInTheDocument()
+    // Nothing has run yet, so the page does not also say no model answered.
+    expect(screen.queryByText('Simulated comparison')).not.toBeInTheDocument()
   })
   it('offers no button once none is left today, and says which share is spent and when it starts again', () => {
     renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={waiting} canAct sampleAllowance={{ left: 0, refusal: 'daily_cap_network' }} />)
