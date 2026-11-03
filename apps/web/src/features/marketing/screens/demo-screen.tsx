@@ -32,7 +32,7 @@ export function DemoScreen() {
         <FeatureGrid items={cast.map(({ key, icon }) => ({ title: t(`cast.items.${key}.title`), body: t(`cast.items.${key}.body`), icon }))} />
       </TitledSection>
       <TitledSection title={t('honest.title')} lead={t('honest.lead')} tone="band">
-        <div className="grid gap-10 md:grid-cols-2 md:gap-12">
+        <div className="grid gap-5 md:grid-cols-2 md:gap-6">
           <MarkedList title={t('honest.real.title')} items={realKeys.map((key) => t(`honest.real.items.${key}`))} icon={CircleCheck} tone="band" />
           <MarkedList
             title={t('honest.simulated.title')}

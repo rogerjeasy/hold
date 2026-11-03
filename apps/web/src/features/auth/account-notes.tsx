@@ -10,24 +10,28 @@ export function AccountNotes() {
   const titleId = useId()
 
   return (
-    <section aria-labelledby={titleId} className="border-t border-t-foreground pt-4">
-      <h2 id={titleId} className="label text-muted-foreground">
+    <section aria-labelledby={titleId} className="rounded-2xl border border-border/70 p-5">
+      <h2 id={titleId} className="label text-xs text-muted-foreground">
         {t('title')}
       </h2>
-      <dl>
-        <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 border-b py-4">
-          <Users aria-hidden="true" className="mt-0.5 size-5 text-primary" />
+      <dl className="mt-1">
+        <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 border-b border-border/70 py-4">
+          <span aria-hidden="true" className="row-span-2 grid size-9 place-items-center rounded-lg bg-primary/10 text-primary">
+            <Users className="size-4.5" />
+          </span>
           <dt className="font-bold">{t('staff.title')}</dt>
-          <dd className="col-start-2 mt-0.5 text-muted-foreground">{t('staff.body')}</dd>
+          <dd className="col-start-2 mt-0.5 text-[0.9375rem] text-muted-foreground">{t('staff.body')}</dd>
         </div>
         <div className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 pt-4">
-          <Link2 aria-hidden="true" className="mt-0.5 size-5 text-primary" />
+          <span aria-hidden="true" className="row-span-2 grid size-9 place-items-center rounded-lg bg-primary/10 text-primary">
+            <Link2 className="size-4.5" />
+          </span>
           <dt className="font-bold">{t('renter.title')}</dt>
-          <dd className="col-start-2 mt-0.5 text-muted-foreground">
+          <dd className="col-start-2 mt-0.5 text-[0.9375rem] text-muted-foreground">
             {t('renter.body')}
-            <Link href={routes.forRenters} className="flex min-h-11 items-center gap-1.5 font-semibold text-foreground underline underline-offset-4">
+            <Link href={routes.forRenters} className="group flex min-h-11 items-center gap-1.5 font-semibold text-foreground underline decoration-primary/50 decoration-2 underline-offset-4 hover:decoration-primary">
               {t('renter.action')}
-              <ArrowRight aria-hidden="true" className="size-4 shrink-0" />
+              <ArrowRight aria-hidden="true" className="size-4 shrink-0 transition-transform duration-300 ease-spring group-hover:translate-x-0.5" />
             </Link>
           </dd>
         </div>

@@ -14,7 +14,7 @@ export function CodeStep({ page }: { page: AttemptPage }) {
       <form action={startOver}>
         <input type="hidden" name="page" value={page} />
         <input type="hidden" name="locale" value={locale} />
-        <button type="submit" className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
+        <button type="submit" className="inline-flex min-h-11 items-center font-semibold underline decoration-primary/50 decoration-2 underline-offset-4 transition-colors hover:decoration-primary">
           {t('startOver')}
         </button>
       </form>

@@ -1381,6 +1381,12 @@
       "pending": {
         "start": "Preparando su tienda, sus dos cuentas y sus alquileres de ejemplo. Tarda unos 20 segundos.",
         "continue": "Iniciando sesión en su demo…"
+      },
+      "steps": {
+        "title": "Preparando tu demostración",
+        "shop": "Creando tu tienda de demostración…",
+        "rentals": "Añadiendo alquileres de ejemplo…",
+        "today": "Abriendo la página Hoy…"
       }
     }
   },

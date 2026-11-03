@@ -18,7 +18,7 @@ export function AiBoundaries({ hiddenHeading }: { hiddenHeading?: string }) {
       ) : (
         <h2 className="sr-only">{hiddenHeading}</h2>
       )}
-      <div className={cn('grid gap-10 md:grid-cols-2 md:gap-12', hiddenHeading === undefined && 'mt-10 md:mt-14')}>
+      <div className={cn('grid gap-5 md:grid-cols-2 md:gap-6', hiddenHeading === undefined && 'mt-10 md:mt-14')}>
         <MarkedList title={t('does.title')} items={doesKeys.map((key) => t(`does.items.${key}`))} icon={CircleCheck} tone="band" />
         <MarkedList title={t('never.title')} items={neverKeys.map((key) => t(`never.items.${key}`))} icon={CircleX} accent tone="band" />
       </div>

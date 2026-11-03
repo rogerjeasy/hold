@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react'
+import { act, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { renderWithIntl } from '@/test/render'
@@ -38,6 +38,43 @@ describe('the demo’s one tap', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Start a demo as Tomás, the owner' }))
 
     expect(await screen.findByRole('status')).toHaveTextContent('Setting up your shop, its two accounts and its sample rentals. This takes about 20 seconds.')
+  })
+
+  it('marks the pressed choice as working at once, and the form as busy', async () => {
+    answered.mockReturnValueOnce(new Promise<DemoFormState>(() => undefined))
+    renderWithIntl(<DemoAccountsForm demo="new" />)
+    const pressed = screen.getByRole('button', { name: 'Start a demo as Tomás, the owner' })
+
+    await userEvent.click(pressed)
+
+    expect(pressed).toHaveAccessibleDescription(/Creating your demo shop/)
+    expect(screen.getByRole('button', { name: 'Start a demo as Jonas, at the counter' })).not.toHaveAccessibleDescription(/Creating/)
+    expect(pressed.closest('form')).toHaveAttribute('aria-busy', 'true')
+  })
+
+  it('walks through the setup in steps while the server works, and never says a step is finished', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true })
+    try {
+      answered.mockReturnValueOnce(new Promise<DemoFormState>(() => undefined))
+      renderWithIntl(<DemoAccountsForm demo="new" />)
+      const user = userEvent.setup({ advanceTimers: (ms) => vi.advanceTimersByTime(ms) })
+
+      await user.click(screen.getByRole('button', { name: 'Start a demo as Tomás, the owner' }))
+      const status = await screen.findByRole('status')
+      const current = () => within(status).getByText((_, element) => element?.getAttribute('aria-current') === 'step')
+
+      expect(current()).toHaveTextContent('Creating your demo shop…')
+      await act(async () => { await vi.advanceTimersByTimeAsync(8_000) })
+      expect(current()).toHaveTextContent('Adding sample rentals…')
+      await act(async () => { await vi.advanceTimersByTimeAsync(10_000) })
+      expect(current()).toHaveTextContent('Opening Today…')
+      // However long the server takes, the last step stays in progress: only the server's answer ends it.
+      await act(async () => { await vi.advanceTimersByTimeAsync(60_000) })
+      expect(current()).toHaveTextContent('Opening Today…')
+      expect(status).not.toHaveTextContent(/done|ready|finished/i)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('says it is signing in when coming back to a demo, which is quick', async () => {

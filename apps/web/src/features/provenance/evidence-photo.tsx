@@ -6,7 +6,7 @@ import type { ProvenanceView } from './photo-provenance'
 export function EvidencePhoto({ caption, url, provenance, timeZone }: { caption: string; url: string; provenance: ProvenanceView | null; timeZone: string }) {
   return (
     <figure className="grid min-w-0 content-start gap-2">
-      <figcaption className="font-semibold">{caption}</figcaption>
+      <figcaption className="label text-xs text-muted-foreground">{caption}</figcaption>
       <PhotoWithMarks src={url} alt={caption} marks={[]} />
       {provenance === null ? null : <PhotoProvenance provenance={provenance} timeZone={timeZone} />}
     </figure>

@@ -2,6 +2,7 @@ import { useTranslations } from 'next-intl'
 import { exampleRental } from './example-rental'
 import { useExampleMoney } from './use-example-money'
 
+// The one hold both phones read from, as a small receipt between them.
 export function HoldTag() {
   const t = useTranslations('bothSides.hold')
   const money = useExampleMoney()
@@ -14,9 +15,12 @@ export function HoldTag() {
   const title = t('title', { number: exampleRental.holdNumber })
 
   return (
-    <div role="group" aria-label={title} className="relative border border-foreground bg-card px-3.5 py-2.5">
-      <p className="mb-1 text-sm font-bold">{title}</p>
-      <dl className="figures grid grid-cols-[auto_auto] gap-x-3.5 gap-y-0.5 text-[0.8125rem]">
+    <div role="group" aria-label={title} className="relative rounded-xl bg-card px-4 py-3 shadow-raised ring-1 ring-border">
+      <p className="mb-2 flex items-center gap-2 text-sm font-bold">
+        <span aria-hidden="true" className="size-2 rounded-full bg-primary" />
+        {title}
+      </p>
+      <dl className="figures grid grid-cols-[auto_auto] gap-x-4 gap-y-1 text-[0.8125rem]">
         {rows.map((row) => (
           <div key={row.label} className="contents">
             <dt className="text-muted-foreground">{row.label}</dt>

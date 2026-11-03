@@ -1,6 +1,6 @@
 'use client'
 
-import { Menu } from 'lucide-react'
+import { ArrowRight, Menu } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -26,20 +26,25 @@ export function MobileMenu({ className }: { className?: string }) {
         </Button>
       </SheetTrigger>
       <SheetContent side="right" closeLabel={t('closeMenu')} className="w-full gap-0 sm:max-w-sm">
-        <SheetHeader className="border-b">
+        <SheetHeader className="border-b border-border/70">
           <SheetTitle className="label text-muted-foreground">{t('menuTitle')}</SheetTitle>
         </SheetHeader>
         <nav aria-label={t('menuTitle')} className="flex flex-1 flex-col overflow-y-auto px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-          <ul>
+          <ul className="stagger mt-2">
             {navItems.map((item) => (
-              <li key={item.key} className="border-b">
-                <Link href={item.href} onClick={close} className="flex min-h-14 items-center text-2xl font-bold tracking-tight">
+              <li key={item.key} className="border-b border-border/70">
+                <Link
+                  href={item.href}
+                  onClick={close}
+                  className="group flex min-h-15 items-center justify-between gap-3 text-2xl font-extrabold tracking-tight transition-colors hover:text-primary"
+                >
                   {t(item.key)}
+                  <ArrowRight aria-hidden="true" className="size-5 shrink-0 text-muted-foreground transition-transform duration-300 ease-spring group-hover:translate-x-1 group-hover:text-primary" />
                 </Link>
               </li>
             ))}
           </ul>
-          <Button asChild className="mt-6 min-h-12">
+          <Button asChild className="mt-auto min-h-12">
             <Link href={routes.demo} onClick={close}>
               {t('demo')}
             </Link>

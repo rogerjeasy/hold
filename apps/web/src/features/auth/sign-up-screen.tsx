@@ -1,7 +1,5 @@
-import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { useId } from 'react'
-import { audienceImages } from '@/features/marketing/audience-points'
 import { routes } from '@/lib/routes'
 import { requestSignUp } from './actions'
 import { AuthForm } from './auth-form'
@@ -13,7 +11,6 @@ import { SignUpSteps } from './sign-up-steps'
 export function SignUpScreen({ codeSentTo }: { codeSentTo?: string | undefined }) {
   const t = useTranslations('auth.signUp')
   const code = useTranslations('auth.code')
-  const shops = useTranslations('audiences.shops')
   const stepsTitleId = useId()
 
   return (
@@ -25,14 +22,7 @@ export function SignUpScreen({ codeSentTo }: { codeSentTo?: string | undefined }
       aside={{
         title: t('aside.title'),
         titleId: stepsTitleId,
-        children: (
-          <>
-            <SignUpSteps labelledBy={stepsTitleId} />
-            <div className="relative mt-8 aspect-video overflow-hidden bg-photo">
-              <Image src={audienceImages.shops} alt={shops('imageAlt')} fill sizes="(min-width: 64rem) 34rem, 100vw" className="object-cover" />
-            </div>
-          </>
-        ),
+        children: <SignUpSteps labelledBy={stepsTitleId} />,
       }}
     />
   )

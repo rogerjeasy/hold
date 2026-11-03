@@ -1,0 +1,42 @@
+/*
+ * Motion that follows the scroll, for the public pages. Each rule runs only where the browser supports scroll-driven
+ * animations and the reader has not asked for less motion: everywhere else the content is simply there, with or
+ * without scripts.
+ */
+
+/* The header's edge appears once the page has moved under it. Until then the bar sits on the paper without a rule. */
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .headerEdge {
+      animation: header-edge linear both;
+      animation-timeline: scroll(root block);
+      animation-range: 0 5rem;
+    }
+  }
+}
+
+@keyframes header-edge {
+  from {
+    border-color: transparent;
+    box-shadow: none;
+    background-color: transparent;
+  }
+}
+
+/* A section rises a little as it enters the window, and is settled once 14rem of it is in view, however tall it is. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0 entry 14rem;
+    }
+  }
+}
+
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(1.75rem);
+  }
+}

@@ -17,19 +17,23 @@ export function SampleRentals() {
   const evidence = useTranslations('evidence')
 
   return (
-    <ul role="list" className="grid gap-4 md:grid-cols-3">
+    <ul role="list" className="stagger grid gap-4 md:grid-cols-3 lg:gap-6">
       {samples.map(({ key, outcome, damaged }) => (
-        <li key={key} className="flex flex-col border bg-card">
+        <li key={key} className="group surface flex flex-col overflow-clip">
           <div className="relative aspect-thumbnail overflow-hidden bg-photo">
-            <PhotoCrop viewBox={evidencePhoto.thumbnailViewBox} src={damaged ? evidencePhoto.returnSrc : evidencePhoto.handoverSrc}>
+            <PhotoCrop
+              viewBox={evidencePhoto.thumbnailViewBox}
+              src={damaged ? evidencePhoto.returnSrc : evidencePhoto.handoverSrc}
+              className="transition-transform duration-700 ease-spring group-hover:scale-[1.04]"
+            >
               <EvidenceMarks showNew={damaged} newLabel={evidence('newTag')} />
             </PhotoCrop>
           </div>
-          <div className="flex flex-1 flex-col gap-3 p-4 md:p-5">
-            <p className="label text-[0.8125rem] text-muted-foreground">{t(`${key}.result`)}</p>
+          <div className="flex flex-1 flex-col gap-3 p-5 md:p-6">
+            <p className="label self-start rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">{t(`${key}.result`)}</p>
             <h3 className="text-title wrap-long-words">{t(`${key}.title`)}</h3>
             <p className="text-muted-foreground">{t(`${key}.body`)}</p>
-            <HoldCard outcome={outcome} className="mt-auto border-border bg-background" />
+            <HoldCard outcome={outcome} className="mt-auto bg-background shadow-none" />
           </div>
         </li>
       ))}

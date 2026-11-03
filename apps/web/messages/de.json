@@ -1381,6 +1381,12 @@
       "pending": {
         "start": "Ihr Geschäft, seine zwei Konten und seine Beispielvermietungen werden eingerichtet. Das dauert etwa 20 Sekunden.",
         "continue": "Sie werden bei Ihrer Demo angemeldet…"
+      },
+      "steps": {
+        "title": "Ihre Demo wird eingerichtet",
+        "shop": "Ihr Demo-Laden wird angelegt…",
+        "rentals": "Beispielvermietungen werden hinzugefügt…",
+        "today": "„Heute“ wird geöffnet…"
       }
     }
   },

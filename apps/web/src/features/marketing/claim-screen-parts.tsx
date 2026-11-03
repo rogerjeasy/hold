@@ -18,11 +18,11 @@ function Thumbnail({ src, label, marked }: { src: string; label: string; marked:
   const t = useTranslations('evidence')
 
   return (
-    <div className="relative aspect-thumbnail overflow-hidden bg-photo">
+    <div className="relative aspect-thumbnail overflow-hidden rounded-lg bg-photo">
       <PhotoCrop viewBox={evidencePhoto.thumbnailViewBox} src={src}>
         {marked ? <EvidenceMarks showNew newLabel={t('newTag')} /> : null}
       </PhotoCrop>
-      <span className="figures absolute bottom-1 left-1 bg-photo-scrim px-1.5 py-0.5 text-xs text-photo-foreground">{label}</span>
+      <span className="figures absolute bottom-1 left-1 rounded-md bg-photo-scrim px-1.5 py-0.5 text-xs text-photo-foreground backdrop-blur-sm">{label}</span>
     </div>
   )
 }
@@ -47,10 +47,10 @@ type FindingRowProps = {
 
 export function FindingRow({ kind, title, amount, note }: FindingRowProps) {
   return (
-    <div className="grid grid-cols-[auto_1fr_auto] items-center gap-x-2 border bg-background px-2.5 py-2">
+    <div className="grid grid-cols-[auto_1fr_auto] items-center gap-x-2 rounded-lg border border-border/70 bg-background px-2.5 py-2">
       <span
         aria-hidden="true"
-        className={cn('size-3', kind === 'new' ? 'border-2 border-primary' : 'border-[1.5px] border-dashed border-muted-foreground')}
+        className={cn('size-3', kind === 'new' ? 'rounded-xs border-2 border-primary' : 'rounded-xs border-[1.5px] border-dashed border-muted-foreground')}
       />
       <span className="min-w-0 font-semibold">{title}</span>
       <span className="font-semibold">{amount}</span>
@@ -64,8 +64,8 @@ export function ScreenAction({ variant, children }: { variant: 'primary' | 'outl
   return (
     <span
       className={cn(
-        'flex min-h-10 items-center justify-center rounded-lg border px-2 text-center font-semibold',
-        variant === 'primary' ? 'border-transparent bg-primary text-primary-foreground' : 'border-border-strong bg-card',
+        'flex min-h-10 items-center justify-center rounded-xl border px-2 text-center font-semibold',
+        variant === 'primary' ? 'border-transparent bg-primary text-primary-foreground shadow-glow' : 'border-border-strong bg-card shadow-xs',
       )}
     >
       {children}

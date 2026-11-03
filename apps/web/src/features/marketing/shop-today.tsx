@@ -5,9 +5,9 @@ import { useExampleMoney } from './use-example-money'
 
 function Tile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="border-b p-4 odd:border-r md:p-5">
-      <dt className="text-[0.9375rem] text-muted-foreground">{label}</dt>
-      <dd className="mt-1 text-title">{value}</dd>
+    <div className="rounded-xl bg-muted/60 p-4">
+      <dt className="text-sm text-muted-foreground">{label}</dt>
+      <dd className="mt-1 text-figure">{value}</dd>
     </div>
   )
 }
@@ -15,9 +15,12 @@ function Tile({ label, value }: { label: string; value: string }) {
 // A picture of a button, as in the phone screens: the panel is an illustration and nothing in it can be pressed.
 function AttentionRow({ action, children }: { action: string; children: ReactNode }) {
   return (
-    <li className="flex items-center justify-between gap-3 border-t py-2.5 text-[0.9375rem]">
-      <span className="min-w-0">{children}</span>
-      <span className="shrink-0 rounded-lg border border-border-strong px-2.5 py-1 text-sm font-semibold">{action}</span>
+    <li className="flex items-center justify-between gap-3 border-t border-border/70 py-3 text-[0.9375rem] first:border-t-0">
+      <span className="flex min-w-0 items-center gap-2.5">
+        <span aria-hidden="true" className="size-2 shrink-0 rounded-full bg-primary" />
+        <span className="min-w-0">{children}</span>
+      </span>
+      <span className="shrink-0 rounded-lg border border-border bg-card px-2.5 py-1 text-sm font-semibold shadow-xs">{action}</span>
     </li>
   )
 }
@@ -29,20 +32,25 @@ export function ShopToday() {
   const money = useExampleMoney()
 
   return (
-    <figure className="border bg-card text-card-foreground">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b px-4 py-3 md:px-5">
-        <p className="font-bold">{shop('shopName')}</p>
+    <figure className="surface overflow-clip text-card-foreground shadow-raised">
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-border/70 px-4 py-3.5 md:px-5">
+        <p className="flex items-center gap-2.5 font-bold">
+          <span aria-hidden="true" className="grid size-7 place-items-center rounded-lg bg-contrast text-xs font-extrabold text-contrast-foreground">
+            {shop('shopName').slice(0, 1)}
+          </span>
+          {shop('shopName')}
+        </p>
         <p className="label text-xs text-muted-foreground">{t('title')}</p>
       </div>
-      <dl className="grid grid-cols-2">
+      <dl className="grid grid-cols-2 gap-2 p-3 md:p-4">
         <Tile label={t('itemsOut')} value={String(exampleShop.itemsOut)} />
         <Tile label={t('dueBack')} value={String(exampleShop.dueBack)} />
         <Tile label={t('holds')} value={money(exampleShop.holdsInPlaceCents)} />
         <Tile label={t('claims')} value={String(exampleShop.claimsWaiting)} />
       </dl>
-      <div className="px-4 pt-4 pb-2 md:px-5">
+      <div className="px-4 pb-2 md:px-5">
         <p className="label text-xs text-muted-foreground">{t('attention')}</p>
-        <ul className="mt-2">
+        <ul className="mt-1">
           <AttentionRow action={t('claimAction')}>
             {t('claim', { number: exampleRental.holdNumber, amount: money(exampleRental.outcomes.damage.takenCents) })}
           </AttentionRow>
@@ -51,7 +59,7 @@ export function ShopToday() {
           </AttentionRow>
         </ul>
       </div>
-      <figcaption className="border-t px-4 py-2.5 text-sm text-muted-foreground md:px-5">{t('caption')}</figcaption>
+      <figcaption className="border-t border-border/70 bg-muted/40 px-4 py-2.5 text-sm text-muted-foreground md:px-5">{t('caption')}</figcaption>
     </figure>
   )
 }
