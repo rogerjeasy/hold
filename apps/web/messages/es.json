@@ -2190,7 +2190,11 @@
         "too_large": "La foto es demasiado grande. Hazla de nuevo.",
         "views_missing": "Aún faltan fotos de algunas vistas.",
         "region_invalid": "Dibuja el recuadro dentro de la foto.",
-        "description_invalid": "Describe la marca en hasta 200 caracteres."
+        "description_invalid": "Describe la marca en hasta 200 caracteres.",
+        "daily_cap": "Las comparaciones reales de ejemplos de hoy ya están todas usadas. Cada una gasta el cupo diario de Claude de la cuenta, así que vuelve a intentarlo mañana; las fotos esperan aquí.",
+        "already_started": "Esta comparación ya ha empezado.",
+        "nothing_to_compare": "Este ejemplo no tiene ninguna comparación pendiente.",
+        "not_a_sample": "Solo la comparación de un ejemplo se inicia a mano. Una devolución real se compara en cuanto se sellan sus fotos."
       },
       "sampleTitle": "Fotografías de demostración",
       "sampleBody": "Estas fotografías son de demostración. El registro de inspección está marcado como simulado."
@@ -2252,6 +2256,17 @@
           "title": "Fotografías de demostración, comparación real",
           "body": "El código y Claude compararon de verdad estas fotografías. Son muestras, no este artículo, así que el resultado muestra cómo funciona la comparación y queda fuera de toda cifra de precisión."
         }
+      },
+      "modelUnavailable": "Claude no respondió a esta comparación, por ejemplo porque se agotó el cupo de llamadas al modelo de hoy. Todavía no se sabe nada de las fotos: inspecciona el artículo tú mismo y anota lo que observes.",
+      "updatesItself": "Esta página se actualiza sola.",
+      "secondLookNot": "La segunda mirada independiente no lo confirmó.",
+      "usage": "{calls, plural, one {# llamada al modelo} other {# llamadas al modelo}}, {read, number} tokens leídos, {written, number} escritos.",
+      "sample": {
+        "title": "Mira cómo Claude compara estas fotos",
+        "body": "La comparación de esta devolución de ejemplo aún no se ha hecho. Iníciala y Claude Opus 4.6 compara de verdad estas fotos de demostración: primero el código encuentra lo que cambió, Claude explica cada cambio y una segunda mirada independiente comprueba cualquier daño. Tarda alrededor de un minuto, no hace falta iniciar sesión en PayPal y no se cobra nada. Cada ejecución gasta el cupo diario de Claude de la cuenta, así que solo se hacen unas pocas al día.",
+        "start": "Ejecutar la comparación real en este ejemplo",
+        "starting": "Iniciando la comparación…",
+        "started": "La comparación ha empezado."
       }
     },
     "incidents": {

@@ -1,6 +1,6 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
-import { CLAUDE_DAILY_TOKENS, DEMO_SESSION_DAYS, DEMO_STARTS_PER_DAY, demoRetirementCutoff, HOSTED_ASSISTANT_SHARE, HOSTED_QUESTIONS_PER_NETWORK, hostedQuestionsPerDay, INSIGHTS_TURNS_PER_DAY, INSIGHTS_TURNS_PER_NETWORK, INSIGHTS_TURNS_PER_SHOP, SAMPLE_ADVOCATE_RUN_TOKENS, SAMPLE_ADVOCATE_RUNS_PER_DAY, SAMPLE_ADVOCATE_RUNS_PER_NETWORK, SAMPLE_ADVOCATE_RUNS_PER_SHOP, utcDay } from './demo-limits.ts'
+import { CLAUDE_DAILY_TOKENS, DEMO_SESSION_DAYS, DEMO_STARTS_PER_DAY, demoRetirementCutoff, HOSTED_ASSISTANT_SHARE, HOSTED_QUESTIONS_PER_NETWORK, hostedQuestionsPerDay, INSIGHTS_TURNS_PER_DAY, INSIGHTS_TURNS_PER_NETWORK, INSIGHTS_TURNS_PER_SHOP, SAMPLE_ADVOCATE_RUN_TOKENS, SAMPLE_ADVOCATE_RUNS_PER_DAY, SAMPLE_ADVOCATE_RUNS_PER_NETWORK, SAMPLE_ADVOCATE_RUNS_PER_SHOP, SAMPLE_COMPARISON_RUNS_PER_DAY, SAMPLE_COMPARISON_RUNS_PER_NETWORK, SAMPLE_COMPARISON_TOKENS, utcDay } from './demo-limits.ts'
 
 describe('the demo’s daily caps', () => {
   it('counts a day as the calendar day in UTC, whatever the hour', () => {
@@ -44,6 +44,11 @@ describe('each caller’s share of the day', () => {
   it('keeps a full day of sample runs, each at its ceiling, inside what the hosted assistant leaves of Claude’s day', () => {
     expect(SAMPLE_ADVOCATE_RUN_TOKENS).toBe(80_000)
     expect(SAMPLE_ADVOCATE_RUNS_PER_DAY * SAMPLE_ADVOCATE_RUN_TOKENS).toBeLessThanOrEqual(CLAUDE_DAILY_TOKENS * (1 - HOSTED_ASSISTANT_SHARE))
+  })
+
+  it('lets the sample comparisons spend at most a fifth of Claude’s day, and one network at most half of them', () => {
+    expect(SAMPLE_COMPARISON_RUNS_PER_DAY * SAMPLE_COMPARISON_TOKENS).toBeLessThanOrEqual(CLAUDE_DAILY_TOKENS / 5)
+    expect(SAMPLE_COMPARISON_RUNS_PER_NETWORK * 2).toBeLessThanOrEqual(SAMPLE_COMPARISON_RUNS_PER_DAY)
   })
 
   it('gives one network, and one shop, only a share of each day’s cap, so one visitor with many demos never takes it all', () => {

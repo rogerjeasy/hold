@@ -138,6 +138,25 @@ describe('the return comparison pipeline', () => {
     expect(await compareInspection({ ...given, marks: [{ id: 'known', view: 'left-side', region }] }, { look: () => Promise.resolve(reply(result([damage]))) })).toMatchObject({ state: 'clean', findings: [{ class: 'known_mark', matchedMarkId: 'known' }] })
     expect(await compareInspection(given, { look: () => Promise.resolve(reply(result([{ ...damage, priceCode: 'invented' }]))) })).toMatchObject({ findings: [{ priceCode: null }] })
   })
+  // A look Bedrock throttled or could not answer is no answer from the model, so the comparison is not put in its name.
+  it('records no model when the model never answered, and says the model was unavailable', async () => {
+    for (const kind of ['throttled', 'unavailable'] as const) {
+      expect(await compareInspection(await input(), { look: () => Promise.resolve({ kind, model: 'recorded-model' }) })).toMatchObject({ state: 'deferred', model: 'not_called', modelUnavailable: true })
+    }
+  })
+  it('keeps the model that answered the first look when the second look was not answered', async () => {
+    let calls = 0
+    const compared = await compareInspection(await input(), { look: () => Promise.resolve(calls++ === 0 ? reply(result([damage])) : { kind: 'throttled' as const, model: 'recorded-model' }) })
+    expect(compared).toMatchObject({ state: 'deferred', model: 'recorded-model', modelUnavailable: true, findings: [{ secondLookConfirmed: false }] })
+  })
+  it('counts a refusal as the model’s answer, not as the model being unavailable', async () => {
+    expect(await compareInspection(await input(), { look: () => Promise.resolve({ kind: 'refused', model: 'recorded-model' }) })).toMatchObject({ state: 'deferred', model: 'recorded-model', modelUnavailable: false })
+  })
+  it('does not call the model unavailable when the comparison reached its own call ceiling', async () => {
+    const given = await input()
+    const compared = await compareInspection({ ...given, views: Array.from({ length: 6 }, (_, index) => ({ ...given.views[0], view: `view-${String(index)}` })).filter((view): view is typeof given.views[number] => view.pair !== undefined) }, { look: () => Promise.resolve(reply(result([damage]))) })
+    expect(compared).toMatchObject({ state: 'deferred', modelUnavailable: false })
+  })
   it('defers a poor photograph or item mismatch and never silently drops a view', async () => {
     const given = await input()
     expect(await compareInspection({ ...given, views: [{ view: 'left-side', pair: { ok: false, reason: 'quality' } }] }, { look: () => { throw new Error('Must not call model') } })).toMatchObject({ state: 'deferred' })

@@ -15,3 +15,13 @@ export function withSampleDisplays(store: EvidenceStore, readSample: (file: stri
     },
   }
 }
+
+// The original a comparison reads for a photograph. A seeded sample's original is the demonstration's own image, which
+// no evidence bucket holds, so it is read by its reserved display key from a store wrapped as above. Only the seed writes
+// a reserved display key; every other photograph is read from the evidence bucket by its own key.
+export async function readOriginal(store: EvidenceStore, photo: { readonly evidenceKey: string; readonly displayKey: string | null }): Promise<Buffer> {
+  if (photo.displayKey === null || !SAMPLE_FILES.has(photo.displayKey)) return store.read(photo.evidenceKey)
+  const body = await store.readDisplay(photo.displayKey)
+  if (body === undefined) throw new Error('A sample photograph is not beside this code.')
+  return body
+}

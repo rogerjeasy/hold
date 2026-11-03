@@ -91,6 +91,9 @@ type SampleRental = {
   readonly proposal?: 'replacement_hold' | 'dispute_answer'
   // Returned by the renter with nobody at the counter, at this moment, and compared overnight (architecture.md 6.13).
   readonly droppedOff?: Moment
+  // Photographed at the handover and the return, its comparison waiting for a person to start it, so a judge can watch
+  // Claude compare the demonstration's photographs without paying anything in PayPal (sample-comparison.ts).
+  readonly awaitsComparison?: true
 }
 
 const SAMPLES: readonly SampleRental[] = [
@@ -102,7 +105,7 @@ const SAMPLES: readonly SampleRental[] = [
   { renter: 'Ahmed Khan', items: ['hybrid', 'seat'], starts: [-1, 16, 30], ends: { fromNow: 300 }, state: 'out', hold: 'placed' },
   { renter: 'Lea Fischer', items: ['emtb'], starts: [-4, 10, 0], ends: [-1, 18, 0], state: 'overdue', hold: 'placed' },
   { renter: 'Chloé Martin', items: ['ebike'], starts: [-3, 10, 0], ends: [-1, 22, 0], state: 'dropped_off', hold: 'placed', droppedOff: [-1, 21, 40] },
-  { renter: 'Marco Rossi', items: ['ebike'], starts: [-26, 10, 0], ends: [-1, 17, 0], state: 'returned', hold: 'placed', proposal: 'replacement_hold' },
+  { renter: 'Marco Rossi', items: ['ebike'], starts: [-26, 10, 0], ends: [-1, 17, 0], state: 'returned', hold: 'placed', proposal: 'replacement_hold', awaitsComparison: true },
   { renter: 'Priya Natarajan', items: ['hybrid'], starts: [-6, 10, 0], ends: [-1, 17, 30], state: 'settling', hold: 'placed', claim: { state: 'awaiting_approval', kind: 'damage' }, photographed: true },
   {
     renter: 'Tom Becker',
@@ -283,6 +286,12 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
       await transaction.update(rentals).set({ droppedOffAt }).where(eq(rentals.id, rental.id))
       await audit('renter.self_return_sent', droppedOffAt, 'renter')
     }
+    const [waitingItem] = rentalItemIds
+    if (sample.awaitsComparison === true && waitingItem !== undefined) {
+      const damage = terms.entries.find((each) => each.category === 'damage') ?? terms.entries[0]
+      if (damage === undefined) throw new Error('The price list has no entries.')
+      await photographSample(transaction, { shopId, userId, item: waitingItem, planId: planIds.get(waitingItem.key) ?? '', view: samplePlan(CATALOG[waitingItem.key].category)[0]?.key ?? 'frame', startsAt, endsAt, priceEntryId: damage.id, compared: false })
+    }
 
     let capturedCents = 0
     if (sample.claim !== undefined) {
@@ -403,12 +412,14 @@ type PhotographedSample = {
   readonly priceEntryId: string
   // The renter photographed the return through their link, and where they left the item.
   readonly byRenter?: true
+  // Left for a person to start: the comparison waits, with no result and no message to the worker.
+  readonly compared?: false
 }
 
 // One view photographed at the handover and again at the return, the faint scuff on record from the handover, and the
 // comparison that found the chip and set the scuff aside. Marked simulated: no model ran, and the photographs are the
-// demonstration's samples. Returns the finding the claim rests on.
-async function photographSample(transaction: Transaction, sample: PhotographedSample): Promise<string> {
+// demonstration's samples. Returns the finding the claim rests on, or nothing while the comparison waits to be started.
+async function photographSample(transaction: Transaction, sample: PhotographedSample): Promise<string | undefined> {
   const { shopId, userId, item, view } = sample
   const byRenter = sample.byRenter === true
   const session = async (kind: 'handover' | 'return', at: Date, shots: readonly (readonly [string, keyof typeof SAMPLE_PHOTOS])[]) => {
@@ -448,6 +459,10 @@ async function photographSample(transaction: Transaction, sample: PhotographedSa
     .values({ shopId, itemId: item.itemId, view, region: SCUFF, description: 'A faint scuff on the down tube.', firstSeenSessionId: handover })
     .returning({ id: marks.id })
   if (scuff === undefined) throw new Error('A sample mark was not created.')
+  if (sample.compared === false) {
+    await transaction.insert(comparisons).values({ shopId, handoverSessionId: handover, returnSessionId: returned, state: 'pending', simulated: true, createdAt: sample.endsAt })
+    return undefined
+  }
   const [comparison] = await transaction
     .insert(comparisons)
     .values({ shopId, handoverSessionId: handover, returnSessionId: returned, state: 'findings', simulated: true, createdAt: sample.endsAt, completedAt: sample.endsAt })

@@ -62,6 +62,8 @@ export type { BeginExtension, CapturedExtension, ExtensionAttention, ExtensionPa
 export { confirmDropOff, dropOffNotice, dropOffsWaiting, photoRepeatsEvidence, reportDropOffMissing, saveSelfReturnSettings, selfReturnFor, selfReturnSettings, sendSelfReturn, startSelfReturn } from './self-return-repository.ts'
 export type { DropOffNotice, SelfReturnItem, SelfReturnStart, SelfReturnView, WaitingDropOff } from './self-return-repository.ts'
 export { beginComparison, comparisonReport, completeComparison } from './comparison-repository.ts'
+export { startSampleComparison } from './sample-comparison.ts'
+export type { SampleComparisonStart } from './sample-comparison.ts'
 export type { ComparisonPhoto, ComparisonReport, StoredInspection } from './comparison-repository.ts'
 
 export { acknowledgeClaimReview, approveClaim, confirmCleanReturn, draftClaim, presentClaim } from './claim-repository.ts'

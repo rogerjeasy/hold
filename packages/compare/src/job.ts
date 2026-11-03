@@ -1,5 +1,6 @@
 import { beginComparison, completeComparison, inShop } from '@hold/db'
 import type { Database, DatabaseRole, StoredInspection } from '@hold/db'
+import { readOriginal } from '@hold/evidence/photos'
 import type { EvidenceStore } from '@hold/evidence'
 import { inspectPair } from '@hold/vision/inspect-pair'
 import type { PairResult } from '@hold/vision/inspect-pair'
@@ -27,15 +28,23 @@ export async function runComparison(dependencies: ComparisonDependencies, messag
     const reused = work.after.some((photo) => !sample(photo) && photoReused(photo, work.previous))
     if (reused) { await finish(deferred('reused_photo')); return 'completed' }
     const views: { view: string; pair: PairResult }[] = []
-    for (const view of work.plan.filter((view) => view.required || work.before.some((photo) => photo.view === view.key) || work.after.some((photo) => photo.view === view.key))) {
+    // The demonstration's samples photograph one view of the plan, so a comparison of samples alone compares the views
+    // both sessions hold. Any other compares every required view, and defers when one is missing.
+    const taken = [...work.before, ...work.after]
+    const samplesOnly = taken.length > 0 && taken.every(sample)
+    const held = (key: string) => work.before.some((photo) => photo.view === key) && work.after.some((photo) => photo.view === key)
+    const compared = work.plan.filter((view) => samplesOnly ? held(view.key) : view.required || work.before.some((photo) => photo.view === view.key) || work.after.some((photo) => photo.view === view.key))
+    for (const view of compared) {
       const before = work.before.find((photo) => photo.view === view.key)
       const after = work.after.find((photo) => photo.view === view.key)
       if (before === undefined || after === undefined) { await finish(deferred('missing_view')); return 'completed' }
-      const originals = await Promise.all([dependencies.evidence.read(before.evidenceKey), dependencies.evidence.read(after.evidenceKey)])
+      const originals = await Promise.all([readOriginal(dependencies.evidence, before), readOriginal(dependencies.evidence, after)])
       views.push({ view: view.key, pair: await inspectPair(originals[0], originals[1]) })
     }
-    const result = await compareInspection({ views, marks: work.known, reported: work.reported, priceCodes: work.prices.map((entry) => entry.code), wearPolicy: work.wearPolicy, itemType: work.itemType }, dependencies.model)
-    await finish({ ...result, reason: result.state === 'deferred' ? 'inspection_uncertain' : null, simulated, findings: result.findings.map(({ priceCode, ...finding }) => ({ ...finding, suggestedPriceEntryId: work.prices.find((entry) => entry.code === priceCode)?.id ?? null })) })
+    const { modelUnavailable, ...result } = await compareInspection({ views, marks: work.known, reported: work.reported, priceCodes: work.prices.map((entry) => entry.code), wearPolicy: work.wearPolicy, itemType: work.itemType }, dependencies.model)
+    // A person reads why it waits for them: the model not answering is not the photographs being uncertain.
+    const reason = result.state !== 'deferred' ? null : modelUnavailable ? 'model_unavailable' : 'inspection_uncertain'
+    await finish({ ...result, reason, simulated, findings: result.findings.map(({ priceCode, ...finding }) => ({ ...finding, suggestedPriceEntryId: work.prices.find((entry) => entry.code === priceCode)?.id ?? null })) })
     return 'completed'
   } catch (error) {
     // Unexpected processing failures still leave a visible manual path; the queue records the failure too.

@@ -2,6 +2,7 @@ import { reserveEvidencePack } from './evidence-repository.ts'
 import { INSPECTION_LIMITS, RENTAL_TRANSITIONS, transition } from '@hold/domain'
 import { and, asc, eq, inArray, isNotNull, isNull, lte, ne, sql } from 'drizzle-orm'
 import { auditLog, captureSessions, comparisons, findings, incidents, itemTypes, items, marks, photoPlans, photos, priceEntries, rentalItems, rentals, users, wearPolicies } from './schema/index.ts'
+import { comparisonQueued } from './sample-comparison.ts'
 import type { Transaction } from './scope.ts'
 
 export type ComparisonPhoto = Pick<typeof photos.$inferSelect, 'view' | 'evidenceKey' | 'sha256' | 'perceptualHash' | 'displayKey' | 'quality'>
@@ -72,11 +73,19 @@ export async function comparisonReport(transaction: Transaction, comparisonId: s
   // A finding over a mark the renter reported during this rental names that report and any line they agreed (step 7).
   const observed = rows.map(({ incidentId, incidentState, agreedCents, incidentCurrency, ...finding }) => ({ ...finding, reported: incidentId === null || incidentState === null || incidentCurrency === null ? null : { incidentId, state: incidentState, agreedCents, currency: incidentCurrency } }))
   const displayPhotos = async (sessionId: string) => (await sessionPhotos(transaction, sessionId)).map(({ view, displayKey }) => ({ view, displayKey }))
+  // Each view's name in the shop's own words, from the photo plan the handover was photographed by.
+  const [plan] = await transaction.select({ views: photoPlans.views }).from(captureSessions).innerJoin(photoPlans, eq(photoPlans.id, captureSessions.photoPlanId)).where(eq(captureSessions.id, comparison.handoverSessionId))
+  const viewLabels: Readonly<Record<string, string>> = Object.fromEntries((plan?.views ?? []).map((view) => [view.key, view.label]))
   const reviews = await transaction.select({ actorName: users.name, at: auditLog.at, detail: auditLog.detail }).from(auditLog)
     .leftJoin(users, sql`${users.id}::text = ${auditLog.actorId}`).where(and(eq(auditLog.subjectKind, 'comparison'), eq(auditLog.subjectId, comparisonId), eq(auditLog.action, 'comparison.manual_review'))).orderBy(asc(auditLog.at))
   return { id: comparison.id, ...session, state: comparison.state, model: comparison.model, promptVersion: comparison.promptVersion, deferredReason: comparison.deferredReason, simulated: comparison.simulated,
     // Whether a model answered at all: only an answer spends input tokens. A seeded sample or the stand-in never does.
     modelAnswered: (comparison.alignment?.['inputTokens'] ?? 0) > 0,
+    // What the model was asked, as the pipeline counted it: shown so a person sees the comparison really ran.
+    usage: { calls: comparison.alignment?.['calls'] ?? 0, inputTokens: comparison.alignment?.['inputTokens'] ?? 0, outputTokens: comparison.alignment?.['outputTokens'] ?? 0 },
+    // A sample's comparison waits for a person to start it; any other is queued when its return is sealed.
+    waitsForStart: comparison.state === 'pending' && comparison.simulated && !(await comparisonQueued(transaction, comparison.id)),
+    viewLabels,
     before: await displayPhotos(comparison.handoverSessionId), after: await displayPhotos(comparison.returnSessionId), findings: observed, reviews }
 }
 
