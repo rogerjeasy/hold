@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label'
 export function PeriodForm({ from, to, invalid }: { from: string; to: string; invalid: boolean }) {
   const t = useTranslations('booking')
   return (
-    <form method="get" className="grid gap-4 border bg-card p-4 text-card-foreground md:p-5">
+    <form method="get" className="surface grid min-w-0 gap-4 p-4 md:p-5">
       <h2 className="text-[1.0625rem] font-extrabold tracking-tight">{t('when')}</h2>
       <div className="grid gap-4 sm:grid-cols-2 sm:items-end">
         <div className="grid min-w-0 gap-1.5">
@@ -19,7 +19,7 @@ export function PeriodForm({ from, to, invalid }: { from: string; to: string; in
           <Label htmlFor="to">{t('ends')}</Label>
           <Input id="to" name="to" type="datetime-local" defaultValue={to} required />
         </div>
-        <Button type="submit" variant="outline" className="justify-self-start sm:col-span-2">
+        <Button type="submit" variant="outline" className="w-full sm:col-span-2 sm:w-auto sm:justify-self-start">
           {t('check')}
         </Button>
       </div>

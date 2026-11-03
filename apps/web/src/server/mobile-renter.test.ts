@@ -222,8 +222,8 @@ describe('a renter screen from the phone', () => {
       const read = await phone.view(name)
       expect(read, name).toMatchObject({ ok: true })
     }
-    // No assistant booked it, so that screen answers as the web page does: a link that cannot show it.
-    expect(await phone.view('assistant')).toEqual({ ok: false, failure: 'link_invalid' })
+    // No assistant booked it, so that screen answers as the web page does: nothing to show, through a working link.
+    expect(await phone.view('assistant')).toEqual({ ok: false, failure: 'not_found' })
     // No claim yet, nor a negotiation.
     expect(await phone.view('claim')).toEqual({ ok: false, failure: 'not_found' })
     expect(await phone.view('negotiation')).toEqual({ ok: false, failure: 'not_found' })

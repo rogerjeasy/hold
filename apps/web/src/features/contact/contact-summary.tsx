@@ -3,6 +3,7 @@ import { Mail, MessageSquare } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useActionState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { StatusPill } from '@/components/ui/status-pill'
 import { RenterMessage } from '@/features/renter/renter-message'
 import { useRouter } from '@/i18n/navigation'
 import type { RenterContactView } from './contact-view'
@@ -26,7 +27,7 @@ export function ContactSummary({ token, contact, onChange }: { token: string; co
           <Icon aria-hidden="true" className="size-4.5 shrink-0 text-primary" />
           {texting ? t('byText', { phone: contact.phone }) : t('byEmail')}
         </p>
-        {texting ? <span className="label shrink-0 border border-border-strong px-1.5 py-px text-[0.625rem] leading-normal text-muted-foreground">{contact.confirmed ? t('confirmed') : t('notConfirmed')}</span> : null}
+        {texting ? <StatusPill tone={contact.confirmed ? 'success' : 'attention'}>{contact.confirmed ? t('confirmed') : t('notConfirmed')}</StatusPill> : null}
       </div>
       <p className="max-w-prose text-pretty text-muted-foreground">{texting ? (contact.confirmed ? t('textBody') : t('notConfirmedBody')) : t('emailBody')}</p>
       <div className="flex flex-wrap gap-2">
@@ -41,7 +42,7 @@ export function ContactSummary({ token, contact, onChange }: { token: string; co
             </form>
           </>
         ) : (
-          <Button type="button" onClick={onChange} className="min-h-12 whitespace-normal">
+          <Button type="button" variant="outline" onClick={onChange} className="min-h-12 whitespace-normal">
             <MessageSquare aria-hidden="true" />
             {t('textInstead')}
           </Button>

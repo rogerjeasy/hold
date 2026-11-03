@@ -3097,7 +3097,56 @@
       "taking": "Votre empreinte de {hold} est posée. PayPal prélève vos frais de {fee}.",
       "done": "Empreinte posée. Seuls vos frais sont prélevés."
     },
-    "evidenceNotice": "Les photos de l'article à la remise et au retour sont gardées comme preuve pendant {days} jours, puis supprimées. <link>Comment Hold traite vos données</link>"
+    "evidenceNotice": "Les photos de l'article à la remise et au retour sont gardées comme preuve pendant {days} jours, puis supprimées. <link>Comment Hold traite vos données</link>",
+    "reviewAndPay": "Vérifier et payer {amount}",
+    "payTitle": "Payer le prix de la location",
+    "records": "Vos documents",
+    "journey": {
+      "title": "Où en est votre location",
+      "next": "Ensuite",
+      "done": "Fait",
+      "now": "En cours",
+      "toDo": "Pas encore",
+      "steps": {
+        "booked": "Réservée",
+        "paid": "Frais payés",
+        "hold": "Empreinte posée",
+        "out": "Retirée",
+        "returned": "Rendue",
+        "settled": "Réglée"
+      }
+    },
+    "holdCard": {
+      "label": "Votre empreinte",
+      "where": "Sur votre propre compte PayPal",
+      "notCharged": "Une réservation, jamais un débit",
+      "standing": {
+        "waiting": "Pas encore posée",
+        "reserved": "Réservée",
+        "settling": "En cours de règlement",
+        "ended": "Terminée",
+        "none": "Non posée"
+      }
+    },
+    "unavailable": {
+      "back": "Revenir à votre location",
+      "no_assistant": {
+        "title": "Aucun assistant sur cette location",
+        "body": "Cette location n’a pas été réservée par un assistant à vous : il n’y a rien à afficher ici. Votre lien fonctionne pour tout le reste."
+      },
+      "no_negotiation": {
+        "title": "Aucun défenseur sur cette réclamation",
+        "body": "Personne ne défend une réclamation pour vous sur cette location. Si la boutique vous envoie une réclamation, vous pourrez la confier à un défenseur depuis sa page."
+      },
+      "no_claim": {
+        "title": "Aucune réclamation à examiner",
+        "body": "La boutique ne vous a envoyé aucune réclamation pour cette location. Si elle le fait, elle apparaîtra ici avec les photos et les prix, et vous pourrez répondre."
+      },
+      "not_handed_over": {
+        "title": "Pas encore retirée",
+        "body": "Les photos de l’état de votre location au départ de la boutique apparaissent ici dès que vous la retirez."
+      }
+    }
   },
   "shopPage": {
     "label": "Réserver en ligne",
@@ -3130,7 +3179,8 @@
     "reviewTitle": "PayPal examine ce paiement",
     "reviewBody": "Le paiement est prélevé mais pas finalisé. Terminez l’examen comme PayPal le ferait, et la boutique est prévenue.",
     "complete": "Finaliser le paiement",
-    "deny": "Refuser le paiement"
+    "deny": "Refuser le paiement",
+    "outcomes": "Autres issues à tester"
   },
   "claim": {
     "title": "Réclamation et règlement",
@@ -3256,6 +3306,16 @@
       "adjusted": "Ajustée",
       "waived": "Le magasin a renoncé à cette réclamation",
       "closed": "Clôturée"
+    },
+    "renterPage": {
+      "fromHold": "Pris sur votre empreinte de {held}. Le reste vous revient.",
+      "fromList": "Prix tiré de la liste publiée par la boutique",
+      "evidence": "Les preuves",
+      "total": "Total réclamé",
+      "itemPhotosLead": "Une personne de la boutique a ajouté cette ligne après avoir examiné l’article, pas une comparaison de photos. Voici l’article à la remise et au retour, vue par vue.",
+      "noPhotos": "Aucune photo scellée de cet article à la remise et au retour n’est disponible.",
+      "more": "Plus sur cette réclamation",
+      "provenance": "D’où viennent ces photos"
     }
   },
   "scorecard": {

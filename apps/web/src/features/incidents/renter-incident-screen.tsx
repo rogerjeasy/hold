@@ -1,10 +1,9 @@
 'use client'
 
 import type { RenterIncident } from '@hold/db'
-import { ArrowLeft } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useLookAgain } from '@/hooks/use-look-again'
-import { Link } from '@/i18n/navigation'
+import { BackLink, RenterHead, RenterPage } from '@/features/renter/renter-page'
 import { linkRoutes } from '@/lib/routes'
 import { IncidentCapture } from './incident-capture'
 import type { CapturePhoto, CaptureView } from './incident-capture'
@@ -20,17 +19,14 @@ export function RenterIncidentScreen({ token, shopName, incident, capture }: { t
   // Photographs still being prepared, or a price a staff member has not yet confirmed: the page looks again by itself.
   useLookAgain((writing && capture.photos.some((photo) => photo.url === null)) || (!writing && (incident.state === 'reported' || (incident.state === 'triaged' && incident.offer === null))), { everyMs: 5000, forMs: 600000 })
   return (
-    <div className="mx-auto grid w-full max-w-5xl gap-6 px-4 py-8 md:px-8 md:py-12">
-      <header className="grid gap-3">
-        <p className="label text-xs text-muted-foreground wrap-long-words">{shopName}</p>
-        <h1 className="text-page-title text-balance wrap-long-words">{t('reportTitle', { item: incident.itemLabel })}</h1>
-        <Link href={linkRoutes.incidents(token)} referrerPolicy="no-referrer" className="inline-flex min-h-11 items-center gap-2 justify-self-start font-semibold underline underline-offset-4"><ArrowLeft aria-hidden="true" className="size-4" />{t('back')}</Link>
-      </header>
-      <section aria-label={t('yourWords')} className="grid gap-2">
-        <h2 className="font-semibold">{t('yourWords')}</h2>
-        <blockquote className="min-w-0 whitespace-pre-wrap border-l-2 pl-3 wrap-long-words">{incident.description}</blockquote>
+    <RenterPage className="max-w-3xl">
+      <RenterHead shopName={shopName} title={t('reportTitle', { item: incident.itemLabel })} />
+      <section aria-label={t('yourWords')} className="surface grid min-w-0 animate-rise gap-2 p-5 md:p-6">
+        <h2 className="label text-xs text-muted-foreground">{t('yourWords')}</h2>
+        <blockquote className="min-w-0 border-l-2 border-primary/60 pl-3.5 text-lg whitespace-pre-wrap text-pretty wrap-long-words">{incident.description}</blockquote>
       </section>
       {writing ? <IncidentCapture token={token} incidentId={incident.id} {...capture} /> : <IncidentOutcomePanel token={token} incident={incident} />}
-    </div>
+      <BackLink href={linkRoutes.incidents(token)}>{t('back')}</BackLink>
+    </RenterPage>
   )
 }

@@ -12,7 +12,7 @@ export function EvidenceNotice() {
       {t.rich('evidenceNotice', {
         days: EVIDENCE_KEPT_DAYS,
         link: (chunks) => (
-          <Link href={routes.privacy} referrerPolicy="no-referrer" className="inline-flex min-h-11 items-center font-semibold text-foreground underline underline-offset-4">
+          <Link href={routes.privacy} referrerPolicy="no-referrer" className="font-semibold text-foreground underline underline-offset-4">
             {chunks}
           </Link>
         ),

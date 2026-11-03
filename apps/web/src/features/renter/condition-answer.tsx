@@ -15,12 +15,12 @@ export function ConditionAnswer({ token, items }: { token: string; items: readon
   const [confirmed, confirm, confirming] = useActionState(confirmCondition, null)
   const [adding, setAdding] = useState(false)
   return (
-    <div className="grid gap-4 border-t pt-6">
+    <div className="surface grid gap-4 p-5 md:p-6">
       {adding ? (
         <MissedPhotos token={token} items={items} />
       ) : (
-        <div className="flex flex-wrap gap-2">
-          <form action={confirm}>
+        <div className="grid gap-3 sm:flex sm:flex-wrap">
+          <form action={confirm} className="grid">
             <input type="hidden" name="token" value={token} />
             <input type="hidden" name="locale" value={locale} />
             <Button type="submit" className="min-h-12" disabled={confirming}>

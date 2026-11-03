@@ -106,3 +106,12 @@ it('tells the renter a claim waits for their review, not that it was approved ag
   expect(screen.getByText('A claim for you to review')).toBeInTheDocument()
   expect(screen.queryByText('Approved')).not.toBeInTheDocument()
 })
+
+it('shows a line a person added by hand beside the item’s own handover and return photographs, view by view', () => {
+  const line = { id: 'line', description: 'Bell missing', reason: 'The bell was not on the handlebar at return.', amountCents: 1500, actorName: 'Ana', beforeUrl: null, afterUrl: null }
+  const itemPhotos = [{ itemId: 'item-1', label: 'E-bike 4', views: [{ view: 'left-side', label: 'Left side', beforeUrl: '/left-before.jpg', afterUrl: '/left-after.jpg' }, { view: 'right-side', label: 'Right side', beforeUrl: '/right-before.jpg', afterUrl: '/right-after.jpg' }] }]
+  renderWithIntl(<RenterClaimScreen token="token" data={{ shopName: 'Ribeira Bikes', currency: 'EUR', state: 'presented', totalCents: 1500, captureCents: 1500, releaseCents: 28500, invoiceCents: 0, replyDueAt: null, holdState: 'placed', canReply: false, timeZone: 'UTC', lines: [line], itemPhotos }} />)
+  expect(screen.getByRole('img', { name: 'At handover: E-bike 4, Left side' })).toHaveAttribute('src', '/left-before.jpg')
+  expect(screen.getByRole('img', { name: 'At return: E-bike 4, Left side' })).toHaveAttribute('src', '/left-after.jpg')
+  expect(screen.getByRole('img', { name: 'At return: E-bike 4, Right side' })).toHaveAttribute('src', '/right-after.jpg')
+})

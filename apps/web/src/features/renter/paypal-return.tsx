@@ -1,6 +1,6 @@
 'use client'
 
-import { CircleCheck, Clock, LoaderCircle } from 'lucide-react'
+import { ArrowRight, CircleCheck, Clock, LoaderCircle } from 'lucide-react'
 import { useLocale } from 'next-intl'
 import { startTransition, useActionState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
@@ -8,6 +8,9 @@ import { useLookAgain } from '@/hooks/use-look-again'
 import { Link } from '@/i18n/navigation'
 import type { RenterActionResult } from '@/server/renter-access'
 import { RenterMessage } from './renter-message'
+import { RenterHead, RenterPage } from './renter-page'
+
+const nextLink = 'inline-flex min-h-11 items-center px-2 font-semibold underline underline-offset-4'
 
 type Confirm<Output> = (previous: unknown, data: FormData) => Promise<RenterActionResult<Output>>
 
@@ -59,53 +62,52 @@ export function PayPalReturn<Output>({ token, orderId, shopName, done, confirm, 
   const elsewhere = afterRefusal !== undefined && refusedFor !== undefined && afterRefusal.reasons.includes(refusedFor) ? afterRefusal : undefined
 
   return (
-    <div className="mx-auto grid w-full max-w-xl gap-6 px-4 py-12 md:px-8">
-      <p className="label text-xs text-muted-foreground">{shopName}</p>
-      <h1 className="text-page-title text-balance">{texts.title}</h1>
-      {reviewing ? (
-        <div className="grid gap-4">
-          <p role="status" className="flex gap-2 text-pretty">
-            <Clock aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
-            {held.text}
-          </p>
-          <Link href={next.href} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
-            {next.label}
-          </Link>
-        </div>
-      ) : finished ? (
-        <div className="grid gap-4">
-          <p role="status" className="flex items-center gap-2 text-lg font-semibold">
-            <CircleCheck aria-hidden="true" className="size-5 shrink-0 text-primary" />
-            {texts.done}
-          </p>
-          <Link href={next.href} className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4">
-            {next.label}
-          </Link>
-        </div>
-      ) : result === null || pending || working ? (
-        <p role="status" className="flex items-center gap-2 text-muted-foreground">
-          <LoaderCircle aria-hidden="true" className="size-5 shrink-0 animate-spin" />
-          {texts.checking}
-        </p>
-      ) : (
-        <div className="grid gap-4">
-          <RenterMessage result={result} wording={wording} />
-          <div className="flex flex-wrap gap-2">
-            {elsewhere === undefined ? (
-              <Button type="button" onClick={ask}>
-                {texts.retry}
-              </Button>
-            ) : (
-              <Button asChild>
-                <Link href={elsewhere.href}>{elsewhere.label}</Link>
-              </Button>
-            )}
-            <Link href={next.href} className="inline-flex min-h-11 items-center px-2 font-semibold underline underline-offset-4">
-              {next.label}
-            </Link>
-          </div>
-        </div>
-      )}
-    </div>
+    <RenterPage className="max-w-xl">
+      <RenterHead shopName={shopName} title={texts.title} />
+      <section className="surface grid min-w-0 justify-items-center gap-5 px-5 py-10 text-center md:px-8 md:py-12">
+        {reviewing ? (
+          <>
+            <span aria-hidden="true" className="grid size-16 place-items-center rounded-full bg-warning/12 text-warning">
+              <Clock className="size-7" />
+            </span>
+            <p role="status" className="max-w-prose text-pretty">{held.text}</p>
+            <Link href={next.href} className={nextLink}>{next.label}</Link>
+          </>
+        ) : finished ? (
+          <>
+            <span aria-hidden="true" className="grid size-16 animate-pop place-items-center rounded-full bg-success/12 text-success">
+              <CircleCheck className="size-8" />
+            </span>
+            <p role="status" className="max-w-prose animate-rise text-xl leading-snug font-extrabold tracking-tight text-balance">{texts.done}</p>
+            <Button asChild className="min-h-12 w-full sm:w-auto">
+              <Link href={next.href}>{next.label}<ArrowRight aria-hidden="true" /></Link>
+            </Button>
+          </>
+        ) : result === null || pending || working ? (
+          <>
+            <span aria-hidden="true" className="grid size-16 animate-pulse-ring place-items-center rounded-full bg-primary/10 text-primary">
+              <LoaderCircle className="size-7 animate-spin" />
+            </span>
+            <p role="status" className="text-muted-foreground">{texts.checking}</p>
+          </>
+        ) : (
+          <>
+            <RenterMessage result={result} wording={wording} />
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              {elsewhere === undefined ? (
+                <Button type="button" onClick={ask} className="min-h-12">
+                  {texts.retry}
+                </Button>
+              ) : (
+                <Button asChild className="min-h-12">
+                  <Link href={elsewhere.href}>{elsewhere.label}</Link>
+                </Button>
+              )}
+              <Link href={next.href} className={nextLink}>{next.label}</Link>
+            </div>
+          </>
+        )}
+      </section>
+    </RenterPage>
   )
 }

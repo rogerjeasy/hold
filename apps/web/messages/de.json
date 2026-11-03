@@ -3097,7 +3097,56 @@
       "taking": "Ihre Reservierung über {hold} ist gesetzt. PayPal bucht jetzt Ihre Gebühr über {fee} ab.",
       "done": "Reservierung gesetzt. Abgebucht wird nur Ihre Gebühr."
     },
-    "evidenceNotice": "Fotos des Artikels bei Übergabe und Rückgabe werden {days} Tage lang als Beleg aufbewahrt und dann gelöscht. <link>Wie Hold mit Ihren Daten umgeht</link>"
+    "evidenceNotice": "Fotos des Artikels bei Übergabe und Rückgabe werden {days} Tage lang als Beleg aufbewahrt und dann gelöscht. <link>Wie Hold mit Ihren Daten umgeht</link>",
+    "reviewAndPay": "Prüfen und {amount} bezahlen",
+    "payTitle": "Mietpreis bezahlen",
+    "records": "Ihre Unterlagen",
+    "journey": {
+      "title": "Wo Ihre Miete steht",
+      "next": "Als Nächstes",
+      "done": "Erledigt",
+      "now": "Läuft gerade",
+      "toDo": "Noch nicht",
+      "steps": {
+        "booked": "Gebucht",
+        "paid": "Gebühr bezahlt",
+        "hold": "Reservierung erteilt",
+        "out": "Abgeholt",
+        "returned": "Zurückgegeben",
+        "settled": "Abgerechnet"
+      }
+    },
+    "holdCard": {
+      "label": "Ihre Reservierung",
+      "where": "In Ihrem eigenen PayPal-Konto",
+      "notCharged": "Eine Reservierung, keine Abbuchung",
+      "standing": {
+        "waiting": "Noch nicht erteilt",
+        "reserved": "Reserviert",
+        "settling": "Wird abgerechnet",
+        "ended": "Beendet",
+        "none": "Nicht erteilt"
+      }
+    },
+    "unavailable": {
+      "back": "Zurück zu Ihrer Miete",
+      "no_assistant": {
+        "title": "Kein Assistent bei dieser Miete",
+        "body": "Diese Miete wurde nicht über einen eigenen Assistenten gebucht, daher gibt es hier nichts zu zeigen. Für alles andere funktioniert Ihr Link."
+      },
+      "no_negotiation": {
+        "title": "Kein Fürsprecher für diese Forderung",
+        "body": "Niemand verhandelt für Sie über eine Forderung zu dieser Miete. Schickt Ihnen der Laden eine Forderung, können Sie sie auf der Seite der Forderung einem Fürsprecher übergeben."
+      },
+      "no_claim": {
+        "title": "Keine Forderung zu prüfen",
+        "body": "Der Laden hat Ihnen zu dieser Miete keine Forderung geschickt. Falls doch, erscheint sie hier mit den Fotos und den Preisen, und Sie können antworten."
+      },
+      "not_handed_over": {
+        "title": "Noch nicht abgeholt",
+        "body": "Die Fotos davon, wie Ihre Miete den Laden verlassen hat, erscheinen hier, sobald Sie sie abholen."
+      }
+    }
   },
   "shopPage": {
     "label": "Online buchen",
@@ -3130,7 +3179,8 @@
     "reviewTitle": "PayPal prüft diese Zahlung",
     "reviewBody": "Die Zahlung ist eingezogen, aber noch nicht abgeschlossen. Schließen Sie die Prüfung ab, wie PayPal es täte, und der Laden wird benachrichtigt.",
     "complete": "Zahlung abschließen",
-    "deny": "Zahlung ablehnen"
+    "deny": "Zahlung ablehnen",
+    "outcomes": "Weitere Ausgänge zum Testen"
   },
   "claim": {
     "title": "Schadenforderung und Abrechnung",
@@ -3256,6 +3306,16 @@
       "adjusted": "Angepasst",
       "waived": "Das Geschäft verzichtet auf diese Forderung",
       "closed": "Abgeschlossen"
+    },
+    "renterPage": {
+      "fromHold": "Aus Ihrer Reservierung von {held}. Der Rest geht an Sie zurück.",
+      "fromList": "Preis aus der veröffentlichten Liste des Ladens",
+      "evidence": "Die Belege",
+      "total": "Gefordert insgesamt",
+      "itemPhotosLead": "Eine Person im Laden hat diese Position nach Prüfung des Artikels hinzugefügt, nicht ein Fotovergleich. Hier ist der Artikel bei Übergabe und bei Rückgabe, Ansicht für Ansicht.",
+      "noPhotos": "Es gibt keine versiegelten Fotos dieses Artikels von Übergabe und Rückgabe.",
+      "more": "Mehr zu dieser Forderung",
+      "provenance": "Woher diese Fotos stammen"
     }
   },
   "scorecard": {

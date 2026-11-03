@@ -14,14 +14,14 @@ export function QuotePanel({ token, quote, timeZone, currency, holdCents, checko
   const format = useShopFormat({ timeZone, currency })
   const amount = format.money(quote.feeCents)
   return (
-    <Panel title={t('title')}>
+    <Panel title={t('title')} className="ring-1 ring-primary/25">
       <div className="grid gap-4 px-4 py-4 md:px-5">
         <dl className="grid gap-3 sm:grid-cols-2">
-          <div className="min-w-0">
+          <div className="min-w-0 rounded-xl bg-muted/60 p-4">
             <dt className="text-sm text-muted-foreground">{t('days', { count: quote.extraDays })}</dt>
-            <dd className="mt-1 text-figure" data-testid="extension-fee">{amount}</dd>
+            <dd className="mt-1 text-figure tabular-nums" data-testid="extension-fee">{amount}</dd>
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 rounded-xl bg-muted/60 p-4">
             <dt className="text-sm text-muted-foreground">{t('newEnd')}</dt>
             <dd className="mt-1 text-lg font-semibold wrap-long-words">{`${format.date(quote.endsAt)}, ${format.time(quote.endsAt)}`}</dd>
           </div>

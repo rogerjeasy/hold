@@ -26,7 +26,7 @@ export function ShopBookingForm({ slug, types, currency, days, from, to }: ShopB
       <input type="hidden" name="startsAt" value={from} />
       <input type="hidden" name="endsAt" value={to} />
       <BookingLines types={types} currency={currency} days={days} />
-      <Button type="submit" disabled={pending || result?.ok === true} className="min-h-12 justify-self-start">
+      <Button type="submit" disabled={pending || result?.ok === true} className="min-h-12 w-full sm:w-auto sm:justify-self-start">
         {pending || result?.ok === true ? t('booking') : t('book')}
       </Button>
       <ShopPageMessage result={refused} />
