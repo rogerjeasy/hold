@@ -12,7 +12,7 @@ vi.setConfig({ testTimeout: 60_000 })
 const actions = await import('./actions')
 const { getServices } = await import('@/server/services')
 const { form, signIn } = await import('@/test/shop-session')
-const { SAMPLE_ADVOCATE_LIMIT } = await import('./limits')
+const { SAMPLE_ADVOCATE_LIMITS } = await import('./limits')
 
 // A judge watches the two advocates argue the demo's sample claim that waits for a reply (extensions.md section 9).
 // The renter is made up, so the owner starts it; nothing about it can ever reach PayPal.
@@ -65,9 +65,21 @@ describe('the advocates on the demo’s sample claim', () => {
     expect((await scoped((transaction) => transaction.select().from(moneyEvents))).filter((event) => event.rentalId === sampleRentalId).map((event) => event.kind)).not.toContain('hold_captured')
   })
 
+  it('lets one network run one sample a day, even from another demo', async () => {
+    const { database } = await getServices()
+    const owner = await signIn(jar, 'tomas@sample-network.example', 'passkey')
+    const staff = await signIn(jar, 'jonas@sample-network.example', 'passkey')
+    const opened = await openDemoSession(database, { owner: { subject: owner, email: 'tomas@sample-network.example' }, staff: { subject: staff, email: 'jonas@sample-network.example' }, slug: 'ribeira-bikes-samplenet', paypal: { credentialReference: 'hold/paypal/shops/demo/sandbox', mode: 'sandbox' }, now: new Date() })
+    shopId = opened.shopId
+    const rentalId = await rentalOf('Elena Duarte')
+    await signIn(jar, 'tomas@sample-network.example', 'email_code')
+    expect(await actions.argueSampleClaim(null, form({ rentalId, locale: 'en' }))).toMatchObject({ ok: false, reason: 'daily_cap' })
+    expect(await claimState(rentalId)).toBe('presented')
+  })
+
   it('stops once the day’s sample runs are spent, since every run spends the account’s Claude tokens', async () => {
     const { database } = await getServices()
-    while (await takeRateToken(database, SAMPLE_ADVOCATE_LIMIT, utcDay(new Date()))) { /* spend the day */ }
+    while (await takeRateToken(database, SAMPLE_ADVOCATE_LIMITS.perDay, utcDay(new Date()))) { /* spend the day */ }
     const { database: db } = await getServices()
     const owner = await signIn(jar, 'tomas@sample-cap.example', 'passkey')
     const staff = await signIn(jar, 'jonas@sample-cap.example', 'passkey')

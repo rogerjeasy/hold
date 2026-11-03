@@ -1,5 +1,5 @@
 import 'server-only'
-import { money, needsStrongSignIn } from '@hold/domain'
+import { money, needsStrongSignIn, utcDay } from '@hold/domain'
 import type { StaffRole } from '@hold/domain'
 import { findPerson, inShop, shopSettings, staffRoleOf, takeRateToken } from '@hold/db'
 import type { Person, RateLimit, ShopSettings, Transaction } from '@hold/db'
@@ -8,6 +8,7 @@ import { z } from 'zod'
 import { chosenShopId, hasSessionCookie, readAccessToken, sessionFactor } from '@/features/auth/session-cookies'
 import type { SignInFactor } from '@/features/auth/session-cookies'
 import { actInScope, failedFields, formObject, Refusal } from './action'
+import { callerNetwork } from './network'
 import { getServices } from './services'
 import { currentBearer } from './staff-bearer'
 
@@ -110,6 +111,9 @@ export type ShopActionSpec<Input, Output = unknown> = {
   readonly input: z.ZodType<Input>
   // A limit on how often a shop may ask, for work that is costly to repeat, counted before the transaction opens.
   readonly rateLimit?: RateLimit
+  // Shares of something every shop spends together, such as the account's daily Claude tokens: each is taken in a
+  // short transaction of its own before the action's opens, and kept, so no lock is held while a model answers.
+  readonly dailyCaps?: { readonly refusal: string; readonly shares: (context: ShopContext, network: string, day: string) => readonly { readonly limit: RateLimit; readonly subject: string }[] }
   // What the audit line says about the outcome beyond its name, such as the model an agent's turn asked.
   readonly auditDetail?: (output: Output) => Record<string, unknown>
 }
@@ -146,6 +150,12 @@ export function shopAction<Input, Output>(
     const parsed = spec.input.safeParse(formObject(data))
     if (!parsed.success) return { ok: false, failure: 'invalid', fields: failedFields(parsed.error) }
     if (spec.rateLimit !== undefined && !(await takeRateToken((await getServices()).database, spec.rateLimit, context.shop.id))) return { ok: false, failure: 'rate_limited' }
+    if (spec.dailyCaps !== undefined) {
+      const { database } = await getServices()
+      for (const share of spec.dailyCaps.shares(context, (await callerNetwork()) ?? 'unknown', utcDay(new Date()))) {
+        if (!(await takeRateToken(database, share.limit, share.subject))) return { ok: false, failure: 'refused', reason: spec.dailyCaps.refusal }
+      }
+    }
     const scope = { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId } as const
     const result = await actInScope(
       scope,

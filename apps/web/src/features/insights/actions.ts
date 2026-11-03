@@ -1,12 +1,12 @@
 'use server'
 
 import { createBedrockInsightsModel, createScriptedInsightsModel, INSIGHTS_TURN_CHARACTERS, runInsightsTurn, studioTurnSchema } from '@hold/agent'
-import { insightsTokensSince, saveInsightsDashboard as saveDashboard, takeRateTokenIn } from '@hold/db'
-import { INSIGHTS_BUDGET_HOURS, utcDay, withinInsightsBudget } from '@hold/domain'
+import { insightsTokensSince, saveInsightsDashboard as saveDashboard } from '@hold/db'
+import { INSIGHTS_BUDGET_HOURS, withinInsightsBudget } from '@hold/domain'
 import { z } from 'zod'
 import { getServices } from '@/server/services'
 import { Refusal, shopAction } from '@/server/shop-access'
-import { INSIGHTS_DAY } from './limits'
+import { INSIGHTS_LIMITS } from './limits'
 
 // The insights dashboard's server functions (extensions.md section 12.5): a turn of the insights agent, which AG
 // Studio's loop asks for from the browser, and saving the shop's own dashboard. Built by shopAction, which checks who is asking and their role, limits how
@@ -49,14 +49,14 @@ export const askInsights = shopAction(
     roles: DECIDERS,
     needsPasskey: false,
     rateLimit: TURNS,
+    // This shop's, this network's and every shop's share of the day: a turn counts once asked for, even if the model then fails.
+    dailyCaps: { refusal: 'insights_daily_cap', shares: (context, network, day) => [{ limit: INSIGHTS_LIMITS.perShop, subject: context.shop.id }, { limit: INSIGHTS_LIMITS.perNetwork, subject: network }, { limit: INSIGHTS_LIMITS.perDay, subject: day }] },
     input: z.strictObject({ turn }),
     auditDetail: (result: Awaited<ReturnType<typeof runInsightsTurn>>) => ({ outcome: result.outcome, model: result.model, promptVersion: result.promptVersion, tokens: result.tokens, kept: result.kept, dropped: result.dropped, ...(result.reason === undefined ? {} : { reason: result.reason }) }),
   },
   async (_context, input, transaction) => {
     // A shop's turns of the last day must have tokens left before another model call is made.
     const now = new Date()
-    // Every shop's turns together first, then this shop's tokens. A refusal rolls back, so it spends no turn.
-    if (!(await takeRateTokenIn(transaction, INSIGHTS_DAY, utcDay(now)))) return new Refusal('insights_daily_cap')
     if (!withinInsightsBudget(await insightsTokensSince(transaction, new Date(now.getTime() - INSIGHTS_BUDGET_HOURS * 60 * 60 * 1000)))) return new Refusal('insights_budget_spent')
     const { config } = await getServices()
     const model = config.services === 'fake' ? createScriptedInsightsModel() : createBedrockInsightsModel({ awsRegion: config.region })

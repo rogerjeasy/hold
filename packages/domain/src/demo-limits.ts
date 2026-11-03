@@ -46,3 +46,9 @@ export const SAMPLE_ADVOCATE_RUNS_PER_DAY = 3
 // AG Studio's insights agent takes several short turns for each question. Every demo is a shop of its own, so a cap per
 // shop bounds nothing in total: this one spans every shop.
 export const INSIGHTS_TURNS_PER_DAY = 60
+
+// One network's and one shop's share of those days: a visitor can start several demos, each a shop of its own, so a
+// share per network keeps one of them from taking a day's cap alone.
+export const SAMPLE_ADVOCATE_RUNS_PER_NETWORK = 1
+export const INSIGHTS_TURNS_PER_NETWORK = 20
+export const INSIGHTS_TURNS_PER_SHOP = 15

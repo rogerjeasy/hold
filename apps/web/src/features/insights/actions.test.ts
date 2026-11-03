@@ -20,7 +20,7 @@ vi.mock('next/headers', () => ({
 vi.mock('next/cache', () => ({ revalidatePath: () => undefined }))
 
 const { askInsights, saveInsightsDashboard } = await import('./actions')
-const { INSIGHTS_DAY } = await import('./limits')
+const { INSIGHTS_LIMITS } = await import('./limits')
 const { getServices } = await import('@/server/services')
 const { form, signIn } = await import('@/test/shop-session')
 
@@ -76,10 +76,19 @@ describe('the shop’s daily budget for the insights agent', () => {
   })
 })
 
+describe('one shop’s share of the day’s turns', () => {
+  it('refuses a turn once this shop has taken its share of the day, and asks no model', async () => {
+    const { database } = await getServices()
+    while (await takeRateToken(database, INSIGHTS_LIMITS.perShop, shopId)) { /* spend the shop's share */ }
+    await signIn(jar, OWNER, 'passkey')
+    expect(await askInsights(null, form({ turn }))).toEqual({ ok: false, failure: 'refused', reason: 'insights_daily_cap' })
+  })
+})
+
 describe('every shop’s turns together in a day', () => {
   it('refuses a turn once the day’s turns across every shop are spent, and asks no model', async () => {
     const { database } = await getServices()
-    while (await takeRateToken(database, INSIGHTS_DAY, utcDay(new Date()))) { /* spend the day */ }
+    while (await takeRateToken(database, INSIGHTS_LIMITS.perDay, utcDay(new Date()))) { /* spend the day */ }
     await signIn(jar, OWNER, 'passkey')
     expect(await askInsights(null, form({ turn }))).toEqual({ ok: false, failure: 'refused', reason: 'insights_daily_cap' })
   })

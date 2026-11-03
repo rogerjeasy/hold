@@ -21,7 +21,7 @@ export type { MoneyStyle } from './money-format.ts'
 export type { Money } from './money.ts'
 export { PENDING_PAYMENT_MINUTES, RENTAL_ENDED_STATES, RENTAL_STATES, RENTAL_TRANSITIONS } from './rental.ts'
 export type { RentalState } from './rental.ts'
-export { EVIDENCE_KEPT_DAYS, EVIDENCE_LOCK_DAYS, PAYPAL_DISPUTE_DAYS } from './data-retention.ts'
+export { BACKUP_KEPT_DAYS, EVIDENCE_KEPT_DAYS, EVIDENCE_LOCK_DAYS, PAYPAL_DISPUTE_DAYS } from './data-retention.ts'
 export { checkRenterErasure, ERASED } from './renter-erasure.ts'
 export type { ErasureProblem } from './renter-erasure.ts'
 export { checkPriceList, PRICE_CATEGORIES, PRICE_LIST_LIMITS, priceCode, publishedText } from './price-list.ts'
@@ -132,4 +132,4 @@ export type { RepairClose, RepairCloseProblem, RepairOutcome, RepairState } from
 
 // What a log may carry (AGENTS.md section 7).
 export { errorForLog } from './log-redaction.ts'
-export { CLAUDE_DAILY_TOKENS, DEMO_SESSION_DAYS, DEMO_STARTS_PER_DAY, demoRetirementCutoff, HOSTED_ASSISTANT_SHARE, HOSTED_QUESTIONS_PER_NETWORK, hostedQuestionsPerDay, INSIGHTS_TURNS_PER_DAY, SAMPLE_ADVOCATE_RUNS_PER_DAY, utcDay } from './demo-limits.ts'
+export { CLAUDE_DAILY_TOKENS, DEMO_SESSION_DAYS, DEMO_STARTS_PER_DAY, demoRetirementCutoff, HOSTED_ASSISTANT_SHARE, HOSTED_QUESTIONS_PER_NETWORK, hostedQuestionsPerDay, INSIGHTS_TURNS_PER_DAY, INSIGHTS_TURNS_PER_NETWORK, INSIGHTS_TURNS_PER_SHOP, SAMPLE_ADVOCATE_RUNS_PER_DAY, SAMPLE_ADVOCATE_RUNS_PER_NETWORK, utcDay } from './demo-limits.ts'
