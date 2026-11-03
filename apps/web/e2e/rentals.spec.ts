@@ -1,5 +1,5 @@
 import { expectFitsEveryWidth } from './support/responsive'
-import { bookAtTheCounter, payFee, renterBrowser } from './support/rental'
+import { bookAtTheCounter, feePaidAndHoldPlaced, payFee, renterBrowser } from './support/rental'
 import { shopReadyToBook } from './support/shop'
 import { expect, test } from './support/test'
 
@@ -135,5 +135,20 @@ test('at pickup, staff ask for the hold, the renter approves it on their own pho
   await page.setViewportSize({ width: 1280, height: 800 })
   await expect(hold.getByText('Ready for handover.')).toBeVisible({ timeout: 15_000 })
   await expect(page.getByRole('region', { name: 'Progress' }).getByText('Done')).toHaveCount(3)
+  await expectFitsEveryWidth(page)
+})
+
+// The PayPal record (architecture.md section 11.9): each call with PayPal's ids, its status and the PayPal-Request-Id,
+// read back before it shows. The ids are long and unbroken, so the page must still fit every width.
+test('the rental page shows each PayPal call with its ids and PayPal-Request-Id, and fits every width', async ({ page, browser }) => {
+  await shopReadyToBook(page, 'Ribeira Bicicletas e Caiaques do Douro Litoral')
+  await bookAtTheCounter(page)
+  await feePaidAndHoldPlaced(page, browser)
+  const record = page.getByRole('region', { name: 'PayPal record' })
+  await expect(record.getByRole('listitem')).toHaveCount(2)
+  await expect(record.getByRole('listitem').first()).toContainText('Fee captured')
+  await expect(record.getByRole('listitem').nth(1)).toContainText('Hold placed')
+  await expect(record.getByRole('listitem').nth(1)).toContainText('CREATED')
+  await expect(record.getByText('PayPal-Request-Id', { exact: true })).toHaveCount(2)
   await expectFitsEveryWidth(page)
 })

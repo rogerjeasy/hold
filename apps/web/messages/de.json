@@ -1735,6 +1735,61 @@
           "opted_out": "Die Person hat STOP geantwortet, Hold nutzt E-Mail",
           "simulated": "Auf der Seite der mietenden Person gezeigt (Sandbox)"
         }
+      },
+      "paypal": {
+        "title": "PayPal-Verlauf",
+        "body": "Jeder Aufruf, den Hold für diese Miete an PayPal gesendet hat, mit den IDs von PayPal. Jeder ging mit einer PayPal-Request-Id hinaus, damit eine Wiederholung nie doppelt wirkt, und keiner zählt, bevor Hold ihn bei PayPal zurückgelesen hat.",
+        "empty": "Noch kein Aufruf an PayPal.",
+        "sampleNote": "Eine Beispielmiete: Diese PayPal-IDs sind erfunden, und es wurde kein Aufruf gesendet.",
+        "kinds": {
+          "fee_captured": "Gebühr eingezogen",
+          "hold_placed": "Reservierung platziert",
+          "hold_renewed": "Reservierung erneuert",
+          "hold_captured": "Forderung aus der Reservierung eingezogen",
+          "hold_released": "Rest der Reservierung freigegeben",
+          "refunded": "Erstattet",
+          "invoice_sent": "Rechnung gesendet",
+          "invoice_paid": "Rechnung bezahlt",
+          "extension_captured": "Verlängerung eingezogen"
+        },
+        "calls": {
+          "authorize": "Reservierung wird platziert",
+          "renew": "Reservierung wird erneuert",
+          "release": "Reservierung wird freigegeben",
+          "capture": "Einzug aus der Reservierung",
+          "refund": "Erstattung läuft",
+          "invoice": "Rechnung wird gesendet",
+          "fee_capture": "Gebühr wird eingezogen",
+          "extension_capture": "Verlängerung wird eingezogen"
+        },
+        "ids": {
+          "order": "Bestellung",
+          "authorization": "Autorisierung",
+          "capture": "Einzug",
+          "refund": "Erstattung",
+          "invoice": "Rechnung"
+        },
+        "status": "Status bei PayPal",
+        "finalCapture": "final_capture",
+        "authorizationNow": "Autorisierung jetzt",
+        "authorizationStates": {
+          "created": "Reserviert",
+          "renewed": "Durch eine neue Autorisierung erneuert",
+          "voided": "Storniert",
+          "captured": "Eingezogen",
+          "expired": "Abgelaufen"
+        },
+        "requestId": "PayPal-Request-Id",
+        "confirmed": "Bestätigt",
+        "event": "Signiertes PayPal-Ereignis {type}, geprüft, {when}",
+        "simulatedEvent": "Ereignis der Vorführung {type}, {when}",
+        "readBack": "Bei PayPal zurückgelesen, {when}",
+        "callStates": {
+          "pending": "Wartet auf das Senden an PayPal",
+          "submitted": "Gesendet, wartet auf die Bestätigung von PayPal",
+          "confirmed": "Von PayPal bestätigt",
+          "failed": "PayPal hat ihn nicht ausgeführt"
+        }
       }
     },
     "items": {

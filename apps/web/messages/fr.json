@@ -1735,6 +1735,61 @@
           "opted_out": "La personne a répondu STOP, Hold utilise l'e-mail",
           "simulated": "Affiché sur la page de la personne qui loue (sandbox)"
         }
+      },
+      "paypal": {
+        "title": "Historique PayPal",
+        "body": "Chaque appel que Hold a fait à PayPal pour cette location, avec les identifiants de PayPal. Chacun est parti avec un PayPal-Request-Id, pour qu'une nouvelle tentative n'agisse jamais deux fois, et aucun ne compte avant que Hold l'ait relu chez PayPal.",
+        "empty": "Aucun appel à PayPal pour l'instant.",
+        "sampleNote": "Une location d'exemple : ces identifiants PayPal sont inventés, et aucun appel n'a été fait.",
+        "kinds": {
+          "fee_captured": "Frais encaissés",
+          "hold_placed": "Blocage posé",
+          "hold_renewed": "Blocage renouvelé",
+          "hold_captured": "Montant encaissé sur le blocage",
+          "hold_released": "Reste du blocage libéré",
+          "refunded": "Remboursé",
+          "invoice_sent": "Facture envoyée",
+          "invoice_paid": "Facture payée",
+          "extension_captured": "Prolongation encaissée"
+        },
+        "calls": {
+          "authorize": "Pose du blocage",
+          "renew": "Renouvellement du blocage",
+          "release": "Libération du blocage",
+          "capture": "Encaissement sur le blocage",
+          "refund": "Remboursement",
+          "invoice": "Envoi d'une facture",
+          "fee_capture": "Encaissement des frais",
+          "extension_capture": "Encaissement de la prolongation"
+        },
+        "ids": {
+          "order": "Commande",
+          "authorization": "Autorisation",
+          "capture": "Encaissement",
+          "refund": "Remboursement",
+          "invoice": "Facture"
+        },
+        "status": "Statut chez PayPal",
+        "finalCapture": "final_capture",
+        "authorizationNow": "Autorisation maintenant",
+        "authorizationStates": {
+          "created": "Bloquée",
+          "renewed": "Renouvelée par une nouvelle autorisation",
+          "voided": "Annulée",
+          "captured": "Encaissée",
+          "expired": "Expirée"
+        },
+        "requestId": "PayPal-Request-Id",
+        "confirmed": "Confirmé",
+        "event": "Événement signé de PayPal {type}, vérifié, {when}",
+        "simulatedEvent": "Événement de la démonstration {type}, {when}",
+        "readBack": "Relu chez PayPal, {when}",
+        "callStates": {
+          "pending": "En attente d'envoi à PayPal",
+          "submitted": "Envoyé, en attente de la confirmation de PayPal",
+          "confirmed": "Confirmé par PayPal",
+          "failed": "PayPal ne l'a pas mené à bien"
+        }
       }
     },
     "items": {

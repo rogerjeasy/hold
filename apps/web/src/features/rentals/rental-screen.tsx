@@ -1,4 +1,4 @@
-import type { RentalDetail, RentalExtension, RentalHandover, RentalHold, RentalReturn, RentalText } from '@hold/db'
+import type { PayPalRecord, RentalDetail, RentalExtension, RentalHandover, RentalHold, RentalReturn, RentalText } from '@hold/db'
 import { RENTAL_ENDED_STATES } from '@hold/domain'
 import { ArrowLeft } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -17,16 +17,18 @@ import type { DropOffEntry } from '@/features/self-return/drop-off-card'
 import { HoldPanel } from './hold-panel'
 import { LetGo } from './let-go'
 import { LinkPanel } from './link-panel'
+import { PayPalRecordPanel } from './paypal-record-panel'
 import { RentalProgress } from './rental-progress'
 import { RentalStateBadge } from './rental-state-badge'
 import { RentalTerms } from './rental-terms'
 
 // dropOff: the item a renter left at the drop point, while nobody has checked it (architecture.md section 6.13).
 // canErase: the owner, who alone may erase the renter's personal details once the rental has ended (section 15.2).
-type RentalScreenProps = { shopName: string; clock: ShopClock; rental: RentalDetail; hold: RentalHold | undefined; handovers: readonly RentalHandover[]; returns?: readonly RentalReturn[]; dropOff?: DropOffEntry | undefined; extensions?: readonly RentalExtension[]; texts?: readonly RentalText[]; canAct: boolean; canErase?: boolean }
+// paypal: every call Hold made to PayPal for the rental, shown to everyone who can see it (section 11.9).
+type RentalScreenProps = { shopName: string; clock: ShopClock; rental: RentalDetail; hold: RentalHold | undefined; handovers: readonly RentalHandover[]; returns?: readonly RentalReturn[]; dropOff?: DropOffEntry | undefined; extensions?: readonly RentalExtension[]; texts?: readonly RentalText[]; paypal?: PayPalRecord | undefined; canAct: boolean; canErase?: boolean }
 
 // One rental: where it stands, what was agreed, the renter's link and the hold at pickup.
-export function RentalScreen({ shopName, clock, rental, hold, handovers, returns = [], dropOff, extensions = [], texts = [], canAct, canErase = false }: RentalScreenProps) {
+export function RentalScreen({ shopName, clock, rental, hold, handovers, returns = [], dropOff, extensions = [], texts = [], paypal, canAct, canErase = false }: RentalScreenProps) {
   const t = useTranslations('shop.rentals')
   const claim = useTranslations('claim')
   const records = useTranslations('records')
@@ -56,6 +58,7 @@ export function RentalScreen({ shopName, clock, rental, hold, handovers, returns
           <div className="grid min-w-0 gap-6">
             <RentalTerms rental={rental} clock={clock} />
             <StaffExtensions extensions={extensions} clock={clock} />
+            {paypal === undefined ? null : <PayPalRecordPanel record={paypal} clock={clock} />}
           </div>
           {/* At the counter on a phone, what staff act on comes before the terms. */}
           <div className="grid min-w-0 gap-6 max-lg:order-first">
