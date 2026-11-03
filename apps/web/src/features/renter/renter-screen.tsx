@@ -15,6 +15,7 @@ import { formatMoney } from '@/lib/money'
 import { linkRoutes } from '@/lib/routes'
 import { SelfReturnCard } from '@/features/self-return/self-return-card'
 import type { SelfReturnOffer } from '@/features/self-return/self-return-card'
+import { EvidenceNotice } from './evidence-notice'
 import { PayButton } from './pay-button'
 import { WalkInButton } from './walk-in-button'
 import { TwoAmounts } from './two-amounts'
@@ -155,6 +156,7 @@ export function RenterScreen({
       </Panel>
       <TwoAmounts view={view} />
       <TermsView currency={view.currency} prices={view.prices} wearPolicy={view.wearPolicy} />
+      {due ? <EvidenceNotice /> : null}
       {due && view.walkIn ? <WalkInButton token={token} fee={formatMoney(money(view.feeCents, view.currency), locale)} hold={formatMoney(money(view.holdCents, view.currency), locale)} checkout={checkout} /> : null}
       {due && !view.walkIn ? <PayButton token={token} amount={formatMoney(money(view.feeCents, view.currency), locale)} checkout={checkout} /> : null}
     </div>

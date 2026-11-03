@@ -40,6 +40,16 @@ test.describe('on a laptop', () => {
     await expect(page).toHaveURL('/sign-in')
   })
 
+  test('the footer leads to the privacy notice, and the notice to the terms of use', async ({ page }) => {
+    await page.goto('/')
+    await page.getByRole('navigation', { name: 'Privacy and terms' }).getByRole('link', { name: 'Privacy notice' }).click()
+    await expect(page).toHaveURL('/privacy')
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Privacy notice')
+    await page.getByRole('main').getByRole('link', { name: 'Read the terms of use' }).click()
+    await expect(page).toHaveURL('/terms')
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Terms of use')
+  })
+
   test('the logo leads home from any page', async ({ page }) => {
     await page.goto('/paypal')
     await page.getByRole('link', { name: 'Hold, home page' }).click()

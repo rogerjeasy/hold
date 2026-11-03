@@ -1,5 +1,6 @@
 import type { RentalHold } from '@hold/db'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
+import { EVIDENCE_KEPT_DAYS } from '@hold/domain'
 import { describe, expect, it, vi } from 'vitest'
 import { renderWithIntl } from '@/test/render'
 import { HoldScreen } from './hold-screen'
@@ -25,6 +26,12 @@ const hold = (overrides: Partial<RentalHold> = {}): RentalHold => ({
 })
 
 describe('the renter’s hold page', () => {
+  it('says, before the renter approves the hold, that the photographs are kept as evidence, linking the privacy notice', () => {
+    renderWithIntl(<HoldScreen token="token" view={view} hold={hold()} />)
+    const notice = screen.getByText(new RegExp(`kept as evidence for ${String(EVIDENCE_KEPT_DAYS)} days`))
+    expect(within(notice).getByRole('link', { name: 'How Hold handles your details' })).toHaveAttribute('href', '/privacy')
+  })
+
   it('approves the hold with PayPal’s own button when the shop’s PayPal app is known', async () => {
     Object.assign(window, { paypal: { createInstance: () => Promise.resolve({ findEligibleMethods: () => Promise.resolve({ isEligible: () => true }), createPayPalOneTimePaymentSession: () => Promise.resolve({ start: () => Promise.resolve() }) }) } })
     const { container } = renderWithIntl(<HoldScreen token="token" view={view} hold={hold()} checkout={{ clientId: 'shop-client-id', environment: 'sandbox' }} />)

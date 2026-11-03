@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react'
 import { LanguageSwitcher } from './language-switcher'
+import { LegalLinks } from './legal-links'
 import { Logo } from './logo'
 import { ThemeToggle } from './theme-toggle'
 
 // The frame of the pages a renter opens: their own link and a shop's page. Only the wordmark, the language and the
-// theme: a renter came to rent, not to read about Hold.
+// theme, and below, the privacy notice and the terms: a renter came to rent, not to read about Hold.
 export function LinkFrame({ children }: { children: ReactNode }) {
   return (
     <>
@@ -20,6 +21,11 @@ export function LinkFrame({ children }: { children: ReactNode }) {
       <main id="main" className="flex-1">
         {children}
       </main>
+      <footer className="border-t">
+        <div className="mx-auto w-full max-w-5xl px-4 text-sm text-muted-foreground md:px-8">
+          <LegalLinks />
+        </div>
+      </footer>
     </>
   )
 }

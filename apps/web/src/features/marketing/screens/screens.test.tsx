@@ -1,6 +1,7 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactElement } from 'react'
+import { EVIDENCE_KEPT_DAYS, EVIDENCE_LOCK_DAYS } from '@hold/domain'
 import { describe, expect, it } from 'vitest'
 import { renderWithIntl } from '@/test/render'
 import { AiScreen } from './ai-screen'
@@ -10,6 +11,8 @@ import { ForShopsScreen } from './for-shops-screen'
 import { HomeScreen } from './home-screen'
 import { HowItWorksScreen } from './how-it-works-screen'
 import { PaypalScreen } from './paypal-screen'
+import { PrivacyScreen } from './privacy-screen'
+import { TermsScreen } from './terms-screen'
 
 const screens: [string, ReactElement, string][] = [
   ['home', <HomeScreen key="home" />, 'One photograph settles it.'],
@@ -19,6 +22,8 @@ const screens: [string, ReactElement, string][] = [
   ['the AI', <AiScreen key="ai" />, 'The AI compares. A person decides.'],
   ['PayPal', <PaypalScreen key="paypal" />, 'Reserved is not charged. PayPal makes that real.'],
   ['demo', <DemoScreen key="demo" />, 'Try a return yourself.'],
+  ['privacy', <PrivacyScreen key="privacy" />, 'Privacy notice'],
+  ['terms', <TermsScreen key="terms" />, 'Terms of use'],
 ]
 
 function headingLevels(): number[] {
@@ -264,5 +269,56 @@ describe('DemoScreen', () => {
   it('sends the reader on to sign in to the demo shop', () => {
     renderWithIntl(<DemoScreen />)
     expect(screen.getByRole('link', { name: 'Sign in to the demo shop' })).toHaveAttribute('href', '/sign-in')
+  })
+})
+
+describe('PrivacyScreen', () => {
+  it('says plainly that Hold is a hackathon build in PayPal’s sandbox, not a registered business', () => {
+    renderWithIntl(<PrivacyScreen />)
+    expect(screen.getByText(/runs in PayPal's sandbox, so no real money moves, and it is not a registered business/)).toBeInTheDocument()
+  })
+
+  it('states the periods the evidence bucket keeps, from the same constants', () => {
+    renderWithIntl(<PrivacyScreen />)
+    expect(screen.getByText(new RegExp(`for ${String(EVIDENCE_LOCK_DAYS)} days.*deleted ${String(EVIDENCE_KEPT_DAYS)} days after they were taken`))).toBeInTheDocument()
+  })
+
+  it('names everyone who handles the details for Hold', () => {
+    renderWithIntl(<PrivacyScreen />)
+    for (const name of ['Amazon Web Services', 'PayPal', 'Anthropic’s Claude, through Amazon Bedrock', 'Amazon Rekognition', 'Google, through Gmail', 'AWS End User Messaging', 'Expo']) {
+      expect(screen.getByRole('heading', { level: 3, name })).toBeInTheDocument()
+    }
+  })
+
+  it('says how to have details erased, and what stays', () => {
+    renderWithIntl(<PrivacyScreen />)
+    const erasure = screen.getByRole('heading', { level: 2, name: 'Having your details erased' }).closest('section')
+    expect(erasure).toHaveTextContent(/its owner erases your name, email and phone number/)
+    expect(erasure).toHaveTextContent(/The money log, approvals, the audit trail and the photographs stay/)
+  })
+
+  it('leads to the terms of use', () => {
+    renderWithIntl(<PrivacyScreen />)
+    expect(screen.getByRole('link', { name: /Read the terms of use/ })).toHaveAttribute('href', '/terms')
+  })
+})
+
+describe('TermsScreen', () => {
+  it('says there is no real money, and no warranty', () => {
+    renderWithIntl(<TermsScreen />)
+    expect(screen.getByRole('heading', { level: 3, name: 'Sandbox only' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 3, name: 'No warranty' })).toBeInTheDocument()
+  })
+
+  it('leads to the privacy notice', () => {
+    renderWithIntl(<TermsScreen />)
+    expect(screen.getByRole('link', { name: /Read the privacy notice/ })).toHaveAttribute('href', '/privacy')
+  })
+})
+
+describe('the promise about photographs', () => {
+  it('states the period the evidence is kept, on the renters’ page', () => {
+    renderWithIntl(<ForRentersScreen />)
+    expect(screen.getByText(new RegExp(`Photographs are deleted ${String(EVIDENCE_KEPT_DAYS)} days after they are taken`))).toBeInTheDocument()
   })
 })
