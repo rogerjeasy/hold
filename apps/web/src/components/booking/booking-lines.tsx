@@ -30,9 +30,9 @@ export function BookingLines({ types, currency, days }: BookingLinesProps) {
 
   return (
     <div className="grid gap-6">
-      <ul className="grid border bg-card text-card-foreground">
+      <ul className="surface grid divide-y divide-border/70 overflow-clip">
         {types.map((type) => (
-          <li key={type.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 border-b px-4 py-3 last:border-b-0 md:px-5">
+          <li key={type.id} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 gap-y-1 px-4 py-3.5 md:px-5">
             <div className="min-w-0">
               <p className="font-semibold wrap-long-words">{type.name}</p>
               <p className="text-sm text-muted-foreground">
@@ -40,14 +40,14 @@ export function BookingLines({ types, currency, days }: BookingLinesProps) {
               </p>
               <p className="text-[0.8125rem] text-muted-foreground">{t('free', { count: type.available })}</p>
             </div>
-            <div className="flex items-center gap-1">
-              <Button type="button" variant="outline" size="icon" aria-label={t('fewer', { name: type.name })} disabled={count(type.id) === 0} onClick={() => { change(type.id, -1) }}>
+            <div className="flex items-center gap-1 rounded-xl bg-muted/60 p-1">
+              <Button type="button" variant="ghost" size="icon" aria-label={t('fewer', { name: type.name })} disabled={count(type.id) === 0} onClick={() => { change(type.id, -1) }}>
                 <Minus aria-hidden="true" />
               </Button>
               <span role="status" aria-label={t('countOf', { name: type.name })} className="figures w-8 text-center text-lg font-semibold">
                 {count(type.id)}
               </span>
-              <Button type="button" variant="outline" size="icon" aria-label={t('more', { name: type.name })} disabled={count(type.id) >= type.available} onClick={() => { change(type.id, 1) }}>
+              <Button type="button" variant="ghost" size="icon" aria-label={t('more', { name: type.name })} disabled={count(type.id) >= type.available} onClick={() => { change(type.id, 1) }}>
                 <Plus aria-hidden="true" />
               </Button>
             </div>

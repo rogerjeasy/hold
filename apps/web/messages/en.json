@@ -3139,7 +3139,56 @@
       "taking": "Your hold of {hold} is placed. PayPal is taking your fee of {fee}.",
       "done": "Hold placed. Only your fee is charged."
     },
-    "evidenceNotice": "Photographs of the item at handover and return are kept as evidence for {days} days, then deleted. <link>How Hold handles your details</link>"
+    "evidenceNotice": "Photographs of the item at handover and return are kept as evidence for {days} days, then deleted. <link>How Hold handles your details</link>",
+    "reviewAndPay": "Review and pay {amount}",
+    "payTitle": "Pay the rental fee",
+    "records": "Your records",
+    "journey": {
+      "title": "Where your rental stands",
+      "next": "Next",
+      "done": "Done",
+      "now": "In progress",
+      "toDo": "Not yet",
+      "steps": {
+        "booked": "Booked",
+        "paid": "Fee paid",
+        "hold": "Hold placed",
+        "out": "Collected",
+        "returned": "Returned",
+        "settled": "Settled"
+      }
+    },
+    "holdCard": {
+      "label": "Your hold",
+      "where": "In your own PayPal account",
+      "notCharged": "A reservation, never a charge",
+      "standing": {
+        "waiting": "Not placed yet",
+        "reserved": "Reserved",
+        "settling": "Being settled",
+        "ended": "Ended",
+        "none": "Not placed"
+      }
+    },
+    "unavailable": {
+      "back": "Back to your rental",
+      "no_assistant": {
+        "title": "No assistant on this rental",
+        "body": "This rental was not booked through an assistant of your own, so there is nothing to show here. Your link works for everything else."
+      },
+      "no_negotiation": {
+        "title": "No advocate on this claim",
+        "body": "Nobody is arguing a claim on your behalf for this rental. If the shop sends you a claim, you can hand it to an advocate from the claim page."
+      },
+      "no_claim": {
+        "title": "No claim to review",
+        "body": "The shop has not sent you a claim for this rental. If it ever does, it appears here with the photographs and the prices, and you can reply."
+      },
+      "not_handed_over": {
+        "title": "Not collected yet",
+        "body": "The photographs of how your rental left the shop appear here once you collect it."
+      }
+    }
   },
   "shopPage": {
     "label": "Book online",
@@ -3172,7 +3221,8 @@
     "reviewTitle": "PayPal is reviewing this payment",
     "reviewBody": "The payment is captured but not settled. Finish the review as PayPal would, and the shop is told.",
     "complete": "Complete the payment",
-    "deny": "Deny the payment"
+    "deny": "Deny the payment",
+    "outcomes": "Other outcomes to test"
   },
   "claim": {
     "title": "Claim and settlement",
@@ -3311,6 +3361,16 @@
       "seniorWaives": "Only an owner, a manager or the person who prepared this claim can waive it.",
       "raisedIt": "You prepared this claim, so another owner or manager decides it.",
       "confirmSenior": "An owner or manager confirms what the advocates agreed."
+    },
+    "renterPage": {
+      "fromHold": "From your hold of {held}. The rest goes back to you.",
+      "fromList": "Price from the shop's published list",
+      "evidence": "The evidence",
+      "total": "Total claimed",
+      "itemPhotosLead": "A person at the shop added this line after looking at the item, not a photograph comparison. Here is the item at handover and at return, view by view.",
+      "noPhotos": "There are no sealed handover and return photographs of this item to show.",
+      "more": "More about this claim",
+      "provenance": "Where these photographs came from"
     }
   },
   "scorecard": {

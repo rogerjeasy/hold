@@ -1580,18 +1580,18 @@ Served by `web`. Each requires a valid signed link.
 | `/r/{token}` | The rental: status, hold, price list |
 | `/r/{token}/pay` | Approve the hold at pickup, or its replacement before it ends. PayPal returns the renter here, and the hold is confirmed by a POST, never on arrival. The fee is paid from `/r/{token}` itself. |
 | `/r/{token}/paid` | Where PayPal returns the renter. Confirms the fee by a POST, never on arrival. |
-| `/r/{token}/condition` | How each item left: its photographs and marks. Within 24 hours of the handover, the link sent then may confirm it or add photographs of anything missed. |
+| `/r/{token}/condition` | How each item left: its photographs and marks. Within 24 hours of the handover, the link sent then may confirm it or add photographs of anything missed. Before the handover, a working link says nothing has been collected yet. |
 | `/r/{token}/session` | Guided photographs for shipped rentals |
-| `/r/{token}/claim` | See a claim, accept or contest it |
+| `/r/{token}/claim` | See a claim, accept or contest it. Each line shows its own photograph pair, or, for a line a person added by hand, every item's sealed handover and return photographs view by view. Before a person approved a claim, a working link says there is none to review. |
 | `/r/{token}/record` | Shared evidence versions and PDF/manifest downloads; `?version={pack UUID}` selects the exact receipt version. Draft and awaiting-approval claims remain staff-only. |
 | `/r/{token}/return` | Returning the item with nobody at the counter (section 6.13): where to leave it and what happens next, the photographs, then a receipt with PayPal's own reading of the hold. Starting, photographing and sending need the scope `return_item`. |
 | `/r/{token}/extend` | Keeping the item longer (section 6.14): when it is due back, one to three more days in a tap or a time to the minute, Hold's price, PayPal's button, and each extension. Asking and paying need the scope `extend`. |
 | `/r/{token}/extended` | Where PayPal returns the renter after approving more days. Confirms by a POST, never on arrival. |
 | `/r/{token}/incident` | Report something that happened during the rental, and list earlier reports. Needs the scope `report_incident`. |
 | `/r/{token}/incident/{incident}` | One report: photographs while it is written, then the fixed message for its kind, the confirmed price and the one-time code to agree it, or the theft steps. Another rental's report answers as an unusable link. |
-| `/r/{token}/negotiation` | The renter's advocate: the transcript, their own highest total, the final tap with a one-time code, and stopping the advocate. The limit is set on `/r/{token}/claim`, after the code, as the third choice. A link without the `accept` and `contest` scopes sees no forms. |
+| `/r/{token}/negotiation` | The renter's advocate: the transcript, their own highest total, the final tap with a one-time code, and stopping the advocate. The limit is set on `/r/{token}/claim`, after the code, as the third choice. A link without the `accept` and `contest` scopes sees no forms. With no advocate yet, a working link says so and leads back to the rental. |
 | `/r/{token}/trust` | The Clean Record: its counts, the deposits never taken, a fresh credential as a QR code, the consent question and deleting the record. Answering and deleting need a one-time code emailed to the payer (section 6.8). |
-| `/r/{token}/assistant` | What the renter's own assistant did on the rental, in plain words from the audit log, the reply it drafted, its declared name marked as not verified, and a button to disconnect it. Any link to the rental may disconnect it, since that only takes access away. A rental no assistant booked answers as an unusable link. |
+| `/r/{token}/assistant` | What the renter's own assistant did on the rental, in plain words from the audit log, the reply it drafted, its declared name marked as not verified, and a button to disconnect it. Any link to the rental may disconnect it, since that only takes access away. A working link to a rental no assistant booked says so and leads back to the rental; only a link that truly cannot be used answers as an unusable link. |
 
 Record build/download POST actions require the signed link's `view` scope and exact rental binding. Visits only read; download actions issue a private, exact-version S3 URL lasting at most 300 seconds. Unknown or malformed selected versions are refused without revealing another rental's metadata.
 

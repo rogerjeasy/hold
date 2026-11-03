@@ -9,23 +9,24 @@ export function BookingTotals({ days, fee, hold }: { days: number; fee: Money; h
   const locale = useLocale()
   const titleId = useId()
   return (
-    <section aria-labelledby={titleId} className="grid gap-4 border bg-card p-4 text-card-foreground md:p-5">
+    <section aria-labelledby={titleId} className="surface grid min-w-0 gap-4 p-4 md:p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 id={titleId} className="text-[1.0625rem] font-extrabold tracking-tight">
           {t('totals')}
         </h2>
         <span className="text-sm text-muted-foreground">{t('days', { count: days })}</span>
       </div>
-      <dl className="grid gap-4 sm:grid-cols-2">
-        <div className="min-w-0">
-          <dt className="text-sm text-muted-foreground">{t('fee')}</dt>
-          <dd className="mt-1 text-figure">{formatMoney(fee, locale)}</dd>
+      <dl className="grid gap-3 sm:grid-cols-2">
+        <div className="min-w-0 rounded-xl border border-border/70 p-4">
+          <dt className="label text-xs text-muted-foreground">{t('fee')}</dt>
+          <dd className="mt-1.5 text-figure tabular-nums wrap-long-words">{formatMoney(fee, locale)}</dd>
           <dd className="mt-1 text-[0.8125rem] text-muted-foreground">{t('feeNote')}</dd>
         </div>
-        <div className="min-w-0">
-          <dt className="text-sm text-muted-foreground">{t('hold')}</dt>
-          <dd className="mt-1 text-figure">{formatMoney(hold, locale)}</dd>
-          <dd className="mt-1 text-[0.8125rem] text-muted-foreground">{t('holdNote')}</dd>
+        {/* The hold in the wallet card's colours, as the renter's own page shows it: reserved, never added to the fee. */}
+        <div className="min-w-0 rounded-xl bg-band p-4 text-band-foreground">
+          <dt className="label text-xs text-band-muted">{t('hold')}</dt>
+          <dd className="mt-1.5 text-figure tabular-nums wrap-long-words">{formatMoney(hold, locale)}</dd>
+          <dd className="mt-1 text-[0.8125rem] text-band-muted">{t('holdNote')}</dd>
         </div>
       </dl>
     </section>

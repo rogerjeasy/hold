@@ -1,14 +1,15 @@
 import type { RentalHold, RenterView } from '@hold/db'
-import { CircleAlert, CircleCheck } from 'lucide-react'
+import { CircleAlert, CircleCheck, Clock } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useShopFormat } from '@/hooks/use-shop-format'
-import { Link } from '@/i18n/navigation'
 import { linkRoutes } from '@/lib/routes'
 import { ContactPanel } from '@/features/contact/contact-panel'
 import type { RenterContactView } from '@/features/contact/contact-view'
 import { HoldReason } from '@/features/trust/hold-reason'
 import { EvidenceNotice } from './evidence-notice'
 import { HoldButton } from './hold-button'
+import { HoldCard } from './hold-card'
+import { BackLink, RenterHead, RenterPage } from './renter-page'
 import { WalkInButton } from './walk-in-button'
 import type { PayPalCheckout } from './paypal-sdk'
 
@@ -32,30 +33,36 @@ export function HoldScreen({ token, view, hold, checkout, contact }: HoldScreenP
   const amount = format.money(hold?.reservedCents ?? view.holdCents)
   // A placed hold with an order waiting is being replaced before it ends.
   const replacing = hold !== undefined && hold.state !== 'requested' && hold.orderId !== null
+  const asking = hold !== undefined && (hold.state === 'requested' || replacing)
   return (
-    <div className="mx-auto grid w-full max-w-xl gap-6 px-4 py-12 md:px-8">
-      <p className="label text-xs text-muted-foreground wrap-long-words">{view.shopName}</p>
-      <h1 className="text-page-title text-balance">{replacing ? t('replaceTitle') : t('title')}</h1>
+    <RenterPage className="max-w-xl">
+      <RenterHead shopName={view.shopName} title={replacing ? t('replaceTitle') : t('title')} />
+      <HoldCard amount={amount} standing={hold === undefined || asking ? 'waiting' : 'reserved'} />
       {hold === undefined ? (
-        <p className="text-lg">{t('notYet')}</p>
-      ) : hold.state === 'requested' || replacing ? (
+        <p className="flex items-start gap-3 rounded-2xl bg-muted/70 px-4 py-3.5 text-pretty">
+          <Clock aria-hidden="true" className="mt-0.5 size-4.5 shrink-0 text-primary" />
+          {t('notYet')}
+        </p>
+      ) : asking ? (
         <div className="grid gap-5">
           <p className="max-w-prose text-lg text-pretty">{replacing && hold.validUntil !== null ? t('replaceLead', { amount, date: format.day(hold.validUntil) }) : t('lead', { amount })}</p>
           <HoldReason hold={hold} money={format.money} audience="renter" />
           {contact === undefined || contact.locked ? null : <ContactPanel token={token} contact={contact} />}
-          {hold.placementFailure === null ? null : (
-            <p role="alert" className="flex gap-1.5 text-[0.9375rem] text-destructive">
-              <CircleAlert aria-hidden="true" className="mt-0.5 size-4.5 shrink-0" />
-              {t('declined')}
-            </p>
-          )}
-          <EvidenceNotice />
-          {hold.strategy === 'combined' && hold.state === 'requested' ? <WalkInButton token={token} fee={format.money(view.feeCents)} hold={amount} checkout={checkout} /> : <HoldButton token={token} amount={amount} checkout={checkout} />}
+          <section aria-label={t('title')} className="surface grid min-w-0 gap-4 p-5 ring-1 ring-primary/25 md:p-6">
+            {hold.placementFailure === null ? null : (
+              <p role="alert" className="flex gap-2 rounded-xl bg-destructive/8 p-3 text-[0.9375rem] text-destructive">
+                <CircleAlert aria-hidden="true" className="mt-0.5 size-4.5 shrink-0" />
+                {t('declined')}
+              </p>
+            )}
+            <EvidenceNotice />
+            {hold.strategy === 'combined' && hold.state === 'requested' ? <WalkInButton token={token} fee={format.money(view.feeCents)} hold={amount} checkout={checkout} /> : <HoldButton token={token} amount={amount} checkout={checkout} />}
+          </section>
         </div>
       ) : (
-        <div className="grid gap-3">
-          <p role="status" className="flex items-start gap-2 text-lg font-semibold">
-            <CircleCheck aria-hidden="true" className="mt-1 size-5 shrink-0 text-primary" />
+        <div className="grid gap-4">
+          <p role="status" className="surface flex animate-pop items-start gap-3 p-5 text-lg font-semibold text-pretty md:p-6">
+            <CircleCheck aria-hidden="true" className="mt-0.5 size-6 shrink-0 text-success" />
             {/* A walk-in's fee is captured from the hold just placed, so the page waits for it before saying it is paid. */}
             {hold.strategy !== 'combined' ? t('placed', { amount }) : view.state === 'pending_payment' ? walkIn('taking', { hold: amount, fee: format.money(view.feeCents) }) : walkIn('placed', { hold: amount, fee: format.money(view.feeCents) })}
           </p>
@@ -63,9 +70,7 @@ export function HoldScreen({ token, view, hold, checkout, contact }: HoldScreenP
           {hold.validUntil === null ? null : <p className="max-w-prose text-muted-foreground">{t('validUntil', { date: format.day(hold.validUntil) })}</p>}
         </div>
       )}
-      <Link href={`${linkRoutes.renter}/${token}`} className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">
-        {t('back')}
-      </Link>
-    </div>
+      <BackLink href={`${linkRoutes.renter}/${token}`}>{t('back')}</BackLink>
+    </RenterPage>
   )
 }

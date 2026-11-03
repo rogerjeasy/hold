@@ -1,11 +1,12 @@
 import type { ConditionReply } from '@hold/domain'
 import { useTranslations } from 'next-intl'
 import { useShopFormat } from '@/hooks/use-shop-format'
-import { Link } from '@/i18n/navigation'
+import { CircleCheck, Clock } from 'lucide-react'
 import { linkRoutes } from '@/lib/routes'
 import { HandoverConfirmation } from '@/features/provenance/handover-confirmation'
 import { ConditionAnswer } from './condition-answer'
 import { ConditionItem } from './condition-item'
+import { BackLink, RenterHead, RenterPage } from './renter-page'
 import type { ConditionItemView } from './condition-item'
 
 export type ConditionView = {
@@ -27,30 +28,25 @@ export function ConditionScreen({ token, report }: { token: string; report: Cond
   const t = useTranslations('renter.condition')
   const format = useShopFormat({ timeZone: report.timeZone, currency: null })
   return (
-    <div className="mx-auto grid w-full max-w-3xl gap-8 px-4 py-8 md:px-8 md:py-12">
-      <header className="grid gap-3">
-        <p className="label text-xs text-muted-foreground wrap-long-words">{report.shopName}</p>
-        <h1 className="text-page-title text-balance">{t('title')}</h1>
-        <p className="max-w-prose text-lg text-pretty">{t('lead')}</p>
+    <RenterPage className="max-w-3xl">
+      <RenterHead shopName={report.shopName} title={t('title')} lead={t('lead')}>
         {report.confirmed !== null ? (
           <HandoverConfirmation confirmed={report.confirmed} timeZone={report.timeZone} />
         ) : report.reply !== null ? (
-          <p role="status" className="font-semibold">{report.reply === 'confirmed' ? t('repliedConfirmed') : t('repliedAdded')}</p>
+          <p role="status" className="flex items-center gap-2 font-semibold"><CircleCheck aria-hidden="true" className="size-5 shrink-0 text-success" />{report.reply === 'confirmed' ? t('repliedConfirmed') : t('repliedAdded')}</p>
         ) : report.open ? (
-          <p className="text-muted-foreground">{t('openUntil', { when: `${format.day(report.closesAt)}, ${format.time(report.closesAt)}` })}</p>
+          <p className="flex items-center gap-2 font-semibold"><Clock aria-hidden="true" className="size-4.5 shrink-0 text-primary" />{t('openUntil', { when: `${format.day(report.closesAt)}, ${format.time(report.closesAt)}` })}</p>
         ) : (
           <p className="text-muted-foreground">{t('closed')}</p>
         )}
-      </header>
+      </RenterHead>
       {report.items.map((item) => (
         <ConditionItem key={item.itemId} item={item} token={token} timeZone={report.timeZone} />
       ))}
       {report.open && report.reply === null ? (
         report.canReply ? <ConditionAnswer token={token} items={report.items} /> : <p className="text-muted-foreground">{t('otherLink')}</p>
       ) : null}
-      <Link href={`${linkRoutes.renter}/${token}`} className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">
-        {t('back')}
-      </Link>
-    </div>
+      <BackLink href={`${linkRoutes.renter}/${token}`}>{t('back')}</BackLink>
+    </RenterPage>
   )
 }

@@ -3139,7 +3139,56 @@
       "taking": "Tu retención de {hold} está hecha. PayPal está cobrando tu tarifa de {fee}.",
       "done": "Retención hecha. Solo se cobra tu tarifa."
     },
-    "evidenceNotice": "Las fotos del artículo en la entrega y la devolución se guardan como prueba durante {days} días y luego se borran. <link>Cómo trata Hold tus datos</link>"
+    "evidenceNotice": "Las fotos del artículo en la entrega y la devolución se guardan como prueba durante {days} días y luego se borran. <link>Cómo trata Hold tus datos</link>",
+    "reviewAndPay": "Revisar y pagar {amount}",
+    "payTitle": "Pagar el precio del alquiler",
+    "records": "Tus documentos",
+    "journey": {
+      "title": "Cómo va tu alquiler",
+      "next": "Siguiente",
+      "done": "Hecho",
+      "now": "En curso",
+      "toDo": "Todavía no",
+      "steps": {
+        "booked": "Reservado",
+        "paid": "Alquiler pagado",
+        "hold": "Retención hecha",
+        "out": "Recogido",
+        "returned": "Devuelto",
+        "settled": "Liquidado"
+      }
+    },
+    "holdCard": {
+      "label": "Tu retención",
+      "where": "En tu propia cuenta de PayPal",
+      "notCharged": "Una reserva, nunca un cargo",
+      "standing": {
+        "waiting": "Aún sin hacer",
+        "reserved": "Reservada",
+        "settling": "Liquidándose",
+        "ended": "Terminada",
+        "none": "Sin hacer"
+      }
+    },
+    "unavailable": {
+      "back": "Volver a tu alquiler",
+      "no_assistant": {
+        "title": "Ningún asistente en este alquiler",
+        "body": "Este alquiler no se reservó con un asistente tuyo, así que aquí no hay nada que mostrar. Tu enlace sirve para todo lo demás."
+      },
+      "no_negotiation": {
+        "title": "Ningún defensor en esta reclamación",
+        "body": "Nadie está defendiendo una reclamación por ti en este alquiler. Si la tienda te envía una reclamación, podrás pasársela a un defensor desde su página."
+      },
+      "no_claim": {
+        "title": "Ninguna reclamación que revisar",
+        "body": "La tienda no te ha enviado ninguna reclamación por este alquiler. Si lo hace, aparecerá aquí con las fotos y los precios, y podrás responder."
+      },
+      "not_handed_over": {
+        "title": "Aún no recogido",
+        "body": "Las fotos de cómo salió tu alquiler de la tienda aparecen aquí en cuanto lo recojas."
+      }
+    }
   },
   "shopPage": {
     "label": "Reservar en línea",
@@ -3172,7 +3221,8 @@
     "reviewTitle": "PayPal está revisando este pago",
     "reviewBody": "El pago está cobrado pero no confirmado. Termina la revisión como lo haría PayPal y la tienda recibe el aviso.",
     "complete": "Completar el pago",
-    "deny": "Rechazar el pago"
+    "deny": "Rechazar el pago",
+    "outcomes": "Otros resultados para probar"
   },
   "claim": {
     "title": "Reclamación y liquidación",
@@ -3311,6 +3361,16 @@
       "seniorWaives": "Solo un propietario, un gerente o quien preparó esta reclamación puede anularla.",
       "raisedIt": "Tú preparaste esta reclamación, así que la decide otro propietario o gerente.",
       "confirmSenior": "Lo que acordaron los representantes lo confirma un propietario o gerente."
+    },
+    "renterPage": {
+      "fromHold": "De tu retención de {held}. El resto vuelve a ti.",
+      "fromList": "Precio de la lista publicada por la tienda",
+      "evidence": "Las pruebas",
+      "total": "Total reclamado",
+      "itemPhotosLead": "Una persona de la tienda añadió esta línea tras revisar el artículo, no una comparación de fotos. Aquí está el artículo en la entrega y en la devolución, vista por vista.",
+      "noPhotos": "No hay fotos selladas de la entrega y la devolución de este artículo.",
+      "more": "Más sobre esta reclamación",
+      "provenance": "De dónde vienen estas fotos"
     }
   },
   "scorecard": {

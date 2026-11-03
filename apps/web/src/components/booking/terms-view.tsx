@@ -17,10 +17,10 @@ export function TermsView({ currency, prices, wearPolicy }: TermsViewProps) {
   return (
     <div className="grid gap-6">
       <Panel title={t('prices')}>
-        <p className="border-b px-4 py-3 text-sm text-muted-foreground md:px-5">{t('pricesLead')}</p>
-        <ul>
+        <p className="border-b border-border/70 bg-muted/40 px-4 py-3 text-sm text-muted-foreground md:px-5">{t('pricesLead')}</p>
+        <ul className="divide-y divide-border/70">
           {prices.map((price) => (
-            <li key={price.description} className="flex items-baseline justify-between gap-4 border-b px-4 py-3 last:border-b-0 md:px-5">
+            <li key={price.description} className="flex items-baseline justify-between gap-4 px-4 py-3.5 md:px-5">
               <span className="min-w-0 wrap-long-words">{price.description}</span>
               <span className="figures shrink-0 font-semibold">{formatMoney(money(price.amountCents, currency), locale)}</span>
             </li>
@@ -28,7 +28,7 @@ export function TermsView({ currency, prices, wearPolicy }: TermsViewProps) {
         </ul>
       </Panel>
       <Panel title={t('wear')}>
-        <p className="border-b px-4 py-3 text-sm text-muted-foreground md:px-5">{t('wearLead')}</p>
+        <p className="border-b border-border/70 bg-muted/40 px-4 py-3 text-sm text-muted-foreground md:px-5">{t('wearLead')}</p>
         <p className="px-4 py-4 whitespace-pre-line wrap-long-words md:px-5">{wearPolicy}</p>
       </Panel>
     </div>

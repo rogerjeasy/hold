@@ -185,7 +185,8 @@ describe('the renter’s side of a connected assistant', () => {
     if (!shown.ok) throw new Error(JSON.stringify(shown))
     jar.clear()
     const staffToken = shown.value.url.split('/r/')[1] ?? ''
-    expect(await assistantPage(staffToken)).toEqual({ ok: false, failure: 'link_invalid' })
+    // A working link to a rental no assistant booked: not found, so the page can say so instead of calling the link broken.
+    expect(await assistantPage(staffToken)).toEqual({ ok: false, failure: 'not_found' })
     expect(await renterPage(staffToken)).toMatchObject({ ok: true, assistant: null })
   })
 })

@@ -105,7 +105,7 @@ export function PayPalButton({ token, start, texts, checkout, navigate = goTo }:
     <form action={go} className="grid gap-3">
       <input type="hidden" name="token" value={token} />
       <input type="hidden" name="locale" value={locale} />
-      <Button type="submit" disabled={pending || result?.ok === true} className="min-h-12 justify-self-start whitespace-normal">
+      <Button type="submit" disabled={pending || result?.ok === true} className="min-h-12 w-full whitespace-normal sm:w-auto sm:justify-self-start">
         {pending || result?.ok === true ? texts.going : texts.go}
       </Button>
       <p className="text-sm text-muted-foreground">{texts.agree}</p>
