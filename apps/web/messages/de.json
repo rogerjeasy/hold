@@ -3697,7 +3697,9 @@
       "assistant_not_connected": "Mit dieser Miete ist gerade kein Assistent verbunden. Wählen Sie den Vertreter von Hold.",
       "not_a_sample": "Nur eine Beispielforderung kann von hier an die Fürsprecher gehen. Ein Mieter startet seinen Fürsprecher über seinen Forderungslink.",
       "simulated_rental": "Das ist eine Probe: Die Einigung der Fürsprecher wird gezeigt, und nichts wird eingezogen.",
-      "daily_cap": "Die heutigen Läufe der Fürsprecher an Beispielen sind vergeben. Jeder Lauf verbraucht das tägliche Claude-Kontingent des Kontos. Bitte morgen erneut versuchen."
+      "daily_cap": "Alle heutigen Live-Läufe der Fürsprecher, über alle Demos, sind vergeben. Sie beginnen um Mitternacht UTC neu.",
+      "daily_cap_network": "Ihr Netzwerk hat seine heutigen Live-Läufe der Fürsprecher verbraucht. Sie beginnen um Mitternacht UTC neu.",
+      "daily_cap_shop": "Diese Demo hat ihren heutigen Live-Lauf der Fürsprecher verbraucht. Er beginnt um Mitternacht UTC neu."
     },
     "sample": {
       "title": "Die Fürsprecher diese Probe verhandeln sehen",
@@ -3706,7 +3708,14 @@
       "pending": "Wird den Fürsprechern übergeben…",
       "started": "Die Fürsprecher haben es übernommen. Ihre Züge erscheinen unten, sobald sie sie machen, meist innerhalb weniger Minuten.",
       "liveTitle": "Beispielforderung, echte Fürsprecher",
-      "liveBody": "Der Mieter und seine Grenze wurden für diese Vorführung erfunden. Jede Seite wurde von Claude vertreten, und jedes Angebot hat einfacher Code geprüft. Was sie vereinbaren, wird nie eingezogen: Eine Probe hat keine echte Sperre."
+      "liveBody": "Der Mieter und seine Grenze wurden für diese Vorführung erfunden. Jede Seite wurde von Claude vertreten, und jedes Angebot hat einfacher Code geprüft. Was sie vereinbaren, wird nie eingezogen: Eine Probe hat keine echte Sperre.",
+      "left": "{count, plural, one {# Live-Lauf heute übrig} other {# Live-Läufe heute übrig}}. Jeder Lauf verbraucht einen Teil des täglichen Claude-Kontingents des Kontos.",
+      "noneTitle": "Heute kein Live-Lauf mehr",
+      "recorded": {
+        "title": "Ein aufgezeichneter Live-Lauf",
+        "body": "Claude Opus 4.6 auf Amazon Bedrock hat am {date} beide Seiten der Beispielforderung der Vorführung vertreten. Dies ist dieser Lauf, wie er aufgezeichnet wurde, nicht die Forderung dieser Demo, damit die Fürsprecher bei der Arbeit zu sehen sind, wenn kein Live-Lauf mehr übrig ist.",
+        "details": "Modell {model} · Prompt {promptVersion} · {calls, plural, one {# Aufruf} other {# Aufrufe}} · {tokens} Token"
+      }
     }
   },
   "operations": {

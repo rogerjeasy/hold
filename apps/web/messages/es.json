@@ -3697,7 +3697,9 @@
       "assistant_not_connected": "Ahora no hay ningún asistente conectado a este alquiler. Elija el representante de Hold.",
       "not_a_sample": "Desde aquí solo se puede pasar a los defensores una reclamación de muestra. Un cliente inicia su propio defensor desde el enlace de su reclamación.",
       "simulated_rental": "Es una muestra: se muestra lo que acordaron los defensores y no se cobra nada.",
-      "daily_cap": "Las ejecuciones de hoy de los defensores sobre muestras ya se han usado. Cada una gasta la asignación diaria de Claude de la cuenta, así que vuelva a intentarlo mañana."
+      "daily_cap": "Todas las ejecuciones reales de los defensores de hoy, en todas las demos, ya se han usado. Vuelven a empezar a medianoche UTC.",
+      "daily_cap_network": "Su red ya ha usado sus ejecuciones reales de los defensores de hoy. Vuelven a empezar a medianoche UTC.",
+      "daily_cap_shop": "Esta demo ya ha usado su ejecución real de los defensores de hoy. Vuelve a empezar a medianoche UTC."
     },
     "sample": {
       "title": "Ver a los defensores discutir esta muestra",
@@ -3706,7 +3708,14 @@
       "pending": "Pasándolo a los defensores…",
       "started": "Los defensores lo tienen. Sus movimientos aparecen abajo a medida que los hacen, normalmente en pocos minutos.",
       "liveTitle": "Reclamación de muestra, defensores reales",
-      "liveBody": "El cliente y su límite se inventaron para esta demostración. Claude defendió cada parte y un código simple comprobó cada oferta. Lo que acuerden nunca se cobra: una muestra no tiene retención real."
+      "liveBody": "El cliente y su límite se inventaron para esta demostración. Claude defendió cada parte y un código simple comprobó cada oferta. Lo que acuerden nunca se cobra: una muestra no tiene retención real.",
+      "left": "{count, plural, one {Queda # ejecución real hoy} other {Quedan # ejecuciones reales hoy}}. Cada una gasta parte de la asignación diaria de Claude de la cuenta.",
+      "noneTitle": "No queda ninguna ejecución real hoy",
+      "recorded": {
+        "title": "Una ejecución real grabada",
+        "body": "Claude Opus 4.6 en Amazon Bedrock defendió las dos partes de la reclamación de muestra de la demostración el {date}. Esta es esa ejecución tal como se grabó, no la reclamación de esta demo, para ver a los defensores trabajando cuando no queda ninguna ejecución real.",
+        "details": "Modelo {model} · prompt {promptVersion} · {calls, plural, one {# llamada} other {# llamadas}} · {tokens} tokens"
+      }
     }
   },
   "operations": {

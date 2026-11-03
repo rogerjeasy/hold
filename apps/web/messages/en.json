@@ -3697,7 +3697,9 @@
       "assistant_not_connected": "No assistant is connected to this rental now. Choose Hold's advocate instead.",
       "not_a_sample": "Only a sample claim can be handed to the advocates from here. A renter starts their own advocate from their claim link.",
       "simulated_rental": "This is a sample: what the advocates agreed is shown, and nothing is taken.",
-      "daily_cap": "Today's runs of the advocates on samples are all taken. Each run spends the account's daily Claude allowance, so try again tomorrow."
+      "daily_cap": "All of today's live runs of the advocates, across every demo, are used. They start again at midnight UTC.",
+      "daily_cap_network": "Your network has used its live runs of the advocates for today. They start again at midnight UTC.",
+      "daily_cap_shop": "This demo has used its live run of the advocates for today. It starts again at midnight UTC."
     },
     "sample": {
       "title": "Watch the advocates argue this sample",
@@ -3706,7 +3708,14 @@
       "pending": "Handing it to the advocates…",
       "started": "The advocates have it. Their moves appear below as they make them, usually within a few minutes.",
       "liveTitle": "Sample claim, live advocates",
-      "liveBody": "The renter and their limit were made up for this demonstration. Each side was argued by Claude, and every offer was checked by plain code. What they agree is never taken: a sample has no real hold."
+      "liveBody": "The renter and their limit were made up for this demonstration. Each side was argued by Claude, and every offer was checked by plain code. What they agree is never taken: a sample has no real hold.",
+      "left": "{count, plural, one {# live run left today} other {# live runs left today}}. Each run spends part of the account's daily Claude allowance.",
+      "noneTitle": "No live run left today",
+      "recorded": {
+        "title": "A recorded live run",
+        "body": "Claude Opus 4.6 on Amazon Bedrock argued both sides of the demonstration's sample claim on {date}. This is that run as it was recorded, not this demo's claim, so the advocates can be seen at work when no live run is left.",
+        "details": "Model {model} · prompt {promptVersion} · {calls, plural, one {# call} other {# calls}} · {tokens} tokens"
+      }
     }
   },
   "operations": {
