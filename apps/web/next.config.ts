@@ -1,10 +1,14 @@
 import { resolve } from 'node:path'
 import type { NextConfig } from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
+import { securityHeaders } from './src/lib/security-headers'
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
 const nextConfig: NextConfig = {
+  // The app does not say what it runs on, and every response carries the security headers.
+  poweredByHeader: false,
+  headers: () => Promise.resolve(securityHeaders()),
   // The workspace packages are TypeScript sources, compiled with the app.
   transpilePackages: ['@hold/auth', '@hold/compare', '@hold/config', '@hold/db', '@hold/domain', '@hold/evidence', '@hold/negotiate', '@hold/notify', '@hold/ops', '@hold/paypal', '@hold/trust', '@hold/vision'],
   // Loaded from node_modules when the server runs. PGlite finds its WebAssembly beside it, and only the test
