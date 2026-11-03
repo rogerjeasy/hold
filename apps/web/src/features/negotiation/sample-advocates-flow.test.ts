@@ -1,6 +1,5 @@
 // @vitest-environment node
-import { claims, inShop, moneyEvents, openDemoSession, rentals, renters, shopNegotiation, takeRateToken } from '@hold/db'
-import { utcDay } from '@hold/domain'
+import { claims, inShop, moneyEvents, openDemoSession, rateTokensLeft, rentals, renters, shopNegotiation, takeRateToken } from '@hold/db'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 process.env['HOLD_ENVIRONMENT'] = 'test'
 process.env['HOLD_COOKIE_KEY'] = Buffer.alloc(32, 13).toString('base64')
@@ -12,7 +11,8 @@ vi.setConfig({ testTimeout: 60_000 })
 const actions = await import('./actions')
 const { getServices } = await import('@/server/services')
 const { form, signIn } = await import('@/test/shop-session')
-const { SAMPLE_ADVOCATE_LIMITS } = await import('./limits')
+const { sampleAdvocateShares, sampleAdvocatesAllowance } = await import('./limits')
+const info = vi.spyOn(console, 'info').mockImplementation(() => undefined)
 
 // A judge watches the two advocates argue the demo's sample claim that waits for a reply (extensions.md section 9).
 // The renter is made up, so the owner starts it; nothing about it can ever reach PayPal.
@@ -65,29 +65,56 @@ describe('the advocates on the demo’s sample claim', () => {
     expect((await scoped((transaction) => transaction.select().from(moneyEvents))).filter((event) => event.rentalId === sampleRentalId).map((event) => event.kind)).not.toContain('hold_captured')
   })
 
-  it('lets one network run one sample a day, even from another demo', async () => {
+  // A demo of its own for each case, as a judge would start one.
+  const openSample = async (name: string) => {
     const { database } = await getServices()
-    const owner = await signIn(jar, 'tomas@sample-network.example', 'passkey')
-    const staff = await signIn(jar, 'jonas@sample-network.example', 'passkey')
-    const opened = await openDemoSession(database, { owner: { subject: owner, email: 'tomas@sample-network.example' }, staff: { subject: staff, email: 'jonas@sample-network.example' }, slug: 'ribeira-bikes-samplenet', paypal: { credentialReference: 'hold/paypal/shops/demo/sandbox', mode: 'sandbox' }, now: new Date() })
+    const owner = await signIn(jar, `tomas@${name}.example`, 'passkey')
+    const staff = await signIn(jar, `jonas@${name}.example`, 'passkey')
+    const opened = await openDemoSession(database, { owner: { subject: owner, email: `tomas@${name}.example` }, staff: { subject: staff, email: `jonas@${name}.example` }, slug: `ribeira-bikes-${name}`, paypal: { credentialReference: 'hold/paypal/shops/demo/sandbox', mode: 'sandbox' }, now: new Date() })
     shopId = opened.shopId
     const rentalId = await rentalOf('Elena Duarte')
-    await signIn(jar, 'tomas@sample-network.example', 'email_code')
+    await signIn(jar, `tomas@${name}.example`, 'email_code')
+    return rentalId
+  }
+  // The test requests carry no network address, so each counts as the one unnamed network.
+  const spend = async (share: 'shop' | 'network' | 'day') => {
+    const { database } = await getServices()
+    const found = sampleAdvocateShares(shopId, 'unknown', new Date()).find((each) => each.share === share)
+    while (found !== undefined && await takeRateToken(database, found.limit, found.subject)) { /* spend the share */ }
+  }
+
+  it('says before anyone asks how many live runs are left, and which share runs out first', async () => {
+    await openSample('sample-allowance')
+    // One run went to the first demo from this network; this demo still has its own.
+    expect(await sampleAdvocatesAllowance(shopId)).toEqual({ left: 1, refusal: null })
+  })
+
+  it('stops once the day’s sample runs are spent, says so on reload, and a refused attempt spends nothing', async () => {
+    const rentalId = await openSample('sample-cap')
+    await spend('day')
+    expect(await sampleAdvocatesAllowance(shopId)).toEqual({ left: 0, refusal: 'daily_cap' })
     expect(await actions.argueSampleClaim(null, form({ rentalId, locale: 'en' }))).toMatchObject({ ok: false, reason: 'daily_cap' })
+    expect(await claimState(rentalId)).toBe('presented')
+    // The shop's and the network's shares taken before the day refused were given back with the transaction.
+    const { database } = await getServices()
+    const network = sampleAdvocateShares(shopId, 'unknown', new Date()).find((each) => each.share === 'network')
+    expect(network === undefined ? 0 : await rateTokensLeft(database, network.limit, network.subject)).toBe(1)
+    expect(info).toHaveBeenCalledWith(JSON.stringify({ event: 'sample_advocates_refused', share: 'day', shopId }))
+  })
+
+  it('lets one network run only its share of samples a day, even from another demo', async () => {
+    const rentalId = await openSample('sample-network')
+    await spend('network')
+    expect(await sampleAdvocatesAllowance(shopId)).toEqual({ left: 0, refusal: 'daily_cap_network' })
+    expect(await actions.argueSampleClaim(null, form({ rentalId, locale: 'en' }))).toMatchObject({ ok: false, reason: 'daily_cap_network' })
     expect(await claimState(rentalId)).toBe('presented')
   })
 
-  it('stops once the day’s sample runs are spent, since every run spends the account’s Claude tokens', async () => {
-    const { database } = await getServices()
-    while (await takeRateToken(database, SAMPLE_ADVOCATE_LIMITS.perDay, utcDay(new Date()))) { /* spend the day */ }
-    const { database: db } = await getServices()
-    const owner = await signIn(jar, 'tomas@sample-cap.example', 'passkey')
-    const staff = await signIn(jar, 'jonas@sample-cap.example', 'passkey')
-    const opened = await openDemoSession(db, { owner: { subject: owner, email: 'tomas@sample-cap.example' }, staff: { subject: staff, email: 'jonas@sample-cap.example' }, slug: 'ribeira-bikes-samplecap', paypal: { credentialReference: 'hold/paypal/shops/demo/sandbox', mode: 'sandbox' }, now: new Date() })
-    shopId = opened.shopId
-    const rentalId = await rentalOf('Elena Duarte')
-    await signIn(jar, 'tomas@sample-cap.example', 'email_code')
-    expect(await actions.argueSampleClaim(null, form({ rentalId, locale: 'en' }))).toMatchObject({ ok: false, reason: 'daily_cap' })
+  it('lets one demo run its sample once a day, whichever network asks', async () => {
+    const rentalId = await openSample('sample-shop')
+    await spend('shop')
+    expect(await sampleAdvocatesAllowance(shopId)).toEqual({ left: 0, refusal: 'daily_cap_shop' })
+    expect(await actions.argueSampleClaim(null, form({ rentalId, locale: 'en' }))).toMatchObject({ ok: false, reason: 'daily_cap_shop' })
     expect(await claimState(rentalId)).toBe('presented')
   })
 })

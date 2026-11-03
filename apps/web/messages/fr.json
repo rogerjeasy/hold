@@ -3697,7 +3697,9 @@
       "assistant_not_connected": "Aucun assistant n'est connecté à cette location pour l'instant. Choisissez le représentant de Hold.",
       "not_a_sample": "Seule une réclamation d’exemple peut être confiée aux défenseurs d’ici. Un loueur lance son propre défenseur depuis le lien de sa réclamation.",
       "simulated_rental": "C’est un exemple : l’accord des défenseurs est affiché et rien n’est prélevé.",
-      "daily_cap": "Les exécutions du jour des défenseurs sur des exemples sont toutes prises. Chacune consomme l’allocation quotidienne de Claude du compte : réessayez demain."
+      "daily_cap": "Toutes les exécutions réelles des défenseurs du jour, sur toutes les démos, sont prises. Elles reprennent à minuit UTC.",
+      "daily_cap_network": "Votre réseau a utilisé ses exécutions réelles des défenseurs pour aujourd’hui. Elles reprennent à minuit UTC.",
+      "daily_cap_shop": "Cette démo a utilisé son exécution réelle des défenseurs pour aujourd’hui. Elle reprend à minuit UTC."
     },
     "sample": {
       "title": "Voir les défenseurs débattre de cet exemple",
@@ -3706,7 +3708,14 @@
       "pending": "Transmission aux défenseurs…",
       "started": "Les défenseurs s’en chargent. Leurs coups apparaissent ci-dessous au fur et à mesure, en général en quelques minutes.",
       "liveTitle": "Réclamation d’exemple, défenseurs réels",
-      "liveBody": "Le loueur et sa limite ont été inventés pour cette démonstration. Claude a défendu chaque partie et un code simple a vérifié chaque offre. Ce qu’ils conviennent n’est jamais prélevé : un exemple n’a pas de blocage réel."
+      "liveBody": "Le loueur et sa limite ont été inventés pour cette démonstration. Claude a défendu chaque partie et un code simple a vérifié chaque offre. Ce qu’ils conviennent n’est jamais prélevé : un exemple n’a pas de blocage réel.",
+      "left": "{count, plural, one {# exécution réelle restante aujourd’hui} other {# exécutions réelles restantes aujourd’hui}}. Chacune consomme une part de l’allocation quotidienne de Claude du compte.",
+      "noneTitle": "Plus d’exécution réelle aujourd’hui",
+      "recorded": {
+        "title": "Une exécution réelle enregistrée",
+        "body": "Claude Opus 4.6 sur Amazon Bedrock a défendu les deux parties de la réclamation d’exemple de la démonstration le {date}. Voici cette exécution telle qu’elle a été enregistrée, et non la réclamation de cette démo, pour voir les défenseurs à l’œuvre quand il ne reste plus d’exécution réelle.",
+        "details": "Modèle {model} · prompt {promptVersion} · {calls, plural, one {# appel} other {# appels}} · {tokens} jetons"
+      }
     }
   },
   "operations": {

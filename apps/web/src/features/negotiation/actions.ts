@@ -1,14 +1,13 @@
 'use server'
 import { confirmAgreement, grantShopSettlement, openSampleAdvocates, revokeShopSettlement, takeRateTokenIn } from '@hold/db'
-import { parseAmount, utcDay } from '@hold/domain'
+import { parseAmount } from '@hold/domain'
 import { z } from 'zod'
 import { Refusal, shopAction, withLocale } from '@/server/shop-access'
 import { writeContestSummary } from '@/server/contest-summary'
 import { sendNegotiation } from '@/server/negotiation-queue'
-import { callerNetwork } from '@/server/network'
 import { getServices } from '@/server/services'
 import { sendSettlement } from '@/server/settlement-queue'
-import { SAMPLE_ADVOCATE_LIMITS } from './limits'
+import { sampleAdvocateNetwork, sampleAdvocateShares } from './limits'
 import { settlementLimitsInput } from './negotiation-input'
 
 // The shop's side of an advocate (extensions.md section 9.4). Only the owner sets or ends the shop advocate's limits,
@@ -38,11 +37,15 @@ export const confirmSettlementForShop = shopAction({ name: 'settlement.decided',
 // or a manager would decide a contested claim. No passkey: nothing here moves money, and what a sample's advocates
 // agree can never be confirmed into a capture. Only a sample: the repository refuses a real renter's claim.
 type SampleOpened = { readonly kind: 'negotiation' | 'reply'; readonly rentalId: string; readonly negotiationId: string; readonly outboxId: string }
-export const argueSampleClaim = shopAction({ name: 'settlement.sample_argued', roles: ['owner', 'manager'], needsPasskey: false, input: withLocale({ rentalId: z.uuid() }) }, async (_context, input, transaction): Promise<SampleOpened | Refusal> => {
+export const argueSampleClaim = shopAction({ name: 'settlement.sample_argued', roles: ['owner', 'manager'], needsPasskey: false, input: withLocale({ rentalId: z.uuid() }) }, async (context, input, transaction): Promise<SampleOpened | Refusal> => {
   const { config } = await getServices()
   // Taken in this transaction: no model is called in it, so a refused or failed opening rolls back and spends nothing.
-  if (!(await takeRateTokenIn(transaction, SAMPLE_ADVOCATE_LIMITS.perNetwork, (await callerNetwork()) ?? 'unknown'))) return new Refusal('daily_cap')
-  if (!(await takeRateTokenIn(transaction, SAMPLE_ADVOCATE_LIMITS.perDay, utcDay(new Date())))) return new Refusal('daily_cap')
+  for (const each of sampleAdvocateShares(context.shop.id, await sampleAdvocateNetwork(), new Date())) {
+    if (await takeRateTokenIn(transaction, each.limit, each.subject)) continue
+    // Logged so an operator can see a judge refused; the shop is named, never the network.
+    console.info(JSON.stringify({ event: 'sample_advocates_refused', share: each.share, shopId: context.shop.id }))
+    return new Refusal(each.refusal)
+  }
   const opened = await openSampleAdvocates(transaction, input.rentalId, { simulated: config.services === 'fake' }, new Date())
   return opened.ok ? { kind: opened.kind, rentalId: opened.rentalId, negotiationId: opened.negotiationId, outboxId: opened.outboxId } : new Refusal(opened.reason)
 }, async (context, result: SampleOpened) => {

@@ -39,16 +39,20 @@ export function demoRetirementCutoff(now: Date): Date {
 // at most half of the day's questions, so one visitor never leaves every judge without.
 export const HOSTED_QUESTIONS_PER_NETWORK = 6
 
-// Each sample handed to the two advocates is a run of many model calls, bounded at 600,000 tokens. Every demo shop has
-// one such sample, so a day allows only a few, whoever asks.
-export const SAMPLE_ADVOCATE_RUNS_PER_DAY = 3
+// Each sample handed to the two advocates is a run of several model calls. The first live run on Bedrock, on 3 November
+// 2026, spent about 28,000 tokens in 8 calls, so a sample's run is bounded at 80,000, well under a real claim's ceiling.
+// A day of runs at that ceiling stays inside what the hosted assistant leaves, with room for the comparisons.
+export const SAMPLE_ADVOCATE_RUN_TOKENS = 80_000
+export const SAMPLE_ADVOCATE_RUNS_PER_DAY = 4
 
 // AG Studio's insights agent takes several short turns for each question. Every demo is a shop of its own, so a cap per
 // shop bounds nothing in total: this one spans every shop.
 export const INSIGHTS_TURNS_PER_DAY = 60
 
 // One network's and one shop's share of those days: a visitor can start several demos, each a shop of its own, so a
-// share per network keeps one of them from taking a day's cap alone.
-export const SAMPLE_ADVOCATE_RUNS_PER_NETWORK = 1
+// share per network keeps one of them from taking a day's cap alone. Each demo has its own sample run, so a judge on a
+// network someone else used that day still has theirs.
+export const SAMPLE_ADVOCATE_RUNS_PER_SHOP = 1
+export const SAMPLE_ADVOCATE_RUNS_PER_NETWORK = 2
 export const INSIGHTS_TURNS_PER_NETWORK = 20
 export const INSIGHTS_TURNS_PER_SHOP = 15

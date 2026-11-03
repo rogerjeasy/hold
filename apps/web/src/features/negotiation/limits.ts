@@ -1,11 +1,45 @@
+import 'server-only'
+import { rateTokensLeft } from '@hold/db'
 import type { RateLimit } from '@hold/db'
-import { SAMPLE_ADVOCATE_RUNS_PER_DAY, SAMPLE_ADVOCATE_RUNS_PER_NETWORK } from '@hold/domain'
+import { SAMPLE_ADVOCATE_RUNS_PER_DAY, SAMPLE_ADVOCATE_RUNS_PER_NETWORK, SAMPLE_ADVOCATE_RUNS_PER_SHOP, utcDay } from '@hold/domain'
+import { callerNetwork } from '@/server/network'
+import { getServices } from '@/server/services'
 
 const DAY = 24 * 60 * 60
 
-// How many samples may be handed to the advocates in a UTC day: by one network, and by every demo together
+// How many samples may be handed to the advocates in a UTC day: by one demo, by one network, and by every demo together
 // (packages/domain demo-limits.ts).
 export const SAMPLE_ADVOCATE_LIMITS = {
+  perShop: { name: 'sample-advocates-shop-day', max: SAMPLE_ADVOCATE_RUNS_PER_SHOP, windowSeconds: DAY },
   perNetwork: { name: 'sample-advocates-network-day', max: SAMPLE_ADVOCATE_RUNS_PER_NETWORK, windowSeconds: DAY },
   perDay: { name: 'sample-advocates-day', max: SAMPLE_ADVOCATE_RUNS_PER_DAY, windowSeconds: DAY },
 } as const satisfies Record<string, RateLimit>
+
+export type SampleAdvocateShare = 'shop' | 'network' | 'day'
+
+// The shares a run takes, in the order they are taken, each with the refusal that names it. Every subject carries the
+// UTC day, so all three start again at midnight UTC, as the page says.
+export function sampleAdvocateShares(shopId: string, network: string, now: Date) {
+  const day = utcDay(now)
+  return [
+    { share: 'shop', limit: SAMPLE_ADVOCATE_LIMITS.perShop, subject: `${shopId}\u0000${day}`, refusal: 'daily_cap_shop' },
+    { share: 'network', limit: SAMPLE_ADVOCATE_LIMITS.perNetwork, subject: `${network}\u0000${day}`, refusal: 'daily_cap_network' },
+    { share: 'day', limit: SAMPLE_ADVOCATE_LIMITS.perDay, subject: day, refusal: 'daily_cap' },
+  ] as const satisfies readonly { share: SampleAdvocateShare; limit: RateLimit; subject: string; refusal: string }[]
+}
+
+// The network a run is counted against. A caller with no address counts as one unnamed network.
+export async function sampleAdvocateNetwork(): Promise<string> {
+  return (await callerNetwork()) ?? 'unknown'
+}
+
+export type SampleAdvocatesAllowance = { readonly left: number; readonly refusal: ReturnType<typeof sampleAdvocateShares>[number]['refusal'] | null }
+
+// How many live runs this demo may still start today, and the refusal a run would get now from the first share with
+// none left, read without taking any, so the page says it before anyone asks and again after a reload.
+export async function sampleAdvocatesAllowance(shopId: string): Promise<SampleAdvocatesAllowance> {
+  const { database } = await getServices()
+  const shares = sampleAdvocateShares(shopId, await sampleAdvocateNetwork(), new Date())
+  const left = await Promise.all(shares.map((each) => rateTokensLeft(database, each.limit, each.subject)))
+  return { left: Math.min(...left), refusal: shares.find((_, index) => left[index] === 0)?.refusal ?? null }
+}

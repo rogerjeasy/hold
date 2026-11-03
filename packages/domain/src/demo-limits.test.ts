@@ -1,6 +1,6 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
-import { CLAUDE_DAILY_TOKENS, DEMO_SESSION_DAYS, DEMO_STARTS_PER_DAY, demoRetirementCutoff, HOSTED_ASSISTANT_SHARE, HOSTED_QUESTIONS_PER_NETWORK, hostedQuestionsPerDay, INSIGHTS_TURNS_PER_DAY, INSIGHTS_TURNS_PER_NETWORK, INSIGHTS_TURNS_PER_SHOP, SAMPLE_ADVOCATE_RUNS_PER_DAY, SAMPLE_ADVOCATE_RUNS_PER_NETWORK, utcDay } from './demo-limits.ts'
+import { CLAUDE_DAILY_TOKENS, DEMO_SESSION_DAYS, DEMO_STARTS_PER_DAY, demoRetirementCutoff, HOSTED_ASSISTANT_SHARE, HOSTED_QUESTIONS_PER_NETWORK, hostedQuestionsPerDay, INSIGHTS_TURNS_PER_DAY, INSIGHTS_TURNS_PER_NETWORK, INSIGHTS_TURNS_PER_SHOP, SAMPLE_ADVOCATE_RUN_TOKENS, SAMPLE_ADVOCATE_RUNS_PER_DAY, SAMPLE_ADVOCATE_RUNS_PER_NETWORK, SAMPLE_ADVOCATE_RUNS_PER_SHOP, utcDay } from './demo-limits.ts'
 
 describe('the demo’s daily caps', () => {
   it('counts a day as the calendar day in UTC, whatever the hour', () => {
@@ -37,11 +37,18 @@ describe('each caller’s share of the day', () => {
   })
 
   it('lets the advocates argue only a few samples a day, and the insights agent only a few dozen turns', () => {
-    expect(SAMPLE_ADVOCATE_RUNS_PER_DAY).toBeLessThanOrEqual(3)
+    expect(SAMPLE_ADVOCATE_RUNS_PER_DAY).toBeLessThanOrEqual(4)
     expect(INSIGHTS_TURNS_PER_DAY).toBeLessThanOrEqual(60)
   })
 
+  it('keeps a full day of sample runs, each at its ceiling, inside what the hosted assistant leaves of Claude’s day', () => {
+    expect(SAMPLE_ADVOCATE_RUN_TOKENS).toBe(80_000)
+    expect(SAMPLE_ADVOCATE_RUNS_PER_DAY * SAMPLE_ADVOCATE_RUN_TOKENS).toBeLessThanOrEqual(CLAUDE_DAILY_TOKENS * (1 - HOSTED_ASSISTANT_SHARE))
+  })
+
   it('gives one network, and one shop, only a share of each day’s cap, so one visitor with many demos never takes it all', () => {
+    expect(SAMPLE_ADVOCATE_RUNS_PER_SHOP).toBe(1)
+    expect(SAMPLE_ADVOCATE_RUNS_PER_SHOP).toBeLessThan(SAMPLE_ADVOCATE_RUNS_PER_NETWORK)
     expect(SAMPLE_ADVOCATE_RUNS_PER_NETWORK).toBeLessThan(SAMPLE_ADVOCATE_RUNS_PER_DAY)
     expect(INSIGHTS_TURNS_PER_NETWORK * 2).toBeLessThanOrEqual(INSIGHTS_TURNS_PER_DAY)
     expect(INSIGHTS_TURNS_PER_SHOP).toBeLessThanOrEqual(INSIGHTS_TURNS_PER_NETWORK)

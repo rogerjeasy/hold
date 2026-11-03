@@ -1,6 +1,8 @@
 import { fireEvent, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { renderWithIntl } from '@/test/render'
+import { recordedRun } from '@/features/negotiation/recorded-run'
+import recorded from '@/test/recorded-advocates-run.json'
 import { ClaimScreen } from './claim-screen'
 import type { ClaimWorkspace } from '@hold/db'
 vi.mock('./actions', () => ({ prepareClaim: vi.fn(), approveAndPresent: vi.fn(), confirmClean: vi.fn(), decide: vi.fn() }))
@@ -10,16 +12,39 @@ vi.mock('@/features/promise/renter-actions', () => ({ writeToShop: vi.fn() }))
 vi.mock('@/hooks/use-look-again', () => ({ useLookAgain: () => undefined }))
 const workspace: ClaimWorkspace = { protectedReply: false, agreedIncidents: [], rentalId: 'rental', rentalState: 'inspecting', currency: 'EUR', simulated: false, reservedCents: 30000, holdState: 'placed', claim: null, prices: [{ id: 'price', description: 'Scratch', amountCents: 3500 }], possibleFindings: [], lines: [], payments: [], invoices: [], execution: null, replies: [], decisions: [], amounts: { capture: { cents: 0, currency: 'EUR' }, release: { cents: 30000, currency: 'EUR' }, invoice: { cents: 0, currency: 'EUR' } } }
 describe('claim preparation and settlement screen', () => {
+  const waiting = { ...workspace, simulated: true, claim: { id: 'claim', state: 'presented' as const, totalCents: 5000, raisedByUserId: 'staff', replyDueAt: new Date('2026-12-08T09:00:00Z') } }
+  const oneLeft = { allowance: { left: 1, refusal: null }, recording: undefined }
   it('offers the owner or a manager the two advocates on a sample claim that waits for its reply, and on nothing else', () => {
-    const waiting = { ...workspace, simulated: true, claim: { id: 'claim', state: 'presented' as const, totalCents: 5000, raisedByUserId: 'staff', replyDueAt: new Date('2026-12-08T09:00:00Z') } }
-    const { unmount } = renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={waiting} canAct canDecide />)
+    const { unmount } = renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={waiting} canAct canDecide sampleAdvocates={oneLeft} />)
     expect(screen.getByRole('button', { name: 'Let the advocates argue it' })).toBeInTheDocument()
+    expect(screen.getByText(/1 live run left today/)).toBeInTheDocument()
     unmount()
-    const real = renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={{ ...waiting, simulated: false }} canAct canDecide />)
+    const real = renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={{ ...waiting, simulated: false }} canAct canDecide sampleAdvocates={oneLeft} />)
     expect(screen.queryByRole('button', { name: 'Let the advocates argue it' })).not.toBeInTheDocument()
     real.unmount()
-    renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={waiting} canAct canDecide={false} />)
+    renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={waiting} canAct canDecide={false} sampleAdvocates={oneLeft} />)
     expect(screen.queryByRole('button', { name: 'Let the advocates argue it' })).not.toBeInTheDocument()
+  })
+  // The server reads the day's allowance for every view of the page, so a reload says the same as the refusal did.
+  it('says which share of the day is spent instead of offering a run that would be refused', () => {
+    for (const [refusal, words] of [['daily_cap_shop', /This demo has used its live run/], ['daily_cap_network', /Your network has used its live runs/], ['daily_cap', /across every demo, are used/]] as const) {
+      const { unmount } = renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={waiting} canAct canDecide sampleAdvocates={{ allowance: { left: 0, refusal }, recording: undefined }} />)
+      expect(screen.queryByRole('button', { name: 'Let the advocates argue it' })).not.toBeInTheDocument()
+      expect(screen.getByText('No live run left today')).toBeInTheDocument()
+      expect(screen.getByText(words)).toBeInTheDocument()
+      unmount()
+    }
+  })
+  it('shows a recorded live run, labelled as one and not this demo’s claim, until a live run of its own exists', () => {
+    const recording = recordedRun(recorded)
+    const { unmount } = renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={waiting} canAct canDecide sampleAdvocates={{ allowance: { left: 0, refusal: 'daily_cap' }, recording }} />)
+    expect(screen.getByText('A recorded live run')).toBeInTheDocument()
+    expect(screen.getByText(/not this demo's claim/)).toBeInTheDocument()
+    expect(screen.getByText(/Model us\.anthropic\.claude-opus-4-6-v1 · prompt advocates-test · 8 calls · 27,632 tokens/)).toBeInTheDocument()
+    expect(screen.getByText('The advocates agreed on €25.00. Nothing is charged until each person confirms.')).toBeInTheDocument()
+    unmount()
+    renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={waiting} canAct canDecide sampleAdvocates={{ allowance: { left: 1, refusal: null }, recording: undefined }} />)
+    expect(screen.queryByText('A recorded live run')).not.toBeInTheDocument()
   })
   it('links the shared claim record from staff review', () => {
     renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={workspace} canAct={false} />)
