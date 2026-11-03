@@ -5,12 +5,39 @@
 **Live demo: <https://p99faar3kp.us-east-1.awsapprunner.com>** · One tap starts a demo shop of your own. Nothing to
 type, no code to wait for, and no other judge's changes in your way.
 
-> A PayPal authorization hold *is* the deposit. The renter's money is reserved, never charged, and a clean return
-> releases it on the spot. Claude compares the handover and return photographs, but plain code finds every
-> difference, every amount comes from the shop's published price list, and a named person approves every charge.
-> PayPal's own record, read back after every webhook, is the truth.
+> Hold replaces the cash deposit at a small rental shop with a PayPal hold the renter approves. At the return, code
+> finds what changed between the handover and return photographs before Claude explains it, a named person approves
+> every cent against a published price list, and the renter sees the same photographs. When the two sides disagree,
+> two bounded advocates settle it inside limits each side set, the agreement is confirmed by both people, and the
+> result is read back from PayPal.
 
 Built for the PayPal AI Hackathon 2026.
+
+## What is new here
+
+A card hold as a deposit, a model that compares photographs, and a person who approves a charge each exist already.
+Hold joins them into one object, the hold, its evidence, the published price list, the person who approved, what the
+renter saw and how it settled, and adds the parts that keep that decision fair to both sides. Each one runs today,
+and each can be seen without signing in:
+
+| What | Where to see it |
+|---|---|
+| **Two advocates under separate mandates.** When a renter contests a claim, Claude argues the shop's side and the renter's side in separate calls, each inside a limit its own person set and never shown the other's. A referee in plain code ([`referee.ts`](packages/domain/src/referee.ts), proven with fast-check properties) refuses any added line, any price above the published list, any reduction without a ground, and any offer that widens the gap. An agreement can only lower an approved claim, both people confirm it, and every move is fingerprinted over the one before. | [`/advocates`](https://p99faar3kp.us-east-1.awsapprunner.com/advocates): a live run recorded from Bedrock, move by move. In a demo shop: **Rentals**, **Elena Duarte**, **Let the advocates argue it**, live |
+| **Code finds, the model explains, a second look checks.** OpenCV aligns each pair and finds every change before Claude is asked; each damage finding then gets an independent second look on a wider crop. With the model down nothing is missed: the change waits for a person. | [`/ai`](https://p99faar3kp.us-east-1.awsapprunner.com/ai), and the real comparison on the demo's sample return |
+| **An operations agent that reads PayPal and cannot charge.** Overnight it checks every hold, claim and dispute against PayPal through PayPal's own MCP server with read-only tools, and leaves a short queue a person decides. None of its proposal kinds takes money. | [`/ai`](https://p99faar3kp.us-east-1.awsapprunner.com/ai): one night's queue as it wrote it, recorded from Bedrock. As the owner in a demo shop: **Morning queue**, **Investigate the samples**, live |
+| **Evidence anyone can check.** The handover photographs are sealed into a signed statement that anyone can verify in the browser against Hold's published key, without trusting Hold. | [`/verify`](https://p99faar3kp.us-east-1.awsapprunner.com/verify) and [`/.well-known/jwks.json`](https://p99faar3kp.us-east-1.awsapprunner.com/.well-known/jwks.json) |
+| **Accuracy counted, not claimed.** The comparison is scored on a held-out half it is never tuned on, and every pair behind every count is published. No run is accepted yet, and the page says so. | [`/reliability`](https://p99faar3kp.us-east-1.awsapprunner.com/reliability) |
+| **Bookable by any assistant, unable to charge.** Hold's own MCP server lets any assistant find a shop, quote and book; the person approves in PayPal, and none of its 22 tools takes an amount. | [`/mcp`](https://p99faar3kp.us-east-1.awsapprunner.com/mcp) and the [hosted assistant](https://p99faar3kp.us-east-1.awsapprunner.com/assistant) |
+
+**What Hold builds on, and how it differs.** Rental software already reserves deposits with card holds, mostly
+through Stripe, where a hold lasts about a week and is captured once. Under Visa's rules an estimated authorization
+for bicycle or equipment rental must be cleared within 10 days and may not include an amount for potential damage
+([Visa Core Rules](https://usa.visa.com/content/dam/VCOM/download/about-visa/visa-rules-public.pdf) 5.7.2.4 and
+table 5-11). Hold uses a PayPal authorization the renter approves for the exact amount, open for up to 29 days in
+the sandbox, with one renewal and a partial final capture that releases the rest; PayPal's own guide names this use,
+"Authorize hotels or rentals at booking, capture at check-in or check-out". AI damage detection already ships in
+equipment rental; Hold puts code in front of the model and publishes its measured accuracy instead of asserting it.
+A person approving each charge is a rule here, not the idea.
 
 ## For judges: five minutes
 

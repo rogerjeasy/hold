@@ -2,7 +2,7 @@
 
 **The deposit that never leaves your account.**
 
-Product description. PayPal AI Hackathon 2026. Draft 4, 3 November 2026.
+Product description. PayPal AI Hackathon 2026. Draft 5, 3 November 2026.
 
 This document describes the product: the problem, the audience, the features, the business value and the impact. It does not describe the implementation.
 
@@ -11,6 +11,8 @@ Draft 2 adds six extensions. They are described in sections 6.11 to 6.16 and spe
 Draft 3 marks what this build does not do yet as planned, where it is described, so the description matches the code.
 
 Draft 4 names the model, marks what has since been built, says plainly what real shops still need from PayPal, and gives the phone app its place.
+
+Draft 5 says what is new against what already exists. A card hold as a deposit, AI photo comparison and a person approving a charge each exist; the summary and section 10 now lead with what Hold adds to them, and claim nothing as a first.
 
 ---
 
@@ -22,12 +24,13 @@ Instead of charging a security deposit and refunding it later, the shop places a
 
 **In one sentence:** Hold lets a rental shop protect its equipment without taking its customers' money, and settles every damage claim with evidence both sides can see.
 
-**The two ideas that make Hold work:**
+**The three ideas that make Hold work:**
 
 1. **The hold is the deposit.** The renter's money is reserved, not charged. If the return is clean, no payment ever happened, so there is nothing to refund, nothing to wait for and nothing lost to currency conversion.
-2. **One evidence pack, two readers.** The condition of the item at handover and at return is recorded the same way every time. Any claim is itemized against the shop's published price list, approved by a person, and shown in full to the renter before it is final.
+2. **One evidence pack, two readers.** The condition of the item at handover and at return is recorded the same way every time. Code finds what changed before a model explains it, any claim is itemized against the shop's published price list, approved by a person, and shown in full to the renter before it is final.
+3. **A disagreement is settled inside limits people set.** When the renter contests a claim, two advocates argue it, one for each side, each inside a limit its own person wrote and never shown the other's. A referee in plain code checks every offer, an agreement can only lower the approved claim, and both people confirm it before PayPal takes anything.
 
-Card holds for deposits already exist in rental software. What does not exist is the second idea joined to the first: a deposit decision that is fast, itemized, evidenced and open to the renter. That is the product.
+Card holds for deposits already exist in rental software, AI damage detection already exists in equipment rental, and a person approving a charge is common practice. None of them is the idea. The idea is the joined object: the hold, its evidence, the published price list, the named person who approved, what the renter saw, and how it settled, as one record both sides can read, and a fair way to settle it when they disagree. That is the product.
 
 ---
 
@@ -371,17 +374,24 @@ For the hackathon, all of this runs in the PayPal sandbox with test money.
 
 ## 10. Why Hold is different
 
-- **It joins the hold to the evidence.** Rental software can reserve money. Scanners can detect damage. Hold is the product where the reserved money and the documented condition are one object, settled in one step.
-- **It keeps a person in charge.** The public reaction to automated damage charging in car rental showed what happens without this. Hold makes human approval and renter visibility central features, not afterthoughts.
-- **It needs no hardware.** The only equipment is the phone the staff already carry.
-- **It works for the small shop.** It is priced and designed for an owner with forty bikes, not a fleet of forty thousand cars.
-- **It protects honest renters as much as shops.** The item passport means nobody pays for someone else's scratch.
-- **It lasts as long as real rentals do.** Protection that survives a three-week rental without becoming a charge.
-- **It shows its accuracy.** The comparison's test results are public, with their counts. Most AI products ask to be believed.
-- **It rewards careful renters.** A clean record lowers the next hold, at any shop that uses Hold.
-- **It is ready for AI agents on both sides.** A renter's assistant can book. An advocate can argue a claim. Each acts inside limits a person wrote, and none can charge.
+What already exists, and what Hold adds to it:
 
----
+| Already exists | Where | What Hold adds |
+|---|---|---|
+| A card hold as a deposit | Small-shop rental software, mostly through Stripe, where a hold lasts about a week and is captured once | A PayPal authorization the renter approves for the exact amount, open for up to 29 days, renewed once when a charge comes late, with a partial final capture that releases the rest at once |
+| AI that compares condition photographs | Equipment rental (Texada, March 2026) and condition-report apps | Plain code finds every change before the model is asked, an independent second look checks each damage finding, and nothing is missed when the model is down. Accuracy is counted on photographs the comparison is never tuned on, and every pair is published |
+| A person who approves a charge | Common practice, and in about a quarter of this hackathon's entries | It is a rule here, not the idea: the person approves against the published price list, the renter sees the same photographs, and the approval is kept in an append-only record with the claim |
+| An AI that mediates a dispute | Several hackathon entries use one model as judge or mediator | Two advocates, one for each side, each in its own call with its own limit; a referee in plain code bounds every offer; the agreement can only lower the claim and both people confirm it |
+
+What no part does alone:
+
+- **It joins the hold to the evidence.** The reserved money, the documented condition, the price list the renter accepted, the person who approved and what the renter saw are one record, settled in one step and read back from PayPal.
+- **It settles a disagreement fairly, in the open.** The advocates argue from the evidence, never past their own side's limit, and every move is fingerprinted over the one before, so the transcript both people receive cannot be quietly changed.
+- **It lets AI work on both sides without letting it take money.** A renter's assistant can book through Hold's MCP server, an operations agent reads PayPal overnight with read-only tools, and the advocates negotiate. Each acts inside limits a person wrote, and none can charge.
+- **Its evidence can be checked without trusting Hold.** The sealed handover photographs come with a signed statement anyone can verify against a published key.
+- **It shows its accuracy.** The comparison's results are public, with their counts and every pair behind them, and until a run is accepted it says so.
+- **It works for the small shop.** No hardware beyond the phone the staff already carry, priced and designed for an owner with forty bikes.
+- **It rewards careful renters.** A Clean Record lowers the next hold, at any shop that uses Hold.
 
 ## 11. Business model
 
