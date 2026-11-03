@@ -1,12 +1,18 @@
 import { SAMPLE_PHOTO_SHA256 } from '@hold/domain'
 import { createHash } from 'node:crypto'
-import { beginComparison, captureSession, comparisonReport, comparisons, completeComparison, findings, holds, inShop, recordPhoto, rentals, sealSession, startCaptureSession } from '@hold/db'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import { beginComparison, captureSession, comparisonReport, comparisons, completeComparison, findings, holds, inShop, openDemoSession, recordPhoto, renters, rentals, sealSession, startCaptureSession, startSampleComparison } from '@hold/db'
 import { createTestDatabase } from '@hold/db/testing'
 import { readyRentalShop } from '@hold/db/testing/ready-rental'
-import { createMemoryEvidenceStore } from '@hold/evidence'
+import { createMemoryEvidenceStore, withSampleDisplays } from '@hold/evidence'
 import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
 import { runComparison } from './job.ts'
+import type { LookRequest } from './model.ts'
+
+// The demonstration's own photographs, as the web app serves them and the comparison worker carries them.
+const SAMPLE_IMAGES = join(import.meta.dirname, '..', '..', '..', 'apps', 'web', 'public', 'images')
 
 const NOW = new Date('2026-10-20T09:00:00Z')
 const sha = (body: Buffer) => createHash('sha256').update(body).digest('hex')
@@ -72,6 +78,28 @@ describe('comparison queue processing', () => {
     const model = { look: () => Promise.resolve({ kind: 'result' as const, model: 'recorded-model', inputTokens: 100, outputTokens: 50, data: { sameItem: true, sameView: true, findings: [], dismissed: [] } }) }
     expect(await runComparison({ ...fixture, role: 'hold_worker', model, now: () => NOW }, { shopId: fixture.shop.scope.shopId, comparisonId: fixture.comparison.id })).toBe('completed')
     expect((await fixture.database.select().from(comparisons))[0]).toMatchObject({ state: 'clean', model: 'recorded-model', simulated: true, deferredReason: null })
+  })
+
+  // A judge starts the sample return's waiting comparison so Claude compares the demonstration's own photographs, which
+  // no evidence bucket holds (architecture.md section 20.3). The samples photograph one view of the plan, so the
+  // comparison compares the views both sessions hold, and says it is a sample's.
+  it('compares a sample return from the demonstration’s own photographs, on the views both sessions hold', async () => {
+    const database = await createTestDatabase()
+    const opened = await openDemoSession(database, { owner: { subject: 'owner-job-sample', email: 'tomas.job@demo.hold.example' }, staff: { subject: 'staff-job-sample', email: 'jonas.job@demo.hold.example' }, slug: 'ribeira-bikes-job', paypal: { credentialReference: 'hold/paypal/shops/demo/sandbox', mode: 'sandbox' }, now: NOW })
+    const scope = { role: 'hold_app' as const, shopId: opened.shopId }
+    const named = await database.select({ id: renters.id, name: renters.name }).from(renters)
+    const marco = (await database.select({ id: rentals.id, renterId: rentals.renterId, shopId: rentals.shopId }).from(rentals)).find((rental) => rental.shopId === opened.shopId && named.find((renter) => renter.id === rental.renterId)?.name === 'Marco Rossi')
+    const started = await inShop(database, scope, (transaction) => startSampleComparison(transaction, marco?.id ?? '', NOW))
+    if (!started.ok) throw new Error(started.reason)
+    const looks: LookRequest[] = []
+    const model = { look: (request: LookRequest) => { looks.push(request); return Promise.resolve({ kind: 'result' as const, model: 'recorded-model', inputTokens: 900, outputTokens: 120, data: { sameItem: true, sameView: true, findings: [], dismissed: [] } }) } }
+    const evidence = withSampleDisplays(createMemoryEvidenceStore({ baseUrl: 'https://hold.test' }), (file) => readFile(join(SAMPLE_IMAGES, file)))
+    expect(await runComparison({ database, role: 'hold_worker', evidence, model, now: () => NOW }, { shopId: opened.shopId, comparisonId: started.comparisonId })).toBe('completed')
+    const report = await inShop(database, scope, (transaction) => comparisonReport(transaction, started.comparisonId))
+    expect(report).toMatchObject({ simulated: true, modelAnswered: true, model: 'recorded-model', usage: { inputTokens: 900, outputTokens: 120 } })
+    expect(report?.state).not.toBe('pending')
+    expect(report?.deferredReason).not.toBe('missing_view')
+    expect(looks[0]?.images[0]?.label).toBe('Full handover photograph')
   })
 
   // A person reads why the comparison waits for them: Bedrock not answering, such as the day's tokens being spent, is

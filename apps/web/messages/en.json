@@ -2190,7 +2190,11 @@
         "too_large": "The photograph is too large. Take it again.",
         "views_missing": "Some views still need a photograph.",
         "region_invalid": "Draw the box inside the photograph.",
-        "description_invalid": "Describe the mark in up to 200 characters."
+        "description_invalid": "Describe the mark in up to 200 characters.",
+        "daily_cap": "Today's real comparisons on samples are all taken. Each spends the account's daily Claude allowance, so try again tomorrow; the photographs wait here.",
+        "already_started": "This comparison has already started.",
+        "nothing_to_compare": "This sample has no comparison waiting to run.",
+        "not_a_sample": "Only a sample's comparison is started by hand. A real return is compared once its photographs are sealed."
       },
       "sampleTitle": "Sample photographs",
       "sampleBody": "These photographs are for demonstration. The inspection record is marked as simulated."
@@ -2253,7 +2257,17 @@
           "body": "Code and Claude compared these photographs for real. They are samples, not this item, so the result shows how the comparison works and is left out of every accuracy figure."
         }
       },
-      "modelUnavailable": "Claude did not answer this comparison, for example because today's allowance of model calls is spent. Nothing is known yet about the photographs: inspect the item yourself and record what you observe."
+      "modelUnavailable": "Claude did not answer this comparison, for example because today's allowance of model calls is spent. Nothing is known yet about the photographs: inspect the item yourself and record what you observe.",
+      "updatesItself": "This page updates by itself.",
+      "secondLookNot": "The independent second look did not confirm it.",
+      "usage": "{calls, plural, one {# model call} other {# model calls}}, {read, number} tokens read, {written, number} written.",
+      "sample": {
+        "title": "Watch Claude compare these photographs",
+        "body": "This sample return's comparison has not run yet. Start it and Claude Opus 4.6 compares these demonstration photographs for real: code first finds what changed, Claude explains each change, and an independent second look checks any damage. It takes about a minute, no PayPal login is needed, and nothing is charged. Each run spends the account's daily Claude allowance, so a few run each day.",
+        "start": "Run the real comparison on this sample",
+        "starting": "Starting the comparison…",
+        "started": "The comparison has started."
+      }
     },
     "incidents": {
       "title": "Incidents",

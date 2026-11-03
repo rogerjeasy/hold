@@ -2190,7 +2190,11 @@
         "too_large": "La photo est trop lourde. Reprenez-la.",
         "views_missing": "Certaines vues attendent encore une photo.",
         "region_invalid": "Tracez le cadre à l'intérieur de la photo.",
-        "description_invalid": "Décrivez la marque en 200 caractères au plus."
+        "description_invalid": "Décrivez la marque en 200 caractères au plus.",
+        "daily_cap": "Les vraies comparaisons d'exemples du jour sont toutes prises. Chacune consomme le quota quotidien Claude du compte, réessayez donc demain ; les photos attendent ici.",
+        "already_started": "Cette comparaison a déjà commencé.",
+        "nothing_to_compare": "Aucune comparaison n'attend pour cet exemple.",
+        "not_a_sample": "Seule la comparaison d'un exemple se lance à la main. Un vrai retour est comparé dès que ses photos sont scellées."
       },
       "sampleTitle": "Photographies de démonstration",
       "sampleBody": "Ces photographies servent à la démonstration. Le dossier d’inspection est signalé comme simulé."
@@ -2253,7 +2257,17 @@
           "body": "Le code et Claude ont réellement comparé ces photographies. Ce sont des exemples, pas cet article : le résultat montre comment fonctionne la comparaison et n’entre dans aucun chiffre de précision."
         }
       },
-      "modelUnavailable": "Claude n'a pas répondu à cette comparaison, par exemple parce que le quota d'appels au modèle du jour est épuisé. Rien n'est encore établi sur les photos : inspectez l'article vous-même et notez ce que vous constatez."
+      "modelUnavailable": "Claude n'a pas répondu à cette comparaison, par exemple parce que le quota d'appels au modèle du jour est épuisé. Rien n'est encore établi sur les photos : inspectez l'article vous-même et notez ce que vous constatez.",
+      "updatesItself": "Cette page se met à jour d'elle-même.",
+      "secondLookNot": "Le second regard indépendant ne l'a pas confirmé.",
+      "usage": "{calls, plural, one {# appel au modèle} other {# appels au modèle}}, {read, number} jetons lus, {written, number} écrits.",
+      "sample": {
+        "title": "Regardez Claude comparer ces photos",
+        "body": "La comparaison de ce retour d'exemple n'a pas encore été lancée. Lancez-la et Claude Opus 4.6 compare réellement ces photos de démonstration : le code trouve d'abord ce qui a changé, Claude explique chaque changement, et un second regard indépendant vérifie tout dommage. Cela prend environ une minute, aucune connexion PayPal n'est nécessaire et rien n'est débité. Chaque lancement consomme le quota quotidien Claude du compte, donc quelques-uns seulement par jour.",
+        "start": "Lancer la vraie comparaison sur cet exemple",
+        "starting": "Lancement de la comparaison…",
+        "started": "La comparaison a commencé."
+      }
     },
     "incidents": {
       "title": "Incidents",

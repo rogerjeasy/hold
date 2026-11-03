@@ -1,10 +1,14 @@
 'use server'
 
-import { auditLog, captureSession, comparisonReport, rentalDetail, rentalItemFor, rentalReturns, sealSession, startCaptureSession } from '@hold/db'
+import { auditLog, captureSession, comparisonReport, rentalDetail, rentalItemFor, rentalReturns, sealSession, startCaptureSession, startSampleComparison, takeRateTokenIn } from '@hold/db'
+import { utcDay } from '@hold/domain'
 import { rentalItemInput, reviewInput, sessionInput } from '@hold/mobile-api'
-import { Refusal, shopAction } from '@/server/shop-access'
+import { z } from 'zod'
+import { callerNetwork } from '@/server/network'
+import { Refusal, shopAction, withLocale } from '@/server/shop-access'
 import { CAPTURE_STAFF, staffPhotoActions } from '@/server/staff-photo'
 import { sendComparisons } from '@/server/comparison-queue'
+import { SAMPLE_COMPARISON_LIMITS } from './limits'
 
 export const startReturn = shopAction(
   { name: 'return.started', roles: CAPTURE_STAFF, needsPasskey: false, input: rentalItemInput },
@@ -43,4 +47,18 @@ export const recordReview = shopAction(
     await transaction.insert(auditLog).values({ shopId: context.shop.id, actorKind: 'person', actorId: context.person.userId, action: 'comparison.manual_review', subjectKind: 'comparison', subjectId: input.comparisonId, detail: { outcome: input.outcome, reason: input.reason } })
     return {}
   },
+)
+
+// Hands the demo's sample return to the comparison worker, so Claude compares the demonstration's own photographs
+// (architecture.md section 20.3). No passkey and any staff role: nothing here moves money, and a sample is never charged.
+// The day's shares are taken in this transaction, where no model is called, so a refused start spends nothing.
+export const compareSample = shopAction(
+  { name: 'comparison.sample_started', roles: CAPTURE_STAFF, needsPasskey: false, input: withLocale({ rentalId: z.uuid() }) },
+  async (_context, input, transaction) => {
+    if (!(await takeRateTokenIn(transaction, SAMPLE_COMPARISON_LIMITS.perNetwork, (await callerNetwork()) ?? 'unknown'))) return new Refusal('daily_cap')
+    if (!(await takeRateTokenIn(transaction, SAMPLE_COMPARISON_LIMITS.perDay, utcDay(new Date())))) return new Refusal('daily_cap')
+    const started = await startSampleComparison(transaction, input.rentalId, new Date())
+    return started.ok ? { rentalId: started.rentalId, comparisonId: started.comparisonId } : new Refusal(started.reason)
+  },
+  (context, output) => sendComparisons(context.shop.id, output.rentalId, [output.comparisonId]),
 )

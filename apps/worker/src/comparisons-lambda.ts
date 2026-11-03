@@ -1,6 +1,8 @@
 import { comparisonMessageSchema, createBedrockComparisonModel, runComparison } from '@hold/compare'
 import { createDataApiDatabase } from '@hold/db/data-api'
-import { createS3EvidenceStore } from '@hold/evidence/photos'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import { createS3EvidenceStore, withSampleDisplays } from '@hold/evidence/photos'
 import { z } from 'zod'
 import { withReviewPush } from './comparison-push.ts'
 import { createStaffPush, workerPushSender } from './push.ts'
@@ -13,7 +15,8 @@ const value = settings.data
 const dependencies = {
   database: createDataApiDatabase({ region: value.AWS_REGION, clusterArn: value.HOLD_DATABASE_CLUSTER_ARN, secretArn: value.HOLD_DATABASE_SECRET_ARN, database: value.HOLD_DATABASE_NAME }),
   role: 'hold_worker' as const,
-  evidence: createS3EvidenceStore({ evidenceBucket: value.HOLD_EVIDENCE_BUCKET, displayBucket: value.HOLD_DISPLAY_BUCKET, region: value.AWS_REGION }),
+  // A sample return's photographs are the demonstration's own, installed beside the code in samples/ (infra/lib/worker.ts).
+  evidence: withSampleDisplays(createS3EvidenceStore({ evidenceBucket: value.HOLD_EVIDENCE_BUCKET, displayBucket: value.HOLD_DISPLAY_BUCKET, region: value.AWS_REGION }), (file) => readFile(join(process.env['LAMBDA_TASK_ROOT'] ?? '.', 'samples', file))),
   model: createBedrockComparisonModel({ awsRegion: value.AWS_REGION }),
   now: () => new Date(),
 }

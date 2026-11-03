@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { SAMPLE_PHOTOS } from '@hold/db'
 import type { EvidenceStore } from '@hold/evidence'
 
@@ -15,4 +17,18 @@ export function withSamplePhotos(store: EvidenceStore): EvidenceStore {
     },
     readDisplay: (key) => (SAMPLE_PATHS.has(key) ? Promise.resolve(undefined) : store.readDisplay(key)),
   }
+}
+
+// One of those images, read from public/images by the test environment's comparisons, which have no worker to carry
+// them. `next dev` runs in apps/web and the unit tests from the repository root, so both places are tried in turn.
+export async function readSampleImage(file: string): Promise<Buffer> {
+  const roots = [join(process.cwd(), 'public', 'images'), join(process.cwd(), 'apps', 'web', 'public', 'images')]
+  for (const root of roots) {
+    try {
+      return await readFile(join(root, file))
+    } catch {
+      // Not in this root: the next one is tried, and the last failure is said below.
+    }
+  }
+  throw new Error('A sample photograph is not in public/images.')
 }

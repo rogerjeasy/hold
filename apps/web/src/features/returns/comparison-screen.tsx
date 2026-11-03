@@ -12,6 +12,7 @@ import { useLookAgain } from '@/hooks/use-look-again'
 import { Link } from '@/i18n/navigation'
 import { rentalRoutes } from '@/lib/routes'
 import { ReviewForm } from './review-form'
+import { SampleComparisonForm } from './sample-comparison-form'
 
 // What a comparison records when no model answered it (packages/compare pipeline.ts).
 const NO_MODEL = 'not_called'
@@ -32,7 +33,10 @@ export function ComparisonScreen({ shopName, report, canAct, calibration }: { sh
   }
   const locale = useLocale()
   const notice = comparisonNotice(report)
-  const pending = report.state === 'pending' || report.state === 'running'
+  // The demo's sample return waits for a person to start its comparison; any other is on its way once sealed.
+  const waiting = report.waitsForStart
+  const pending = !waiting && (report.state === 'pending' || report.state === 'running')
+  const label = (view: string) => report.viewLabels[view] ?? view
   useLookAgain(pending || [...report.before, ...report.after].some((photo) => photo.url === null), { forMs: 180_000 })
   const outcome = report.state === 'clean' ? 'clean' : report.state === 'findings' ? 'findings' : 'deferred'
   // Where a renter left the item has no handover twin: it is shown on its own and never compared (section 6.13).
@@ -41,23 +45,25 @@ export function ComparisonScreen({ shopName, report, canAct, calibration }: { sh
   return <ShopFrame shopName={shopName} title={report.label}><div className="grid gap-6">
     <Link className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4" href={rentalRoutes.rental(report.rentalId)}>{t('back')}</Link>
     {notice === 'none' ? null : <Notice title={t(`notices.${notice}.title`)} body={t(`notices.${notice}.body`)} />}
-    {pending ? <p role="status">{t('pending')}</p> : <Panel title={t(`outcomes.${outcome}`)}><div className="grid gap-3 px-4 py-4 md:px-5"><p>{report.deferredReason === 'model_unavailable' ? t('modelUnavailable') : t(`bodies.${outcome}`)}</p><p className="text-muted-foreground">{t('boundary')}</p>
+    {waiting ? <Panel title={t('sample.title')}><div className="grid gap-3 px-4 py-4 md:px-5"><p className="max-w-prose">{t('sample.body')}</p><p className="text-muted-foreground">{t('boundary')}</p>{canAct ? <SampleComparisonForm rentalId={report.rentalId} /> : null}</div></Panel>
+      : pending ? <p role="status">{t('pending')} {t('updatesItself')}</p> : <Panel title={t(`outcomes.${outcome}`)}><div className="grid gap-3 px-4 py-4 md:px-5"><p>{report.deferredReason === 'model_unavailable' ? t('modelUnavailable') : t(`bodies.${outcome}`)}</p><p className="text-muted-foreground">{t('boundary')}</p>
       {report.deferredReason === 'reused_photo' ? <p>{t('reused')}</p> : null}
       {report.deferredReason === 'processing_failed' ? <p>{t('unavailable')}</p> : null}
     </div></Panel>}
-    {views.map((view) => <Panel key={view} title={view}><div className="grid gap-4 px-4 py-4 md:grid-cols-2 md:px-5">{(['before', 'after'] as const).map((side) => {
+    {views.map((view) => <Panel key={view} title={label(view)}><div className="grid gap-4 px-4 py-4 md:grid-cols-2 md:px-5">{(['before', 'after'] as const).map((side) => {
       const photo = report[side].find((photo) => photo.view === view)
-      return <figure key={side} className="min-w-0"><figcaption className="mb-2 font-semibold">{t(side)}</figcaption>{photo?.url == null ? <p>{t('preparing')}</p> : <PhotoWithMarks src={photo.url} alt={t('photo', { side: t(side), view })} marks={side === 'after' ? report.findings.filter((finding) => finding.view === view) : []} />}</figure>
+      return <figure key={side} className="min-w-0"><figcaption className="mb-2 font-semibold">{t(side)}</figcaption>{photo?.url == null ? <p>{t('preparing')}</p> : <PhotoWithMarks src={photo.url} alt={t('photo', { side: t(side), view: label(view) })} marks={side === 'after' ? report.findings.filter((finding) => finding.view === view) : []} />}</figure>
     })}</div></Panel>)}
     {dropPoint === undefined ? null : <Panel title={t('dropPoint')}><div className="grid max-w-md gap-2 px-4 py-4 md:px-5">{dropPoint.url === null ? <p>{t('preparing')}</p> : <img src={dropPoint.url} alt={t('dropPoint')} className="aspect-thumbnail w-full object-cover" />}<p className="text-sm text-muted-foreground">{t('dropPointBody')}</p></div></Panel>}
     {report.findings.length === 0 ? null : <Panel title={t('observations')}><ul className="grid gap-4 px-4 py-4 md:px-5">{report.findings.map((finding) => <li key={finding.id} className="grid min-w-0 gap-1 border-t pt-3 first:border-t-0 first:pt-0">
       <p className="font-semibold">{t(`classes.${finding.class}`)}</p><p className="wrap-long-words">{finding.description}</p>
-      {finding.secondLookConfirmed === true ? <p className="text-muted-foreground">{t('secondLook')}</p> : null}
+      {finding.secondLookConfirmed === true ? <p className="text-muted-foreground">{t('secondLook')}</p> : finding.secondLookConfirmed === false ? <p className="text-muted-foreground">{t('secondLookNot')}</p> : null}
       {finding.class === 'known_mark' || finding.class === 'wear' || finding.class === 'reported' ? null : <p className="text-sm text-muted-foreground wrap-long-words">{accuracy(finding.confidence)}</p>}
       {finding.reported === null ? null : <p>{finding.reported.agreedCents === null ? t('reportedNotAgreed') : t('reportedAgreed', { amount: formatMoney(money(finding.reported.agreedCents, finding.reported.currency), locale) })} <Link className="font-semibold underline underline-offset-4" href={rentalRoutes.claim(report.rentalId)}>{t(finding.reported.agreedCents === null ? 'claimLink' : 'reportedLink')}</Link></p>}
       {finding.amountCents !== null && finding.currency !== null && finding.class !== 'known_mark' && finding.class !== 'wear' && finding.class !== 'reported' ? <p>{t('price', { description: finding.priceDescription ?? '', amount: formatMoney(money(finding.amountCents, finding.currency), locale) })}</p> : null}
     </li>)}</ul></Panel>}
-    <p className="text-sm text-muted-foreground wrap-long-words">{t('version', { model: report.model === null || report.model === NO_MODEL ? t('notRun') : report.model, prompt: report.promptVersion ?? t('notRun') })}</p>
+    <div className="grid gap-1 text-sm text-muted-foreground"><p className="wrap-long-words">{t('version', { model: report.model === null || report.model === NO_MODEL ? t('notRun') : report.model, prompt: report.promptVersion ?? t('notRun') })}</p>
+      {report.modelAnswered ? <p>{t('usage', { calls: report.usage.calls, read: report.usage.inputTokens, written: report.usage.outputTokens })}</p> : null}</div>
     {report.reviews.length === 0 ? null : <Panel title={t('reviewHistory')}><ul className="grid gap-3 px-4 py-4 md:px-5">{report.reviews.map((review, index) => <li key={index} className="min-w-0"><p className="font-semibold wrap-long-words">{review.actorName ?? t('staff')} · {t(`outcomes.${review.outcome}`)}</p><p className="whitespace-pre-wrap wrap-long-words">{review.reason}</p></li>)}</ul></Panel>}
     {canAct ? <Panel title={t('manual')}><div className="px-4 py-4 md:px-5"><ReviewForm comparisonId={report.id} /></div></Panel> : null}
   </div></ShopFrame>

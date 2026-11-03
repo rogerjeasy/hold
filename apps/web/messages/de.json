@@ -2190,7 +2190,11 @@
         "too_large": "Das Foto ist zu groß. Machen Sie es erneut.",
         "views_missing": "Einige Ansichten brauchen noch ein Foto.",
         "region_invalid": "Zeichnen Sie das Feld innerhalb des Fotos.",
-        "description_invalid": "Beschreiben Sie die Spur in bis zu 200 Zeichen."
+        "description_invalid": "Beschreiben Sie die Spur in bis zu 200 Zeichen.",
+        "daily_cap": "Die heutigen echten Vergleiche mit Beispielen sind alle vergeben. Jeder verbraucht das tägliche Claude-Kontingent des Kontos, versuchen Sie es also morgen wieder; die Fotos warten hier.",
+        "already_started": "Dieser Vergleich hat bereits begonnen.",
+        "nothing_to_compare": "Für dieses Beispiel wartet kein Vergleich.",
+        "not_a_sample": "Nur der Vergleich eines Beispiels wird von Hand gestartet. Eine echte Rückgabe wird verglichen, sobald ihre Fotos versiegelt sind."
       },
       "sampleTitle": "Beispielfotos",
       "sampleBody": "Diese Fotos dienen der Demonstration. Der Prüfbericht ist als simuliert gekennzeichnet."
@@ -2253,7 +2257,17 @@
           "body": "Code und Claude haben diese Fotos wirklich verglichen. Es sind Beispiele, nicht dieser Gegenstand. Das Ergebnis zeigt also, wie der Vergleich arbeitet, und zählt in keiner Genauigkeitszahl."
         }
       },
-      "modelUnavailable": "Claude hat auf diesen Vergleich nicht geantwortet, etwa weil das heutige Kontingent an Modellaufrufen aufgebraucht ist. Über die Fotos ist noch nichts bekannt: Prüfen Sie den Artikel selbst und halten Sie fest, was Sie sehen."
+      "modelUnavailable": "Claude hat auf diesen Vergleich nicht geantwortet, etwa weil das heutige Kontingent an Modellaufrufen aufgebraucht ist. Über die Fotos ist noch nichts bekannt: Prüfen Sie den Artikel selbst und halten Sie fest, was Sie sehen.",
+      "updatesItself": "Diese Seite aktualisiert sich von selbst.",
+      "secondLookNot": "Der unabhängige zweite Blick hat es nicht bestätigt.",
+      "usage": "{calls, plural, one {# Modellaufruf} other {# Modellaufrufe}}, {read, number} Tokens gelesen, {written, number} geschrieben.",
+      "sample": {
+        "title": "Sehen Sie Claude diese Fotos vergleichen",
+        "body": "Der Vergleich dieser Beispielrückgabe ist noch nicht gelaufen. Starten Sie ihn, und Claude Opus 4.6 vergleicht diese Demonstrationsfotos wirklich: Zuerst findet Code, was sich verändert hat, Claude erklärt jede Veränderung, und ein unabhängiger zweiter Blick prüft jeden Schaden. Es dauert etwa eine Minute, kein PayPal-Login ist nötig, und nichts wird belastet. Jeder Lauf verbraucht das tägliche Claude-Kontingent des Kontos, daher laufen nur wenige pro Tag.",
+        "start": "Den echten Vergleich mit diesem Beispiel ausführen",
+        "starting": "Der Vergleich wird gestartet…",
+        "started": "Der Vergleich hat begonnen."
+      }
     },
     "incidents": {
       "title": "Vorfälle",

@@ -52,3 +52,11 @@ export const INSIGHTS_TURNS_PER_DAY = 60
 export const SAMPLE_ADVOCATE_RUNS_PER_NETWORK = 1
 export const INSIGHTS_TURNS_PER_NETWORK = 20
 export const INSIGHTS_TURNS_PER_SHOP = 15
+
+// A judge has Claude compare the demonstration's photographs on the sample return that waits for its comparison. One
+// view takes a first look at both full photographs and a second look at crops: budgeted at 30,000 tokens, about half
+// again what one look with two photographs spent on 2 November 2026. Each demo shop has one such return, so a share per
+// shop is the return itself; these stop many demos together.
+export const SAMPLE_COMPARISON_TOKENS = 30_000
+export const SAMPLE_COMPARISON_RUNS_PER_DAY = 6
+export const SAMPLE_COMPARISON_RUNS_PER_NETWORK = 3

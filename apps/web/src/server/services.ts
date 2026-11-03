@@ -8,7 +8,7 @@ import type { CredentialKeySource, KeySource, WebConfig } from '@hold/config'
 import { demoSessionLive, OPS_AGENT_QUEUE, openDemoSession } from '@hold/db'
 import type { Database } from '@hold/db'
 import { createDataApiDatabase } from '@hold/db/data-api'
-import { createMemoryDocumentStore, createS3DocumentStore, createMemoryEvidenceStore, createS3EvidenceStore, makeDisplayCopy, mediaMessageSchema } from '@hold/evidence'
+import { createMemoryDocumentStore, createS3DocumentStore, createMemoryEvidenceStore, createS3EvidenceStore, makeDisplayCopy, mediaMessageSchema, withSampleDisplays } from '@hold/evidence'
 import type { DisplayJobDependencies, DocumentStore, EvidenceStore, MemoryEvidenceStore } from '@hold/evidence'
 import { noFaces } from '@hold/vision'
 import { opsAgentMessageSchema, runOperations } from '@hold/ops/run'
@@ -27,7 +27,7 @@ import { createRenterAsk } from './renter-ask'
 import { simulatedOperations } from './simulated-operations'
 import { simulatedRecords } from './simulated-records'
 import { DEMO_WEBHOOK_PATH } from './demo-webhook-address'
-import { withSamplePhotos } from './sample-photos'
+import { readSampleImage, withSamplePhotos } from './sample-photos'
 
 // What a PayPal credential check found: the credentials work, PayPal refused them, or PayPal could not be reached.
 export type CredentialCheck = 'accepted' | 'refused' | 'unavailable'
@@ -94,8 +94,9 @@ function runAtOnce(settle: () => SettleDependencies, media: DisplayJobDependenci
   return async (message) => {
     if (message.queue === 'media') await makeDisplayCopy(media, mediaMessageSchema.parse(message.body))
     // This environment's model is explicitly simulated and never calls Bedrock. The same pipeline still rejects
-    // reused, unreadable or poorly aligned photographs before any model result is considered.
-    if (message.queue === 'comparisons') await runComparison({ database: media.database, role: media.role ?? 'hold_worker', evidence: media.evidence, model: { look: () => Promise.resolve({ kind: 'unavailable', model: 'simulated' }) }, simulated: true, now: () => new Date() }, comparisonMessageSchema.parse(message.body))
+    // reused, unreadable or poorly aligned photographs before any model result is considered. A sample return's
+    // photographs are the demonstration's own, read from public/images as the comparison worker reads its copies.
+    if (message.queue === 'comparisons') await runComparison({ database: media.database, role: media.role ?? 'hold_worker', evidence: withSampleDisplays(media.evidence, readSampleImage), model: { look: () => Promise.resolve({ kind: 'unavailable', model: 'simulated' }) }, simulated: true, now: () => new Date() }, comparisonMessageSchema.parse(message.body))
     if (message.queue === 'executions') await runExecution(settle(), executionMessageSchema.parse(message.body))
     if (message.queue === 'paypal-events') await applyPayPalEvent(settle(), paypalEventMessageSchema.parse(message.body))
     if (message.queue === 'upkeep') await runUpkeep(settle(), upkeepMessageSchema.parse(message.body))

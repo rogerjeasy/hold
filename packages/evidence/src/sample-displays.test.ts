@@ -25,6 +25,14 @@ describe('the sample photographs, for the evidence worker', () => {
     expect(await wrapped.readDisplay('shop/session/view.jpg')).toBeUndefined()
   })
 
+  it('gives a comparison a seeded sample’s original from its file, and any other photograph’s from the store', async () => {
+    const store = evidence.createMemoryEvidenceStore({ baseUrl: 'https://hold.test' })
+    const wrapped = evidence.withSampleDisplays(store, readSample)
+    expect(await evidence.readOriginal(wrapped, { evidenceKey: 'sample/shop/session/frame-left.jpg', displayKey: SAMPLE_PHOTOS.damage })).toEqual(await readSample('sample-return-damage.jpg'))
+    await expect(evidence.readOriginal(wrapped, { evidenceKey: 'shop/session/frame-left.jpg', displayKey: 'sample/not-a-sample.jpg' })).rejects.toThrow()
+    await expect(evidence.readOriginal(store, { evidenceKey: 'sample/shop/session/frame-left.jpg', displayKey: SAMPLE_PHOTOS.damage })).rejects.toThrow('A sample photograph is not beside this code.')
+  })
+
   it('lets a sample rental’s record be built from them', async () => {
     const opened = await openDemoSession(database, { owner: { subject: 'owner-sd', email: 'tomas.sd@demo.hold.example' }, staff: { subject: 'staff-sd', email: 'jonas.sd@demo.hold.example' }, slug: 'ribeira-bikes-sd', paypal: { credentialReference: 'hold/paypal/shops/demo/sandbox', mode: 'sandbox' }, now: NOW })
     const scope = { role: 'hold_app' as const, shopId: opened.shopId }

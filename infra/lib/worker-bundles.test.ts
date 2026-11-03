@@ -22,11 +22,12 @@ describe('every worker bundle', () => {
   })
 })
 
-// The evidence worker builds sample rentals' records from the demonstration's own images, which are not in the display
-// bucket, so its bundle carries them in samples/ (packages/evidence sample-displays.ts).
-describe('the evidence worker’s bundle', () => {
+// The evidence worker builds sample rentals' records, and the comparison worker compares a sample return, from the
+// demonstration's own images, which are in neither bucket, so their bundles carry them in samples/ (packages/evidence
+// sample-displays.ts).
+describe('the evidence and comparison workers’ bundles', () => {
   it('carries every sample photograph the seed names, in samples/', () => {
-    expect(WORKERS_WITH_SAMPLES).toContain('evidence-lambda.ts')
+    expect(WORKERS_WITH_SAMPLES).toEqual(expect.arrayContaining(['evidence-lambda.ts', 'comparisons-lambda.ts']))
     const output = mkdtempSync(join(tmpdir(), 'hold-bundle-'))
     for (const command of sampleCopyCommands(join(import.meta.dirname, '..', '..'), output)) execSync(command)
     expect(readdirSync(join(output, 'samples')).sort()).toEqual(expect.arrayContaining(['sample-drop-point.jpg', 'sample-handover.jpg', 'sample-return-damage.jpg']))
