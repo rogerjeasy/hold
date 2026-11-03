@@ -39,7 +39,8 @@ test('an owner works through the morning by keyboard: grouped by kind, the late 
   await expect(groups(page)).toHaveCount(3)
   await expect(groups(page).first()).toHaveText(/^Holds and returns\s*3 decisions · €335\.00 in all$/)
   await expect(groups(page).filter({ hasText: /^Claims/ })).toHaveText(/^Claims\s*2 decisions · €80\.00 in all$/)
-  await expect(groups(page).filter({ hasText: /^From the agent/ })).toHaveText(/^From the agent\s*2 decisions · €300\.00 in all$/)
+  // The replacement hold's €300 and the €35 the renter disputes: an answer to a dispute shows the captured amount.
+  await expect(groups(page).filter({ hasText: /^From the agent/ })).toHaveText(/^From the agent\s*2 decisions · €335\.00 in all$/)
   await expect(dataRows(page).first()).toContainText('Lea Fischer is late')
   await expect(dataRows(page).first()).toContainText('Overdue')
 
