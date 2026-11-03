@@ -3696,7 +3696,8 @@
       "link_invalid": "This link cannot be used for this.",
       "assistant_not_connected": "No assistant is connected to this rental now. Choose Hold's advocate instead.",
       "not_a_sample": "Only a sample claim can be handed to the advocates from here. A renter starts their own advocate from their claim link.",
-      "simulated_rental": "This is a sample: what the advocates agreed is shown, and nothing is taken."
+      "simulated_rental": "This is a sample: what the advocates agreed is shown, and nothing is taken.",
+      "daily_cap": "Today's runs of the advocates on samples are all taken. Each run spends the account's daily Claude allowance, so try again tomorrow."
     },
     "sample": {
       "title": "Watch the advocates argue this sample",

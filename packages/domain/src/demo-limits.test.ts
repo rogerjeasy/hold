@@ -1,6 +1,6 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
-import { CLAUDE_DAILY_TOKENS, DEMO_SESSION_DAYS, DEMO_STARTS_PER_DAY, demoRetirementCutoff, HOSTED_ASSISTANT_SHARE, hostedQuestionsPerDay, utcDay } from './demo-limits.ts'
+import { CLAUDE_DAILY_TOKENS, DEMO_SESSION_DAYS, DEMO_STARTS_PER_DAY, demoRetirementCutoff, HOSTED_ASSISTANT_SHARE, HOSTED_QUESTIONS_PER_NETWORK, hostedQuestionsPerDay, INSIGHTS_TURNS_PER_DAY, SAMPLE_ADVOCATE_RUNS_PER_DAY, utcDay } from './demo-limits.ts'
 
 describe('the demo’s daily caps', () => {
   it('counts a day as the calendar day in UTC, whatever the hour', () => {
@@ -27,6 +27,18 @@ describe('the demo’s daily caps', () => {
         if (tokensPerQuestion <= CLAUDE_DAILY_TOKENS * HOSTED_ASSISTANT_SHARE) expect(questions * tokensPerQuestion).toBeLessThanOrEqual(CLAUDE_DAILY_TOKENS * HOSTED_ASSISTANT_SHARE)
       }),
     )
+  })
+})
+
+describe('each caller’s share of the day', () => {
+  it('lets one network ask enough for one booking, and never the whole day’s questions', () => {
+    expect(HOSTED_QUESTIONS_PER_NETWORK).toBeGreaterThanOrEqual(4)
+    expect(HOSTED_QUESTIONS_PER_NETWORK * 2).toBeLessThanOrEqual(hostedQuestionsPerDay(30_000))
+  })
+
+  it('lets the advocates argue only a few samples a day, and the insights agent only a few dozen turns', () => {
+    expect(SAMPLE_ADVOCATE_RUNS_PER_DAY).toBeLessThanOrEqual(3)
+    expect(INSIGHTS_TURNS_PER_DAY).toBeLessThanOrEqual(60)
   })
 })
 

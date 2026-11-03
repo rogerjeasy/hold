@@ -3696,7 +3696,8 @@
       "link_invalid": "Este enlace no sirve para esto.",
       "assistant_not_connected": "Ahora no hay ningún asistente conectado a este alquiler. Elija el representante de Hold.",
       "not_a_sample": "Desde aquí solo se puede pasar a los defensores una reclamación de muestra. Un cliente inicia su propio defensor desde el enlace de su reclamación.",
-      "simulated_rental": "Es una muestra: se muestra lo que acordaron los defensores y no se cobra nada."
+      "simulated_rental": "Es una muestra: se muestra lo que acordaron los defensores y no se cobra nada.",
+      "daily_cap": "Las ejecuciones de hoy de los defensores sobre muestras ya se han usado. Cada una gasta la asignación diaria de Claude de la cuenta, así que vuelva a intentarlo mañana."
     },
     "sample": {
       "title": "Ver a los defensores discutir esta muestra",

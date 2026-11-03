@@ -1,12 +1,13 @@
 'use server'
-import { confirmAgreement, grantShopSettlement, openSampleAdvocates, revokeShopSettlement } from '@hold/db'
-import { parseAmount } from '@hold/domain'
+import { confirmAgreement, grantShopSettlement, openSampleAdvocates, revokeShopSettlement, takeRateTokenIn } from '@hold/db'
+import { parseAmount, utcDay } from '@hold/domain'
 import { z } from 'zod'
 import { Refusal, shopAction, withLocale } from '@/server/shop-access'
 import { writeContestSummary } from '@/server/contest-summary'
 import { sendNegotiation } from '@/server/negotiation-queue'
 import { getServices } from '@/server/services'
 import { sendSettlement } from '@/server/settlement-queue'
+import { SAMPLE_ADVOCATE_LIMIT } from './limits'
 import { settlementLimitsInput } from './negotiation-input'
 
 // The shop's side of an advocate (extensions.md section 9.4). Only the owner sets or ends the shop advocate's limits,
@@ -38,6 +39,7 @@ export const confirmSettlementForShop = shopAction({ name: 'settlement.decided',
 type SampleOpened = { readonly kind: 'negotiation' | 'reply'; readonly rentalId: string; readonly negotiationId: string; readonly outboxId: string }
 export const argueSampleClaim = shopAction({ name: 'settlement.sample_argued', roles: ['owner', 'manager'], needsPasskey: false, input: withLocale({ rentalId: z.uuid() }) }, async (_context, input, transaction): Promise<SampleOpened | Refusal> => {
   const { config } = await getServices()
+  if (!(await takeRateTokenIn(transaction, SAMPLE_ADVOCATE_LIMIT, utcDay(new Date())))) return new Refusal('daily_cap')
   const opened = await openSampleAdvocates(transaction, input.rentalId, { simulated: config.services === 'fake' }, new Date())
   return opened.ok ? { kind: opened.kind, rentalId: opened.rentalId, negotiationId: opened.negotiationId, outboxId: opened.outboxId } : new Refusal(opened.reason)
 }, async (context, result: SampleOpened) => {

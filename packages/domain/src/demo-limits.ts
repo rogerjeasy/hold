@@ -34,3 +34,15 @@ export const DEMO_SESSION_DAYS = 7
 export function demoRetirementCutoff(now: Date): Date {
   return new Date(now.getTime() - DEMO_SESSION_DAYS * DAY_MILLISECONDS)
 }
+
+// One network's share of the hosted assistant's day: enough for one booking, which takes three or four questions, and
+// at most half of the day's questions, so one visitor never leaves every judge without.
+export const HOSTED_QUESTIONS_PER_NETWORK = 6
+
+// Each sample handed to the two advocates is a run of many model calls, bounded at 600,000 tokens. Every demo shop has
+// one such sample, so a day allows only a few, whoever asks.
+export const SAMPLE_ADVOCATE_RUNS_PER_DAY = 3
+
+// AG Studio's insights agent takes several short turns for each question. Every demo is a shop of its own, so a cap per
+// shop bounds nothing in total: this one spans every shop.
+export const INSIGHTS_TURNS_PER_DAY = 60

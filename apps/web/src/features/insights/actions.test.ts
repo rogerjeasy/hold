@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { INSIGHTS_PROMPT_VERSION } from '@hold/agent'
-import { acceptInvitation, auditLog, createInvitation, inShop, registerOwner, savedInsightsDashboard } from '@hold/db'
-import { INSIGHTS_DAILY_TOKENS } from '@hold/domain'
+import { acceptInvitation, auditLog, createInvitation, inShop, registerOwner, savedInsightsDashboard, takeRateToken } from '@hold/db'
+import { INSIGHTS_DAILY_TOKENS, utcDay } from '@hold/domain'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 
 process.env['HOLD_ENVIRONMENT'] = 'test'
@@ -20,6 +20,7 @@ vi.mock('next/headers', () => ({
 vi.mock('next/cache', () => ({ revalidatePath: () => undefined }))
 
 const { askInsights, saveInsightsDashboard } = await import('./actions')
+const { INSIGHTS_DAY } = await import('./limits')
 const { getServices } = await import('@/server/services')
 const { form, signIn } = await import('@/test/shop-session')
 
@@ -72,6 +73,15 @@ describe('the shop’s daily budget for the insights agent', () => {
       transaction.insert(auditLog).values({ shopId, actorKind: 'person', actorId: ownerId, action: 'insights.turn', detail: { tokens: INSIGHTS_DAILY_TOKENS }, at: new Date() }))
     await signIn(jar, OWNER, 'passkey')
     expect(await askInsights(null, form({ turn }))).toEqual({ ok: false, failure: 'refused', reason: 'insights_budget_spent' })
+  })
+})
+
+describe('every shop’s turns together in a day', () => {
+  it('refuses a turn once the day’s turns across every shop are spent, and asks no model', async () => {
+    const { database } = await getServices()
+    while (await takeRateToken(database, INSIGHTS_DAY, utcDay(new Date()))) { /* spend the day */ }
+    await signIn(jar, OWNER, 'passkey')
+    expect(await askInsights(null, form({ turn }))).toEqual({ ok: false, failure: 'refused', reason: 'insights_daily_cap' })
   })
 })
 
