@@ -15,8 +15,8 @@ Built for the PayPal AI Hackathon 2026.
 ## For judges: five minutes
 
 The whole money loop below runs as Jonas, at the counter, and needs **no passkey**: the shop sends claims above €150
-to its owner, and Jonas approves up to €100. Keep two things to hand: the PayPal sandbox buyer login from the
-submission's testing instructions, and an email address of your own.
+to its owner, and Jonas approves up to €100. Keep two things to hand: the PayPal sandbox buyer login from
+[Testing instructions](#testing-instructions) below, and an email address of your own.
 
 1. Open the [live demo](https://p99faar3kp.us-east-1.awsapprunner.com/sign-in) and tap **Start a demo as Jonas, at
    the counter**. You get a Ribeira Bikes in Lisbon of your own, already busy with sample rentals marked **Sample**,
@@ -31,7 +31,9 @@ submission's testing instructions, and an email address of your own.
 4. Open the comparison. Code finds the candidate areas, Claude says what changed, then takes an independent second
    look at a wider crop. When both agree, the chip is offered as a claim line priced from the shop's list. When the
    second look is not sure, the return waits for a person: choose **Scratch on the frame, through the paint · €35.00**
-   and say what you see. Tap **Prepare claim for review**, then **Approve and show renter link**.
+   and say what you see. Tap **Prepare claim for review**, then **Approve and show renter link**. The screen says
+   **Demonstration photographs, real comparison**: the photographs are samples, but code and Claude really compared
+   them, and the result is kept out of every accuracy figure.
 5. Open the renter's link, as the renter would on their phone. Tap **I have reviewed this claim** and **Email me a
    verification code**: it goes to your email, because the sandbox buyer has no inbox. Accept the claim. PayPal
    captures €35 of the hold and releases the other €215, in the sandbox, and the rental shows **Settlement
@@ -44,6 +46,12 @@ submission's testing instructions, and an email address of your own.
 need a decision, **Calendar** shows every bike as a row and every rental as a bar marked by where its PayPal hold
 stands, and one sample claim is one the renter contested. Tomás's own money decisions ask for a passkey,
 which **Add a passkey** sets up on your device. **Start a fresh demo** opens a new shop.
+
+**Watch the two advocates argue.** Open **Rentals**, then **Elena Duarte**, then her claim: a scratch and a cleaning
+charge, still waiting for her reply. Tap **Let the advocates argue it**. Claude argues the renter's side and the shop's
+side separately, each from the evidence and within its own limit, and plain code checks every offer. The moves appear on
+the page as they are made, usually within a few minutes. Elena and her limit are made up for the demonstration, so
+nothing is ever taken from this sample. In a real contest the renter starts their own advocate from their claim link.
 
 Anything simulated is labelled on screen and marked `simulated` in the record.
 
@@ -77,6 +85,13 @@ photographs, what the comparison found, and whether it was right.
 Not measured yet: no run over the evaluation set has been accepted. Until one is, Hold claims no accuracy for the
 comparison.
 <!-- scorecard:end -->
+
+A run was accepted on 29 October 2026 by mistake: the model answered too few of its pairs for it to measure the
+comparison. It was withdrawn on 3 November and stays on record, and the reliability page says so. A threshold had also
+been set after looking at a run on the gate half, so the gate half was rebuilt with new pairs. The next accepted run is
+measured only on pairs that shaped no choice. The set's photographs are freely licensed, and most returns are generated
+from the handover photograph with drawn damage, each marked synthetic. A figure worth publishing needs real photographs
+of real damage.
 
 ## Connect your own assistant
 
@@ -153,10 +168,11 @@ The rules every change follows are in [`AGENTS.md`](AGENTS.md), and the threats 
 | Part | Choice |
 |---|---|
 | Payments | PayPal Orders v2 (authorize, capture, void, reauthorize), the PayPal JavaScript SDK v6 button on the renter's pages, webhooks with read-back (one shared webhook for every demo shop, routed by the order's `custom_id`), Invoicing v2, refunds, Disputes v1 (the shop's answer as evidence, with the rental's evidence pack attached), PayPal's MCP server read-only for the operations agent |
-| AI | Claude Opus 4.6 on Amazon Bedrock for judging (designed for Opus 5.5, which the account has no quota for yet), OpenCV.js on the phone for photo quality |
+| AI | Claude Opus 4.6 on Amazon Bedrock (designed for Opus 5.5, which the account has no quota for yet) for every AI step: the photo comparison and its independent second look, the contested claim's neutral summary, sorting a renter's incident report, the operations agent's overnight checks through PayPal's MCP server, the hosted assistant that books through Hold's own MCP server, and the two advocates. OpenCV aligns photographs and finds what changed before the model is asked, and checks photo quality on the phone (OpenCV.js). Amazon Rekognition finds faces so they can be blurred |
 | Web | Next.js, React, Tailwind CSS and shadcn/ui, in English, German, Spanish and French |
 | Scheduling | Bryntum Scheduler (trial package) for the shop's calendar: items as rows, rentals as bars marked by their PayPal hold |
-| Decisions | AG Grid Community for the decision board: every claim, agent proposal, renter's report, ending hold and late return waiting on a person, in the order it falls due, keyboard first |
+| Grids | AG Grid Enterprise for five grids: the decision board (row grouping, master-detail, context menu), the money ledger (grouping and totals, master-detail, Excel export), the price list editor (cell selection, clipboard, rich select), the fleet passport (tree data, sparklines drawn by AG Charts) and every pair on the reliability page (set filter, Excel export) |
+| Insights | AG Studio for the owner's insights dashboard, with its agent's model turns run through Hold's server |
 | Data | Aurora PostgreSQL Serverless v2 through the RDS Data API, Drizzle ORM |
 | Work | SQS queues and Lambda workers, EventBridge Scheduler for hold upkeep |
 | Identity | Amazon Cognito with emailed codes and passkeys |
@@ -164,6 +180,18 @@ The rules every change follows are in [`AGENTS.md`](AGENTS.md), and the threats 
 | Tests | Vitest and fast-check, Playwright end to end, a photo evaluation set |
 
 Why each was chosen is in [`docs/tech-stack.md`](docs/tech-stack.md).
+
+## Testing instructions
+
+The hosted demo needs no account and no code. The one login a judge needs is the PayPal sandbox buyer, to approve the
+fee and the hold in PayPal's own pages:
+
+- PayPal sandbox buyer email: [sandbox buyer email]
+- PayPal sandbox buyer password: [sandbox buyer password]
+
+It is a sandbox account with test money only. The sandbox buyer has no inbox, so give your own email address when a
+rental asks for the renter's, and the renter's one-time code reaches you there. Owner money decisions ask for a
+passkey on your own device, which **Add a passkey** on the Security page sets up in a few seconds.
 
 ## Run it yourself
 
@@ -176,6 +204,20 @@ pnpm check        # lint, type-check and every unit test
 pnpm test:e2e     # builds the app and runs Playwright against the fakes
 ```
 
+**Run the whole app with no account.** The same fakes run the built app on your machine: a database in memory, a
+simulated PayPal approval page, stand-ins for Claude that say they are stand-ins, and a fixed sign-in code,
+`24681357`. **Start a demo as Tomás, the owner** works as it does on the hosted demo.
+
+```sh
+pnpm install
+pnpm --filter @hold/web build
+cd apps/web
+HOLD_ENVIRONMENT=test HOLD_COOKIE_KEY="$(openssl rand -base64 32)" HOLD_PUBLIC_URL=http://localhost:3000 \
+  node node_modules/next/dist/bin/next start --port 3000
+```
+
+Everything lives in memory and is gone when the server stops.
+
 To run the app against your own AWS services, copy `apps/web/.env.example` to `apps/web/.env.local`, fill it in, and
 run `pnpm dev`. The infrastructure is in `infra/` as CDK stacks, all named `hold-*`.
 
@@ -187,6 +229,21 @@ PAYPAL_SANDBOX_CLIENT_ID=… PAYPAL_SANDBOX_CLIENT_SECRET=… AWS_PROFILE=… pn
 
 It checks the credentials with PayPal and stores them in Secrets Manager. Every demo started after that shares the
 sandbox business account. There is nothing to reset: each demo starts fresh.
+
+## What real shops still need
+
+Hold runs end to end in PayPal's sandbox. Before a shop takes real money, these are still open:
+
+- **Connecting a shop without holding its secret.** Today a shop pastes its own PayPal app's client ID and secret, and
+  Hold keeps the secret in AWS Secrets Manager. The production path is PayPal's partner onboarding: Partner Referrals,
+  then calls made for the shop with PayPal's auth assertion, so a shop connects with a PayPal sign-in. The sandbox
+  refused Partner Referrals to this account on 28 October 2026, so it needs PayPal to approve Hold as a partner.
+- **Rentals longer than 29 days.** Three days before a hold ends, Hold asks the renter to approve a fresh one from a
+  link. If they do not, the shop is unprotected for the rest of the rental. The plan is to save the renter's PayPal
+  wallet with their consent and place the next hold from it.
+- **A measured comparison.** No accuracy is claimed until a run on real photographs of real damage is accepted.
+
+A phone app for iOS and Android is in `apps/mobile`. It is not part of this submission's demonstration.
 
 ## License
 

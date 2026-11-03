@@ -25,7 +25,7 @@ One repository, pnpm workspaces, TypeScript everywhere. These script names are t
 
 ```
 pnpm install
-pnpm dev                 # web, worker and PostgreSQL through Docker Compose
+pnpm dev                 # the web app (next dev) against your own AWS services; README says how to run it on the in-process fakes with no account
 pnpm test                # Vitest, every package
 pnpm test <path>         # one file or folder
 pnpm test:e2e            # Playwright, the full suite: run it locally before work that touches a screen is done

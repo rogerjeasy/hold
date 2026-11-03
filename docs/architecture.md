@@ -815,7 +815,7 @@ So the hold is always its own authorization, and when it is placed depends on th
 | Dispute | Disputes v1 | Read dispute, provide evidence | `CUSTOMER.DISPUTE.*` |
 | The record of truth | Webhooks, Transaction Search | | |
 | Owner identity | Log in with PayPal | OAuth exchange | |
-| Owner's assistant | Agent Toolkit, sandbox MCP server | Read tools | |
+| Operations agent | PayPal's sandbox MCP server, read tools only (the Agent Toolkit is not used: `tech-stack.md` section 5) | Read tools | |
 
 ### 8.4 The life of one hold in PayPal calls
 
@@ -920,7 +920,7 @@ Hold never responds to a dispute without the owner's confirmation.
 - **Debug IDs.** PayPal returns a debug ID with each response. Hold logs it with every call.
 - **Retry policy.** Network and server errors are retried with backoff and the same idempotency key. Client errors are not retried.
 
-**How the Agent Toolkit is used.** The toolkit has no tool to authorize, renew, release or partly capture a hold, so the adapter calls the REST API for those. The toolkit is used for invoices, refunds, shipment tracking and reading disputes and transactions, and it gives the owner's assistant its PayPal read tools.
+**The Agent Toolkit is not used.** The toolkit has no tool to authorize, renew, release or partly capture a hold, and its `create_order` takes its amount from the model, which no assistant's tool may do here. So the adapter calls the REST API for every money step: orders, authorizations, captures, voids, renewals, refunds, invoices and dispute evidence. The one agent that reads PayPal, the operations agent, reaches PayPal's own sandbox MCP server with read tools only (`tech-stack.md` section 5).
 
 ---
 
@@ -1149,6 +1149,8 @@ A wrong damage finding on a clean return is treated as the worst error the syste
 
 ### 10.5 The owner's assistant
 
+**Planned, not in this build (status 3 November 2026).** What is built for the owner is the operations agent's morning queue (section 6.10 and `extensions.md` section 6) and the insights agent on AG Studio, which only draws the owner's dashboards. The design below is the plan. Its PayPal reads would go through PayPal's MCP server, as the operations agent's do, not through the Agent Toolkit.
+
 The owner can ask questions and give instructions in plain language.
 
 - **Model:** Claude Opus 5.5 on Amazon Bedrock (`anthropic.claude-opus-5-5`), through the Bedrock SDK's Mantle client and the Anthropic SDK's tool runner.
@@ -1161,8 +1163,8 @@ The owner can ask questions and give instructions in plain language.
 | `list_rentals`, `get_rental` | Read |
 | `list_claims`, `get_claim` | Read |
 | `damage_report`, `item_history` | Read |
-| `search_paypal_transactions`, `get_paypal_insights` | Read, through the PayPal toolkit |
-| `get_shipment_status` | Read, through the PayPal toolkit |
+| `search_paypal_transactions`, `get_paypal_insights` | Read, through PayPal's MCP server |
+| `get_shipment_status` | Read, through PayPal's MCP server |
 | `propose_release` | Proposal, confirmed by the owner on screen |
 | `propose_extension` | Proposal, confirmed by the owner on screen |
 | `draft_message_to_renter` | Draft, sent only after the owner confirms |

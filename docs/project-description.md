@@ -2,13 +2,15 @@
 
 **The deposit that never leaves your account.**
 
-Product description. PayPal AI Hackathon 2026. Draft 3, 28 October 2026.
+Product description. PayPal AI Hackathon 2026. Draft 4, 3 November 2026.
 
 This document describes the product: the problem, the audience, the features, the business value and the impact. It does not describe the implementation.
 
 Draft 2 adds six extensions. They are described in sections 6.11 to 6.16 and specified in `extensions.md`. They do not change what Hold is. Each one strengthens a promise the product already makes.
 
 Draft 3 marks what this build does not do yet as planned, where it is described, so the description matches the code.
+
+Draft 4 names the model, marks what has since been built, says plainly what real shops still need from PayPal, and gives the phone app its place.
 
 ---
 
@@ -186,7 +188,7 @@ Priya sees the same two photographs, the outlined mark and the price. She accept
 - **Live status of the hold.** Reserved, extended, released or partly taken, always visible.
 - **The full evidence.** Every photograph from handover and return, the comparison and the claim.
 - **A right to reply.** The renter can accept a claim or contest it, with their own photographs and comments, within a period the shop sets.
-- **A fair summary.** When a claim is contested, Hold lays out both positions neutrally for the person who decides. *Planned, not in this build.* The owner sees the renter's words, the advocates' exchange and the evidence.
+- **A fair summary.** When a claim is contested, Claude lays out both positions neutrally for the person who decides, from the records, and the renter reads the same summary. The owner also sees the renter's words, the advocates' exchange and the evidence.
 - **A clean record.** A renter who returns items in good condition builds a history the shop can reward with smaller holds.
 
 ### 6.7 Shipped rentals
@@ -232,7 +234,7 @@ Priya sees the same two photographs, the outlined mark and the price. She accept
 - **Shown beside each finding.** Next to a finding's confidence is how often findings at that level proved correct.
 - **It cannot quietly get worse.** A new version that does worse on the test is not released.
 - **Every decision teaches.** When a person removes a finding from a claim, that is recorded and tracked over time.
-- **Where it stands.** The runner, the gate and the pages are built. The evaluation set's photographs are still to be taken, so no run has been accepted, and until one is, Hold claims no accuracy.
+- **Where it stands.** The runner, the gate and the pages are built, and the set holds 300 pairs. They start from freely licensed photographs, and most returns are generated from the handover photograph with damage drawn from its own pixels, each marked synthetic. A run accepted by mistake on 29 October measured almost nothing, because the model answered too few pairs, so it was withdrawn on 3 November and the page says so. No run is accepted now, and until one is, Hold claims no accuracy. A figure worth publishing needs real photographs of real damage.
 
 ### 6.12 The morning queue
 
@@ -272,6 +274,7 @@ Priya sees the same two photographs, the outlined mark and the price. She accept
 - **People confirm.** By default the renter and the owner each confirm the result with one tap. Only then is the agreed amount taken and the rest released.
 - **No agreement, no harm.** If the advocates cannot agree, the owner decides, exactly as before, with the full exchange in front of them.
 - **On the record.** The exchange is added to the evidence both sides receive.
+- **Watch it in the demo.** The demo shop holds a sample claim that still waits for the renter's reply. One button hands it to the two advocates, who argue it live. The renter and their limit are made up for the demonstration, and nothing is ever taken from a sample.
 
 ### 6.16 When something happens during the rental
 
@@ -314,9 +317,16 @@ PayPal also brings two advantages over the card holds found in rental software t
 
 For the hackathon, all of this runs in the PayPal sandbox with test money.
 
+**What real shops still need from PayPal.** Two things stand between this build and a shop taking real money.
+
+- **Connecting a shop.** Today a shop pastes its own PayPal app's client ID and secret, and Hold keeps the secret in AWS Secrets Manager. That works for a pilot, but no platform should hold its merchants' secrets. The production path is PayPal's partner onboarding: Partner Referrals, then calls made for the shop with PayPal's auth assertion, so a shop connects with a PayPal sign-in and Hold never sees a secret. The sandbox refused Partner Referrals to this account on 28 October 2026, so it needs PayPal to approve Hold as a partner.
+- **Rentals longer than 29 days.** A PayPal hold lasts up to 29 days. Today Hold asks the renter, three days before it ends, to approve a fresh hold from a link. If they do not, the shop is unprotected for the rest of the rental. The plan is to save the renter's PayPal wallet with their consent (Payment Method Tokens) and place the next hold from it.
+
 ---
 
 ## 8. What AI does in Hold, and what it does not
+
+**The model.** Claude Opus 4.6 on Amazon Bedrock does every AI step: comparing photographs and taking an independent second look, writing a contested claim's summary, sorting a renter's incident report, the operations agent's overnight checks, the hosted assistant that books through Hold's MCP server, and the two advocates. Plain code does the rest. OpenCV aligns photographs and finds what changed before the model is asked, and checks photo quality on the phone. Amazon Rekognition finds faces so they can be blurred.
 
 **AI does the work that needs perception and language:**
 
@@ -325,7 +335,7 @@ For the hackathon, all of this runs in the PayPal sandbox with test money.
 - Classifies each change as no change, ordinary wear or damage, with a stated confidence.
 - Matches damage to the shop's price list.
 - Writes the claim in plain words, in the renter's language.
-- Summarizes both sides of a contested claim neutrally. (Planned.)
+- Summarizes both sides of a contested claim neutrally.
 - Turns the shop's rules, written in ordinary language, into a consistent price list and wear policy. (Planned.)
 - Spots photographs that look reused or wrong.
 - Answers the owner's questions about the business and carries out confirmed instructions. (Planned.)
@@ -451,7 +461,7 @@ On top of those eight steps, in this order, each only once the one before it wor
 13. **Advocates.** A contested claim is settled between two advocates and confirmed by both people.
 14. **The incident desk,** if time allows. A scratch is reported and agreed during the rental.
 
-**Where it runs.** In a web browser on any phone. Staff and renters install nothing.
+**Where it runs.** In a web browser on any phone. Staff and renters install nothing. A native app for iOS and Android is in the repository, but it is not part of this submission's demonstration.
 
 **The story in the video** follows Tomás, Jonas and Priya. It opens on the moment a customer hears the word "deposit" and hesitates, and closes on a clean return where nothing was ever charged.
 
