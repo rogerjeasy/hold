@@ -12,6 +12,9 @@ import { useLookAgain } from '@/hooks/use-look-again'
 import { Link } from '@/i18n/navigation'
 import { rentalRoutes } from '@/lib/routes'
 import { ApproveClaimForm, CleanReleaseForm, DecideClaimForm } from './claim-controls'
+import type { SampleAdvocatesAllowance } from '@/features/negotiation/limits'
+import type { RecordedRun } from '@/features/negotiation/recorded-run'
+import { RecordedRunView } from '@/features/negotiation/recorded-run-view'
 import { SampleAdvocatesForm } from '@/features/negotiation/sample-advocates-form'
 import { ShopConfirmForm } from '@/features/negotiation/shop-confirm-form'
 import { TranscriptView } from '@/features/negotiation/transcript-view'
@@ -23,11 +26,13 @@ import { PromiseStatus } from '@/features/promise/promise-status'
 
 // Whether this session must still be proven by a passkey before a money decision, and how to offer it.
 type PasskeyState = { readonly needed: boolean; readonly hasPasskey: boolean; readonly email: string }
+type SampleAdvocates = { readonly allowance: SampleAdvocatesAllowance; readonly recording: RecordedRun | undefined }
 
 // A line's box is drawn only on the photograph it was found or drawn on: the return photograph for a finding (the
 // comparison's frame), the renter's own for a reported mark. The handover photograph may be turned against it.
 // contest: the neutral summary of the renter's contest, shown above the decision (architecture.md section 6.15).
-export function ClaimScreen({ shopName, timeZone = 'UTC', data, canAct, canDecide = false, photoUrls = {}, passkey, negotiation, contest, promise = null, messages, renterName = null, isOwner = false, now }: { shopName: string; timeZone?: string; data: ClaimWorkspace; canAct: boolean; canDecide?: boolean; photoUrls?: Readonly<Record<string, string>>; passkey?: PasskeyState; negotiation?: ShopNegotiation; contest?: ContestView; promise?: ClaimPromise | null; messages?: readonly ClaimMessage[]; renterName?: string | null; isOwner?: boolean; now?: Date | undefined }) {
+// sampleAdvocates: on a sample claim that waits for its reply, today's live runs left and the recorded live run.
+export function ClaimScreen({ shopName, timeZone = 'UTC', data, canAct, canDecide = false, photoUrls = {}, passkey, negotiation, contest, promise = null, messages, renterName = null, isOwner = false, now, sampleAdvocates }: { shopName: string; timeZone?: string; data: ClaimWorkspace; canAct: boolean; canDecide?: boolean; photoUrls?: Readonly<Record<string, string>>; passkey?: PasskeyState; negotiation?: ShopNegotiation; contest?: ContestView; promise?: ClaimPromise | null; messages?: readonly ClaimMessage[]; renterName?: string | null; isOwner?: boolean; now?: Date | undefined; sampleAdvocates?: SampleAdvocates }) {
   const t = useTranslations('claim'); const locale = useLocale()
   const records = useTranslations('records')
   const advocates = useTranslations('negotiation')
@@ -68,10 +73,10 @@ export function ClaimScreen({ shopName, timeZone = 'UTC', data, canAct, canDecid
         {ownerOnly && canAct ? <p>{promiseText('ownerOnly')}</p> : null}
         {claimForms.length === 0 ? null : decision(<div className="grid gap-4">{claimForms}</div>)}
         {/* Moves no money, so it never waits behind the passkey that guards the forms above. */}
-        {data.simulated && data.claim.state === 'presented' && negotiation === undefined && canAct && canDecide ? <SampleAdvocatesForm rentalId={data.rentalId} /> : null}
+        {sampleAdvocates !== undefined && data.simulated && data.claim.state === 'presented' && negotiation === undefined && canAct && canDecide ? <SampleAdvocatesForm rentalId={data.rentalId} allowance={sampleAdvocates.allowance} /> : null}
       </div></Panel>
       {messages === undefined ? null : <ClaimConversation audience="shop" rentalId={data.rentalId} messages={messages} shopName={shopName} renterName={renterName} timeZone={timeZone} canWrite={canAct && data.claim.state !== 'closed'} />}
-      {negotiation === undefined ? null : <TranscriptView transcript={negotiation.transcript} />}
+      {negotiation !== undefined ? <TranscriptView transcript={negotiation.transcript} /> : data.simulated && sampleAdvocates?.recording !== undefined ? <RecordedRunView run={sampleAdvocates.recording} /> : null}
     </>}
   </div></ShopFrame>
 }

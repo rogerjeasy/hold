@@ -1,0 +1,35 @@
+{
+  "recording": {
+    "recordedAt": "2026-11-03T07:49:10.000Z",
+    "model": "us.anthropic.claude-opus-4-6-v1",
+    "promptVersion": "advocates-test",
+    "calls": 8,
+    "tokens": 27632,
+    "transcript": {
+      "id": "00000000-0000-4000-8000-000000000001",
+      "kind": "negotiation",
+      "state": "agreed",
+      "endedReason": null,
+      "currency": "EUR",
+      "claimTotalCents": 5000,
+      "agreedCents": 2500,
+      "deadline": "2026-11-10T07:48:12.000Z",
+      "roundLimit": 6,
+      "shopConfirmedAt": null,
+      "renterConfirmedAt": null,
+      "simulated": false,
+      "sample": true,
+      "chainVerified": true,
+      "lines": [
+        { "lineId": "00000000-0000-4000-8000-0000000000a1", "publishedCents": 3500, "description": "Scratch on the frame, through the paint" },
+        { "lineId": "00000000-0000-4000-8000-0000000000a2", "publishedCents": 1500, "description": "Bent brake lever" }
+      ],
+      "wearClauses": [],
+      "moves": [
+        { "sequence": 1, "side": "shop", "kind": "offer", "lines": [{ "lineId": "00000000-0000-4000-8000-0000000000a1", "cents": 3500, "ground": null, "evidence": [] }, { "lineId": "00000000-0000-4000-8000-0000000000a2", "cents": 1500, "ground": null, "evidence": [] }], "totalCents": 5000, "passReason": null, "actor": "referee", "model": null, "createdAt": "2026-11-03T07:48:12.000Z", "fingerprint": "1111111111111111111111111111111111111111111111111111111111111111" },
+        { "sequence": 2, "side": "renter", "kind": "offer", "lines": [{ "lineId": "00000000-0000-4000-8000-0000000000a1", "cents": 1500, "ground": null, "evidence": [] }, { "lineId": "00000000-0000-4000-8000-0000000000a2", "cents": 1000, "ground": "uncertain_evidence", "evidence": [] }], "totalCents": 2500, "passReason": null, "actor": "renter_advocate", "model": "us.anthropic.claude-opus-4-6-v1", "createdAt": "2026-11-03T07:48:40.000Z", "fingerprint": "2222222222222222222222222222222222222222222222222222222222222222" },
+        { "sequence": 3, "side": "shop", "kind": "accept", "lines": [], "totalCents": null, "passReason": null, "actor": "shop_advocate", "model": "us.anthropic.claude-opus-4-6-v1", "createdAt": "2026-11-03T07:49:05.000Z", "fingerprint": "3333333333333333333333333333333333333333333333333333333333333333" }
+      ]
+    }
+  }
+}
