@@ -1,3 +1,161 @@
 {
-  "recording": null
+  "recording": {
+    "recordedAt": "2026-11-03T12:33:23.641Z",
+    "model": "claude-opus-4-6",
+    "promptVersion": "advocate-2",
+    "calls": 10,
+    "tokens": 36301,
+    "transcript": {
+      "id": "4b146ea0-4520-4aa5-a137-db823ea400a9",
+      "kind": "negotiation",
+      "state": "agreed",
+      "endedReason": null,
+      "currency": "EUR",
+      "claimTotalCents": 5000,
+      "agreedCents": 2500,
+      "deadline": "2026-11-09T12:31:34.338Z",
+      "roundLimit": 6,
+      "shopConfirmedAt": null,
+      "renterConfirmedAt": null,
+      "simulated": false,
+      "sample": true,
+      "chainVerified": true,
+      "lines": [
+        {
+          "lineId": "174afc0d-9feb-49b0-853d-de7dffd8a942",
+          "publishedCents": 1500,
+          "description": "Cleaning after a muddy ride"
+        },
+        {
+          "lineId": "6ec21c7a-7d35-4771-91b3-6c198e73da44",
+          "publishedCents": 3500,
+          "description": "Scratch on the frame, through the paint"
+        }
+      ],
+      "wearClauses": [
+        {
+          "id": "wear-1",
+          "text": "Light scuffs on tyres, pedals and grips are ordinary wear and are never charged. A mark already recorded at the handover is never charged again."
+        }
+      ],
+      "moves": [
+        {
+          "sequence": 1,
+          "side": "shop",
+          "kind": "offer",
+          "lines": [
+            {
+              "cents": 1500,
+              "ground": null,
+              "lineId": "174afc0d-9feb-49b0-853d-de7dffd8a942",
+              "evidence": []
+            },
+            {
+              "cents": 3500,
+              "ground": null,
+              "lineId": "6ec21c7a-7d35-4771-91b3-6c198e73da44",
+              "evidence": []
+            }
+          ],
+          "totalCents": 5000,
+          "passReason": null,
+          "actor": "referee",
+          "model": null,
+          "createdAt": "2026-11-03T12:31:34.338Z",
+          "fingerprint": "5386586a3a5917bc34ff9d0e717b31d933f54e680363c344a06245363c11a082"
+        },
+        {
+          "sequence": 2,
+          "side": "renter",
+          "kind": "offer",
+          "lines": [
+            {
+              "cents": 0,
+              "ground": "ordinary_wear",
+              "lineId": "174afc0d-9feb-49b0-853d-de7dffd8a942",
+              "evidence": [
+                "wear-1"
+              ]
+            },
+            {
+              "cents": 1500,
+              "ground": "uncertain_evidence",
+              "lineId": "6ec21c7a-7d35-4771-91b3-6c198e73da44",
+              "evidence": []
+            }
+          ],
+          "totalCents": 1500,
+          "passReason": null,
+          "actor": "renter_advocate",
+          "model": "claude-opus-4-6",
+          "createdAt": "2026-11-03T12:32:08.906Z",
+          "fingerprint": "f7e5e4f015442b3d79e0dc478567c81d06a1311a7eb526a6dc197aadb16840aa"
+        },
+        {
+          "sequence": 3,
+          "side": "shop",
+          "kind": "offer",
+          "lines": [
+            {
+              "cents": 1500,
+              "ground": null,
+              "lineId": "174afc0d-9feb-49b0-853d-de7dffd8a942",
+              "evidence": []
+            },
+            {
+              "cents": 2500,
+              "ground": "uncertain_evidence",
+              "lineId": "6ec21c7a-7d35-4771-91b3-6c198e73da44",
+              "evidence": []
+            }
+          ],
+          "totalCents": 4000,
+          "passReason": null,
+          "actor": "shop_advocate",
+          "model": "claude-opus-4-6",
+          "createdAt": "2026-11-03T12:32:48.781Z",
+          "fingerprint": "a4f7831045353b38589de3b13b4a3694fcda47f9dcffecb733c450f06d7019f7"
+        },
+        {
+          "sequence": 4,
+          "side": "renter",
+          "kind": "offer",
+          "lines": [
+            {
+              "cents": 0,
+              "ground": "ordinary_wear",
+              "lineId": "174afc0d-9feb-49b0-853d-de7dffd8a942",
+              "evidence": [
+                "wear-1"
+              ]
+            },
+            {
+              "cents": 2500,
+              "ground": "uncertain_evidence",
+              "lineId": "6ec21c7a-7d35-4771-91b3-6c198e73da44",
+              "evidence": []
+            }
+          ],
+          "totalCents": 2500,
+          "passReason": null,
+          "actor": "renter_advocate",
+          "model": "claude-opus-4-6",
+          "createdAt": "2026-11-03T12:33:17.559Z",
+          "fingerprint": "a2d562a09535cb0f29b2c36182fecb73a2472fce1f68b676c53f53ce622c5396"
+        },
+        {
+          "sequence": 5,
+          "side": "shop",
+          "kind": "accept",
+          "lines": [],
+          "totalCents": null,
+          "passReason": null,
+          "actor": "shop_advocate",
+          "model": "claude-opus-4-6",
+          "createdAt": "2026-11-03T12:33:23.523Z",
+          "fingerprint": "1458a3501923ff64234ef842012a3d510d0b0fa05e2880961e2508be68e728c5"
+        }
+      ]
+    }
+  }
 }

@@ -35,3 +35,5 @@ if (transcript === undefined || transcript.state === 'open' || transcript.simula
 
 await writeFile(OUT, `${JSON.stringify({ recording: { recordedAt: new Date(), model, promptVersion: ADVOCATE_PROMPT_VERSION, calls: outcome.calls, tokens: outcome.tokens, transcript } }, null, 2)}\n`)
 console.log(`Recorded a ${transcript.state} run in ${String(outcome.calls)} calls and ${String(outcome.tokens)} tokens to ${OUT}.`)
+// The in-memory database would keep the process alive once the recording is written.
+await database.$client.close()
