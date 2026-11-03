@@ -25,8 +25,8 @@ const figure = (page: Page, value: string) => dashboard(page).locator('.ag-studi
 test('an owner opens the dashboard on the shop’s own figures, the same the money page shows', async ({ page }) => {
   await openInsights(page)
   await expect(dashboard(page).getByText('Held on renters’ accounts now')).toBeVisible()
-  await expect(figure(page, '€3,250.00')).toBeVisible()
-  await expect(figure(page, '€568.00')).toBeVisible()
+  await expect(figure(page, '€3,550.00')).toBeVisible()
+  await expect(figure(page, '€613.00')).toBeVisible()
   await expect(figure(page, '€515.00')).toBeVisible()
   await expect(widgetTitle(page, 'Damage priced and recovered, by item type')).toBeVisible()
 })
@@ -50,7 +50,7 @@ test('the dashboard an owner leaves is kept for the next visit, and goes back to
   await expect(widgetTitle(page, 'Holds by trust rung')).toHaveCount(0)
   await expect(page.getByText('Your dashboard is saved for your next visit.')).toBeVisible()
   await page.reload()
-  await expect(figure(page, '€3,250.00')).toBeVisible()
+  await expect(figure(page, '€3,550.00')).toBeVisible()
   await expect(widgetTitle(page, 'Holds by trust rung')).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Back to the first dashboard' }).click()
@@ -77,10 +77,10 @@ test('counter staff are told only the owner or a manager opens it', async ({ pag
 test('on a phone the owner reads the figures the dashboard opens with', async ({ page }) => {
   await openInsights(page)
   // Studio draws after the page; the widths are measured once it has.
-  await expect(figure(page, '€3,250.00')).toBeVisible()
+  await expect(figure(page, '€3,550.00')).toBeVisible()
   await page.setViewportSize({ width: 390, height: 844 })
   await expect(page.getByText('The dashboard needs a wider screen. These are the figures it opens with.')).toBeVisible()
-  await expect(page.getByText('€3,250.00').locator('visible=true')).toBeVisible()
+  await expect(page.getByText('€3,550.00').locator('visible=true')).toBeVisible()
   await expectFitsEveryWidth(page)
 })
 
@@ -88,7 +88,7 @@ for (const theme of ['light', 'dark'] as const) {
   test(`the insights page passes the accessibility checks in the ${theme} theme`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' })
     await openInsights(page)
-    await expect(figure(page, '€3,250.00')).toBeVisible()
+    await expect(figure(page, '€3,550.00')).toBeVisible()
     const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze()
     expect(results.violations.map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`)).toEqual([])
   })

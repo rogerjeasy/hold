@@ -108,16 +108,6 @@ describe('starting a demo', () => {
     expect(created.length).toBe(before)
   })
 
-  it('counts starts from an unknown network together, against the same limit a network has', async () => {
-    for (let index = 0; index < DEMO_LIMITS.startsPerNetwork.max; index += 1) {
-      const result = await startDemo(demo, 'owner', { network: undefined })
-      expect(result.ok).toBe(true)
-    }
-    const before = created.length
-    expect(await startDemo(demo, 'owner', { network: undefined })).toEqual({ ok: false, notice: 'busy' })
-    expect(created.length).toBe(before)
-  })
-
   it('counts every network’s starts against one cap for the day, in UTC', async () => {
     const asked: { name: string; subject: string }[] = []
     const counting = {

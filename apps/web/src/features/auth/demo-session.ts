@@ -65,8 +65,9 @@ async function signIn(dependencies: DemoDependencies, session: DemoSession, key:
 export async function startDemo(dependencies: DemoDependencies, key: DemoAccountKey, requester: Requester): Promise<DemoStart> {
   const { sessions } = dependencies
   if (sessions === undefined) return { ok: false, notice: 'unavailable' }
-  // A start whose network cannot be told counts with every other such start, never outside the limit.
-  if (!(await dependencies.allow(DEMO_LIMITS.startsPerNetwork, requester.network ?? 'unknown'))) return { ok: false, notice: 'busy' }
+  // A network is unknown only for a request from this machine (callerNetwork): the deployed app always sits behind App
+  // Runner's load balancer, which names it. The day's cap below still counts every start.
+  if (requester.network !== undefined && !(await dependencies.allow(DEMO_LIMITS.startsPerNetwork, requester.network))) return { ok: false, notice: 'busy' }
   if (!(await dependencies.allow(DEMO_LIMITS.startsPerDay, utcDay(dependencies.now())))) return { ok: false, notice: 'demo_cap' }
   const code = dependencies.newCode()
   const people = Object.fromEntries(DEMO_ACCOUNT_KEYS.map((each) => [each, { email: `${NAMES[each]}.${code}@${DEMO_SESSION_DOMAIN}`, password: newDemoPassword() }])) as Record<DemoAccountKey, DemoSession['owner']>

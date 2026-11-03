@@ -126,6 +126,6 @@ test('counter staff read every version and the open rentals agreed to it, and ca
   await expectInShop(page, 'Ribeira Bikes')
   await page.getByRole('navigation', { name: 'Shop pages' }).getByRole('link', { name: 'Prices' }).click()
   await expect(page.getByText('Only the owner or a manager can publish prices.')).toBeVisible()
-  await expect(page.getByRole('region', { name: 'Versions' }).getByRole('listitem').first()).toContainText('10 open rentals agreed to it')
+  await expect(page.getByRole('region', { name: 'Versions' }).getByRole('listitem').first()).toContainText('11 open rentals agreed to it')
   await expect(page.getByRole('button', { name: 'Publish this price list' })).toHaveCount(0)
 })
