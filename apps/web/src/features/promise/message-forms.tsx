@@ -24,7 +24,7 @@ export function RenterMessageForm({ token }: { token: string }) {
       <Label htmlFor={id}>{t('messages.writeRenter')}</Label>
       <Textarea id={id} name="body" required maxLength={MESSAGE_LIMIT} aria-describedby={`${id}-hint`} />
       <p id={`${id}-hint`} className="text-sm text-muted-foreground">{t('messages.renterHint')}</p>
-      <Button type="submit" disabled={sending} className="min-h-12 justify-self-stretch sm:justify-self-start">{t('messages.send')}</Button>
+      <Button type="submit" variant="outline" disabled={sending} className="min-h-12 justify-self-stretch sm:justify-self-start">{t('messages.send')}</Button>
       {result?.ok === true ? <p role="status">{t('messages.sent')}</p> : <RenterMessage result={result} wording={wording} />}
     </form>
   )
@@ -42,7 +42,7 @@ export function ShopMessageForm({ rentalId, renterName }: { rentalId: string; re
       <Label htmlFor={id}>{t('writeShop', { renter: renterName })}</Label>
       <Textarea id={id} name="body" required maxLength={MESSAGE_LIMIT} aria-describedby={`${id}-hint`} />
       <p id={`${id}-hint`} className="text-sm text-muted-foreground">{t('shopHint', { renter: renterName })}</p>
-      <Button type="submit" disabled={sending} className="min-h-12 justify-self-stretch sm:justify-self-start">{t('send')}</Button>
+      <Button type="submit" variant="outline" disabled={sending} className="min-h-12 justify-self-stretch sm:justify-self-start">{t('send')}</Button>
       <ActionMessage result={result} success={t('sent')} results="promise.results" />
     </form>
   )
