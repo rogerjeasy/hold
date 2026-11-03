@@ -14,7 +14,7 @@ export function HoldReason({ hold, money, audience }: HoldReasonProps) {
   if (hold.trust === null || hold.reservedCents >= hold.ordinaryCents) return null
   const values = { amount: money(hold.reservedCents), ordinary: money(hold.ordinaryCents), count: hold.trust.cleanReturns, months: hold.trust.windowMonths }
   return (
-    <p className="max-w-prose border-l-2 border-primary pl-3 text-pretty">
+    <p className="max-w-prose rounded-xl bg-primary/8 px-3.5 py-2.5 text-pretty">
       {audience === 'renter' ? t('reason', values) : t('staffReason', { ...values, version: hold.trust.version, rung: hold.trust.rung })}
     </p>
   )

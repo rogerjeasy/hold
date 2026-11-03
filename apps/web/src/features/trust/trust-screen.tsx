@@ -1,6 +1,7 @@
 import type { LedgerLine, PublishedTrustLadder } from '@hold/db'
 import { useTranslations } from 'next-intl'
 import { PasskeyGate } from '@/features/shop/passkey-gate'
+import type { PasskeyGateState } from '@/features/shop/passkey-gate'
 import { ShopFrame } from '@/features/shop/shop-frame'
 import { shopRoutes } from '@/lib/routes'
 import { CurrentLadder } from './current-ladder'
@@ -15,7 +16,7 @@ export type TrustScreenProps = {
   // The shop's currency, set by its first price list. Without it there is nothing to publish yet.
   currency: string | null
   canPublish: boolean
-  gate: { needed: boolean; hasPasskey: boolean; email: string }
+  gate: PasskeyGateState
   ledger: readonly LedgerLine[]
 }
 
@@ -24,9 +25,8 @@ export type TrustScreenProps = {
 export function TrustScreen({ shopName, timeZone, current, currency, canPublish, gate, ledger }: TrustScreenProps) {
   const t = useTranslations('trust.ladder')
   return (
-    <ShopFrame shopName={shopName} title={t('title')}>
-      <div className="grid max-w-4xl gap-10">
-        <p className="max-w-prose text-pretty">{t('lead')}</p>
+    <ShopFrame shopName={shopName} title={t('title')} description={t('lead')}>
+      <div className="grid max-w-5xl min-w-0 gap-8">
         <CurrentLadder current={current} />
         {canPublish && currency !== null ? (
           <PasskeyGate {...gate} returnTo={shopRoutes.trust}>

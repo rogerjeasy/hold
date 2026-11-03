@@ -1,6 +1,7 @@
 import { ArrowLeft } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { PasskeyGate } from '@/features/shop/passkey-gate'
+import type { PasskeyGateState } from '@/features/shop/passkey-gate'
 import { ShopFrame } from '@/features/shop/shop-frame'
 import { Link } from '@/i18n/navigation'
 import { shopRoutes } from '@/lib/routes'
@@ -13,7 +14,7 @@ type ItemTypeScreenProps = {
   values: ItemTypeFormValues | undefined
   canManage: boolean
   returnTo: string
-  gate: { needed: boolean; hasPasskey: boolean; email: string }
+  gate: PasskeyGateState
 }
 
 // The page around the item type form: a new type, or one being edited.
@@ -21,8 +22,8 @@ export function ItemTypeScreen({ shopName, currency, values, canManage, returnTo
   const t = useTranslations('shop.items.form')
   return (
     <ShopFrame shopName={shopName} title={values === undefined ? t('newTitle') : t('editTitle', { name: values.name })}>
-      <div className="grid max-w-4xl gap-8">
-        <Link href={shopRoutes.items} className="inline-flex min-h-11 items-center gap-1.5 justify-self-start font-semibold text-muted-foreground hover:text-foreground">
+      <div className="grid max-w-4xl min-w-0 gap-6">
+        <Link href={shopRoutes.items} className="-mt-4 -ml-2 inline-flex min-h-11 items-center gap-1.5 justify-self-start rounded-xl px-2 font-semibold text-muted-foreground transition-colors hover:bg-foreground/6 hover:text-foreground md:-mt-6">
           <ArrowLeft aria-hidden="true" className="size-4" />
           {t('back')}
         </Link>

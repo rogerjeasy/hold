@@ -15,9 +15,9 @@ export function EvidenceSession({ session, timeZone }: { session: CheckedSession
   const holds = session.seal === 'holds'
   const link = session.link !== 'first' ? t(`links.${session.link}`) : session.previous === null ? t('links.firstEver') : t('links.first', { seal: shortSeal(session.previous) })
   return (
-    <section aria-labelledby={`session-${session.fingerprint}`} className="grid min-w-0 gap-4 border bg-card p-4 md:p-5">
+    <section aria-labelledby={`session-${session.fingerprint}`} className="surface grid min-w-0 gap-4 p-4 md:p-5">
       <div className="grid gap-1">
-        <h3 id={`session-${session.fingerprint}`} className="text-lg font-bold">{t(`kinds.${session.kind}`)}</h3>
+        <h3 id={`session-${session.fingerprint}`} className="text-[1.0625rem] leading-tight font-extrabold tracking-tight">{t(`kinds.${session.kind}`)}</h3>
         <p className="text-sm text-muted-foreground">{`${format.day(session.sealedAt)}, ${format.time(session.sealedAt)}`}</p>
       </div>
       <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-sm">
@@ -25,7 +25,7 @@ export function EvidenceSession({ session, timeZone }: { session: CheckedSession
         <dd className="grid gap-0.5">
           <span title={session.fingerprint} className="figures">{shortSeal(session.fingerprint)}</span>
           <span className={`flex items-start gap-1.5 font-semibold ${holds ? '' : 'text-destructive'}`}>
-            {holds ? <CircleCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-primary" /> : <CircleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" />}
+            {holds ? <CircleCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-success" /> : <CircleAlert aria-hidden="true" className="mt-0.5 size-4 shrink-0" />}
             {holds ? t('sealHolds') : t('sealBroken')}
           </span>
         </dd>
@@ -34,7 +34,7 @@ export function EvidenceSession({ session, timeZone }: { session: CheckedSession
       </dl>
       <ul className="grid gap-4 sm:grid-cols-2">
         {session.photos.map((photo) => (
-          <li key={photo.view} className="grid min-w-0 content-start gap-2 border-t pt-3">
+          <li key={photo.view} className="grid min-w-0 content-start gap-2 border-t border-border/70 pt-3">
             <p className="font-semibold wrap-long-words">{viewLabel(photo)}</p>
             <PhotoProvenance provenance={{ takenAt: photo.receivedAt, takenBy: session.takenBy, source: photo.source, sha256: photo.sha256, sealedAt: session.sealedAt }} timeZone={timeZone} />
           </li>

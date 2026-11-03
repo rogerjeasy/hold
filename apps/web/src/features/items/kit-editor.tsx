@@ -1,11 +1,12 @@
 'use client'
 
 import { ITEM_TYPE_LIMITS } from '@hold/domain'
-import { Plus, Trash2 } from 'lucide-react'
+import { Backpack, Plus, Trash2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { FormCard } from '@/components/ui/form-card'
 import type { Rows } from './use-rows'
 
 export type KitRow = { readonly name: string; readonly count: string }
@@ -14,9 +15,7 @@ export type KitRow = { readonly name: string; readonly count: string }
 export function KitEditor({ kit }: { kit: Rows<KitRow> }) {
   const t = useTranslations('shop.items.form')
   return (
-    <fieldset className="grid gap-4">
-      <legend className="text-title">{t('kit')}</legend>
-      <p className="max-w-prose text-muted-foreground">{t('kitHelp')}</p>
+    <FormCard title={t('kit')} help={t('kitHelp')} icon={Backpack}>
       {kit.rows.length === 0 ? null : (
         <ol className="grid gap-3">
           {kit.rows.map((row, index) => {
@@ -38,7 +37,7 @@ export function KitEditor({ kit }: { kit: Rows<KitRow> }) {
                   aria-label={t('kitCount', { number })}
                   onChange={(event) => { kit.update(row.key, { count: event.target.value }) }}
                 />
-                <Button type="button" variant="ghost" size="icon" aria-label={t('kitRemove', { number })} onClick={() => { kit.remove(row.key) }}>
+                <Button type="button" variant="ghost" size="icon" className="hover:bg-destructive/10 hover:text-destructive" aria-label={t('kitRemove', { number })} onClick={() => { kit.remove(row.key) }}>
                   <Trash2 aria-hidden="true" />
                 </Button>
               </li>
@@ -46,10 +45,10 @@ export function KitEditor({ kit }: { kit: Rows<KitRow> }) {
           })}
         </ol>
       )}
-      <Button type="button" variant="outline" className="justify-self-start" disabled={kit.rows.length >= ITEM_TYPE_LIMITS.accessories} onClick={() => { kit.add({ name: '', count: '1' }) }}>
+      <Button type="button" variant="soft" className="justify-self-start" disabled={kit.rows.length >= ITEM_TYPE_LIMITS.accessories} onClick={() => { kit.add({ name: '', count: '1' }) }}>
         <Plus aria-hidden="true" />
         {t('kitAdd')}
       </Button>
-    </fieldset>
+    </FormCard>
   )
 }

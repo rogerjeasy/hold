@@ -24,7 +24,9 @@ registerGridModules()
 // Types above their items, the types' totals, the line of damage findings, the right-click menu and the spreadsheet
 // download: AG Grid Enterprise, with AG Charts drawing the lines.
 const MODULES = [TreeDataModule, SparklinesModule.with(AgChartsCommunityModule), ContextMenuModule, ExcelExportModule]
-const EXPORTED = ['type', 'name', 'standing', 'rentals', 'daysOut', 'damage', 'incurred', 'recovered', 'repairCost', 'repairMargin', 'openRepairs', 'marks', 'signal']
+// The grid sits inside its card, which draws the edge.
+const FLEET_THEME = holdGridTheme.withParams({ wrapperBorder: false })
+const EXPORTED =['type', 'name', 'standing', 'rentals', 'daysOut', 'damage', 'incurred', 'recovered', 'repairCost', 'repairMargin', 'openRepairs', 'marks', 'signal']
 
 // A type's total, from its items that have the figure.
 function total({ values }: IAggFuncParams<FleetRow>): number | null {
@@ -105,15 +107,18 @@ export function FleetGrid({ rows, clock, canManage }: FleetGridProps) {
   const state = useMemo(() => ({ money: format.money }), [format])
   return (
     <FleetGridContext.Provider value={state}>
-      <div className="grid min-w-0 gap-3">
-        <Button type="button" variant="outline" className="min-h-11 justify-self-start" disabled={api === null} onClick={download}>
-          <Download aria-hidden="true" />
-          {t('download')}
-        </Button>
+      <div className="surface min-w-0 overflow-clip">
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 border-b border-border/70 px-4 py-3 md:px-5">
+          <p className="label text-xs text-muted-foreground">{t('grid')}</p>
+          <Button type="button" variant="outline" disabled={api === null} onClick={download}>
+            <Download aria-hidden="true" />
+            {t('download')}
+          </Button>
+        </div>
         <div className="hold-grid min-w-0" role="region" aria-label={t('grid')}>
           <AgGridReact<FleetRow>
             modules={MODULES}
-            theme={holdGridTheme}
+            theme={FLEET_THEME}
             popupParent={popupParent}
             rowData={rowData}
             columnDefs={columns}
@@ -136,6 +141,7 @@ export function FleetGrid({ rows, clock, canManage }: FleetGridProps) {
             onCellKeyDown={onCellKeyDown}
           />
         </div>
+        <p className="border-t border-border/70 px-4 py-3 text-sm text-muted-foreground md:px-5">{t('keys')}</p>
       </div>
     </FleetGridContext.Provider>
   )

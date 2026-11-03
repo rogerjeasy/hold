@@ -1,0 +1,119 @@
+/*
+ * Bryntum Scheduler in Hold's tokens (features/calendar). Bryntum's own theme draws the structure; these variables
+ * give it Hold's surfaces, hairlines, type and accent, so the calendar follows the light and dark themes like every
+ * other page. Each bar takes its standing's colour from the tokens too (calendar-model.ts), and says it in words.
+ */
+.hold-calendar,
+.hold-calendar .b-scheduler {
+  --b-primary: var(--primary);
+  --b-widget-color: var(--card-foreground);
+  --b-widget-border-color: var(--border);
+  --b-widget-focus-outline-color: var(--ring);
+  --b-grid-cell-background: var(--card);
+  --b-grid-cell-color: var(--card-foreground);
+  --b-grid-cell-border-color: var(--border);
+  --b-grid-cell-hover-background: color-mix(in oklab, var(--muted) 55%, var(--card));
+  --b-grid-cell-selected-background: color-mix(in oklab, var(--primary) 8%, var(--card));
+  --b-grid-cell-selected-color: var(--card-foreground);
+  --b-grid-cell-focused-outline-color: var(--ring);
+  --b-grid-row-border-color: var(--border);
+  --b-grid-header-background: var(--card);
+  --b-grid-header-color: var(--muted-foreground);
+  --b-grid-header-border-color: var(--border);
+  --b-grid-header-font-weight: 500;
+  --b-grid-splitter-color: var(--border);
+  --b-splitter-color: var(--border);
+  --b-current-time-color: var(--primary);
+  --b-sch-event-font-weight: 600;
+  --b-sch-event-border-radius: var(--radius-lg);
+  color: var(--card-foreground);
+  font-family: var(--font-sans);
+}
+
+/* The time axis reads like Hold's labels: small, mono, upper case. */
+.hold-calendar .b-sch-header-time-axis-cell {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* A bar: a tint of its standing's colour, a firm edge of it on the left, and the words in ink, readable on both themes
+ * at a glance. Its colour arrives as --b-primary from the bar's eventColor. */
+.hold-calendar .b-sch-event:where(:not(.b-milestone)) {
+  --b-sch-event-background: color-mix(in oklab, var(--b-primary) 14%, var(--card));
+  --b-sch-event-color: var(--card-foreground);
+  box-shadow: inset 4px 0 0 var(--b-primary), var(--shadow-xs);
+  color: var(--card-foreground);
+}
+
+.hold-calendar .b-sch-event-wrap:is(:hover, .b-hover) .b-sch-event:where(:not(.b-milestone)) {
+  --b-sch-event-background: color-mix(in oklab, var(--b-primary) 22%, var(--card));
+}
+
+.hold-calendar .b-sch-event-wrap.b-selected .b-sch-event:where(:not(.b-milestone)) {
+  --b-sch-event-background: color-mix(in oklab, var(--b-primary) 28%, var(--card));
+}
+
+/* The bar's two lines: who rents it, and where the hold stands. */
+.hold-calendar .hold-bar {
+  display: grid;
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.hold-calendar .hold-bar > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hold-calendar .hold-bar-standing {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+
+/* An item's row: its name, and its type under it. */
+.hold-calendar .hold-item {
+  display: grid;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.hold-calendar .hold-item-name {
+  font-weight: 600;
+}
+
+.hold-calendar .hold-item-type {
+  font-size: 0.8125rem;
+  color: var(--muted-foreground);
+}
+
+/* A bar reached by the keyboard shows Hold's focus ring. */
+.hold-calendar .b-sch-event-wrap:focus-visible,
+.hold-calendar .b-sch-event:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* The hairlines Bryntum draws itself, and the surfaces behind them, in the theme's own colours. */
+.hold-calendar .b-scheduler,
+.hold-calendar .b-grid-panel-body {
+  background-color: var(--card);
+}
+
+.hold-calendar .b-column-line,
+.hold-calendar .b-column-line-major {
+  border-color: var(--border);
+}
+
+.hold-calendar :is(.b-grid-splitter, .b-grid-splitter-inner) {
+  background-color: var(--border);
+}
+
+/* Now, on the time axis: the time in the accent's own foreground, readable on both themes. */
+.hold-calendar .b-sch-current-time label {
+  color: var(--primary-foreground);
+  font-family: var(--font-mono);
+}

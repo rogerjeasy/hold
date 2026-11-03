@@ -2,10 +2,12 @@ import { RepairCostSection } from './repair-cost-section'
 import type { RepairCostRow } from './repair-cost-rows'
 import type { PriceListVersion, PublishedPriceList } from '@hold/db'
 import { amountText, money } from '@hold/domain'
+import { Eye } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 import type { Locale } from '@/i18n/routing'
 import { shopRoutes } from '@/lib/routes'
 import { PasskeyGate } from '@/features/shop/passkey-gate'
+import type { PasskeyGateState } from '@/features/shop/passkey-gate'
 import { ShopFrame } from '@/features/shop/shop-frame'
 import type { Draft } from './editor-model'
 import { emptyDraft } from './editor-model'
@@ -21,7 +23,7 @@ export type PricesScreenProps = {
   fixedCurrency: string | null
   threshold: string
   canPublish: boolean
-  gate: { needed: boolean; hasPasskey: boolean; email: string }
+  gate: PasskeyGateState
   // What repairs cost against each price (architecture.md section 9.6).
   repairCosts?: readonly RepairCostRow[]
   previewTerms: Readonly<Record<Locale, TermsMessages>>
@@ -39,14 +41,11 @@ export function PricesScreen({ shopName, shopId, current, versions, fixedCurrenc
   const t = useTranslations('shop.prices')
   const format = useFormatter()
   return (
-    <ShopFrame shopName={shopName} title={t('title')}>
-      <div className="grid min-w-0 gap-10">
-        <p className="max-w-prose text-lead text-muted-foreground">
-          {current === undefined ? t('none') : t('current', { version: current.version, date: format.dateTime(current.publishedAt, { dateStyle: 'medium' }) })}
-        </p>
+    <ShopFrame shopName={shopName} title={t('title')} description={current === undefined ? t('none') : t('current', { version: current.version, date: format.dateTime(current.publishedAt, { dateStyle: 'medium' }) })}>
+      <div className="grid min-w-0 gap-8">
         {!canPublish ? (
           <>
-            <p className="text-muted-foreground">{t('readOnly')}</p>
+            <p className="flex items-center gap-2 text-muted-foreground"><Eye aria-hidden="true" className="size-4 shrink-0" />{t('readOnly')}</p>
             <VersionsPanel versions={versions} currency={current?.currency ?? fixedCurrency ?? 'EUR'} draft={{ entries: current?.entries ?? [], wearPolicy: current?.wearPolicy ?? '' }} />
           </>
         ) : gate.needed ? (

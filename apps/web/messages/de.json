@@ -1457,7 +1457,14 @@
       "addFirst": "Auf diesem Gerät ist noch keiner. Fügen Sie zuerst einen hinzu.",
       "confirm": "Mit meinem Passkey bestätigen",
       "add": "Passkey hinzufügen",
-      "addHere": "Kein Passkey auf diesem Gerät? Einen hinzufügen"
+      "addHere": "Kein Passkey auf diesem Gerät? Einen hinzufügen",
+      "stays": "Ein Passkey bleibt auf dem Gerät oder im Browser, wo er erstellt wurde. Nutzen Sie diesen oder fügen Sie hier einen hinzu.",
+      "demo": {
+        "title": "In der Demo?",
+        "body": "Ein Passkey aus einem anderen Browser kommt nicht mit. Starten Sie hier eine neue Demo, oder melden Sie sich ab und kehren Sie im Browser mit dem Passkey zurück.",
+        "fresh": "Neue Demo starten",
+        "signOut": "Abmelden"
+      }
     },
     "results": {
       "signed_out": "Ihre Sitzung ist beendet. Melden Sie sich erneut an.",
@@ -1502,7 +1509,8 @@
       "unnamed": "Passkey {number}",
       "added": "Hinzugefügt am {date}",
       "how": "Ihr Gerät bewahrt den Passkey auf. Hold und sein Anmeldedienst behalten nur den öffentlichen Teil, mit dem sich allein niemand anmelden kann.",
-      "confirmToAdd": "Für einen weiteren Passkey braucht es einen, den Sie schon haben. So kann niemand, der an Ihre E-Mails kommt, einen eigenen hinzufügen."
+      "confirmToAdd": "Für einen weiteren Passkey braucht es einen, den Sie schon haben. So kann niemand, der an Ihre E-Mails kommt, einen eigenen hinzufügen.",
+      "listTitle": "Ihre Passkeys"
     },
     "staff": {
       "title": "Team",
@@ -1531,7 +1539,8 @@
         "submit": "Einladung senden",
         "sending": "Wird gesendet…",
         "sent": "Einladung gesendet."
-      }
+      },
+      "lead": "Wer im Laden arbeitet, was jede Person tun darf, und welche Einladungen noch auf Antwort warten."
     },
     "prices": {
       "title": "Preise",
@@ -2150,7 +2159,11 @@
       "notificationsDemoOn": "Diese Demo teilt sich eine PayPal-Sandbox-App mit allen anderen Demos. PayPal schickt die Ereignisse dieser App an eine Adresse, und Hold gibt jedes an die Demo weiter, deren Miete es nennt, nachdem es bei PayPal geprüft und das Genannte nachgelesen hat.",
       "turnOn": "Benachrichtigungen einschalten",
       "turningOn": "Wird eingeschaltet…",
-      "turnedOn": "Benachrichtigungen sind eingeschaltet."
+      "turnedOn": "Benachrichtigungen sind eingeschaltet.",
+      "status": {
+        "connected": "Verbunden",
+        "notConnected": "Nicht verbunden"
+      }
     },
     "handover": {
       "title": "Übergabe",
@@ -2399,7 +2412,8 @@
         "resolved": "Erledigt",
         "withdrawn": "Zurückgezogen"
       },
-      "sortedBySimulated": "Eingeordnet von einem Ersatz für die Testumgebung, geprüft vom Code."
+      "sortedBySimulated": "Eingeordnet von einem Ersatz für die Testumgebung, geprüft vom Code.",
+      "emptyBody": "Meldet ein Mieter etwas über seinen Link, erscheint es hier, sortiert und mit der Entscheidung, die noch aussteht."
     },
     "calendar": {
       "title": "Kalender",
@@ -2421,7 +2435,12 @@
       "noItemsAction": "Zu den Artikeln",
       "unknownRenter": "Kundschaft noch unbekannt",
       "loading": "Kalender wird geladen…",
-      "loadFailed": "Der Kalender konnte nicht geladen werden. Laden Sie die Seite neu oder finden Sie jede Miete unter Mieten."
+      "loadFailed": "Der Kalender konnte nicht geladen werden. Laden Sie die Seite neu oder finden Sie jede Miete unter Mieten.",
+      "view": {
+        "label": "Kalender anzeigen als",
+        "timeline": "Zeitleiste",
+        "list": "Liste"
+      }
     },
     "priceEditor": {
       "draftOf": "Entwurf von Version {version}",

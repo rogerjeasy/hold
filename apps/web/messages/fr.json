@@ -1457,7 +1457,14 @@
       "addFirst": "Il n'y en a pas encore sur cet appareil. Ajoutez-en d'abord une.",
       "confirm": "Confirmer avec ma clé d'accès",
       "add": "Ajouter une clé d'accès",
-      "addHere": "Pas de clé d’accès sur cet appareil ? En ajouter une"
+      "addHere": "Pas de clé d’accès sur cet appareil ? En ajouter une",
+      "stays": "Une clé d'accès reste sur l'appareil ou le navigateur qui l'a créée. Utilisez celui-ci, ou ajoutez-en une ici.",
+      "demo": {
+        "title": "Vous testez la démo ?",
+        "body": "Une clé d'accès ajoutée dans un autre navigateur ne vous suit pas. Lancez une nouvelle démo ici, ou déconnectez-vous et revenez dans le navigateur qui la détient.",
+        "fresh": "Lancer une nouvelle démo",
+        "signOut": "Se déconnecter"
+      }
     },
     "results": {
       "signed_out": "Votre session est terminée. Reconnectez-vous.",
@@ -1502,7 +1509,8 @@
       "unnamed": "Clé d'accès {number}",
       "added": "Ajoutée le {date}",
       "how": "Votre appareil garde la clé d'accès. Hold et son service de connexion n'en gardent que la partie publique, qui ne permet pas de vous connecter à elle seule.",
-      "confirmToAdd": "Pour ajouter une autre clé d'accès, il faut une clé que vous avez déjà, pour que personne ayant accès à vos e-mails ne puisse ajouter la sienne."
+      "confirmToAdd": "Pour ajouter une autre clé d'accès, il faut une clé que vous avez déjà, pour que personne ayant accès à vos e-mails ne puisse ajouter la sienne.",
+      "listTitle": "Vos clés d'accès"
     },
     "staff": {
       "title": "Équipe",
@@ -1531,7 +1539,8 @@
         "submit": "Envoyer l'invitation",
         "sending": "Envoi…",
         "sent": "Invitation envoyée."
-      }
+      },
+      "lead": "Qui travaille à la boutique, ce que chacun peut faire, et les invitations encore en attente de réponse."
     },
     "prices": {
       "title": "Prix",
@@ -2150,7 +2159,11 @@
       "notificationsDemoOn": "Cette démonstration partage une app du bac à sable PayPal avec toutes les autres. PayPal envoie les événements de cette app à une seule adresse, et Hold transmet chacun à la boutique de démonstration dont il nomme la location, après l’avoir vérifié auprès de PayPal et relu ce qu’il nomme.",
       "turnOn": "Activer les notifications",
       "turningOn": "Activation…",
-      "turnedOn": "Les notifications sont activées."
+      "turnedOn": "Les notifications sont activées.",
+      "status": {
+        "connected": "Connecté",
+        "notConnected": "Non connecté"
+      }
     },
     "handover": {
       "title": "Remise",
@@ -2399,7 +2412,8 @@
         "resolved": "Réglé",
         "withdrawn": "Retiré"
       },
-      "sortedBySimulated": "Classé par un substitut de l’environnement de test, vérifié par le code."
+      "sortedBySimulated": "Classé par un substitut de l’environnement de test, vérifié par le code.",
+      "emptyBody": "Quand un locataire signale quelque chose depuis son lien, cela apparaît ici, trié, avec la décision qui l'attend."
     },
     "calendar": {
       "title": "Calendrier",
@@ -2421,7 +2435,12 @@
       "noItemsAction": "Aller aux articles",
       "unknownRenter": "Client pas encore connu",
       "loading": "Chargement du calendrier…",
-      "loadFailed": "Le calendrier n’a pas pu se charger. Rechargez la page, ou retrouvez chaque location dans Locations."
+      "loadFailed": "Le calendrier n’a pas pu se charger. Rechargez la page, ou retrouvez chaque location dans Locations.",
+      "view": {
+        "label": "Afficher le calendrier en",
+        "timeline": "Frise",
+        "list": "Liste"
+      }
     },
     "priceEditor": {
       "draftOf": "Brouillon de la version {version}",

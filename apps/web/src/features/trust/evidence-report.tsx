@@ -18,8 +18,8 @@ export function EvidenceReport({ evidence }: { evidence: VerifiedEvidence }) {
   const confirmed = evidence.confirmed
   return (
     <div className="grid gap-6">
-      <p role="status" className={`flex items-start gap-2 text-lg font-semibold text-pretty ${evidence.intact ? '' : 'text-destructive'}`}>
-        {evidence.intact ? <CircleCheck aria-hidden="true" className="mt-1 size-5 shrink-0 text-primary" /> : <CircleAlert aria-hidden="true" className="mt-1 size-5 shrink-0" />}
+      <p role="status" className={`flex animate-pop items-start gap-3 rounded-2xl border p-4 text-lg font-semibold text-pretty md:p-5 ${evidence.intact ? 'border-success/30 bg-success/8' : 'border-destructive/30 bg-destructive/8 text-destructive'}`}>
+        {evidence.intact ? <CircleCheck aria-hidden="true" className="mt-1 size-5 shrink-0 text-success" /> : <CircleAlert aria-hidden="true" className="mt-1 size-5 shrink-0" />}
         {evidence.intact ? t('intact', signed) : t('broken', signed)}
       </p>
       {evidence.simulated ? (

@@ -6,9 +6,9 @@ import type { CalendarBooking, ShopCalendar } from '@hold/db'
 export const STANDINGS = ['held', 'awaiting', 'late', 'settling', 'done'] as const
 export type Standing = (typeof STANDINGS)[number]
 
-// The scheduler paints its bars itself, so the calendar's colours are values rather than the app's tokens. They are
-// defined here once, for the bars and the legend alike, and every bar also says its standing in words.
-export const STANDING_COLORS: Readonly<Record<Standing, string>> = { held: '#1f7a4d', awaiting: '#b45309', late: '#b42318', settling: '#5b4bc4', done: '#6b6b6b' }
+// Each standing's colour, as the app's own tokens, for the bars and the legend alike, so both follow the light and dark
+// themes. The scheduler takes a bar's colour as a CSS value, and every bar also says its standing in words.
+export const STANDING_COLORS: Readonly<Record<Standing, string>> = { held: 'var(--success)', awaiting: 'var(--warning)', late: 'var(--destructive)', settling: 'var(--contrast)', done: 'var(--muted-foreground)' }
 
 export function standingOf(booking: Pick<CalendarBooking, 'rentalState' | 'holdState'>): Standing {
   switch (booking.rentalState) {

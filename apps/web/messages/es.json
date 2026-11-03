@@ -1457,7 +1457,14 @@
       "addFirst": "Todavía no hay ninguna en este dispositivo. Añade una primero.",
       "confirm": "Confirmar con mi llave de acceso",
       "add": "Añadir una llave de acceso",
-      "addHere": "¿No hay llave de acceso en este dispositivo? Añade una"
+      "addHere": "¿No hay llave de acceso en este dispositivo? Añade una",
+      "stays": "Una llave de acceso se queda en el dispositivo o navegador que la creó. Usa ese, o añade una aquí.",
+      "demo": {
+        "title": "¿Estás en la demo?",
+        "body": "Una llave de acceso añadida en otro navegador no viene contigo. Empieza una demo nueva aquí, o cierra sesión y vuelve en el navegador que la tiene.",
+        "fresh": "Empezar una demo nueva",
+        "signOut": "Cerrar sesión"
+      }
     },
     "results": {
       "signed_out": "Tu sesión ha terminado. Vuelve a entrar.",
@@ -1502,7 +1509,8 @@
       "unnamed": "Llave de acceso {number}",
       "added": "Añadida el {date}",
       "how": "Tu dispositivo guarda la llave de acceso. Hold y su servicio de inicio de sesión guardan solo la parte pública, que por sí sola no permite entrar.",
-      "confirmToAdd": "Para añadir otra llave de acceso hace falta una que ya tengas, así nadie que llegue a tu correo puede añadir la suya."
+      "confirmToAdd": "Para añadir otra llave de acceso hace falta una que ya tengas, así nadie que llegue a tu correo puede añadir la suya.",
+      "listTitle": "Tus llaves de acceso"
     },
     "staff": {
       "title": "Equipo",
@@ -1531,7 +1539,8 @@
         "submit": "Enviar la invitación",
         "sending": "Enviando…",
         "sent": "Invitación enviada."
-      }
+      },
+      "lead": "Quién trabaja en la tienda, qué puede hacer cada persona y las invitaciones que aún esperan respuesta."
     },
     "prices": {
       "title": "Precios",
@@ -2150,7 +2159,11 @@
       "notificationsDemoOn": "Esta demostración comparte una app del entorno de pruebas de PayPal con todas las demás. PayPal envía los eventos de esa app a una dirección, y Hold pasa cada uno a la tienda de demostración cuyo alquiler nombra, después de comprobarlo con PayPal y volver a leer lo que nombra.",
       "turnOn": "Activar avisos",
       "turningOn": "Activando…",
-      "turnedOn": "Los avisos están activados."
+      "turnedOn": "Los avisos están activados.",
+      "status": {
+        "connected": "Conectado",
+        "notConnected": "Sin conectar"
+      }
     },
     "handover": {
       "title": "Entrega",
@@ -2399,7 +2412,8 @@
         "resolved": "Resuelto",
         "withdrawn": "Retirado"
       },
-      "sortedBySimulated": "Clasificado por un sustituto del entorno de prueba, comprobado por el código."
+      "sortedBySimulated": "Clasificado por un sustituto del entorno de prueba, comprobado por el código.",
+      "emptyBody": "Cuando un cliente informa de algo desde su enlace, aparece aquí, clasificado y con la decisión que espera."
     },
     "calendar": {
       "title": "Calendario",
@@ -2421,7 +2435,12 @@
       "noItemsAction": "Ir a los artículos",
       "unknownRenter": "Cliente aún desconocido",
       "loading": "Cargando el calendario…",
-      "loadFailed": "No se pudo cargar el calendario. Vuelva a cargar la página o busque cada alquiler en Alquileres."
+      "loadFailed": "No se pudo cargar el calendario. Vuelva a cargar la página o busque cada alquiler en Alquileres.",
+      "view": {
+        "label": "Ver el calendario como",
+        "timeline": "Línea de tiempo",
+        "list": "Lista"
+      }
     },
     "priceEditor": {
       "draftOf": "Borrador de la versión {version}",

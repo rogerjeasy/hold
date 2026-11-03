@@ -1457,7 +1457,14 @@
       "addFirst": "There is none on this device yet. Add one first.",
       "confirm": "Confirm with my passkey",
       "add": "Add a passkey",
-      "addHere": "No passkey on this device? Add one"
+      "addHere": "No passkey on this device? Add one",
+      "stays": "A passkey stays on the device or browser that made it. Use that one, or add a passkey here.",
+      "demo": {
+        "title": "On the demo?",
+        "body": "A passkey you added in another browser does not come with you. Start a fresh demo here, or sign out and come back in the browser that has it.",
+        "fresh": "Start a fresh demo",
+        "signOut": "Sign out"
+      }
     },
     "results": {
       "signed_out": "Your session has ended. Sign in again.",
@@ -1502,7 +1509,8 @@
       "unnamed": "Passkey {number}",
       "added": "Added {date}",
       "how": "Your device keeps the passkey. Hold and its sign-in service keep only the public half, which cannot sign you in on its own.",
-      "confirmToAdd": "Adding another passkey needs one you already have, so nobody who reaches your inbox can add their own."
+      "confirmToAdd": "Adding another passkey needs one you already have, so nobody who reaches your inbox can add their own.",
+      "listTitle": "Your passkeys"
     },
     "staff": {
       "title": "Staff",
@@ -1531,7 +1539,8 @@
         "submit": "Send the invitation",
         "sending": "Sending…",
         "sent": "Invitation sent."
-      }
+      },
+      "lead": "Who works at the shop, what each person may do, and the invitations still waiting for an answer."
     },
     "prices": {
       "title": "Prices",
@@ -2150,7 +2159,11 @@
       "notificationsDemoOn": "This demo shares one PayPal sandbox app with every other demo. PayPal sends that app’s events to one address, and Hold passes each one to the demo shop whose rental it names, after checking it with PayPal and reading back what it names.",
       "turnOn": "Turn on notifications",
       "turningOn": "Turning on…",
-      "turnedOn": "Notifications are on."
+      "turnedOn": "Notifications are on.",
+      "status": {
+        "connected": "Connected",
+        "notConnected": "Not connected"
+      }
     },
     "handover": {
       "title": "Handover",
@@ -2399,7 +2412,8 @@
         "resolved": "Settled",
         "withdrawn": "Withdrawn"
       },
-      "sortedBySimulated": "Sorted by a stand-in for the test environment, checked by code."
+      "sortedBySimulated": "Sorted by a stand-in for the test environment, checked by code.",
+      "emptyBody": "When a renter reports something from their link, it appears here, sorted, with the decision it waits for."
     },
     "calendar": {
       "title": "Calendar",
@@ -2421,7 +2435,12 @@
       "noItemsAction": "Go to items",
       "unknownRenter": "Renter not known yet",
       "loading": "Loading the calendar…",
-      "loadFailed": "The calendar could not load. Reload the page, or find each rental under Rentals."
+      "loadFailed": "The calendar could not load. Reload the page, or find each rental under Rentals.",
+      "view": {
+        "label": "Show the calendar as",
+        "timeline": "Timeline",
+        "list": "List"
+      }
     },
     "priceEditor": {
       "draftOf": "Draft of version {version}",

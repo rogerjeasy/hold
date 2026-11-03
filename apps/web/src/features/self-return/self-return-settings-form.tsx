@@ -21,7 +21,7 @@ export function SelfReturnSettingsForm({ shopName, settings }: { shopName: strin
   const [allowed, setAllowed] = useState(settings.allowed)
   const [dropPoint, setDropPoint] = useState(settings.dropPoint ?? '')
   return (
-    <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
+    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
       <div className="grid min-w-0 gap-5">
         {/* Outside the form, which React resets after each save: the box itself carries no value, the hidden field does. */}
         <CheckBox label={t('allowed')} checked={allowed} onChange={setAllowed} />
@@ -51,9 +51,9 @@ export function SelfReturnSettingsForm({ shopName, settings }: { shopName: strin
           <ActionMessage result={result} success={t('saved')} results="selfReturn.settings.results" />
         </form>
       </div>
-      <aside aria-labelledby="preview" className="grid min-w-0 gap-3">
+      <aside aria-labelledby="preview" className="grid min-w-0 gap-3 lg:sticky lg:top-6">
         <h2 id="preview" className="label text-xs text-muted-foreground">{t('preview')}</h2>
-        {allowed && dropPoint.trim() !== '' ? <DropPointCard shopName={shopName} dropPoint={dropPoint.trim()} /> : <p className="border border-dashed p-4 text-muted-foreground">{allowed ? t('previewEmpty') : t('off')}</p>}
+        {allowed && dropPoint.trim() !== '' ? <DropPointCard shopName={shopName} dropPoint={dropPoint.trim()} /> : <p className="rounded-2xl border border-dashed border-border-strong/70 bg-muted/40 p-4 text-muted-foreground">{allowed ? t('previewEmpty') : t('off')}</p>}
       </aside>
     </div>
   )

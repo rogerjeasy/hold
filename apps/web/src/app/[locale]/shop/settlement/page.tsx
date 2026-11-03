@@ -32,9 +32,8 @@ export default async function Page() {
   const waiver = loaded.waiver === undefined ? null : { validUntil: loaded.waiver.validUntil, dailyCount: waiverLimits !== undefined && 'dailyCount' in waiverLimits && typeof waiverLimits.dailyCount === 'number' ? waiverLimits.dailyCount : 0 }
   const gate = owner ? await passkeyGate(context) : undefined
   return (
-    <ShopFrame shopName={context.shop.name} title={t('settingsTitle')}>
-      <div className="grid max-w-5xl gap-12">
-        <p className="max-w-prose text-lead text-pretty">{t('settingsLead')}</p>
+    <ShopFrame shopName={context.shop.name} title={t('settingsTitle')} description={t('settingsLead')}>
+      <div className="grid max-w-5xl min-w-0 gap-6">
         <PromiseSettingsSection shopName={context.shop.name} days={loaded.days} waiver={waiver} canEdit={owner} gate={gate} />
         <SettlementLimitsSection currency={context.shop.currency} current={current} canEdit={owner} gate={gate} />
       </div>

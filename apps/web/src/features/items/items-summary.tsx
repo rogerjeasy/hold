@@ -15,7 +15,7 @@ export function ItemsSummary({ catalog }: { catalog: ItemCatalog }) {
       <h2 id={titleId} className="sr-only">
         {t('label')}
       </h2>
-      <dl className="grid grid-cols-2 border bg-card text-card-foreground xl:grid-cols-4">
+      <dl className="surface grid grid-cols-2 overflow-clip xl:grid-cols-4">
         <Figure label={t('total')} value={String(live.length)} note={t('totalNote', { types: catalog.types.length })} />
         <Figure label={t('available')} value={String(count('available'))} note={t('availableNote')} />
         <Figure label={t('out')} value={String(count('out', 'overdue'))} note={t('outNote', { overdue: count('overdue') })} urgent={count('overdue') > 0} />

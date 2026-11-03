@@ -13,10 +13,11 @@ export type RentalSchedulerProps = {
   failed: string
 }
 
-// Bryntum Scheduler draws in the browser only, from its own build, which loads once the page is in the browser.
+// Bryntum Scheduler draws in the browser only, from its own build, which loads once the page is in the browser. It
+// fills a frame as tall as the screen allows, so the page around it stays still while it scrolls inside.
 export function RentalScheduler(props: RentalSchedulerProps) {
   return (
-    <div className="h-[32rem] min-h-80 overflow-hidden border border-border-strong bg-card" aria-label={props.itemColumn}>
+    <div className="h-[min(40rem,72dvh)] min-h-80 overflow-hidden bg-card">
       <BryntumRentals {...props} />
     </div>
   )

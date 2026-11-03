@@ -3,13 +3,14 @@
 import type { PriceListVersion } from '@hold/db'
 import { checkPriceRows, PRICE_CATEGORIES, SHOP_CURRENCIES } from '@hold/domain'
 import type { PriceCategory } from '@hold/domain'
-import { Plus, Redo2, Undo2 } from 'lucide-react'
+import { Lock, Plus, Redo2, Send, Undo2 } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useActionState, useCallback, useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
+import { StatusPill } from '@/components/ui/status-pill'
 import { Textarea } from '@/components/ui/textarea'
 import type { Locale } from '@/i18n/routing'
 import { ActionMessage } from '@/features/shop/action-message'
@@ -77,8 +78,8 @@ export function PriceEditor({ shopId, baseVersion, published, fixedCurrency, thr
   useEffect(() => { if (result?.ok === true) discard() }, [result, discard])
 
   return (
-    <div className="grid min-w-0 gap-12">
-      <form action={publish} className="grid min-w-0 gap-8">
+    <div className="grid min-w-0 gap-8">
+      <form action={publish} className="grid min-w-0 gap-6">
         <input type="hidden" name="locale" value={locale} />
         {draft.rows.map((row) => (
           <span key={row.key} hidden>
@@ -87,8 +88,8 @@ export function PriceEditor({ shopId, baseVersion, published, fixedCurrency, thr
             <input type="hidden" name="amount" value={row.amount.trim()} />
           </span>
         ))}
-        <div className="grid gap-5 sm:grid-cols-2">
-          <div className="grid gap-1.5">
+        <div className="surface grid gap-5 p-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] md:p-5">
+          <div className="grid content-start gap-1.5">
             <Label htmlFor="currency">{t('currency')}</Label>
             {fixedCurrency === null ? (
               <Select id="currency" name="currency" value={currency} onChange={(event) => { setCurrency(event.target.value) }}>
@@ -97,42 +98,51 @@ export function PriceEditor({ shopId, baseVersion, published, fixedCurrency, thr
             ) : (
               <>
                 <input type="hidden" name="currency" value={fixedCurrency} />
-                <p id="currency" className="flex min-h-12 items-center font-semibold">{fixedCurrency}</p>
+                <p id="currency" className="figures flex min-h-12 items-center gap-2 text-lg font-semibold">
+                  <Lock aria-hidden="true" className="size-4 text-muted-foreground" />
+                  {fixedCurrency}
+                </p>
               </>
             )}
           </div>
-          <div className="grid gap-1.5">
+          <div className="grid content-start gap-1.5">
             <Label htmlFor="threshold">{t('threshold', { currency })}</Label>
-            <Input id="threshold" name="threshold" inputMode="decimal" defaultValue={threshold} maxLength={20} aria-describedby="threshold-help" />
+            <Input id="threshold" name="threshold" inputMode="decimal" defaultValue={threshold} maxLength={20} className="figures max-w-60" aria-describedby="threshold-help" />
             <p id="threshold-help" className="text-sm text-muted-foreground">{t('thresholdHelp')}</p>
           </div>
         </div>
 
         <div className="grid min-w-0 gap-6 min-[1400px]:grid-cols-[minmax(0,5fr)_minmax(18rem,2fr)] min-[1400px]:items-start">
-          <div className="grid min-w-0 gap-4">
-            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-              <h2 className="text-title">{editor('draftOf', { version: (baseVersion ?? 0) + 1 })}</h2>
-              <p data-testid="draft-status" className={cellsToFix === 0 ? 'text-sm font-semibold' : 'text-sm font-semibold text-destructive'}>{editor('problems', { count: cellsToFix })}</p>
-            </div>
-            {restored ? <p role="status" className="border border-border-strong px-3 py-2 text-sm">{editor('restored')}</p> : null}
-            <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="outline" className="min-h-11" disabled={!canUndo} onClick={undo}><Undo2 aria-hidden="true" />{editor('undo')}</Button>
-              <Button type="button" variant="outline" className="min-h-11" disabled={!canRedo} onClick={redo}><Redo2 aria-hidden="true" />{editor('redo')}</Button>
-              <Button type="button" variant="outline" className="min-h-11" onClick={() => { change(addRow(draft)) }}><Plus aria-hidden="true" />{t('add')}</Button>
-              {canUndo || restored ? <Button type="button" variant="ghost" className="min-h-11" onClick={discard}>{editor('discard')}</Button> : null}
-            </div>
-            <PastePanel onPaste={onPaste} message={pasteMessage} />
-            <div className="hidden min-w-0 gap-2 md:grid">
-              <PriceGrid rows={draft.rows} currency={currency} problems={problems} onChange={onChange} onRemove={onRemove} onMove={onMove} onInsert={onInsert} onPasteCells={onPasteCells} onUndo={undo} onRedo={redo} />
-              <p className="text-sm text-muted-foreground">{editor('grid.keys')}</p>
-            </div>
-            <div className="md:hidden">
-              <PriceCards rows={draft.rows} currency={currency} problems={problems} onChange={onChange} onRemove={onRemove} />
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="wearPolicy" className="text-title">{t('wear')}</Label>
-              <p className="text-muted-foreground">{t('wearHelp')}</p>
-              <Textarea id="wearPolicy" name="wearPolicy" value={wearText} maxLength={4000} required onChange={(event) => { setWearText(event.target.value) }} onBlur={() => { if (wearText !== draft.wearPolicy) change({ ...draft, wearPolicy: wearText }) }} />
+          <div className="grid min-w-0 gap-6">
+            {/* On a phone the prices are cards of their own, so the editor around them is not a card too. */}
+            <section aria-labelledby="draft-title" className="grid min-w-0 gap-4 md:surface md:gap-0 md:overflow-clip">
+              <div className="grid gap-3 md:border-b md:border-border/70 md:px-5 md:py-4">
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                  <h2 id="draft-title" className="text-[1.375rem] leading-tight font-extrabold tracking-tight">{editor('draftOf', { version: (baseVersion ?? 0) + 1 })}</h2>
+                  <p data-testid="draft-status"><StatusPill tone={cellsToFix === 0 ? 'success' : 'danger'}>{editor('problems', { count: cellsToFix })}</StatusPill></p>
+                </div>
+                {restored ? <p role="status" className="rounded-xl bg-primary/8 px-3.5 py-2.5 text-sm">{editor('restored')}</p> : null}
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button type="button" variant="soft" onClick={() => { change(addRow(draft)) }}><Plus aria-hidden="true" />{t('add')}</Button>
+                  <span aria-hidden="true" className="mx-1 hidden h-6 w-px bg-border sm:block" />
+                  <Button type="button" variant="ghost" disabled={!canUndo} onClick={undo}><Undo2 aria-hidden="true" />{editor('undo')}</Button>
+                  <Button type="button" variant="ghost" disabled={!canRedo} onClick={redo}><Redo2 aria-hidden="true" />{editor('redo')}</Button>
+                  {canUndo || restored ? <Button type="button" variant="ghost" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={discard}>{editor('discard')}</Button> : null}
+                </div>
+                <PastePanel onPaste={onPaste} message={pasteMessage} />
+              </div>
+              <div className="hidden min-w-0 md:block">
+                <PriceGrid rows={draft.rows} currency={currency} problems={problems} onChange={onChange} onRemove={onRemove} onMove={onMove} onInsert={onInsert} onPasteCells={onPasteCells} onUndo={undo} onRedo={redo} />
+                <p className="border-t border-border/70 px-5 py-3 text-sm text-muted-foreground">{editor('grid.keys')}</p>
+              </div>
+              <div className="md:hidden">
+                <PriceCards rows={draft.rows} currency={currency} problems={problems} onChange={onChange} onRemove={onRemove} />
+              </div>
+            </section>
+            <div className="surface grid gap-2 p-4 md:p-5">
+              <Label htmlFor="wearPolicy" className="text-[1.0625rem] leading-tight font-extrabold tracking-tight">{t('wear')}</Label>
+              <p className="text-sm text-muted-foreground">{t('wearHelp')}</p>
+              <Textarea id="wearPolicy" name="wearPolicy" value={wearText} maxLength={4000} required className="mt-1 min-h-28" onChange={(event) => { setWearText(event.target.value) }} onBlur={() => { if (wearText !== draft.wearPolicy) change({ ...draft, wearPolicy: wearText }) }} />
             </div>
           </div>
           <div className="min-w-0 min-[1400px]:sticky min-[1400px]:top-6">
@@ -140,9 +150,13 @@ export function PriceEditor({ shopId, baseVersion, published, fixedCurrency, thr
           </div>
         </div>
 
-        <div className="grid gap-3">
-          <Button type="submit" disabled={pending || cellsToFix > 0} className="min-h-12 justify-self-start">{pending ? t('publishing') : t('publish')}</Button>
-          <p className="text-sm text-muted-foreground">{t('publishHelp')}</p>
+        {/* Publishing stays in reach while the draft scrolls under it, from a tablet up; a phone keeps its screen for the draft. */}
+        <div className="glass z-10 md:sticky md:bottom-[calc(var(--shop-bottom-inset,0px)+1rem)] flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl border p-2.5 shadow-raised">
+          <Button type="submit" disabled={pending || cellsToFix > 0} className="min-h-12">
+            <Send aria-hidden="true" />
+            {pending ? t('publishing') : t('publish')}
+          </Button>
+          <p className="min-w-0 flex-[1_1_14rem] text-sm text-muted-foreground">{t('publishHelp')}</p>
           <ActionMessage result={result} success={t('published')} />
         </div>
       </form>

@@ -1,6 +1,8 @@
-import { KeyRound } from 'lucide-react'
+import { Fingerprint, KeyRound, ShieldCheck } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
 import type { Passkey } from '@hold/auth'
+import { Notice } from '@/components/ui/notice'
+import { Panel } from '@/components/ui/panel'
 import { AddPasskey } from '@/features/auth/add-passkey'
 import { PasskeyGate } from './passkey-gate'
 import { ShopFrame } from './shop-frame'
@@ -19,42 +21,46 @@ type SecurityScreenProps = {
 export function SecurityScreen({ shopName, passkeys, required, emailCodeSession, email }: SecurityScreenProps) {
   const t = useTranslations('shop.security')
   const format = useFormatter()
+  const gated = emailCodeSession && (passkeys?.length ?? 0) > 0
 
   return (
-    <ShopFrame shopName={shopName} title={t('title')}>
-      <div className="grid max-w-prose gap-6">
-        <p className="text-lead text-muted-foreground">{required ? t('leadRequired') : t('lead')}</p>
+    <ShopFrame shopName={shopName} title={t('title')} description={required ? t('leadRequired') : t('lead')}>
+      <div className="grid max-w-2xl min-w-0 gap-6">
         {passkeys === undefined ? (
-          <p role="alert" className="text-destructive">
-            {t('unavailable')}
-          </p>
-        ) : passkeys.length === 0 ? (
-          <p className="font-semibold">{t('none')}</p>
+          <>
+            <Notice announced tone="destructive" title={t('title')} body={t('unavailable')} />
+            <AddPasskey />
+          </>
         ) : (
-          <ul className="border-t">
-            {passkeys.map((passkey, index) => (
-              <li key={passkey.id} className="flex items-center gap-3 border-b py-4">
-                <KeyRound aria-hidden="true" className="size-5 shrink-0 text-primary" />
-                <span className="min-w-0 wrap-long-words">
-                  {passkey.name ?? t('unnamed', { number: index + 1 })}
-                  {passkey.createdAt === undefined ? null : (
-                    <span className="block text-sm text-muted-foreground">{t('added', { date: format.dateTime(passkey.createdAt, { dateStyle: 'medium' }) })}</span>
-                  )}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <Panel title={t('listTitle')} icon={Fingerprint} aside={passkeys.length === 0 ? null : <span className="figures text-sm text-muted-foreground">{passkeys.length}</span>}>
+            {passkeys.length === 0 ? (
+              <p className="px-4 py-5 font-semibold md:px-5">{t('none')}</p>
+            ) : (
+              <ul className="stagger">
+                {passkeys.map((passkey, index) => (
+                  <li key={passkey.id} className="flex items-center gap-3 border-b border-border/70 px-4 py-3.5 last:border-b-0 md:px-5">
+                    <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-xl bg-success/12 text-success">
+                      <KeyRound className="size-4.5" />
+                    </span>
+                    <span className="min-w-0 font-semibold wrap-long-words">
+                      {passkey.name ?? t('unnamed', { number: index + 1 })}
+                      {passkey.createdAt === undefined ? null : (
+                        <span className="block text-sm font-normal text-muted-foreground">{t('added', { date: format.dateTime(passkey.createdAt, { dateStyle: 'medium' }) })}</span>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {gated ? null : <div className="border-t border-border/70 px-4 py-4 md:px-5"><AddPasskey /></div>}
+          </Panel>
         )}
-        <PasskeyGate
-          needed={emailCodeSession && (passkeys?.length ?? 0) > 0}
-          hasPasskey
-          email={email}
-          returnTo="/shop/security"
-          body={t('confirmToAdd')}
-        >
-          <AddPasskey />
-        </PasskeyGate>
-        <p className="text-sm text-muted-foreground">{t('how')}</p>
+        {/* The gate is a card of its own, so it stands below the list rather than inside it. */}
+        {gated ? <PasskeyGate needed hasPasskey email={email} returnTo="/shop/security" body={t('confirmToAdd')}>{null}</PasskeyGate> : null}
+        <p className="flex gap-2.5 text-sm text-muted-foreground">
+          <ShieldCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-success" />
+          {t('how')}
+        </p>
       </div>
     </ShopFrame>
   )

@@ -26,8 +26,8 @@ type CellProps = CustomCellRendererProps<FleetRow>
 function FastestBadge() {
   const t = useTranslations('shop.items.fleet')
   return (
-    <span className="inline-flex shrink-0 items-center gap-1 border border-primary px-1.5 py-0.5 text-xs font-semibold">
-      <Gauge aria-hidden="true" className="size-3.5 shrink-0 text-primary" />
+    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+      <Gauge aria-hidden="true" className="size-3.5 shrink-0" />
       {t('fastest')}
     </span>
   )
