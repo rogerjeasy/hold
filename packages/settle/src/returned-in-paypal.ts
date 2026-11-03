@@ -1,4 +1,4 @@
-import { holdRefundsOfCapture, recordReturnedInPayPal } from '@hold/db'
+import { holdRefundsOfCapture, isRecorded, recordReturnedInPayPal } from '@hold/db'
 import type { ReturnedInPayPal } from '@hold/db'
 import type { PayPalHolds, PayPalResult } from '@hold/paypal'
 import { z } from 'zod'
@@ -50,18 +50,17 @@ async function whatPayPalReturned(dependencies: SettleDependencies, paypal: PayP
   return { captureId: capture.captureId, reference: `${capture.captureId}:reversed`, amount: 'rest_of_capture', occurredAt: dependencies.now() }
 }
 
-// Whether a refund PayPal reports is Hold's own. A refund execution of Hold's on the same capture that already knows the
-// refund's id names it; one that does not yet, because PayPal answered before Hold saved the id, is run now: its call
-// carries the same PayPal-Request-Id, so PayPal gives back the same refund, and Hold records it as its own. Only a
-// refund none of them made is money PayPal returned without Hold.
-async function holdOwnRefund(dependencies: SettleDependencies, shopId: string, refundId: string, captureId: string): Promise<'recorded' | 'ran' | 'not_hold\'s'> {
-  const named = async () => (await inWorkerShop(dependencies, shopId, (transaction) => holdRefundsOfCapture(transaction, captureId)))
-  const before = await named()
-  if (before.some((refund) => refund.refundId === refundId)) return 'recorded'
-  const unknown = before.filter((refund) => refund.refundId === null && (refund.state === 'pending' || refund.state === 'submitted'))
-  if (unknown.length === 0) return 'not_hold\'s'
-  for (const refund of unknown) await runExecution(dependencies, { shopId, executionId: refund.id })
-  return (await named()).some((refund) => refund.refundId === refundId) ? 'ran' : 'not_hold\'s'
+// Whether a refund PayPal reports is already in the money log, as Hold's own. Only a line under the refund's id says so:
+// an execution that merely knows the id may still fail. A refund execution of Hold's on the same capture that is still
+// pending or submitted is run first, whether or not it knows the id yet, because PayPal may have answered before Hold
+// saved it: its call carries the same PayPal-Request-Id, so PayPal gives back the same refund, and Hold records it as
+// its own. Whatever is still not in the money log after that is money PayPal returned without Hold, and is recorded so.
+async function holdOwnRefund(dependencies: SettleDependencies, shopId: string, refundId: string, captureId: string): Promise<'recorded' | 'ran' | 'not_recorded'> {
+  const recorded = () => inWorkerShop(dependencies, shopId, (transaction) => isRecorded(transaction, refundId))
+  if (await recorded()) return 'recorded'
+  const open = (await inWorkerShop(dependencies, shopId, (transaction) => holdRefundsOfCapture(transaction, captureId))).filter((refund) => (refund.refundId === null || refund.refundId === refundId) && (refund.state === 'pending' || refund.state === 'submitted'))
+  for (const refund of open) await runExecution(dependencies, { shopId, executionId: refund.id })
+  return open.length > 0 && await recorded() ? 'ran' : 'not_recorded'
 }
 
 export async function applyReturnedInPayPal(dependencies: SettleDependencies, shopId: string, paypal: PayPalHolds, event: { readonly type: ReturnedTypes; readonly resource: unknown }): Promise<{ readonly processing: 'applied' | 'ignored'; readonly rentalId: string | null }> {

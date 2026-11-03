@@ -1,5 +1,5 @@
 import type { Money } from '@hold/domain'
-import { and, eq, inArray, sql } from 'drizzle-orm'
+import { and, eq, inArray, isNull, sql } from 'drizzle-orm'
 import { executions, moneyEvents } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
@@ -20,14 +20,36 @@ export type ReturnedInPayPal = {
   readonly occurredAt: Date
 }
 
+// Holds every other transaction that would record money back from this capture until this one ends, so two cannot
+// both count the same remainder: money PayPal returned, here, and Hold's own refund (confirmClaimRefund). A lock on a
+// money log row would need the right to update it, which no role has, so it is an advisory lock named by the capture.
+export async function lockCapture(transaction: Transaction, captureId: string): Promise<void> {
+  await transaction.execute(sql`select pg_advisory_xact_lock(hashtext(${`money-returned:${captureId}`}))`)
+}
+
+// What has already gone back from a capture: every line that names it, and a refund Hold made before lines named their
+// capture (migration 0047), which can only have come from the rental's one hold capture.
+async function returnedFrom(transaction: Transaction, capture: { readonly paypalReference: string; readonly rentalId: string; readonly kind: string }): Promise<number> {
+  const total = async (where: ReturnType<typeof and>) => (await transaction.select({ cents: sql<number>`coalesce(sum(${moneyEvents.amountCents}), 0)`.mapWith(Number) }).from(moneyEvents).where(where))[0]?.cents ?? 0
+  const named = await total(eq(moneyEvents.returnedFrom, capture.paypalReference))
+  if (capture.kind !== 'hold_captured') return named
+  const holdCaptures = await transaction.select({ id: moneyEvents.id }).from(moneyEvents).where(and(eq(moneyEvents.rentalId, capture.rentalId), eq(moneyEvents.kind, 'hold_captured')))
+  return holdCaptures.length === 1 ? named + await total(and(eq(moneyEvents.rentalId, capture.rentalId), eq(moneyEvents.kind, 'refunded'), isNull(moneyEvents.returnedFrom))) : named
+}
+
+// Whether the money log already holds this PayPal reference, under any kind.
+export async function isRecorded(transaction: Transaction, reference: string): Promise<boolean> {
+  return (await transaction.select({ id: moneyEvents.id }).from(moneyEvents).where(eq(moneyEvents.paypalReference, reference))).length > 0
+}
+
 // Writes money PayPal returned to the renter without Hold onto the rental whose capture it came from (architecture.md
 // section 8.7). Only a capture Hold made has a rental here; any other is not Hold's, and nothing is written. The caller
 // has read the refund or the capture back from PayPal. Appends only, and once; never more than is left of the capture.
 export async function recordReturnedInPayPal(transaction: Transaction, returned: ReturnedInPayPal): Promise<{ readonly rentalId: string } | undefined> {
+  await lockCapture(transaction, returned.captureId)
   const [capture] = await transaction.select().from(moneyEvents).where(and(eq(moneyEvents.paypalReference, returned.captureId), inArray(moneyEvents.kind, CAPTURE_KINDS)))
   if (capture === undefined || !(capture.kind in RETURNED_AS)) return undefined
-  const [already] = await transaction.select({ cents: sql<number>`coalesce(sum(${moneyEvents.amountCents}), 0)`.mapWith(Number) }).from(moneyEvents).where(eq(moneyEvents.returnedFrom, returned.captureId))
-  const left = capture.amountCents - (already?.cents ?? 0)
+  const left = capture.amountCents - await returnedFrom(transaction, capture)
   const amount = returned.amount === 'rest_of_capture' ? { cents: left, currency: capture.currency } : returned.amount
   if (amount.cents <= 0 || amount.cents > left) return { rentalId: capture.rentalId }
   await transaction

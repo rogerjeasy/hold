@@ -5,6 +5,7 @@ import { EXECUTIONS_QUEUE, markExecutionSent } from './fee-repository.ts'
 import { closeSettledRental, settlementWork } from './settlement-repository.ts'
 import { approvals, claims, executions, moneyEvents, outbox } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
+import { lockCapture } from './returned-in-paypal.ts'
 
 export async function queueClaimRefund(transaction: Transaction, claimId: string, userId: string, reason: string, now: Date) {
   const [claim] = await transaction.select().from(claims).where(eq(claims.id, claimId)).for('update')
@@ -28,6 +29,8 @@ export async function confirmClaimRefund(transaction: Transaction, executionId: 
   if (work.execution.state === 'confirmed') return true
   const [approval] = await transaction.select().from(approvals).where(and(eq(approvals.subject, 'refund'), eq(approvals.subjectId, work.claim.id), eq(approvals.decision, 'approved')))
   if (approval === undefined || work.claim.state !== 'charged' || read.status !== 'completed' || read.captureId !== work.execution.paypalResourceIds['capture'] || read.amount.cents !== work.execution.amountCents || read.amount.currency !== work.execution.currency) return false
+  // Waits for any other record of money back from this capture, so both cannot count the same remainder.
+  await lockCapture(transaction, read.captureId)
   const events = await transaction.select().from(moneyEvents).where(eq(moneyEvents.rentalId, work.claim.rentalId))
   const captured = events.filter((event) => event.kind === 'hold_captured').reduce((sum, event) => sum + event.amountCents, 0)
   // This refund itself is never counted against itself, however PayPal's event and Hold's read-back met.

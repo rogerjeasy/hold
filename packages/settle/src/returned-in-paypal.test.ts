@@ -1,5 +1,6 @@
 import { approveClaim, claimWorkspace, decideClaim, draftClaim, executions, inShop, moneyEvents, presentClaim, publishPriceList, rentalDetail, rentals, replyToClaim, staffRoles } from '@hold/db'
-import { and, eq } from 'drizzle-orm'
+import { readFile } from 'node:fs/promises'
+import { and, eq, sql } from 'drizzle-orm'
 import { beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { runClaimDeadline } from './claim-deadline.ts'
 import { applyPayPalEvent, createMemoryScheduler, requestHoldPlacement, runExecution } from './index.ts'
@@ -56,8 +57,8 @@ describe('money PayPal returned to the renter without Hold', () => {
     const resource = { id: refund.value.refundId, links: [{ rel: 'up', href: captureUrl(captureId) }] }
     expect(await applyPayPalEvent(dependencies(), { shopId: fixture.shopId, eventId: await fixture.delivered('PAYMENT.CAPTURE.REFUNDED', resource) })).toBe('applied')
     expect(await returnedInPayPal(rentalId)).toEqual([expect.objectContaining({ amountCents: 20_00, currency: 'EUR', paypalReference: refund.value.refundId })])
-    // PayPal may deliver it twice; the money log takes it once.
-    expect(await applyPayPalEvent(dependencies(), { shopId: fixture.shopId, eventId: await fixture.delivered('PAYMENT.CAPTURE.REFUNDED', resource) })).toBe('applied')
+    // PayPal may deliver it twice; the money log takes it once, and the second delivery applies nothing.
+    expect(await applyPayPalEvent(dependencies(), { shopId: fixture.shopId, eventId: await fixture.delivered('PAYMENT.CAPTURE.REFUNDED', resource) })).toBe('ignored')
     expect(await returnedInPayPal(rentalId)).toHaveLength(1)
     // Hold's own refunds are untouched: none was made.
     expect(await fixture.database.select().from(moneyEvents).where(and(eq(moneyEvents.rentalId, rentalId), eq(moneyEvents.kind, 'refunded')))).toEqual([])
@@ -156,5 +157,54 @@ describe('money PayPal returned, kept apart from what a claim may still take or 
     const returned = await refundsOf(rentalId)
     expect(returned.map((row) => row.amountCents)).toEqual([10_00, 25_00])
     expect(returned.reduce((total, row) => total + row.amountCents, 0)).toBeLessThanOrEqual(35_00)
+  })
+})
+
+describe('what is left of a capture, however its refunds were written and whatever arrives at once', () => {
+  it('counts a refund written before lines named their capture, so a later reversal records only the rest', async () => {
+    const { rentalId, captureId } = await charged()
+    const [capture] = await fixture.database.select().from(moneyEvents).where(eq(moneyEvents.paypalReference, captureId))
+    if (capture === undefined) throw new Error('No capture line')
+    // A refund Hold made before migration 0047, whose line names no capture.
+    await fixture.database.insert(moneyEvents).values({ shopId: capture.shopId, rentalId, holdId: capture.holdId, kind: 'refunded', currency: 'EUR', amountCents: 10_00, paypalReference: 'REFUND-BEFORE-0047', occurredAt: NOW })
+    fixture.fake.reverseCapture(captureId)
+    expect(await applyPayPalEvent(dependencies(), { shopId: fixture.shopId, eventId: await fixture.delivered('PAYMENT.CAPTURE.REVERSED', { id: captureId }) })).toBe('applied')
+    expect((await refundsOf(rentalId)).map((row) => [row.kind, row.amountCents])).toEqual([['refunded', 10_00], ['refunded_in_paypal', 25_00]])
+  })
+
+  it('names the capture on a refund line written before the column existed, as migration 0047 backfills it', async () => {
+    const { rentalId, captureId } = await charged()
+    const [capture] = await fixture.database.select().from(moneyEvents).where(eq(moneyEvents.paypalReference, captureId))
+    if (capture === undefined) throw new Error('No capture line')
+    await fixture.database.insert(moneyEvents).values({ shopId: capture.shopId, rentalId, holdId: capture.holdId, kind: 'refunded', currency: 'EUR', amountCents: 5_00, paypalReference: 'REFUND-TO-BACKFILL', occurredAt: NOW })
+    const migration = await readFile(new URL('../../db/migrations/0047_execution_rechecks.sql', import.meta.url), 'utf8')
+    const backfill = migration.split('--> statement-breakpoint').map((statement) => statement.replace(/^\s*(--[^\n]*\n\s*)*/, '').trim()).filter((statement) => statement.startsWith('UPDATE "money_events"'))
+    expect(backfill).toHaveLength(2)
+    for (const statement of backfill) await fixture.database.execute(sql.raw(statement))
+    const [line] = await fixture.database.select().from(moneyEvents).where(eq(moneyEvents.paypalReference, 'REFUND-TO-BACKFILL'))
+    expect(line?.returnedFrom).toBe(captureId)
+  })
+
+  it('never records more than the capture when a refund and a reversal of it arrive at once', async () => {
+    const { rentalId, captureId } = await charged()
+    const refund = await fixture.fake.refundCapture({ captureId, amount: eur(30_00), idempotencyKey: 'racing-refund' })
+    if (!refund.ok) throw new Error('No refund')
+    fixture.fake.reverseCapture(captureId)
+    const refunded = await fixture.delivered('PAYMENT.CAPTURE.REFUNDED', { id: refund.value.refundId, links: [{ rel: 'up', href: captureUrl(captureId) }] })
+    const reversed = await fixture.delivered('PAYMENT.CAPTURE.REVERSED', { id: captureId })
+    await Promise.all([applyPayPalEvent(dependencies(), { shopId: fixture.shopId, eventId: refunded }), applyPayPalEvent(dependencies(), { shopId: fixture.shopId, eventId: reversed })])
+    expect((await refundsOf(rentalId)).reduce((total, row) => total + row.amountCents, 0)).toBeLessThanOrEqual(35_00)
+  })
+
+  it('still records a refund whose Hold execution knew its id but never confirmed it, as money PayPal returned', async () => {
+    const { rentalId, refund } = await waivedAfterProtectiveCapture()
+    const captureId = refund.paypalResourceIds['capture'] ?? ''
+    const made = await fixture.fake.refundCapture({ captureId, amount: eur(refund.amountCents ?? 0), idempotencyKey: refund.idempotencyKey })
+    if (!made.ok) throw new Error('No refund')
+    // Hold saved the refund's id, then the execution failed before anything reached the money log.
+    await fixture.database.update(executions).set({ state: 'failed', paypalResourceIds: { ...refund.paypalResourceIds, refund: made.value.refundId } }).where(eq(executions.id, refund.id))
+    const event = await fixture.delivered('PAYMENT.CAPTURE.REFUNDED', { id: made.value.refundId, links: [{ rel: 'up', href: captureUrl(captureId) }] })
+    expect(await applyPayPalEvent(dependencies(), { shopId: fixture.shopId, eventId: event })).toBe('applied')
+    expect((await refundsOf(rentalId)).map((row) => [row.kind, row.amountCents, row.paypalReference])).toEqual([['refunded_in_paypal', refund.amountCents, made.value.refundId]])
   })
 })
