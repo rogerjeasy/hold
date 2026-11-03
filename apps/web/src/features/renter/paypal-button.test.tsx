@@ -12,9 +12,9 @@ type Callbacks = { onApprove: (data: { orderId: string }) => Promise<void>; onCa
 // PayPal's v6 web SDK as its reference shows it: an instance from a client ID, eligibility, and a one-time payment
 // session whose start takes a promise of { orderId }.
 function fakeSdk(outcome: 'approve' | 'cancel' | 'error') {
-  const created: { clientId?: string; components?: string[] }[] = []
+  const created: { clientId?: string; components?: string[]; locale?: string }[] = []
   const paypal = {
-    createInstance: (options: { clientId: string; components: string[] }) => {
+    createInstance: (options: { clientId: string; components: string[]; locale: string }) => {
       created.push(options)
       return Promise.resolve({
         findEligibleMethods: () => Promise.resolve({ isEligible: (method: string) => method === 'paypal' }),
@@ -48,7 +48,8 @@ describe('the button that takes the renter to PayPal', () => {
     await waitFor(() => {
       expect(container.querySelector('paypal-button')).not.toBeNull()
     })
-    expect(created).toEqual([{ clientId: 'shop-client-id', components: ['paypal-payments'] }])
+    // PayPal's button and its window speak the page's language, not one PayPal guesses from where the renter is.
+    expect(created).toEqual([{ clientId: 'shop-client-id', components: ['paypal-payments'], locale: 'en-GB' }])
     fireEvent.click(container.querySelector('paypal-button') as Element)
 
     await waitFor(() => {
@@ -56,6 +57,16 @@ describe('the button that takes the renter to PayPal', () => {
     })
     // No amount is sent: the server reads the fee from the rental.
     expect((start.mock.calls[0] as unknown as [unknown, FormData])[1].get('token')).toBe('token')
+  })
+
+  it('asks PayPal for the page’s own language on a French page', async () => {
+    const created = fakeSdk('approve')
+    const fr = (await import('../../../messages/fr.json')).default
+    const { container } = renderWithIntl(<PayPalButton token="token" start={vi.fn(() => Promise.resolve(started))} texts={texts} checkout={{ clientId: 'shop-client-id', environment: 'sandbox' }} navigate={vi.fn()} />, { locale: 'fr', messages: fr })
+    await waitFor(() => {
+      expect(container.querySelector('paypal-button')).not.toBeNull()
+    })
+    expect(created[0]?.locale).toBe('fr-FR')
   })
 
   it('says so when the renter closes PayPal without approving, and changes nothing', async () => {

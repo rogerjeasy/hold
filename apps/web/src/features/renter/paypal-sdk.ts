@@ -2,6 +2,8 @@
 // settings in its address, an instance made from the shop's client ID, and a one-time payment session that PayPal's own
 // button starts. Only the parts Hold uses are typed here.
 
+import type { Locale } from '@/i18n/routing'
+
 export type PayPalCheckout = { readonly clientId: string; readonly environment: 'sandbox' }
 
 export type PaymentSessionCallbacks = {
@@ -14,7 +16,11 @@ type SdkInstance = {
   findEligibleMethods(): Promise<{ isEligible(method: string): boolean }>
   createPayPalOneTimePaymentSession(callbacks: PaymentSessionCallbacks): Promise<PaymentSession>
 }
-type PayPalNamespace = { createInstance(options: { readonly clientId: string; readonly components: readonly string[] }): Promise<SdkInstance> }
+type PayPalNamespace = { createInstance(options: { readonly clientId: string; readonly components: readonly string[]; readonly locale: string }): Promise<SdkInstance> }
+
+// The language PayPal's button and its window speak, as the page's own. Without it PayPal guesses from where the renter
+// is, and an English page in Switzerland got a French button.
+export const PAYPAL_LOCALES: Readonly<Record<Locale, string>> = { en: 'en-GB', es: 'es-ES', fr: 'fr-FR', de: 'de-DE' }
 
 const SCRIPTS: Record<PayPalCheckout['environment'], string> = { sandbox: 'https://www.sandbox.paypal.com/web-sdk/v6/core' }
 const LOAD_MILLISECONDS = 10_000
@@ -48,11 +54,11 @@ function loadScript(environment: PayPalCheckout['environment']): Promise<PayPalN
 
 // A payment session for PayPal's own button, or nothing when the SDK cannot load or PayPal is not offered here. The
 // caller then sends the renter to PayPal's page instead.
-export async function paypalSession(checkout: PayPalCheckout, callbacks: PaymentSessionCallbacks): Promise<PaymentSession | undefined> {
+export async function paypalSession(checkout: PayPalCheckout, locale: Locale, callbacks: PaymentSessionCallbacks): Promise<PaymentSession | undefined> {
   try {
     const paypal = await loadScript(checkout.environment)
     if (paypal === undefined) return undefined
-    const instance = await paypal.createInstance({ clientId: checkout.clientId, components: ['paypal-payments'] })
+    const instance = await paypal.createInstance({ clientId: checkout.clientId, components: ['paypal-payments'], locale: PAYPAL_LOCALES[locale] })
     if (!(await instance.findEligibleMethods()).isEligible('paypal')) return undefined
     return await instance.createPayPalOneTimePaymentSession(callbacks)
   } catch {

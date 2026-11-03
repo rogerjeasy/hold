@@ -50,7 +50,7 @@ export function PayPalButton({ token, start, texts, checkout, navigate = goTo }:
   useEffect(() => {
     if (checkout === undefined) return
     let live = true
-    void paypalSession(checkout, {
+    void paypalSession(checkout, locale, {
       onApprove: () => {
         const started = startedRef.current
         if (started !== undefined) navigate(started.returnUrl)
@@ -70,7 +70,7 @@ export function PayPalButton({ token, start, texts, checkout, navigate = goTo }:
     return () => {
       live = false
     }
-  }, [checkout, navigate])
+  }, [checkout, locale, navigate])
 
   // The order is asked for at once, not awaited first, as PayPal's button must open while the click still counts.
   const order = async () => {
