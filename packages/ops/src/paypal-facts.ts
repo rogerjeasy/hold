@@ -12,8 +12,10 @@ export type ShopPayPalReads = {
   readonly openReader: () => Promise<OpenedReader>
 }
 
-// A hold Hold still counts as reserved that PayPal has already ended.
+// A hold Hold still counts as reserved that PayPal has already ended. A walk-in hold is placed with the fee and the
+// fee is captured from it at once, so PayPal reads it as partly captured for its whole life: that is no difference.
 const ENDED: readonly AuthorizationStatus[] = ['voided', 'captured', 'partially_captured', 'expired', 'denied']
+const ended = (hold: { readonly strategy: string }, status: AuthorizationStatus) => ENDED.includes(status) && !(hold.strategy === 'combined' && status === 'partially_captured')
 
 export async function paypalFacts(database: Database, shopId: string, reads: ShopPayPalReads | undefined): Promise<Pick<ShopSnapshot, 'disputes' | 'differences'> & { readonly reached: boolean }> {
   if (reads === undefined) return { disputes: [], differences: [], reached: false }
@@ -31,7 +33,7 @@ export async function paypalFacts(database: Database, shopId: string, reads: Sho
   const differences = []
   for (const hold of await asWorker((transaction) => holdsToReconcile(transaction))) {
     const status = await reads.authorization(hold.authorizationId).catch(() => undefined)
-    if (status !== undefined && ENDED.includes(status)) differences.push({ id: `${hold.holdId}:${status}`, subjectKind: 'hold', subjectId: hold.holdId, rentalId: hold.rentalId })
+    if (status !== undefined && ended(hold, status)) differences.push({ id: `${hold.holdId}:${status}`, subjectKind: 'hold', subjectId: hold.holdId, rentalId: hold.rentalId })
   }
   return { disputes, differences, reached: open !== undefined }
 }

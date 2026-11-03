@@ -41,6 +41,7 @@ const proposal = (overrides: Partial<QueueEntry> = {}): QueueEntry => ({
   references: ['AUTH-123'],
   draft: null,
   raisedByAgent: true,
+  model: null,
   deadline: at('2026-10-14T18:00:00Z'),
   exceptionKind: 'clean_return_unconfirmed',
   amountCents: 300_00,
@@ -228,6 +229,14 @@ describe('samples', () => {
   it('marks a proposal about a sample rental as a sample, as the rental itself is', () => {
     const rows = boardRows(records({ proposals: [proposal(), proposal({ id: 'proposal-sample', rentalId: 'rental-9', payload: { fixedReason: 'hold_ending', simulated: 'yes' } })] }), owner, NOW)
     expect(rows.map((row) => [row.id, row.simulated])).toEqual([['proposal:proposal-1', false], ['proposal:proposal-sample', true]])
+  })
+
+  it('marks a sample entry as one no model looked at yet, or as investigated with PayPal\'s facts simulated, as the queue does', () => {
+    const seeded = proposal({ id: 'proposal-seeded', rentalId: 'rental-9', payload: { fixedReason: 'hold_ending', investigated: 'no', paypalChecked: 'no', simulated: 'yes' } })
+    const investigated = proposal({ id: 'proposal-investigated', rentalId: 'rental-10', model: 'us.anthropic.claude-opus-4-6-v1', payload: { investigated: 'yes', paypalChecked: 'simulated', simulated: 'yes' } })
+    const rows = boardRows(records({ proposals: [seeded, investigated] }), owner, NOW).flatMap((row) => (row.kind === 'proposal' ? [[row.id, row.marks.filter((mark) => mark !== 'raisedByAgent'), row.model]] : []))
+    expect(rows).toEqual(expect.arrayContaining([['proposal:proposal-seeded', ['sampleNotInvestigated'], null], ['proposal:proposal-investigated', ['sampleInvestigated'], 'us.anthropic.claude-opus-4-6-v1']]))
+    expect(rows).toHaveLength(2)
   })
 })
 

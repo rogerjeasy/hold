@@ -1,11 +1,12 @@
 'use server'
 
-import { confirmRule as confirmOwnerRule, decideProposal, decideRule, draftRule, grantStandingRule as grantMandate, liveStandingRule, pendingProposals, queueOperationsCheck, revokeMandate, rulesForOwner } from '@hold/db'
+import { confirmRule as confirmOwnerRule, decideProposal, decideRule, draftRule, grantStandingRule as grantMandate, liveStandingRule, pendingProposals, queueOperationsCheck, revokeMandate, rulesForOwner, startSampleInvestigation } from '@hold/db'
 import { mayApproveTogether, parseAmount, proposalMovesMoney } from '@hold/domain'
 import { z } from 'zod'
 import { sendWrittenAt } from '@/server/outbox-send'
 import { list, Refusal, shopAction, withLocale } from '@/server/shop-access'
 import type { ShopContext } from '@/server/shop-access'
+import { SAMPLE_INVESTIGATION_LIMITS } from './limits'
 
 // Every server function of the morning queue (extensions.md section 6.3, steps 5 and 6, and section 6.5). Each is built
 // by shopAction, which checks who is asking and their role before the work below runs. A test checks that this file
@@ -63,6 +64,20 @@ export const checkNow = shopAction({ name: 'operations.check_requested', roles: 
   const at = new Date()
   await queueOperationsCheck(transaction, at)
   return { at }
+}, handOn)
+
+// A demo's sample entries, investigated by the operations agent with PayPal's facts simulated (section 6.14). Each run
+// spends the account's daily Claude allowance, so this shop's, this network's and every demo's share is taken first.
+// Nothing here moves money: a sample entry, however it is worded, carries nothing out when approved.
+export const investigateSamples = shopAction({
+  name: 'operations.samples_investigated',
+  roles: DECIDERS,
+  needsPasskey: false,
+  input: withLocale({}),
+  dailyCaps: { refusal: 'samples_daily_cap', shares: (context, network, day) => [{ limit: SAMPLE_INVESTIGATION_LIMITS.perShop, subject: context.shop.id }, { limit: SAMPLE_INVESTIGATION_LIMITS.perNetwork, subject: network }, { limit: SAMPLE_INVESTIGATION_LIMITS.perDay, subject: day }] },
+}, async (_context, _input, transaction) => {
+  const started = await startSampleInvestigation(transaction, new Date())
+  return started.ok ? { at: started.at } : new Refusal(started.reason === 'running' ? 'samples_running' : 'no_samples')
 }, handOn)
 
 // The owner confirms a drafted rule as it is or below an amount they set, which starts from the proposal's amount.

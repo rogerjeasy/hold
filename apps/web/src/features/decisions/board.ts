@@ -2,6 +2,8 @@ import type { DecisionClaim, DecisionClaimLine, DecisionRecords, ExtensionAttent
 import { DETECTOR_KINDS, holdDay, holdStanding, mayConfirm, money, promiseStanding, proposalMovesMoney, settle } from '@hold/domain'
 import type { ApprovalAction, DetectorKind, ProposalKind, StaffRole } from '@hold/domain'
 import type { ContestView } from '@/features/contest/contest-summary-panel'
+import { entryMarks } from '@/features/operations/entry-marks'
+import type { EntryMark } from '@/features/operations/entry-marks'
 
 // The decision board (extensions.md section 12.5): every record that waits on a person, as one row each. What a row
 // asks, who may decide it from where the viewer stands, and when it falls due are read here from the records and the
@@ -18,7 +20,7 @@ export type BoardGroup = (typeof BOARD_GROUPS)[number]
 // Once the shop missed the date it promised the renter, the owner alone decides (architecture.md section 6.16).
 export type Decider = 'you' | 'senior' | 'another_senior' | 'owner' | 'staff'
 
-export type ProposalMark = 'raisedByAgent' | 'notInvestigated' | 'paypalNotChecked' | 'draftDropped'
+export type ProposalMark = EntryMark
 
 type Common = {
   readonly id: string
@@ -61,6 +63,8 @@ export type ProposalRow = Common & {
   readonly references: readonly string[]
   readonly draft: string | null
   readonly marks: readonly ProposalMark[]
+  // The model whose answer the entry carries, named by its marks; null for the detector's fixed reason.
+  readonly model: string | null
 }
 
 export type IncidentRow = Common & {
@@ -162,11 +166,6 @@ function claimRow(claim: DecisionClaim, viewer: Viewer, staffCount: number, now:
 
 function proposalRow(entry: QueueEntry, viewer: Viewer, now: Date): ProposalRow {
   const decider = seniorDecider(viewer)
-  const marks: ProposalMark[] = []
-  if (entry.raisedByAgent) marks.push('raisedByAgent')
-  if (entry.payload['investigated'] === 'no') marks.push('notInvestigated')
-  if (entry.payload['paypalChecked'] === 'no') marks.push('paypalNotChecked')
-  if (entry.payload['draftDropped'] === 'yes') marks.push('draftDropped')
   const fixed = entry.payload['fixedReason']
   return {
     id: `proposal:${entry.id}`,
@@ -188,7 +187,8 @@ function proposalRow(entry: QueueEntry, viewer: Viewer, now: Date): ProposalRow 
     reason: entry.reason,
     references: entry.references,
     draft: entry.draft,
-    marks,
+    marks: entryMarks(entry),
+    model: entry.model,
   }
 }
 

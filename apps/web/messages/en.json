@@ -3792,7 +3792,9 @@
       "raisedByAgent": "Observation raised by the agent",
       "notInvestigated": "Not investigated",
       "paypalNotChecked": "PayPal could not be checked",
-      "draftDropped": "Draft removed: its amounts did not match the records"
+      "draftDropped": "Draft removed: its amounts did not match the records",
+      "sampleNotInvestigated": "Sample entry: no model has looked at it yet",
+      "sampleInvestigated": "Investigated by {model} · PayPal facts simulated for a sample"
     },
     "openRental": "Open the rental",
     "approve": "Approve",
@@ -3862,7 +3864,10 @@
       "not_together": "Only releases can be approved together.",
       "rule_not_open": "This rule was already decided.",
       "amount_invalid": "That is not an amount above zero. Use digits, such as 10 or 10.50.",
-      "standing_rule_off": "The standing rule is already off."
+      "standing_rule_off": "The standing rule is already off.",
+      "samples_daily_cap": "Today's investigations of the samples are used, for this demo or across all demos. Each spends the account's daily Claude allowance, so try again tomorrow.",
+      "samples_running": "The samples are being investigated already. This page updates by itself.",
+      "no_samples": "No sample entry waits to be investigated."
     },
     "rules": {
       "title": "Rules from your rejections",
@@ -3893,6 +3898,18 @@
       "revoke": "Turn off",
       "revoked": "Standing rule off.",
       "ownerOnly": "Only the owner turns it on or off."
+    },
+    "samples": {
+      "title": "Investigate the samples",
+      "body": "The sample entries on this queue were written without a model. Ask the operations agent to investigate them as it does each night: Claude reads each sample's records, checks them with the PayPal read tools and writes its own reason. A sample's PayPal references were never on PayPal, so PayPal's facts are simulated from the sample. Nothing it writes moves money.",
+      "start": "Investigate the samples",
+      "starting": "Starting…",
+      "started": "Started. This page updates by itself when Claude has answered.",
+      "allowance": "It uses the demo's daily Claude allowance: once a day for each demo.",
+      "running": "Claude is investigating the samples, since {at}. This page updates by itself.",
+      "investigated": "{model} investigated {count, plural, one {# sample entry} other {# sample entries}} at {at}. They are on the queue below.",
+      "notAnswered": "Claude did not answer at {at}, so the sample entries stay as they were.",
+      "stalled": "The investigation started at {at} did not finish. You can start it again."
     }
   },
   "decisions": {

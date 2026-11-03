@@ -3792,7 +3792,9 @@
       "raisedByAgent": "Beobachtung des Agenten",
       "notInvestigated": "Nicht untersucht",
       "paypalNotChecked": "PayPal konnte nicht geprüft werden",
-      "draftDropped": "Entwurf entfernt: seine Beträge stimmten nicht mit den Unterlagen überein"
+      "draftDropped": "Entwurf entfernt: seine Beträge stimmten nicht mit den Unterlagen überein",
+      "sampleNotInvestigated": "Beispieleintrag: noch von keinem Modell geprüft",
+      "sampleInvestigated": "Geprüft von {model} · PayPal-Daten für ein Beispiel simuliert"
     },
     "openRental": "Vermietung öffnen",
     "approve": "Genehmigen",
@@ -3862,7 +3864,10 @@
       "not_together": "Nur Freigaben können gemeinsam genehmigt werden.",
       "rule_not_open": "Über diese Regel wurde bereits entschieden.",
       "amount_invalid": "Das ist kein Betrag über null. Verwenden Sie Ziffern, etwa 10 oder 10,50.",
-      "standing_rule_off": "Die Dauerregel ist bereits aus."
+      "standing_rule_off": "Die Dauerregel ist bereits aus.",
+      "samples_daily_cap": "Die heutigen Prüfungen der Beispiele sind verbraucht, für diese Demo oder für alle Demos. Jede verbraucht das tägliche Claude-Kontingent des Kontos, versuchen Sie es morgen wieder.",
+      "samples_running": "Die Beispiele werden bereits geprüft. Diese Seite aktualisiert sich von selbst.",
+      "no_samples": "Kein Beispieleintrag wartet auf eine Prüfung."
     },
     "rules": {
       "title": "Regeln aus Ihren Ablehnungen",
@@ -3893,6 +3898,18 @@
       "revoke": "Ausschalten",
       "revoked": "Dauerregel aus.",
       "ownerOnly": "Nur die Inhaberin oder der Inhaber schaltet sie ein oder aus."
+    },
+    "samples": {
+      "title": "Die Beispiele prüfen lassen",
+      "body": "Die Beispieleinträge in dieser Liste wurden ohne Modell geschrieben. Lassen Sie den Betriebsagenten sie prüfen, wie er es jede Nacht tut: Claude liest die Unterlagen jedes Beispiels, prüft sie mit den PayPal-Lesewerkzeugen und schreibt eine eigene Begründung. Die PayPal-Referenzen eines Beispiels gab es bei PayPal nie, daher werden die PayPal-Daten aus dem Beispiel simuliert. Nichts davon bewegt Geld.",
+      "start": "Die Beispiele prüfen lassen",
+      "starting": "Wird gestartet…",
+      "started": "Gestartet. Diese Seite aktualisiert sich, sobald Claude geantwortet hat.",
+      "allowance": "Das verbraucht das tägliche Claude-Kontingent der Demo: einmal am Tag je Demo.",
+      "running": "Claude prüft die Beispiele, seit {at}. Diese Seite aktualisiert sich von selbst.",
+      "investigated": "{model} hat um {at} {count, plural, one {# Beispieleintrag} other {# Beispieleinträge}} geprüft. Sie stehen unten in der Liste.",
+      "notAnswered": "Claude hat um {at} nicht geantwortet, die Beispieleinträge bleiben, wie sie waren.",
+      "stalled": "Die um {at} gestartete Prüfung wurde nicht beendet. Sie können sie erneut starten."
     }
   },
   "decisions": {

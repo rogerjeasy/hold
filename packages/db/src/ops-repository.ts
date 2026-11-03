@@ -13,16 +13,21 @@ export const OPS_AGENT_QUEUE = 'ops-agent'
 
 const DEFAULT_SETTINGS = { confirmCleanWithinHours: 4, invoiceUnpaidDays: 7, incidentWaitHours: 2 } as const
 
-// What the detectors read: the shop's own records, with what code read from PayPal beside them.
+// What the detectors read: the shop's own records, with what code read from PayPal beside them. A sample rental's
+// records are left out with the rental: its renter and its PayPal references were made up for the demonstration, so
+// nothing about it is worth a reminder, a PayPal read or the model's tokens.
 export async function shopSnapshot(transaction: Transaction, now: Date, fromPayPal: Pick<ShopSnapshot, 'disputes' | 'differences'>): Promise<ShopSnapshot> {
   const [shop] = await transaction.select({ opsSettings: shops.opsSettings }).from(shops).limit(1)
-  const rentalRows = await transaction.select({ id: rentals.id, state: rentals.state, endsAt: rentals.endsAt, renterId: rentals.renterId }).from(rentals).where(eq(rentals.simulated, false))
+  const real = eq(rentals.simulated, false)
+  const rentalRows = await transaction.select({ id: rentals.id, state: rentals.state, endsAt: rentals.endsAt, renterId: rentals.renterId }).from(rentals).where(real)
   const holdRows = await transaction.select({ id: holds.id, rentalId: holds.rentalId, state: holds.state, reservedCents: holds.reservedCents, currency: holds.currency, validUntil: authorizations.validUntil, stateChangedAt: holds.stateChangedAt, replacementOrderId: holds.replacementOrderId })
-    .from(holds).leftJoin(authorizations, eq(authorizations.id, holds.currentAuthorizationId))
+    .from(holds).innerJoin(rentals, eq(rentals.id, holds.rentalId)).leftJoin(authorizations, eq(authorizations.id, holds.currentAuthorizationId)).where(real)
   const comparisonRows = await transaction.select({ rentalId: rentalItems.rentalId, state: comparisons.state, completedAt: comparisons.completedAt, simulated: comparisons.simulated })
-    .from(comparisons).innerJoin(captureSessions, eq(captureSessions.id, comparisons.returnSessionId)).innerJoin(rentalItems, eq(rentalItems.id, captureSessions.rentalItemId))
-  const claimRows = await transaction.select({ id: claims.id, rentalId: claims.rentalId, state: claims.state, totalCents: claims.totalCents, currency: claims.currency, replyDueAt: claims.replyDueAt, decideBy: claims.decideBy, decidedAt: claims.decidedAt, promiseMissedAt: claims.promiseMissedAt }).from(claims)
-  const invoiceRows = await transaction.select({ id: invoices.id, claimId: invoices.claimId, rentalId: invoices.rentalId, state: invoices.state, amountCents: invoices.amountCents, sentAt: invoices.sentAt }).from(invoices)
+    .from(comparisons).innerJoin(captureSessions, eq(captureSessions.id, comparisons.returnSessionId)).innerJoin(rentalItems, eq(rentalItems.id, captureSessions.rentalItemId)).innerJoin(rentals, eq(rentals.id, rentalItems.rentalId)).where(real)
+  const claimRows = await transaction.select({ id: claims.id, rentalId: claims.rentalId, state: claims.state, totalCents: claims.totalCents, currency: claims.currency, replyDueAt: claims.replyDueAt, decideBy: claims.decideBy, decidedAt: claims.decidedAt, promiseMissedAt: claims.promiseMissedAt })
+    .from(claims).innerJoin(rentals, eq(rentals.id, claims.rentalId)).where(real)
+  const invoiceRows = await transaction.select({ id: invoices.id, claimId: invoices.claimId, rentalId: invoices.rentalId, state: invoices.state, amountCents: invoices.amountCents, sentAt: invoices.sentAt })
+    .from(invoices).innerJoin(rentals, eq(rentals.id, invoices.rentalId)).where(real)
   // An incident waits for staff from when it was sorted to them (extensions.md section 10).
   const incidentRows = await transaction.select({ id: incidents.id, rentalId: incidents.rentalId, waitingSince: sql<Date | null>`coalesce(${incidents.sortedAt}, ${incidents.sentAt})`.mapWith(incidents.sortedAt) })
     .from(incidents).where(and(eq(incidents.state, 'awaiting_staff'), eq(incidents.simulated, false)))
@@ -140,6 +145,8 @@ export type QueueEntry = {
   readonly references: readonly string[]
   readonly draft: string | null
   readonly raisedByAgent: boolean
+  // The model whose answer the entry carries; null when it carries the detector's fixed reason.
+  readonly model: string | null
   readonly deadline: Date | null
   readonly exceptionKind: string | null
   // Read from the records the proposal names, now; never from the proposal or the model.
@@ -169,7 +176,7 @@ export async function morningQueue(transaction: Transaction, now: Date): Promise
   const entries: QueueEntry[] = []
   for (const { proposal, deadline, exceptionKind, moneyCents } of rows) {
     const amount = await amountFor(transaction, proposal.kind, proposal.subjectKind, proposal.subjectId, proposal.rentalId)
-    entries.push({ id: proposal.id, kind: proposal.kind, subjectKind: proposal.subjectKind, subjectId: proposal.subjectId, rentalId: proposal.rentalId, reason: proposal.reason, references: proposal.references, draft: proposal.draft, raisedByAgent: proposal.raisedByAgent, deadline, exceptionKind, ...amount, moneyCents: amount.amountCents ?? moneyCents ?? 0, payload: proposal.payload })
+    entries.push({ id: proposal.id, kind: proposal.kind, subjectKind: proposal.subjectKind, subjectId: proposal.subjectId, rentalId: proposal.rentalId, reason: proposal.reason, references: proposal.references, draft: proposal.draft, raisedByAgent: proposal.raisedByAgent, model: proposal.model, deadline, exceptionKind, ...amount, moneyCents: amount.amountCents ?? moneyCents ?? 0, payload: proposal.payload })
   }
   return orderQueue(entries)
 }
@@ -294,10 +301,20 @@ export async function pendingProposals(transaction: Transaction, ids: readonly s
   return ids.length === 0 ? [] : transaction.select().from(proposals).where(and(inArray(proposals.id, [...ids]), eq(proposals.state, 'pending')))
 }
 
-// The holds PayPal still reserves money for, with the authorization each rests on: what the nightly check reads back.
+// The holds PayPal still reserves money for, with the authorization each rests on and how it was placed: what the
+// nightly check reads back. Not a sample's: its authorization was never on PayPal.
 export async function holdsToReconcile(transaction: Transaction) {
-  return transaction.select({ holdId: holds.id, rentalId: holds.rentalId, state: holds.state, authorizationId: authorizations.paypalAuthorizationId })
-    .from(holds).innerJoin(authorizations, eq(authorizations.id, holds.currentAuthorizationId)).where(inArray(holds.state, ['placed', 'at_risk']))
+  return transaction.select({ holdId: holds.id, rentalId: holds.rentalId, state: holds.state, strategy: holds.strategy, authorizationId: authorizations.paypalAuthorizationId })
+    .from(holds).innerJoin(authorizations, eq(authorizations.id, holds.currentAuthorizationId)).innerJoin(rentals, eq(rentals.id, holds.rentalId))
+    .where(and(inArray(holds.state, ['placed', 'at_risk']), eq(rentals.simulated, false)))
+}
+
+// Which of these exceptions already have a proposal waiting for the owner: a run asks the model about none of them
+// again, since what it would write is already on the queue.
+export async function exceptionsAwaitingOwner(transaction: Transaction, exceptionIds: readonly string[]): Promise<ReadonlySet<string>> {
+  if (exceptionIds.length === 0) return new Set()
+  const rows = await transaction.select({ exceptionId: proposals.exceptionId }).from(proposals).where(and(inArray(proposals.exceptionId, [...exceptionIds]), eq(proposals.state, 'pending')))
+  return new Set(rows.flatMap((row) => (row.exceptionId === null ? [] : [row.exceptionId])))
 }
 
 // Which rental each captured payment belongs to, so a dispute PayPal names by its capture finds its rental.

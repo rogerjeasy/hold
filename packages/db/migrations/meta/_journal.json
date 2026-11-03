@@ -323,6 +323,13 @@
       "when": 1793665100000,
       "tag": "0045_rate_tokens_left",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "7",
+      "when": 1793670000000,
+      "tag": "0046_sample_investigation",
+      "breakpoints": true
     }
   ]
 }
