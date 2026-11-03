@@ -37,9 +37,9 @@ export function BookingForm({ types, currency, days, from, to, startsToday = fal
       <input type="hidden" name="startsAt" value={from} />
       <input type="hidden" name="endsAt" value={to} />
       <BookingLines types={types} currency={currency} days={days} />
-      <fieldset className="grid gap-4">
-        <legend className="text-title">{t('renter')}</legend>
-        <p className="max-w-prose text-muted-foreground">{t('renterHelp')}</p>
+      <fieldset className="surface grid gap-4 p-4 md:p-6">
+        <legend className="float-left mb-1 w-full text-xl font-extrabold tracking-tight">{t('renter')}</legend>
+        <p className="max-w-prose text-pretty text-muted-foreground">{t('renterHelp')}</p>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="grid min-w-0 gap-1.5">
             <Label htmlFor="contactName">{t('name')}</Label>
@@ -75,7 +75,7 @@ export function BookingForm({ types, currency, days, from, to, startsToday = fal
         </div>
       ) : null}
       <div className="grid gap-3">
-        <Button type="submit" disabled={pending} className="min-h-12 justify-self-start">
+        <Button type="submit" disabled={pending} className="min-h-12 max-sm:w-full sm:justify-self-start">
           {pending ? t('booking') : t('book')}
         </Button>
         <ActionMessage result={result} success={t('booked')} results="shop.rentals.results" />

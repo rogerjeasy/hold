@@ -1,9 +1,12 @@
 'use client'
 import type { ClaimMessage, ClaimPromise, ClaimWorkspace, ShopNegotiation } from '@hold/db'
+import type { ApprovalRefused } from '@hold/domain'
 import { formatMoney, money } from '@hold/domain'
+import { FileText, Gavel, LoaderCircle, LockKeyhole, Quote } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
-import { PhotoWithMarks } from '@/components/photo-with-marks'
+import { BackLink } from '@/components/ui/back-link'
+import { Button } from '@/components/ui/button'
 import { Notice } from '@/components/ui/notice'
 import { Panel } from '@/components/ui/panel'
 import { ShopFrame } from '@/features/shop/shop-frame'
@@ -11,28 +14,35 @@ import { PasskeyGate } from '@/features/shop/passkey-gate'
 import { useLookAgain } from '@/hooks/use-look-again'
 import { Link } from '@/i18n/navigation'
 import { rentalRoutes } from '@/lib/routes'
-import { ApproveClaimForm, CleanReleaseForm, DecideClaimForm } from './claim-controls'
+import { ApproveClaimForm, DecideClaimForm } from './claim-controls'
 import type { SampleAdvocatesAllowance } from '@/features/negotiation/limits'
 import type { RecordedRun } from '@/features/negotiation/recorded-run'
 import { RecordedRunView } from '@/features/negotiation/recorded-run-view'
 import { SampleAdvocatesForm } from '@/features/negotiation/sample-advocates-form'
 import { ShopConfirmForm } from '@/features/negotiation/shop-confirm-form'
 import { TranscriptView } from '@/features/negotiation/transcript-view'
-import { ClaimDraftForm } from './claim-draft-form'
 import { ContestSummaryPanel } from '@/features/contest/contest-summary-panel'
 import type { ContestView } from '@/features/contest/contest-summary-panel'
 import { ClaimConversation } from '@/features/promise/claim-conversation'
 import { PromiseStatus } from '@/features/promise/promise-status'
+import { ClaimLines } from './claim-lines'
+import { claimRefusals } from './claim-permissions'
+import type { ClaimViewer } from './claim-permissions'
+import { ClaimStart } from './claim-start'
+import { SettlementMeter } from './settlement-meter'
 
 // Whether this session must still be proven by a passkey before a money decision, and how to offer it.
 type PasskeyState = { readonly needed: boolean; readonly hasPasskey: boolean; readonly email: string }
 type SampleAdvocates = { readonly allowance: SampleAdvocatesAllowance; readonly recording: RecordedRun | undefined }
 
-// A line's box is drawn only on the photograph it was found or drawn on: the return photograph for a finding (the
-// comparison's frame), the renter's own for a reported mark. The handover photograph may be turned against it.
+type ClaimScreenProps = { shopName: string; timeZone?: string; data: ClaimWorkspace; canAct: boolean; canDecide?: boolean; photoUrls?: Readonly<Record<string, string>>; passkey?: PasskeyState; negotiation?: ShopNegotiation; contest?: ContestView; promise?: ClaimPromise | null; messages?: readonly ClaimMessage[]; renterName?: string | null; isOwner?: boolean; now?: Date | undefined; sampleAdvocates?: SampleAdvocates; viewer?: ClaimViewer }
+
+const SENIOR = ['owner', 'manager']
+
 // contest: the neutral summary of the renter's contest, shown above the decision (architecture.md section 6.15).
 // sampleAdvocates: on a sample claim that waits for its reply, today's live runs left and the recorded live run.
-export function ClaimScreen({ shopName, timeZone = 'UTC', data, canAct, canDecide = false, photoUrls = {}, passkey, negotiation, contest, promise = null, messages, renterName = null, isOwner = false, now, sampleAdvocates }: { shopName: string; timeZone?: string; data: ClaimWorkspace; canAct: boolean; canDecide?: boolean; photoUrls?: Readonly<Record<string, string>>; passkey?: PasskeyState; negotiation?: ShopNegotiation; contest?: ContestView; promise?: ClaimPromise | null; messages?: readonly ClaimMessage[]; renterName?: string | null; isOwner?: boolean; now?: Date | undefined; sampleAdvocates?: SampleAdvocates }) {
+// viewer: who is reading, so the page offers only the decisions the server would let them take (audit finding JW-M4).
+export function ClaimScreen({ shopName, timeZone = 'UTC', data, canAct, canDecide = false, photoUrls = {}, passkey, negotiation, contest, promise = null, messages, renterName = null, isOwner = false, now, sampleAdvocates, viewer }: ClaimScreenProps) {
   const t = useTranslations('claim'); const locale = useLocale()
   const records = useTranslations('records')
   const advocates = useTranslations('negotiation')
@@ -49,34 +59,75 @@ export function ClaimScreen({ shopName, timeZone = 'UTC', data, canAct, canDecid
   // Once the shop missed the date it promised the renter, only the owner decides, and the renter reads the reason.
   const promiseMissed = promise?.standing === 'missed'
   const ownerOnly = promiseMissed && !isOwner
+  // A renter's contest of a claim already charged early is decided as a contested claim is.
+  const protectedContest = claim !== null && ['charging', 'charged', 'charge_failed'].includes(claim.state) && data.protectedReply && data.replies.some((reply) => reply.decision === 'contest')
+  const contested = claim !== null && (['contested', 'escalated'].includes(claim.state) || protectedContest)
+  const refusals = viewer === undefined || claim === null ? { approve: null, decide: null } : claimRefusals(viewer, claim, data.currency, contested, promiseMissed)
+  const seniorConfirms = viewer === undefined || SENIOR.includes(viewer.role)
+  const approvable = claim !== null && ['awaiting_approval', 'approved', 'presented'].includes(claim.state)
+  const decidable = claim !== null && !ownerOnly && (claim.state === 'awaiting_approval' || contested)
   const claimForms = claim === null || !canAct ? [] : [
-    ['awaiting_approval', 'approved', 'presented'].includes(claim.state) ? <ApproveClaimForm key="approve" claimId={claim.id} /> : null,
-    !ownerOnly && (['awaiting_approval', 'contested', 'escalated'].includes(claim.state) || (['charging', 'charged', 'charge_failed'].includes(claim.state) && data.protectedReply && data.replies.some((reply) => reply.decision === 'contest'))) ? <DecideClaimForm key="decide" claim={claim} reasonShownToRenter={promiseMissed} /> : null,
-    negotiation?.awaitingShop === true ? <ShopConfirmForm key="confirm" negotiationId={negotiation.transcript.id} agreed={amount(negotiation.transcript.agreedCents ?? 0)} /> : null,
+    approvable && refusals.approve === null ? <ApproveClaimForm key="approve" claimId={claim.id} /> : null,
+    decidable && refusals.decide === null ? <DecideClaimForm key="decide" claim={claim} reasonShownToRenter={promiseMissed} /> : null,
+    negotiation?.awaitingShop === true && seniorConfirms ? <ShopConfirmForm key="confirm" negotiationId={negotiation.transcript.id} agreed={amount(negotiation.transcript.agreedCents ?? 0)} /> : null,
   ].filter((form) => form !== null)
-  return <ShopFrame shopName={shopName} title={t('title')}><div className="grid gap-6">
-    <Link href={rentalRoutes.rental(data.rentalId)} className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{t('back')}</Link>
-    <Link href={rentalRoutes.record(data.rentalId)} className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{records('title')}</Link>
+  // What this person may not decide here, each said once, in place of a button the server would refuse.
+  const notYours = (claim === null || !canAct ? [] : [
+    approvable && refusals.approve !== null ? refusalWords(refusals.approve, 'approve') : null,
+    decidable && refusals.decide !== null ? refusalWords(refusals.decide, contested ? 'decide' : 'waive') : null,
+    negotiation?.awaitingShop === true && !seniorConfirms ? ('confirmSenior' as const) : null,
+  ]).filter((key): key is LimitKey => key !== null)
+  const limit = viewer === undefined ? '' : amount(viewer.approvalLimitCents)
+
+  return <ShopFrame shopName={shopName} title={t('title')} actions={<>
+    <BackLink href={rentalRoutes.rental(data.rentalId)}>{t('back')}</BackLink>
+    <Button asChild variant="ghost"><Link href={rentalRoutes.record(data.rentalId)}><FileText aria-hidden="true" />{records('title')}</Link></Button>
+  </>}><div className="grid gap-6">
     {data.simulated ? <Notice title={t('sampleTitle')} body={t('sampleBody')} /> : null}
     <Notice title={t('humanDecision')} body={t('boundary')} />
     {promise === null ? null : <PromiseStatus promise={promise} audience="shop" claimState={data.claim?.state ?? 'contested'} shopName={shopName} timeZone={timeZone} now={now ?? new Date()} />}
-    {data.rentalState === 'closed' ? <Notice title={t('settled')} body={t('settledBody')} /> : null}
-    {pending ? <p role="status">{t('pending')}</p> : null}
-    {data.execution?.state === 'failed' ? <Notice title={t('failed')} body={t('failedBody')} /> : null}
-    <Panel title={t('summary')}><dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-3 px-4 py-4 md:px-5"><dt>{t('reserved')}</dt><dd className="figures">{amount(data.reservedCents)}</dd><dt>{t('capture')}</dt><dd className="figures">{amount(data.amounts.capture.cents)}</dd><dt>{t('release')}</dt><dd className="figures">{amount(data.amounts.release.cents)}</dd>{data.amounts.invoice.cents > 0 ? <><dt>{t('invoice')}</dt><dd className="figures">{amount(data.amounts.invoice.cents)}</dd></> : null}</dl></Panel>
-    {data.claim === null ? canAct && !data.simulated && ['returned', 'inspecting'].includes(data.rentalState) ? <><Panel title={t('cleanTitle')}><div className="p-4 md:p-5">{decision(<CleanReleaseForm rentalId={data.rentalId} />)}</div></Panel><Panel title={t('draftTitle')}><div className="p-4 md:p-5"><ClaimDraftForm data={data} /></div></Panel></> : <p>{t('noClaim')}</p> : <>
-      {contest === undefined ? null : <ContestSummaryPanel view={contest} audience="shop" timeZone={timeZone} rentalId={data.rentalId} canRewrite={canDecide} photos={Object.fromEntries(data.lines.map((line) => [line.id, { before: line.beforeKey === null ? null : (photoUrls[line.beforeKey] ?? null), after: line.afterKey === null ? null : (photoUrls[line.afterKey] ?? null), region: line.region }]))} />}
-      <Panel title={t(`states.${data.claim.state}`)}><div className="grid gap-4 p-4 md:p-5"><ul className="grid gap-4">{data.lines.map((line) => <li key={line.id} className="grid min-w-0 gap-1 border-b pb-3"><p className="font-semibold wrap-long-words">{line.description} · {amount(line.amountCents)}</p>{line.source === 'agreed_in_rental' ? <p className="text-sm font-semibold">{t('agreed.drafted')}</p> : null}<p className="whitespace-pre-wrap wrap-long-words">{line.reason ?? line.findingDescription ?? line.incidentDescription}</p><p className="text-sm text-muted-foreground">{t('namedBy', { name: line.actorName ?? t('staff') })}</p><div className="grid gap-4 sm:grid-cols-2">{(['beforeKey', 'afterKey'] as const).map((side) => { const key = line[side]; const url = key === null ? undefined : photoUrls[key]; const label = t(side === 'beforeKey' ? 'beforeUrl' : 'afterUrl'); return url === undefined ? null : <figure key={side}><figcaption className="mb-2 font-semibold">{label}</figcaption><PhotoWithMarks src={url} alt={label} marks={line.region === null || side === 'beforeKey' ? [] : [{ id: line.id, region: line.region }]} /></figure> })}</div></li>)}</ul>
-        {data.decisions.map((decision, index) => <p key={index}>{t('decisionBy', { name: decision.name ?? t('staff') })}</p>)}
-        {data.replies.map((reply, index) => <blockquote key={index} className="min-w-0 whitespace-pre-wrap border-l-2 pl-3 wrap-long-words">{reply.comment}</blockquote>)}
-        {negotiation?.transcript.state === 'agreed' && negotiation.transcript.shopConfirmedAt !== null ? <p role="status">{advocates('confirm.waiting')}</p> : null}
-        {ownerOnly && canAct ? <p>{promiseText('ownerOnly')}</p> : null}
-        {claimForms.length === 0 ? null : decision(<div className="grid gap-4">{claimForms}</div>)}
-        {/* Moves no money, so it never waits behind the passkey that guards the forms above. */}
-        {sampleAdvocates !== undefined && data.simulated && data.claim.state === 'presented' && negotiation === undefined && canAct && canDecide ? <SampleAdvocatesForm rentalId={data.rentalId} allowance={sampleAdvocates.allowance} /> : null}
-      </div></Panel>
-      {messages === undefined ? null : <ClaimConversation audience="shop" rentalId={data.rentalId} messages={messages} shopName={shopName} renterName={renterName} timeZone={timeZone} canWrite={canAct && data.claim.state !== 'closed'} />}
-      {negotiation !== undefined ? <TranscriptView transcript={negotiation.transcript} /> : data.simulated && sampleAdvocates?.recording !== undefined ? <RecordedRunView run={sampleAdvocates.recording} /> : null}
-    </>}
+    {data.rentalState === 'closed' ? <Notice tone="success" title={t('settled')} body={t('settledBody')} /> : null}
+    {pending ? <p role="status" className="flex items-center gap-2.5 justify-self-start rounded-full bg-primary/10 px-4 py-2 font-semibold text-primary"><LoaderCircle aria-hidden="true" className="size-4.5 shrink-0 animate-spin" />{t('pending')}</p> : null}
+    {data.execution?.state === 'failed' ? <Notice tone="destructive" title={t('failed')} body={t('failedBody')} /> : null}
+    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+      <div className="grid min-w-0 gap-6">
+        {claim === null ? canAct && !data.simulated && ['returned', 'inspecting'].includes(data.rentalState) ? <ClaimStart data={data} decision={decision} /> : <div className="surface px-5 py-8 text-center text-muted-foreground">{t('noClaim')}</div> : <>
+          {contest === undefined ? null : <ContestSummaryPanel view={contest} audience="shop" timeZone={timeZone} rentalId={data.rentalId} canRewrite={canDecide} photos={Object.fromEntries(data.lines.map((line) => [line.id, { before: line.beforeKey === null ? null : (photoUrls[line.beforeKey] ?? null), after: line.afterKey === null ? null : (photoUrls[line.afterKey] ?? null), region: line.region }]))} />}
+          <Panel title={t(`states.${claim.state}`)} icon={Gavel}>
+            <div className="grid gap-5 p-4 md:p-5">
+              <ClaimLines lines={data.lines} currency={data.currency} photoUrls={photoUrls} />
+              {data.decisions.length === 0 ? null : <ul className="grid gap-1.5">{data.decisions.map((each, index) => <li key={index} className="text-sm text-muted-foreground">{t('decisionBy', { name: each.name ?? t('staff') })}</li>)}</ul>}
+              {data.replies.map((reply, index) => <blockquote key={index} className="flex min-w-0 gap-3 rounded-xl bg-muted/60 px-4 py-3"><Quote aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-muted-foreground" /><span className="min-w-0 whitespace-pre-wrap wrap-long-words">{reply.comment}</span></blockquote>)}
+              {negotiation?.transcript.state === 'agreed' && negotiation.transcript.shopConfirmedAt !== null ? <p role="status" className="font-semibold">{advocates('confirm.waiting')}</p> : null}
+              {ownerOnly && canAct ? <p className="flex gap-2 text-muted-foreground"><LockKeyhole aria-hidden="true" className="mt-0.5 size-4 shrink-0" />{promiseText('ownerOnly')}</p> : null}
+              {notYours.length === 0 ? null : <ul className="grid gap-2">{notYours.map((key) => <li key={key} className="flex gap-2.5 rounded-xl border border-dashed border-border-strong px-3.5 py-3 text-[0.9375rem] text-muted-foreground"><LockKeyhole aria-hidden="true" className="mt-0.5 size-4 shrink-0" /><span className="min-w-0 text-pretty">{t(`limits.${key}`, { limit })}</span></li>)}</ul>}
+              {claimForms.length === 0 ? null : <div className="border-t border-border/70 pt-5">{decision(<div className="grid gap-6">{claimForms}</div>)}</div>}
+              {/* Moves no money, so it never waits behind the passkey that guards the forms above. */}
+              {sampleAdvocates !== undefined && data.simulated && claim.state === 'presented' && negotiation === undefined && canAct && canDecide ? <div className="border-t border-border/70 pt-5"><SampleAdvocatesForm rentalId={data.rentalId} allowance={sampleAdvocates.allowance} /></div> : null}
+            </div>
+          </Panel>
+          {messages === undefined ? null : <ClaimConversation audience="shop" rentalId={data.rentalId} messages={messages} shopName={shopName} renterName={renterName} timeZone={timeZone} canWrite={canAct && claim.state !== 'closed'} />}
+          {negotiation !== undefined ? <TranscriptView transcript={negotiation.transcript} /> : data.simulated && sampleAdvocates?.recording !== undefined ? <RecordedRunView run={sampleAdvocates.recording} /> : null}
+        </>}
+      </div>
+      {/* The amounts come first on a phone, and stay beside the claim from lg. */}
+      <div className="min-w-0 max-lg:order-first lg:sticky lg:top-6"><SettlementMeter data={data} /></div>
+    </div>
   </div></ShopFrame>
+}
+
+type LimitKey = 'overLimit' | 'seniorApproves' | 'seniorDecides' | 'seniorWaives' | 'raisedIt' | 'confirmSenior'
+
+// The words for why a decision is not this person's. A missed promise is already said by the promise itself.
+function refusalWords(refused: ApprovalRefused, decision: 'approve' | 'decide' | 'waive'): LimitKey | null {
+  switch (refused.kind) {
+    case 'over_approval_limit':
+      return 'overLimit'
+    case 'raised_the_claim':
+      return 'raisedIt'
+    case 'owner_decides_after_promise':
+      return null
+    case 'role_may_not_confirm':
+      return decision === 'approve' ? 'seniorApproves' : decision === 'decide' ? 'seniorDecides' : 'seniorWaives'
+  }
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import { Mail, MessageSquare, QrCode } from 'lucide-react'
+import { Link2, Mail, MessageSquare, QrCode } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useActionState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -25,15 +25,16 @@ export function LinkPanel({ rentalId, contact, paid, walkIn = false, held = fals
   const Icon = contact?.channel === 'text' ? MessageSquare : Mail
 
   return (
-    <Panel title={t('title')}>
-      <div className="grid gap-4 px-4 py-4 md:px-5">
+    <Panel title={t('title')} icon={Link2}>
+      <div className="grid gap-4 px-4 py-5 md:px-5">
         {held ? <Notice tone="warning" title={t('heldTitle')} body={t('heldBody')} /> : null}
-        <p className="text-muted-foreground">{paid ? t('paid') : walkIn ? t('walkIn') : t('body')}</p>
+        <p className="text-pretty text-muted-foreground">{paid ? t('paid') : walkIn ? t('walkIn') : t('body')}</p>
         <div className="flex flex-wrap gap-2">
           <form action={show}>
             <input type="hidden" name="locale" value={locale} />
             <input type="hidden" name="rentalId" value={rentalId} />
-            <Button type="submit" disabled={showing}>
+            {/* Before the fee is paid the link is the next step; after, asking for the hold is, so the link steps back. */}
+            <Button type="submit" variant={paid ? 'outline' : 'default'} disabled={showing}>
               <QrCode aria-hidden="true" />
               {showing ? t('showing') : t('show')}
             </Button>

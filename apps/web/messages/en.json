@@ -1588,7 +1588,8 @@
         "out": "Out",
         "returned": "Returned",
         "done": "Done",
-        "none": "No rentals here."
+        "none": "No rentals here.",
+        "noneBody": "Nothing in this part of a rental's life right now. Choose another, or show them all."
       },
       "columns": {
         "who": "Renter",
@@ -1655,7 +1656,10 @@
         "toDo": "Not yet",
         "lapsedNote": "The time to pay ran out, so the items are no longer kept. The renter can still pay while nobody else has booked them.",
         "assistant": "By the renter's own assistant",
-        "erasedRenter": "Personal details erased"
+        "erasedRenter": "Personal details erased",
+        "runs": "{start} – {end}",
+        "paidBy": "Paid by {name}",
+        "stepOf": "Step {number} of {total}: {step}"
       },
       "link": {
         "title": "The renter's link",
@@ -2224,7 +2228,9 @@
         "back": "Back to the rental",
         "sealedNote": "Sealed. These photographs can no longer change.",
         "texted": "The renter has been texted the condition report. They can also scan this code."
-      }
+      },
+      "lead": "Photograph each view inside the outline, box any mark already there, then seal.",
+      "progress": "{done} of {total} views photographed"
     },
     "returns": {
       "title": "Return inspection",
@@ -2337,7 +2343,8 @@
         "started": "The comparison has started.",
         "left": "{count, plural, one {# real comparison left today from your network} other {# real comparisons left today from your network}}. Each spends part of the account's daily Claude allowance.",
         "noneTitle": "No real comparison left today"
-      }
+      },
+      "marked": "{count, plural, one {# mark found} other {# marks found}}"
     },
     "incidents": {
       "title": "Incidents",
@@ -3256,6 +3263,19 @@
       "adjusted": "Adjusted",
       "waived": "The shop waived this claim",
       "closed": "Closed"
+    },
+    "cleanAnyway": "If you inspected the item in person and it is fine, you can still release the whole hold. You will be asked to write what you checked.",
+    "releaseAnyway": "Release the hold without a claim",
+    "keepHold": "Keep the hold",
+    "damagedTitle": "Possible new damage found",
+    "damagedBody": "The comparison found something new, or the renter agreed a line during the rental. Prepare a claim from the evidence; a person still approves it before the renter sees it.",
+    "limits": {
+      "overLimit": "This claim is over your approval limit of {limit}, so an owner or manager approves it.",
+      "seniorApproves": "An owner or manager approves this claim.",
+      "seniorDecides": "An owner or manager decides a contested claim.",
+      "seniorWaives": "Only an owner, a manager or the person who prepared this claim can waive it.",
+      "raisedIt": "You prepared this claim, so another owner or manager decides it.",
+      "confirmSenior": "An owner or manager confirms what the advocates agreed."
     }
   },
   "scorecard": {

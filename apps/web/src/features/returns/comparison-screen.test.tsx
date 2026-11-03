@@ -14,6 +14,13 @@ describe('the comparison review screen', () => {
     expect(screen.queryByRole('button', { name: /charge|capture|release/i })).not.toBeInTheDocument()
     expect(screen.getByLabelText('Your inspection notes')).toBeInTheDocument()
   })
+  // Found in the audit: views headed by their keys ("frame-left", "frame-drive-side").
+  it('heads each view with its name in words, never its key, even for a view the plan does not name', () => {
+    renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={{ ...report, before: [...report.before, { view: 'frame-drive-side', url: '/before-2.jpg' }], after: [...report.after, { view: 'frame-drive-side', url: '/after-2.jpg' }] }} canAct />)
+    expect(screen.getByRole('heading', { name: 'Left side' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Frame drive side' })).toBeInTheDocument()
+    expect(screen.queryByText('frame-drive-side')).not.toBeInTheDocument()
+  })
   it('shows simulation and preparation explicitly and leaves read-only members no form', () => {
     renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={{ ...report, simulated: true, modelAnswered: false, state: 'pending' }} canAct={false} />)
     expect(screen.getByText('Simulated comparison')).toBeInTheDocument()

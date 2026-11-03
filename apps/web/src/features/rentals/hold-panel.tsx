@@ -2,11 +2,12 @@
 
 import type { RentalHold } from '@hold/db'
 import type { RentalState } from '@hold/domain'
-import { CircleAlert, CircleCheck, LoaderCircle, QrCode } from 'lucide-react'
+import { CircleAlert, LoaderCircle, LockKeyhole, QrCode, ShieldCheck } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { useActionState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Panel } from '@/components/ui/panel'
+import { StatusPill } from '@/components/ui/status-pill'
 import { ActionMessage } from '@/features/shop/action-message'
 import { useLookAgain } from '@/hooks/use-look-again'
 import type { ShopClock } from '@/hooks/use-shop-format'
@@ -41,21 +42,28 @@ export function HoldPanel({ rentalId, state, holdCents, hold, clock }: HoldPanel
 
   if (hold?.state === 'placed') {
     return (
-      <Panel title={t('title')}>
-        <div className="grid gap-3 px-4 py-4 md:px-5">
-          <p className="flex items-start gap-2 font-semibold">
-            <CircleCheck aria-hidden="true" className="mt-0.5 size-4.5 shrink-0 text-primary" />
-            {t('placed', { amount })}
-          </p>
-          {state === 'ready' ? <p className="text-muted-foreground">{t('ready')}</p> : null}
+      <Panel title={t('title')} icon={ShieldCheck}>
+        <div className="grid gap-4 px-4 py-5 md:px-5">
+          <div className="grid animate-pop gap-1">
+            <p className="text-figure tabular-nums wrap-long-words">{amount}</p>
+            <p className="flex items-start gap-2 text-[0.9375rem] font-semibold">
+              <LockKeyhole aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-success" />
+              {t('placed', { amount })}
+            </p>
+          </div>
+          {state === 'ready' ? <StatusPill tone="success" className="justify-self-start">{t('ready')}</StatusPill> : null}
           <HoldReason hold={hold} money={format.money} audience="staff" />
-          {hold.orderId === null ? null : <p className="border-l-2 border-primary pl-3">{t('replacing')}</p>}
+          {hold.orderId === null ? null : <p className="rounded-xl bg-warning/10 px-3 py-2.5 text-[0.9375rem] text-pretty">{t('replacing')}</p>}
           {hold.assuredUntil === null || hold.validUntil === null ? null : (
-            <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
-              <dt className="text-muted-foreground">{t('assuredUntil')}</dt>
-              <dd className="figures">{format.day(hold.assuredUntil)}</dd>
-              <dt className="text-muted-foreground">{t('validUntil')}</dt>
-              <dd className="figures">{format.day(hold.validUntil)}</dd>
+            <dl className="grid grid-cols-2 gap-2">
+              <div className="min-w-0 rounded-xl bg-muted/70 px-3 py-2.5">
+                <dt className="text-xs text-muted-foreground">{t('assuredUntil')}</dt>
+                <dd className="figures mt-0.5 font-semibold">{format.day(hold.assuredUntil)}</dd>
+              </div>
+              <div className="min-w-0 rounded-xl bg-muted/70 px-3 py-2.5">
+                <dt className="text-xs text-muted-foreground">{t('validUntil')}</dt>
+                <dd className="figures mt-0.5 font-semibold">{format.day(hold.validUntil)}</dd>
+              </div>
             </dl>
           )}
         </div>
@@ -64,15 +72,15 @@ export function HoldPanel({ rentalId, state, holdCents, hold, clock }: HoldPanel
   }
 
   return (
-    <Panel title={t('title')}>
-      <div className="grid gap-4 px-4 py-4 md:px-5">
+    <Panel title={t('title')} icon={ShieldCheck}>
+      <div className="grid gap-4 px-4 py-5 md:px-5">
         {waiting ? (
-          <p role="status" className="flex items-start gap-2">
-            <LoaderCircle aria-hidden="true" className="mt-0.5 size-4.5 shrink-0 animate-spin text-muted-foreground" />
+          <p role="status" className="flex items-start gap-2.5 rounded-xl bg-primary/8 px-3 py-2.5 font-medium">
+            <LoaderCircle aria-hidden="true" className="mt-0.5 size-4.5 shrink-0 animate-spin text-primary" />
             {t('waiting', { amount })}
           </p>
         ) : (
-          <p className="text-muted-foreground">{t('body', { amount })}</p>
+          <p className="text-pretty text-muted-foreground">{t('body', { amount })}</p>
         )}
         {hold === undefined ? null : <HoldReason hold={hold} money={format.money} audience="staff" />}
         {hold?.placementFailure === null || hold?.placementFailure === undefined ? null : (
@@ -84,7 +92,7 @@ export function HoldPanel({ rentalId, state, holdCents, hold, clock }: HoldPanel
         <form action={ask}>
           <input type="hidden" name="locale" value={locale} />
           <input type="hidden" name="rentalId" value={rentalId} />
-          <Button type="submit" disabled={asking} className="whitespace-normal">
+          <Button type="submit" variant={state === 'awaiting_hold' || shown?.ok === true ? 'outline' : 'default'} disabled={asking} className="max-sm:w-full">
             <QrCode aria-hidden="true" />
             {asking ? t('asking') : state === 'awaiting_hold' || shown?.ok === true ? t('again') : t('ask')}
           </Button>

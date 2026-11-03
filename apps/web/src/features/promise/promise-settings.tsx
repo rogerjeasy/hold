@@ -25,7 +25,7 @@ export function PromiseSettingsSection({ shopName, days, waiver, canEdit, gate }
         <p className="label text-xs text-muted-foreground">{t('preview')}</p>
         <PromiseBeforeContest shopName={shopName} days={days} />
       </div>
-      <div className="grid gap-3 border-t pt-5">
+      <div className="grid gap-3 border-t border-border/70 pt-5">
         <h3 className="text-lg leading-tight font-extrabold tracking-tight">{t('waiver.title')}</h3>
         <p className="max-w-prose text-pretty text-muted-foreground">{t('waiver.lead')}</p>
         <p className="font-semibold">{waiver === null ? t('waiver.off') : t('waiver.live', { until: format.dateTime(waiver.validUntil, { dateStyle: 'medium' }), count: waiver.dailyCount })}</p>

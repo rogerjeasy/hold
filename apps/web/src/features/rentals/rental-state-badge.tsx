@@ -1,33 +1,34 @@
 import type { RentalState } from '@hold/domain'
-import { cn } from 'cn'
-import { ArrowDownLeft, ArrowUpRight, CircleCheck, Clock, Hourglass, MapPin, ScanSearch, TriangleAlert, XCircle } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { StatusPill } from '@/components/ui/status-pill'
+import type { StatusTone } from '@/components/ui/status-pill'
 
-const ICONS: Readonly<Record<RentalState, LucideIcon>> = {
-  pending_payment: Hourglass,
-  booked: CircleCheck,
-  awaiting_hold: Clock,
-  ready: CircleCheck,
-  out: ArrowUpRight,
-  overdue: TriangleAlert,
-  dropped_off: MapPin,
-  returned: ArrowDownLeft,
-  inspecting: ScanSearch,
-  settling: ScanSearch,
-  closed: CircleCheck,
-  cancelled: XCircle,
-  abandoned: XCircle,
+// Each state's tone: waiting on someone, moving along, needing a person, done, or stopped.
+const TONES: Readonly<Record<RentalState, StatusTone>> = {
+  pending_payment: 'attention',
+  booked: 'progress',
+  awaiting_hold: 'attention',
+  ready: 'progress',
+  out: 'progress',
+  overdue: 'danger',
+  dropped_off: 'attention',
+  returned: 'attention',
+  inspecting: 'attention',
+  settling: 'progress',
+  closed: 'success',
+  cancelled: 'neutral',
+  abandoned: 'neutral',
 }
 
-// Where a rental stands, as an icon and words. An unpaid booking past its time says so.
-export function RentalStateBadge({ state, lapsed }: { state: RentalState; lapsed: boolean }) {
+// Someone is waiting on these right now, so the dot pulses.
+const LIVE: ReadonlySet<RentalState> = new Set(['awaiting_hold', 'overdue', 'dropped_off'])
+
+// Where a rental stands, in words on a tinted pill. An unpaid booking past its time says so.
+export function RentalStateBadge({ state, lapsed, className }: { state: RentalState; lapsed: boolean; className?: string }) {
   const t = useTranslations('rentalStates')
-  const Icon = lapsed ? XCircle : ICONS[state]
   return (
-    <span className={cn('inline-flex items-center gap-1.5 text-sm font-semibold', (state === 'overdue' || state === 'pending_payment') && !lapsed && 'text-warning', (lapsed || state === 'abandoned' || state === 'cancelled') && 'text-muted-foreground')}>
-      <Icon aria-hidden="true" className="size-4 shrink-0" />
+    <StatusPill tone={lapsed ? 'neutral' : TONES[state]} live={!lapsed && LIVE.has(state)} className={className}>
       {lapsed ? t('lapsed') : t(state)}
-    </span>
+    </StatusPill>
   )
 }

@@ -31,17 +31,17 @@ export function DropOffActions({ rentalId, missing }: { rentalId: string; missin
         <form action={confirm} className="contents">
           <input type="hidden" name="locale" value={locale} />
           <input type="hidden" name="rentalId" value={rentalId} />
-          <Button type="submit" className="min-h-12 max-sm:w-full" disabled={busy}>{missing ? t('hereNow') : t('here')}</Button>
+          <Button type="submit" className="max-sm:w-full" disabled={busy}>{missing ? t('hereNow') : t('here')}</Button>
         </form>
         {missing ? null : (
           <form action={report} className="contents">
             <input type="hidden" name="locale" value={locale} />
             <input type="hidden" name="rentalId" value={rentalId} />
-            <Button type="submit" variant="outline" className="min-h-12 max-sm:w-full" disabled={busy}>{t('notHere')}</Button>
+            <Button type="submit" variant="outline" className="max-sm:w-full" disabled={busy}>{t('notHere')}</Button>
           </form>
         )}
       </div>
-      {missing ? null : <p className="text-sm text-muted-foreground">{t('notHereBody')}</p>}
+      {missing ? null : <p className="text-sm text-pretty text-muted-foreground">{t('notHereBody')}</p>}
       <ActionMessage result={confirmed} success={t('confirmed')} results="selfReturn.staff.results" />
       <ActionMessage result={reported} success={reported?.ok === true && reported.value.sent !== null ? t('recordedTold') : t('recorded')} results="selfReturn.staff.results" />
     </div>

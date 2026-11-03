@@ -24,7 +24,7 @@ export function SampleAdvocatesForm({ rentalId, allowance }: { rentalId: string;
       {allowance.left === 0 ? <Notice title={t('noneTitle')} body={results(allowance.refusal ?? 'daily_cap')} /> : (
         <>
           <p className="text-sm text-muted-foreground">{t('left', { count: allowance.left })}</p>
-          <Button type="submit" disabled={pending || result?.ok === true} className="min-h-12 justify-self-start whitespace-normal">{pending ? t('pending') : t('start')}</Button>
+          <Button type="submit" disabled={pending || result?.ok === true} className="max-sm:w-full sm:justify-self-start">{pending ? t('pending') : t('start')}</Button>
         </>
       )}
       <div aria-live="polite"><ActionMessage result={result} success={t('started')} results="negotiation.results" /></div>

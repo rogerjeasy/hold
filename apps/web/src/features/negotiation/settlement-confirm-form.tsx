@@ -21,7 +21,7 @@ export function SettlementConfirmForm({ token, agreed }: { token: string; agreed
   return (
     <Panel title={t('renterTitle')}>
       <div className="grid gap-4 p-4 md:p-5">
-        <p className="text-lg font-semibold">{agreed}</p>
+        <p className="text-figure tabular-nums">{agreed}</p>
         <p>{t('renterGuidance')}</p>
         <div className="grid gap-3">
           <Button type="button" onClick={code.send} disabled={code.pending} className="min-h-12 justify-self-start whitespace-normal">{t('sendCode')}</Button>

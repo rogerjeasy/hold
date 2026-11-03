@@ -1588,7 +1588,8 @@
         "out": "Fuera",
         "returned": "Devueltos",
         "done": "Hechos",
-        "none": "No hay alquileres aquí."
+        "none": "No hay alquileres aquí.",
+        "noneBody": "Ahora no hay alquileres en esta etapa. Elige otra o muéstralos todos."
       },
       "columns": {
         "who": "Cliente",
@@ -1655,7 +1656,10 @@
         "toDo": "Aún no",
         "lapsedNote": "El plazo de pago se agotó, así que los artículos ya no se guardan. El cliente aún puede pagar mientras nadie más los haya reservado.",
         "assistant": "Por el asistente del propio cliente",
-        "erasedRenter": "Datos personales borrados"
+        "erasedRenter": "Datos personales borrados",
+        "runs": "{start} – {end}",
+        "paidBy": "Pagado por {name}",
+        "stepOf": "Paso {number} de {total}: {step}"
       },
       "link": {
         "title": "El enlace del cliente",
@@ -2224,7 +2228,9 @@
         "back": "Volver al alquiler",
         "sealedNote": "Sellado. Estas fotos ya no pueden cambiar.",
         "texted": "Quien alquila ha recibido por SMS el informe de estado. También puede escanear este código."
-      }
+      },
+      "lead": "Fotografía cada vista dentro del marco, señala las marcas que ya hay y luego sella.",
+      "progress": "{done} de {total} vistas fotografiadas"
     },
     "returns": {
       "title": "Inspección de devolución",
@@ -2337,7 +2343,8 @@
         "started": "La comparación ha empezado.",
         "left": "{count, plural, one {Queda # comparación real hoy desde su red} other {Quedan # comparaciones reales hoy desde su red}}. Cada una gasta parte de la asignación diaria de Claude de la cuenta.",
         "noneTitle": "No queda ninguna comparación real hoy"
-      }
+      },
+      "marked": "{count, plural, one {# marca encontrada} other {# marcas encontradas}}"
     },
     "incidents": {
       "title": "Incidentes",
@@ -3256,6 +3263,19 @@
       "adjusted": "Ajustada",
       "waived": "La tienda ha renunciado a esta reclamación",
       "closed": "Cerrada"
+    },
+    "cleanAnyway": "Si revisaste el artículo en persona y está bien, aún puedes liberar toda la reserva. Se te pedirá que escribas qué comprobaste.",
+    "releaseAnyway": "Liberar la reserva sin reclamación",
+    "keepHold": "Mantener la reserva",
+    "damagedTitle": "Posible daño nuevo",
+    "damagedBody": "La comparación encontró algo nuevo, o el cliente aceptó una línea durante el alquiler. Prepara una reclamación con las pruebas; una persona la aprueba antes de que el cliente la vea.",
+    "limits": {
+      "overLimit": "Esta reclamación supera tu límite de aprobación de {limit}, así que la aprueba un propietario o gerente.",
+      "seniorApproves": "Esta reclamación la aprueba un propietario o gerente.",
+      "seniorDecides": "Una reclamación impugnada la decide un propietario o gerente.",
+      "seniorWaives": "Solo un propietario, un gerente o quien preparó esta reclamación puede anularla.",
+      "raisedIt": "Tú preparaste esta reclamación, así que la decide otro propietario o gerente.",
+      "confirmSenior": "Lo que acordaron los representantes lo confirma un propietario o gerente."
     }
   },
   "scorecard": {

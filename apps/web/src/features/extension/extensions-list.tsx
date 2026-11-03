@@ -17,7 +17,7 @@ export function ExtensionsList({ extensions, timeZone, currency }: { extensions:
         {extensions.map((extension) => {
           const Icon = ICONS[extension.state]
           return (
-            <li key={extension.id} className="flex gap-2 border bg-card px-4 py-3">
+            <li key={extension.id} className="surface flex gap-3 px-4 py-3.5">
               <Icon aria-hidden="true" className={extension.state === 'failed' ? 'mt-0.5 size-4.5 shrink-0 text-destructive' : 'mt-0.5 size-4.5 shrink-0 text-success'} />
               <span className="min-w-0 wrap-long-words">{t(extension.state, { days: extension.extraDays, amount: format.money(extension.amountCents), when: `${format.date(extension.toEndsAt)}, ${format.time(extension.toEndsAt)}` })}</span>
             </li>

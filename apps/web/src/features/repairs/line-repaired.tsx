@@ -9,10 +9,10 @@ export function LineRepaired({ description, repairedAt, url, timeZone }: { descr
   const t = useTranslations('claim')
   const format = useFormatter()
   return (
-    <div className="grid gap-2 border-t pt-3">
+    <div className="grid gap-2 rounded-xl bg-success/6 p-3.5">
       <p className="flex items-center gap-2 font-semibold text-success"><CircleCheck aria-hidden="true" className="size-5 shrink-0" />{t('repairedOn', { date: format.dateTime(repairedAt, { month: 'short', day: 'numeric', timeZone }) })}</p>
       <p className="text-sm text-muted-foreground text-pretty">{t('repairedBody')}</p>
-      {url === null ? null : <div className="sm:max-w-[50%]"><PhotoWithMarks src={url} alt={t('repairedAlt', { line: description })} marks={[]} /></div>}
+      {url === null ? null : <div className="sm:max-w-sm"><PhotoWithMarks src={url} alt={t('repairedAlt', { line: description })} marks={[]} /></div>}
     </div>
   )
 }

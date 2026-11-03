@@ -67,33 +67,47 @@ export function PhotoTaker({ view, upload, onTaken, guide, returnSamples = false
   const busy = step.kind === 'checking' || step.kind === 'uploading'
 
   return (
-    <div className="grid gap-3">
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
+    <div className="grid gap-4">
+      <div className="relative aspect-thumbnail w-full overflow-hidden rounded-2xl bg-photo shadow-raised">
         <video ref={camera.video} playsInline muted aria-label={t('camera', { view: view.label })} className="size-full object-contain" />
         {guide === undefined || (!ghostShown && !noCamera) ? null : <img src={guide} alt={t('guide', { view: view.label })} style={{ opacity: noCamera ? 1 : ghostStrength / 100 }} className="pointer-events-none absolute inset-0 size-full object-contain" />}
         <OutlineOverlay outline={view.outline} />
-        {noCamera && guide === undefined ? <p className="absolute inset-x-0 bottom-0 bg-black/70 p-3 text-sm text-white">{t('noCamera')}</p> : null}
+        {/* Which view this is, on the frame itself, as a camera's own label would be. */}
+        <span aria-hidden="true" className="label absolute top-3 right-3 left-3 w-fit truncate rounded-full bg-photo-scrim px-3 py-1 text-[0.6875rem] text-photo-foreground">{view.label}</span>
+        {busy ? (
+          <span aria-hidden="true" className="absolute inset-0 grid animate-fade place-items-center bg-photo-scrim/60">
+            <span className="grid justify-items-center gap-2 text-photo-foreground">
+              <LoaderCircle className="size-7 animate-spin" />
+              {step.kind === 'uploading' ? <span className="figures text-sm">{Math.round(step.share * 100)}%</span> : null}
+            </span>
+          </span>
+        ) : null}
+        {step.kind === 'uploading' ? <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1 origin-left bg-mark transition-transform duration-300 ease-swift" style={{ transform: `scaleX(${String(step.share)})` }} /> : null}
+        {noCamera && guide === undefined ? <p className="absolute inset-x-0 bottom-0 bg-photo-scrim px-4 py-3 text-sm text-photo-foreground">{t('noCamera')}</p> : null}
       </div>
-      {guide !== undefined && noCamera ? <div className="grid gap-1 text-sm"><p>{t('noCamera')}</p><p className="text-muted-foreground">{t('guideNoCamera')}</p></div> : null}
+      {guide !== undefined && noCamera ? <div className="grid gap-1 rounded-xl bg-muted/70 px-3.5 py-3 text-sm"><p className="font-semibold">{t('noCamera')}</p><p className="text-muted-foreground">{t('guideNoCamera')}</p></div> : null}
       {guide !== undefined && camera.state === 'live' ? <GhostControls shown={ghostShown} onShown={setGhostShown} strength={ghostStrength} onStrength={setGhostStrength} /> : null}
-      <div className="flex flex-wrap gap-2">
+      <div className="grid gap-2 sm:flex sm:flex-wrap">
         <Button type="button" className="min-h-12" disabled={busy || camera.state !== 'live'} onClick={() => { const video = camera.video.current; if (video !== null) void take(() => readFrame(video), 'camera') }}>
           <Camera aria-hidden="true" />
           {t('take')}
         </Button>
-        <Button asChild variant="outline" className="min-h-12">
+        <Button asChild variant="outline" className="min-h-12 cursor-pointer">
           <label>
             <ImageUp aria-hidden="true" />
             {t('file')}
             <input type="file" accept="image/jpeg" capture="environment" className="sr-only" disabled={busy} onChange={(event) => { const file = event.target.files?.[0]; if (file !== undefined) void take(() => readImage(file), 'file') }} />
           </label>
         </Button>
-        <Button type="button" variant="ghost" className="min-h-12" disabled={busy} onClick={() => { takeSample(sample) }}>
+      </div>
+      {/* The demonstration's own photographs, said to be samples, kept apart from the real ways to take one. */}
+      <div className="flex flex-wrap gap-1.5 border-t border-dashed border-border-strong/70 pt-3">
+        <Button type="button" variant="ghost" className="min-h-11" disabled={busy} onClick={() => { takeSample(sample) }}>
           <FlaskConical aria-hidden="true" />
           {t('sample')}
         </Button>
         {returnSamples ? RETURN_SAMPLES.map((sample) => (
-          <Button key={sample.source} type="button" variant="ghost" className="min-h-12" disabled={busy} onClick={() => { takeSample(sample.source) }}>
+          <Button key={sample.source} type="button" variant="ghost" className="min-h-11" disabled={busy} onClick={() => { takeSample(sample.source) }}>
             <FlaskConical aria-hidden="true" />
             {t(sample.label)}
           </Button>
@@ -105,8 +119,8 @@ export function PhotoTaker({ view, upload, onTaken, guide, returnSamples = false
           {step.kind === 'uploading' ? t('uploading', { percent: Math.round(step.share * 100) }) : t('checking')}
         </p>
       ) : null}
-      {step.kind === 'retake' ? <p role="alert" className="text-destructive">{t('retake', { problems: step.problems.map((problem) => t(`problems.${problem}`)).join(', ') })}</p> : null}
-      {step.kind === 'failed' ? <p role="alert" className="text-destructive">{step.reason === 'photo_reused' ? t('reused') : t('failed')}</p> : null}
+      {step.kind === 'retake' ? <p role="alert" className="rounded-xl bg-destructive/8 px-3.5 py-2.5 text-destructive">{t('retake', { problems: step.problems.map((problem) => t(`problems.${problem}`)).join(', ') })}</p> : null}
+      {step.kind === 'failed' ? <p role="alert" className="rounded-xl bg-destructive/8 px-3.5 py-2.5 text-destructive">{step.reason === 'photo_reused' ? t('reused') : t('failed')}</p> : null}
     </div>
   )
 }

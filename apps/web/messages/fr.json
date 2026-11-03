@@ -1588,7 +1588,8 @@
         "out": "Sorties",
         "returned": "Rendues",
         "done": "Terminées",
-        "none": "Aucune location ici."
+        "none": "Aucune location ici.",
+        "noneBody": "Aucune location à cette étape pour l’instant. Choisissez-en une autre ou affichez-les toutes."
       },
       "columns": {
         "who": "Client",
@@ -1655,7 +1656,10 @@
         "toDo": "Pas encore",
         "lapsedNote": "Le délai de paiement est dépassé, donc les articles ne sont plus gardés. Le client peut encore régler tant que personne d'autre ne les a réservés.",
         "assistant": "Par l'assistant du locataire",
-        "erasedRenter": "Données personnelles effacées"
+        "erasedRenter": "Données personnelles effacées",
+        "runs": "{start} – {end}",
+        "paidBy": "Payé par {name}",
+        "stepOf": "Étape {number} sur {total} : {step}"
       },
       "link": {
         "title": "Le lien du client",
@@ -2224,7 +2228,9 @@
         "back": "Retour à la location",
         "sealedNote": "Scellé. Ces photos ne peuvent plus changer.",
         "texted": "La personne qui loue a reçu le rapport d'état par SMS. Elle peut aussi scanner ce code."
-      }
+      },
+      "lead": "Photographiez chaque vue dans le cadre, encadrez les marques déjà présentes, puis scellez.",
+      "progress": "{done} vues photographiées sur {total}"
     },
     "returns": {
       "title": "Inspection du retour",
@@ -2337,7 +2343,8 @@
         "started": "La comparaison a commencé.",
         "left": "{count, plural, one {# vraie comparaison restante aujourd’hui depuis votre réseau} other {# vraies comparaisons restantes aujourd’hui depuis votre réseau}}. Chacune consomme une part de l’allocation quotidienne de Claude du compte.",
         "noneTitle": "Plus de vraie comparaison aujourd’hui"
-      }
+      },
+      "marked": "{count, plural, one {# marque trouvée} other {# marques trouvées}}"
     },
     "incidents": {
       "title": "Incidents",
@@ -3256,6 +3263,19 @@
       "adjusted": "Ajustée",
       "waived": "Le magasin a renoncé à cette réclamation",
       "closed": "Clôturée"
+    },
+    "cleanAnyway": "Si vous avez inspecté l’article vous-même et qu’il est en bon état, vous pouvez quand même libérer toute la réserve. On vous demandera d’écrire ce que vous avez vérifié.",
+    "releaseAnyway": "Libérer la réserve sans réclamation",
+    "keepHold": "Garder la réserve",
+    "damagedTitle": "Nouveau dommage possible",
+    "damagedBody": "La comparaison a trouvé quelque chose de nouveau, ou le locataire a accepté une ligne pendant la location. Préparez une réclamation à partir des preuves ; une personne l’approuve encore avant que le locataire la voie.",
+    "limits": {
+      "overLimit": "Cette réclamation dépasse votre plafond d’approbation de {limit} : un propriétaire ou un responsable l’approuve.",
+      "seniorApproves": "Un propriétaire ou un responsable approuve cette réclamation.",
+      "seniorDecides": "Un propriétaire ou un responsable tranche une réclamation contestée.",
+      "seniorWaives": "Seul un propriétaire, un responsable ou la personne qui a préparé cette réclamation peut l’annuler.",
+      "raisedIt": "Vous avez préparé cette réclamation : un autre propriétaire ou responsable la tranche.",
+      "confirmSenior": "Un propriétaire ou un responsable confirme ce que les représentants ont convenu."
     }
   },
   "scorecard": {

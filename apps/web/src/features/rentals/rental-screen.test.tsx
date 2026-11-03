@@ -107,6 +107,19 @@ describe('a rental', () => {
     expect(terms).toHaveTextContent('Version 2')
   })
 
+  // Found in the audit: once the fee was paid, the page was titled after whoever paid in PayPal ("Fake Renter") while
+  // its contact said the name the shop booked ("Judge Renter").
+  it('is titled with the name the shop booked it under, and names a different PayPal payer quietly beneath', () => {
+    renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ state: 'booked', who: 'Fake Renter', contactName: 'Judge Renter', renterName: 'Fake Renter' })} hold={undefined} handovers={[]} canAct />)
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Judge Renter')
+    expect(screen.getByText('Paid by Fake Renter')).toBeInTheDocument()
+  })
+
+  it('names no payer when PayPal’s name is the one the shop booked', () => {
+    renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ state: 'booked', renterName: 'Priya Natarajan' })} hold={undefined} handovers={[]} canAct />)
+    expect(screen.queryByText(/^Paid by/)).not.toBeInTheDocument()
+  })
+
   it('shows how far it has come', () => {
     renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ state: 'booked', renterName: 'Priya N.' })} hold={undefined} handovers={[]} canAct />)
     const steps = within(screen.getByRole('region', { name: 'Progress' })).getAllByRole('listitem')

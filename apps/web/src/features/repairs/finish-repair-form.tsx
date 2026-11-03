@@ -35,7 +35,7 @@ export function FinishRepairForm({ repair, currency, photographsMissing }: { rep
             <input type="hidden" name="outcome" value={outcomes[line.id] ?? 'repaired'} />
             <div className="grid gap-2 sm:grid-cols-2">
               {(['repaired', 'left'] as const).map((outcome) => (
-                <label key={outcome} className="relative flex min-h-12 cursor-pointer items-center gap-3 border border-border-strong bg-card px-3 has-[:checked]:border-foreground has-[:checked]:bg-muted has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring">
+                <label key={outcome} className="relative flex min-h-12 cursor-pointer items-center gap-3 rounded-xl border border-border bg-card px-3 transition-colors duration-200 ease-swift has-[:checked]:border-primary has-[:checked]:bg-primary/6 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring">
                   {/* The whole choice is the control: an invisible radio over it, a dot drawn at the size of text. */}
                   <input type="radio" form={choices} name={`outcome-${line.id}`} value={outcome} checked={outcomes[line.id] === outcome} onChange={() => { setOutcomes((now) => ({ ...now, [line.id]: outcome })) }} className="peer absolute inset-0 size-full cursor-pointer opacity-0" />
                   <span aria-hidden="true" className="grid size-5 shrink-0 place-items-center rounded-full border-2 border-border-strong bg-card peer-checked:border-primary peer-checked:[&>span]:opacity-100"><span className="size-2.5 rounded-full bg-primary opacity-0" /></span>

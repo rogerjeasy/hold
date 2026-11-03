@@ -15,7 +15,7 @@ type StatusProps = { readonly promise: ClaimPromise; readonly audience: 'renter'
 export function PromiseBeforeContest({ shopName, days }: { shopName: string; days: number }) {
   const t = useTranslations('promise.renter')
   return (
-    <div className="grid gap-1 border border-border-strong bg-background p-3">
+    <div className="grid gap-1 rounded-xl border border-border/70 bg-muted/50 px-3.5 py-3">
       <p className="label text-xs text-muted-foreground">{t('beforeLabel')}</p>
       <p className="text-pretty">{t('beforeBody', { shop: shopName, days })}</p>
     </div>
@@ -30,8 +30,8 @@ export function PromiseStatus({ promise, audience, claimState, shopName, timeZon
   const voice = audience === 'renter' ? 'renter' : 'shop'
   if (promise.standing === 'open') {
     return (
-      <div className="flex min-w-0 items-center gap-3 border border-border-strong border-l-4 border-l-warning bg-card p-4 md:p-5">
-        <Clock aria-hidden="true" className="size-8 shrink-0" />
+      <div className="surface flex min-w-0 items-center gap-4 p-4 md:p-5">
+        <span aria-hidden="true" className="grid size-12 shrink-0 place-items-center rounded-2xl bg-warning/14 text-warning"><Clock className="size-6" /></span>
         <div className="grid min-w-0 gap-0.5">
           <p className="label text-xs text-muted-foreground">{t(`${voice}.openLabel`)}</p>
           <p className="text-figure wrap-long-words">{due}</p>
@@ -41,7 +41,7 @@ export function PromiseStatus({ promise, audience, claimState, shopName, timeZon
     )
   }
   const decided = promise.decidedAt === null ? null : format.deadline(promise.decidedAt)
-  if (promise.standing === 'kept') return <p className="text-muted-foreground">{audience === 'renter' ? t('renter.keptBody', { shop: shopName, when: decided ?? due }) : t('shop.keptBody', { when: decided ?? due })}</p>
+  if (promise.standing === 'kept') return <p className="text-pretty text-muted-foreground">{audience === 'renter' ? t('renter.keptBody', { shop: shopName, when: decided ?? due }) : t('shop.keptBody', { when: decided ?? due })}</p>
   if (audience === 'shop') {
     if (decided !== null) return <p className="text-muted-foreground">{t('shop.lateBody', { when: decided })}</p>
     return <Notice tone="destructive" title={t('shop.missedLabel')} body={t('shop.missedBody', { when: due })} />

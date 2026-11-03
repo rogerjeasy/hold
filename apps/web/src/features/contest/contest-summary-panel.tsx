@@ -55,15 +55,15 @@ export function ContestSummaryPanel({ view, audience, timeZone, photos = {}, ren
   const titleId = useId()
   // Sized by its own width, not the window's: it sits across a claim page and beside the decision board's grid alike.
   return (
-    <section aria-labelledby={titleId} className="@container min-w-0 border border-t-4 border-t-foreground bg-card">
-      <div className="grid gap-2.5 border-b px-4 py-4 @lg:px-5">
+    <section aria-labelledby={titleId} className="@container surface min-w-0 overflow-clip">
+      <div className="grid gap-3 border-b border-border/70 px-4 py-5 @lg:px-5">
         <h2 id={titleId} className="text-[1.1875rem] leading-tight font-extrabold tracking-tight">{t('title')}</h2>
         {summary === null ? (
           <>
             <p className="text-pretty">{t(`missing.${view.outcome === 'answered' ? 'pending' : view.outcome}`)}</p>
             <figure className="grid gap-1">
               <figcaption className="text-sm text-muted-foreground">{t(audience === 'shop' ? 'renterWrote' : 'youWrote')}</figcaption>
-              <blockquote className="min-w-0 border-l-2 border-border-strong pl-3 whitespace-pre-wrap italic wrap-long-words">{view.comment === '' ? t('noWords') : view.comment}</blockquote>
+              <blockquote className="min-w-0 rounded-xl bg-muted/60 px-3.5 py-2.5 whitespace-pre-wrap italic wrap-long-words">{view.comment === '' ? t('noWords') : view.comment}</blockquote>
             </figure>
             {canRewrite && rentalId !== undefined ? <RewriteSummaryForm rentalId={rentalId} first={view.outcome === 'pending'} /> : null}
           </>
@@ -72,40 +72,40 @@ export function ContestSummaryPanel({ view, audience, timeZone, photos = {}, ren
             <p className="text-lg leading-snug text-pretty">{summary.overview}</p>
             <p className="text-sm font-semibold">{t('count', { disputed: disputed ?? 0, total: summary.lines.length })}</p>
             <p className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              <span className="label bg-muted px-1.5 py-0.5 text-[0.6875rem] text-foreground">{view.simulated ? t('bySimulated') : t('byClaude')}</span>
+              <span className="label rounded-md bg-muted px-1.5 py-0.5 text-[0.6875rem] text-foreground">{view.simulated ? t('bySimulated') : t('byClaude')}</span>
               {t('neutral')}
             </p>
           </>
         )}
       </div>
-      <ol>
+      <ol className="divide-y divide-border/70">
         {view.lines.map((line) => {
           const words = said(line.id)
           const isDisputed = words?.disputed ?? true
           const photo = photos[line.id]
           const pictured = photo !== undefined && (photo.before !== null || photo.after !== null)
           return (
-            <li key={line.id} className="grid min-w-0 gap-3 border-b px-4 py-4 last:border-b-0 @lg:px-5">
+            <li key={line.id} className="grid min-w-0 gap-3 px-4 py-5 @lg:px-5">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <h3 className="min-w-0 font-extrabold tracking-tight wrap-long-words">{line.description}</h3>
-                {words === undefined ? null : <span className={isDisputed ? 'label bg-primary/10 px-1.5 py-0.5 text-[0.6875rem] text-primary' : 'label bg-success/10 px-1.5 py-0.5 text-[0.6875rem] text-success'}>{isDisputed ? t('disputed') : t('notDisputed')}</span>}
+                {words === undefined ? null : <span className={isDisputed ? 'label rounded-md bg-primary/10 px-1.5 py-0.5 text-[0.6875rem] text-primary' : 'label rounded-md bg-success/10 px-1.5 py-0.5 text-[0.6875rem] text-success'}>{isDisputed ? t('disputed') : t('notDisputed')}</span>}
               </div>
               {words !== undefined && !isDisputed ? <p className="text-[0.9375rem] text-muted-foreground wrap-long-words">{shopSide(line)}</p> : (
                 <>
                   {words === undefined ? null : (
                     <div className="grid gap-2.5 @xl:grid-cols-2">
-                      <div className="grid content-start gap-1 border px-3 py-2.5">
+                      <div className="grid content-start gap-1 rounded-xl border border-border/70 px-3.5 py-3">
                         <p className="label text-[0.6875rem] text-muted-foreground">{t('shopSays')}</p>
                         <p className="text-pretty wrap-long-words">{shopSide(line)}</p>
                       </div>
-                      <div className="grid content-start gap-1 border px-3 py-2.5">
+                      <div className="grid content-start gap-1 rounded-xl border border-border/70 px-3.5 py-3">
                         <p className="label text-[0.6875rem] text-muted-foreground">{t(audience === 'shop' ? 'renterSays' : 'youSaid')}</p>
                         {words.renterQuote === null ? null : <blockquote className="border-l-2 border-border-strong pl-2.5 italic wrap-long-words">“{words.renterQuote}”</blockquote>}
                         {words.renterSays === null ? null : <p className="text-sm text-pretty text-muted-foreground">{words.renterSays}</p>}
                       </div>
                     </div>
                   )}
-                  <div className={pictured ? 'grid gap-3 border bg-background px-3 py-3 @2xl:grid-cols-[minmax(0,15rem)_minmax(0,1fr)]' : 'grid gap-3 border bg-background px-3 py-3'}>
+                  <div className={pictured ? 'grid gap-3 rounded-xl bg-muted/50 p-3.5 @2xl:grid-cols-[minmax(0,15rem)_minmax(0,1fr)]' : 'grid gap-3 rounded-xl bg-muted/50 p-3.5'}>
                     {!pictured ? null : (
                       <div className="grid grid-cols-2 gap-2">
                         {photo.before === null ? null : <figure className="min-w-0"><PhotoWithMarks src={photo.before} alt={t('before', { line: line.description })} marks={[]} /><figcaption className="label mt-1 text-[0.625rem] text-muted-foreground">{t('beforeShort')}</figcaption></figure>}

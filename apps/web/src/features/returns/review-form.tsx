@@ -20,8 +20,8 @@ export function ReviewForm({ comparisonId }: { comparisonId: string }) {
     <Select id="inspection-outcome" name="outcome" defaultValue="deferred">{reviewNote.shape.outcome.options.map((outcome) => <option key={outcome} value={outcome}>{t(`outcomes.${outcome}`)}</option>)}</Select>
     <Label htmlFor="inspection-reason">{t('notes')}</Label>
     <Textarea id="inspection-reason" name="reason" required maxLength={1000} />
-    <p className="text-muted-foreground">{t('noteBoundary')}</p>
-    <Button type="submit" disabled={pending} className="min-h-12 justify-self-start">{t('record')}</Button>
+    <p className="text-sm text-pretty text-muted-foreground">{t('noteBoundary')}</p>
+    <Button type="submit" disabled={pending} className="max-sm:w-full sm:justify-self-start">{t('record')}</Button>
     <ActionMessage result={result} success={t('recorded')} results="shop.returns.results" />
   </form>
 }

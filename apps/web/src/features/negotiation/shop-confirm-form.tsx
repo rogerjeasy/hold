@@ -12,15 +12,15 @@ export function ShopConfirmForm({ negotiationId, agreed }: { negotiationId: stri
   const locale = useLocale()
   const [result, decide, pending] = useActionState(confirmSettlementForShop, null)
   return (
-    <form action={decide} className="grid gap-3">
+    <form action={decide} className="grid gap-3 rounded-2xl border border-primary/25 bg-primary/5 p-4 md:p-5">
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="negotiationId" value={negotiationId} />
       <h3 className="text-lg font-semibold">{t('shopTitle')}</h3>
-      <p className="text-lg font-semibold">{agreed}</p>
+      <p className="text-figure tabular-nums">{agreed}</p>
       <p className="text-muted-foreground">{t('shopGuidance')}</p>
       <div className="flex flex-wrap gap-3">
-        <Button type="submit" name="decision" value="confirm" disabled={pending} className="min-h-12 whitespace-normal">{t('confirm')}</Button>
-        <Button type="submit" name="decision" value="decline" variant="outline" disabled={pending} className="min-h-12 whitespace-normal">{t('decline')}</Button>
+        <Button type="submit" name="decision" value="confirm" disabled={pending} className="max-sm:w-full">{t('confirm')}</Button>
+        <Button type="submit" name="decision" value="decline" variant="outline" disabled={pending} className="max-sm:w-full">{t('decline')}</Button>
       </div>
       <ActionMessage result={result} success={t('shopDone')} results="negotiation.results" />
     </form>

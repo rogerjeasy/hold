@@ -10,11 +10,26 @@ const BOXES: Readonly<Record<ViewOutline, { readonly x: number; readonly y: numb
   detail: { x: 30, y: 30, width: 40, height: 40 },
 }
 
+// How far each corner's bracket runs along its edges, as a share of the frame.
+const ARM = 6
+
+// The outline as a faint dashed box with firm corner brackets, the way a camera frames its subject. A soft dark line
+// under each keeps it readable over a bright photograph.
 export function OutlineOverlay({ outline }: { outline: ViewOutline }) {
-  const box = BOXES[outline]
+  const { x, y, width, height } = BOXES[outline]
+  const right = x + width
+  const bottom = y + height
+  const corners = [
+    `M ${String(x)} ${String(y + ARM)} V ${String(y)} H ${String(x + ARM)}`,
+    `M ${String(right - ARM)} ${String(y)} H ${String(right)} V ${String(y + ARM)}`,
+    `M ${String(right)} ${String(bottom - ARM)} V ${String(bottom)} H ${String(right - ARM)}`,
+    `M ${String(x + ARM)} ${String(bottom)} H ${String(x)} V ${String(bottom - ARM)}`,
+  ].join(' ')
   return (
     <svg aria-hidden="true" viewBox="0 0 100 100" preserveAspectRatio="none" className="pointer-events-none absolute inset-0 size-full">
-      <rect x={box.x} y={box.y} width={box.width} height={box.height} rx="2" fill="none" stroke="white" strokeWidth="0.6" strokeDasharray="3 2" vectorEffect="non-scaling-stroke" />
+      <rect x={x} y={y} width={width} height={height} rx="1.5" fill="none" className="stroke-photo-foreground" strokeOpacity="0.55" strokeWidth="1" strokeDasharray="4 4" vectorEffect="non-scaling-stroke" />
+      <path d={corners} fill="none" className="stroke-photo-scrim" strokeOpacity="0.5" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+      <path d={corners} fill="none" className="stroke-photo-foreground" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
     </svg>
   )
 }
