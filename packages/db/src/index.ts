@@ -23,6 +23,8 @@ export { insightsTokensSince, saveInsightsDashboard, savedInsightsDashboard } fr
 export type { SavedInsightsDashboard } from './insights-dashboard-repository.ts'
 export type { FleetItemRecord } from './fleet-records.ts'
 export { moneyLedgerRecords } from './money-ledger-records.ts'
+export { rentalPayPalRecord } from './paypal-record.ts'
+export type { PayPalRecord, PayPalRecordLine } from './paypal-record.ts'
 export type { LedgerAuditLine, LedgerEvent, LedgerExecution, LedgerRecord, LedgerRental, MoneyLedgerRecords } from './money-ledger-records.ts'
 export type { ActiveHold, ActivityLine, ClaimWaiting, CounterVisit, DroppedOff, LateRental, ShopToday, TodayWindow } from './shop-today.ts'
 export type { PayPalMode, PublicShop, ShopSettings } from './shop-repository.ts'

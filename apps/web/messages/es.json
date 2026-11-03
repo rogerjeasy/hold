@@ -1735,6 +1735,61 @@
           "opted_out": "Respondió STOP, así que Hold usa el correo",
           "simulated": "Mostrado en la página de quien alquila (sandbox)"
         }
+      },
+      "paypal": {
+        "title": "Registro de PayPal",
+        "body": "Cada llamada que Hold hizo a PayPal para este alquiler, con los identificadores de PayPal. Cada una se envió con un PayPal-Request-Id, para que un reintento nunca actúe dos veces, y ninguna cuenta hasta que Hold la vuelve a leer en PayPal.",
+        "empty": "Todavía no hay ninguna llamada a PayPal.",
+        "sampleNote": "Un alquiler de ejemplo: estos identificadores de PayPal son inventados y no se hizo ninguna llamada.",
+        "kinds": {
+          "fee_captured": "Tarifa cobrada",
+          "hold_placed": "Retención realizada",
+          "hold_renewed": "Retención renovada",
+          "hold_captured": "Cargo cobrado de la retención",
+          "hold_released": "Resto de la retención liberado",
+          "refunded": "Reembolsado",
+          "invoice_sent": "Factura enviada",
+          "invoice_paid": "Factura pagada",
+          "extension_captured": "Ampliación cobrada"
+        },
+        "calls": {
+          "authorize": "Realizando la retención",
+          "renew": "Renovando la retención",
+          "release": "Liberando la retención",
+          "capture": "Cobrando de la retención",
+          "refund": "Reembolsando",
+          "invoice": "Enviando una factura",
+          "fee_capture": "Cobrando la tarifa",
+          "extension_capture": "Cobrando la ampliación"
+        },
+        "ids": {
+          "order": "Pedido",
+          "authorization": "Autorización",
+          "capture": "Cobro",
+          "refund": "Reembolso",
+          "invoice": "Factura"
+        },
+        "status": "Estado en PayPal",
+        "finalCapture": "final_capture",
+        "authorizationNow": "Autorización ahora",
+        "authorizationStates": {
+          "created": "Retenida",
+          "renewed": "Renovada con una nueva autorización",
+          "voided": "Anulada",
+          "captured": "Cobrada",
+          "expired": "Caducada"
+        },
+        "requestId": "PayPal-Request-Id",
+        "confirmed": "Confirmado",
+        "event": "Evento firmado de PayPal {type}, verificado, {when}",
+        "simulatedEvent": "Evento de la demostración {type}, {when}",
+        "readBack": "Leído de nuevo en PayPal, {when}",
+        "callStates": {
+          "pending": "Esperando a enviarse a PayPal",
+          "submitted": "Enviada, esperando la confirmación de PayPal",
+          "confirmed": "Confirmada por PayPal",
+          "failed": "PayPal no la completó"
+        }
       }
     },
     "items": {

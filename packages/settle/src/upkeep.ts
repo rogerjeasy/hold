@@ -64,6 +64,7 @@ async function askForReplacement(dependencies: SettleDependencies, message: Extr
     amount: money(target.reservedCents, target.currency),
     rentalReference: target.rentalId,
     description: approval.orderDescription.slice(0, 127),
+    brandName: approval.shopName,
     returnUrl: approval.url,
     cancelUrl: approval.url,
     idempotencyKey: `hold-replacement-order-${authorizationId}`,

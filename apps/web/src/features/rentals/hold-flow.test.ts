@@ -160,6 +160,7 @@ describe('the renter approving the hold', () => {
     const orderId = orderOf(started.value.approvalUrl)
     const { simulatedPayPal, database } = await getServices()
     expect(simulatedPayPal?.orderLinks(orderId)?.amount).toEqual({ cents: HOLD_CENTS, currency: 'EUR' })
+    expect(simulatedPayPal?.orderLinks(orderId)?.brandName).toBe('Pickup Bikes')
     // PayPal's own button returns to where PayPal's page would, with the order named as PayPal names it.
     expect(started.value.orderId).toBe(orderId)
     expect(started.value.returnUrl).toBe(`${simulatedPayPal?.orderLinks(orderId)?.returnUrl ?? ''}?token=${orderId}`)
@@ -230,7 +231,7 @@ describe('replacing the hold before it ends', () => {
     if (placed === undefined || upkeep === undefined) throw new Error('No placed hold.')
 
     // What the worker does three days before the hold ends.
-    const order = await simulatedPayPal?.createHoldOrder({ amount: { cents: HOLD_CENTS, currency: 'EUR' }, rentalReference: rentalId, description: 'Refundable hold', returnUrl: 'https://hold.test/pay', cancelUrl: 'https://hold.test/pay', idempotencyKey: `replacement-${rentalId}` })
+    const order = await simulatedPayPal?.createHoldOrder({ amount: { cents: HOLD_CENTS, currency: 'EUR' }, rentalReference: rentalId, description: 'Refundable hold', brandName: 'Ribeira Bikes', returnUrl: 'https://hold.test/pay', cancelUrl: 'https://hold.test/pay', idempotencyKey: `replacement-${rentalId}` })
     if (order?.ok !== true) throw new Error('No replacement order.')
     await inThisShop((transaction) => saveReplacementOrder(transaction, placed.id, upkeep.authorizationId, order.value.orderId))
 

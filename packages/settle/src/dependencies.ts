@@ -30,7 +30,7 @@ export type Notifier = {
 // What asking a renter for a new hold needs: a new link to the page where they approve it, and the words PayPal shows
 // them, in their language. The worker signs the link with the renter-link key, which settling never sees.
 export type RenterAsk = {
-  approval(shopId: string, rentalId: string): Promise<{ readonly url: string; readonly orderDescription: string }>
+  approval(shopId: string, rentalId: string): Promise<{ readonly url: string; readonly orderDescription: string; readonly shopName: string }>
 }
 
 // What settling needs from outside: the database and the role it acts as, PayPal for a shop's account, a way to queue

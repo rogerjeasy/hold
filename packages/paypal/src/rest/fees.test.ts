@@ -49,6 +49,7 @@ describe('createFeeOrder', () => {
       amount: FEE,
       rentalReference: 'rental-1',
       description: 'Rental fee: 1 × City e-bike, 3 days',
+      brandName: 'Ribeira Bikes',
       returnUrl: 'https://hold.test/r/token/paid',
       cancelUrl: 'https://hold.test/r/token',
       idempotencyKey: 'fee-order-rental-1-1',
@@ -60,7 +61,7 @@ describe('createFeeOrder', () => {
     expect(call?.body).toMatchObject({
       intent: 'CAPTURE',
       purchase_units: [{ custom_id: 'rental-1', amount: { currency_code: 'EUR', value: '120.00' } }],
-      payment_source: { paypal: { experience_context: { shipping_preference: 'NO_SHIPPING', return_url: 'https://hold.test/r/token/paid' } } },
+      payment_source: { paypal: { experience_context: { brand_name: 'Ribeira Bikes', shipping_preference: 'NO_SHIPPING', return_url: 'https://hold.test/r/token/paid' } } },
     })
   })
 })

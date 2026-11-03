@@ -20,7 +20,7 @@ export function createWorkerRenterAsk(options: { readonly database: Database; re
         await issueRenterLink(transaction, shopId, rentalId, { fingerprint: issued.fingerprint, expiresAt: renterLinkExpiry(rental.endsAt) }, BOOKING_LINK_SCOPES)
         return { token: issued.token, language: rental.language, shopName: shop.name }
       })
-      return { url: `${options.publicUrl}${renterLinkPath(link.token, link.language)}/pay`, orderDescription: holdOrderDescription(link.language, link.shopName) }
+      return { url: `${options.publicUrl}${renterLinkPath(link.token, link.language)}/pay`, orderDescription: holdOrderDescription(link.language, link.shopName), shopName: link.shopName }
     },
   }
 }

@@ -150,6 +150,8 @@ export function createRestPayPalHolds(client: PayPalClient): PayPalHolds {
         payment_source: {
           paypal: {
             experience_context: {
+              // PayPal takes at most 127 characters.
+              brand_name: input.brandName.trim().slice(0, 127),
               return_url: input.returnUrl,
               cancel_url: input.cancelUrl,
               user_action: 'PAY_NOW',

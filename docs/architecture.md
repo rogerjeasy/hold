@@ -1429,6 +1429,27 @@ sequenceDiagram
 | A return with nobody at the counter | Section 6.13 |
 | More days from the renter's phone | Section 6.14 |
 
+### 11.9 The PayPal record of a rental
+
+Every flow above ends in PayPal, and the rental's page shows what PayPal did, so a person can find each step in
+PayPal's own records. The panel "PayPal record" lists, in the order money moved, one line for each thing PayPal
+confirmed for the rental and one for each call PayPal has not confirmed yet. Every role that can open the rental sees
+it, read-only included: it holds PayPal's ids and Hold's keys, never a payer's details or an event's body.
+
+| On the line | Where it comes from |
+|---|---|
+| What happened: fee captured, hold placed, renewed, charge captured, rest released, refunded, invoice sent or paid, extension captured | The money log (`money_events.kind`), written only after a read-back |
+| PayPal's ids: order, authorization, capture, refund, invoice | The call's `executions.paypal_resource_ids` (Hold's own references, such as the claim, are left out) and the line's own PayPal reference |
+| PayPal's status: `CREATED`, `COMPLETED`, `VOIDED`, `CAPTURED`, `SENT`, `PAID` | The status the read-back required before the line was written |
+| `final_capture` | `true` on a charge from the hold, which always releases the rest; `false` on a walk-in's fee captured from the hold |
+| Authorization now | `authorizations.state`, as Hold last read it |
+| `PayPal-Request-Id` | `executions.idempotency_key` of the call that asked for it |
+| Confirmed | When Hold read it back from PayPal, and the PayPal event of the matching type whose signature was verified |
+
+A call still waiting shows its state (`pending`, `submitted` or `failed`) and its key, and no status, because PayPal
+has not confirmed it. A sample rental's lines are labelled as samples and say nothing was read back: their references
+start with `SIMULATED-` and no call was made. The read is `rentalPayPalRecord` in `packages/db`.
+
 ---
 
 ## 12. Identity and access

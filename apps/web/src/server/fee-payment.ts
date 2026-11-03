@@ -42,6 +42,7 @@ export async function startFeePayment(link: RenterLink, inLinkShop: InLinkShop, 
   const created = await paypal.createFeeOrder({
     amount: money(view.feeCents, view.currency),
     rentalReference: link.rentalId,
+    brandName: view.shopName,
     description: t('orderDescription', { shop: view.shopName, items: view.lines.map((line) => `${String(line.count)} × ${line.name}`).join(', '), days: view.days }).slice(0, 127),
     ...back,
     // A first order, or a fresh one after an order that can no longer be approved.

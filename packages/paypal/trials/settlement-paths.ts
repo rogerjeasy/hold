@@ -29,7 +29,7 @@ const trial = startTrial(`settlement-paths-${step}`)
 const { holds } = trial
 
 if (step === 'pay-refund-invoice') {
-  const order = must(await holds.createFeeOrder({ amount: trial.money(FEE_CENTS), rentalReference: `trial-settlement-${trial.key()}`, description: 'Hold trial. A rental fee to refund in part.', returnUrl: 'https://example.com/hold/approved', cancelUrl: 'https://example.com/hold/cancelled', idempotencyKey: trial.key() }), 'Creating the fee order')
+  const order = must(await holds.createFeeOrder({ amount: trial.money(FEE_CENTS), rentalReference: `trial-settlement-${trial.key()}`, description: 'Hold trial. A rental fee to refund in part.', brandName: 'Hold trial', returnUrl: 'https://example.com/hold/approved', cancelUrl: 'https://example.com/hold/cancelled', idempotencyKey: trial.key() }), 'Creating the fee order')
   console.log(`\nApprove this order with a sandbox personal account. The trial continues by itself.\n  ${order.approvalUrl ?? 'no approval link'}\n`)
   const deadline = Date.now() + APPROVAL_LIMIT_MILLISECONDS
   for (;;) {

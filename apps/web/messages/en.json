@@ -1735,6 +1735,61 @@
           "opted_out": "The renter replied STOP, so Hold uses email",
           "simulated": "Shown on the renter’s page (sandbox)"
         }
+      },
+      "paypal": {
+        "title": "PayPal record",
+        "body": "Every call Hold made to PayPal for this rental, with PayPal's own ids. Each was sent with a PayPal-Request-Id, so a retry can never act twice, and none counts until Hold has read it back from PayPal.",
+        "empty": "No call to PayPal yet.",
+        "sampleNote": "A sample rental: these PayPal ids are made up, and no call was made.",
+        "kinds": {
+          "fee_captured": "Fee captured",
+          "hold_placed": "Hold placed",
+          "hold_renewed": "Hold renewed",
+          "hold_captured": "Charge captured from the hold",
+          "hold_released": "Rest of the hold released",
+          "refunded": "Refunded",
+          "invoice_sent": "Invoice sent",
+          "invoice_paid": "Invoice paid",
+          "extension_captured": "Extension captured"
+        },
+        "calls": {
+          "authorize": "Placing the hold",
+          "renew": "Renewing the hold",
+          "release": "Releasing the hold",
+          "capture": "Capturing from the hold",
+          "refund": "Refunding",
+          "invoice": "Sending an invoice",
+          "fee_capture": "Capturing the fee",
+          "extension_capture": "Capturing the extension"
+        },
+        "ids": {
+          "order": "Order",
+          "authorization": "Authorization",
+          "capture": "Capture",
+          "refund": "Refund",
+          "invoice": "Invoice"
+        },
+        "status": "PayPal status",
+        "finalCapture": "final_capture",
+        "authorizationNow": "Authorization now",
+        "authorizationStates": {
+          "created": "Held",
+          "renewed": "Renewed by a new authorization",
+          "voided": "Voided",
+          "captured": "Captured",
+          "expired": "Expired"
+        },
+        "requestId": "PayPal-Request-Id",
+        "confirmed": "Confirmed",
+        "event": "PayPal's signed event {type}, verified, {when}",
+        "simulatedEvent": "The demonstration's event {type}, {when}",
+        "readBack": "Read back from PayPal, {when}",
+        "callStates": {
+          "pending": "Waiting to be sent to PayPal",
+          "submitted": "Sent, waiting for PayPal to confirm",
+          "confirmed": "Confirmed by PayPal",
+          "failed": "PayPal did not complete it"
+        }
       }
     },
     "items": {
