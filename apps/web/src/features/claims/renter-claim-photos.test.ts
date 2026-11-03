@@ -32,7 +32,7 @@ it('gives the renter the sealed handover and return photographs of each item, fo
   const page = await renterClaimPage(rental.claimToken, 'en')
   if (!page.ok) throw new Error(page.failure)
   expect(page.data.lines).toMatchObject([{ beforeUrl: null, afterUrl: null }])
-  expect(page.data.itemPhotos).toMatchObject([{ label: expect.any(String), views: [{ view: 'left-side', label: 'Left side' }, { view: 'right-side', label: 'Right side' }] }])
+  expect(page.data.itemPhotos).toMatchObject([{ label: expect.any(String) as string, views: [{ view: 'left-side', label: 'Left side' }, { view: 'right-side', label: 'Right side' }] }])
   for (const view of page.data.itemPhotos?.[0]?.views ?? []) {
     expect(view.beforeUrl).toEqual(expect.any(String))
     expect(view.afterUrl).toEqual(expect.any(String))
