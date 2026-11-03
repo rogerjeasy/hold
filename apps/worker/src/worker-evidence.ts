@@ -1,5 +1,7 @@
 import { createDataApiDatabase } from '@hold/db/data-api'
-import { createS3DocumentStore, createS3EvidenceStore } from '@hold/evidence'
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import { createS3DocumentStore, createS3EvidenceStore, withSampleDisplays } from '@hold/evidence'
 import type { EvidencePackDependencies } from '@hold/evidence'
 import { z } from 'zod'
 
@@ -20,7 +22,8 @@ export function workerEvidence(): EvidencePackDependencies {
   return {
     database: createDataApiDatabase({ region: settings.AWS_REGION, clusterArn: settings.HOLD_DATABASE_CLUSTER_ARN, secretArn: settings.HOLD_DATABASE_SECRET_ARN, database: settings.HOLD_DATABASE_NAME }),
     role: 'hold_worker',
-    evidence: createS3EvidenceStore({ region: settings.AWS_REGION, evidenceBucket: settings.HOLD_EVIDENCE_BUCKET, displayBucket: settings.HOLD_DISPLAY_BUCKET }),
+    // The sample rentals' photographs are installed beside the code, in samples/ (infra/lib/worker.ts).
+    evidence: withSampleDisplays(createS3EvidenceStore({ region: settings.AWS_REGION, evidenceBucket: settings.HOLD_EVIDENCE_BUCKET, displayBucket: settings.HOLD_DISPLAY_BUCKET }), (file) => readFile(join(process.env['LAMBDA_TASK_ROOT'] ?? '.', 'samples', file))),
     documents: createS3DocumentStore({ region: settings.AWS_REGION, evidenceBucket: settings.HOLD_EVIDENCE_BUCKET }),
   }
 }
