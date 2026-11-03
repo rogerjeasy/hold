@@ -73,6 +73,22 @@ export async function openAdvocate(transaction: Transaction, input: { readonly r
   return { ok: true, negotiationId: negotiation.id, kind: negotiate ? 'negotiation' as const : 'reply' as const, rentalId: input.rentalId, outboxId } as const
 }
 
+// What the made-up renter of the demo's sample claim would say and allow: their contest, and the most they would pay.
+export const SAMPLE_CONTEST = {
+  highestTotalCents: 30_00,
+  comment: 'That mark on the frame was there when I collected the bike, and the mud was on the tyres, not the frame.',
+} as const
+
+// Lets the two advocates argue a sample claim that waits for its reply, with the sample renter's words and limit
+// (extensions.md section 9). Only a sample: a real renter's contest and limit are theirs alone to give, with their
+// one-time code. simulated: the advocates are the test environment's stand-in, not Claude.
+export async function openSampleAdvocates(transaction: Transaction, rentalId: string, options: { readonly simulated: boolean }, now: Date) {
+  const [rental] = await transaction.select({ simulated: rentals.simulated }).from(rentals).where(eq(rentals.id, rentalId))
+  if (rental === undefined) return { ok: false, reason: 'not_found' } as const
+  if (!rental.simulated) return { ok: false, reason: 'not_a_sample' } as const
+  return openAdvocate(transaction, { rentalId, highestTotalCents: SAMPLE_CONTEST.highestTotalCents, comment: SAMPLE_CONTEST.comment, simulated: options.simulated, advocate: 'hold' }, now)
+}
+
 // Hands a negotiation to the advocates' worker, in order per rental. The request that wrote it sends it at once; the
 // outbox relay sends it if that fails.
 export async function queueNegotiation(transaction: Transaction, negotiation: { readonly shopId: string; readonly rentalId: string; readonly negotiationId: string }, now: Date): Promise<string> {

@@ -7,7 +7,7 @@ import { markClaimDecided } from './claim-promise-repository.ts'
 import { queueClaimCapture } from './claim-reply-repository.ts'
 import { escalateNegotiation } from './negotiation-ending.ts'
 import { negotiationRecords } from './negotiation-view.ts'
-import { approvals, auditLog, claims, negotiations, staffRoles } from './schema/index.ts'
+import { approvals, auditLog, claims, negotiations, rentals, staffRoles } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
 // Settling an agreement (extensions.md section 9.9). Each side whose mandate asks for a final tap confirms: on the
@@ -23,6 +23,9 @@ export async function confirmAgreement(transaction: Transaction, negotiationId: 
   const [negotiation] = await transaction.select().from(negotiations).where(eq(negotiations.id, negotiationId)).for('update')
   if (negotiation === undefined || negotiation.kind !== 'negotiation') return { ok: false, reason: 'not_found' } as const
   if (negotiation.state !== 'agreed') return { ok: false, reason: 'not_agreed' } as const
+  // A sample's agreement shows what the advocates would settle on. Its hold is sample data, so nothing may be taken.
+  const [rental] = await transaction.select({ simulated: rentals.simulated }).from(rentals).where(eq(rentals.id, negotiation.rentalId))
+  if (rental?.simulated !== false) return { ok: false, reason: 'simulated_rental' } as const
   if (who.kind === 'staff') {
     const [claim] = await transaction.select({ raisedBy: claims.raisedByUserId, currency: claims.currency }).from(claims).where(eq(claims.id, negotiation.claimId))
     const [staff] = await transaction.select({ count: count() }).from(staffRoles)

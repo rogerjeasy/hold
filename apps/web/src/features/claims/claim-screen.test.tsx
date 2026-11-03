@@ -4,12 +4,23 @@ import { renderWithIntl } from '@/test/render'
 import { ClaimScreen } from './claim-screen'
 import type { ClaimWorkspace } from '@hold/db'
 vi.mock('./actions', () => ({ prepareClaim: vi.fn(), approveAndPresent: vi.fn(), confirmClean: vi.fn(), decide: vi.fn() }))
-vi.mock('@/features/negotiation/actions', () => ({ confirmSettlementForShop: vi.fn() }))
+vi.mock('@/features/negotiation/actions', () => ({ confirmSettlementForShop: vi.fn(), argueSampleClaim: vi.fn() }))
 vi.mock('@/features/promise/actions', () => ({ writeToRenter: vi.fn() }))
 vi.mock('@/features/promise/renter-actions', () => ({ writeToShop: vi.fn() }))
 vi.mock('@/hooks/use-look-again', () => ({ useLookAgain: () => undefined }))
 const workspace: ClaimWorkspace = { protectedReply: false, agreedIncidents: [], rentalId: 'rental', rentalState: 'inspecting', currency: 'EUR', simulated: false, reservedCents: 30000, holdState: 'placed', claim: null, prices: [{ id: 'price', description: 'Scratch', amountCents: 3500 }], possibleFindings: [], lines: [], payments: [], invoices: [], execution: null, replies: [], decisions: [], amounts: { capture: { cents: 0, currency: 'EUR' }, release: { cents: 30000, currency: 'EUR' }, invoice: { cents: 0, currency: 'EUR' } } }
 describe('claim preparation and settlement screen', () => {
+  it('offers the owner or a manager the two advocates on a sample claim that waits for its reply, and on nothing else', () => {
+    const waiting = { ...workspace, simulated: true, claim: { id: 'claim', state: 'presented' as const, totalCents: 5000, raisedByUserId: 'staff', replyDueAt: new Date('2026-12-08T09:00:00Z') } }
+    const { unmount } = renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={waiting} canAct canDecide />)
+    expect(screen.getByRole('button', { name: 'Let the advocates argue it' })).toBeInTheDocument()
+    unmount()
+    const real = renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={{ ...waiting, simulated: false }} canAct canDecide />)
+    expect(screen.queryByRole('button', { name: 'Let the advocates argue it' })).not.toBeInTheDocument()
+    real.unmount()
+    renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={waiting} canAct canDecide={false} />)
+    expect(screen.queryByRole('button', { name: 'Let the advocates argue it' })).not.toBeInTheDocument()
+  })
   it('links the shared claim record from staff review', () => {
     renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={workspace} canAct={false} />)
     expect(screen.getByRole('link', { name: 'Your rental record' })).toHaveAttribute('href', '/shop/rentals/rental/record')
@@ -38,7 +49,7 @@ describe('claim preparation and settlement screen', () => {
 
 describe('a claim argued by the advocates', () => {
   const at = new Date('2026-11-01T10:00:00Z')
-  const transcript = { id: 'negotiation', kind: 'negotiation' as const, state: 'agreed' as const, endedReason: null, currency: 'EUR', claimTotalCents: 3500, agreedCents: 1750, deadline: at, roundLimit: 6, shopConfirmedAt: null, renterConfirmedAt: null, simulated: true, chainVerified: true, lines: [{ lineId: 'line', publishedCents: 3500, description: 'Scratch' }], wearClauses: [], moves: [{ sequence: 1, side: 'shop' as const, kind: 'offer' as const, lines: [{ lineId: 'line', cents: 3500, ground: null, evidence: [] }], totalCents: 3500, passReason: null, actor: 'referee', model: null, createdAt: at, fingerprint: 'a'.repeat(64) }] }
+  const transcript = { id: 'negotiation', kind: 'negotiation' as const, state: 'agreed' as const, endedReason: null, currency: 'EUR', claimTotalCents: 3500, agreedCents: 1750, deadline: at, roundLimit: 6, shopConfirmedAt: null, renterConfirmedAt: null, simulated: true, sample: false, chainVerified: true, lines: [{ lineId: 'line', publishedCents: 3500, description: 'Scratch' }], wearClauses: [], moves: [{ sequence: 1, side: 'shop' as const, kind: 'offer' as const, lines: [{ lineId: 'line', cents: 3500, ground: null, evidence: [] }], totalCents: 3500, passReason: null, actor: 'referee', model: null, createdAt: at, fingerprint: 'a'.repeat(64) }] }
   const claimed = (state: 'agreed' | 'escalated') => ({ ...workspace, claim: { id: 'claim', state, totalCents: 3500, raisedByUserId: 'staff', replyDueAt: at } })
 
   it('asks the owner or a manager to confirm what the advocates agreed', () => {

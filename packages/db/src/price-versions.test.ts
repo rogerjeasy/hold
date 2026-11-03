@@ -36,7 +36,7 @@ beforeAll(async () => {
 describe('the versions of a shop’s terms', () => {
   it('lists each published version newest first, with its entries, its wear policy and the open rentals agreed to it', async () => {
     const versions = await inShop(database, shop, (transaction) => priceListVersions(transaction))
-    expect(versions.map((each) => [each.version, each.liveRentals])).toEqual([[2, 0], [1, 10]])
+    expect(versions.map((each) => [each.version, each.liveRentals])).toEqual([[2, 0], [1, 11]])
     expect(versions[0]).toMatchObject({ currency: 'EUR', wearPolicy: 'Scuffs and dust are wear.' })
     expect(versions[0]?.entries).toEqual([
       { description: 'Deep scratch on the frame', category: 'damage', amountCents: 40_00 },

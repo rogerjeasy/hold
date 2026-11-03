@@ -3511,7 +3511,18 @@
       "code_recently_sent": "Se envió un código hace menos de un minuto. Revise su correo.",
       "email_unavailable": "No se pudo enviar el correo. Inténtelo en un momento.",
       "link_invalid": "Este enlace no sirve para esto.",
-      "assistant_not_connected": "Ahora no hay ningún asistente conectado a este alquiler. Elija el representante de Hold."
+      "assistant_not_connected": "Ahora no hay ningún asistente conectado a este alquiler. Elija el representante de Hold.",
+      "not_a_sample": "Desde aquí solo se puede pasar a los defensores una reclamación de muestra. Un cliente inicia su propio defensor desde el enlace de su reclamación.",
+      "simulated_rental": "Es una muestra: se muestra lo que acordaron los defensores y no se cobra nada."
+    },
+    "sample": {
+      "title": "Ver a los defensores discutir esta muestra",
+      "body": "El cliente de esta muestra es inventado. Su impugnación y lo máximo que pagaría están fijados para la demostración, y los límites de la tienda son los de la página de reclamaciones impugnadas. Claude defiende cada parte con las pruebas, un código simple comprueba cada oferta y nunca se cobra nada de una muestra.",
+      "start": "Dejar que los defensores lo discutan",
+      "pending": "Pasándolo a los defensores…",
+      "started": "Los defensores lo tienen. Sus movimientos aparecen abajo a medida que los hacen, normalmente en pocos minutos.",
+      "liveTitle": "Reclamación de muestra, defensores reales",
+      "liveBody": "El cliente y su límite se inventaron para esta demostración. Claude defendió cada parte y un código simple comprobó cada oferta. Lo que acuerden nunca se cobra: una muestra no tiene retención real."
     }
   },
   "operations": {

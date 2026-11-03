@@ -1,8 +1,11 @@
 'use server'
-import { confirmAgreement, grantShopSettlement, revokeShopSettlement } from '@hold/db'
+import { confirmAgreement, grantShopSettlement, openSampleAdvocates, revokeShopSettlement } from '@hold/db'
 import { parseAmount } from '@hold/domain'
 import { z } from 'zod'
 import { Refusal, shopAction, withLocale } from '@/server/shop-access'
+import { writeContestSummary } from '@/server/contest-summary'
+import { sendNegotiation } from '@/server/negotiation-queue'
+import { getServices } from '@/server/services'
 import { sendSettlement } from '@/server/settlement-queue'
 import { settlementLimitsInput } from './negotiation-input'
 
@@ -27,4 +30,17 @@ export const confirmSettlementForShop = shopAction({ name: 'settlement.decided',
   return result.ok ? result : new Refusal(result.reason)
 }, async (context, result) => {
   if (result.executionId !== null) await sendSettlement(context.shop.id, result.rentalId, result.executionId)
+})
+
+// Hands the demo's sample claim that waits for a reply to the two advocates (extensions.md section 9), as the owner
+// or a manager would decide a contested claim. No passkey: nothing here moves money, and what a sample's advocates
+// agree can never be confirmed into a capture. Only a sample: the repository refuses a real renter's claim.
+type SampleOpened = { readonly kind: 'negotiation' | 'reply'; readonly rentalId: string; readonly negotiationId: string; readonly outboxId: string }
+export const argueSampleClaim = shopAction({ name: 'settlement.sample_argued', roles: ['owner', 'manager'], needsPasskey: false, input: withLocale({ rentalId: z.uuid() }) }, async (_context, input, transaction): Promise<SampleOpened | Refusal> => {
+  const { config } = await getServices()
+  const opened = await openSampleAdvocates(transaction, input.rentalId, { simulated: config.services === 'fake' }, new Date())
+  return opened.ok ? { kind: opened.kind, rentalId: opened.rentalId, negotiationId: opened.negotiationId, outboxId: opened.outboxId } : new Refusal(opened.reason)
+}, async (context, result: SampleOpened) => {
+  try { await sendNegotiation(context.shop.id, result.rentalId, result.negotiationId, result.outboxId) } catch { /* The committed outbox retries delivery. */ }
+  await writeContestSummary(context.shop.id, result.rentalId)
 })

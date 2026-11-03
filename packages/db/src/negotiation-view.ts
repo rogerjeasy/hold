@@ -91,7 +91,7 @@ export type NegotiationRecords = NonNullable<Awaited<ReturnType<typeof negotiati
 // side's limits.
 export async function negotiationTranscript(transaction: Transaction, rentalId: string) {
   const records = await rentalNegotiation(transaction, rentalId)
-  return records === undefined ? undefined : transcriptOf(records)
+  return records === undefined ? undefined : transcriptOf(records, await isSample(transaction, rentalId))
 }
 
 async function rentalNegotiation(transaction: Transaction, rentalId: string) {
@@ -114,7 +114,7 @@ export async function shopNegotiation(transaction: Transaction, rentalId: string
   const records = await rentalNegotiation(transaction, rentalId)
   if (records === undefined) return undefined
   const { negotiation } = records
-  return { transcript: transcriptOf(records), awaitingShop: negotiation.state === 'agreed' && negotiation.shopConfirmedAt === null && asksForTap(records.shopMandate, 'settlement_shop') }
+  return { transcript: transcriptOf(records, await isSample(transaction, rentalId)), awaitingShop: negotiation.state === 'agreed' && negotiation.shopConfirmedAt === null && asksForTap(records.shopMandate, 'settlement_shop') }
 }
 export type ShopNegotiation = NonNullable<Awaited<ReturnType<typeof shopNegotiation>>>
 
@@ -126,7 +126,7 @@ export async function renterNegotiation(transaction: Transaction, rentalId: stri
   const { negotiation, renterMandate } = records
   const own = checkSettlementLimits('settlement_renter', renterMandate.limits)
   return {
-    transcript: transcriptOf(records),
+    transcript: transcriptOf(records, await isSample(transaction, rentalId)),
     highestTotalCents: own.ok ? own.value.highestTotalCents : 0,
     awaitingRenter: negotiation.state === 'agreed' && negotiation.renterConfirmedAt === null && asksForTap(renterMandate, 'settlement_renter'),
     stopped: renterMandate.revokedAt !== null,
@@ -136,7 +136,13 @@ export async function renterNegotiation(transaction: Transaction, rentalId: stri
 }
 export type RenterNegotiation = NonNullable<Awaited<ReturnType<typeof renterNegotiation>>>
 
-function transcriptOf(records: NegotiationRecords) {
+// A sample rental's negotiation is shown as one: its renter and their limit were made up for the demonstration.
+async function isSample(transaction: Transaction, rentalId: string) {
+  const [rental] = await transaction.select({ simulated: rentals.simulated }).from(rentals).where(eq(rentals.id, rentalId))
+  return rental?.simulated === true
+}
+
+function transcriptOf(records: NegotiationRecords, sample = false) {
   const { negotiation } = records
   return {
     id: negotiation.id,
@@ -151,6 +157,7 @@ function transcriptOf(records: NegotiationRecords) {
     shopConfirmedAt: negotiation.shopConfirmedAt,
     renterConfirmedAt: negotiation.renterConfirmedAt,
     simulated: negotiation.simulated || records.moves.some((move) => move.model === 'simulated'),
+    sample,
     chainVerified: verifyTranscript(records.moves).ok,
     lines: records.lines.map((line) => ({ lineId: line.lineId, publishedCents: line.publishedCents, description: records.descriptions[line.lineId]?.description ?? '' })),
     wearClauses: records.wearClauses,

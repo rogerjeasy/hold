@@ -12,6 +12,7 @@ import { useLookAgain } from '@/hooks/use-look-again'
 import { Link } from '@/i18n/navigation'
 import { rentalRoutes } from '@/lib/routes'
 import { ApproveClaimForm, CleanReleaseForm, DecideClaimForm } from './claim-controls'
+import { SampleAdvocatesForm } from '@/features/negotiation/sample-advocates-form'
 import { ShopConfirmForm } from '@/features/negotiation/shop-confirm-form'
 import { TranscriptView } from '@/features/negotiation/transcript-view'
 import { ClaimDraftForm } from './claim-draft-form'
@@ -33,7 +34,9 @@ export function ClaimScreen({ shopName, timeZone = 'UTC', data, canAct, canDecid
   const promiseText = useTranslations('promise.shop')
   const amount = (cents: number) => formatMoney(money(cents, data.currency), locale)
   const pending = ['releasing', 'renewing', 'capturing'].includes(data.holdState) || data.claim?.state === 'charging' || (data.execution !== null && ['pending', 'submitted'].includes(data.execution.state))
-  useLookAgain(pending, { forMs: 180000 })
+  // While the advocates argue, the page looks again so each move appears as it is made.
+  const arguing = negotiation?.transcript.state === 'open'
+  useLookAgain(pending || arguing, { forMs: 600000 })
   // Releasing, approving and deciding need a passkey where the person's role asks for one. Preparing a claim does not.
   // The forms that decide money sit behind one prompt, however many of them apply.
   const decision = (forms: ReactNode) => passkey?.needed === true ? <PasskeyGate {...passkey} returnTo={rentalRoutes.claim(data.rentalId)} body={t('passkeyBody')}>{forms}</PasskeyGate> : forms
@@ -64,6 +67,8 @@ export function ClaimScreen({ shopName, timeZone = 'UTC', data, canAct, canDecid
         {negotiation?.transcript.state === 'agreed' && negotiation.transcript.shopConfirmedAt !== null ? <p role="status">{advocates('confirm.waiting')}</p> : null}
         {ownerOnly && canAct ? <p>{promiseText('ownerOnly')}</p> : null}
         {claimForms.length === 0 ? null : decision(<div className="grid gap-4">{claimForms}</div>)}
+        {/* Moves no money, so it never waits behind the passkey that guards the forms above. */}
+        {data.simulated && data.claim.state === 'presented' && negotiation === undefined && canAct && canDecide ? <SampleAdvocatesForm rentalId={data.rentalId} /> : null}
       </div></Panel>
       {messages === undefined ? null : <ClaimConversation audience="shop" rentalId={data.rentalId} messages={messages} shopName={shopName} renterName={renterName} timeZone={timeZone} canWrite={canAct && data.claim.state !== 'closed'} />}
       {negotiation === undefined ? null : <TranscriptView transcript={negotiation.transcript} />}

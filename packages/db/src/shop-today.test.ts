@@ -73,12 +73,12 @@ describe('a shop with no rentals', () => {
 describe('sample rentals', () => {
   beforeAll(async () => {
     await inShop(database, shopA, (transaction) => publishPriceList(transaction, shopA.shopId, priceList, NOW))
-    expect(await addSamples(shopA)).toEqual({ ok: true, rentals: 12 })
+    expect(await addSamples(shopA)).toEqual({ ok: true, rentals: 13 })
   })
 
   it('are all marked as simulated', async () => {
     const today = await inShop(database, shopA, (transaction) => shopToday(transaction, window))
-    expect(today.rentals).toEqual({ total: 12, simulated: 12 })
+    expect(today.rentals).toEqual({ total: 13, simulated: 13 })
   })
 
   it('are added once', async () => {
@@ -88,8 +88,8 @@ describe('sample rentals', () => {
   it('give the day’s figures', async () => {
     const today = await inShop(database, shopA, (transaction) => shopToday(transaction, window))
     expect(today).toMatchObject({ rentalsOut: 5, itemsOut: 7, dueBackToday: 3 })
-    expect(today.activeHolds.reduce((sum, hold) => sum + hold.reservedCents, 0)).toBe(3250_00)
-    expect(today.activeHolds.map((hold) => holdStanding(hold, NOW)).sort()).toEqual(['assured', 'assured', 'assured', 'assured', 'ending', 'valid', 'valid', 'valid', 'valid'])
+    expect(today.activeHolds.reduce((sum, hold) => sum + hold.reservedCents, 0)).toBe(3550_00)
+    expect(today.activeHolds.map((hold) => holdStanding(hold, NOW)).sort()).toEqual(['assured', 'assured', 'assured', 'assured', 'ending', 'valid', 'valid', 'valid', 'valid', 'valid'])
   })
 
   it('list the claims waiting, with the renter’s words for a contested one', async () => {
@@ -120,7 +120,7 @@ describe('sample rentals', () => {
 
   it('add up the month from the money log and the claims', async () => {
     const { month } = await inShop(database, shopA, (transaction) => shopToday(transaction, window))
-    expect(month).toEqual({ feesCents: 533_00, releasedCents: 515_00, claimedCents: 115_00, recoveredCents: 35_00 })
+    expect(month).toEqual({ feesCents: 578_00, releasedCents: 515_00, claimedCents: 150_00, recoveredCents: 35_00 })
   })
 
   it('show the latest activity first, with each sample line marked as simulated', async () => {

@@ -7,7 +7,7 @@ import { TranscriptView } from './transcript-view'
 
 const at = new Date('2026-11-01T10:00:00Z')
 const transcript: NegotiationTranscript = {
-  id: 'negotiation-1', kind: 'negotiation', state: 'agreed', endedReason: null, currency: 'EUR', claimTotalCents: 50_00, agreedCents: 28_00, deadline: at, roundLimit: 6, shopConfirmedAt: null, renterConfirmedAt: null, simulated: true, chainVerified: true,
+  id: 'negotiation-1', kind: 'negotiation', state: 'agreed', endedReason: null, currency: 'EUR', claimTotalCents: 50_00, agreedCents: 28_00, deadline: at, roundLimit: 6, shopConfirmedAt: null, renterConfirmedAt: null, simulated: true, sample: false, chainVerified: true,
   lines: [{ lineId: 'scratch', publishedCents: 35_00, description: 'Scratch' }, { lineId: 'dent', publishedCents: 15_00, description: 'Dent' }],
   wearClauses: [{ id: 'wear-1', text: 'Scuffs under 2 cm are wear.' }],
   moves: [
@@ -35,6 +35,13 @@ describe('the transcript both people read', () => {
     renderWithIntl(<TranscriptView transcript={{ ...transcript, state: 'escalated', endedReason: 'mandate_ended', agreedCents: null }} />)
     expect(screen.getByText(/Simulated advocates/)).toBeInTheDocument()
     expect(screen.getByText('An advocate was stopped, or its limits ended.')).toBeInTheDocument()
+  })
+
+  it('says a sample’s renter and limit were made up, and that Claude argued both sides, when the advocates were real', () => {
+    const live = { ...transcript, simulated: false, sample: true, moves: transcript.moves.map((move) => ({ ...move, model: move.model === null ? null : 'us.anthropic.claude-opus-4-6-v1' })) }
+    renderWithIntl(<TranscriptView transcript={live} />)
+    expect(screen.getByText('Sample claim, live advocates')).toBeInTheDocument()
+    expect(screen.queryByText(/Simulated advocates/)).not.toBeInTheDocument()
   })
 
   it('reads in the renter’s language', () => {

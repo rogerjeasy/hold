@@ -31,7 +31,7 @@ describe('a demo session', () => {
   it('opens a busy shop of its own at an address nobody can guess, with the owner, the counter staff and the shared sandbox connection', async () => {
     const opened = await openDemoSession(database, { ...people('k3v9q2'), slug: 'ribeira-bikes-k3v9q2', paypal: PAYPAL, now: NOW })
 
-    expect(opened).toMatchObject({ slug: 'ribeira-bikes-k3v9q2', rentals: 12 })
+    expect(opened).toMatchObject({ slug: 'ribeira-bikes-k3v9q2', rentals: 13 })
     expect((await findPerson(database, 'owner-k3v9q2'))?.shops).toEqual([{ shopId: opened.shopId, name: DEMO_SHOP.name, role: 'owner' }])
     expect((await findPerson(database, 'staff-k3v9q2'))?.shops).toEqual([{ shopId: opened.shopId, name: DEMO_SHOP.name, role: 'counter_staff' }])
     const [shop] = await database.select().from(shops).where(eq(shops.id, opened.shopId))

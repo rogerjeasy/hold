@@ -5,6 +5,7 @@ import { addItems, saveItemType } from './item-repository.ts'
 import { publishPriceList } from './price-list-repository.ts'
 import { addSampleRentals } from './sample-rentals.ts'
 import { saveSelfReturnSettings } from './self-return-repository.ts'
+import { grantShopSettlement } from './settlement-mandate-repository.ts'
 import { staffRoles } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
 
@@ -45,6 +46,9 @@ export const DEMO_SHOP = {
   },
   // Returns with nobody at the counter (architecture.md section 6.13), in Tomás's words and hours.
   dropPoint: 'The locked rack to the left of the shop door. Lock the bike with the code on its tag.',
+  // The shop advocate may agree down to half a claim of up to 200 euros, over six rounds, for 45 days: through the
+  // judging weeks for a demo started before submissions close.
+  advocateLimits: { lowestSharePercent: 50, largestClaimCents: 200_00, rounds: 6, days: 45 },
   opensAt: '09:00',
   closesAt: '19:00',
   wearPolicy:
@@ -84,5 +88,10 @@ export async function furnishDemoShop(transaction: Transaction, shopId: string, 
   await saveSelfReturnSettings(transaction, shopId, { allowed: true, dropPoint: DEMO_SHOP.dropPoint, hours: { opens: DEMO_SHOP.opensAt, closes: DEMO_SHOP.closesAt } })
   const samples = await addSampleRentals(transaction, { shopId, userId: ownerUserId, raisedByUserId: staff.userId, timeZone: DEMO_SHOP.timeZone, now })
   if (!samples.ok) throw new Error(`The sample rentals were refused: ${samples.reason}.`)
+  // The owner's limits for the shop's advocate, set as Tomás would on the contested-claims page, so a judge can hand
+  // the sample claim that waits for a reply to the two advocates without a passkey first. Only a demo shop gets them.
+  const advocate = DEMO_SHOP.advocateLimits
+  const granted = await grantShopSettlement(transaction, ownerUserId, { lowestSharePercent: advocate.lowestSharePercent, largestClaimCents: advocate.largestClaimCents, rounds: advocate.rounds, evidenceRequired: true, finalTap: true }, advocate.days, now)
+  if (!granted.ok) throw new Error(`The demo advocate's limits were refused: ${granted.reason}.`)
   return { rentals: samples.rentals }
 }

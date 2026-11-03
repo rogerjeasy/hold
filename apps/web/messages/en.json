@@ -3511,7 +3511,18 @@
       "code_recently_sent": "A code was sent less than a minute ago. Check your email.",
       "email_unavailable": "The email could not be sent. Try again in a moment.",
       "link_invalid": "This link cannot be used for this.",
-      "assistant_not_connected": "No assistant is connected to this rental now. Choose Hold's advocate instead."
+      "assistant_not_connected": "No assistant is connected to this rental now. Choose Hold's advocate instead.",
+      "not_a_sample": "Only a sample claim can be handed to the advocates from here. A renter starts their own advocate from their claim link.",
+      "simulated_rental": "This is a sample: what the advocates agreed is shown, and nothing is taken."
+    },
+    "sample": {
+      "title": "Watch the advocates argue this sample",
+      "body": "The renter of this sample is made up. Their contest and the most they would pay are fixed for the demonstration, and the shop's limits are the ones on the Contested claims page. Claude argues each side from the evidence, plain code checks every offer, and nothing is ever taken from a sample.",
+      "start": "Let the advocates argue it",
+      "pending": "Handing it to the advocates…",
+      "started": "The advocates have it. Their moves appear below as they make them, usually within a few minutes.",
+      "liveTitle": "Sample claim, live advocates",
+      "liveBody": "The renter and their limit were made up for this demonstration. Each side was argued by Claude, and every offer was checked by plain code. What they agree is never taken: a sample has no real hold."
     }
   },
   "operations": {

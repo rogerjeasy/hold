@@ -82,7 +82,9 @@ type SampleRental = {
   readonly state: RentalState
   readonly hold: Extract<HoldState, 'requested' | 'placed' | 'released' | 'captured'>
   // The first published price of this kind is the one claimed.
-  readonly claim?: { readonly state: Extract<ClaimState, 'awaiting_approval' | 'contested' | 'charged'>; readonly kind: PriceCategory; readonly reply?: string }
+  // presented: shown to the renter and still waiting for their reply, so the advocates can be asked to argue it. also:
+  // a second line, added by a person at the counter with no finding behind it.
+  readonly claim?: { readonly state: Extract<ClaimState, 'awaiting_approval' | 'presented' | 'contested' | 'charged'>; readonly kind: PriceCategory; readonly also?: PriceCategory; readonly reply?: string }
   // Photographed at the handover and the return, and compared: the claim rests on the finding.
   readonly photographed?: true
   // What the operations agent would propose about it, had it read sample rentals: shown as a sample, it moves nothing.
@@ -111,6 +113,8 @@ const SAMPLES: readonly SampleRental[] = [
     hold: 'placed',
     claim: { state: 'contested', kind: 'loss', reply: 'The lock was in the bag when I handed it back.' },
   },
+  // Waits for the renter's reply: the claim a judge can hand to the two advocates (extensions.md section 9).
+  { renter: 'Elena Duarte', items: ['ebike'], starts: [-4, 10, 0], ends: [-1, 18, 0], state: 'settling', hold: 'placed', claim: { state: 'presented', kind: 'damage', also: 'cleaning' }, photographed: true },
   { renter: 'Julia Novak', items: ['ebike'], starts: [-9, 10, 0], ends: [-7, 17, 0], state: 'closed', hold: 'released' },
   { renter: 'Daniel Ortiz', items: ['hybrid'], starts: [-8, 9, 0], ends: [-6, 18, 0], state: 'closed', hold: 'captured', claim: { state: 'charged', kind: 'damage' }, photographed: true, proposal: 'dispute_answer' },
 ]
@@ -285,11 +289,15 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
       const kind = sample.claim.kind
       const entry = terms.entries.find((each) => each.category === kind) ?? terms.entries[0]
       if (entry === undefined) throw new Error('The price list has no entries.')
+      const also = sample.claim.also === undefined ? undefined : terms.entries.find((each) => each.category === sample.claim?.also)
       const raisedAt = inMonth(new Date(endsAt.getTime() + 60 * MINUTE))
       const presented = sample.claim.state !== 'awaiting_approval'
+      // A claim still waiting for its reply stays open for a week, so a judge who comes back to the demo can still
+      // hand it to the advocates.
+      const replyDueAt = sample.claim.state === 'presented' ? new Date(now.getTime() + 7 * 24 * 60 * MINUTE) : null
       const [claim] = await transaction
         .insert(claims)
-        .values({ shopId, rentalId: rental.id, currency, totalCents: entry.amountCents, state: sample.claim.state, raisedByUserId: raiser, presentedAt: presented ? raisedAt : null, promiseDays: presented ? (promise?.days ?? null) : null, createdAt: raisedAt })
+        .values({ shopId, rentalId: rental.id, currency, totalCents: entry.amountCents + (also?.amountCents ?? 0), state: sample.claim.state, raisedByUserId: raiser, presentedAt: presented ? raisedAt : null, replyDueAt, promiseDays: presented ? (promise?.days ?? null) : null, createdAt: raisedAt })
         .returning({ id: claims.id })
       if (claim === undefined) throw new Error('A sample claim was not created.')
       const [photographed] = rentalItemIds
@@ -310,7 +318,11 @@ export async function addSampleRentals(transaction: Transaction, input: SampleRe
         reason: findingId === undefined ? 'Sample data, added to show how a claim looks.' : null,
         createdAt: raisedAt,
       })
+      if (also !== undefined) {
+        await transaction.insert(claimLines).values({ shopId, claimId: claim.id, priceEntryId: also.id, currency, amountCents: also.amountCents, source: 'person', findingId: null, addedByUserId: raiser, reason: 'Sample data: mud on the chain and the frame at the return, cleaned at the counter.', createdAt: raisedAt })
+      }
       await audit('claim.raised', raisedAt, 'person', raiser)
+      if (sample.claim.state === 'presented') await audit('claim.presented', raisedAt, 'person', raiser)
       if (sample.claim.reply !== undefined) {
         const repliedAt = inMonth(new Date(raisedAt.getTime() + 18 * 60 * MINUTE))
         await transaction.insert(claimReplies).values({ shopId, claimId: claim.id, decision: 'contest', comment: sample.claim.reply, createdAt: repliedAt })

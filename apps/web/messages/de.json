@@ -3511,7 +3511,18 @@
       "code_recently_sent": "Vor weniger als einer Minute wurde ein Code gesendet. Prüfen Sie Ihre E-Mails.",
       "email_unavailable": "Die E-Mail konnte nicht gesendet werden. Versuchen Sie es gleich noch einmal.",
       "link_invalid": "Dieser Link kann dafür nicht verwendet werden.",
-      "assistant_not_connected": "Mit dieser Miete ist gerade kein Assistent verbunden. Wählen Sie den Vertreter von Hold."
+      "assistant_not_connected": "Mit dieser Miete ist gerade kein Assistent verbunden. Wählen Sie den Vertreter von Hold.",
+      "not_a_sample": "Nur eine Beispielforderung kann von hier an die Fürsprecher gehen. Ein Mieter startet seinen Fürsprecher über seinen Forderungslink.",
+      "simulated_rental": "Das ist eine Probe: Die Einigung der Fürsprecher wird gezeigt, und nichts wird eingezogen."
+    },
+    "sample": {
+      "title": "Die Fürsprecher diese Probe verhandeln sehen",
+      "body": "Der Mieter dieser Probe ist erfunden. Sein Einspruch und das Höchste, das er zahlen würde, sind für die Vorführung festgelegt, und die Grenzen des Geschäfts sind die auf der Seite für bestrittene Forderungen. Claude vertritt jede Seite anhand der Belege, einfacher Code prüft jedes Angebot, und von einer Probe wird nie etwas eingezogen.",
+      "start": "Die Fürsprecher verhandeln lassen",
+      "pending": "Wird den Fürsprechern übergeben…",
+      "started": "Die Fürsprecher haben es übernommen. Ihre Züge erscheinen unten, sobald sie sie machen, meist innerhalb weniger Minuten.",
+      "liveTitle": "Beispielforderung, echte Fürsprecher",
+      "liveBody": "Der Mieter und seine Grenze wurden für diese Vorführung erfunden. Jede Seite wurde von Claude vertreten, und jedes Angebot hat einfacher Code geprüft. Was sie vereinbaren, wird nie eingezogen: Eine Probe hat keine echte Sperre."
     }
   },
   "operations": {

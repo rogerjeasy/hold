@@ -11,7 +11,7 @@ const data: RenterNegotiation = {
   stopped: false,
   advocate: 'hold',
   transcript: {
-    id: 'negotiation-1', kind: 'negotiation', state: 'agreed', endedReason: null, currency: 'EUR', claimTotalCents: 35_00, agreedCents: 17_50, deadline: at, roundLimit: 6, shopConfirmedAt: null, renterConfirmedAt: null, simulated: false, chainVerified: true,
+    id: 'negotiation-1', kind: 'negotiation', state: 'agreed', endedReason: null, currency: 'EUR', claimTotalCents: 35_00, agreedCents: 17_50, deadline: at, roundLimit: 6, shopConfirmedAt: null, renterConfirmedAt: null, simulated: false, sample: false, chainVerified: true,
     lines: [{ lineId: 'scratch', publishedCents: 35_00, description: 'Scratch' }], wearClauses: [],
     moves: [{ sequence: 1, side: 'shop', kind: 'offer', lines: [{ lineId: 'scratch', cents: 35_00, ground: null, evidence: [] }], totalCents: 35_00, passReason: null, actor: 'referee', model: null, createdAt: at, fingerprint: 'a'.repeat(64) }],
   },

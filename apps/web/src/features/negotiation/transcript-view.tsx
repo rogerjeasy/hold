@@ -19,6 +19,7 @@ export function TranscriptView({ transcript }: { transcript: NegotiationTranscri
       <div className="grid gap-4 p-4 md:p-5">
         <p>{state}</p>
         {transcript.endedReason === null ? null : <p>{t(`ended.${transcript.endedReason}`)}</p>}
+        {transcript.sample && !transcript.simulated ? <Notice title={t('sample.liveTitle')} body={t('sample.liveBody')} /> : null}
         {transcript.simulated ? <Notice title={t('simulated')} body={t('transcript.noLimits')} /> : <p className="text-muted-foreground">{t('transcript.noLimits')}</p>}
         <ol className="grid gap-4">
           {transcript.moves.map((move) => <MoveItem key={move.sequence} move={move} transcript={transcript} amount={amount} />)}
