@@ -13,7 +13,7 @@
     "test:ci": "vitest run packages/domain packages/settle packages/db/src/row-level-security.test.ts packages/mcp/src/catalogue.test.ts apps/web/src/server/shop-access.test.ts",
     "test:e2e": "pnpm --filter @hold/web test:e2e",
     "test:e2e:key": "pnpm --filter @hold/web test:e2e:key",
-    "lint": "pnpm -r --if-present run typegen && eslint . && pnpm --filter @hold/mobile lint",
+    "lint": "pnpm -r --if-present run typegen && NODE_OPTIONS=--max-old-space-size=8192 eslint . && pnpm --filter @hold/mobile lint",
     "typecheck": "tsc --noEmit && pnpm -r --if-present run typecheck",
     "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm test:mobile",
     "eval": "pnpm --filter @hold/eval run eval",
