@@ -8,6 +8,7 @@ import type { Client } from '@modelcontextprotocol/sdk/client/index.js'
 import { and, eq } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { TOOL_NAMES } from './catalogue.ts'
+import { handleMcpRequest } from './server.ts'
 import { readSecret } from './secrets.ts'
 import { connectClient, TEST_SECRET, testPorts } from './testing.ts'
 
@@ -91,6 +92,26 @@ describe('an MCP client given only the server’s address (X3.1)', () => {
     expect(String(booking.data['approval_url'])).toMatch(/^https:\/\/paypal\.example\/checkoutnow\?token=ORDER-/)
     expect(String(booking.data['booking_secret'])).toMatch(/^hbs_/)
     expect(booking.content.map((part) => part.type)).toEqual(['text', 'image'])
+  })
+})
+
+describe('a person who opens the address in a browser or with curl', () => {
+  it('reads how to connect an MCP client, while a client asking for a stream is still answered 405', async () => {
+    const ports = testPorts(database, logged)
+    const read = await handleMcpRequest(new Request('https://hold.test/mcp', { headers: { accept: 'text/html,*/*' } }), '', ports, '203.0.113.11')
+    expect(read.status).toBe(200)
+    expect(read.headers.get('content-type')).toContain('application/json')
+    expect(await read.json()).toMatchObject({
+      name: 'hold',
+      transport: 'streamable-http',
+      address: 'https://hold.test/mcp',
+      tools: TOOL_NAMES.length,
+      connect: { claudeCode: 'claude mcp add --transport http hold https://hold.test/mcp', cursor: { mcpServers: { hold: { url: 'https://hold.test/mcp' } } }, inspector: 'npx @modelcontextprotocol/inspector' },
+    })
+    const stream = await handleMcpRequest(new Request('https://hold.test/mcp', { headers: { accept: 'text/event-stream' } }), '', ports, '203.0.113.11')
+    expect(stream.status).toBe(405)
+    expect(stream.headers.get('allow')).toBe('POST')
+    expect((await handleMcpRequest(new Request('https://hold.test/mcp', { method: 'DELETE' }), '', ports, '203.0.113.11')).status).toBe(405)
   })
 })
 

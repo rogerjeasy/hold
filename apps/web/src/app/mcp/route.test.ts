@@ -123,8 +123,8 @@ describe('/mcp', () => {
     expect(String(paid['agent_token'])).toMatch(/^hat_/)
   })
 
-  it('answers only POST, and refuses a body over 64 KB before it is read as a call', async () => {
-    expect((await route.GET(new Request('https://hold.test/mcp'))).status).toBe(405)
+  it('answers calls only by POST, and refuses a body over 64 KB before it is read as a call', async () => {
+    expect((await route.GET(new Request('https://hold.test/mcp', { headers: { accept: 'text/event-stream' } }))).status).toBe(405)
     const large = await route.POST(new Request('https://hold.test/mcp', { method: 'POST', body: 'x'.repeat(64 * 1024 + 1), headers: { 'content-type': 'application/json', accept: 'application/json, text/event-stream' } }))
     expect(large.status).toBe(413)
   })

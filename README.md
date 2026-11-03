@@ -98,7 +98,23 @@ of real damage.
 Hold's MCP server is at **`https://p99faar3kp.us-east-1.awsapprunner.com/mcp`** (streamable HTTP, no sign-in for the
 public tools). Any MCP client can find a shop, read its damage prices, get a quote and book. The person approves every
 payment in PayPal. No tool takes an amount and none can capture a hold. The tools are listed in
-[`docs/extensions.md`](docs/extensions.md) section 8.
+[`docs/extensions.md`](docs/extensions.md) section 8. Opening the address in a browser shows these same instructions.
+
+```bash
+# Claude Code
+claude mcp add --transport http hold https://p99faar3kp.us-east-1.awsapprunner.com/mcp
+
+# MCP Inspector: choose "Streamable HTTP" and paste the address
+npx @modelcontextprotocol/inspector
+```
+
+Cursor, in `.cursor/mcp.json`:
+
+```json
+{ "mcpServers": { "hold": { "url": "https://p99faar3kp.us-east-1.awsapprunner.com/mcp" } } }
+```
+
+Then ask, for example, "Find a bike shop on Hold and quote me a city bike for tomorrow".
 
 ## How it fits together
 

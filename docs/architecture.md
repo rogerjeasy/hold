@@ -1583,7 +1583,7 @@ Served by `web` at `/mcp` over streamable HTTP. It lets a traveller's own AI ass
 
 No tool takes an amount but the line amounts of the renter's advocate's offer, which the referee bounds, and none can capture a hold. Accepting or contesting a claim needs the person's confirmation or a mandate. The tools, the identity rules and the defenses are in `extensions.md` section 8.
 
-**As built.** `apps/web/src/app/mcp/route.ts` reads the body up to 64 KB and hands it to `handleMcpRequest` in `packages/mcp`, outside the language proxy. Each POST gets a fresh server over the SDK's web-standard streamable HTTP transport in stateless mode with JSON responses, so any instance answers any call; GET and DELETE are answered 405. The tools and their input and output schemas are in `packages/mcp/src/catalogue.ts`, listed with JSON Schemas generated from the same zod schemas that check every call; unknown fields are refused. Shop-written text comes back inside `{ "merchant_words": … }`.
+**As built.** `apps/web/src/app/mcp/route.ts` reads the body up to 64 KB and hands it to `handleMcpRequest` in `packages/mcp`, outside the language proxy. Each POST gets a fresh server over the SDK's web-standard streamable HTTP transport in stateless mode with JSON responses, so any instance answers any call. A GET that asks for an event stream, and any DELETE, are answered 405; a GET that does not, from a browser or curl, reads a JSON guide to connecting a client. The tools and their input and output schemas are in `packages/mcp/src/catalogue.ts`, listed with JSON Schemas generated from the same zod schemas that check every call; unknown fields are refused. Shop-written text comes back inside `{ "merchant_words": … }`.
 
 | Tool | Tier | Needs |
 |---|---|---|

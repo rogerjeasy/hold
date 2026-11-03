@@ -67,9 +67,26 @@ const jsonError = (status: number, message: string) => new Response(JSON.stringi
 
 const initializeSchema = z.object({ method: z.literal('initialize'), params: z.object({ clientInfo: z.object({ name: z.string() }) }) })
 
+// What a person reads who opens the address in a browser or with curl: what this is and how to connect a client.
+function connectionGuide(request: Request): Response {
+  const url = new URL(request.url)
+  const address = `${url.origin}${url.pathname}`
+  const guide = {
+    ...SERVER_INFO,
+    transport: 'streamable-http',
+    address,
+    tools: TOOL_NAMES.length,
+    about: 'Send JSON-RPC calls here by POST from an MCP client. No sign-in. No tool takes an amount; a person approves every payment in PayPal.',
+    connect: { claudeCode: `claude mcp add --transport http hold ${address}`, cursor: { mcpServers: { hold: { url: address } } }, inspector: 'npx @modelcontextprotocol/inspector' },
+  }
+  return new Response(JSON.stringify(guide, null, 2), { status: 200, headers: { 'content-type': 'application/json; charset=utf-8' } })
+}
+
 // One HTTP request to /mcp, its body already read. Only POST carries calls: this server offers no stream of its own
-// messages and keeps no session to end, so GET and DELETE are answered 405, as the transport's specification allows.
+// messages and keeps no session to end, so a client's GET for a stream and DELETE are answered 405, as the transport's
+// specification allows. A GET that asks for no stream is a person, and reads how to connect.
 export async function handleMcpRequest(request: Request, body: string, ports: McpPorts, network: string | undefined): Promise<Response> {
+  if (request.method === 'GET' && !(request.headers.get('accept') ?? '').includes('text/event-stream')) return connectionGuide(request)
   if (request.method !== 'POST') return new Response(null, { status: 405, headers: { allow: 'POST' } })
   let parsed: unknown
   try {
