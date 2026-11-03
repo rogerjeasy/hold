@@ -1,6 +1,7 @@
 import type { NegotiationTranscript } from '@hold/db'
 import { formatMoney, money } from '@hold/domain'
 import type { Ground } from '@hold/domain'
+import { MessagesSquare } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { Notice } from '@/components/ui/notice'
 import { Panel } from '@/components/ui/panel'
@@ -15,13 +16,13 @@ export function TranscriptView({ transcript }: { transcript: NegotiationTranscri
   const amount = (cents: number) => formatMoney(money(cents, transcript.currency), locale)
   const state = transcript.state === 'agreed' || transcript.state === 'settled' ? t(`states.${transcript.state}`, { amount: amount(transcript.agreedCents ?? 0) }) : t(`states.${transcript.state}`)
   return (
-    <Panel title={t('transcript.title')}>
+    <Panel title={t('transcript.title')} icon={MessagesSquare}>
       <div className="grid gap-4 p-4 md:p-5">
-        <p>{state}</p>
+        <p className="text-lg font-extrabold tracking-tight text-pretty">{state}</p>
         {transcript.endedReason === null ? null : <p>{t(`ended.${transcript.endedReason}`)}</p>}
         {transcript.sample && !transcript.simulated ? <Notice title={t('sample.liveTitle')} body={t('sample.liveBody')} /> : null}
         {transcript.simulated ? <Notice title={t('simulated')} body={t('transcript.noLimits')} /> : <p className="text-muted-foreground">{t('transcript.noLimits')}</p>}
-        <ol className="grid gap-4">
+        <ol className="grid gap-3">
           {transcript.moves.map((move) => <MoveItem key={move.sequence} move={move} transcript={transcript} amount={amount} />)}
         </ol>
         <p className="text-sm text-muted-foreground">{t(transcript.chainVerified ? 'transcript.chainVerified' : 'transcript.chainBroken')}</p>
@@ -34,8 +35,8 @@ function MoveItem({ move, transcript, amount }: { move: Move; transcript: Negoti
   const t = useTranslations('negotiation')
   const summary = move.kind === 'offer' ? (move.actor === 'referee' ? t('transcript.opening', { amount: amount(move.totalCents ?? 0) }) : t('transcript.offer', { amount: amount(move.totalCents ?? 0) })) : move.kind === 'accept' ? t('transcript.accept') : t('transcript.pass')
   return (
-    <li className="grid min-w-0 gap-2 border-b pb-3">
-      <p className="text-sm text-muted-foreground">{t('transcript.move', { number: move.sequence })} · {move.actor === 'renter_assistant' ? t('transcript.side.renter_assistant') : t(`transcript.side.${move.side}`)}</p>
+    <li className={`grid min-w-0 gap-2 rounded-2xl border p-4 ${move.side === 'shop' ? 'border-border/70 bg-background/60 sm:mr-8' : 'border-primary/20 bg-primary/5 sm:ml-8'}`}>
+      <p className="label text-[0.6875rem] text-muted-foreground">{t('transcript.move', { number: move.sequence })} · {move.actor === 'renter_assistant' ? t('transcript.side.renter_assistant') : t(`transcript.side.${move.side}`)}</p>
       <p className="font-semibold">{summary}</p>
       {move.kind === 'pass' && move.passReason !== null ? <p>{t(`transcript.passReasons.${move.passReason}`)}</p> : null}
       {move.lines.length === 0 ? null : (

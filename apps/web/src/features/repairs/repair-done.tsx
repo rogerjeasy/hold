@@ -14,10 +14,10 @@ export function RepairDone({ repair, clock }: { repair: ItemRepair; clock: ShopC
   return (
     <div className="grid gap-4">
       <Notice tone="success" title={t('page.doneTitle')} body={t('page.doneBody')} />
-      <ul className="grid gap-1">
+      <ul className="grid gap-1.5">
         {repair.lines.map((line) => <li key={line.id} className="flex flex-wrap gap-x-2"><span className="font-semibold wrap-long-words">{line.description}</span><span className="text-muted-foreground">· {t(`page.${line.outcome ?? 'left'}`)}</span></li>)}
       </ul>
-      <dl className="grid grid-cols-[auto_auto] justify-start gap-x-6 gap-y-1">
+      <dl className="grid grid-cols-[auto_auto] justify-start gap-x-6 gap-y-1 rounded-xl bg-muted/60 px-4 py-3">
         <dt className="text-muted-foreground">{t('costLabel')}</dt><dd className="figures font-semibold">{format.money(repair.costCents ?? 0)}</dd>
         {claimed > 0 ? <><dt className="text-muted-foreground">{t('claimedLabel')}</dt><dd className="figures font-semibold">{format.money(claimed)}</dd></> : null}
       </dl>

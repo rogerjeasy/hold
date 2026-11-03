@@ -48,7 +48,7 @@ export function MarkEditor({ sessionId, view, photoUrl, marks, readOnly = false 
             tabIndex={0}
             aria-label={t('box')}
             aria-valuetext={t('boxAt', { x: Math.round(draft.box.x * 100), y: Math.round(draft.box.y * 100), width: Math.round(draft.box.width * 100), height: Math.round(draft.box.height * 100) })}
-            className="cursor-move touch-none border-primary bg-primary/15 focus-visible:outline-2 focus-visible:outline-offset-2"
+            className="cursor-move touch-none rounded-sm border-mark bg-mark/20 focus-visible:outline-2 focus-visible:outline-offset-2"
             {...draft.handlers}
           />
         )}
@@ -56,10 +56,10 @@ export function MarkEditor({ sessionId, view, photoUrl, marks, readOnly = false 
       {marks.length === 0 ? null : (
         <ul className="grid gap-2">
           {marks.map((mark) => (
-            <li key={mark.id} className="flex min-w-0 flex-wrap items-center justify-between gap-2">
+            <li key={mark.id} className="flex min-w-0 flex-wrap items-center justify-between gap-2 rounded-xl border border-border/70 bg-background/60 py-2 pr-2 pl-3.5">
               <span className="min-w-0 wrap-long-words">{mark.description}</span>
               {mark.confirmed || readOnly ? (
-                <span className="text-sm text-muted-foreground">{mark.new ? t('added') : t('confirmed')}</span>
+                <span className="min-h-11 content-center px-2 text-sm font-semibold text-success">{mark.new ? t('added') : t('confirmed')}</span>
               ) : (
                 <form action={confirm}>
                   <input type="hidden" name="locale" value={locale} />
@@ -79,8 +79,8 @@ export function MarkEditor({ sessionId, view, photoUrl, marks, readOnly = false 
           {t('add')}
         </Button>
       ) : (
-        <form action={add} className="grid gap-3">
-          <p className="text-sm text-muted-foreground">{t('howTo')}</p>
+        <form action={add} className="grid gap-3 rounded-xl border border-border/70 bg-muted/40 p-4">
+          <p className="text-sm text-pretty text-muted-foreground">{t('howTo')}</p>
           <input type="hidden" name="locale" value={locale} />
           <input type="hidden" name="sessionId" value={sessionId} />
           <input type="hidden" name="view" value={view} />

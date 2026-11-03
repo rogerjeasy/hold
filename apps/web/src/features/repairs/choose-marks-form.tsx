@@ -27,7 +27,7 @@ export function ChooseMarksForm({ itemId, marks, views }: { itemId: string; mark
               {/* A box drawn at the size of text, its real control an invisible input filling a 44 pixel square on top. */}
               <span className="relative grid size-11 shrink-0 place-items-center">
                 <input type="checkbox" name="markId" value={mark.id} className="peer absolute inset-0 size-11 cursor-pointer opacity-0" />
-                <span aria-hidden="true" className="grid size-5 place-items-center border-2 border-border-strong bg-card text-primary-foreground peer-checked:border-primary peer-checked:bg-primary peer-checked:[&>svg]:opacity-100 peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background">
+                <span aria-hidden="true" className="grid size-5 place-items-center rounded-md border-2 border-border-strong bg-card text-primary-foreground peer-checked:border-primary peer-checked:bg-primary peer-checked:[&>svg]:opacity-100 peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background">
                   <Check className="size-3.5 opacity-0" strokeWidth={3} />
                 </span>
               </span>
@@ -35,7 +35,7 @@ export function ChooseMarksForm({ itemId, marks, views }: { itemId: string; mark
             </label>
           ))}
         </fieldset>
-        <Button type="submit" variant="outline" disabled={opening} className="min-h-12 justify-self-stretch sm:justify-self-start">{t('open')}</Button>
+        <Button type="submit" variant="outline" disabled={opening} className="justify-self-stretch sm:justify-self-start">{t('open')}</Button>
         <ActionMessage result={result} success={t('opened')} results="repairs.results" />
       </form>
     </Panel>

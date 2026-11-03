@@ -1,5 +1,6 @@
 'use client'
 import type { ItemRepair } from '@hold/db'
+import { History } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Panel } from '@/components/ui/panel'
 import type { ShopClock } from '@/hooks/use-shop-format'
@@ -10,13 +11,13 @@ export function RepairHistory({ repairs, clock }: { repairs: readonly ItemRepair
   const t = useTranslations('repairs')
   const format = useShopFormat(clock)
   return (
-    <Panel title={t('historyTitle')}>
-      <ul>
+    <Panel title={t('historyTitle')} icon={History}>
+      <ul className="divide-y divide-border/70">
         {repairs.map((repair) => {
           const claimed = repair.lines.reduce((total, line) => total + (line.claimedCents ?? 0), 0)
           const date = repair.closedAt === null ? '' : format.day(repair.closedAt)
           return (
-            <li key={repair.id} className="grid gap-1 border-b px-4 py-3.5 last:border-b-0 md:px-5">
+            <li key={repair.id} className="grid gap-1.5 px-4 py-4 md:px-5">
               <p className="font-semibold wrap-long-words">{repair.lines.map((line) => line.description).join(' · ')}</p>
               <p className="text-sm text-muted-foreground">{repair.closer === null ? t('doneUnnamed', { date }) : t('doneBy', { name: repair.closer, date })}</p>
               <dl className="grid grid-cols-[auto_auto] justify-start gap-x-4 text-sm">

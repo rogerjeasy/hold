@@ -30,11 +30,11 @@ export function RepairCapture({ session, guides, canAct }: { session: HandoverVi
     router.refresh()
   }
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)]">
-      <div className="min-w-0 max-lg:order-last"><ViewList views={session.plan.map((each) => ({ ...each, done: session.photos.some((shot) => shot.view === each.key) }))} current={current} onChoose={(key) => { setCurrent(key); setRetaking(false) }} /></div>
+    <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,17rem)_minmax(0,1fr)] lg:gap-6">
+      <div className="min-w-0 max-lg:order-last lg:sticky lg:top-6"><ViewList views={session.plan.map((each) => ({ ...each, done: session.photos.some((shot) => shot.view === each.key) }))} current={current} onChoose={(key) => { setCurrent(key); setRetaking(false) }} /></div>
       {view === undefined ? null : (
         <Panel title={view.label} className="min-w-0">
-          <div className="grid gap-4 px-4 py-4 md:px-5 xl:grid-cols-2">
+          <div className="grid gap-4 p-3 sm:p-4 md:p-5 xl:grid-cols-2">
             <div className="grid min-w-0 content-start gap-2">
               <p className="label text-xs text-muted-foreground">{t('where')}</p>
               {shown.map((guide) => guide.url === null ? <p key={guide.description} className="text-muted-foreground">{guide.description}</p> : <PhotoWithMarks key={guide.description} src={guide.url} alt={t('whereAlt', { mark: guide.description })} marks={guide.region === null ? [] : [{ id: guide.description, region: guide.region, confirmed: true }]} />)}

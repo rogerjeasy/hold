@@ -19,7 +19,7 @@ export function PromiseDaysForm({ days }: { days: number }) {
       <Label htmlFor={id}>{t('days')}</Label>
       <p id={`${id}-hint`} className="text-sm text-muted-foreground">{t('hint')}</p>
       <Input id={id} name="days" type="number" inputMode="numeric" min={DECISION_PROMISE.minDays} max={DECISION_PROMISE.maxDays} step={1} required defaultValue={days} aria-describedby={`${id}-hint`} className="sm:max-w-xs" />
-      <Button type="submit" disabled={saving} className="min-h-12 justify-self-stretch sm:justify-self-start">{t('save')}</Button>
+      <Button type="submit" disabled={saving} className="justify-self-stretch sm:justify-self-start">{t('save')}</Button>
       <ActionMessage result={result} success={t('saved')} results="promise.results" />
     </form>
   )
@@ -45,7 +45,7 @@ export function GrantWaiverForm() {
           <Input id={daysId} name="days" type="number" inputMode="numeric" min={1} max={90} required defaultValue={60} />
         </div>
       </div>
-      <Button type="submit" disabled={pending} className="min-h-12 justify-self-stretch sm:justify-self-start">{t('grant')}</Button>
+      <Button type="submit" disabled={pending} className="justify-self-stretch sm:justify-self-start">{t('grant')}</Button>
       <ActionMessage result={result} success={t('granted')} results="promise.results" />
     </form>
   )
@@ -58,7 +58,7 @@ export function RevokeWaiverForm() {
   return (
     <form action={revoke} className="grid gap-2">
       <input type="hidden" name="locale" value={locale} />
-      <Button type="submit" variant="outline" disabled={pending} className="min-h-12 justify-self-stretch sm:justify-self-start">{t('revoke')}</Button>
+      <Button type="submit" variant="outline" disabled={pending} className="justify-self-stretch sm:justify-self-start">{t('revoke')}</Button>
       <ActionMessage result={result} success={t('revoked')} results="promise.results" />
     </form>
   )

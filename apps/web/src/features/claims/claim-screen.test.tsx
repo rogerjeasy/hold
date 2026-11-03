@@ -173,6 +173,62 @@ describe('a line the renter agreed during the rental (X5.3)', () => {
   })
 })
 
+// Found in the audit: after a return with possible new damage, the one orange button above the fold released the hold.
+describe('a return with possible new damage (F-M10)', () => {
+  const possibleFindings = [{ id: 'finding', description: 'A chip in the paint on the down tube.', suggestedPriceEntryId: 'price', comparisonId: 'comparison', view: 'left-side', simulated: false }]
+  it('leads with preparing the claim, and releases the hold only on a second, quieter step', () => {
+    renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={{ ...workspace, possibleFindings }} canAct />)
+    const prepare = screen.getByRole('button', { name: 'Prepare claim for review' })
+    expect(prepare).toHaveAttribute('data-variant', 'default')
+    expect(screen.queryByRole('button', { name: 'Confirm clean return and release hold' })).not.toBeInTheDocument()
+    const anyway = screen.getByRole('button', { name: 'Release the hold without a claim' })
+    expect(anyway).toHaveAttribute('data-variant', 'outline')
+    expect(prepare.compareDocumentPosition(anyway) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    fireEvent.click(anyway)
+    expect(screen.getByLabelText('Inspection reason')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Confirm clean return and release hold' })).toHaveAttribute('data-variant', 'outline')
+  })
+  it('offers the clean release at once when the comparison found nothing new', () => {
+    renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={workspace} canAct />)
+    expect(screen.getByRole('button', { name: 'Confirm clean return and release hold' })).toHaveAttribute('data-variant', 'default')
+    expect(screen.queryByRole('button', { name: 'Release the hold without a claim' })).not.toBeInTheDocument()
+  })
+})
+
+// Found in the audit (JW-M4): counter staff were shown claim decisions the server would refuse them.
+describe('decisions a person may not take', () => {
+  const counter = { userId: 'jonas', role: 'counter_staff' as const, approvalLimitCents: 2000, staffCount: 3 }
+  const owner = { userId: 'tomas', role: 'owner' as const, approvalLimitCents: 0, staffCount: 3 }
+  const awaiting = (totalCents: number) => ({ ...workspace, claim: { id: 'claim', state: 'awaiting_approval' as const, totalCents, raisedByUserId: 'staff', replyDueAt: null } })
+  const contested = { ...workspace, rentalState: 'settling' as const, claim: { id: 'claim', state: 'contested' as const, totalCents: 3500, raisedByUserId: 'staff', replyDueAt: null } }
+
+  it('tells counter staff a claim over their limit is for an owner or manager, and offers the owner the approval', () => {
+    const { unmount } = renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={awaiting(3500)} canAct viewer={counter} />)
+    expect(screen.queryByRole('button', { name: 'Approve and show renter link' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Waive claim and release hold' })).not.toBeInTheDocument()
+    expect(screen.getByText('This claim is over your approval limit of €20.00, so an owner or manager approves it.')).toBeInTheDocument()
+    unmount()
+    renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={awaiting(3500)} canAct canDecide viewer={owner} />)
+    expect(screen.getByRole('button', { name: 'Approve and show renter link' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Waive claim and release hold' })).toBeInTheDocument()
+    expect(screen.queryByText(/over your approval limit/)).not.toBeInTheDocument()
+  })
+
+  it('lets counter staff approve a claim within their limit', () => {
+    renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={awaiting(1500)} canAct viewer={counter} />)
+    expect(screen.getByRole('button', { name: 'Approve and show renter link' })).toBeInTheDocument()
+  })
+
+  it('leaves a contested claim to an owner or manager', () => {
+    const { unmount } = renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={contested} canAct viewer={counter} />)
+    expect(screen.queryByRole('button', { name: 'Uphold claim and settle' })).not.toBeInTheDocument()
+    expect(screen.getByText('An owner or manager decides a contested claim.')).toBeInTheDocument()
+    unmount()
+    renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={contested} canAct canDecide viewer={owner} />)
+    expect(screen.getByRole('button', { name: 'Uphold claim and settle' })).toBeInTheDocument()
+  })
+})
+
 describe('the promise to decide a contested claim', () => {
   const decideBy = new Date('2026-11-03T17:00:00Z')
   const contested = (state: 'contested' | 'escalated') => ({ ...workspace, rentalState: 'settling' as const, claim: { id: 'claim', state, totalCents: 3500, raisedByUserId: 'staff', replyDueAt: null } })

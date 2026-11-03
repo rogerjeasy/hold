@@ -21,7 +21,7 @@ export function RewriteSummaryForm({ rentalId, first }: { rentalId: string; firs
     <form action={rewrite} className="grid justify-items-start gap-2">
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="rentalId" value={rentalId} />
-      <Button type="submit" variant="outline" className="min-h-11" disabled={pending}>{first ? t('write') : t('rewrite')}</Button>
+      <Button type="submit" variant="outline" disabled={pending}>{first ? t('write') : t('rewrite')}</Button>
       <ActionMessage result={result} success={t('rewritten')} results="contest.results" />
     </form>
   )

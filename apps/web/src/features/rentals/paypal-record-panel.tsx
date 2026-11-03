@@ -1,5 +1,6 @@
 import type { PayPalRecord, PayPalRecordLine } from '@hold/db'
 import { formatMoney, money } from '@hold/domain'
+import { Landmark } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
 import { Panel } from '@/components/ui/panel'
 import { SampleTag } from '@/components/ui/sample-tag'
@@ -14,14 +15,14 @@ const ID_NAMES = ['order', 'authorization', 'capture', 'refund', 'invoice'] as c
 export function PayPalRecordPanel({ record, clock }: { record: PayPalRecord; clock: ShopClock }) {
   const t = useTranslations('shop.rentals.paypal')
   return (
-    <Panel title={t('title')} aside={record.simulated ? <SampleTag /> : null}>
+    <Panel title={t('title')} icon={Landmark} aside={record.simulated ? <SampleTag /> : null}>
       <div className="grid gap-3 px-4 py-4 md:px-5">
-        <p className="max-w-prose text-muted-foreground">{t('body')}</p>
-        {record.simulated ? <p className="border-l-2 border-primary pl-3">{t('sampleNote')}</p> : null}
+        <p className="max-w-prose text-pretty text-muted-foreground">{t('body')}</p>
+        {record.simulated ? <p className="rounded-xl bg-muted/70 px-3 py-2.5 text-[0.9375rem]">{t('sampleNote')}</p> : null}
         {record.lines.length === 0 ? <p>{t('empty')}</p> : null}
       </div>
       {record.lines.length === 0 ? null : (
-        <ol className="border-t">
+        <ol className="divide-y divide-border/70 border-t border-border/70">
           {record.lines.map((line, index) => <RecordLine key={`${line.requestId ?? line.kind ?? ''}-${String(index)}`} line={line} simulated={record.simulated} clock={clock} />)}
         </ol>
       )}
@@ -35,15 +36,15 @@ function RecordLine({ line, simulated, clock }: { line: PayPalRecordLine; simula
   const format = useShopFormat(clock)
   const title = line.kind !== null ? t(`kinds.${line.kind}`) : line.action !== null ? t(`calls.${line.action}`) : ''
   return (
-    <li className="grid min-w-0 gap-2 border-b px-4 py-3 last:border-b-0 md:px-5">
+    <li className="grid min-w-0 gap-2.5 px-4 py-4 md:px-5">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
         <span className="flex min-w-0 flex-wrap items-center gap-2 font-semibold">
           {title}
           {simulated ? <SampleTag /> : null}
         </span>
-        <span className="figures">{formatMoney(money(line.amountCents, line.currency), locale)}</span>
+        <span className="text-lg font-extrabold tracking-tight tabular-nums">{formatMoney(money(line.amountCents, line.currency), locale)}</span>
       </div>
-      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 text-sm">
+      <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 rounded-xl bg-muted/50 px-3 py-2.5 text-sm">
         {ID_NAMES.map((name) => {
           const id = line.ids[name]
           return id === undefined ? null : <Row key={name} label={t(`ids.${name}`)} value={id} code />
@@ -66,7 +67,7 @@ function Row({ label, value, code = false }: { label: string; value: string; cod
   return (
     <>
       <dt className="text-muted-foreground">{label}</dt>
-      <dd className={code ? 'min-w-0 font-mono break-all' : 'min-w-0'}>{value}</dd>
+      <dd className={code ? 'min-w-0 font-mono text-[0.8125rem] break-all' : 'min-w-0'}>{value}</dd>
     </>
   )
 }

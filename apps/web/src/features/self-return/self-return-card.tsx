@@ -13,14 +13,14 @@ export function SelfReturnCard({ token, offer }: { token: string; offer: SelfRet
   const t = useTranslations('selfReturn.card')
   if (!offer.offered) return null
   return (
-    <section aria-labelledby="self-return-card" className={cn('grid gap-3 bg-card p-4 md:p-5', offer.shopClosed ? 'border-2 border-foreground' : 'border')}>
-      <h2 id="self-return-card" className="flex items-start gap-2 text-lg leading-snug font-extrabold tracking-tight text-balance">
-        <MapPin aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-primary" />
+    <section aria-labelledby="self-return-card" className={cn('surface grid gap-3 p-4 md:p-5', offer.shopClosed && 'border-primary/50 shadow-raised')}>
+      <h2 id="self-return-card" className="flex items-center gap-3 text-lg leading-snug font-extrabold tracking-tight text-balance">
+        <span aria-hidden="true" className="grid size-9 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary"><MapPin className="size-4.5" /></span>
         {offer.shopClosed ? t('closedTitle') : t('openTitle')}
       </h2>
       <p className="max-w-prose text-pretty">{t('body')}</p>
       <p className="label text-xs text-muted-foreground">{t('meta')}</p>
-      <Button asChild variant={offer.shopClosed ? 'default' : 'outline'} className="min-h-12 justify-self-stretch sm:justify-self-start">
+      <Button asChild variant={offer.shopClosed ? 'default' : 'outline'} className="justify-self-stretch sm:justify-self-start">
         <Link href={linkRoutes.selfReturn(token)} referrerPolicy="no-referrer">
           {t('start')}
           <ArrowRight aria-hidden="true" />

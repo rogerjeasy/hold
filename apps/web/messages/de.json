@@ -1594,7 +1594,8 @@
         "out": "Verliehen",
         "returned": "Zurückgegeben",
         "done": "Erledigt",
-        "none": "Hier sind keine Mieten."
+        "none": "Hier sind keine Mieten.",
+        "noneBody": "Gerade ist keine Miete in diesem Abschnitt. Wählen Sie einen anderen oder zeigen Sie alle."
       },
       "columns": {
         "who": "Mietende Person",
@@ -1661,7 +1662,10 @@
         "toDo": "Noch nicht",
         "lapsedNote": "Die Zahlungsfrist ist abgelaufen, deshalb werden die Artikel nicht mehr freigehalten. Die mietende Person kann noch bezahlen, solange niemand sonst sie gebucht hat.",
         "assistant": "Durch den eigenen Assistenten des Mieters",
-        "erasedRenter": "Persönliche Daten gelöscht"
+        "erasedRenter": "Persönliche Daten gelöscht",
+        "runs": "{start} – {end}",
+        "paidBy": "Bezahlt von {name}",
+        "stepOf": "Schritt {number} von {total}: {step}"
       },
       "link": {
         "title": "Der Link der mietenden Person",
@@ -2230,7 +2234,9 @@
         "back": "Zurück zur Miete",
         "sealedNote": "Versiegelt. Diese Fotos können sich nicht mehr ändern.",
         "texted": "Die mietende Person hat den Zustandsbericht per SMS erhalten. Sie kann auch diesen Code scannen."
-      }
+      },
+      "lead": "Fotografieren Sie jede Ansicht im Rahmen, markieren Sie vorhandene Spuren und versiegeln Sie dann.",
+      "progress": "{done} von {total} Ansichten fotografiert"
     },
     "returns": {
       "title": "Rückgabe prüfen",
@@ -2343,7 +2349,8 @@
         "started": "Der Vergleich hat begonnen.",
         "left": "{count, plural, one {# echter Vergleich heute aus Ihrem Netzwerk übrig} other {# echte Vergleiche heute aus Ihrem Netzwerk übrig}}. Jeder verbraucht einen Teil des täglichen Claude-Kontingents des Kontos.",
         "noneTitle": "Heute kein echter Vergleich mehr"
-      }
+      },
+      "marked": "{count, plural, one {# Stelle gefunden} other {# Stellen gefunden}}"
     },
     "incidents": {
       "title": "Vorfälle",
@@ -3272,6 +3279,19 @@
       "adjusted": "Angepasst",
       "waived": "Das Geschäft verzichtet auf diese Forderung",
       "closed": "Abgeschlossen"
+    },
+    "cleanAnyway": "Wenn Sie den Artikel selbst geprüft haben und alles in Ordnung ist, können Sie die ganze Kaution trotzdem freigeben. Sie schreiben dann auf, was Sie geprüft haben.",
+    "releaseAnyway": "Kaution ohne Forderung freigeben",
+    "keepHold": "Kaution behalten",
+    "damagedTitle": "Möglicher neuer Schaden gefunden",
+    "damagedBody": "Der Vergleich hat etwas Neues gefunden, oder die mietende Person hat während der Miete einem Posten zugestimmt. Erstellen Sie die Forderung aus den Belegen; eine Person genehmigt sie, bevor die mietende Person sie sieht.",
+    "limits": {
+      "overLimit": "Diese Forderung liegt über Ihrem Genehmigungslimit von {limit}, daher genehmigt sie die Inhaberschaft oder die Leitung.",
+      "seniorApproves": "Diese Forderung genehmigt die Inhaberschaft oder die Leitung.",
+      "seniorDecides": "Über eine bestrittene Forderung entscheidet die Inhaberschaft oder die Leitung.",
+      "seniorWaives": "Nur Inhaberschaft, Leitung oder wer diese Forderung erstellt hat, kann sie erlassen.",
+      "raisedIt": "Sie haben diese Forderung erstellt, daher entscheidet eine andere Person aus Inhaberschaft oder Leitung.",
+      "confirmSenior": "Was die Vertreter vereinbart haben, bestätigt die Inhaberschaft oder die Leitung."
     }
   },
   "scorecard": {

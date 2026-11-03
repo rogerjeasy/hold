@@ -8,7 +8,7 @@ export function DropOffsSection({ dropOffs, clock, canAct }: { dropOffs: readonl
   const t = useTranslations('selfReturn.staff')
   if (dropOffs.length === 0) return null
   return (
-    <section aria-labelledby="drop-offs" className="grid gap-4">
+    <section aria-labelledby="drop-offs" className="grid gap-5">
       <div className="grid gap-1.5">
         <h2 id="drop-offs" className="text-[1.375rem] leading-tight font-extrabold tracking-tight">{t('sectionTitle', { count: dropOffs.length })}</h2>
         <p className="max-w-prose text-muted-foreground">{t('sectionLead')}</p>
