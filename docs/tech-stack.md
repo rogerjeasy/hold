@@ -100,6 +100,7 @@ Two services share one codebase:
 - **QR codes.** `qrcode` draws the renter's link as SVG on the server, for the renter to scan at the counter. It is the second dependency added beyond this list: a QR encoder by hand is several hundred lines of error correction for no gain.
 - **Type.** Archivo for headlines and text, JetBrains Mono for small labels and amounts. Both are served from the app itself through `next/font`.
 - **Components.** shadcn/ui on the Radix primitives. Buttons are at least 44 pixels tall. Shared primitives live in `src/components/ui`, the header and footer in `src/features/site`, the public pages in `src/features/marketing`, and sign-in and sign-up in `src/features/auth`.
+- **A model's Markdown.** The hosted assistant answers in Markdown, with emphasis, lists, headings and tables. `react-markdown` 10.1.0 with `remark-gfm` 4.0.1 (GitHub's tables, strikethrough and task lists) renders it as structure through one component, `src/components/ui/markdown.tsx`, chosen over a parser of Hold's own because GitHub's Markdown has edge cases a second parser would get wrong. HTML in the text is dropped, never rendered; a picture is shown as its description and never fetched; only `https:`, `http:` and `mailto:` links are followed, in a new tab without the opener; a wide table scrolls in its own box. What the person typed is shown exactly as typed.
 - **Language routing.** Next.js 16 root parameters carry the language. The older `setRequestLocale` call is deprecated in `next-intl` and is not used.
 
 ### 4.1 Guided photo capture

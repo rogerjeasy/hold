@@ -1,12 +1,14 @@
 import type { Conversation } from '@hold/mcp'
 import { Bot, User, Wrench } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { Markdown } from '@/components/ui/markdown'
 import { SampleTag } from '@/components/ui/sample-tag'
 
 type Line = { readonly key: string; readonly kind: 'person' | 'assistant' | 'tool'; readonly text: string }
 
 // The chat as the person reads it: what they wrote, what the assistant said, and each Hold tool it used. Tool results
-// stay out of sight; they are the assistant's to read.
+// stay out of sight; they are the assistant's to read. The assistant writes Markdown, shown as the structure it means;
+// the person's words are shown exactly as typed.
 export function ChatTranscript({ conversation, simulated }: { conversation: Conversation; simulated: boolean }) {
   const t = useTranslations('hostedAssistant')
   const lines = conversation.flatMap((message, index) =>
@@ -27,13 +29,13 @@ export function ChatTranscript({ conversation, simulated }: { conversation: Conv
             {line.text}
           </li>
         ) : (
-          <li key={line.key} className={`grid max-w-prose gap-1 rounded-md border px-3 py-2 ${line.kind === 'person' ? 'justify-self-end bg-muted' : 'justify-self-start'}`}>
+          <li key={line.key} className={`grid min-w-0 max-w-prose gap-1.5 rounded-md border px-3 py-2 ${line.kind === 'person' ? 'justify-self-end bg-muted' : 'w-full justify-self-start'}`}>
             <span className="flex items-center gap-1.5 text-[0.8125rem] font-semibold text-muted-foreground">
               {line.kind === 'person' ? <User aria-hidden="true" className="size-3.5" /> : <Bot aria-hidden="true" className="size-3.5" />}
               {line.kind === 'person' ? t('you') : t('assistant')}
               {line.kind === 'assistant' && simulated ? <SampleTag label={t('simulated')} /> : null}
             </span>
-            <span className="text-pretty whitespace-pre-line wrap-long-words">{line.text}</span>
+            {line.kind === 'person' ? <span className="text-pretty whitespace-pre-line wrap-long-words">{line.text}</span> : <Markdown text={line.text} />}
           </li>
         ),
       )}
