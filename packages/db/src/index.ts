@@ -101,6 +101,8 @@ export { acceptedEvalRun, acceptedEvalRunAsOwner, fieldRecord, gateRunHistory, r
 export type { EvalRunRecord, FieldRecordMonth } from './scorecard-repository.ts'
 export { auditAgentCall, beginOpsRun, completeOpsRun, decideProposal, exceptionFacts, exceptionsAwaitingOwner, finishProposal, OPS_AGENT_QUEUE, OPS_EXECUTE_QUEUE, proposalAmount, proposalToCarryOut, queueOperationsCheck, recentDecisions, holdsToReconcile, rentalsForCaptures, morningQueue, pendingProposals, recordExceptions, shopSnapshot, shopsForOperations, writeProposal } from './ops-repository.ts'
 export type { AgentCallLine, DecisionInput, DecisionResult, ProposalInput, QueueEntry, RecordedException, RunUsage, WriteResult } from './ops-repository.ts'
+export { recordSampleInvestigation, sampleEntriesToInvestigate, sampleInvestigation, startSampleInvestigation } from './sample-investigation-repository.ts'
+export type { SampleAnswer, SampleEntry, SampleInvestigationStart, SampleInvestigationStatus } from './sample-investigation-repository.ts'
 export { confirmedRules, confirmRule, decideRule, draftRule, grantStandingRule, liveStandingRule, mandateForUse, recordReminder, remindersSentOn, revokeMandate, rulesForOwner } from './ops-settings-repository.ts'
 export { addPoliceReport, agreeIncident, confirmIncidentPrice, incidentAlert, incidentForRenter, incidentsWaitingForStaff, issueIncidentCode, leaveIncidentForReturn, makeShopMatter, markIncidentAlerted, rentalIncidents, saveTheftDetails, sendIncident, shopIncidents, sortIncidentReport, startIncident } from './incident-repository.ts'
 export type { MarkedBox, NewIncident, RenterIncident, ShopIncident, TriageAnswer } from './incident-repository.ts'

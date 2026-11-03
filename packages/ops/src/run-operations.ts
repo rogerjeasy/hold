@@ -1,15 +1,16 @@
-import { beginOpsRun, completeOpsRun, confirmedRules, decideProposal, exceptionFacts, exceptionsAwaitingOwner, inShop, liveStandingRule, recordExceptions, recordReminder, shopSnapshot, writeProposal } from '@hold/db'
+import { beginOpsRun, completeOpsRun, confirmedRules, decideProposal, exceptionsAwaitingOwner, inShop, liveStandingRule, recordExceptions, recordReminder, shopSnapshot, writeProposal } from '@hold/db'
 import type { Database, RecordedException, Transaction } from '@hold/db'
-import { detectExceptions, guardNumbers, money, orderQueue, suppressedByRule } from '@hold/domain'
-import type { DetectorKind, OwnerRule, ProposalKind, ReminderKind } from '@hold/domain'
+import { detectExceptions, orderQueue, suppressedByRule } from '@hold/domain'
+import type { DetectorKind, ReminderKind } from '@hold/domain'
 import { z } from 'zod'
-import { gatedTools } from './gated-tools.ts'
 import type { RunBudget } from './gated-tools.ts'
-import { investigationSchema, OPS_LIMITS, OPS_PROMPT_VERSION } from './investigator.ts'
-import type { InvestigationAnswer, Investigator, OpsLimits } from './investigator.ts'
+import { fixedChoice, investigate } from './investigate-exception.ts'
+import type { Choice } from './investigate-exception.ts'
+import { OPS_LIMITS, OPS_PROMPT_VERSION } from './investigator.ts'
+import type { Investigator, OpsLimits } from './investigator.ts'
 import { paypalFacts } from './paypal-facts.ts'
 import type { ShopPayPalReads } from './paypal-facts.ts'
-import type { PayPalReader } from './paypal-reader.ts'
+import { investigateSamples } from './sample-investigation.ts'
 
 export type { ShopPayPalReads } from './paypal-facts.ts'
 export type Reminder = { readonly kind: ReminderKind; readonly shopId: string; readonly rentalId: string; readonly dueAt: Date | null }
@@ -42,23 +43,10 @@ const FIXED_REASONS: Readonly<Record<DetectorKind, string>> = {
   decision_promise_missed: 'The shop did not decide this contested claim by the date it promised; only the owner may decide it now.',
 }
 
-// What goes on the queue for one exception. A null reason means the detector's fixed reason.
-type Choice = {
-  readonly kind: ProposalKind
-  readonly reason: string | null
-  readonly references: readonly string[]
-  readonly draft: string | null
-  readonly model: string | null
-  readonly investigated: boolean
-  readonly draftDropped: boolean
-  readonly paypalConfirmed: boolean
-  readonly observations: InvestigationAnswer['observations']
-}
-const fixedChoice = (kind: ProposalKind, investigated: boolean): Choice => ({ kind, reason: null, references: [], draft: null, model: null, investigated, draftDropped: false, paypalConfirmed: false, observations: [] })
-
 // One message on the ops-agent queue: from the nightly fan-out, a manual check by the owner (written to the outbox,
-// which adds the shop), or when a dispute opens, a hold becomes at risk or a capture fails.
-export const opsAgentMessageSchema = z.strictObject({ shopId: z.uuid(), trigger: z.enum(['nightly', 'dispute_opened', 'hold_at_risk', 'capture_failed', 'manual']) })
+// which adds the shop), or when a dispute opens, a hold becomes at risk or a capture fails. samplesRunId: the run a
+// demo shop's owner opened to have its samples investigated (section 6.14), which reads no PayPal account.
+export const opsAgentMessageSchema = z.strictObject({ shopId: z.uuid(), trigger: z.enum(['nightly', 'dispute_opened', 'hold_at_risk', 'capture_failed', 'manual']), samplesRunId: z.uuid().optional() })
 
 // One run for one shop (extensions.md section 6.3): detectors find the exceptions, reminders go out, the model
 // investigates what needs a decision within the run's ceilings, and the owner's queue is written. Nothing here moves
@@ -67,6 +55,7 @@ export async function runOperations(dependencies: OpsDependencies, input: z.infe
   const { database } = dependencies
   const { shopId } = input
   const limits = dependencies.limits ?? OPS_LIMITS
+  if (input.samplesRunId !== undefined) return investigateSamples({ ...dependencies, limits }, { shopId, runId: input.samplesRunId })
   const now = dependencies.now()
   const asWorker = <Result>(work: (transaction: Transaction) => Promise<Result>) => inShop(database, { role: 'hold_worker', shopId }, work)
   const runId = await asWorker((transaction) => beginOpsRun(transaction, input.trigger, now))
@@ -119,57 +108,6 @@ export async function runOperations(dependencies: OpsDependencies, input: z.infe
   }
   await asWorker((transaction) => completeOpsRun(transaction, runId, { toolCalls: budget.toolCalls, inputTokens: usage.inputTokens, outputTokens: usage.outputTokens, model: usage.model, promptVersion: usage.model === null ? null : OPS_PROMPT_VERSION, paypalChecked: reached && reader !== undefined, counts: { exceptions: recorded.length, proposals, reminders, remindersFailed } }, now))
   return runId
-}
-
-type Investigation = {
-  readonly shopId: string
-  readonly exception: RecordedException
-  // The currency of the amount the exception names; unknown, no number may stand in a draft.
-  readonly currency: string | undefined
-  readonly candidates: readonly ProposalKind[]
-  readonly rules: readonly OwnerRule[]
-  readonly reader: PayPalReader | undefined
-  readonly runId: string
-  readonly budget: RunBudget
-  readonly limits: OpsLimits
-  readonly stopAt: number
-  readonly usage: { inputTokens: number; outputTokens: number; model: string | null }
-}
-
-// Asks the model about one exception. Anything but a valid answer of an allowed kind falls back to the detector's
-// first allowed kind with the fixed reason: a refusal, an outage, or an answer steered toward another kind.
-async function investigate(dependencies: OpsDependencies, work: Investigation): Promise<Choice> {
-  const { exception, candidates } = work
-  const fallback = fixedChoice(candidates[0] ?? 'note', true)
-  const investigator = dependencies.investigator
-  if (investigator === undefined) return fallback
-  // Only ever serialized for the model, so its shape is not needed here.
-  const facts = await inShop<unknown>(dependencies.database, { role: 'hold_worker', shopId: work.shopId }, (transaction) =>
-    exception.rentalId === null ? Promise.resolve({ subjectKind: exception.subjectKind, subjectId: exception.subjectId }) : exceptionFacts(transaction, 'rental', exception.rentalId))
-  const answered = { count: 0 }
-  const tools = gatedTools({ database: dependencies.database, shopId: work.shopId, runId: work.runId, subject: { kind: exception.subjectKind, id: exception.subjectId }, reader: work.reader, budget: work.budget, answered, maxToolCalls: work.limits.maxToolCalls, now: dependencies.now })
-  const signal = AbortSignal.timeout(Math.max(1, work.stopAt - Date.now()))
-  const result = await investigator.investigate(
-    { exceptionKind: exception.kind, allowed: candidates, deadline: exception.deadline, facts: JSON.stringify({ exception: { kind: exception.kind, subjectKind: exception.subjectKind, subjectId: exception.subjectId, moneyCents: exception.moneyCents }, records: facts }), rules: work.rules, paypalAvailable: work.reader !== undefined },
-    tools,
-    { toolCalls: work.limits.toolCallsPerException, signal },
-  ).catch(() => undefined)
-  if (result === undefined) return fallback
-  work.budget.tokens += result.inputTokens + result.outputTokens
-  work.usage.inputTokens += result.inputTokens
-  work.usage.outputTokens += result.outputTokens
-  work.usage.model = result.model
-  if (result.kind !== 'result') return fallback
-  const parsed = investigationSchema.safeParse(result.data)
-  if (!parsed.success) return fallback
-  const { proposalKind, reason, references, draft, paypalConfirmed, observations } = parsed.data
-  // A kind the detector does not allow is the mark of a steered answer: only its observations, which can be notes
-  // and nothing else, are kept.
-  if (!candidates.includes(proposalKind)) return { ...fallback, model: result.model, observations }
-  // The model's word that it checked PayPal counts only if a PayPal read for this exception actually answered.
-  // A draft is a message about money: every number in it must be the amount the records hold (section 6.7).
-  const guarded = draft === null ? null : guardNumbers(draft, work.currency === undefined ? [] : [money(exception.moneyCents, work.currency)])
-  return { kind: proposalKind, reason, references, draft: guarded, model: result.model, investigated: true, draftDropped: draft !== null && guarded === null, paypalConfirmed: paypalConfirmed && answered.count > 0, observations }
 }
 
 // Writes the queue entry, the agent's observations as notes, and, for a clean return nobody confirmed, applies the

@@ -526,6 +526,22 @@ Fifteen seconds. Tomás opens the morning queue, reads six lines, approves five 
 
 About three days. Its foundations, which are proposals, tiers and mandates, are reused by Extensions 3 and 4.
 
+### 6.14 Investigating a demo's samples
+
+A demo shop's morning queue opens with two sample entries, a hold near its end (Marco Rossi) and a dispute waiting for an answer (Daniel Ortiz), seeded as no model looked at them, since the nightly run never reads samples (section 6.7). Left so, a judge sees the agent's words nowhere. Until 3 November 2026 their chips read "Not investigated" and "PayPal could not be checked", which a stranger takes for a broken integration; they now read "Sample entry: no model has looked at it yet".
+
+**When the owner or a manager asks.** The queue page offers **Investigate the samples** while a sample entry waits that no model has looked at. It opens an ops run marked as the samples' own (`counts.samples`), and hands it to the `ops-agent` queue through the outbox with `samplesRunId` (`startSampleInvestigation` in `packages/db`; `investigateSamples` in `features/operations/actions.ts`). The worker's handler for that queue takes it to `investigateSamples` in `packages/ops`, which runs the same investigation as a nightly run, through the same gateway, audit lines and ceilings, over each waiting sample entry. No PayPal account is read and no reminder is sent.
+
+**PayPal's facts are simulated, and said to be.** A sample's PayPal references were made up and never existed at PayPal. The investigator is offered PayPal's read tools, and each answers with the sample's own records and the words "Simulated for a demonstration sample: PayPal has no record of it" (`samplePayPalReader`). Each call passes the gateway and gets its audit line, as any PayPal read does.
+
+**What is written.** An answer of the entry's own kind is written over the sample entry: Claude's reason, references and any draft (the draft through the same number guard), the model and the prompt version, the run, and the marks `investigated: yes`, `paypalChecked: simulated`. The entry keeps `simulated: yes`, so approving it records the decision and carries nothing out (`decideProposal`). A refusal, an outage or a steered kind leaves the entry as it was. The worker may not rewrite a proposal's words, so it does this through `hold_record_sample_investigation` (migration `0047`), which rewrites only a waiting sample entry in the transaction's own shop and returns false for any other.
+
+**On screen.** The entry reads "Investigated by Claude Opus 4.6 · PayPal facts simulated for a sample". Above the queue, the state of the last run comes from the server, so a reload keeps it: running since a time, with the page looking again; how many entries which model investigated and when; that Claude did not answer, so the entries stay as they were; or that a run did not finish within ten minutes, which can be started again.
+
+**Its cost.** Two investigations of a few short turns, inside the run's ceilings. Each run still spends the account's daily Claude allowance, so it is allowed once a day per demo, twice per network and four times across every demo (`SAMPLE_INVESTIGATIONS_PER_*` in `packages/domain` demo-limits.ts), refused beyond that with a message that says why.
+
+**Tests.** `sample-investigation-repository.test.ts` (one run at a time, a stalled run, the function refusing a real entry, a decided one and another shop's), `sample-investigation.test.ts` in `packages/ops` (Claude asked about both entries with simulated PayPal answers and audit lines, the shop's PayPal never read, a refusal or a steered kind writing nothing), `sample-investigation-flow.test.ts` (roles, the outbox message, the page's status, the three caps) and `queue-screen.test.tsx` (the chips and every status line).
+
 ---
 
 ## 7. Extension 2: the Clean Record and the trust ladder

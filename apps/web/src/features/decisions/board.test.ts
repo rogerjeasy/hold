@@ -41,6 +41,7 @@ const proposal = (overrides: Partial<QueueEntry> = {}): QueueEntry => ({
   references: ['AUTH-123'],
   draft: null,
   raisedByAgent: true,
+  model: null,
   deadline: at('2026-10-14T18:00:00Z'),
   exceptionKind: 'clean_return_unconfirmed',
   amountCents: 300_00,

@@ -9,6 +9,7 @@ import { useShopFormat } from '@/hooks/use-shop-format'
 import { Link } from '@/i18n/navigation'
 import { rentalRoutes } from '@/lib/routes'
 import { formatMoney } from '@/lib/money'
+import { modelName } from '@/lib/model-name'
 import { EntryActions } from './entry-actions'
 
 const isDetector = (kind: string | undefined): kind is DetectorKind => DETECTOR_KINDS.some((each) => each === kind)
@@ -22,12 +23,18 @@ export function QueueEntryCard({ entry, clock, canDecide, passkeyNeeded, togethe
   const locale = useLocale()
   const format = useShopFormat(clock)
   const fixed = entry.payload['fixedReason']
+  const sample = entry.payload['simulated'] === 'yes'
+  // A sample's PayPal references were never on PayPal: it is said to be a sample no model looked at yet, or the model
+  // that investigated it with PayPal's facts simulated, never that the agent or PayPal failed (section 6.14).
   const marks = [
     entry.raisedByAgent ? { key: 'raisedByAgent' as const, icon: Bot } : undefined,
-    entry.payload['investigated'] === 'no' ? { key: 'notInvestigated' as const, icon: SearchX } : undefined,
-    entry.payload['paypalChecked'] === 'no' ? { key: 'paypalNotChecked' as const, icon: WifiOff } : undefined,
+    sample && entry.payload['investigated'] === 'no' ? { key: 'sampleNotInvestigated' as const, icon: SearchX } : undefined,
+    sample && entry.payload['investigated'] === 'yes' && entry.model !== null ? { key: 'sampleInvestigated' as const, icon: Bot } : undefined,
+    !sample && entry.payload['investigated'] === 'no' ? { key: 'notInvestigated' as const, icon: SearchX } : undefined,
+    !sample && entry.payload['paypalChecked'] === 'no' ? { key: 'paypalNotChecked' as const, icon: WifiOff } : undefined,
     entry.payload['draftDropped'] === 'yes' ? { key: 'draftDropped' as const, icon: CircleSlash } : undefined,
   ].flatMap((mark) => (mark === undefined ? [] : [mark]))
+  const model = entry.model === null ? '' : modelName(entry.model)
   const titleId = `entry-${entry.id}`
   return (
     <article aria-labelledby={titleId} className="grid h-full min-w-0 content-start gap-3 border bg-card p-4 text-card-foreground md:p-5">
@@ -65,7 +72,7 @@ export function QueueEntryCard({ entry, clock, canDecide, passkeyNeeded, togethe
           {marks.map(({ key, icon: Icon }) => (
             <li key={key} className="inline-flex items-center gap-1.5 border border-border-strong px-2 py-1 text-sm">
               <Icon aria-hidden="true" className="size-4 shrink-0" />
-              {t(`marks.${key}`)}
+              {t(`marks.${key}`, { model })}
             </li>
           ))}
         </ul>

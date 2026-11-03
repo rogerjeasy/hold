@@ -3768,7 +3768,9 @@
       "raisedByAgent": "Observation de l’agent",
       "notInvestigated": "Non examiné",
       "paypalNotChecked": "PayPal n’a pas pu être vérifié",
-      "draftDropped": "Brouillon retiré : ses montants ne correspondaient pas aux registres"
+      "draftDropped": "Brouillon retiré : ses montants ne correspondaient pas aux registres",
+      "sampleNotInvestigated": "Entrée d’exemple : aucun modèle ne l’a encore examinée",
+      "sampleInvestigated": "Examinée par {model} · données PayPal simulées pour un exemple"
     },
     "openRental": "Ouvrir la location",
     "approve": "Approuver",
@@ -3838,7 +3840,10 @@
       "not_together": "Seules les libérations peuvent être approuvées ensemble.",
       "rule_not_open": "Cette règle a déjà été décidée.",
       "amount_invalid": "Ce n’est pas un montant supérieur à zéro. Utilisez des chiffres, comme 10 ou 10,50.",
-      "standing_rule_off": "La règle permanente est déjà désactivée."
+      "standing_rule_off": "La règle permanente est déjà désactivée.",
+      "samples_daily_cap": "Les examens des exemples d’aujourd’hui sont utilisés, pour cette démo ou pour toutes. Chacun consomme le quota quotidien de Claude du compte, réessayez demain.",
+      "samples_running": "Les exemples sont déjà en cours d’examen. Cette page se met à jour d’elle-même.",
+      "no_samples": "Aucune entrée d’exemple n’attend d’être examinée."
     },
     "rules": {
       "title": "Règles issues de vos refus",
@@ -3869,6 +3874,18 @@
       "revoke": "Désactiver",
       "revoked": "Règle permanente désactivée.",
       "ownerOnly": "Seul le propriétaire l’active ou la désactive."
+    },
+    "samples": {
+      "title": "Faire examiner les exemples",
+      "body": "Les entrées d’exemple de cette file ont été écrites sans modèle. Demandez à l’agent d’exploitation de les examiner comme il le fait chaque nuit : Claude lit les dossiers de chaque exemple, les vérifie avec les outils de lecture de PayPal et rédige son propre motif. Les références PayPal d’un exemple n’ont jamais existé chez PayPal, les données PayPal sont donc simulées à partir de l’exemple. Rien de ce qu’il écrit ne déplace d’argent.",
+      "start": "Faire examiner les exemples",
+      "starting": "Lancement…",
+      "started": "Lancé. Cette page se met à jour d’elle-même quand Claude a répondu.",
+      "allowance": "Cela utilise le quota quotidien de Claude de la démo : une fois par jour pour chaque démo.",
+      "running": "Claude examine les exemples, depuis {at}. Cette page se met à jour d’elle-même.",
+      "investigated": "{model} a examiné {count, plural, one {# entrée d’exemple} other {# entrées d’exemple}} à {at}. Elles sont dans la file ci-dessous.",
+      "notAnswered": "Claude n’a pas répondu à {at}, les entrées d’exemple restent donc telles quelles.",
+      "stalled": "L’examen lancé à {at} ne s’est pas terminé. Vous pouvez le relancer."
     }
   },
   "decisions": {

@@ -1,4 +1,4 @@
-import { dropOffsWaiting, inShop, liveStandingRule, morningQueue, proposalAmount, recentDecisions, rulesForOwner } from '@hold/db'
+import { dropOffsWaiting, inShop, liveStandingRule, morningQueue, proposalAmount, recentDecisions, rulesForOwner, sampleEntriesToInvestigate, sampleInvestigation } from '@hold/db'
 import type { Transaction } from '@hold/db'
 import { shopDay } from '@hold/domain'
 import type { Metadata } from 'next'
@@ -35,6 +35,8 @@ export default async function Page() {
     rules: await rulesWithAmounts(transaction),
     standingRule: await liveStandingRule(transaction, now),
     dropOffs: await dropOffsWaiting(transaction),
+    // A demo's sample entries no model has looked at yet, and how the last investigation of them stands (section 6.14).
+    samples: { waiting: (await sampleEntriesToInvestigate(transaction)).length, status: await sampleInvestigation(transaction, now) },
   }))
   return (
     <QueueScreen

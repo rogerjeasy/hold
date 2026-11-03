@@ -3768,7 +3768,9 @@
       "raisedByAgent": "Observación del agente",
       "notInvestigated": "Sin investigar",
       "paypalNotChecked": "No se pudo comprobar PayPal",
-      "draftDropped": "Borrador retirado: sus importes no coincidían con los registros"
+      "draftDropped": "Borrador retirado: sus importes no coincidían con los registros",
+      "sampleNotInvestigated": "Entrada de muestra: ningún modelo la ha revisado aún",
+      "sampleInvestigated": "Revisada por {model} · datos de PayPal simulados para una muestra"
     },
     "openRental": "Abrir el alquiler",
     "approve": "Aprobar",
@@ -3838,7 +3840,10 @@
       "not_together": "Solo las liberaciones se pueden aprobar juntas.",
       "rule_not_open": "Esta regla ya se decidió.",
       "amount_invalid": "No es un importe mayor que cero. Use cifras, como 10 o 10,50.",
-      "standing_rule_off": "La regla permanente ya está desactivada."
+      "standing_rule_off": "La regla permanente ya está desactivada.",
+      "samples_daily_cap": "Las revisiones de hoy de las muestras ya se usaron, para esta demo o para todas. Cada una gasta la cuota diaria de Claude de la cuenta, así que inténtelo mañana.",
+      "samples_running": "Las muestras ya se están revisando. Esta página se actualiza sola.",
+      "no_samples": "Ninguna entrada de muestra espera ser revisada."
     },
     "rules": {
       "title": "Reglas de sus rechazos",
@@ -3869,6 +3874,18 @@
       "revoke": "Desactivar",
       "revoked": "Regla permanente desactivada.",
       "ownerOnly": "Solo el propietario la activa o la desactiva."
+    },
+    "samples": {
+      "title": "Revisar las muestras",
+      "body": "Las entradas de muestra de esta cola se escribieron sin un modelo. Pida al agente de operaciones que las revise como hace cada noche: Claude lee los registros de cada muestra, los comprueba con las herramientas de lectura de PayPal y escribe su propio motivo. Las referencias de PayPal de una muestra nunca estuvieron en PayPal, así que los datos de PayPal se simulan a partir de la muestra. Nada de lo que escribe mueve dinero.",
+      "start": "Revisar las muestras",
+      "starting": "Iniciando…",
+      "started": "Iniciado. Esta página se actualiza sola cuando Claude responde.",
+      "allowance": "Usa la cuota diaria de Claude de la demo: una vez al día por cada demo.",
+      "running": "Claude está revisando las muestras, desde las {at}. Esta página se actualiza sola.",
+      "investigated": "{model} revisó {count, plural, one {# entrada de muestra} other {# entradas de muestra}} a las {at}. Están en la cola de abajo.",
+      "notAnswered": "Claude no respondió a las {at}, así que las entradas de muestra siguen como estaban.",
+      "stalled": "La revisión iniciada a las {at} no terminó. Puede iniciarla de nuevo."
     }
   },
   "decisions": {

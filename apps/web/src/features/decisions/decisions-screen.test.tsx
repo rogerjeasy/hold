@@ -47,7 +47,7 @@ const claim = (overrides: Partial<DecisionClaim> = {}): DecisionClaim => ({
   ...overrides,
 })
 const release = (id: string, rentalId: string, amountCents: number): QueueEntry => ({
-  id, kind: 'release_hold', subjectKind: 'hold', subjectId: `hold-${id}`, rentalId, reason: 'The comparison was clean.', references: ['AUTH-7Y21'], draft: null, raisedByAgent: false,
+  id, kind: 'release_hold', subjectKind: 'hold', subjectId: `hold-${id}`, rentalId, reason: 'The comparison was clean.', references: ['AUTH-7Y21'], draft: null, raisedByAgent: false, model: null,
   deadline: at('2026-10-14T18:00:00Z'), exceptionKind: 'clean_return_unconfirmed', amountCents, currency: 'EUR', moneyCents: amountCents, payload: { fixedReason: 'clean_return_unconfirmed', investigated: 'no', paypalChecked: 'yes' },
 })
 const records = (overrides: Partial<DecisionRecords> = {}): DecisionRecords => ({

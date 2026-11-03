@@ -316,6 +316,13 @@
       "when": 1793664500000,
       "tag": "0044_demo_retirement",
       "breakpoints": true
+    },
+    {
+      "idx": 47,
+      "version": "7",
+      "when": 1793670000000,
+      "tag": "0047_sample_investigation",
+      "breakpoints": true
     }
   ]
 }

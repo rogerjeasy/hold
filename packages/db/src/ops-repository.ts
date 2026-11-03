@@ -145,6 +145,8 @@ export type QueueEntry = {
   readonly references: readonly string[]
   readonly draft: string | null
   readonly raisedByAgent: boolean
+  // The model whose answer the entry carries; null when it carries the detector's fixed reason.
+  readonly model: string | null
   readonly deadline: Date | null
   readonly exceptionKind: string | null
   // Read from the records the proposal names, now; never from the proposal or the model.
@@ -174,7 +176,7 @@ export async function morningQueue(transaction: Transaction, now: Date): Promise
   const entries: QueueEntry[] = []
   for (const { proposal, deadline, exceptionKind, moneyCents } of rows) {
     const amount = await amountFor(transaction, proposal.kind, proposal.subjectKind, proposal.subjectId, proposal.rentalId)
-    entries.push({ id: proposal.id, kind: proposal.kind, subjectKind: proposal.subjectKind, subjectId: proposal.subjectId, rentalId: proposal.rentalId, reason: proposal.reason, references: proposal.references, draft: proposal.draft, raisedByAgent: proposal.raisedByAgent, deadline, exceptionKind, ...amount, moneyCents: amount.amountCents ?? moneyCents ?? 0, payload: proposal.payload })
+    entries.push({ id: proposal.id, kind: proposal.kind, subjectKind: proposal.subjectKind, subjectId: proposal.subjectId, rentalId: proposal.rentalId, reason: proposal.reason, references: proposal.references, draft: proposal.draft, raisedByAgent: proposal.raisedByAgent, model: proposal.model, deadline, exceptionKind, ...amount, moneyCents: amount.amountCents ?? moneyCents ?? 0, payload: proposal.payload })
   }
   return orderQueue(entries)
 }

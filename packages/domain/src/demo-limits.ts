@@ -52,3 +52,10 @@ export const INSIGHTS_TURNS_PER_DAY = 60
 export const SAMPLE_ADVOCATE_RUNS_PER_NETWORK = 1
 export const INSIGHTS_TURNS_PER_NETWORK = 20
 export const INSIGHTS_TURNS_PER_SHOP = 15
+
+// A demo's two sample entries on the morning queue, investigated by the operations agent when the owner asks
+// (extensions.md section 6.14). A run is at most two investigations of a few short turns each, well under the run's
+// 400,000-token ceiling, but it still spends the account's day: once per demo a day, twice per network, four in all.
+export const SAMPLE_INVESTIGATIONS_PER_SHOP = 1
+export const SAMPLE_INVESTIGATIONS_PER_NETWORK = 2
+export const SAMPLE_INVESTIGATIONS_PER_DAY = 4
