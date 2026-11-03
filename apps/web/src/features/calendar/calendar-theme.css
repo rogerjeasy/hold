@@ -117,3 +117,13 @@
   color: var(--primary-foreground);
   font-family: var(--font-mono);
 }
+
+/*
+ * The date header follows the body's sideways scroll and hides its own scrollbar, so nobody scrolls it by itself.
+ * Bryntum still marks it scrollable (overflow-x: auto, inline), which leaves a region no keyboard can reach (axe:
+ * scrollable-region-focusable). Clipped instead, it still follows the body: scrollLeft moves clipped content too. Its
+ * inline style is Bryntum's, so only !important outranks it.
+ */
+.hold-calendar .b-grid-headers {
+  overflow-x: hidden !important;
+}

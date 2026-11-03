@@ -2440,7 +2440,8 @@
         "label": "Afficher le calendrier en",
         "timeline": "Frise",
         "list": "Liste"
-      }
+      },
+      "rentalsRow": "Locations"
     },
     "priceEditor": {
       "draftOf": "Brouillon de la version {version}",

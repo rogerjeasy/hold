@@ -2440,7 +2440,8 @@
         "label": "Show the calendar as",
         "timeline": "Timeline",
         "list": "List"
-      }
+      },
+      "rentalsRow": "Rentals"
     },
     "priceEditor": {
       "draftOf": "Draft of version {version}",

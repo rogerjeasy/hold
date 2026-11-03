@@ -9,6 +9,7 @@ import { rentalRoutes } from '@/lib/routes'
 import { openingDate } from './calendar-model'
 import type { Standing } from './calendar-model'
 import { loadBryntum } from './bryntum-loader'
+import { keepCalendarAria } from './calendar-aria'
 import type { RentalSchedulerProps } from './rental-scheduler'
 import './calendar-theme.css'
 
@@ -37,14 +38,20 @@ function SchedulerSkeleton() {
 
 // Read only: a booking is made, moved or ended on its rental's page, where every rule is checked. Selecting a bar opens
 // that page. Each bar says who rents it and its standing in words, encoded, as Bryntum inserts it as HTML.
-export function BryntumRentals({ resources, events, window: shown, itemColumn, standingText, loading, failed }: RentalSchedulerProps) {
+export function BryntumRentals({ resources, events, window: shown, itemColumn, rentalsRow, barLabel, standingText, loading, failed }: RentalSchedulerProps) {
   const locale = useLocale()
   const router = useRouter()
   const container = useRef<HTMLDivElement>(null)
   const [state, setState] = useState<'loading' | 'ready' | 'failed'>('loading')
+  // Read when a bar is drawn, so a new label function from the page does not rebuild the whole scheduler.
+  const labelRef = useRef(barLabel)
+  useEffect(() => {
+    labelRef.current = barLabel
+  }, [barLabel])
   useEffect(() => {
     let live = true
     let scheduler: Scheduler | undefined
+    let stopAria: (() => void) | undefined
     const keys = new AbortController()
     loadBryntum().then(
       (bryntum) => {
@@ -92,6 +99,13 @@ export function BryntumRentals({ resources, events, window: shown, itemColumn, s
             },
           },
         })
+        const byId = new Map(events.map((event) => [event.id, event]))
+        const drawnScheduler = scheduler
+        stopAria = keepCalendarAria(container.current, rentalsRow, (bar) => {
+          const record = bar instanceof HTMLElement ? drawnScheduler.resolveEventRecord(bar) : null
+          const event = record === null ? undefined : byId.get(String(record.id))
+          return event === undefined ? null : labelRef.current(event)
+        })
         // A bar reached with the arrow keys opens its rental with Enter or Space, as a click does. Bryntum keeps those
         // keys for its own editing, which is off here, so they are read from the bar itself.
         const drawn = scheduler
@@ -112,9 +126,10 @@ export function BryntumRentals({ resources, events, window: shown, itemColumn, s
     return () => {
       live = false
       keys.abort()
+      stopAria?.()
       scheduler?.destroy()
     }
-  }, [resources, events, shown, itemColumn, standingText, locale, router])
+  }, [resources, events, shown, itemColumn, rentalsRow, standingText, locale, router])
   return (
     <div className="hold-calendar relative h-full">
       {state === 'ready' ? null : (

@@ -2440,7 +2440,8 @@
         "label": "Ver el calendario como",
         "timeline": "Línea de tiempo",
         "list": "Lista"
-      }
+      },
+      "rentalsRow": "Alquileres"
     },
     "priceEditor": {
       "draftOf": "Borrador de la versión {version}",

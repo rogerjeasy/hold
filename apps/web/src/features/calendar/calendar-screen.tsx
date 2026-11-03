@@ -4,7 +4,7 @@ import type { ShopCalendar } from '@hold/db'
 import { cn } from 'cn'
 import { Bike, CalendarRange, GanttChart, List } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { buttonVariants } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
 import { SEGMENTED_TRACK, segmentClass } from '@/components/ui/segmented'
@@ -50,8 +50,9 @@ export function CalendarScreen({ shopName, clock, window, calendar }: CalendarSc
   const t = useTranslations('shop.calendar')
   const format = useShopFormat(clock)
   const [view, setView] = useState<View>('timeline')
-  const model = calendarModel(calendar, t('unknownRenter'))
-  const standingText: Readonly<Record<Standing, string>> = { held: t('standings.held'), awaiting: t('standings.awaiting'), late: t('standings.late'), settling: t('standings.settling'), done: t('standings.done') }
+  const model = useMemo(() => calendarModel(calendar, t('unknownRenter')), [calendar, t])
+  // Kept the same object between renders: the scheduler is built from it, and a new one would rebuild it.
+  const standingText: Readonly<Record<Standing, string>> = useMemo(() => ({ held: t('standings.held'), awaiting: t('standings.awaiting'), late: t('standings.late'), settling: t('standings.settling'), done: t('standings.done') }), [t])
   return (
     <ShopFrame shopName={shopName} title={t('title')} description={t('lead')}>
       {model.resources.length === 0 ? (
@@ -82,7 +83,7 @@ export function CalendarScreen({ shopName, clock, window, calendar }: CalendarSc
           </ul>
           {model.events.length === 0 ? <p className="px-4 py-3 text-muted-foreground md:px-5">{t('empty')}</p> : null}
           <div className={cn('min-w-0', view === 'timeline' ? 'hidden md:block' : 'hidden')}>
-            <RentalScheduler resources={model.resources} events={model.events} window={window} itemColumn={t('item')} standingText={standingText} loading={t('loading')} failed={t('loadFailed')} />
+            <RentalScheduler resources={model.resources} events={model.events} window={window} itemColumn={t('item')} rentalsRow={t('rentalsRow')} barLabel={(event) => `${event.name}, ${standingText[event.standing]}, ${format.day(new Date(event.startDate))} – ${format.day(new Date(event.endDate))}`} standingText={standingText} loading={t('loading')} failed={t('loadFailed')} />
           </div>
           <CalendarList resources={model.resources} events={model.events} clock={clock} standingText={standingText} className={view === 'timeline' ? 'md:hidden' : undefined} />
         </section>

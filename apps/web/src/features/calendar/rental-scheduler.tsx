@@ -8,6 +8,10 @@ export type RentalSchedulerProps = {
   events: readonly CalendarEvent[]
   window: { readonly from: Date; readonly to: Date }
   itemColumn: string
+  // What a screen reader calls the row of rental bars.
+  rentalsRow: string
+  // What a screen reader hears for one bar: who rents it, where its hold stands and its dates.
+  barLabel: (event: CalendarEvent) => string
   standingText: Readonly<Record<Standing, string>>
   loading: string
   failed: string

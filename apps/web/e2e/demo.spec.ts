@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright'
 import type { Page } from '@playwright/test'
 import { acceptClaim, handedOverAndReturned } from './support/claim'
 import { addVirtualAuthenticator } from './support/passkey'
@@ -136,6 +137,18 @@ test('on a wide screen the calendar draws each rental as a bar, and a bar opens 
   await bar.click()
   await expect(page).toHaveURL(/\/shop\/rentals\/[0-9a-f-]{36}$/)
 })
+
+for (const theme of ['light', 'dark'] as const) {
+  test(`the calendar passes the accessibility checks in the ${theme} theme, its bars and headers included`, async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.emulateMedia({ colorScheme: theme })
+    await startDemo(page, 'Tomás, the owner')
+    await page.goto('/shop/calendar')
+    await expect(page.locator('.b-sch-event').first()).toBeVisible()
+    const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']).analyze()
+    expect(results.violations.map((violation) => `${violation.id}: ${violation.nodes.map((node) => node.target.join(' ')).join(', ')}`)).toEqual([])
+  })
+}
 
 test('a judge adds a passkey to their own demo, then confirms with it', async ({ page }) => {
   await addVirtualAuthenticator(page)
