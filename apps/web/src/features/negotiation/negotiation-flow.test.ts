@@ -8,6 +8,8 @@ const jar = new Map<string, string>()
 vi.mock('next/headers', () => ({ cookies: () => Promise.resolve({ get: (name: string) => jar.has(name) ? { name, value: jar.get(name) } : undefined, set: (name: string, value: string) => jar.set(name, value), delete: (name: string) => jar.delete(name) }), headers: () => Promise.resolve(new Headers()) }))
 vi.mock('next/cache', () => ({ revalidatePath: () => undefined }))
 vi.mock('next-intl/server', () => ({ getTranslations: () => Promise.resolve((key: string) => key) }))
+// Each test runs a whole negotiation on the database, which under a full run takes longer than the default allows.
+vi.setConfig({ testTimeout: 60_000 })
 const claimActions = await import('@/features/claims/actions')
 const claimRenter = await import('@/features/claims/renter-actions')
 const actions = await import('./actions')
