@@ -20,6 +20,6 @@ export function createComparisonWorker(stack: Stack, props: WorkerProps): void {
   // A finished comparison is pushed to the counter's phones to review (architecture.md section 13.9).
   allowPushes(role)
   role.addToPolicy(new iam.PolicyStatement({ actions: ['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'], resources: [`arn:aws:logs:${stack.region}:${stack.account}:log-group:/aws/lambda/${name('worker', 'comparisons')}:*`] }))
-  const worker = workerFunction(stack, 'ComparisonWorker', name('worker', 'comparisons'), 'comparisons-lambda.ts', role, { HOLD_DATABASE_CLUSTER_ARN: props.cluster.clusterArn, HOLD_DATABASE_SECRET_ARN: props.workerUserSecret.secretArn, HOLD_DATABASE_NAME: DATABASE_NAME, HOLD_EVIDENCE_BUCKET: props.evidenceBucket.bucketName, HOLD_DISPLAY_BUCKET: props.displayBucket.bucketName, ...PUSH_ENVIRONMENT }, { memorySize: 1536, nativeModules: ['sharp', '@techstark/opencv-js'] })
+  const worker = workerFunction(stack, 'ComparisonWorker', name('worker', 'comparisons'), 'comparisons-lambda.ts', role, { HOLD_DATABASE_CLUSTER_ARN: props.cluster.clusterArn, HOLD_DATABASE_SECRET_ARN: props.workerUserSecret.secretArn, HOLD_DATABASE_NAME: DATABASE_NAME, HOLD_EVIDENCE_BUCKET: props.evidenceBucket.bucketName, HOLD_DISPLAY_BUCKET: props.displayBucket.bucketName, ...PUSH_ENVIRONMENT }, { memorySize: 1536 })
   worker.addEventSource(new SqsEventSource(queue, { batchSize: 1, reportBatchItemFailures: true }))
 }

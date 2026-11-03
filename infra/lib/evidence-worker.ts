@@ -27,7 +27,7 @@ export function createEvidenceWorkers(stack: Stack, props: WorkerProps): void {
   // Both buckets use AWS-managed S3 encryption with bucket keys, whose encryption context is the bucket ARN.
   evidenceRole.addToPolicy(new iam.PolicyStatement({ actions: ['kms:Decrypt', 'kms:GenerateDataKey'], resources: [`arn:aws:kms:${REGION}:${ACCOUNT}:key/*`], conditions: { StringEquals: { 'kms:ViaService': `s3.${REGION}.amazonaws.com`, 'kms:CallerAccount': ACCOUNT, 'kms:EncryptionContext:aws:s3:arn': [props.evidenceBucket.bucketArn, props.displayBucket.bucketArn] }, 'ForAnyValue:StringEquals': { 'kms:ResourceAliases': 'alias/aws/s3' } } }))
   // PDFKit needs its font data; the evidence package also imports sharp, whose native loader must remain external.
-  const evidence = workerFunction(stack, 'EvidenceWorker', name('worker', 'evidence'), 'evidence-lambda.ts', evidenceRole, { ...environment, HOLD_EVIDENCE_BUCKET: props.evidenceBucket.bucketName, HOLD_DISPLAY_BUCKET: props.displayBucket.bucketName }, { memorySize: 1536, nativeModules: ['pdfkit', 'sharp'] })
+  const evidence = workerFunction(stack, 'EvidenceWorker', name('worker', 'evidence'), 'evidence-lambda.ts', evidenceRole, { ...environment, HOLD_EVIDENCE_BUCKET: props.evidenceBucket.bucketName, HOLD_DISPLAY_BUCKET: props.displayBucket.bucketName }, { memorySize: 1536 })
   evidence.addEventSource(new SqsEventSource(evidenceQueue, { batchSize: 1, reportBatchItemFailures: true }))
 
   const receiptRole = databaseRole(stack, props, 'ReceiptRole', 'receipts')

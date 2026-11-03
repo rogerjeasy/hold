@@ -99,7 +99,30 @@ function workerRole(stack: Stack, props: WorkerProps): iam.Role {
 
 // sharp ships a native binary for the machine it is installed on, so it is installed, not bundled. The deploy runs on
 // Linux x86-64, as Lambda does.
-type FunctionOptions = { readonly memorySize?: number; readonly nativeModules?: readonly string[]; readonly timeout?: Duration }
+type FunctionOptions = { readonly memorySize?: number; readonly timeout?: Duration }
+
+// Packages a worker must install beside its bundle rather than bundle: sharp and opencv carry native or WebAssembly
+// code, and sharp and pdfkit call createRequire(import.meta.url), which is empty in the CommonJS bundle, so bundled
+// they kill the function as Lambda loads it. worker-bundles.test.ts checks every entry reaches none of them bundled.
+export const NATIVE_PACKAGES = ['sharp', 'pdfkit', '@techstark/opencv-js'] as const
+export const WORKER_NATIVE_MODULES: Readonly<Record<string, readonly (typeof NATIVE_PACKAGES)[number][]>> = {
+  'comparisons-lambda.ts': ['sharp', '@techstark/opencv-js'],
+  'evidence-lambda.ts': ['pdfkit', 'sharp'],
+  'media-lambda.ts': ['sharp'],
+  // The operations agent attaches a rental's evidence pack to a dispute answer, which reaches the PDF renderer.
+  'ops-agent-lambda.ts': ['pdfkit', 'sharp'],
+  'ops-execute-lambda.ts': ['pdfkit', 'sharp'],
+}
+
+// Workers that build a sample rental's record carry the demonstration's own photographs in samples/, since they are not
+// in the display bucket (packages/evidence sample-displays.ts).
+export const WORKERS_WITH_SAMPLES: readonly string[] = ['evidence-lambda.ts']
+const SAMPLE_IMAGES = join('apps', 'web', 'public', 'images')
+
+// The shell commands that copy them in once the code is bundled, run on the deploying machine.
+export function sampleCopyCommands(inputDir: string, outputDir: string): string[] {
+  return [`mkdir -p "${join(outputDir, 'samples')}"`, `cp "${join(inputDir, SAMPLE_IMAGES)}"/sample-*.jpg "${join(outputDir, 'samples')}/"`]
+}
 
 export function workerFunction(stack: Stack, id: string, functionName: string, entry: string, role: iam.Role, environment: Record<string, string>, options: FunctionOptions = {}): nodejs.NodejsFunction {
   return new nodejs.NodejsFunction(stack, id, {
@@ -113,7 +136,12 @@ export function workerFunction(stack: Stack, id: string, functionName: string, e
     timeout: options.timeout ?? WORKER_TIMEOUT,
     role,
     environment,
-    bundling: { minify: true, sourceMap: false, ...(options.nativeModules === undefined ? {} : { nodeModules: [...options.nativeModules] }) },
+    bundling: {
+      minify: true,
+      sourceMap: false,
+      ...(WORKER_NATIVE_MODULES[entry] === undefined ? {} : { nodeModules: [...WORKER_NATIVE_MODULES[entry]] }),
+      ...(WORKERS_WITH_SAMPLES.includes(entry) ? { commandHooks: { beforeBundling: () => [], beforeInstall: () => [], afterBundling: sampleCopyCommands } } : {}),
+    },
   })
 }
 
@@ -154,7 +182,7 @@ export function createWorker(stack: Stack, props: WorkerProps): { readonly relay
   const executions = workerFunction(stack, 'ExecutionsWorker', name('worker', 'executions'), 'executions-lambda.ts', role, environment)
   const upkeep = workerFunction(stack, 'UpkeepWorker', name('worker', 'upkeep'), 'upkeep-lambda.ts', role, environment)
   // Image work needs room: a 12-megapixel original is about 36 MB of pixels.
-  const media = workerFunction(stack, 'MediaWorker', name('worker', 'media'), 'media-lambda.ts', role, environment, { memorySize: 1536, nativeModules: ['sharp'] })
+  const media = workerFunction(stack, 'MediaWorker', name('worker', 'media'), 'media-lambda.ts', role, environment, { memorySize: 1536 })
   const relay = workerFunction(stack, 'OutboxRelayWorker', name('worker', 'outbox', 'relay'), 'outbox-relay-lambda.ts', role, environment)
 
   // A message whose work failed is named back, so only it is tried again; the rest of the batch is done.
