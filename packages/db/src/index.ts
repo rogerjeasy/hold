@@ -144,3 +144,4 @@ export { recordPushDelivery, registerRenterPush, registerStaffPush, renterPushTa
 export type { PushRegistration } from './push-device-repository.ts'
 export { eraseRenter } from './renter-erasure-repository.ts'
 export type { ErasureResult } from './renter-erasure-repository.ts'
+export { nameOfRental, rentalName } from './rental-name.ts'

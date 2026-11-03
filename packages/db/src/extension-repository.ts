@@ -5,6 +5,7 @@ import { EXECUTIONS_QUEUE, markExecutionSent } from './fee-repository.ts'
 import type { FeeExecution } from './fee-repository.ts'
 import { authorizations, auditLog, executions, holds, moneyEvents, outbox, rentalExtensions, rentalItems, rentals, renters, shops } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
+import { rentalName } from './rental-name.ts'
 
 // More days a renter pays for from their own phone or assistant (architecture.md section 6.14). Plain code prices them
 // from the day rates agreed at booking and checks the item is free and the hold still covers the return; the fee is
@@ -240,7 +241,7 @@ const isAttention = (value: string | null): value is ExtensionAttention => value
 // Extension payments a person has not checked yet, oldest first.
 export async function extensionPaymentsToCheck(transaction: Transaction): Promise<readonly ExtensionPaymentToCheck[]> {
   const rows = await transaction
-    .select({ extensionId: rentalExtensions.id, rentalId: rentalExtensions.rentalId, renterName: renters.name, attention: rentalExtensions.attention, attentionAt: rentalExtensions.attentionAt, quotedCents: rentalExtensions.amountCents, capturedCents: rentalExtensions.capturedCents, currency: rentalExtensions.currency, paypalCaptureId: rentalExtensions.paypalCaptureId, extraDays: rentalExtensions.extraDays, simulated: rentals.simulated })
+    .select({ extensionId: rentalExtensions.id, rentalId: rentalExtensions.rentalId, renterName: rentalName, attention: rentalExtensions.attention, attentionAt: rentalExtensions.attentionAt, quotedCents: rentalExtensions.amountCents, capturedCents: rentalExtensions.capturedCents, currency: rentalExtensions.currency, paypalCaptureId: rentalExtensions.paypalCaptureId, extraDays: rentalExtensions.extraDays, simulated: rentals.simulated })
     .from(rentalExtensions).innerJoin(rentals, eq(rentals.id, rentalExtensions.rentalId)).leftJoin(renters, eq(renters.id, rentals.renterId))
     .where(and(isNotNull(rentalExtensions.attention), isNull(rentalExtensions.checkedAt))).orderBy(asc(rentalExtensions.attentionAt))
   return rows.flatMap(({ attention, attentionAt, capturedCents, paypalCaptureId, ...row }) =>

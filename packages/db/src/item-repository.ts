@@ -4,6 +4,7 @@ import { and, asc, count, desc, eq, inArray, ne, notInArray, sql } from 'drizzle
 import type { PhotoPlanView } from './schema/index.ts'
 import { captureSessions, claims, items, itemTypes, MARK_STATUSES, marks, photoPlans, photos, rentalItems, rentals, renters, shops } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
+import { rentalName } from './rental-name.ts'
 
 // The shop's item types and items (architecture.md section 6.3). Every function runs inside inShop, so row-level
 // security hides another shop's rows: an id from elsewhere reads as not found.
@@ -278,7 +279,7 @@ export async function itemPassport(transaction: Transaction, itemId: string): Pr
       state: rentals.state,
       startsAt: rentals.startsAt,
       endsAt: rentals.endsAt,
-      renterName: renters.name,
+      renterName: rentalName,
       simulated: rentals.simulated,
       claimState: claims.state,
       claimTotalCents: claims.totalCents,

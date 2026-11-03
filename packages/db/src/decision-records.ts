@@ -15,6 +15,7 @@ import { authorizations, claimLines, claimReplies, claims, comparisons, findings
 import type { Transaction } from './scope.ts'
 import { activeHolds, lateRentals } from './shop-today.ts'
 import type { ActiveHold, LateRental } from './shop-today.ts'
+import { rentalName } from './rental-name.ts'
 
 // What the decision board reads (extensions.md section 12.5): every record that waits on a person. Plain rows; what
 // each one asks of whom, and in what order, is worked out from them by plain code on the way to the screen.
@@ -82,7 +83,7 @@ async function waitingClaims(transaction: Transaction): Promise<DecisionClaim[]>
     .select({
       claimId: claims.id,
       rentalId: claims.rentalId,
-      renterName: renters.name,
+      renterName: rentalName,
       state: claims.state,
       totalCents: claims.totalCents,
       currency: claims.currency,

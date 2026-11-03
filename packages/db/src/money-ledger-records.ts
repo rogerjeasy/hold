@@ -3,6 +3,7 @@ import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm'
 import { auditLog, claims, executions, holds, moneyEvents, paypalEvents, rentals, renters, shopExceptions } from './schema/index.ts'
 import { eventResourceId, resourceOf } from './paypal-resources.ts'
 import type { Transaction } from './scope.ts'
+import { rentalName } from './rental-name.ts'
 
 // What the money ledger reads (extensions.md section 12.5): every line of the shop's money log with what confirms it,
 // and each rental it belongs to with what its money is checked against. Plain rows; what each line did and whether a
@@ -92,7 +93,7 @@ export async function moneyLedgerRecords(transaction: Transaction): Promise<Mone
   for (const execution of sent) for (const id of Object.values(execution.resources)) executionOf.set(id, { action: execution.action, idempotencyKey: execution.idempotencyKey, attempts: execution.attempts })
 
   const rentalRows = await transaction
-    .select({ rentalId: rentals.id, renterName: renters.name, startsAt: rentals.startsAt, endsAt: rentals.endsAt, simulated: rentals.simulated, currency: rentals.currency, holdId: holds.id, reservedCents: holds.reservedCents, holdState: holds.state, trustRung: holds.trustRung, ordinaryCents: holds.ordinaryCents, claimId: claims.id, claimState: claims.state, claimCents: claims.totalCents })
+    .select({ rentalId: rentals.id, renterName: rentalName, startsAt: rentals.startsAt, endsAt: rentals.endsAt, simulated: rentals.simulated, currency: rentals.currency, holdId: holds.id, reservedCents: holds.reservedCents, holdState: holds.state, trustRung: holds.trustRung, ordinaryCents: holds.ordinaryCents, claimId: claims.id, claimState: claims.state, claimCents: claims.totalCents })
     .from(rentals)
     .leftJoin(renters, eq(renters.id, rentals.renterId))
     .leftJoin(holds, eq(holds.rentalId, rentals.id))
