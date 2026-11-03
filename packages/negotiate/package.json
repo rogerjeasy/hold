@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "record:sample": "node --env-file-if-exists=../../.env scripts/record-sample-run.ts"
+  },
   "dependencies": {
     "@anthropic-ai/bedrock-sdk": "^0.34.4",
     "@anthropic-ai/sdk": "^0.133.0",
