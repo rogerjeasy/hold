@@ -30,4 +30,22 @@ describe('the demo’s one tap', () => {
     expect(notice.getByText('This demo has ended.')).toBeInTheDocument()
     expect(notice.getByText(/kept for seven days/)).toBeInTheDocument()
   })
+
+  it('says what it is doing while a new demo is set up, so the long wait never looks like nothing', async () => {
+    answered.mockReturnValueOnce(new Promise<DemoFormState>(() => undefined))
+    renderWithIntl(<DemoAccountsForm demo="new" />)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Start a demo as Tomás, the owner' }))
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Setting up your shop, its two accounts and its sample rentals. This takes about 20 seconds.')
+  })
+
+  it('says it is signing in when coming back to a demo, which is quick', async () => {
+    answered.mockReturnValueOnce(new Promise<DemoFormState>(() => undefined))
+    renderWithIntl(<DemoAccountsForm demo="current" />)
+
+    await userEvent.click(screen.getByRole('button', { name: 'Continue as Jonas, at the counter' }))
+
+    expect(await screen.findByRole('status')).toHaveTextContent('Signing you in to your demo…')
+  })
 })

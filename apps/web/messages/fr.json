@@ -1377,7 +1377,11 @@
         "action": "Lancer une nouvelle démo",
         "hint": "Une nouvelle boutique et de nouveaux comptes, en tant que Tomás. Votre démonstration actuelle reste telle quelle."
       },
-      "note": "Une étape qui déplace de l’argent demande une clé d’accès sur votre propre appareil, que vous pouvez ajouter sur la page Sécurité. PayPal fonctionne dans son bac à sable : aucun argent réel ne circule. Ce navigateur garde votre démonstration, pour passer de Tomás à Jonas."
+      "note": "Une étape qui déplace de l’argent demande une clé d’accès sur votre propre appareil, que vous pouvez ajouter sur la page Sécurité. PayPal fonctionne dans son bac à sable : aucun argent réel ne circule. Ce navigateur garde votre démonstration, pour passer de Tomás à Jonas.",
+      "pending": {
+        "start": "Préparation de votre magasin, de ses deux comptes et de ses locations d’exemple. Cela prend environ 20 secondes.",
+        "continue": "Connexion à votre démo…"
+      }
     }
   },
   "shop": {

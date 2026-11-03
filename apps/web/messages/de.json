@@ -1377,7 +1377,11 @@
         "action": "Neue Demo starten",
         "hint": "Ein neuer Laden und neue Konten, als Tomás. Ihre jetzige Demo bleibt, wie sie ist."
       },
-      "note": "Ein Schritt, der Geld bewegt, verlangt einen Passkey auf Ihrem eigenen Gerät, den Sie auf der Seite Sicherheit hinzufügen können. PayPal läuft in seiner Sandbox, es fließt also kein echtes Geld. Dieser Browser behält Ihre Demo, damit Sie zwischen Tomás und Jonas wechseln können."
+      "note": "Ein Schritt, der Geld bewegt, verlangt einen Passkey auf Ihrem eigenen Gerät, den Sie auf der Seite Sicherheit hinzufügen können. PayPal läuft in seiner Sandbox, es fließt also kein echtes Geld. Dieser Browser behält Ihre Demo, damit Sie zwischen Tomás und Jonas wechseln können.",
+      "pending": {
+        "start": "Ihr Geschäft, seine zwei Konten und seine Beispielvermietungen werden eingerichtet. Das dauert etwa 20 Sekunden.",
+        "continue": "Sie werden bei Ihrer Demo angemeldet…"
+      }
     }
   },
   "shop": {

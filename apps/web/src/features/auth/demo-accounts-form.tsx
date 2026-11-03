@@ -1,8 +1,8 @@
 'use client'
 
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, LoaderCircle } from 'lucide-react'
 import { useLocale, useTranslations } from 'next-intl'
-import { useActionState, useId } from 'react'
+import { useActionState, useId, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Notice } from '@/components/ui/notice'
 import { SampleTag } from '@/components/ui/sample-tag'
@@ -22,6 +22,8 @@ export function DemoAccountsForm({ demo }: { demo: 'new' | 'current' }) {
   const titleId = useId()
   const [state, submit, pending] = useActionState(signInWithDemoAccount, initialDemoFormState)
   const choice = demo === 'current' ? 'continue' : 'start'
+  // Which kind of tap is waiting: a new demo takes about twenty seconds to set up, coming back to one only a sign-in.
+  const [submitted, setSubmitted] = useState<'start' | 'continue'>(choice)
 
   return (
     <section aria-labelledby={titleId} className="border border-border-strong bg-card p-4 text-card-foreground md:p-5">
@@ -32,7 +34,7 @@ export function DemoAccountsForm({ demo }: { demo: 'new' | 'current' }) {
         <SampleTag label={t('demo.tag')} />
       </div>
       <p className="mt-2 text-muted-foreground wrap-long-words">{t(demo === 'current' ? 'demo.leadCurrent' : 'demo.lead')}</p>
-      <form action={submit} className="mt-4 grid gap-3">
+      <form action={submit} onSubmit={() => { setSubmitted(choice) }} aria-busy={pending} className="mt-4 grid gap-3">
         <input type="hidden" name="locale" value={locale} />
         <input type="hidden" name="demo" value={choice} />
         {accounts.map(({ key, variant }) => (
@@ -46,7 +48,7 @@ export function DemoAccountsForm({ demo }: { demo: 'new' | 'current' }) {
         ))}
       </form>
       {demo === 'current' ? (
-        <form action={submit} className="mt-3 grid gap-1">
+        <form action={submit} onSubmit={() => { setSubmitted('start') }} className="mt-3 grid gap-1">
           <input type="hidden" name="locale" value={locale} />
           <input type="hidden" name="demo" value="start" />
           <Button type="submit" name="account" value="owner" variant="ghost" disabled={pending} className="min-h-12 justify-between text-left whitespace-normal">
@@ -55,6 +57,12 @@ export function DemoAccountsForm({ demo }: { demo: 'new' | 'current' }) {
           </Button>
           <p className="text-[0.9375rem] text-muted-foreground">{t('demo.fresh.hint')}</p>
         </form>
+      ) : null}
+      {pending ? (
+        <p role="status" className="mt-4 flex items-start gap-2 font-semibold wrap-long-words">
+          <LoaderCircle aria-hidden="true" className="mt-0.5 size-4.5 shrink-0 animate-spin text-primary" />
+          {t(`demo.pending.${submitted}`)}
+        </p>
       ) : null}
       <p className="mt-4 text-[0.9375rem] text-muted-foreground wrap-long-words">{t('demo.note')}</p>
       {state.notice === undefined ? null : (
