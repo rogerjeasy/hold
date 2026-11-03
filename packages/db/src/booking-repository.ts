@@ -260,12 +260,14 @@ export type RentalDetail = Omit<RentalSummary, 'items'> & {
   readonly createdAt: Date
   readonly priceListVersion: number
   readonly items: readonly BookedItem[]
+  // When the owner erased the renter's personal details from this ended rental (architecture.md section 15.2).
+  readonly renterErasedAt: Date | null
 }
 
 export async function rentalDetail(transaction: Transaction, rentalId: string, now: Date): Promise<RentalDetail | undefined> {
   if (!UUID.test(rentalId)) return undefined
   const [row] = await transaction
-    .select({ ...summaryColumns, contactEmail: rentals.contactEmail, contactChannel: rentals.contactChannel, contactPhone: rentals.contactPhone, language: rentals.language, priceListVersion: priceLists.version })
+    .select({ ...summaryColumns, contactEmail: rentals.contactEmail, contactChannel: rentals.contactChannel, contactPhone: rentals.contactPhone, language: rentals.language, priceListVersion: priceLists.version, renterErasedAt: rentals.renterErasedAt })
     .from(rentals)
     .leftJoin(renters, eq(renters.id, rentals.renterId))
     .innerJoin(priceLists, eq(priceLists.id, rentals.priceListId))
@@ -289,6 +291,7 @@ export async function rentalDetail(transaction: Transaction, rentalId: string, n
     createdAt: row.createdAt,
     priceListVersion: row.priceListVersion,
     items: booked.sort((a, b) => a.label.localeCompare(b.label, undefined, { numeric: true, sensitivity: 'base' })),
+    renterErasedAt: row.renterErasedAt,
   }
 }
 
