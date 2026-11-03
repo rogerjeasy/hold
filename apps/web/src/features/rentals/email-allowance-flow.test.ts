@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { inShop, itemCatalog, registerOwner, rentalDetail, takeEmailAllowance } from '@hold/db'
 import { EMAIL_LIMITS } from '@hold/domain'
-import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 process.env['HOLD_ENVIRONMENT'] = 'test'
 process.env['HOLD_COOKIE_KEY'] = Buffer.alloc(32, 11).toString('base64')
@@ -31,9 +31,8 @@ vi.setConfig({ testTimeout: 60_000 })
 // The public demo must never become a way to send mail at will: every email someone asks Hold to send counts against
 // the day's allowance (packages/domain EMAIL_LIMITS, architecture.md section 15). What the email was for still happens.
 
-const OWNER = 'owner@email-allowance.example'
+let OWNER = ''
 let shopId: string
-let ownerId: string
 let typeId: string
 
 const day = (offset: number) => `${new Date(Date.now() + offset * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}T10:00`
@@ -46,27 +45,33 @@ const booking = (contactEmail: string) => {
 const sentTo = async (address: string) => ((await getServices()).mailer as unknown as { sent: { to: string }[] }).sent.filter((email) => email.to === address).length
 
 // Spends one share of this shop's emails for the day, as earlier requests would have.
-async function spend(target: { readonly rentalId: string | null; readonly to: string }) {
+async function spend(target: { readonly rentalId: string | null; readonly to: string; readonly essential?: boolean }) {
   const { database } = await getServices()
   const scope = { role: 'hold_app', shopId } as const
-  while (await inShop(database, scope, (transaction) => takeEmailAllowance(transaction, { shopId, rentalId: target.rentalId, to: target.to, essential: true, network: '203.0.113.90' }))) { /* spend it */ }
+  while (await inShop(database, scope, (transaction) => takeEmailAllowance(transaction, { shopId, rentalId: target.rentalId, to: target.to, essential: target.essential ?? true, network: '203.0.113.90' }))) { /* spend it */ }
 }
 
-beforeAll(async () => {
+// A shop of its own for each test, so one test's spent limits never reach the next.
+let shops = 0
+async function openShop() {
+  shops += 1
+  OWNER = `owner-${String(shops)}@email-allowance.example`
   const { database } = await getServices()
   const subject = await signIn(jar, OWNER, 'passkey')
-  const registered = await registerOwner(database, { subject, email: OWNER, name: 'Ana', language: 'en', shop: { name: 'Allowance Rentals', timeZone: 'UTC' } })
+  const registered = await registerOwner(database, { subject, email: OWNER, name: 'Ana', language: 'en', shop: { name: `Allowance Rentals ${String(shops)}`, timeZone: 'UTC' } })
   shopId = registered.shopId
-  ownerId = registered.userId
+  const ownerId = registered.userId
   expect(await shop.publishPrices(null, form({ currency: 'EUR', threshold: '', wearPolicy: 'Scuffs are wear.', description: 'Scratch', category: 'damage', amount: '35', locale: 'en' }))).toMatchObject({ ok: true })
   expect(await items.saveItemType(null, form({ itemTypeId: '', name: 'City bike', category: 'bike', value: '800', hold: '200', dayRate: '20', viewLabel: 'Frame', viewOutline: 'whole_side', viewRequired: 'yes', locale: 'en' }))).toMatchObject({ ok: true })
   typeId = (await inShop(database, { role: 'hold_app', shopId, userId: ownerId }, itemCatalog)).types[0]?.id ?? ''
   expect(await items.addItems(null, form({ itemTypeId: typeId, count: '5', size: '', serial: '', locale: 'en' }))).toMatchObject({ ok: true })
   expect(await shop.connectPayPal(null, form({ clientId: 'sandbox-client-id', clientSecret: 'sandbox-client-secret', locale: 'en' }))).toMatchObject({ ok: true })
-})
-
-beforeEach(() => {
   jar.clear()
+}
+
+beforeEach(async () => {
+  jar.clear()
+  await openShop()
   info.mockClear()
 })
 
@@ -110,7 +115,7 @@ describe('a staff invitation, once the shop’s emails for the day are spent', (
   it('is refused and not kept, while another shop still invites', async () => {
     await signIn(jar, OWNER, 'passkey')
     expect(await shop.inviteStaff(null, form({ email: 'first-staff@email-allowance.example', role: 'counter_staff', approvalLimit: '', locale: 'en' }))).toMatchObject({ ok: true })
-    for (let sent = 0; sent < EMAIL_LIMITS.perShopPerDay; sent += 1) await spend({ rentalId: null, to: `filler-${String(sent)}@email-allowance.example` })
+    for (let sent = 0; sent < EMAIL_LIMITS.perShopPerDay; sent += 1) await spend({ rentalId: null, to: `filler-${String(sent)}@email-allowance.example`, essential: false })
     const refused = 'refused-staff@email-allowance.example'
     expect(await shop.inviteStaff(null, form({ email: refused, role: 'counter_staff', approvalLimit: '', locale: 'en' }))).toEqual({ ok: false, failure: 'refused', reason: 'email_daily_cap' })
     expect(await sentTo(refused)).toBe(0)

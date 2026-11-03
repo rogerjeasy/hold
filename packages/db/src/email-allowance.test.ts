@@ -64,33 +64,47 @@ describe('the day’s emails', () => {
     expect(await take(message(shopId, { to: to.toUpperCase(), essential: true }))).toBe(false)
   })
 
-  it('stop at the limit for one shop, rental or not', async () => {
+  it('stop at the limit for one shop, rental or not, of which a real shop’s essential mail may take only its share', async () => {
     const shopId = await shop(false)
-    expect(await exhaust(() => message(shopId, { rentalId: null, essential: true }))).toBe(EMAIL_LIMITS.perShopPerDay)
+    expect(await exhaust(() => message(shopId, { rentalId: null, essential: true }))).toBe(EMAIL_LIMITS.perShopEssentialPerDay)
+    expect(await exhaust(() => message(shopId, { rentalId: null, essential: false }))).toBe(EMAIL_LIMITS.perShopPerDay - EMAIL_LIMITS.perShopEssentialPerDay)
   })
 
   it('spend nothing when refused: every limit is checked before any is counted', async () => {
-    const shopId = await shop(false)
+    const shopId = await shop(true)
     const rentalId = randomUUID()
     const to = `full-${randomUUID()}@example.com`
-    expect(await exhaust(() => message(shopId, { to, essential: true }))).toBe(EMAIL_LIMITS.perAddressPerShopPerDay)
-    for (let tried = 0; tried < 5; tried += 1) expect(await take(message(shopId, { rentalId, to, essential: true }))).toBe(false)
-    expect(await exhaust(() => message(shopId, { rentalId, essential: true }))).toBe(EMAIL_LIMITS.perRentalPerDay)
+    expect(await exhaust(() => message(shopId, { to, essential: true, network: freshNetwork() }))).toBe(EMAIL_LIMITS.perAddressPerShopPerDay)
+    for (let tried = 0; tried < 5; tried += 1) expect(await take(message(shopId, { rentalId, to, essential: true, network: freshNetwork() }))).toBe(false)
+    expect(await exhaust(() => message(shopId, { rentalId, essential: true, network: freshNetwork() }))).toBe(EMAIL_LIMITS.perRentalPerDay)
   })
 })
 
 describe('the demos’ mail', () => {
-  it('stops for every demo together, essential included, however many networks and demos ask', async () => {
+  it('stops for every demo’s essential mail together, however many networks and demos ask', async () => {
     shopIdFor.current = await shop(true)
-    const allowed = await exhaustAcross(true, (shopId) => message(shopId, { essential: true, network: freshNetwork() }))
-    expect(allowed).toBe(EMAIL_LIMITS.demoPerDay)
+    expect(await exhaustAcross(true, (shopId) => message(shopId, { essential: true, network: freshNetwork() }))).toBe(EMAIL_LIMITS.demoEssentialPerDay)
   })
 
-  it('stops for one network’s essential mail across its demos', async () => {
+  it('stops for every demo’s discretionary mail together, and that never starves another demo’s essential mail', async () => {
+    shopIdFor.current = await shop(true)
+    expect(await exhaustAcross(true, (shopId) => message(shopId, { essential: false, network: freshNetwork() }))).toBe(EMAIL_LIMITS.demoDiscretionaryPerDay)
+    expect(await take(message(await shop(true), { essential: true, network: freshNetwork() }))).toBe(true)
+  })
+
+  it('stops for one network’s essential mail across its demos, counted apart from its discretionary mail', async () => {
     const network = '203.0.113.66'
     shopIdFor.current = await shop(true)
     expect(await exhaustAcross(true, (shopId) => message(shopId, { essential: true, network }))).toBe(EMAIL_LIMITS.demoEssentialPerNetworkPerDay)
     expect(await take(message(await shop(true), { essential: true, network: '203.0.113.67' }))).toBe(true)
+    expect(await take(message(await shop(true), { essential: false, network }))).toBe(true)
+  })
+
+  it('stops for one network’s discretionary mail across its demos', async () => {
+    const network = '203.0.113.88'
+    shopIdFor.current = await shop(true)
+    expect(await exhaustAcross(true, (shopId) => message(shopId, { essential: false, network }))).toBe(EMAIL_LIMITS.demoDiscretionaryPerNetworkPerDay)
+    expect(await take(message(await shop(true), { essential: false, network: '203.0.113.89' }))).toBe(true)
   })
 
   it('stops for one address across demos, so many demos cannot bomb it, essential or not', async () => {
@@ -104,6 +118,8 @@ describe('the demos’ mail', () => {
     shopIdFor.current = await shop(true)
     await exhaustAcross(true, (shopId) => message(shopId, { to, essential: true, network: freshNetwork() }))
     shopIdFor.current = await shop(true)
+    await exhaustAcross(true, (shopId) => message(shopId, { essential: true, network: freshNetwork() }))
+    shopIdFor.current = await shop(true)
     await exhaustAcross(true, (shopId) => message(shopId, { essential: false, network: freshNetwork() }))
     expect(await take(message(await shop(true), { essential: true, network: freshNetwork() }))).toBe(false)
     // The same renter, at a real shop: the link and a code still go.
@@ -114,9 +130,12 @@ describe('the demos’ mail', () => {
 })
 
 describe('the real shops’ mail', () => {
-  it('keeps a bounded day for essential mail that no demo touches', async () => {
+  it('keeps a bounded day for essential mail that no demo touches, of which no one shop takes more than its share', async () => {
+    const first = await shop(false)
+    expect(await exhaust(() => message(first, { essential: true }))).toBe(EMAIL_LIMITS.perShopEssentialPerDay)
     shopIdFor.current = await shop(false)
-    expect(await exhaustAcross(false, (shopId) => message(shopId, { essential: true }))).toBe(EMAIL_LIMITS.shopsEssentialPerDay)
+    const rest = await exhaustAcross(false, (shopId) => message(shopId, { essential: true }))
+    expect(EMAIL_LIMITS.perShopEssentialPerDay + rest).toBe(EMAIL_LIMITS.shopsEssentialPerDay)
     // Discretionary mail has its own day.
     expect(await take(message(await shop(false), { essential: false }))).toBe(true)
   })
@@ -127,11 +146,19 @@ describe('the real shops’ mail', () => {
     expect(await take(message(await shop(false), { essential: true }))).toBe(true)
   })
 
-  it('caps discretionary mail to one address across every shop, demo or real, but never a real renter’s essential mail', async () => {
+  it('caps discretionary mail to one address across real shops, never a real renter’s essential mail', async () => {
     const to = `copied-${randomUUID()}@example.com`
-    shopIdFor.current = await shop(true)
-    expect(await exhaustAcross(true, (shopId) => message(shopId, { to, essential: false, network: freshNetwork() }))).toBe(EMAIL_LIMITS.discretionaryPerAddressPerDay)
-    expect(await take(message(await shop(false), { to, essential: false }))).toBe(false)
+    shopIdFor.current = await shop(false)
+    expect(await exhaustAcross(false, (shopId) => message(shopId, { to, essential: false }))).toBe(EMAIL_LIMITS.shopsDiscretionaryPerAddressPerDay)
     expect(await take(message(await shop(false), { to, essential: true }))).toBe(true)
+  })
+
+  it('keeps its count for an address apart from the demos’: demos sending to it never use up a real shop’s quota', async () => {
+    const to = `shared-${randomUUID()}@example.com`
+    shopIdFor.current = await shop(true)
+    await exhaustAcross(true, (shopId) => message(shopId, { to, essential: false, network: freshNetwork() }))
+    expect(await take(message(await shop(true), { to, essential: false, network: freshNetwork() }))).toBe(false)
+    shopIdFor.current = await shop(false)
+    expect(await exhaustAcross(false, (shopId) => message(shopId, { to, essential: false }))).toBe(EMAIL_LIMITS.shopsDiscretionaryPerAddressPerDay)
   })
 })

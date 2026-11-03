@@ -26,21 +26,24 @@ export const SENDING_ACCOUNT = { perDay: 500, signInHeadroom: 100 } as const
 
 // At most this many emails a day that someone asked Hold to send, so the public demo never becomes a relay and no
 // tenant can stop another shop's renter getting what they need. Every email counts per rental, per address in its shop
-// and per shop. Then each falls into one of three pools that never overlap, which together leave the sign-in codes
-// their room: all demo mail, essential included (demoPerDay); real shops' essential mail, which a renter needs to act
-// on their own money (shopsEssentialPerDay), reserved so no demo can touch it; and real shops' discretionary mail
-// (shopsDiscretionaryPerDay). A demo's essential mail also counts per caller's network, and all demo mail per address
-// across demos, so one visitor can neither take the demos' day nor bomb one address from many demos. All discretionary
-// mail also counts per address across every shop. A real shop's essential mail to its own renter counts against
-// nothing another shop sends. A judge's demo in full sends about fifteen, so none of these is met in normal use.
+// and per shop. Then each falls into one of four pools that never overlap, which together leave the sign-in codes their
+// room: demos' essential mail, which a renter needs to act on their own money; demos' discretionary mail; real shops'
+// essential mail, which no demo can touch and of which one real shop may spend only a third; and real shops'
+// discretionary mail. Each demo pool also counts per caller's network, and all demo mail per address across demos, so
+// one visitor can neither take a demo pool nor bomb one address from many demos. Real shops' discretionary mail also
+// counts per address across real shops; demos never touch a real shop's count for an address. A judge's demo in full
+// sends about fifteen, so none of these is met in normal use.
 export const EMAIL_LIMITS = {
   perRentalPerDay: 15,
   perAddressPerShopPerDay: 30,
   perShopPerDay: 60,
+  perShopEssentialPerDay: 30,
   demoEssentialPerNetworkPerDay: 40,
+  demoDiscretionaryPerNetworkPerDay: 20,
   demoPerAddressPerDay: 40,
-  discretionaryPerAddressPerDay: 20,
-  demoPerDay: 200,
+  shopsDiscretionaryPerAddressPerDay: 20,
+  demoEssentialPerDay: 120,
+  demoDiscretionaryPerDay: 80,
   shopsEssentialPerDay: 100,
   shopsDiscretionaryPerDay: 100,
 } as const
