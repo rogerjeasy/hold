@@ -1789,7 +1789,8 @@
           "submitted": "Enviada, esperando la confirmación de PayPal",
           "confirmed": "Confirmada por PayPal",
           "failed": "PayPal no la completó"
-        }
+        },
+        "releasedBy": "Liberado por la captura final {capture}, en la misma llamada a PayPal. No se hizo ninguna llamada aparte."
       }
     },
     "items": {

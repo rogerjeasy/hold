@@ -40,6 +40,8 @@ export type PayPalRecordLine = {
   readonly event: LedgerEvent | null
   // Where the authorization behind the line stands now, as Hold last read it.
   readonly authorizationState: AuthorizationState | null
+  // The final capture that released this rest of the hold in the same PayPal call, when no call of its own did.
+  readonly releasedBy: { readonly capture: string } | null
 }
 
 export type PayPalRecord = { readonly simulated: boolean; readonly lines: readonly PayPalRecordLine[] }
@@ -98,6 +100,13 @@ export async function rentalPayPalRecord(transaction: Transaction, rentalId: str
     if (call !== undefined) matched.add(call.id)
     const event = events.find((each) => each.resource === resource && shape.events.includes(each.type))
     const authorization = shape.id === 'authorization' ? resource : call?.paypalResourceIds['authorization']
+    const state = held.find((each) => each.paypalId === authorization)?.state ?? null
+    // What a final capture leaves of the hold goes back to the renter in that same call: the line names the capture once
+    // and carries none of its ids, key or status, so it never reads as a second request to PayPal.
+    if (shape === REMAINDER) {
+      const capture = call?.paypalResourceIds['capture']
+      return { kind: line.kind, action: null, currency: line.currency, amountCents: line.amountCents, ids: {}, paypalStatus: null, finalCapture: null, requestId: null, callState: null, at: line.occurredAt, readBackAt: line.recordedAt, event: null, authorizationState: state, releasedBy: capture === undefined ? null : { capture } }
+    }
     return {
       kind: line.kind,
       action: call?.action ?? null,
@@ -111,12 +120,13 @@ export async function rentalPayPalRecord(transaction: Transaction, rentalId: str
       at: line.occurredAt,
       readBackAt: line.recordedAt,
       event: event === undefined ? null : { type: event.type, eventId: event.eventId, receivedAt: event.receivedAt, simulated: event.simulated },
-      authorizationState: held.find((each) => each.paypalId === authorization)?.state ?? null,
+      authorizationState: state,
+      releasedBy: null,
     }
   })
   for (const call of calls) {
     if (matched.has(call.id) || call.state === 'confirmed') continue
-    lines.push({ kind: null, action: call.action, currency: call.currency ?? '', amountCents: call.amountCents ?? 0, ids: paypalIds(call.paypalResourceIds), paypalStatus: null, finalCapture: call.action === 'capture' ? true : null, requestId: call.idempotencyKey, callState: call.state, at: call.createdAt, readBackAt: null, event: null, authorizationState: null })
+    lines.push({ kind: null, action: call.action, currency: call.currency ?? '', amountCents: call.amountCents ?? 0, ids: paypalIds(call.paypalResourceIds), paypalStatus: null, finalCapture: call.action === 'capture' ? true : null, requestId: call.idempotencyKey, callState: call.state, at: call.createdAt, readBackAt: null, event: null, authorizationState: null, releasedBy: null })
   }
   lines.sort((first, second) => first.at.getTime() - second.at.getTime() || rank(first) - rank(second) || (first.readBackAt?.getTime() ?? 0) - (second.readBackAt?.getTime() ?? 0))
   return { simulated: rental.simulated, lines }

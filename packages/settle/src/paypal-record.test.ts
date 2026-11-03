@@ -63,8 +63,9 @@ describe('the PayPal record of a rental', () => {
     const shown = await record(rentalId)
     expect(shown?.lines.map((line) => line.kind)).toEqual(['fee_captured', 'hold_placed', 'hold_captured', 'hold_released'])
     expect(shown?.lines[2]).toMatchObject({ action: 'capture', amountCents: 35_00, paypalStatus: 'COMPLETED', finalCapture: true, requestId: capture?.idempotencyKey, ids: { authorization: capture?.paypalResourceIds['authorization'], capture: capture?.paypalResourceIds['capture'] } })
-    // PayPal releases what a final capture leaves of the hold in the same call: the line carries that call's key.
-    expect(shown?.lines[3]).toMatchObject({ action: 'capture', amountCents: HOLD - 35_00, paypalStatus: 'CAPTURED', requestId: capture?.idempotencyKey })
+    // PayPal releases what a final capture leaves of the hold in the same call: the line names that capture and makes no
+    // call of its own, so it never reads as a second request to PayPal.
+    expect(shown?.lines[3]).toMatchObject({ kind: 'hold_released', action: null, amountCents: HOLD - 35_00, paypalStatus: null, requestId: null, releasedBy: { capture: capture?.paypalResourceIds['capture'] }, ids: {} })
     expect(shown?.lines[1]?.authorizationState).toBe('captured')
   })
 

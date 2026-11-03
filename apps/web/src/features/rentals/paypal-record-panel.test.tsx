@@ -19,6 +19,7 @@ const line = (overrides: Partial<PayPalRecordLine>): PayPalRecordLine => ({
   readBackAt: new Date('2026-11-03T10:14:05Z'),
   event: null,
   authorizationState: 'captured',
+  releasedBy: null,
   ...overrides,
 })
 const record = (lines: readonly PayPalRecordLine[], simulated = false): PayPalRecord => ({ simulated, lines })
@@ -45,6 +46,16 @@ describe('the PayPal record on a rental’s page', () => {
     expect(item).toHaveTextContent('Charge captured from the hold')
     expect(item).toHaveTextContent('PayPal statusCOMPLETEDfinal_capturetrue')
     expect(item).toHaveTextContent("PayPal's signed event PAYMENT.CAPTURE.COMPLETED, verified, Tue, Nov 3, 10:20 AM")
+  })
+
+  it('says the rest of the hold went back to the renter with the final capture, naming it once, as no call of its own', () => {
+    renderWithIntl(<PayPalRecordPanel record={record([line({ kind: 'hold_released', action: null, amountCents: 215_00, paypalStatus: null, requestId: null, ids: {}, releasedBy: { capture: '3KS68577UK8376128' } })])} clock={clock} />)
+    const item = screen.getByRole('listitem')
+    expect(item).toHaveTextContent('Rest of the hold released')
+    expect(item).toHaveTextContent('€215.00')
+    expect(item).toHaveTextContent('Released by the final capture 3KS68577UK8376128, in the same PayPal call. No separate call was made.')
+    expect(item).not.toHaveTextContent('PayPal-Request-Id')
+    expect(item).not.toHaveTextContent('PayPal status')
   })
 
   it('shows a call PayPal has not confirmed as waiting, not as done', () => {

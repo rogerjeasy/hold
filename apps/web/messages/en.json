@@ -1789,7 +1789,8 @@
           "submitted": "Sent, waiting for PayPal to confirm",
           "confirmed": "Confirmed by PayPal",
           "failed": "PayPal did not complete it"
-        }
+        },
+        "releasedBy": "Released by the final capture {capture}, in the same PayPal call. No separate call was made."
       }
     },
     "items": {

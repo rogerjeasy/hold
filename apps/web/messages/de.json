@@ -1789,7 +1789,8 @@
           "submitted": "Gesendet, wartet auf die Bestätigung von PayPal",
           "confirmed": "Von PayPal bestätigt",
           "failed": "PayPal hat ihn nicht ausgeführt"
-        }
+        },
+        "releasedBy": "Durch die finale Erfassung {capture} im selben PayPal-Aufruf freigegeben. Es gab keinen eigenen Aufruf."
       }
     },
     "items": {
