@@ -1,7 +1,7 @@
 import type { ClaimState, HoldState, MoneyEventKind } from '@hold/domain'
 import { and, asc, eq, inArray, isNull, sql } from 'drizzle-orm'
-import { z } from 'zod'
 import { auditLog, claims, executions, holds, moneyEvents, paypalEvents, rentals, renters, shopExceptions } from './schema/index.ts'
+import { eventResourceId, resourceOf } from './paypal-resources.ts'
 import type { Transaction } from './scope.ts'
 
 // What the money ledger reads (extensions.md section 12.5): every line of the shop's money log with what confirms it,
@@ -57,20 +57,6 @@ const UNAPPROVED: readonly ClaimState[] = ['draft', 'awaiting_approval', 'waived
 // of what is left.
 const KIND_ORDER = sql`case ${moneyEvents.kind} when 'fee_captured' then 0 when 'hold_placed' then 1 when 'hold_renewed' then 2 when 'hold_captured' then 3 when 'hold_released' then 4 when 'invoice_sent' then 5 when 'invoice_paid' then 6 else 7 end`
 
-// A line's reference names a PayPal resource, with what happened to it after a colon where one resource has several.
-const resourceOf = (reference: string) => reference.split(':')[0] ?? reference
-
-const eventBody = z.object({ resource: z.object({ id: z.string() }) })
-
-function resourceId(rawBody: string): string | undefined {
-  try {
-    const parsed = eventBody.safeParse(JSON.parse(rawBody))
-    return parsed.success ? parsed.data.resource.id : undefined
-  } catch {
-    return undefined
-  }
-}
-
 export async function moneyLedgerRecords(transaction: Transaction): Promise<MoneyLedgerRecords> {
   const rows = await transaction
     .select({
@@ -98,7 +84,7 @@ export async function moneyLedgerRecords(transaction: Transaction): Promise<Mone
     .orderBy(asc(paypalEvents.receivedAt))
   const eventOf = new Map<string, LedgerEvent>()
   for (const event of events) {
-    const id = resourceId(event.rawBody)
+    const id = eventResourceId(event.rawBody)
     if (id !== undefined && !eventOf.has(id)) eventOf.set(id, { type: event.type, eventId: event.eventId, receivedAt: event.receivedAt, simulated: event.verification === 'simulated' })
   }
   const sent = await transaction.select({ action: executions.action, idempotencyKey: executions.idempotencyKey, attempts: executions.attempts, resources: executions.paypalResourceIds }).from(executions).where(inArray(executions.rentalId, rentalIds))
