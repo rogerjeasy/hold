@@ -100,3 +100,9 @@ it('says under the before and after photographs where each came from, offers to 
   expect(screen.getByText('A chosen file, uploaded in the app')).toBeInTheDocument()
   expect(screen.getByRole('button', { name: 'Check this evidence' })).toBeInTheDocument()
 })
+
+it('tells the renter a claim waits for their review, not that it was approved against them', () => {
+  renderWithIntl(<RenterClaimScreen token="token" data={{ shopName: 'Ribeira Bikes', currency: 'EUR', state: 'approved', totalCents: 3500, captureCents: 3500, releaseCents: 21500, invoiceCents: 0, replyDueAt: null, holdState: 'placed', lines: [], canReply: false }} />)
+  expect(screen.getByText('A claim for you to review')).toBeInTheDocument()
+  expect(screen.queryByText('Approved')).not.toBeInTheDocument()
+})

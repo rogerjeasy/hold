@@ -3213,7 +3213,26 @@
     },
     "repairedOn": "Reparado {date}",
     "repairedBody": "La tienda reparó lo que usted pagó. Lo que costó la reparación lo asume la tienda.",
-    "repairedAlt": "Reparado: {line}"
+    "repairedAlt": "Reparado: {line}",
+    "renterStates": {
+      "draft": "En preparación",
+      "awaiting_approval": "En revisión por la tienda",
+      "approved": "Una reclamación para que la revise",
+      "presented": "Esperando su respuesta",
+      "accepted": "Ha aceptado esta reclamación",
+      "contested": "Ha impugnado esta reclamación: la tienda la está revisando",
+      "lapsed": "Su plazo de respuesta ha terminado",
+      "negotiating": "En negociación",
+      "agreed": "Se ha llegado a un acuerdo",
+      "escalated": "Pasada al propietario de la tienda para que decida",
+      "decided": "La tienda ha decidido",
+      "charging": "Liquidación en curso",
+      "charged": "Cobrado",
+      "charge_failed": "El cobro no se ha realizado",
+      "adjusted": "Ajustada",
+      "waived": "La tienda ha renunciado a esta reclamación",
+      "closed": "Cerrada"
+    }
   },
   "scorecard": {
     "title": "Qué tan fiable es la comparación",

@@ -3213,7 +3213,26 @@
     },
     "repairedOn": "Repariert {date}",
     "repairedBody": "Das Geschäft hat repariert, wofür Sie bezahlt haben. Was die Reparatur kostete, bleibt beim Geschäft.",
-    "repairedAlt": "Repariert: {line}"
+    "repairedAlt": "Repariert: {line}",
+    "renterStates": {
+      "draft": "Wird vorbereitet",
+      "awaiting_approval": "Wird vom Geschäft geprüft",
+      "approved": "Eine Forderung zu Ihrer Prüfung",
+      "presented": "Wartet auf Ihre Antwort",
+      "accepted": "Sie haben diese Forderung angenommen",
+      "contested": "Sie haben diese Forderung bestritten – das Geschäft prüft sie",
+      "lapsed": "Ihre Antwortfrist ist abgelaufen",
+      "negotiating": "Wird verhandelt",
+      "agreed": "Eine Einigung wurde erzielt",
+      "escalated": "An den Inhaber zur Entscheidung übergeben",
+      "decided": "Das Geschäft hat entschieden",
+      "charging": "Abrechnung läuft",
+      "charged": "Belastet",
+      "charge_failed": "Die Belastung ist nicht durchgegangen",
+      "adjusted": "Angepasst",
+      "waived": "Das Geschäft verzichtet auf diese Forderung",
+      "closed": "Abgeschlossen"
+    }
   },
   "scorecard": {
     "title": "Wie zuverlässig ist der Vergleich",

@@ -49,7 +49,7 @@ export function RenterClaimScreen({ token, data }: { token: string; data: Renter
     <header><p className="label text-xs text-muted-foreground wrap-long-words">{data.shopName}</p><h1 className="mt-3 text-page-title text-balance">{t('renterTitle')}</h1></header>
     <Link href={linkRoutes.record(token)} referrerPolicy="no-referrer" className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{records('title')}</Link>
     {data.negotiation === true ? <Link href={linkRoutes.negotiation(token)} referrerPolicy="no-referrer" className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{advocate('link')}</Link> : null}
-    <Notice title={t(`states.${data.state}`)} body={data.state === 'closed' ? t('settledBody') : t('renterBoundary')} />
+    <Notice title={t(`renterStates.${data.state}`)} body={data.state === 'closed' ? t('settledBody') : t('renterBoundary')} />
     {data.promise == null ? null : <PromiseStatus promise={data.promise} audience="renter" claimState={data.state} shopName={data.shopName} timeZone={data.timeZone ?? 'UTC'} now={data.now ?? new Date()} />}
     {pending ? <p role="status">{t('pending')}</p> : null}
     {data.replyDueAt === null || !data.canReply ? null : <p>{t('replyDue', { when: format.dateTime(data.replyDueAt, { dateStyle: 'medium', timeStyle: 'short' }) })}</p>}

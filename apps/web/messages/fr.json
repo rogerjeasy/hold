@@ -3213,7 +3213,26 @@
     },
     "repairedOn": "Réparé {date}",
     "repairedBody": "La boutique a réparé ce que vous avez payé. Le coût de la réparation reste à la charge de la boutique.",
-    "repairedAlt": "Réparé : {line}"
+    "repairedAlt": "Réparé : {line}",
+    "renterStates": {
+      "draft": "En préparation",
+      "awaiting_approval": "En cours d’examen par le magasin",
+      "approved": "Une réclamation à examiner",
+      "presented": "En attente de votre réponse",
+      "accepted": "Vous avez accepté cette réclamation",
+      "contested": "Vous avez contesté cette réclamation : le magasin l’examine",
+      "lapsed": "Votre délai de réponse est écoulé",
+      "negotiating": "En négociation",
+      "agreed": "Un accord a été trouvé",
+      "escalated": "Transmise au propriétaire du magasin pour décision",
+      "decided": "Le magasin a décidé",
+      "charging": "Règlement en cours",
+      "charged": "Débité",
+      "charge_failed": "Le débit n’a pas abouti",
+      "adjusted": "Ajustée",
+      "waived": "Le magasin a renoncé à cette réclamation",
+      "closed": "Clôturée"
+    }
   },
   "scorecard": {
     "title": "Quelle est la fiabilité de la comparaison",

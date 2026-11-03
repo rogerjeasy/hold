@@ -3213,7 +3213,26 @@
     },
     "repairedOn": "Repaired {date}",
     "repairedBody": "The shop repaired what you paid for. What the repair cost stays with the shop.",
-    "repairedAlt": "Repaired: {line}"
+    "repairedAlt": "Repaired: {line}",
+    "renterStates": {
+      "draft": "Being prepared",
+      "awaiting_approval": "Being reviewed by the shop",
+      "approved": "A claim for you to review",
+      "presented": "Waiting for your reply",
+      "accepted": "You accepted this claim",
+      "contested": "You contested this claim — the shop is reviewing it",
+      "lapsed": "Your reply period has ended",
+      "negotiating": "Being negotiated",
+      "agreed": "An agreement was reached",
+      "escalated": "Passed to the shop owner to decide",
+      "decided": "The shop has decided",
+      "charging": "Settlement in progress",
+      "charged": "Charged",
+      "charge_failed": "The charge did not go through",
+      "adjusted": "Adjusted",
+      "waived": "The shop waived this claim",
+      "closed": "Closed"
+    }
   },
   "scorecard": {
     "title": "How reliable is the comparison",
