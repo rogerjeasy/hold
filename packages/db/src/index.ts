@@ -9,6 +9,8 @@ export type { CalendarBooking, CalendarItem, ShopCalendar } from './calendar-rep
 export { DEMO_SHOP } from './demo-shop.ts'
 export { demoAccountForRental, openDemoSession } from './demo-session.ts'
 export type { DemoSessionInput, OpenedDemoSession } from './demo-session.ts'
+export { demoSessionLive, demoSessionsDue, retireDemoSession } from './demo-retirement.ts'
+export type { DueDemoSession } from './demo-retirement.ts'
 export type { DemoPerson } from './demo-shop.ts'
 export type { SampleRentalsResult } from './sample-rentals.ts'
 export type { RateLimit } from './rate-limit.ts'

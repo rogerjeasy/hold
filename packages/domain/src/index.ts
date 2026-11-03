@@ -132,3 +132,4 @@ export type { RepairClose, RepairCloseProblem, RepairOutcome, RepairState } from
 
 // What a log may carry (AGENTS.md section 7).
 export { errorForLog } from './log-redaction.ts'
+export { CLAUDE_DAILY_TOKENS, DEMO_SESSION_DAYS, DEMO_STARTS_PER_DAY, demoRetirementCutoff, HOSTED_ASSISTANT_SHARE, hostedQuestionsPerDay, utcDay } from './demo-limits.ts'

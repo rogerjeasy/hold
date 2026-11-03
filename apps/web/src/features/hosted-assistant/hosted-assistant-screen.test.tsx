@@ -55,6 +55,14 @@ describe('the hosted assistant’s page', () => {
     expect(await screen.findByText(/could not be reached/)).toBeInTheDocument()
   })
 
+  it('says plainly when the day’s questions are spent, and that nothing was booked', async () => {
+    asked.mockResolvedValueOnce({ ok: false, failure: 'daily_cap' })
+    renderWithIntl(<HostedAssistantScreen mcpUrl="https://hold.example/mcp" />)
+    await userEvent.type(screen.getByLabelText('Your message'), 'Hello')
+    await userEvent.click(screen.getByRole('button', { name: 'Send' }))
+    expect(await screen.findByText('The assistant has answered all the questions it can today. Try again after midnight UTC. Nothing was booked.')).toBeInTheDocument()
+  })
+
   it('sends with Enter, keeps Shift+Enter for a new line, and empties the box once sent', async () => {
     asked.mockClear()
     renderWithIntl(<HostedAssistantScreen mcpUrl="https://hold.example/mcp" />)

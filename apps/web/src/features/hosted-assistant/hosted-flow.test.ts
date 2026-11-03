@@ -1,5 +1,6 @@
 // @vitest-environment node
-import { auditLog, inShop, itemCatalog, openDemoSession, registerOwner } from '@hold/db'
+import { auditLog, inShop, itemCatalog, openDemoSession, registerOwner, retireDemoSession, takeRateToken } from '@hold/db'
+import { utcDay } from '@hold/domain'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 
 process.env['HOLD_ENVIRONMENT'] = 'test'
@@ -26,6 +27,7 @@ const items = await import('@/features/items/actions')
 const { getServices } = await import('@/server/services')
 const { form, signIn } = await import('@/test/shop-session')
 const { writeDemoSession } = await import('@/features/auth/session-cookies')
+const { HOSTED_QUESTION_LIMITS } = await import('./limits')
 
 vi.setConfig({ testTimeout: 30_000 })
 
@@ -102,5 +104,40 @@ describe('the hosted assistant’s page', () => {
     let last: unknown
     for (let index = 0; index < 20; index += 1) last = await askAssistant(null, form({ conversation: 'not json', text: 'Hi', locale: 'en' }))
     expect(last).toEqual({ ok: false, failure: 'rate_limited' })
+  })
+
+  it('no longer names the judge’s demo shop to the assistant once the demo was retired', async () => {
+    forwarded.value = '203.0.113.122'
+    const { database } = await getServices()
+    const demo = await openDemoSession(database, {
+      owner: { subject: 'owner-hosted2', email: 'tomas.hosted2@demo.hold.example' },
+      staff: { subject: 'staff-hosted2', email: 'jonas.hosted2@demo.hold.example' },
+      slug: 'ribeira-bikes-hosted2',
+      paypal: { credentialReference: 'hold/paypal/shops/demo/sandbox', mode: 'sandbox' },
+      now: new Date(),
+    })
+    const password = 'x'.repeat(24)
+    await writeDemoSession({ shopId: demo.shopId, owner: { email: 'tomas.hosted2@demo.hold.example', password }, staff: { email: 'jonas.hosted2@demo.hold.example', password } })
+    const later = new Date(Date.now() + 8 * 24 * 60 * 60 * 1000)
+    await retireDemoSession(database, { shopId: demo.shopId, cutoff: new Date(Date.now() + 24 * 60 * 60 * 1000), now: later })
+
+    const answered = await ask([], 'Book me a bike for three days.')
+    if (!answered.ok) throw new Error(JSON.stringify(answered))
+    expect(answered.value.toolCalls.map((call) => call.name)).not.toContain('get_shop')
+    const lines = await inShop(database, { role: 'hold_app', shopId: demo.shopId }, (transaction) => transaction.select().from(auditLog))
+    expect(lines.map((line) => line.action).filter((action) => action.startsWith('assistant.'))).toEqual([])
+    jar.clear()
+  })
+
+  // Sized so that a day of questions cannot spend the account's daily Claude tokens (packages/domain demo-limits.ts).
+  it('says plainly once the day’s questions from every network are spent', async () => {
+    forwarded.value = '198.51.100.201'
+    const { database } = await getServices()
+    expect(HOSTED_QUESTION_LIMITS.perDay).toEqual({ name: 'hosted-assistant-day', max: 15, windowSeconds: 24 * 60 * 60 })
+    for (let index = 0; index < HOSTED_QUESTION_LIMITS.perDay.max; index += 1) await takeRateToken(database, HOSTED_QUESTION_LIMITS.perDay, utcDay(new Date()))
+
+    expect(await ask([], 'Book me an e-bike.')).toEqual({ ok: false, failure: 'daily_cap' })
+    forwarded.value = '198.51.100.202'
+    expect(await ask([], 'Book me an e-bike.')).toEqual({ ok: false, failure: 'daily_cap' })
   })
 })

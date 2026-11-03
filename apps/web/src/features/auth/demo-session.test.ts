@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { createFakeIdentity } from '@hold/auth'
 import type { FakeIdentity } from '@hold/auth'
-import { findPerson, openDemoSession, takeRateToken } from '@hold/db'
+import { demoSessionLive, findPerson, openDemoSession, retireDemoSession, takeRateToken } from '@hold/db'
 import type { Database } from '@hold/db'
 import { createTestDatabase } from '@hold/db/testing'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -41,6 +41,7 @@ beforeEach(() => {
       },
       open: (input) => openDemoSession(database, input),
       paypal: () => Promise.resolve(PAYPAL),
+      live: (shopId) => demoSessionLive(database, shopId),
     },
     newCode: () => `r${String(thisRun)}c${String((codes += 1))}`,
     now: () => new Date('2026-12-01T09:00:00Z'),
@@ -106,6 +107,32 @@ describe('starting a demo', () => {
     expect(await startDemo(demo, 'owner', { network: 'busy-network' })).toEqual({ ok: false, notice: 'busy' })
     expect(created.length).toBe(before)
   })
+
+  it('counts every network’s starts against one cap for the day, in UTC', async () => {
+    const asked: { name: string; subject: string }[] = []
+    const counting = {
+      ...demo,
+      allow: (limit: { name: string }, subject: string) => {
+        asked.push({ name: limit.name, subject })
+        return Promise.resolve(true)
+      },
+    }
+
+    await startDemo(counting, 'owner', { network: 'first-network' })
+    await startDemo(counting, 'owner', { network: 'second-network' })
+    await startDemo(counting, 'owner', { network: undefined })
+
+    expect(asked.filter((each) => each.name === DEMO_LIMITS.startsPerDay.name).map((each) => each.subject)).toEqual(['2026-12-01', '2026-12-01', '2026-12-01'])
+    expect(DEMO_LIMITS.startsPerDay).toEqual({ name: 'demo_starts_per_day', max: 100, windowSeconds: 24 * 60 * 60 })
+  })
+
+  it('says plainly that today’s demos are all taken once the day’s cap is reached, and makes nothing', async () => {
+    const capped = { ...demo, allow: (limit: { name: string }) => Promise.resolve(limit.name !== DEMO_LIMITS.startsPerDay.name) }
+
+    expect(await startDemo(capped, 'owner', { network: 'judge' })).toEqual({ ok: false, notice: 'demo_cap' })
+    expect(await startDemo(capped, 'staff', { network: undefined })).toEqual({ ok: false, notice: 'demo_cap' })
+    expect(created).toEqual([])
+  })
 })
 
 describe('continuing a demo', () => {
@@ -121,5 +148,15 @@ describe('continuing a demo', () => {
     const { session } = await started('owner')
 
     expect(await continueDemo(demo, { ...session, staff: { ...session.staff, password: 'changed-since-Aa1!' } }, 'staff', { network: 'judge' })).toEqual({ ok: false, notice: 'unavailable' })
+  })
+
+  it('refuses a demo that was retired after its week, and says so, before its accounts are asked', async () => {
+    const { session } = await started('owner')
+    const signIn = vi.spyOn(identity, 'signInWithPassword')
+    const later = new Date(Date.now() + 8 * 24 * 60 * 60 * 1000)
+    expect(await retireDemoSession(database, { shopId: session.shopId, cutoff: new Date(later.getTime() - 7 * 24 * 60 * 60 * 1000), now: later })).toBe(true)
+
+    expect(await continueDemo(demo, session, 'owner', { network: 'judge' })).toEqual({ ok: false, notice: 'demo_ended' })
+    expect(signIn).not.toHaveBeenCalled()
   })
 })

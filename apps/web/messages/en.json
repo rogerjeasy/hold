@@ -1280,6 +1280,14 @@
       "invitation_closed": {
         "title": "This invitation can no longer be used.",
         "body": "Ask the shop to send you a new one."
+      },
+      "demo_cap": {
+        "title": "Today’s demos are all taken.",
+        "body": "Each demo makes a shop and two accounts, so only so many start in a day. New ones open at midnight UTC. Nothing was made."
+      },
+      "demo_ended": {
+        "title": "This demo has ended.",
+        "body": "Demos are kept for seven days, then retired with everything in them. Start a fresh one: it takes one tap."
       }
     },
     "code": {
@@ -3551,6 +3559,7 @@
     },
     "results": {
       "rate_limited": "Too many messages from this network. Wait a few minutes and try again.",
+      "daily_cap": "The assistant has answered all the questions it can today. Try again after midnight UTC. Nothing was booked.",
       "invalid": "That message could not be sent. Reload the page and start again."
     },
     "connectTitle": "Connect your own assistant",

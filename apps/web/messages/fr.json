@@ -1280,6 +1280,14 @@
       "invitation_closed": {
         "title": "Cette invitation n'est plus utilisable.",
         "body": "Demandez à la boutique de vous en envoyer une nouvelle."
+      },
+      "demo_cap": {
+        "title": "Les démonstrations du jour sont toutes prises.",
+        "body": "Chaque démonstration crée une boutique et deux comptes, alors seules quelques-unes démarrent par jour. De nouvelles ouvrent à minuit UTC. Rien n'a été créé."
+      },
+      "demo_ended": {
+        "title": "Cette démonstration est terminée.",
+        "body": "Les démonstrations sont gardées sept jours, puis retirées avec tout ce qu'elles contiennent. Lancez-en une nouvelle : un seul geste suffit."
       }
     },
     "code": {
@@ -3551,6 +3559,7 @@
     },
     "results": {
       "rate_limited": "Trop de messages depuis ce réseau. Attendez quelques minutes et réessayez.",
+      "daily_cap": "L'assistant a répondu aujourd'hui à toutes les questions qu'il pouvait. Réessayez après minuit UTC. Rien n'a été réservé.",
       "invalid": "Ce message n'a pas pu être envoyé. Rechargez la page et recommencez."
     },
     "connectTitle": "Connecter votre propre assistant",

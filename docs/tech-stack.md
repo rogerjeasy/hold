@@ -501,6 +501,7 @@ Judges do not have a bike to photograph, so the demo must work without one. They
 - Set an AWS billing alarm before deploying anything.
 - Set a spending limit on the Claude account. Image comparison uses more tokens than text, and the demo is public.
 - Each operations agent run and each negotiation has its own ceiling on calls and tokens.
+- The public demo has daily caps across every network (`architecture.md` section 20.3): a hundred demo starts a day, which keeps the user pool under Cognito Essentials' 10,000 free monthly active users, and fifteen hosted-assistant questions a day, which keeps the assistant to half of the account's daily Opus 4.6 tokens (about 940,000, measured when they ran out on 29 October 2026; Service Quotas does not list the limit). Demos are retired after seven days and their two users removed by a daily cleanup, so the pool holds at most a week of them.
 - Object Lock retention on demo photographs should be short, so the bucket can be cleaned up afterwards.
 
 ---

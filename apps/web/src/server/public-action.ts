@@ -1,21 +1,24 @@
 import 'server-only'
 import { takeRateToken } from '@hold/db'
 import type { RateLimit } from '@hold/db'
+import { utcDay } from '@hold/domain'
 import type { z } from 'zod'
 import { failedFields, formObject } from './action'
 import { callerNetwork } from './network'
 import { getServices } from './services'
 
 // The one way in for a public function that acts for nobody and in no shop, such as the hosted assistant's page
-// (extensions.md section 8.10). The network is rate limited and the input validated against a strict schema. Anything
-// it does in a shop it does through a gateway of its own, which checks and audits each step.
+// (extensions.md section 8.10). The network is rate limited and the input validated against a strict schema, and a
+// function that spends something shared, such as the account's Claude tokens, may also have a cap for the day across
+// every network, counted only for valid input. Anything it does in a shop it does through a gateway of its own, which
+// checks and audits each step.
 
 export type PublicActionResult<Output> =
   | { readonly ok: true; readonly value: Output }
-  | { readonly ok: false; readonly failure: 'rate_limited' }
+  | { readonly ok: false; readonly failure: 'rate_limited' | 'daily_cap' }
   | { readonly ok: false; readonly failure: 'invalid'; readonly fields: readonly string[] }
 
-export type PublicActionSpec<Input> = { readonly name: string; readonly limit: RateLimit; readonly input: z.ZodType<Input> }
+export type PublicActionSpec<Input> = { readonly name: string; readonly limit: RateLimit; readonly dailyCap?: RateLimit; readonly input: z.ZodType<Input> }
 
 const PUBLIC_ACTIONS = new WeakSet<object>()
 
@@ -29,6 +32,7 @@ export function publicAction<Input, Output>(spec: PublicActionSpec<Input>, act: 
     if (!(await takeRateToken(database, spec.limit, (await callerNetwork()) ?? 'local'))) return { ok: false, failure: 'rate_limited' }
     const parsed = spec.input.safeParse(formObject(data))
     if (!parsed.success) return { ok: false, failure: 'invalid', fields: failedFields(parsed.error) }
+    if (spec.dailyCap !== undefined && !(await takeRateToken(database, spec.dailyCap, utcDay(new Date())))) return { ok: false, failure: 'daily_cap' }
     return { ok: true, value: await act(parsed.data) }
   }
   PUBLIC_ACTIONS.add(action)

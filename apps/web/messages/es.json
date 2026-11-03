@@ -1280,6 +1280,14 @@
       "invitation_closed": {
         "title": "Esta invitación ya no sirve.",
         "body": "Pide a la tienda que te envíe otra."
+      },
+      "demo_cap": {
+        "title": "Las demostraciones de hoy están agotadas.",
+        "body": "Cada demostración crea una tienda y dos cuentas, así que solo empiezan unas cuantas al día. Habrá nuevas a partir de la medianoche UTC. No se ha creado nada."
+      },
+      "demo_ended": {
+        "title": "Esta demostración ha terminado.",
+        "body": "Las demostraciones se guardan siete días y después se retiran con todo lo que contienen. Empieza una nueva: basta un toque."
       }
     },
     "code": {
@@ -3551,6 +3559,7 @@
     },
     "results": {
       "rate_limited": "Demasiados mensajes desde esta red. Espera unos minutos y vuelve a intentarlo.",
+      "daily_cap": "El asistente ya ha respondido todas las preguntas que puede hoy. Vuelve a intentarlo después de la medianoche UTC. No se ha reservado nada.",
       "invalid": "No se pudo enviar ese mensaje. Recarga la página y empieza de nuevo."
     },
     "connectTitle": "Conecta tu propio asistente",

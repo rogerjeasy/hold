@@ -5,7 +5,7 @@ import { createCognitoIdentity, createDemoSessionAccounts, createFakeIdentity, r
 import type { Identity } from '@hold/auth'
 import { loadWebConfig } from '@hold/config'
 import type { CredentialKeySource, KeySource, WebConfig } from '@hold/config'
-import { OPS_AGENT_QUEUE, openDemoSession } from '@hold/db'
+import { demoSessionLive, OPS_AGENT_QUEUE, openDemoSession } from '@hold/db'
 import type { Database } from '@hold/db'
 import { createDataApiDatabase } from '@hold/db/data-api'
 import { createMemoryDocumentStore, createS3DocumentStore, createMemoryEvidenceStore, createS3EvidenceStore, makeDisplayCopy, mediaMessageSchema } from '@hold/evidence'
@@ -211,6 +211,7 @@ async function build(): Promise<Services> {
       demoSessions: {
         accounts: { create: (account) => Promise.resolve(identity.addDemoAccount(account.email, account.password)) },
         open: (input) => openDemoSession(database, input),
+        live: (shopId) => demoSessionLive(database, shopId),
         paypal: async () => {
           const subscribed = await simulatedPayPal.createWebhook({ url: `${config.publicUrl}${DEMO_WEBHOOK_PATH}`, eventTypes: PAYPAL_EVENT_TYPES })
           return { credentialReference: DEMO_PAYPAL_REFERENCE, mode: 'sandbox', ...(subscribed.ok ? { webhookId: subscribed.value.webhookId } : {}) }
@@ -257,7 +258,12 @@ async function build(): Promise<Services> {
     renterLinkKey: await loadKey(config.renterLinkKey, config.region),
     identity: createCognitoIdentity({ region: config.region, ...config.cognito }),
     demoSessions: config.demoSessions
-      ? { accounts: createDemoSessionAccounts({ region: config.region, ...config.cognito }), open: (input) => openDemoSession(database, input), paypal: demoPayPalFrom(paypalCredentials, paypalFor, config.publicUrl) }
+      ? {
+          accounts: createDemoSessionAccounts({ region: config.region, ...config.cognito }),
+          open: (input) => openDemoSession(database, input),
+          paypal: demoPayPalFrom(paypalCredentials, paypalFor, config.publicUrl),
+          live: (shopId) => demoSessionLive(database, shopId),
+        }
       : undefined,
     database,
     // Through the SMTP account in Secrets Manager, read when the first email is sent.

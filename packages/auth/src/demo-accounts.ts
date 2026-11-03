@@ -13,3 +13,8 @@ export type DemoAccountKey = (typeof DEMO_ACCOUNT_KEYS)[number]
 export function newDemoPassword(): string {
   return `${randomBytes(24).toString('base64url')}Aa1!`
 }
+
+// Whether an address is a demo session's, and so an account Hold made and may remove.
+export function isDemoSessionAddress(email: string): boolean {
+  return email.toLowerCase().endsWith(`@${DEMO_SESSION_DOMAIN}`)
+}

@@ -1,5 +1,6 @@
 import type { AuthField, Problems } from './auth-input'
 import type { CodeProblem } from './code-input'
+import type { DemoNotice } from './demo-session'
 import type { CodeFailure, FlowNotice } from './sign-in-flow'
 
 // What the server answers a submitted form with. The form shows it as it is. A good submission moves on to the
@@ -31,6 +32,6 @@ export type PasskeyFormState = {
 }
 
 // What the server answers a tap on a demo account with. A good tap moves on to the shop instead.
-export type DemoFormState = { notice?: Extract<FlowNotice, 'busy' | 'unavailable'> }
+export type DemoFormState = { notice?: DemoNotice }
 
 export const initialDemoFormState: DemoFormState = {}

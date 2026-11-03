@@ -1,6 +1,6 @@
 import { AdminAddUserToGroupCommand, AdminCreateUserCommand, CognitoIdentityProviderClient, InitiateAuthCommand, RespondToAuthChallengeCommand } from '@aws-sdk/client-cognito-identity-provider'
 import type { AttributeType, InitiateAuthCommandOutput } from '@aws-sdk/client-cognito-identity-provider'
-import { DEMO_SESSION_DOMAIN, newDemoPassword } from '../demo-accounts.ts'
+import { DEMO_SESSION_DOMAIN, isDemoSessionAddress, newDemoPassword } from '../demo-accounts.ts'
 import type { AccountType } from '../identity.ts'
 import type { CognitoSettings } from './cognito-identity.ts'
 
@@ -44,7 +44,7 @@ export function createDemoSessionAccounts(
   return {
     async create(account) {
       const Username = account.email
-      if (!Username.endsWith(`@${DEMO_SESSION_DOMAIN}`)) throw new Error(`A demo session account must be on ${DEMO_SESSION_DOMAIN}.`)
+      if (!isDemoSessionAddress(Username)) throw new Error(`A demo session account must be on ${DEMO_SESSION_DOMAIN}.`)
       const temporary = newDemoPassword()
       const created = await client.send(
         new AdminCreateUserCommand({

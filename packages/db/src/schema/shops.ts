@@ -2,7 +2,7 @@ import { STAFF_ROLES } from '@hold/domain'
 import { sql } from 'drizzle-orm'
 import { boolean, check, integer, jsonb, pgPolicy, pgTable, text, unique } from 'drizzle-orm/pg-core'
 import { appRole, shopIsolation, workerRole } from './access.ts'
-import { cents, createdAt, currency, id, reference } from './columns.ts'
+import { at, cents, createdAt, currency, id, reference } from './columns.ts'
 import { allowed, PAYPAL_MODES, paypalMode, staffRole } from './enums.ts'
 
 // A person who signs in to Hold. Not tied to one shop, so it has no shop_id.
@@ -46,6 +46,9 @@ export const shops = pgTable(
     opsSettings: jsonb().$type<{ readonly confirmCleanWithinHours?: number; readonly invoiceUnpaidDays?: number; readonly incidentWaitHours?: number; readonly remindersOff?: readonly string[] }>().notNull().default({}),
     // A shop one judge's demo session opened (architecture.md section 20.3). Never listed for renters' assistants.
     demoSession: boolean().notNull().default(false),
+    // When the daily cleanup retired this demo, a week after it opened. Only a demo shop is ever retired, and a
+    // retired shop keeps every record but is found nowhere (migration 0044).
+    retiredAt: at(),
     // Whether renters may return an item themselves when nobody is at the counter, and where they leave it, in the
     // shop's words (architecture.md section 6.13). Self-return is never on without a drop point.
     selfReturn: boolean().notNull().default(false),
@@ -66,6 +69,7 @@ export const shops = pgTable(
     check('hours_both_or_neither', sql`(${table.opensAt} is null) = (${table.closesAt} is null)`),
     check('extension_days_allowed', sql`${table.extensionMaxDays} between 0 and 28`),
     check('promise_days_allowed', sql`${table.decisionPromiseDays} between 1 and 14`),
+    check('only_demo_retires', sql`${table.retiredAt} is null or ${table.demoSession}`),
     shopIsolation(table.id),
   ],
 )

@@ -309,6 +309,13 @@
       "when": 1793663950844,
       "tag": "0043_renter_erasure",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "7",
+      "when": 1793664500000,
+      "tag": "0044_demo_retirement",
+      "breakpoints": true
     }
   ]
 }

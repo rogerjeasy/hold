@@ -1280,6 +1280,14 @@
       "invitation_closed": {
         "title": "Diese Einladung gilt nicht mehr.",
         "body": "Bitten Sie den Verleih um eine neue."
+      },
+      "demo_cap": {
+        "title": "Die Demos für heute sind vergeben.",
+        "body": "Jede Demo legt einen Verleih und zwei Konten an, deshalb starten nur so viele am Tag. Neue gibt es ab Mitternacht UTC. Es wurde nichts angelegt."
+      },
+      "demo_ended": {
+        "title": "Diese Demo ist beendet.",
+        "body": "Demos bleiben sieben Tage erhalten und werden dann mit allem darin stillgelegt. Starten Sie eine neue: Ein Tippen genügt."
       }
     },
     "code": {
@@ -3551,6 +3559,7 @@
     },
     "results": {
       "rate_limited": "Zu viele Nachrichten aus diesem Netz. Warten Sie einige Minuten und versuchen Sie es erneut.",
+      "daily_cap": "Der Assistent hat heute alle Fragen beantwortet, die er beantworten kann. Versuchen Sie es nach Mitternacht UTC erneut. Es wurde nichts gebucht.",
       "invalid": "Diese Nachricht konnte nicht gesendet werden. Laden Sie die Seite neu und beginnen Sie von vorn."
     },
     "connectTitle": "Den eigenen Assistenten verbinden",
