@@ -9,6 +9,7 @@ import { invoiceApprovedClaim } from './claim-invoice.ts'
 import { checkLateExtensionPayment } from './extension-capture.ts'
 import { applyFeeEvent } from './fee-capture.ts'
 import { applyHoldEvent } from './hold-placement.ts'
+import { applyReturnedInPayPal } from './returned-in-paypal.ts'
 
 // Applying an event PayPal delivered (architecture.md section 8.5). It is verified with PayPal first, and then only
 // the resource it names is read back from PayPal: nothing in the event's body is believed. Applying it again changes
@@ -66,14 +67,28 @@ export async function applyPayPalEvent(dependencies: SettleDependencies, message
     return 'rejected'
   }
 
-  const parsed = eventSchema.safeParse(JSON.parse(event.rawBody))
+  const raw = JSON.parse(event.rawBody) as unknown
+  const parsed = eventSchema.safeParse(raw)
   const body = parsed.success ? parsed.data : undefined
+  const resource = z.object({ resource: z.unknown() }).safeParse(raw).data?.resource
+  // Money PayPal took back from a capture, as after a chargeback or a lost dispute, never Hold's own call.
+  if (body?.event_type === 'PAYMENT.CAPTURE.REVERSED') {
+    const returned = await applyReturnedInPayPal(dependencies, shopId, paypal, { type: 'PAYMENT.CAPTURE.REVERSED', resource })
+    await mark('verified', returned.processing, returned.rentalId)
+    return returned.processing
+  }
   if (body?.resource?.id !== undefined && ['PAYMENT.CAPTURE.COMPLETED', 'PAYMENT.CAPTURE.DENIED', 'PAYMENT.AUTHORIZATION.VOIDED', 'PAYMENT.CAPTURE.REFUNDED', 'INVOICING.INVOICE.PAID'].includes(body.event_type)) {
     const settlement = await inScope((transaction) => settlementExecutionForResource(transaction, body.resource?.id ?? '', body.event_type))
     if (settlement !== undefined) {
       const result = settlement.action === 'invoice' ? await invoiceApprovedClaim(dependencies, shopId, settlement.id, paypal) : await runExecution(dependencies, { shopId, executionId: settlement.id })
       await mark('verified', result === 'failed' ? 'failed' : 'applied', settlement.rentalId)
       return 'applied'
+    }
+    // A refund no execution of Hold's waits for: one made in PayPal, or Hold's own, already recorded under its id.
+    if (body.event_type === 'PAYMENT.CAPTURE.REFUNDED') {
+      const returned = await applyReturnedInPayPal(dependencies, shopId, paypal, { type: 'PAYMENT.CAPTURE.REFUNDED', resource })
+      await mark('verified', returned.processing, returned.rentalId)
+      return returned.processing
     }
     // A capture Hold stopped waiting for, which PayPal completed after all, goes to a person.
     const late = body.event_type === 'PAYMENT.CAPTURE.COMPLETED' ? await inScope((transaction) => expiredExtensionForCapture(transaction, body.resource?.id ?? '')) : undefined

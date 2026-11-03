@@ -255,4 +255,9 @@ describe('readCapture', () => {
     expect(await holds.readCapture('CAP-READ')).toMatchObject({ ok: true, value: { captureId: 'CAP-READ', authorizationId: 'AUTH-1', amount: { cents: 3500, currency: 'EUR' } } })
     expect(server.apiCalls()[0]?.path).toBe('/v2/payments/captures/CAP-READ')
   })
+
+  it('reads a capture PayPal took back, as after a chargeback, as reversed', async () => {
+    const { holds } = holdsAgainst([{ status: 200, body: { id: 'CAP-REVERSED', status: 'REVERSED', amount: { currency_code: 'EUR', value: '35.00' }, final_capture: true, create_time: '2026-10-20T09:00:00Z', supplementary_data: { related_ids: { authorization_id: 'AUTH-1' } } } }])
+    expect(await holds.readCapture('CAP-REVERSED')).toMatchObject({ ok: true, value: { captureId: 'CAP-REVERSED', status: 'reversed' } })
+  })
 })

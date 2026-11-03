@@ -1750,7 +1750,8 @@
           "refunded": "Erstattet",
           "invoice_sent": "Rechnung gesendet",
           "invoice_paid": "Rechnung bezahlt",
-          "extension_captured": "Verlängerung eingezogen"
+          "extension_captured": "Verlängerung eingezogen",
+          "refunded_in_paypal": "In PayPal zurückgezahlt, nicht von Hold"
         },
         "calls": {
           "authorize": "Reservierung wird platziert",
@@ -4184,7 +4185,8 @@
       "hold_captured": "Aus der Reservierung eingezogen",
       "refunded": "An den Mieter erstattet",
       "invoice_sent": "Dem Mieter in Rechnung gestellt",
-      "invoice_paid": "Rechnung bezahlt"
+      "invoice_paid": "Rechnung bezahlt",
+      "refunded_in_paypal": "In PayPal an den Mieter zurückgezahlt, nicht von Hold"
     },
     "flows": {
       "to_shop": "An das Geschäft",

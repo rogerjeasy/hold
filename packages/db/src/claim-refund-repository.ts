@@ -1,4 +1,4 @@
-import { CLAIM_TRANSITIONS, transition } from '@hold/domain'
+import { CLAIM_TRANSITIONS, REFUND_KINDS, transition } from '@hold/domain'
 import { and, eq } from 'drizzle-orm'
 import { queueSettlementReceipts } from './receipt-repository.ts'
 import { EXECUTIONS_QUEUE, markExecutionSent } from './fee-repository.ts'
@@ -30,7 +30,7 @@ export async function confirmClaimRefund(transaction: Transaction, executionId: 
   if (approval === undefined || work.claim.state !== 'charged' || read.status !== 'completed' || read.captureId !== work.execution.paypalResourceIds['capture'] || read.amount.cents !== work.execution.amountCents || read.amount.currency !== work.execution.currency) return false
   const events = await transaction.select().from(moneyEvents).where(eq(moneyEvents.rentalId, work.claim.rentalId))
   const captured = events.filter((event) => event.kind === 'hold_captured').reduce((sum, event) => sum + event.amountCents, 0)
-  const refunded = events.filter((event) => event.kind === 'refunded').reduce((sum, event) => sum + event.amountCents, 0)
+  const refunded = events.filter((event) => REFUND_KINDS.includes(event.kind)).reduce((sum, event) => sum + event.amountCents, 0)
   if (read.amount.cents + refunded > captured) return false
   if (!transition(CLAIM_TRANSITIONS, work.claim.state, 'adjusted').ok) return false
   await transaction.insert(moneyEvents).values({ shopId: work.claim.shopId, rentalId: work.claim.rentalId, holdId: work.hold.id, kind: 'refunded', currency: read.amount.currency, amountCents: read.amount.cents, paypalReference: read.refundId, occurredAt: read.createdAt }).onConflictDoNothing()

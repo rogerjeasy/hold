@@ -117,7 +117,7 @@ export { gateInsightsCalls, INSIGHTS_BUDGET_HOURS, INSIGHTS_DAILY_TOKENS, INSIGH
 export type { DroppedCall, InsightsCall } from './insights-gateway.ts'
 export { daysOut, itemWear, recoveredCents, repairMargin, wearingFastest } from './fleet.ts'
 export type { ItemRentalRecord, ItemRepairs, ItemWear, WearComparison, DateWindow } from './fleet.ts'
-export { lineFlows, MONEY_CHECKS, MONEY_EVENT_KINDS, rentalMoney } from './money-ledger.ts'
+export { lineFlows, MONEY_CHECKS, MONEY_EVENT_KINDS, REFUND_KINDS, rentalMoney } from './money-ledger.ts'
 export type { LedgerLine, LineFlow, MoneyCheck, MoneyEventKind, MoneyWhere, RentalMoney, RentalMoneyFacts } from './money-ledger.ts'
 export { neverTaken } from './never-taken.ts'
 export type { MoneyLogLine, NeverTaken } from './never-taken.ts'

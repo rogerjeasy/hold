@@ -34,6 +34,8 @@ export type FakePayPal = PayPalHolds & {
   orderLinks(orderId: string): { readonly returnUrl: string; readonly cancelUrl: string; readonly amount: Money; readonly description: string; readonly brandName: string; readonly underReview: boolean } | undefined
   // Stands in for a renter opening a dispute with PayPal.
   openDispute(dispute: OpenDispute): void
+  // Stands in for PayPal taking a capture's money back, as after a chargeback or a lost dispute.
+  reverseCapture(captureId: string): void
   // The evidence the shop gave on each dispute, in order: its notes and the name of the document it attached.
   readonly disputeEvidence: { readonly disputeId: string; readonly notes: string; readonly fileName: string | null }[]
 }
@@ -173,6 +175,11 @@ export function createFakePayPal(options: FakePayPalOptions): FakePayPal {
 
     openDispute(dispute) {
       disputes.push(dispute)
+    },
+
+    reverseCapture(captureId) {
+      const capture = captures.get(captureId)
+      if (capture !== undefined) captures.set(captureId, { ...capture, status: 'reversed' })
     },
 
     listOpenDisputes() {

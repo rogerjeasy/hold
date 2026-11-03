@@ -65,6 +65,7 @@ const CAPTURE_STATUS: Record<PayPalCapture['status'], CaptureStatus> = {
   FAILED: 'failed',
   PARTIALLY_REFUNDED: 'partially_refunded',
   REFUNDED: 'refunded',
+  REVERSED: 'reversed',
 }
 
 function read<Shape>(schema: z.ZodType<Shape>, reply: PayPalResult<PayPalReply>): PayPalResult<Shape> {

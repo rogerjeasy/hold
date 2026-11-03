@@ -748,6 +748,7 @@ Acting on a hold involves a database and an outside API, which cannot share a tr
 3. The worker calls PayPal with the idempotency key.
 4. The worker records PayPal's reply and marks the execution submitted.
 5. The execution is confirmed only when the matching PayPal event is verified, or the resource is read back from PayPal.
+6. An execution PayPal left waiting, still `pending` or `submitted`, is read back again on a timer, not only when an event comes: every minute the outbox relay finds those untouched for 15 minutes (`EXECUTION_RECHECK_MINUTES`) in every shop through `hold_executions_to_recheck` (migration `0047`), which only `hold_worker` may call and which stamps each one found so it comes back only after another 15 minutes, and sends each to the executions queue again with a deduplication id of its own (`recheckWaitingExecutions` in `packages/settle`). Running it again repeats nothing PayPal already did: a call PayPal took is made with the same `PayPal-Request-Id`, a resource Hold saved is only read back, and a confirmed or failed execution is never sent. Since 3 November 2026; before, a capture PayPal held for review waited for its webhook alone.
 
 **More days** a renter paid for from their phone follow them too, with the action `extension_capture` (section 6.14).
 
@@ -892,11 +893,12 @@ sequenceDiagram
 
 ### 8.6 Reconciliation
 
-Every night Hold compares its records with PayPal.
+Every night the operations agent's run compares Hold's records with PayPal (section 6.10), and through the day Hold reads back what is still waiting.
 
-- **Every open hold** is read from PayPal. Its status and expiry must match Hold's record.
-- **Every capture and refund** in the shop's transaction history must have a money event in Hold.
-- **A difference** raises an alert. Missing events are applied through the normal path. Anything else is shown to the owner and is never corrected silently.
+- **Every open hold**, one in `placed` or `at_risk`, is read from PayPal. When its status or expiry differs from Hold's record, an exception is raised for the owner's morning queue. Nothing is changed and nothing is applied: a difference is shown to the owner and never corrected silently.
+- **An execution PayPal left waiting** is read back every 15 minutes until PayPal's record finishes it (section 7.6, step 6). This, not the nightly run, is what recovers a capture or a release whose event never came.
+- **Money PayPal returned without Hold**, a refund made from PayPal's own pages or a reversal, reaches the money log from its verified event and a read-back (section 8.7).
+- **Not built:** reading the shop's whole transaction history to find a capture or refund Hold has no money event for.
 
 ### 8.7 Disputes
 
@@ -906,7 +908,9 @@ A renter may open a dispute with PayPal despite the reply period.
 2. The owner is told, with the evidence pack already built.
 3. The owner reviews and confirms.
 4. Hold uploads the evidence pack to PayPal as the shop's response.
-5. Later events update the dispute's state. If the shop loses, the refund appears as a money event like any other.
+5. Later events update the dispute's state. If the shop loses, PayPal returns the money as a refund or a reversal of the capture, and it appears in the money log as its own kind of line, `refunded_in_paypal`, never as a refund Hold made.
+
+**Money returned in PayPal, as built (3 November 2026).** A verified `PAYMENT.CAPTURE.REFUNDED` that no refund execution of Hold's is waiting for names its refund and, by its link up, the capture; Hold reads the refund back from PayPal, which must name the same capture and read completed. A verified `PAYMENT.CAPTURE.REVERSED` names the capture, which Hold reads back and which must read reversed. Either is written only for a capture Hold made, found by PayPal's capture id among the rental's fee, hold and extension captures, as one `refunded_in_paypal` line (`applyReturnedInPayPal` in `packages/settle`, `recordReturnedInPayPal` in `packages/db`). Its PayPal reference is the refund's id, or the capture's with `:reversed`, unique in the money log, so a redelivered event, or the event for a refund Hold made and already recorded under that id, writes nothing new. Every sum of what a shop kept subtracts it beside Hold's own refunds (`REFUND_KINDS` in `packages/domain`), so a later refund Hold makes can never return more than is left. Shops connected before 3 November 2026 are subscribed without `PAYMENT.CAPTURE.REVERSED` until their webhook is made again; their refunds arrive.
 
 Hold never responds to a dispute without the owner's confirmation.
 
