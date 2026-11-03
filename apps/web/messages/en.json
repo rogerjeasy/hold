@@ -1381,6 +1381,12 @@
       "pending": {
         "start": "Setting up your shop, its two accounts and its sample rentals. This takes about 20 seconds.",
         "continue": "Signing you in to your demo…"
+      },
+      "steps": {
+        "title": "Setting up your demo",
+        "shop": "Creating your demo shop…",
+        "rentals": "Adding sample rentals…",
+        "today": "Opening Today…"
       }
     }
   },

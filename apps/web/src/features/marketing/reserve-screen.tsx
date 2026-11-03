@@ -5,7 +5,7 @@ import { useExampleMoney } from './use-example-money'
 
 function AmountRow({ label, amount, state }: { label: string; amount: string; state: string }) {
   return (
-    <div className="grid grid-cols-[1fr_auto] gap-x-2 border bg-background px-2.5 py-2">
+    <div className="grid grid-cols-[1fr_auto] gap-x-2 rounded-lg border border-border/70 bg-background px-2.5 py-2">
       <span className="font-semibold">{label}</span>
       <span className="font-semibold">{amount}</span>
       <span className="col-span-2 text-[0.8125rem] text-muted-foreground">{state}</span>

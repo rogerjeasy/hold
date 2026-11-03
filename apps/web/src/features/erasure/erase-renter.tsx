@@ -26,7 +26,7 @@ export function EraseRenter({ rentalId, erasedAt, clock }: EraseRenterProps) {
     setUnderstood(false)
   }
   return (
-    <section aria-labelledby={titleId} className="grid min-w-0 gap-3 border border-l-4 border-border-strong border-l-destructive bg-card p-4 text-card-foreground md:p-5">
+    <section aria-labelledby={titleId} className="grid min-w-0 gap-3 rounded-2xl border border-destructive/30 bg-[color-mix(in_oklab,var(--destructive)_4%,var(--card))] p-4 text-card-foreground shadow-xs md:p-5">
       <h2 id={titleId} className="font-semibold">{t('title')}</h2>
       {erasedAt !== null ? (
         <p>{t('erasedOn', { date: format.day(erasedAt) })}</p>

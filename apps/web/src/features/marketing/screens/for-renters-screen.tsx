@@ -12,6 +12,7 @@ import { PointList } from '../point-list'
 import { PriceListCard } from '../price-list-card'
 import { RenterClaimScreen } from '../renter-claim-screen'
 import { SplitSection, TitledSection } from '../section'
+import { Stage } from '../stage'
 import { StatementCompare } from '../statement-compare'
 
 const pricePointKeys = ['cap', 'wear', 'old'] as const
@@ -48,11 +49,11 @@ export function ForRentersScreen() {
         lead={t('benefitsLead')}
         asideFirst
         aside={
-          <div className="flex justify-center border bg-card px-4 py-8 lg:py-12">
+          <Stage className="flex justify-center px-4 py-10 lg:py-14">
             <PhoneFrame caption={sides('renter.caption')}>
               <RenterClaimScreen />
             </PhoneFrame>
-          </div>
+          </Stage>
         }
       >
         <PointList points={renterPointKeys.map((key) => audience(`points.${key}`))} className="text-[1.0625rem]" />

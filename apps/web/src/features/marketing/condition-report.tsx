@@ -12,20 +12,20 @@ export function ConditionReport() {
   const time = format.dateTime(exampleRental.handoverAt, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
 
   return (
-    <div role="group" aria-label={t('title')} className="w-full border border-foreground bg-card p-4">
+    <div role="group" aria-label={t('title')} className="w-full rounded-xl border border-border bg-card p-4 shadow-raised">
       <p className="flex flex-wrap items-baseline justify-between gap-x-3">
         <span className="font-bold">{t('title')}</span>
         <span className="label text-xs text-muted-foreground">{shop('item')}</span>
       </p>
       <ul className="mt-3 text-[0.9375rem]">
         {photoPlanKeys.map((key) => (
-          <li key={key} className="flex items-center gap-2 border-t py-1.5">
+          <li key={key} className="flex items-center gap-2 border-t border-border/70 py-1.5">
             <CircleCheck aria-hidden="true" className="size-4 shrink-0 text-success" />
             {views(key)}
           </li>
         ))}
       </ul>
-      <p className="border-t pt-2 text-[0.9375rem]">{t('noted', { count: exampleRental.marksAtHandover })}</p>
+      <p className="border-t border-border/70 pt-2 text-[0.9375rem]">{t('noted', { count: exampleRental.marksAtHandover })}</p>
       <p className="figures mt-1 text-[0.8125rem] text-muted-foreground">{t('confirmed', { time })}</p>
     </div>
   )

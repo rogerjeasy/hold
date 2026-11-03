@@ -22,13 +22,13 @@ export function CaptureScreen() {
         <span className="text-base font-bold tracking-tight">{t(`views.${currentView}`)}</span>
         <span className="figures text-xs text-muted-foreground">{t('progress', { current, total: photoPlanKeys.length })}</span>
       </p>
-      <div className="relative aspect-evidence-tall overflow-hidden bg-photo">
+      <div className="relative aspect-evidence-tall overflow-hidden rounded-lg bg-photo">
         <PhotoCrop viewBox={evidencePhoto.crops.wheel} src={evidencePhoto.handoverSrc}>
           {FRAME_CORNERS.map((corner) => (
             <path key={corner} d={corner} strokeWidth="4" className="fill-none stroke-photo-foreground" />
           ))}
         </PhotoCrop>
-        <span className="figures absolute bottom-1.5 left-1.5 flex items-center gap-1 bg-photo-scrim px-1.5 py-0.5 text-xs text-photo-foreground">
+        <span className="figures absolute bottom-1.5 left-1.5 flex items-center gap-1 rounded-md bg-photo-scrim px-1.5 py-0.5 text-xs text-photo-foreground backdrop-blur-sm">
           <Check aria-hidden="true" className="size-3" />
           {t('hint')}
         </span>
@@ -40,7 +40,7 @@ export function CaptureScreen() {
             <li
               key={key}
               className={cn(
-                'relative aspect-square overflow-hidden',
+                'relative aspect-square overflow-hidden rounded-md',
                 captured ? 'bg-photo' : 'border border-dashed border-border-strong',
                 key === currentView && 'border-2 border-solid border-primary',
               )}

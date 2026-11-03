@@ -1381,6 +1381,12 @@
       "pending": {
         "start": "Préparation de votre magasin, de ses deux comptes et de ses locations d’exemple. Cela prend environ 20 secondes.",
         "continue": "Connexion à votre démo…"
+      },
+      "steps": {
+        "title": "Préparation de votre démonstration",
+        "shop": "Création de votre boutique de démonstration…",
+        "rentals": "Ajout des locations d’exemple…",
+        "today": "Ouverture de la page Aujourd’hui…"
       }
     }
   },

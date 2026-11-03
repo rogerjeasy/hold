@@ -1,4 +1,6 @@
+import { cn } from 'cn'
 import { useTranslations } from 'next-intl'
+import motion from '@/features/site/motion.module.css'
 import { routes } from '@/lib/routes'
 import { AudiencePanel } from './audience-panel'
 import { audienceImages, renterPointKeys, shopPointKeys } from './audience-points'
@@ -7,8 +9,8 @@ export function AudiencePanels() {
   const t = useTranslations('audiences')
 
   return (
-    <div className="border-t">
-      <div className="mx-auto grid max-w-page gap-4 px-4 py-14 md:grid-cols-2 md:px-8 md:py-18 lg:px-10 lg:py-24">
+    <div>
+      <div className={cn('mx-auto grid max-w-page gap-5 px-4 py-16 md:grid-cols-2 md:px-8 md:py-22 lg:gap-6 lg:px-10 lg:py-28', motion.reveal)}>
         <AudiencePanel
           label={t('shops.label')}
           title={t('shops.title')}

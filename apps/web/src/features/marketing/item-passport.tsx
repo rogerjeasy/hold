@@ -44,15 +44,15 @@ export function ItemPassport() {
   ] as const
 
   return (
-    <figure className="border bg-card">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b px-4 py-3 md:px-5">
+    <figure className="surface overflow-clip shadow-raised">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-border/70 px-5 py-4">
         <p className="font-bold">{shop('item')}</p>
         <p className="label text-xs text-muted-foreground">{t('label')}</p>
       </div>
-      <ol role="list" className="px-4 md:px-5">
+      <ol role="list" className="px-5">
         {entries.map((entry) => (
-          <li key={entry.key} className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-center gap-4 border-b py-4 last:border-b-0 sm:grid-cols-[7.5rem_minmax(0,1fr)]">
-            <div className="relative aspect-thumbnail overflow-hidden bg-photo">
+          <li key={entry.key} className="relative grid grid-cols-[5.5rem_minmax(0,1fr)] items-center gap-4 border-b border-border/70 py-4 last:border-b-0 sm:grid-cols-[7.5rem_minmax(0,1fr)]">
+            <div className="relative aspect-thumbnail overflow-hidden rounded-lg bg-photo ring-1 ring-foreground/10">
               <PhotoCrop viewBox={entry.crop} src={entry.src}>
                 <EvidenceMarks showNew={entry.showNew} newLabel={evidence('newTag')} />
               </PhotoCrop>
@@ -65,7 +65,7 @@ export function ItemPassport() {
           </li>
         ))}
       </ol>
-      <figcaption className="border-t px-4 py-2.5 text-sm text-muted-foreground md:px-5">{t('caption')}</figcaption>
+      <figcaption className="border-t border-border/70 bg-muted/40 px-5 py-3 text-sm text-muted-foreground">{t('caption')}</figcaption>
     </figure>
   )
 }

@@ -22,7 +22,7 @@ const swatches = {
 function Amount({ swatch, label, amount }: { swatch: string; label: string; amount: string }) {
   return (
     <div className="flex items-center gap-2">
-      <span aria-hidden="true" className={cn('size-3 shrink-0 border border-current', swatch)} />
+      <span aria-hidden="true" className={cn('size-3 shrink-0 rounded-xs border border-current', swatch)} />
       <dt className="opacity-70">{label}</dt>
       <dd className="font-medium">{amount}</dd>
     </div>
@@ -43,7 +43,7 @@ export function HoldMeter({ reservedCents, settled, tone = 'page', className }: 
 
   return (
     <div className={className}>
-      <div role="img" aria-label={summary} style={barStyle} className="flex h-4 border border-current">
+      <div role="img" aria-label={summary} style={barStyle} className="flex h-4 overflow-clip rounded-full border border-current">
         {settled === undefined ? (
           <span className={cn('w-full', swatches.reserved)} />
         ) : (

@@ -21,7 +21,8 @@ export function EvidenceMarks({ showNew, newLabel }: { showNew: boolean; newLabe
         className="fill-none stroke-photo-foreground"
       />
       {showNew ? (
-        <g>
+        // The new mark arrives with a small spring each time it is shown.
+        <g className="animate-pop origin-center [transform-box:fill-box]">
           <rect x={newMark.x} y={newMark.y} width={newMark.size} height={newMark.size} strokeWidth="4" className="fill-none stroke-mark" />
           <rect x={newMark.x - 2} y={newMark.y - TAG_HEIGHT} width={tagWidth} height={TAG_HEIGHT} className="fill-mark" />
           <text

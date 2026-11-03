@@ -22,9 +22,12 @@ export function HoldCard({ outcome, tone = 'page', className, children }: HoldCa
     <div
       role="group"
       aria-label={title}
-      className={cn('w-full border p-4', tone === 'band' ? 'border-band-border' : 'border-foreground bg-card', className)}
+      className={cn('w-full rounded-xl border p-4', tone === 'band' ? 'border-band-border bg-band-hover' : 'border-border bg-card shadow-xs', className)}
     >
-      <p className="mb-3 font-bold">{title}</p>
+      <p className="mb-3 flex items-center gap-2 font-bold">
+        <span aria-hidden="true" className={cn('size-2 rounded-full', tone === 'band' ? 'bg-band-accent' : 'bg-primary')} />
+        {title}
+      </p>
       <HoldMeter
         reservedCents={exampleRental.reservedCents}
         settled={outcome === undefined ? undefined : exampleRental.outcomes[outcome]}

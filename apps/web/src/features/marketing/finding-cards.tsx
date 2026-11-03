@@ -18,22 +18,22 @@ export function FindingCards() {
 
   return (
     <figure>
-      <ul role="list" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <ul role="list" className="stagger grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {findings.map(({ key, crop, icon: Icon, iconClass, confidence, marks }) => (
-          <li key={key} className="flex flex-col border bg-card">
+          <li key={key} className="group surface flex flex-col overflow-clip">
             <div className="relative aspect-thumbnail overflow-hidden bg-photo">
-              <PhotoCrop viewBox={evidencePhoto.crops[crop]}>
+              <PhotoCrop viewBox={evidencePhoto.crops[crop]} className="transition-transform duration-700 ease-spring group-hover:scale-[1.04]">
                 {marks === 'none' ? null : <EvidenceMarks showNew={marks === 'new'} newLabel={evidence('newTag')} />}
               </PhotoCrop>
             </div>
-            <div className="flex flex-1 flex-col gap-2 p-4">
+            <div className="flex flex-1 flex-col gap-2 p-5">
               <p className="label flex items-center gap-2 text-[0.8125rem]">
                 <Icon aria-hidden="true" className={`size-4.5 shrink-0 ${iconClass}`} />
                 {t(`items.${key}.verdict`)}
               </p>
               <h3 className="text-xl leading-tight font-bold tracking-tight wrap-long-words">{t(`items.${key}.title`)}</h3>
               <p className="text-muted-foreground">{t(`items.${key}.body`)}</p>
-              <p className="figures mt-auto self-start border border-border-strong px-2 py-1 text-[0.8125rem]">{t(confidence)}</p>
+              <p className="figures mt-auto self-start rounded-full bg-muted px-3 py-1 text-[0.8125rem]">{t(confidence)}</p>
             </div>
           </li>
         ))}

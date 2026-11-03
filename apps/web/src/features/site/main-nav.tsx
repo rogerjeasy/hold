@@ -11,15 +11,17 @@ export function MainNav({ className }: { className?: string }) {
 
   return (
     <nav aria-label={t('main')} className={className}>
-      <ul className="flex items-center">
+      <ul className="flex items-center gap-0.5">
         {navItems.map((item) => (
           <li key={item.key}>
             <Link
               href={item.href}
               aria-current={pathname === item.href ? 'page' : undefined}
               className={cn(
-                'inline-flex min-h-11 items-center px-2.5 text-[0.9375rem] whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground',
-                'aria-[current=page]:font-semibold aria-[current=page]:text-foreground aria-[current=page]:underline aria-[current=page]:decoration-primary aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8',
+                'relative inline-flex min-h-11 items-center rounded-full px-3 text-[0.9375rem] whitespace-nowrap text-muted-foreground transition-colors duration-200 hover:bg-foreground/5 hover:text-foreground',
+                // The current page is marked twice: by weight and a soft pill, and by a dot in the accent beneath it.
+                'aria-[current=page]:bg-foreground/6 aria-[current=page]:font-semibold aria-[current=page]:text-foreground',
+                'after:absolute after:bottom-1 after:left-1/2 after:size-1 after:-translate-x-1/2 after:rounded-full after:bg-primary after:opacity-0 after:transition-opacity aria-[current=page]:after:opacity-100',
               )}
             >
               {t(item.key)}

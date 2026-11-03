@@ -17,16 +17,8 @@ export function SignInScreen({ codeSentTo, demo }: { codeSentTo?: string | undef
     <AuthShell
       title={codeSentTo === undefined ? t('title') : code('title')}
       lead={codeSentTo === undefined ? t('lead') : code('lead', { email: codeSentTo })}
-      form={
-        codeSentTo === undefined ? (
-          <div className="grid gap-8">
-            {demo === undefined ? null : <DemoAccountsForm demo={demo} />}
-            <AuthForm kind="signIn" action={requestSignIn} />
-          </div>
-        ) : (
-          <CodeStep page="signIn" />
-        )
-      }
+      preface={codeSentTo === undefined && demo !== undefined ? <DemoAccountsForm demo={demo} /> : undefined}
+      form={codeSentTo === undefined ? <AuthForm kind="signIn" action={requestSignIn} /> : <CodeStep page="signIn" />}
       other={{ question: t('switch'), action: t('switchAction'), href: routes.signUp }}
       aside={{ title: t('aside.title'), lead: t('aside.lead'), children: <ShopToday /> }}
     />
