@@ -41,9 +41,10 @@ export const HOSTED_QUESTIONS_PER_NETWORK = 6
 
 // Each sample handed to the two advocates is a run of several model calls. The first live run on Bedrock, on 3 November
 // 2026, spent about 28,000 tokens in 8 calls, so a sample's run is bounded at 80,000, well under a real claim's ceiling.
-// A day of runs at that ceiling stays inside what the hosted assistant leaves, with room for the comparisons.
+// A day of every sample run at its ceiling (the advocates', the comparisons' and the investigations') stays inside
+// what the hosted assistant leaves of Claude's day. Once they are spent the claim page shows a recorded live run.
 export const SAMPLE_ADVOCATE_RUN_TOKENS = 80_000
-export const SAMPLE_ADVOCATE_RUNS_PER_DAY = 4
+export const SAMPLE_ADVOCATE_RUNS_PER_DAY = 3
 
 // AG Studio's insights agent takes several short turns for each question. Every demo is a shop of its own, so a cap per
 // shop bounds nothing in total: this one spans every shop.
@@ -62,12 +63,13 @@ export const INSIGHTS_TURNS_PER_SHOP = 15
 // again what one look with two photographs spent on 2 November 2026. Each demo shop has one such return, so a share per
 // shop is the return itself; these stop many demos together.
 export const SAMPLE_COMPARISON_TOKENS = 30_000
-export const SAMPLE_COMPARISON_RUNS_PER_DAY = 6
-export const SAMPLE_COMPARISON_RUNS_PER_NETWORK = 3
+export const SAMPLE_COMPARISON_RUNS_PER_DAY = 4
+export const SAMPLE_COMPARISON_RUNS_PER_NETWORK = 2
 
 // A demo's two sample entries on the morning queue, investigated by the operations agent when the owner asks
-// (extensions.md section 6.14). A run is at most two investigations of a few short turns each, well under the run's
-// 400,000-token ceiling, but it still spends the account's day: once per demo a day, twice per network, four in all.
+// (extensions.md section 6.14). A run is at most two investigations of a few short turns each, so it stops at 40,000
+// tokens rather than a nightly run's 400,000: once per demo a day, once per network, twice in all.
+export const SAMPLE_INVESTIGATION_TOKENS = 40_000
 export const SAMPLE_INVESTIGATIONS_PER_SHOP = 1
-export const SAMPLE_INVESTIGATIONS_PER_NETWORK = 2
-export const SAMPLE_INVESTIGATIONS_PER_DAY = 4
+export const SAMPLE_INVESTIGATIONS_PER_NETWORK = 1
+export const SAMPLE_INVESTIGATIONS_PER_DAY = 2

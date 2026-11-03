@@ -1,5 +1,6 @@
 import { completeOpsRun, exceptionFacts, inShop, recordSampleInvestigation, sampleEntriesToInvestigate } from '@hold/db'
 import type { Transaction } from '@hold/db'
+import { SAMPLE_INVESTIGATION_TOKENS } from '@hold/domain'
 import type { RunBudget } from './gated-tools.ts'
 import { investigate } from './investigate-exception.ts'
 import type { InvestigateDependencies } from './investigate-exception.ts'
@@ -14,7 +15,9 @@ import { samplePayPalReader } from './sample-paypal-reader.ts'
 // nothing out. No PayPal account is read, no reminder is sent, and nothing here moves money.
 export async function investigateSamples(dependencies: InvestigateDependencies & { readonly limits?: OpsLimits }, input: { readonly shopId: string; readonly runId: string }): Promise<string> {
   const { shopId, runId } = input
-  const limits = dependencies.limits ?? OPS_LIMITS
+  // A sample run stops at its own token ceiling, far below a nightly run's (packages/domain demo-limits.ts).
+  const given = dependencies.limits ?? OPS_LIMITS
+  const limits = { ...given, maxTokens: Math.min(given.maxTokens, SAMPLE_INVESTIGATION_TOKENS) }
   const now = dependencies.now()
   const asWorker = <Result>(work: (transaction: Transaction) => Promise<Result>) => inShop(dependencies.database, { role: 'hold_worker', shopId }, work)
   const entries = await asWorker((transaction) => sampleEntriesToInvestigate(transaction))

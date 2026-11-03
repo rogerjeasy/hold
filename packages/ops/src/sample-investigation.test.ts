@@ -1,5 +1,6 @@
 import { addSampleRentals, auditLog, inShop, opsRuns, proposals, sampleInvestigation, startSampleInvestigation } from '@hold/db'
 import { createTestDatabase } from '@hold/db/testing'
+import { SAMPLE_INVESTIGATION_TOKENS } from '@hold/domain'
 import type { TestDatabase } from '@hold/db/testing'
 import { readyRentalShop } from '@hold/db/testing/ready-rental'
 import type { ReadyRentalShop } from '@hold/db/testing/ready-rental'
@@ -88,6 +89,19 @@ describe('investigating a demo shop\'s samples, when its owner asks (extensions.
     const again = await start(later)
     await runOperations(dependencies({ investigator: undefined, now: () => later }), { shopId: shop.scope.shopId, trigger: 'manual', samplesRunId: again })
     expect(await shop.act((transaction) => sampleInvestigation(transaction, later))).toMatchObject({ runId: again, state: 'completed', investigated: 0, model: null })
+  })
+
+  it('stops at a sample run\'s own token ceiling, far below a nightly run\'s, so the next entry is not asked about', async () => {
+    const asked: string[] = []
+    const costly: Investigator = {
+      investigate(request) {
+        asked.push(request.exceptionKind)
+        return Promise.resolve({ kind: 'result', data: answerFor(request.exceptionKind), model: 'us.anthropic.claude-opus-4-6-v1', inputTokens: SAMPLE_INVESTIGATION_TOKENS, outputTokens: 0 })
+      },
+    }
+    const runId = await start()
+    await runOperations(dependencies({ investigator: costly }), { shopId: shop.scope.shopId, trigger: 'manual', samplesRunId: runId })
+    expect(asked).toHaveLength(1)
   })
 
   it('keeps a steered answer off the entry: a kind the sample does not allow writes nothing', async () => {

@@ -52,12 +52,9 @@ describe('investigating the demo\'s samples', () => {
     expect(await operations.investigateSamples(null, form(locale))).toEqual({ ok: false, failure: 'refused', reason: 'samples_daily_cap' })
   })
 
-  it('lets one network ask twice a day, whichever demos it starts', async () => {
+  it('lets one network ask once a day, whichever demos it starts', async () => {
     const second = await demo('second')
     await signIn(jar, second.owner, 'email_code')
-    expect(await operations.investigateSamples(null, form(locale))).toMatchObject({ ok: true })
-    const third = await demo('third')
-    await signIn(jar, third.owner, 'email_code')
     expect(await operations.investigateSamples(null, form(locale))).toEqual({ ok: false, failure: 'refused', reason: 'samples_daily_cap' })
   })
 })
