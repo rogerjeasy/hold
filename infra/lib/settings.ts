@@ -31,6 +31,12 @@ export { BACKUP_KEPT_DAYS, EVIDENCE_KEPT_DAYS, EVIDENCE_LOCK_DAYS } from '@hold/
 // (tech-stack.md section 18).
 export const DATABASE_MIN_CAPACITY = 0
 export const DATABASE_MAX_CAPACITY = 2
+// The monthly cost the account's budget warns at (infra/lib/alarms.ts), in US dollars, unless the deploy names another
+// with -c monthlyBudgetUsd=<amount>. tech-stack.md section 18 sets no figure. Hold's own share is small: one App Runner
+// instance, Aurora paused when idle or at 0.5 capacity units in December, Lambda and queues at demo traffic, and
+// Claude for the demo. The budget is the whole account's, which Wick and CareCircle share, so the owner raises it to
+// cover them.
+export const MONTHLY_BUDGET_USD = 100
 // Not `hold`, which Aurora PostgreSQL reserves (SQL's WITH HOLD).
 export const DATABASE_NAME = 'hold_db'
 // The role the application connects as. It does not own the tables, so row-level security applies to it.

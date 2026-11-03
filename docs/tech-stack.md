@@ -328,7 +328,7 @@ In the hackathon build, the owner pastes their sandbox app's client ID and secre
 **Operating notes**
 
 - Keep minimum capacity above zero during judging, so a judge's first visit is not slowed by the database resuming.
-- Point-in-time recovery switched on.
+- Point-in-time recovery switched on, with automated backups kept for 35 days, the most AWS allows. Backup storage up to the cluster's own size is free, so the longer window costs cents a month at most.
 - Encryption at rest with AWS KMS.
 
 ---
@@ -363,7 +363,9 @@ Receipts contain a view-only link selecting the exact pack UUID, not a PDF attac
 - **AWS CDK in TypeScript** defines every resource, so the environment can be recreated from the repository. The code is in `infra/`. The account's existing CDK bootstrap is shared, and Hold's stacks are `HoldData`, `HoldIdentity`, `HoldWork`, `HoldRegistry` and `HoldDelivery`.
 - **GitHub Actions** builds, tests and deploys, signing in to AWS through OpenID Connect with no stored keys. CI runs on every pull request; Deploy runs on main once CI passes (`architecture.md` section 20.2). The role is `hold-github-deploy`, in the HoldDelivery stack, and uses the account's existing GitHub identity provider.
 - **AWS Secrets Manager** holds PayPal credentials and the AG Grid Enterprise licence key (`hold/web/ag-grid-licence`). Claude on Bedrock is reached with the task's IAM role, so no Claude key is stored.
-- **Amazon CloudWatch** for logs, metrics and alarms. Alarms on failed captures, holds about to lapse, failed webhooks and queue backlogs.
+- **Amazon CloudWatch** for logs, metrics and alarms. Every alarm reports to one SNS topic, `hold-alarms`, when it goes off and when it clears, and the topic emails the address the deploy names (`architecture.md` section 17.1). Deployed alarms, since 3 November 2026: a message set aside on any dead-letter queue, money work waiting more than 15 minutes on `paypal-events`, `executions` or `upkeep`, the outbox relay failing or not running for 15 minutes, and three or more server errors from the web app in five minutes. Alarms on holds about to lapse and on reconciliation differences need metrics of Hold's own, not yet published.
+- **AWS Budgets** watches the account's monthly cost (`hold-account-monthly`) and tells the same topic at 80% and 100% spent and when the month is forecast to pass it.
+- **App Runner's health check** is HTTP on `/api/health`, which answers without the database, so a paused cluster resuming never makes a healthy server look failed.
 - **AWS WAF** on the App Runner service is optional, for rate limiting on the public renter links.
 
 ---
@@ -498,7 +500,7 @@ Judges do not have a bike to photograph, so the demo must work without one. They
 
 - The environment must stay up from submission on 12 November until judging ends on 15 December 2026.
 - Keep the App Runner service small and Aurora's maximum capacity low. Aurora's minimum is zero, so it pauses when idle. Decided 27 October 2026: it is raised to 0.5 for the judging weeks only, 1 to 15 December, by a deploy on 1 December and another on 16 December that sets it back (`DATABASE_MIN_CAPACITY` in `infra/lib/settings.ts`). Until then a judge's first visit after a quiet spell waits for the database to resume.
-- Set an AWS billing alarm before deploying anything.
+- The account's monthly budget, `hold-account-monthly`, is 100 USD unless the deploy names another with `-c monthlyBudgetUsd=<amount>` (`MONTHLY_BUDGET_USD` in `infra/lib/settings.ts`). No figure was set before 3 November 2026; Hold's own share is small (one App Runner instance, Aurora paused or at 0.5 capacity units, Lambda and queues at demo traffic, Claude for the demo), but the budget is the whole account's, which Wick and CareCircle share, so it is raised to cover them. A budget on Hold's tag alone would read nothing until the tag is activated for cost allocation.
 - Set a spending limit on the Claude account. Image comparison uses more tokens than text, and the demo is public.
 - Each operations agent run and each negotiation has its own ceiling on calls and tokens.
 - The public demo has daily caps across every network (`architecture.md` section 20.3): a hundred demo starts a day, which keeps the user pool under Cognito Essentials' 10,000 free monthly active users, and fifteen hosted-assistant questions a day, which keeps the assistant to half of the account's daily Opus 4.6 tokens (about 940,000, measured when they ran out on 29 October 2026; Service Quotas does not list the limit). Demos are retired after seven days and their two users removed by a daily cleanup, so the pool holds at most a week of them.

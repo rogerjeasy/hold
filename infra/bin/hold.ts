@@ -29,5 +29,15 @@ const textSender: unknown = app.node.tryGetContext('textSender')
 if (textSender !== undefined && (typeof textSender !== 'string' || textSender === '')) throw new Error('"textSender" in cdk.json is the sender name or number texts come from.')
 const textReports: unknown = app.node.tryGetContext('textReports')
 
-createHoldApp(app, { senderEmail, webImageTag, webPublicUrl, textSender, textReports: textReports === 'on' })
+// Where alarms and the account's budget email: -c alarmEmail=<address>, which the deploy passes from a GitHub secret
+// so no address is committed. Empty or unset, the alarms email nobody.
+const alarmEmail: unknown = app.node.tryGetContext('alarmEmail')
+if (alarmEmail !== undefined && alarmEmail !== '' && (typeof alarmEmail !== 'string' || !alarmEmail.includes('@'))) throw new Error('-c alarmEmail=<address> is the address alarms are emailed to.')
+
+// The account's monthly cost the budget warns at, in US dollars: -c monthlyBudgetUsd=<amount>, or the default in lib/settings.ts.
+const monthlyBudgetUsd: unknown = app.node.tryGetContext('monthlyBudgetUsd')
+const budget = monthlyBudgetUsd === undefined ? undefined : Number(monthlyBudgetUsd)
+if (budget !== undefined && !(Number.isFinite(budget) && budget > 0)) throw new Error('-c monthlyBudgetUsd=<amount> is a number of US dollars above zero.')
+
+createHoldApp(app, { senderEmail, webImageTag, webPublicUrl, textSender, textReports: textReports === 'on', alarmEmail: alarmEmail === '' ? undefined : alarmEmail, monthlyBudgetUsd: budget })
 app.synth()

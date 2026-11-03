@@ -1622,6 +1622,7 @@ Every call takes one path (`callTool` in `dispatch.ts`): the actor is resolved (
 | `/terms` | The terms of use of the hackathon build: sandbox only, photographs of items not people, the AI can be wrong and never charges, no warranty. |
 | `/assistant` | A demonstration: chat with the hosted assistant, which rents through Hold's MCP server as any outside assistant would, and the `/mcp` address for connecting one's own. Labelled as a demonstration, and its stand-in as simulated. |
 | `/mcp` | Hold's MCP server for renters' assistants, over streamable HTTP with no sign-in (section 13.4). |
+| `/api/health` | App Runner's health check. Answers `{"status":"ok"}`, never cached, reads nothing from the request and reaches no service, so the database pausing cannot fail it. |
 
 The first nine routes are the public site. They take no sign-in, read no shop data and call no service. `/sign-in` and `/sign-up` post to a server function that checks the input and, until Cognito is connected, does nothing else (section 12.1).
 
@@ -1796,9 +1797,9 @@ The CDK code is in `infra/`, as five stacks:
 |---|---|---|
 | `HoldData` | The Aurora cluster, its two logins, the evidence and display buckets | Termination protection. Every resource is retained if the stack is deleted |
 | `HoldIdentity` | The Cognito pool `hold-staff` for owners and staff, its groups and its web client. Its codes go to the custom email sender `hold-code-sender`, a Lambda function, encrypted with the KMS key `alias/hold-code-key`, and out through the SMTP account in `hold/email/smtp`. The key and the secret are an administrator's. Cognito still names the SES identity `rogerjeasybavibidila@gmail.com`, verified outside the stack, which it requires but sends nothing through | Termination protection, deletion protection on the pool |
-| `HoldWork` | The spine's queues and their dead-letter queues and alarms, the schedule group, the role the scheduler uses | |
+| `HoldWork` | The spine's queues and their dead-letter queues and alarms, the schedule group, the role the scheduler uses, the alarm topic `hold-alarms` every alarm reports to, and the account's monthly budget `hold-account-monthly` (section 17.1) | |
 | `HoldRegistry` | The image repository | Retained |
-| `HoldWeb` | The App Runner service `hold-web`, its instance role and the role it pulls the image with, and a scaling limit of two instances. Its address is App Runner's own, https://p99faar3kp.us-east-1.awsapprunner.com, the stack's `ServiceUrl` output | Termination protection, because a new service would get a new address. Set once by an administrator, since the pipeline may not change it |
+| `HoldWeb` | The App Runner service `hold-web`, its instance role and the role it pulls the image with, and a scaling limit of two instances. Its address is App Runner's own, https://p99faar3kp.us-east-1.awsapprunner.com, the stack's `ServiceUrl` output. Its server-error alarm reports to `hold-alarms` | Termination protection, because a new service would get a new address. Set once by an administrator, since the pipeline may not change it |
 
 The worker's compute is added with its code. The web app's address is known only once the service exists, so it goes into `infra/cdk.json` as `webPublicUrl` after the first deploy, and the links in Hold's emails use it from the next one.
 
@@ -1819,7 +1820,7 @@ The worker's compute is added with its code. The web app's address is known only
 
 | Service | Runs on | Notes |
 |---|---|---|
-| web | App Runner, 1 vCPU and 2 GB, one to two instances | Checked by TCP on port 3000. Runs the image named by the deploy, never the newest pushed |
+| web | App Runner, 1 vCPU and 2 GB, one to two instances | Checked over HTTP at `/api/health` every ten seconds, five seconds to answer, unhealthy after five misses. The route answers without the database, which pauses when idle. Runs the image named by the deploy, never the newest pushed |
 | worker | Lambda, Node 24, 512 MB, four minutes per message | App Runner throttles CPU between requests, so it cannot poll queues. Five functions: `hold-worker-paypal-events`, `hold-worker-executions` and `hold-worker-upkeep` fed by their FIFO queues, `hold-worker-media` (1.5 GB, with sharp) fed by the standard `media` queue, each message read with its queue's schema and naming only the messages that failed so only those are tried again, and `hold-worker-outbox-relay` started every minute by EventBridge Scheduler. The worker makes schedules only in `hold-schedules`, hands them only the scheduler's role, and emails through Hold's SMTP login. The four minutes allow a paused Aurora cluster to wake. Each queue hides a message for six minutes, longer than a function may run on it. Code in `apps/worker`, deployed by `infra/lib/worker.ts` |
 
 ### 14.5 Data
@@ -1827,7 +1828,7 @@ The worker's compute is added with its code. The web app's address is known only
 - **Aurora Serverless v2,** PostgreSQL 17, one writer, with the RDS Data API switched on. The minimum capacity is zero while building, so the cluster pauses when idle, and is raised above zero for judging.
 - **The database** is `hold_db`. Aurora reserves `hold`. While the cluster is paused, the first call fails with `DatabaseResumingException` until it resumes, so the adapter retries that error.
 - **Two logins.** `hold_admin` runs migrations. `hold_app` is what the services use. It does not own the tables, so row-level security applies to it.
-- **Backups** kept for seven days, with point-in-time recovery.
+- **Backups** kept for 35 days, the most AWS allows for automated backups, with point-in-time recovery. Backup storage up to the cluster's own size costs nothing, and the database is small, so the window costs cents a month at most. No copy is kept outside the cluster's own backups.
 - **Encryption** at rest with the AWS-managed KMS key.
 - **Migrations** run as a one-off step before each deployment.
 
@@ -1852,7 +1853,7 @@ The worker's compute is added with its code. The web app's address is known only
 | `ops-agent` | Operations agent runs | Per shop |
 | `negotiations` | A negotiation to run to its end, or a reply to write: one message per negotiation, taken by `hold-worker-negotiations` (ten minutes, its own role: the database and Claude on Bedrock only). A retried message picks up where the transcript stands. | Per rental |
 
-Every queue has a dead-letter queue and an alarm on it.
+Every queue has a dead-letter queue and an alarm on it. The three queues that move money, `paypal-events`, `executions` and `upkeep`, also have an alarm when their oldest message has waited more than 15 minutes, before its fifth try would set it aside.
 
 The outbox relay carries evidence and receipt identities without tokens or contact details. Separate evidence and receipt Lambda roles have only their required database, logs, queue and artifact/secret access: the renderer reads face-blurred display copies and writes/reads `packs/*`, without PayPal credentials; the receipt worker reads its link-signing and SMTP secrets. PDFKit and sharp are external pinned worker modules so PDFKit font data and sharp's native loader ship with the bundle. Deploy the updated `HoldDelivery` permissions boundary before the compute stack. AWS deployment and Linux Lambda runtime execution remain unverified in this change.
 
@@ -1988,9 +1989,9 @@ The outbox relay carries evidence and receipt identities without tokens or conta
 - **At rest:** KMS encryption in Aurora and both buckets.
 - **Minimal data:** photographs of items, the renter's PayPal identity and contact email. No payment details are stored. PayPal holds those.
 - **Faces:** blurred in every copy people see.
-- **Logs:** no tokens, no credentials, no photograph contents. Personal details are masked.
+- **Logs:** no tokens, no credentials, no photograph contents. Personal details are masked. An error is logged through `errorForLog` (`packages/domain/src/log-redaction.ts`): its name, message, stack frames and causes, with email addresses, phone numbers, bearer and named tokens, secrets and passwords, PayPal's tokens and payer in URLs, long hex and base64 values, and a failed query's values taken out.
 - **Model calls:** photographs of items and the minimum text needed. No renter contact details.
-- **Retention:** evidence photographs, manifests and evidence packs are locked for `EVIDENCE_LOCK_DAYS` (180, the period PayPal accepts a dispute after a payment) and deleted by the evidence bucket's lifecycle rule `EVIDENCE_KEPT_DAYS` (365) after they were written, with their face-blurred copies in the display bucket. Both constants live in `packages/domain/src/data-retention.ts`, which `infra/lib/settings.ts` and the privacy notice both read, so the storage and the page cannot disagree. A test there keeps the deletion after the lock and after the longest dispute window a hold allows. Rentals, the money log, approvals and the audit trail are the shop's accounts and are kept while it uses Hold; database backups last `BACKUP_KEPT_DAYS` (7), read by the database stack and the privacy notice alike. A shop's own retention period is not built.
+- **Retention:** evidence photographs, manifests and evidence packs are locked for `EVIDENCE_LOCK_DAYS` (180, the period PayPal accepts a dispute after a payment) and deleted by the evidence bucket's lifecycle rule `EVIDENCE_KEPT_DAYS` (365) after they were written, with their face-blurred copies in the display bucket. Both constants live in `packages/domain/src/data-retention.ts`, which `infra/lib/settings.ts` and the privacy notice both read, so the storage and the page cannot disagree. A test there keeps the deletion after the lock and after the longest dispute window a hold allows. Rentals, the money log, approvals and the audit trail are the shop's accounts and are kept while it uses Hold; database backups last `BACKUP_KEPT_DAYS` (35), read by the database stack and the privacy notice alike. A shop's own retention period is not built.
 - **Erasure:** on a renter's request, a shop's owner erases them from the rental page once every rental of theirs in the shop has ended (`eraseRenter` in `apps/web/src/features/erasure`, `eraseRenter` in `packages/db`, migration 0043). The name, email and phone the shop booked with become `[erased]` (`ERASED`), the phone and its codes are cleared, the shop's texts to them keep their status but not the number or words, and a renter phone's push registration is revoked. The rental is stamped `renter_erased_at`, after which the shop no longer sees the renter's PayPal name and email (the `renter_of_shop` policy). Those are shared by every shop the renter paid, so `hold_erase_renter_identity` replaces them only once no shop holds an unerased rental of theirs; PayPal gives them again on a later payment. The money log, approvals, the audit trail, PayPal's event bodies, the renter's own words in claims and incidents, and photographs are kept: they are append-only, and the photographs go on their date. The PayPal payer ID stays, since the money log refers to it. An audit line `renter.erased` names the rental and the count, nobody's details. It cannot be undone. The Clean Record has its own deletion, by the renter (extensions.md section 7).
 
 ---
@@ -2025,7 +2026,7 @@ The outbox relay carries evidence and receipt identities without tokens or conta
 
 ### 17.1 Logs, metrics and alarms
 
-- **Structured logs** from both services, each line tagged with the shop, the rental, the hold, the execution and PayPal's debug ID.
+- **Structured logs** from both services, each line tagged with the shop, the rental, the hold, the execution and PayPal's debug ID. A message the worker fails on is logged with its error's text and stack, redacted by `errorForLog` (section 15.2), as is a sign-up whose membership could not be written. Push, text and email failures are still logged by kind only, since their errors can carry a device token.
 - **A correlation ID** follows one piece of work from the first request through every queue.
 
 | Metric | Why |
@@ -2044,6 +2045,18 @@ The outbox relay carries evidence and receipt identities without tokens or conta
 | Model cost per comparison | Keeps running costs known |
 
 **Alarms** on any hold that expires, any hold at risk for more than an hour, any execution unknown for more than a few minutes, any reconciliation difference and any dead-lettered message.
+
+Deployed since 3 November 2026, each reporting to the SNS topic `hold-alarms` when it goes off and when it clears (`infra/lib/alarms.ts`):
+
+| Alarm | Goes off when |
+|---|---|
+| `hold-{queue}-dead-letter` | A message on any queue failed five times and was set aside |
+| `hold-{paypal-events,executions,upkeep}-waiting` | Money work has waited more than 15 minutes on its queue: its worker is failing or not running |
+| `hold-outbox-relay-failing` | The outbox relay failed, or did not run, in three five-minute periods in a row. Lambda reports zero errors for a period the relay ran without failing, so no report means it did not run |
+| `hold-web-server-errors` | The web app answered three or more requests with a 5xx in five minutes |
+| Budget `hold-account-monthly` | The account's cost passed 80% or 100% of the month's budget, or is forecast to pass it |
+
+The topic emails the address in the deploy's `HOLD_ALARM_EMAIL` secret, passed as `-c alarmEmail=`. Without one the topic has no subscriber, and the alarms change state only where CloudWatch shows them. The alarms on expiring or at-risk holds, unknown executions and reconciliation differences need metrics Hold does not yet publish.
 
 ### 17.2 The audit trail
 
@@ -2152,7 +2165,8 @@ GitHub signs in to AWS through OpenID Connect as `hold-github-deploy`, made by t
 - Every role it makes must carry the `project=hold` tag and `hold-permissions-boundary`, and it changes only roles that carry the tag. It can neither remove the boundary nor the tag, and can hand on only the web app's two roles, `hold-web` and `hold-web-access`, which trust App Runner alone, and the code sender's, `hold-code-sender`, which trusts Lambda alone. It creates an App Runner service only with the `project=hold` tag, and changes only services named `hold-*`. The boundary caps any Hold role at exactly what the app uses: sending and reading Hold's queues, reading and writing objects, reading Hold's secrets and keeping the shops' PayPal credentials, the database through the Data API, its schedules, its image, sending email, Claude on Bedrock, its own logs, putting a person in a group of its user pool, and decrypting with Hold's own keys. The only role a Hold role may hand on is the scheduler's, to the scheduler.
 - **What remains.** A template on main can still give a Hold role a trust policy naming another principal; the boundary keeps such a role to Hold's own resources. Main is where Hold's code comes from, so whoever can change it can already change what the app does with Hold's data.
 - HoldDelivery itself, with both roles and the boundary, is deployed only by an administrator, so a commit on main cannot widen what the pipeline may do.
-- Beyond deploying, the pipeline may push to `hold-app` and run statements on `hold-database` with the two database secrets. No AWS key is stored in GitHub. The ARNs it needs are repository variables, which hold no secret.
+- Beyond deploying, the pipeline may push to `hold-app` and run statements on `hold-database` with the two database secrets. No AWS key is stored in GitHub. The ARNs it needs are repository variables, which hold no secret. The one secret it reads, `HOLD_ALARM_EMAIL`, is the address alarms email; it is a secret rather than a variable only so that Actions masks it in the public log of the diff.
+- CloudFormation makes the alarm topic, its subscription and the budget through `hold-cloudformation-monitoring`, which reaches only topics and budgets named `hold-*` and cannot publish. It is part of HoldDelivery, so an administrator deploys it before the first pipeline deploy that makes them.
 
 **The image** (`Dockerfile`) is the web app's standalone build, run by `apps/web/serve.ts` instead of the server.js Next.js generates. That server names a host, and then treats each language rewrite as a request to another site, which loops. `serve.ts` starts it the way `next start` does.
 

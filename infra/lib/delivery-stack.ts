@@ -163,7 +163,7 @@ function computePolicy(stack: Stack): iam.ManagedPolicy {
 }
 
 // What CloudFormation needs for renters' texts (infra/lib/texts.ts): Hold's configuration set, which reports each text's
-// delivery, and the topic it reports to, with the queue that topic feeds. Nothing of another project's.
+// delivery. The topic it reports to is made with the monitoring policy's grant. Nothing of another project's.
 function textsPolicy(stack: Stack): iam.ManagedPolicy {
   return new iam.ManagedPolicy(stack, 'TextsPolicy', {
     managedPolicyName: name('cloudformation', 'texts'),
@@ -172,7 +172,24 @@ function textsPolicy(stack: Stack): iam.ManagedPolicy {
       statement(['sms-voice:CreateConfigurationSet', 'sms-voice:DeleteConfigurationSet', 'sms-voice:CreateEventDestination', 'sms-voice:UpdateEventDestination', 'sms-voice:DeleteEventDestination', 'sms-voice:TagResource', 'sms-voice:UntagResource', 'sms-voice:ListTagsForResource'], [`arn:aws:sms-voice:${REGION}:${ACCOUNT}:configuration-set/${PREFIX}-*`]),
       // Listing names no resource.
       statement(['sms-voice:DescribeConfigurationSets'], ['*']),
-      statement(['sns:CreateTopic', 'sns:DeleteTopic', 'sns:GetTopicAttributes', 'sns:SetTopicAttributes', 'sns:Subscribe', 'sns:Unsubscribe', 'sns:GetSubscriptionAttributes', 'sns:SetSubscriptionAttributes', 'sns:TagResource', 'sns:UntagResource', 'sns:ListTagsForResource'], [`arn:aws:sns:${REGION}:${ACCOUNT}:${PREFIX}-*`]),
+    ],
+  })
+}
+
+// What CloudFormation needs to tell people (infra/lib/alarms.ts): Hold's topics and their subscriptions, for the alarms and
+// the text reports, and Hold's budget on the account's cost. It may not publish to a topic, and touches no topic or
+// budget of another project's.
+function monitoringPolicy(stack: Stack): iam.ManagedPolicy {
+  return new iam.ManagedPolicy(stack, 'MonitoringPolicy', {
+    managedPolicyName: name('cloudformation', 'monitoring'),
+    description: "What CloudFormation needs for Hold's alarm topic and budget, and nothing of other projects",
+    statements: [
+      statement(
+        ['sns:CreateTopic', 'sns:DeleteTopic', 'sns:GetTopicAttributes', 'sns:SetTopicAttributes', 'sns:GetDataProtectionPolicy', 'sns:Subscribe', 'sns:Unsubscribe', 'sns:ListSubscriptionsByTopic', 'sns:GetSubscriptionAttributes', 'sns:SetSubscriptionAttributes', 'sns:TagResource', 'sns:UntagResource', 'sns:ListTagsForResource'],
+        [`arn:aws:sns:${REGION}:${ACCOUNT}:${PREFIX}-*`],
+      ),
+      // Budgets are the account's, named in no region. Making one is ModifyBudget; there is no separate action for it.
+      statement(['budgets:ModifyBudget', 'budgets:ViewBudget', 'budgets:TagResource', 'budgets:UntagResource', 'budgets:ListTagsForResource'], [`arn:aws:budgets::${ACCOUNT}:budget/${PREFIX}-*`]),
     ],
   })
 }
@@ -267,6 +284,7 @@ function cloudFormationRole(stack: Stack, boundary: iam.ManagedPolicy, pipelineR
   add(deny(['iam:*'], [...pipelineRoles.map(at.role), boundary.managedPolicyArn]))
   role.addManagedPolicy(computePolicy(stack))
   role.addManagedPolicy(textsPolicy(stack))
+  role.addManagedPolicy(monitoringPolicy(stack))
   return role
 }
 

@@ -117,7 +117,7 @@ export function workerFunction(stack: Stack, id: string, functionName: string, e
   })
 }
 
-export function createWorker(stack: Stack, props: WorkerProps): void {
+export function createWorker(stack: Stack, props: WorkerProps): { readonly relay: lambda.IFunction } {
   const role = workerRole(stack, props)
   const queue = (queueName: string) => {
     const found = props.queues.get(queueName)
@@ -172,4 +172,5 @@ export function createWorker(stack: Stack, props: WorkerProps): void {
     flexibleTimeWindow: { mode: 'OFF' },
     target: { arn: relay.functionArn, roleArn: props.schedulerRole.roleArn, retryPolicy: { maximumRetryAttempts: 0 } },
   })
+  return { relay }
 }

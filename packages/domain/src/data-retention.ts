@@ -13,4 +13,6 @@ export const EVIDENCE_LOCK_DAYS = PAYPAL_DISPUTE_DAYS
 export const EVIDENCE_KEPT_DAYS = 365
 
 // The database's automated backups are kept this long, so an erased renter's details leave them this many days later.
-export const BACKUP_KEPT_DAYS = 7
+// The most AWS keeps automated backups, for point-in-time recovery across a month. Aurora charges nothing for backup
+// storage up to the cluster's own size, and Hold's database is a few hundred megabytes, so it costs cents a month.
+export const BACKUP_KEPT_DAYS = 35

@@ -7,6 +7,8 @@ import * as sqs from 'aws-cdk-lib/aws-sqs'
 import type * as rds from 'aws-cdk-lib/aws-rds'
 import type * as s3 from 'aws-cdk-lib/aws-s3'
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
+import type * as sns from 'aws-cdk-lib/aws-sns'
+import { createAlarmTopic, createMonthlyBudget, reportTo } from './alarms.ts'
 import { name } from './settings.ts'
 import { createWorker } from './worker.ts'
 import { createComparisonWorker } from './comparison-worker.ts'
@@ -17,7 +19,8 @@ import { createTextReports } from './texts.ts'
 import type { TextSettings } from './texts.ts'
 
 // Background work (architecture.md section 14.7): the spine's queues, each with a dead-letter queue and an alarm on
-// it, and the group the worker's schedules live in. The extensions add their queues when they arrive.
+// it, and the group the worker's schedules live in. The extensions add their queues when they arrive. The topic every
+// alarm reports to, and the account's budget, live here too (architecture.md section 17.1).
 
 type QueueSpec = {
   readonly name: string
@@ -52,14 +55,21 @@ export const QUEUES: readonly QueueSpec[] = [
 // After this many failed attempts a message moves to its dead-letter queue, where the alarm sees it.
 const MAX_ATTEMPTS = 5
 
+// The queues that move money: PayPal's events, approved captures and releases, and a hold's timed upkeep.
+export const MONEY_QUEUES = ['paypal-events', 'executions', 'upkeep'] as const
+// A message tried twice has waited two six-minute visibility timeouts. Fifteen minutes means money work is stuck, and
+// tells a person well before the fifth try, about half an hour in, sets the message aside.
+const MONEY_WAIT = Duration.minutes(15)
+
 export type WorkResources = {
   readonly stack: Stack
   readonly queues: ReadonlyMap<string, sqs.Queue>
   readonly scheduleGroup: scheduler.ScheduleGroup
   readonly schedulerRole: iam.Role
+  readonly alarmTopic: sns.Topic
 }
 
-function createQueue(stack: Stack, spec: QueueSpec): sqs.Queue {
+function createQueue(stack: Stack, spec: QueueSpec, alarmTopic: sns.ITopic): sqs.Queue {
   const suffix = spec.orderedPerRental ? '.fifo' : ''
   const fifo = spec.orderedPerRental ? { fifo: true } : {}
   const deadLetterQueue = new sqs.Queue(stack, `${spec.name}-dead-letter`, {
@@ -69,7 +79,7 @@ function createQueue(stack: Stack, spec: QueueSpec): sqs.Queue {
     encryption: sqs.QueueEncryption.SQS_MANAGED,
     enforceSSL: true,
   })
-  new cloudwatch.Alarm(stack, `${spec.name}-dead-letter-alarm`, {
+  const deadLettered = new cloudwatch.Alarm(stack, `${spec.name}-dead-letter-alarm`, {
     alarmName: name(spec.name, 'dead-letter'),
     alarmDescription: `A message on ${spec.name} failed ${String(MAX_ATTEMPTS)} times and was set aside.`,
     metric: deadLetterQueue.metricApproximateNumberOfMessagesVisible({ period: Duration.minutes(5) }),
@@ -78,7 +88,8 @@ function createQueue(stack: Stack, spec: QueueSpec): sqs.Queue {
     evaluationPeriods: 1,
     treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
   })
-  return new sqs.Queue(stack, spec.name, {
+  reportTo(alarmTopic, deadLettered)
+  const queue = new sqs.Queue(stack, spec.name, {
     queueName: `${name(spec.name)}${suffix}`,
     ...(spec.orderedPerRental
       ? {
@@ -96,6 +107,22 @@ function createQueue(stack: Stack, spec: QueueSpec): sqs.Queue {
     encryption: sqs.QueueEncryption.SQS_MANAGED,
     enforceSSL: true,
   })
+  if ((MONEY_QUEUES as readonly string[]).includes(spec.name)) {
+    reportTo(
+      alarmTopic,
+      new cloudwatch.Alarm(stack, `${spec.name}-waiting-alarm`, {
+        alarmName: name(spec.name, 'waiting'),
+        alarmDescription: `Money work on ${spec.name} has waited more than ${String(MONEY_WAIT.toMinutes())} minutes: its worker is failing or not running.`,
+        metric: queue.metricApproximateAgeOfOldestMessage({ period: Duration.minutes(5), statistic: cloudwatch.Stats.MAXIMUM }),
+        threshold: MONEY_WAIT.toSeconds(),
+        comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
+        evaluationPeriods: 1,
+        // SQS stops reporting on a queue that has been empty for hours, which is no fault.
+        treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+      }),
+    )
+  }
+  return queue
 }
 
 export type WorkStackProps = StackProps & {
@@ -106,11 +133,16 @@ export type WorkStackProps = StackProps & {
   readonly evidenceBucket: s3.IBucket
   readonly displayBucket: s3.IBucket
   readonly texts: TextSettings
+  // The address alarms and the budget email, from the deploy. Without one, nobody is subscribed.
+  readonly alarmEmail: string | undefined
+  readonly monthlyBudgetUsd: number
 }
 
 export function createWorkStack(app: App, props: WorkStackProps): WorkResources {
   const stack = new Stack(app, 'HoldWork', { ...props, description: 'Hold: queues, schedules and the worker' })
-  const queues = new Map(QUEUES.map((spec) => [spec.name, createQueue(stack, spec)]))
+  const alarmTopic = createAlarmTopic(stack, props.alarmEmail)
+  createMonthlyBudget(stack, alarmTopic, props.monthlyBudgetUsd)
+  const queues = new Map(QUEUES.map((spec) => [spec.name, createQueue(stack, spec, alarmTopic)]))
 
   // Schedules for each hold are made and removed by the worker at run time (section 14.7), in this group only.
   const scheduleGroup = new scheduler.ScheduleGroup(stack, 'ScheduleGroup', { scheduleGroupName: name('schedules') })
@@ -125,7 +157,24 @@ export function createWorkStack(app: App, props: WorkStackProps): WorkResources 
   for (const queue of queues.values()) queue.grantSendMessages(schedulerRole)
 
   const workerProps = { cluster: props.cluster, workerUserSecret: props.workerUserSecret, queues, scheduleGroup, schedulerRole, publicUrl: props.publicUrl, renterLinkKey: props.renterLinkKey, evidenceBucket: props.evidenceBucket, displayBucket: props.displayBucket, texts: props.texts }
-  createWorker(stack, workerProps)
+  const { relay } = createWorker(stack, workerProps)
+  // Every request that writes to the outbox also sends at once; the relay catches what that missed. A relay that fails,
+  // or no longer runs, leaves money work unsent with nothing else to notice it. Lambda reports its errors for every
+  // period it runs, as zero when none failed, so a period with no report means the relay did not run at all.
+  reportTo(
+    alarmTopic,
+    new cloudwatch.Alarm(stack, 'OutboxRelayAlarm', {
+      alarmName: name('outbox', 'relay', 'failing'),
+      alarmDescription: 'The outbox relay has failed, or not run, for fifteen minutes: money work waits unsent.',
+      metric: relay.metricErrors({ period: Duration.minutes(5), statistic: cloudwatch.Stats.SUM }),
+      threshold: 1,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      // Three periods in a row, so a database resuming from a pause, which a run waits out, is not a fault.
+      evaluationPeriods: 3,
+      datapointsToAlarm: 3,
+      treatMissingData: cloudwatch.TreatMissingData.BREACHING,
+    }),
+  )
   createComparisonWorker(stack, workerProps)
   createNegotiationWorker(stack, workerProps)
   createEvidenceWorkers(stack, workerProps)
@@ -138,5 +187,5 @@ export function createWorkStack(app: App, props: WorkStackProps): WorkResources 
   new CfnOutput(stack, 'ScheduleGroupName', { value: scheduleGroup.scheduleGroupName })
   new CfnOutput(stack, 'SchedulerRoleArn', { value: schedulerRole.roleArn })
 
-  return { stack, queues, scheduleGroup, schedulerRole }
+  return { stack, queues, scheduleGroup, schedulerRole, alarmTopic }
 }

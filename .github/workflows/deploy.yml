@@ -70,15 +70,20 @@ jobs:
           docker build --tag "$REGISTRY/hold-app:$COMMIT" .
           docker push "$REGISTRY/hold-app:$COMMIT"
 
-      # The web app runs the image just pushed, named by the commit (infra/lib/web-stack.ts).
+      # The web app runs the image just pushed, named by the commit (infra/lib/web-stack.ts). Alarms email the address in
+      # the HOLD_ALARM_EMAIL secret (infra/lib/alarms.ts). It is a secret, not a variable, because this repository is
+      # public and the diff prints the subscription: Actions masks a secret in the log. Unset, it is empty and the alarms
+      # email nobody.
       - name: Show what the deploy will change
-        run: pnpm --filter @hold/infra exec cdk diff $STACKS -c webImageTag="$COMMIT"
+        run: pnpm --filter @hold/infra exec cdk diff $STACKS -c webImageTag="$COMMIT" -c alarmEmail="$ALARM_EMAIL"
         env:
           STACKS: HoldData HoldIdentity HoldWork HoldRegistry HoldWeb
           COMMIT: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ALARM_EMAIL: ${{ secrets.HOLD_ALARM_EMAIL }}
       - name: Deploy the stacks
-        run: pnpm --filter @hold/infra exec cdk deploy $STACKS -c webImageTag="$COMMIT" --role-arn "$CLOUDFORMATION_ROLE" --require-approval never
+        run: pnpm --filter @hold/infra exec cdk deploy $STACKS -c webImageTag="$COMMIT" -c alarmEmail="$ALARM_EMAIL" --role-arn "$CLOUDFORMATION_ROLE" --require-approval never
         env:
           STACKS: HoldData HoldIdentity HoldWork HoldRegistry HoldWeb
           COMMIT: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ALARM_EMAIL: ${{ secrets.HOLD_ALARM_EMAIL }}
           CLOUDFORMATION_ROLE: ${{ vars.AWS_CLOUDFORMATION_ROLE_ARN }}

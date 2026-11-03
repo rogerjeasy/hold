@@ -4,7 +4,7 @@ import { createDataStack } from './data-stack.ts'
 import { createDeliveryStack } from './delivery-stack.ts'
 import { createIdentityStack } from './identity-stack.ts'
 import { createRegistryStack } from './registry-stack.ts'
-import { ACCOUNT, CDK_ASSETS_PREFIX, CDK_BOOTSTRAP_QUALIFIER, PERMISSIONS_BOUNDARY, REGION, TAGS } from './settings.ts'
+import { ACCOUNT, CDK_ASSETS_PREFIX, CDK_BOOTSTRAP_QUALIFIER, MONTHLY_BUDGET_USD, PERMISSIONS_BOUNDARY, REGION, TAGS } from './settings.ts'
 import { createWebStack } from './web-stack.ts'
 import { createWorkStack } from './work-stack.ts'
 
@@ -18,6 +18,11 @@ export type HoldAppOptions = {
   // delivery reports are on, which needs HoldDelivery deployed with the permissions to make them.
   readonly textSender?: string | undefined
   readonly textReports?: boolean
+  // The address alarms and the account's budget email, passed by the deploy so it is in no committed file. Unset, the
+  // alarms still change state but email nobody.
+  readonly alarmEmail?: string | undefined
+  // The account's monthly cost the budget warns at, in US dollars (MONTHLY_BUDGET_USD unless given).
+  readonly monthlyBudgetUsd?: number
 }
 
 // A browser offers a passkey only on the domain it was made for, so passkeys are made for the web app's own host.
@@ -50,6 +55,8 @@ export function createHoldApp(app: App, options: HoldAppOptions) {
     evidenceBucket: data.evidenceBucket,
     displayBucket: data.displayBucket,
     texts,
+    alarmEmail: options.alarmEmail,
+    monthlyBudgetUsd: options.monthlyBudgetUsd ?? MONTHLY_BUDGET_USD,
   })
   const stacks = {
     data,
@@ -73,6 +80,7 @@ export function createHoldApp(app: App, options: HoldAppOptions) {
       displayBucket: data.displayBucket,
       queues: work.queues,
       texts,
+      alarmTopic: work.alarmTopic,
     }),
     delivery: createDeliveryStack(app, { env, synthesizer: synthesizer() }),
   }

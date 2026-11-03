@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { App } from 'aws-cdk-lib'
 import { Match, Template } from 'aws-cdk-lib/assertions'
@@ -41,6 +41,7 @@ const NAME_PROPERTIES = [
   'ClientName',
   'RepositoryName',
   'AlarmName',
+  'TopicName',
   'Name',
   'ServiceName',
   'AutoScalingConfigurationName',
@@ -103,6 +104,10 @@ describe('the database', () => {
 
   it('is kept if the stack is deleted', () => {
     data.hasResource('AWS::RDS::DBCluster', { DeletionPolicy: 'Retain' })
+  })
+
+  it('keeps automated backups for 35 days, the most AWS allows', () => {
+    data.hasResourceProperties('AWS::RDS::DBCluster', { BackupRetentionPeriod: 35 })
   })
 })
 
@@ -269,7 +274,8 @@ describe('queues', () => {
   })
 
   it('raises an alarm for each dead-letter queue', () => {
-    work.resourceCountIs('AWS::CloudWatch::Alarm', QUEUES.length)
+    const deadLetterAlarms = Object.values(work.findResources('AWS::CloudWatch::Alarm')).filter((alarm) => String((alarm as { Properties: { AlarmName: unknown } }).Properties.AlarmName).endsWith('-dead-letter'))
+    expect(deadLetterAlarms).toHaveLength(QUEUES.length)
   })
 
   it('keeps the scheduler role’s description as deployed, since the pipeline may not change a role’s description', () => {
@@ -464,6 +470,11 @@ describe('the web app', () => {
 
   it('cannot be deleted by accident, since a new service would get a new address', () => {
     expect(stacks.web.stack.terminationProtection).toBe(true)
+  })
+
+  it('is checked over HTTP on a path that answers without the database, which may be paused', () => {
+    web.hasResourceProperties('AWS::AppRunner::Service', { HealthCheckConfiguration: { Protocol: 'HTTP', Path: '/api/health', Interval: 10, Timeout: 5, HealthyThreshold: 1, UnhealthyThreshold: 5 } })
+    expect(existsSync(join(import.meta.dirname, '..', '..', 'apps', 'web', 'src', 'app', 'api', 'health', 'route.ts'))).toBe(true)
   })
 
   it('stops at two instances, so a burst of traffic cannot run up the bill through judging', () => {

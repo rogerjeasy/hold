@@ -1,6 +1,7 @@
-import { CfnOutput, RemovalPolicy, Stack } from 'aws-cdk-lib'
+import { CfnOutput, Duration, RemovalPolicy, Stack } from 'aws-cdk-lib'
 import type { App, StackProps } from 'aws-cdk-lib'
 import * as apprunner from 'aws-cdk-lib/aws-apprunner'
+import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
 import type * as cognito from 'aws-cdk-lib/aws-cognito'
 import type * as ecr from 'aws-cdk-lib/aws-ecr'
 import * as iam from 'aws-cdk-lib/aws-iam'
@@ -11,7 +12,9 @@ import { allowPushes, PUSH_ENVIRONMENT } from './pushes.ts'
 import { allowTexting, textEnvironment } from './texts.ts'
 import type { TextSettings } from './texts.ts'
 import { ACCOUNT, CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES, CREDENTIAL_KEY_ALIAS, DATABASE_NAME, name, PREFIX, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
+import type * as sns from 'aws-cdk-lib/aws-sns'
 import type * as sqs from 'aws-cdk-lib/aws-sqs'
+import { reportTo } from './alarms.ts'
 
 // The web app on App Runner (tech-stack.md section 8): one container service with its own HTTPS address, no load
 // balancer, NAT gateway or VPC. It runs the image CI built from a commit, named by the deploy, and changes only
@@ -20,6 +23,11 @@ import type * as sqs from 'aws-cdk-lib/aws-sqs'
 const PORT = 3000
 // Two instances at most, so a burst of traffic cannot run up the bill through judging (tech-stack.md section 18).
 const MAX_INSTANCES = 2
+// The app's health check route (apps/web/src/app/api/health/route.ts): it answers without the database, which pauses
+// when idle and would make a healthy server look failed while it resumed.
+const HEALTH_CHECK_PATH = '/api/health'
+// One server error can be a stray request; three in five minutes means a page is failing for the people using it.
+const SERVER_ERRORS_PER_FIVE_MINUTES = 3
 
 export type WebResources = {
   readonly stack: Stack
@@ -46,6 +54,8 @@ export type WebStackProps = StackProps & {
   readonly trustKey: secretsmanager.ISecret
   // The worker's queues the app hands work to at once.
   readonly queues: ReadonlyMap<string, sqs.IQueue>
+  // Where the web app's alarm reports (infra/lib/alarms.ts).
+  readonly alarmTopic: sns.ITopic
 }
 
 // The queues the app hands work to: executions to capture, and the PayPal events it has stored.
@@ -184,8 +194,30 @@ export function createWebStack(app: App, props: WebStackProps): WebResources {
     },
     instanceConfiguration: { cpu: '1 vCPU', memory: '2 GB', instanceRoleArn: instanceRole(stack, props, [gridLicence, studioLicence]).roleArn },
     autoScalingConfigurationArn: scaling.attrAutoScalingConfigurationArn,
-    healthCheckConfiguration: { protocol: 'TCP' },
+    // Over HTTP, so a server that accepts connections but cannot answer is replaced. Ten seconds between checks and five
+    // to answer leave room for a busy instance; five misses in a row, under a minute, mark it unhealthy.
+    healthCheckConfiguration: { protocol: 'HTTP', path: HEALTH_CHECK_PATH, interval: 10, timeout: 5, healthyThreshold: 1, unhealthyThreshold: 5 },
   })
+
+  reportTo(
+    props.alarmTopic,
+    new cloudwatch.Alarm(stack, 'ServerErrorsAlarm', {
+      alarmName: name('web', 'server', 'errors'),
+      alarmDescription: `The web app answered ${String(SERVER_ERRORS_PER_FIVE_MINUTES)} or more requests with a server error in five minutes.`,
+      metric: new cloudwatch.Metric({
+        namespace: 'AWS/AppRunner',
+        metricName: '5xxStatusResponses',
+        dimensionsMap: { ServiceName: service.serviceName ?? name('web'), ServiceID: service.attrServiceId },
+        period: Duration.minutes(5),
+        statistic: cloudwatch.Stats.SUM,
+      }),
+      threshold: SERVER_ERRORS_PER_FIVE_MINUTES,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+      evaluationPeriods: 1,
+      // App Runner reports nothing for a quiet period, and quiet is not failing.
+      treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
+    }),
+  )
 
   new CfnOutput(stack, 'ServiceUrl', { value: `https://${service.attrServiceUrl}` })
   return { stack, service }
