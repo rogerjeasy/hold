@@ -20,15 +20,30 @@ export type TextStatus = (typeof TEXT_STATUSES)[number]
 // At most this many texts a day to one rental, one number and one shop, so nobody can run up the shop's bill by asking.
 export const TEXT_LIMITS = { perRentalPerDay: 12, perNumberPerDay: 12, perShopPerDay: 400 } as const
 
-// At most this many emails a day that someone asked Hold to send. Every email leaves through one sending account, which
-// also carries Cognito's sign-in codes and allows about 500 a day, so the public demo must never become a relay, and no
-// tenant may ever stop another shop's renter getting what they need. Every email counts per rental, per address in its
-// shop and per shop. Essential mail, which a renter needs to act on their own money (their link and their one-time
-// codes), never counts against anything another tenant can spend: in a demo it counts only against its caller's
-// network. Discretionary mail (invitations, alerts, copies and messages) also counts against a day shared by its own
-// kind of shop, so demo shops can never spend a real shop's mail. A judge's demo in full sends about fifteen, so none
-// of these is met in normal use.
-export const EMAIL_LIMITS = { perRentalPerDay: 15, perAddressPerShopPerDay: 30, perShopPerDay: 60, demoEssentialPerNetworkPerDay: 40, demoDiscretionaryPerDay: 150, shopsDiscretionaryPerDay: 300 } as const
+// The one account every email leaves through, which also carries Cognito's sign-in codes: about this many a day, and
+// the share of it kept for those codes and the worker's reminders, which no request can spend.
+export const SENDING_ACCOUNT = { perDay: 500, signInHeadroom: 100 } as const
+
+// At most this many emails a day that someone asked Hold to send, so the public demo never becomes a relay and no
+// tenant can stop another shop's renter getting what they need. Every email counts per rental, per address in its shop
+// and per shop. Then each falls into one of three pools that never overlap, which together leave the sign-in codes
+// their room: all demo mail, essential included (demoPerDay); real shops' essential mail, which a renter needs to act
+// on their own money (shopsEssentialPerDay), reserved so no demo can touch it; and real shops' discretionary mail
+// (shopsDiscretionaryPerDay). A demo's essential mail also counts per caller's network, and all demo mail per address
+// across demos, so one visitor can neither take the demos' day nor bomb one address from many demos. All discretionary
+// mail also counts per address across every shop. A real shop's essential mail to its own renter counts against
+// nothing another shop sends. A judge's demo in full sends about fifteen, so none of these is met in normal use.
+export const EMAIL_LIMITS = {
+  perRentalPerDay: 15,
+  perAddressPerShopPerDay: 30,
+  perShopPerDay: 60,
+  demoEssentialPerNetworkPerDay: 40,
+  demoPerAddressPerDay: 40,
+  discretionaryPerAddressPerDay: 20,
+  demoPerDay: 200,
+  shopsEssentialPerDay: 100,
+  shopsDiscretionaryPerDay: 100,
+} as const
 
 // The messages a renter needs to act on their own money: the link to their rental, the condition report they answer,
 // and their one-time codes. Everything else Hold emails is discretionary.
