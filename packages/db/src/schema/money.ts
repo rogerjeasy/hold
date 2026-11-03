@@ -71,6 +71,8 @@ export const moneyEvents = pgTable(
     paypalFeeCents: cents(),
     netCents: cents(),
     paypalReference: text().notNull().unique(),
+    // On money back to the renter: PayPal's id of the capture it came back from, so what is left of each capture is known.
+    returnedFrom: text(),
     occurredAt: at().notNull(),
     recordedAt: createdAt(),
   },

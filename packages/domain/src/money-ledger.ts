@@ -5,13 +5,15 @@ import type { HoldState } from './hold.ts'
 // here moves money or decides anything, it only reads the lines back.
 
 // extension_captured: extra days a renter paid for from their phone (architecture.md section 6.14), never from the hold.
-// refunded_in_paypal: money PayPal returned to the renter from a capture Hold made, without Hold: a refund from PayPal's
+// refunded_in_paypal: money PayPal returned to the renter from the hold's capture, without Hold: a refund from PayPal's
 // own pages or a reversal, such as after a lost dispute (architecture.md section 8.7). refunded is a refund Hold made.
-export const MONEY_EVENT_KINDS = ['fee_captured', 'hold_placed', 'hold_renewed', 'hold_released', 'hold_captured', 'refunded', 'invoice_sent', 'invoice_paid', 'extension_captured', 'refunded_in_paypal'] as const
+// fee_refunded_in_paypal: the same from what the renter paid for the rental itself, its fee or extra days. It is money
+// back, but no part of a claim, so it never changes what a claim may still take or give back.
+export const MONEY_EVENT_KINDS = ['fee_captured', 'hold_placed', 'hold_renewed', 'hold_released', 'hold_captured', 'refunded', 'invoice_sent', 'invoice_paid', 'extension_captured', 'refunded_in_paypal', 'fee_refunded_in_paypal'] as const
 export type MoneyEventKind = (typeof MONEY_EVENT_KINDS)[number]
 
-// Every kind of money that went back to the renter after it was taken, whoever sent it back. What a shop kept is what
-// it took less these.
+// Every kind of money that went back to the renter from the hold's capture, whoever sent it back. What a shop kept of a
+// claim is what it took less these.
 export const REFUND_KINDS: readonly MoneyEventKind[] = ['refunded', 'refunded_in_paypal']
 
 // A line of one rental's money log, in the order the log holds them: when it happened, then when it was written.
@@ -31,6 +33,7 @@ const FIXED_FLOWS: Readonly<Record<Exclude<MoneyEventKind, 'hold_released'>, Lin
   invoice_paid: 'to_shop',
   refunded: 'to_renter',
   refunded_in_paypal: 'to_renter',
+  fee_refunded_in_paypal: 'to_renter',
   hold_placed: 'held',
   hold_renewed: 'renewed',
   invoice_sent: 'invoiced',

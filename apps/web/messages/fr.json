@@ -1755,7 +1755,8 @@
           "invoice_sent": "Facture envoyée",
           "invoice_paid": "Facture payée",
           "extension_captured": "Prolongation encaissée",
-          "refunded_in_paypal": "Rendu dans PayPal, pas par Hold"
+          "refunded_in_paypal": "Rendu dans PayPal, pas par Hold",
+          "fee_refunded_in_paypal": "Paiement de la location rendu dans PayPal"
         },
         "calls": {
           "authorize": "Pose du blocage",
@@ -4190,7 +4191,8 @@
       "refunded": "Remboursé au client",
       "invoice_sent": "Facturé au client",
       "invoice_paid": "Facture payée",
-      "refunded_in_paypal": "Rendu au locataire dans PayPal, pas par Hold"
+      "refunded_in_paypal": "Rendu au locataire dans PayPal, pas par Hold",
+      "fee_refunded_in_paypal": "Paiement de la location rendu dans PayPal, pas par Hold"
     },
     "flows": {
       "to_shop": "À la boutique",

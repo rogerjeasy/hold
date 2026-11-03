@@ -5,6 +5,7 @@ import { EXECUTIONS_QUEUE, markExecutionSent } from './fee-repository.ts'
 import { closeSettledRental, settlementWork } from './settlement-repository.ts'
 import { approvals, claims, executions, moneyEvents, outbox } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
+import { lockCapture } from './returned-in-paypal.ts'
 
 export async function queueClaimRefund(transaction: Transaction, claimId: string, userId: string, reason: string, now: Date) {
   const [claim] = await transaction.select().from(claims).where(eq(claims.id, claimId)).for('update')
@@ -28,12 +29,15 @@ export async function confirmClaimRefund(transaction: Transaction, executionId: 
   if (work.execution.state === 'confirmed') return true
   const [approval] = await transaction.select().from(approvals).where(and(eq(approvals.subject, 'refund'), eq(approvals.subjectId, work.claim.id), eq(approvals.decision, 'approved')))
   if (approval === undefined || work.claim.state !== 'charged' || read.status !== 'completed' || read.captureId !== work.execution.paypalResourceIds['capture'] || read.amount.cents !== work.execution.amountCents || read.amount.currency !== work.execution.currency) return false
+  // Waits for any other record of money back from this capture, so both cannot count the same remainder.
+  await lockCapture(transaction, read.captureId)
   const events = await transaction.select().from(moneyEvents).where(eq(moneyEvents.rentalId, work.claim.rentalId))
   const captured = events.filter((event) => event.kind === 'hold_captured').reduce((sum, event) => sum + event.amountCents, 0)
-  const refunded = events.filter((event) => REFUND_KINDS.includes(event.kind)).reduce((sum, event) => sum + event.amountCents, 0)
+  // This refund itself is never counted against itself, however PayPal's event and Hold's read-back met.
+  const refunded = events.filter((event) => REFUND_KINDS.includes(event.kind) && event.paypalReference !== read.refundId).reduce((sum, event) => sum + event.amountCents, 0)
   if (read.amount.cents + refunded > captured) return false
   if (!transition(CLAIM_TRANSITIONS, work.claim.state, 'adjusted').ok) return false
-  await transaction.insert(moneyEvents).values({ shopId: work.claim.shopId, rentalId: work.claim.rentalId, holdId: work.hold.id, kind: 'refunded', currency: read.amount.currency, amountCents: read.amount.cents, paypalReference: read.refundId, occurredAt: read.createdAt }).onConflictDoNothing()
+  await transaction.insert(moneyEvents).values({ shopId: work.claim.shopId, rentalId: work.claim.rentalId, holdId: work.hold.id, kind: 'refunded', currency: read.amount.currency, amountCents: read.amount.cents, paypalReference: read.refundId, returnedFrom: read.captureId, occurredAt: read.createdAt }).onConflictDoNothing()
   await transaction.update(claims).set({ state: 'adjusted' }).where(eq(claims.id, work.claim.id))
   if (transition(CLAIM_TRANSITIONS, 'adjusted', 'closed').ok) await transaction.update(claims).set({ state: 'closed' }).where(eq(claims.id, work.claim.id))
   await transaction.update(executions).set({ state: 'confirmed', lastError: null, paypalResourceIds: { ...work.execution.paypalResourceIds, refund: read.refundId }, updatedAt: now }).where(eq(executions.id, executionId))

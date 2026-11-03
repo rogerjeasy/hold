@@ -4452,6 +4452,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "returned_from": {
+          "name": "returned_from",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "occurred_at": {
           "name": "occurred_at",
           "type": "timestamp with time zone",
@@ -4534,7 +4540,7 @@
       "checkConstraints": {
         "kind_allowed": {
           "name": "kind_allowed",
-          "value": "\"money_events\".\"kind\" in ('fee_captured', 'hold_placed', 'hold_renewed', 'hold_released', 'hold_captured', 'refunded', 'invoice_sent', 'invoice_paid', 'extension_captured', 'refunded_in_paypal')"
+          "value": "\"money_events\".\"kind\" in ('fee_captured', 'hold_placed', 'hold_renewed', 'hold_released', 'hold_captured', 'refunded', 'invoice_sent', 'invoice_paid', 'extension_captured', 'refunded_in_paypal', 'fee_refunded_in_paypal')"
         }
       },
       "isRLSEnabled": false
