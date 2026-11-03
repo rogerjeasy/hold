@@ -42,6 +42,8 @@ describe('sample proposals', () => {
     expect(replacement?.deadline).toBeInstanceOf(Date)
     const dispute = entries.find((entry) => entry.kind === 'respond_to_dispute')
     expect(dispute).toMatchObject({ subjectKind: 'dispute', payload: { fixedReason: 'dispute_open', simulated: 'yes' } })
+    // A dispute answer is about the money the renter disputes: what was captured, not what is left on the claim.
+    expect(dispute).toMatchObject({ amountCents: 3500, currency: 'EUR' })
     expect(dispute?.draft).not.toBeNull()
     expect(dispute?.references.every((reference) => reference.startsWith('SIMULATED-'))).toBe(true)
   })

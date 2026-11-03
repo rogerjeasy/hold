@@ -165,6 +165,8 @@ async function amountFor(transaction: Transaction, kind: ProposalKind, subjectKi
   const [claim] = await transaction.select({ totalCents: claims.totalCents, currency: claims.currency }).from(claims).where(subjectKind === 'claim' ? eq(claims.id, subjectId) : eq(claims.rentalId, rentalId))
   if (claim === undefined) return { amountCents: null, currency: null }
   const captured = (await transaction.select({ amountCents: moneyEvents.amountCents }).from(moneyEvents).where(and(eq(moneyEvents.rentalId, rentalId), eq(moneyEvents.kind, 'hold_captured')))).reduce((sum, event) => sum + event.amountCents, 0)
+  // An answer to a dispute is about the money the renter disputes, which is what was captured.
+  if (kind === 'respond_to_dispute') return { amountCents: captured, currency: claim.currency }
   return { amountCents: Math.max(0, claim.totalCents - captured), currency: claim.currency }
 }
 

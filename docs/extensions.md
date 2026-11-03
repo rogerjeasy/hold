@@ -514,7 +514,7 @@ PayPal's write tools, such as `create_invoice`, `create_refund` and `accept_disp
 - **X1.7** Every PayPal MCP tool call appears in the audit log with its shop, run and tool name.
 - **X1.8** The containment test in 6.10 passes.
 - **X1.9** A rejection with a reason produces a drafted rule. Once confirmed, the next run does not make that proposal.
-- **X1.10** Amounts on the queue screen equal the database values for the records they name.
+- **X1.10** Amounts on the queue screen equal the database values for the records they name: the hold for a release or a replacement hold, what the claim still leaves uncaptured for an invoice or a refund, and what was captured for an answer to a dispute, since that is the money disputed.
 
 **Progress, 27 October 2026, the owner's screens.** X1.5, X1.9 and X1.10 are met in tests against the test environment's simulated PayPal. X1.5: `operations-flow.test.ts` approves a replacement whose hold was released meanwhile; it is refused and kept as superseded, and shown under "Decided in the last day". X1.9: `operations-flow.test.ts` rejects with a reason, confirms the drafted rule, and the next run makes no proposal for a second hold near its end, until the rule is discarded; `queue.spec.ts` does the same through the page with two disputed payments. X1.10: the queue page's entries carry the hold's reserved amount as the database holds it (`operations-flow.test.ts`), and the screen shows it through the shared money formatter (`queue-screen.test.tsx`, `queue.spec.ts`).
 
