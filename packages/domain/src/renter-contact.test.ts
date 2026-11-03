@@ -1,7 +1,7 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
 import { RENTAL_STATES } from './rental.ts'
-import { callingCodeFor, contactChangeNeedsCode, maskedPhone, phoneNumber, renterCodeRecipient, textAllowed } from './renter-contact.ts'
+import { callingCodeFor, contactChangeNeedsCode, EMAIL_LIMITS, emailIsEssential, maskedPhone, phoneNumber, renterCodeRecipient, SENDING_ACCOUNT, textAllowed } from './renter-contact.ts'
 
 describe('a phone number a renter types', () => {
   it('is kept in the international form, whatever spacing and punctuation it was typed with', () => {
@@ -81,5 +81,23 @@ describe('where a renter’s one-time code goes', () => {
 describe('changing the number texts go to', () => {
   it('is free until the hold is placed at the counter, and needs a code from the trusted channel after', () => {
     expect(RENTAL_STATES.filter((state) => !contactChangeNeedsCode(state))).toEqual(['pending_payment', 'booked', 'awaiting_hold'])
+  })
+})
+
+describe('the day’s emails Hold may be asked to send', () => {
+  it('keep every pool together under the sending account’s day, with room left for sign-in codes', () => {
+    // The pools are disjoint: all demo mail, real shops' essential mail, and real shops' discretionary mail.
+    expect(EMAIL_LIMITS.demoPerDay + EMAIL_LIMITS.shopsEssentialPerDay + EMAIL_LIMITS.shopsDiscretionaryPerDay).toBeLessThanOrEqual(SENDING_ACCOUNT.perDay - SENDING_ACCOUNT.signInHeadroom)
+  })
+
+  it('let one network, and one address across demos, have only a share of the demos’ day', () => {
+    expect(EMAIL_LIMITS.demoEssentialPerNetworkPerDay * 4).toBeLessThanOrEqual(EMAIL_LIMITS.demoPerDay)
+    expect(EMAIL_LIMITS.demoPerAddressPerDay * 4).toBeLessThanOrEqual(EMAIL_LIMITS.demoPerDay)
+    expect(EMAIL_LIMITS.discretionaryPerAddressPerDay).toBeLessThan(EMAIL_LIMITS.demoPerAddressPerDay)
+  })
+
+  it('name as essential only what a renter needs to act on their own money', () => {
+    expect((['renter_link', 'condition_link', 'renter_code', 'phone_code'] as const).every(emailIsEssential)).toBe(true)
+    expect((['shop_message', 'drop_off', 'reminder', 'receipt'] as const).some(emailIsEssential)).toBe(false)
   })
 })

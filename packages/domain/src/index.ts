@@ -74,7 +74,7 @@ export { checkPromiseDays, DECISION_PROMISE, decideByFor, missedPromiseOutcome, 
 export type { PromiseFacts, PromiseStanding } from './decision-promise.ts'
 export { claimCodeRecipient } from './claim-code-recipient.ts'
 export type { ClaimCodeRecipient } from './claim-code-recipient.ts'
-export { callingCodeFor, CONTACT_CHANNELS, contactChangeNeedsCode, EMAIL_LIMITS, emailIsEssential, maskedPhone, PHONE_CODE, phoneNumber, renterCodeRecipient, TEXT_LIMITS, TEXT_PURPOSES, TEXT_STATUSES, textAllowed } from './renter-contact.ts'
+export { callingCodeFor, CONTACT_CHANNELS, contactChangeNeedsCode, EMAIL_LIMITS, emailIsEssential, maskedPhone, PHONE_CODE, phoneNumber, renterCodeRecipient, SENDING_ACCOUNT, TEXT_LIMITS, TEXT_PURPOSES, TEXT_STATUSES, textAllowed } from './renter-contact.ts'
 export type { ContactChannel, RenterCodeRecipient, TextPurpose, TextStatus } from './renter-contact.ts'
 export { isExpoPushToken, isStaffPushPath, PUSH_FOR_TEXT, PUSH_PLATFORMS, RENTER_PUSH_EVENTS, RENTER_PUSH_PAGES, STAFF_PUSH_EVENTS, STAFF_PUSH_ROLES, staffPushPath } from './push.ts'
 export type { PushPlatform, RenterPushEvent, RenterPushPage, StaffPushEvent, StaffPushTarget } from './push.ts'
