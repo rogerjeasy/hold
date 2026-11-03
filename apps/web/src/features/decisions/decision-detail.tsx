@@ -1,21 +1,19 @@
 import { HOLD_VALIDITY_DAYS } from '@hold/domain'
-import { Bot, CircleSlash, SearchX, ShieldAlert, WifiOff } from 'lucide-react'
-import type { LucideIcon } from 'lucide-react'
+import { ShieldAlert } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { Ref } from 'react'
 import { SampleTag } from '@/components/ui/sample-tag'
 import { EntryActions } from '@/features/operations/entry-actions'
+import { EntryMarkList } from '@/features/operations/entry-mark-list'
 import { Link } from '@/i18n/navigation'
 import { itemRoutes, rentalRoutes, shopRoutes } from '@/lib/routes'
-import type { BoardRow, IncidentRow, ProposalMark, ProposalRow } from './board'
+import type { BoardRow, IncidentRow, ProposalRow } from './board'
 import { ClaimDetail } from './claim-detail'
 import { DropOffDetail } from './drop-off-detail'
 import { ExtensionPaymentDetail } from './extension-payment-detail'
 import { detailLinkClass, Fact, SubHeading } from '@/components/detail-parts'
 import { RenterWords } from './detail-parts'
 import type { RowText } from './use-row-text'
-
-const MARK_ICONS: Readonly<Record<ProposalMark, LucideIcon>> = { raisedByAgent: Bot, notInvestigated: SearchX, paypalNotChecked: WifiOff, draftDropped: CircleSlash }
 
 function ProposalDetail({ row, text, passkeyNeeded }: { row: ProposalRow; text: RowText; passkeyNeeded: boolean }) {
   const t = useTranslations('operations')
@@ -39,19 +37,7 @@ function ProposalDetail({ row, text, passkeyNeeded }: { row: ProposalRow; text: 
           <blockquote className="min-w-0 border-l-2 pl-3 whitespace-pre-wrap wrap-long-words">{row.draft}</blockquote>
         </div>
       )}
-      {row.marks.length === 0 ? null : (
-        <ul className="flex flex-wrap gap-2">
-          {row.marks.map((mark) => {
-            const Icon = MARK_ICONS[mark]
-            return (
-              <li key={mark} className="inline-flex items-center gap-1.5 border border-border-strong px-2 py-1 text-sm">
-                <Icon aria-hidden="true" className="size-4 shrink-0" />
-                {t(`marks.${mark}`)}
-              </li>
-            )
-          })}
-        </ul>
-      )}
+      <EntryMarkList marks={row.marks} model={row.model} />
       {row.decider === 'you' ? <EntryActions proposalId={row.proposalId} kind={row.proposalKind} passkeyNeeded={passkeyNeeded} together={undefined} /> : null}
     </>
   )
