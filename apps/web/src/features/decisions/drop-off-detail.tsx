@@ -16,7 +16,7 @@ export function DropOffDetail({ row, text, photoUrls }: DropOffDetailProps) {
     photo === null ? null : { view: photo.view, url: photo.displayKey === null ? null : (photoUrls[photo.displayKey] ?? null) }
   return (
     <>
-      <ul className="grid gap-1 text-[0.9375rem]">
+      <ul className="grid gap-1.5 text-[0.9375rem]">
         <li>{row.onTime ? t('returnedOnTime', { when: text.moment(row.droppedOffAt) }) : t('returnedLate', { when: text.moment(row.droppedOffAt) })}</li>
         {row.items.map((item) => (
           <li key={item.label} className="wrap-long-words">
@@ -32,8 +32,8 @@ export function DropOffDetail({ row, text, photoUrls }: DropOffDetailProps) {
           <DropOffPhoto photo={shown(item.dropPoint)} caption={t('dropPoint')} />
         </div>
       ))}
-      {row.missingAt === null ? <p className="border-l-2 border-primary pl-3 text-pretty">{t('note')}</p> : (
-        <p role="status" className="flex gap-2 font-semibold text-destructive">
+      {row.missingAt === null ? <p className="max-w-prose rounded-xl border border-border/70 bg-card px-4 py-3 text-pretty shadow-[inset_3px_0_0_var(--primary)]">{t('note')}</p> : (
+        <p role="status" className="flex gap-2 rounded-xl border border-destructive/30 bg-destructive/6 px-4 py-3 font-semibold text-destructive">
           <CircleAlert aria-hidden="true" className="mt-0.5 size-4.5 shrink-0" />
           {t('missing', { when: text.moment(row.missingAt), name: row.missingBy ?? t('someone') })}
         </p>

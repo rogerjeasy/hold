@@ -1,5 +1,6 @@
 'use client'
 
+import { Keyboard, SearchX } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useActionState, useCallback, useEffect, useMemo, useState } from 'react'
 import type { DetailHeading } from '@/components/grid/master-detail'
@@ -63,12 +64,18 @@ export function DecisionBoard({ rows, clock, photoUrls, passkeyNeeded }: Decisio
         <ApprovalMessage result={result} success={operations('approvedTogether')} />
       </div>
       {visible.length === 0 ? (
-        <p className="text-muted-foreground">{t('noMatch')}</p>
+        <p className="surface flex animate-fade items-center gap-3 p-4 text-muted-foreground md:px-5">
+          <SearchX aria-hidden="true" className="size-5 shrink-0" />
+          {t('noMatch')}
+        </p>
       ) : (
         <>
-          <div className="hidden min-w-0 gap-2 md:grid">
+          <div className="hidden min-w-0 gap-3 md:grid">
             <DecisionGrid rows={visible} text={text} grouped={view.group === 'all'} selectedIds={selected} onSelect={onSelect} renderDetail={renderDetail} />
-            <p className="text-sm text-muted-foreground">{t('keys')}</p>
+            <p className="flex items-start gap-2 text-sm text-muted-foreground">
+              <Keyboard aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+              {t('keys')}
+            </p>
           </div>
           <div className="md:hidden">
             <DecisionCards rows={visible} text={text} photoUrls={photoUrls} passkeyNeeded={passkeyNeeded} selectedIds={selected} onToggleChosen={toggle} />

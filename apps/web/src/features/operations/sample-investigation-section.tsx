@@ -36,7 +36,7 @@ export function SampleInvestigationSection({ samples, clock }: { samples: Sample
         : status.investigated > 0 && status.model !== null ? t('investigated', { model: modelName(status.model), count: status.investigated, at: finished })
           : t('notAnswered', { at: finished })
   return (
-    <section aria-labelledby="sample-investigation" className="grid max-w-prose gap-3 border bg-card p-4 text-card-foreground md:p-5">
+    <section aria-labelledby="sample-investigation" className="surface relative isolate grid max-w-prose gap-3 overflow-clip p-4 md:p-5">
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <h2 id="sample-investigation" className="text-lg font-semibold text-pretty">{t('title')}</h2>
         <SampleTag />

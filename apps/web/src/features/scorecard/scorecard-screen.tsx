@@ -1,5 +1,7 @@
 import type { FieldRecordMonthCounts } from '@hold/domain'
+import { ArrowRight } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { buttonVariants } from '@/components/ui/button'
 import { Link } from '@/i18n/navigation'
 import { routes } from '@/lib/routes'
 import { ShopFrame } from '@/features/shop/shop-frame'
@@ -14,13 +16,15 @@ export function ScorecardScreen({ shopName, run, months, withdrawn }: { shopName
   const t = useTranslations('scorecard')
   const open = useTranslations('openScorecard')
   return (
-    <ShopFrame shopName={shopName} title={t('title')}>
-      <div className="grid gap-10">
-        <p className="max-w-prose">{t('lead')}</p>
+    <ShopFrame shopName={shopName} title={t('title')} description={t('lead')}>
+      <div className="grid min-w-0 stagger gap-10">
         {run === undefined ? <NotMeasured withdrawn={withdrawn} /> : (
           <div className="grid gap-4">
             <ScorecardFigures run={run} />
-            <Link href={routes.reliability} className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{open('ownerLink')}</Link>
+            <Link href={routes.reliability} className={buttonVariants({ variant: 'outline', className: 'justify-self-start' })}>
+              {open('ownerLink')}
+              <ArrowRight aria-hidden="true" />
+            </Link>
           </div>
         )}
         <FieldRecord months={months} />

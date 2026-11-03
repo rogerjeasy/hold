@@ -13,7 +13,7 @@ export function CheckNowForm() {
   const locale = useLocale()
   const [result, check, pending] = useActionState(checkNow, null)
   return (
-    <form action={check} className="grid justify-items-start gap-2">
+    <form action={check} className="grid justify-items-start gap-2 md:max-w-64 md:justify-items-end md:text-right">
       <input type="hidden" name="locale" value={locale} />
       <Button type="submit" variant="outline" disabled={pending}>
         <RefreshCw aria-hidden="true" className={pending ? 'animate-spin motion-reduce:animate-none' : undefined} />

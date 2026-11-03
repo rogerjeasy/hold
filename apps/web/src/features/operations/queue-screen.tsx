@@ -1,7 +1,9 @@
 import type { QueueEntry } from '@hold/db'
 import type { Mandate } from '@hold/domain'
 import { proposalMovesMoney, queueBrief } from '@hold/domain'
+import { Bot, CircleCheck, Eye } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import { EmptyState } from '@/components/ui/empty-state'
 import type { ShopClock } from '@/hooks/use-shop-format'
 import { shopRoutes } from '@/lib/routes'
 import { PasskeyGate } from '@/features/shop/passkey-gate'
@@ -47,15 +49,27 @@ export function QueueScreen({ shopName, clock, endOfDay, entries, recent, rules,
   const brief = queueBrief(entries, endOfDay)
   const moneyWaits = entries.some((entry) => proposalMovesMoney(entry.kind))
   return (
-    <ShopFrame shopName={shopName} title={t('title')}>
-      <div className="grid max-w-5xl gap-10">
+    <ShopFrame shopName={shopName} title={t('title')} description={t('lead')}>
+      <div className="grid max-w-5xl min-w-0 gap-10">
         <DropOffsSection dropOffs={dropOffs} clock={clock} canAct={canCheck} />
-        <div className="grid gap-4">
-          <p className="text-lg font-semibold text-pretty" data-testid="queue-brief">
-            {brief.decisions === 0 ? t('briefNone') : t('brief', { decisions: brief.decisions, expiring: brief.expiringToday })}
-          </p>
-          <p className="max-w-prose text-muted-foreground">{t('lead')}</p>
-          {canDecide ? <CheckNowForm /> : <p className="text-muted-foreground">{t('readOnly')}</p>}
+        <div className="surface grid min-w-0 gap-4 p-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:gap-6 md:p-5">
+          <div className="flex min-w-0 items-start gap-3.5">
+            <span aria-hidden="true" className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+              <Bot className="size-5" />
+            </span>
+            <div className="grid min-w-0 gap-1 self-center">
+              <p className="text-[1.0625rem] font-semibold text-pretty wrap-long-words" data-testid="queue-brief">
+                {brief.decisions === 0 ? t('briefNone') : t('brief', { decisions: brief.decisions, expiring: brief.expiringToday })}
+              </p>
+              {canDecide ? null : (
+                <p className="flex items-center gap-1.5 text-muted-foreground">
+                  <Eye aria-hidden="true" className="size-4 shrink-0" />
+                  {t('readOnly')}
+                </p>
+              )}
+            </div>
+          </div>
+          {canDecide ? <CheckNowForm /> : null}
         </div>
         {canDecide && (samples.waiting > 0 || samples.status !== undefined) ? <SampleInvestigationSection samples={samples} clock={clock} /> : null}
         {canDecide && moneyWaits && gate.needed ? (
@@ -63,7 +77,13 @@ export function QueueScreen({ shopName, clock, endOfDay, entries, recent, rules,
             {null}
           </PasskeyGate>
         ) : null}
-        {entries.length === 0 ? <p>{t('empty')}</p> : <QueueGroups entries={entries} clock={clock} canDecide={canDecide} passkeyNeeded={gate.needed} />}
+        {entries.length === 0 ? (
+          <div className="surface overflow-clip">
+            <EmptyState icon={CircleCheck} title={t('allClear')} body={t('empty')} />
+          </div>
+        ) : (
+          <QueueGroups entries={entries} clock={clock} canDecide={canDecide} passkeyNeeded={gate.needed} />
+        )}
         <RecentDecisions recent={recent} clock={clock} />
         <RulesSection rules={rules} clock={clock} isOwner={isOwner} />
         <StandingRuleSection standingRule={standingRule} clock={clock} isOwner={isOwner} gate={gate} />

@@ -18,9 +18,9 @@ export function DecisionGroupLabel({ node }: CustomCellRendererProps<BoardRow>) 
   const aggregates: unknown = node.aggData
   const total = typeof aggregates === 'object' && aggregates !== null && 'amount' in aggregates ? aggregates.amount : undefined
   return (
-    <span className="flex min-w-0 flex-wrap items-baseline gap-x-3">
-      <span className="font-semibold">{t(`groups.${node.key}`)}</span>
-      <span className="figures text-sm text-muted-foreground">
+    <span className="flex min-w-0 flex-wrap items-center gap-x-3 leading-normal">
+      <span className="font-bold tracking-tight">{t(`groups.${node.key}`)}</span>
+      <span className="figures rounded-full bg-muted px-2.5 py-0.5 text-[0.8125rem] text-muted-foreground">
         {t('groupCount', { count: node.allChildrenCount ?? 0 })}
         {typeof total === 'number' ? ` · ${t('groupTotal', { amount: text.money(total) })}` : null}
       </span>

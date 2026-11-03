@@ -1,8 +1,10 @@
 'use client'
 
+import { CircleCheck, Keyboard, SearchX } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useMemo, useState } from 'react'
 import type { DetailHeading } from '@/components/grid/master-detail'
+import { ToggleChip } from '@/components/ui/toggle-chip'
 import type { ShopClock } from '@/hooks/use-shop-format'
 import type { LedgerGrouping } from './ledger-cells'
 import { LedgerCards } from './ledger-cards'
@@ -13,11 +15,6 @@ import type { LedgerRentalRow, LedgerRow, MoneyFilter } from './ledger-rows'
 import { useLedgerText } from './use-ledger-text'
 
 const GROUPINGS: readonly LedgerGrouping[] = ['rental', 'month']
-
-const chipClass = (pressed: boolean) =>
-  pressed
-    ? 'inline-flex min-h-11 items-center gap-2 border border-foreground bg-foreground px-3.5 font-semibold text-background'
-    : 'inline-flex min-h-11 items-center gap-2 border border-border-strong px-3.5 font-semibold hover:bg-muted'
 
 // The ledger itself: where the money is now, as filters with each one's count; a rental's lines together or a month's;
 // then the grid, each line opening in place, or a card per rental on a phone. One choice of rows serves both.
@@ -35,26 +32,28 @@ export function MoneyLedger({ rows, rentals, clock }: { rows: readonly LedgerRow
       <div className="grid gap-3">
         <div role="group" aria-label={t('filters')} className="flex flex-wrap gap-2">
           {MONEY_FILTERS.map((each) => (
-            <button key={each} type="button" aria-pressed={filter === each} onClick={() => { setFilter(each) }} className={chipClass(filter === each)}>
-              {t(`filter.${each}`)} <span className="figures text-sm opacity-80">{counts[each]}</span>
-            </button>
+            <ToggleChip key={each} pressed={filter === each} onPress={() => { setFilter(each) }} label={t(`filter.${each}`)} count={counts[each]} />
           ))}
         </div>
         <div role="group" aria-label={t('grouping')} className="hidden flex-wrap gap-2 md:flex">
           {GROUPINGS.map((each) => (
-            <button key={each} type="button" aria-pressed={grouping === each} onClick={() => { setGrouping(each) }} className={chipClass(grouping === each)}>
-              {t(`groupBy.${each}`)}
-            </button>
+            <ToggleChip key={each} pressed={grouping === each} onPress={() => { setGrouping(each) }} label={t(`groupBy.${each}`)} />
           ))}
         </div>
       </div>
       {visible.length === 0 ? (
-        <p className="max-w-prose text-muted-foreground">{filter === 'check' ? t('noCheck') : t('noMatch')}</p>
+        <p className="surface flex animate-fade items-center gap-3 p-4 text-muted-foreground md:px-5">
+          {filter === 'check' ? <CircleCheck aria-hidden="true" className="size-5 shrink-0 text-success" /> : <SearchX aria-hidden="true" className="size-5 shrink-0" />}
+          {filter === 'check' ? t('noCheck') : t('noMatch')}
+        </p>
       ) : (
         <>
-          <div className="hidden min-w-0 gap-2 md:grid">
+          <div className="hidden min-w-0 gap-3 md:grid">
             <LedgerGrid rows={visible} text={text} grouping={grouping} renderDetail={renderDetail} />
-            <p className="text-sm text-muted-foreground">{t('keys')}</p>
+            <p className="flex items-start gap-2 text-sm text-muted-foreground">
+              <Keyboard aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+              {t('keys')}
+            </p>
           </div>
           <div className="md:hidden">
             <LedgerCards rows={visible} text={text} />

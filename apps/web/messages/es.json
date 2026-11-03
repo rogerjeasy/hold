@@ -2603,7 +2603,8 @@
       "heldNote": "{count, plural, =0 {Sin retenciones} one {# retención} other {# retenciones}}",
       "claims": "Reclamaciones por decidir",
       "claimsNote": "{amount} en total",
-      "claimsNoteNone": "Ninguna pendiente"
+      "claimsNoteNone": "Ninguna pendiente",
+      "urgent": "Te espera"
     },
     "renter": "Un cliente",
     "decisions": {
@@ -2632,7 +2633,14 @@
         "title": "{renter} impugnó una reclamación de {amount}",
         "quote": "El cliente escribió"
       },
-      "openBoard": "Abrir todas las decisiones"
+      "openBoard": "Abrir todas las decisiones",
+      "kinds": {
+        "dropped_off": "Dejado",
+        "claim": "Por aprobar",
+        "hold_ending": "Retención por vencer",
+        "late": "Con retraso",
+        "contested": "Impugnado"
+      }
     },
     "counter": {
       "title": "Hoy en el mostrador",
@@ -2657,7 +2665,8 @@
         "released": "Liberada",
         "captured": "Cobrada",
         "other": "{amount}"
-      }
+      },
+      "emptyBody": "Las entregas y devoluciones reservadas para hoy aparecen aquí, en el orden en que llegan."
     },
     "holds": {
       "title": "Retenciones en PayPal",
@@ -2725,7 +2734,8 @@
       "needsPrices": "Publica primero una lista de precios. Las reclamaciones de muestra usan sus precios."
     },
     "setup": {
-      "progress": "{done} de {total} hechos"
+      "progress": "{done} de {total} hechos",
+      "lead": "Unos pocos pasos y la tienda está lista para su primera retención."
     }
   },
   "sample": {
@@ -4011,7 +4021,8 @@
       "investigated": "{model} revisó {count, plural, one {# entrada de muestra} other {# entradas de muestra}} a las {at}. Están en la cola de abajo.",
       "notAnswered": "Claude no respondió a las {at}, así que las entradas de muestra siguen como estaban.",
       "stalled": "La revisión iniciada a las {at} no terminó. Puede iniciarla de nuevo."
-    }
+    },
+    "allClear": "Todo al día"
   },
   "decisions": {
     "title": "Decisiones",
@@ -4139,7 +4150,13 @@
         }
       },
       "repairBody": "Fotografíe las vistas reparadas y registre el coste desde el pasaporte del artículo. Las marcas reparadas salen del pasaporte.",
-      "openPassport": "Abrir el pasaporte del artículo"
+      "openPassport": "Abrir el pasaporte del artículo",
+      "notYours": {
+        "senior": "Solo un propietario o encargado puede decidirlo.",
+        "another_senior": "Presentaste tú esta reclamación, así que decide otro propietario o encargado.",
+        "owner": "Ahora solo puede decidirlo el propietario: ya pasó la fecha prometida al cliente.",
+        "staff": "Tu rol puede leer esta decisión, no tomarla."
+      }
     },
     "together": {
       "label": "Liberaciones elegidas",
@@ -4162,7 +4179,8 @@
     "repairLine": {
       "claim": "De la reclamación cobrada a {renter}",
       "opened": "Abierta desde el pasaporte"
-    }
+    },
+    "allClear": "Todo al día"
   },
   "money": {
     "title": "Dinero",
@@ -4275,7 +4293,8 @@
       "audit": "Registro de auditoría",
       "noAudit": "Aún no hay nada anotado sobre este alquiler.",
       "openRental": "Abrir el alquiler"
-    }
+    },
+    "emptyTitle": "Aún no hay nada en el registro"
   },
   "insights": {
     "title": "Análisis",
@@ -4387,7 +4406,11 @@
     "saving": "Guardando tu panel…",
     "saved": "Tu panel está guardado para tu próxima visita.",
     "saveFailed": "No se pudo guardar tu panel. Tus cambios siguen en esta página.",
-    "reset": "Volver al primer panel"
+    "reset": "Volver al primer panel",
+    "onlyDecidersBody": "Pide estas cifras a un propietario o encargado. La página Dinero, que todo el personal puede leer, muestra cada pago tal como lo registró PayPal.",
+    "openMoney": "Abrir la página Dinero",
+    "emptyTitle": "Aún no hay cifras",
+    "live": "Hecho con tus registros, al momento."
   },
   "selfReturn": {
     "card": {

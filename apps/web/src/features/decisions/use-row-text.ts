@@ -103,6 +103,8 @@ export function useRowText(clock: ShopClock) {
     overdueWord: () => t('due.overdueWord'),
     decider: (row: BoardRow) => t(`deciders.${row.decider}`),
     deciderLine: (row: BoardRow) => t(`deciderLine.${row.decider}`),
+    // Why a decision that is not the viewer's offers them nothing to press; none for one that is theirs.
+    notYours: (row: BoardRow): string | null => (row.decider === 'you' ? null : t(`detail.notYours.${row.decider}`)),
     choose: (row: BoardRow) => t('choose', { amount: money(row.amountCents) }),
   }
 }

@@ -16,10 +16,11 @@ export function StandingRuleSection({ standingRule, clock, isOwner, gate }: Stan
   const limits = standingRule?.limits
   const dailyCount = limits !== undefined && 'dailyCount' in limits ? Number(limits.dailyCount) : 0
   return (
-    <section aria-labelledby="standing-rule" className="grid min-w-0 gap-3">
+    <section aria-labelledby="standing-rule" className="surface grid min-w-0 gap-3 p-4 md:p-5">
       <h2 id="standing-rule" className="text-[1.1875rem] font-extrabold tracking-tight">{t('title')}</h2>
       <p className="max-w-prose text-muted-foreground">{t('lead')}</p>
-      <p className="font-semibold" data-testid="standing-rule-state">
+      <p className="flex items-center gap-2 font-semibold" data-testid="standing-rule-state">
+        <span aria-hidden="true" className={standingRule === undefined ? 'size-2 shrink-0 rounded-full bg-border-strong' : 'size-2 shrink-0 animate-pulse-ring rounded-full bg-success text-success'} />
         {standingRule === undefined ? t('off') : t('live', { until: `${format.date(standingRule.validUntil)} ${format.time(standingRule.validUntil)}`, count: dailyCount })}
       </p>
       {!isOwner ? <p className="text-muted-foreground">{t('ownerOnly')}</p> : (

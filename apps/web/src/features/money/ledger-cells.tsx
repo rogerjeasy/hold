@@ -48,7 +48,7 @@ export function WhatCell({ data }: CellProps) {
 
 export function MoneyCell({ value }: CustomCellRendererProps<LedgerRow, number | null>) {
   const { text } = useLedgerGrid()
-  return typeof value === 'number' ? <span className="figures flex h-full items-center justify-end">{text.money(value)}</span> : null
+  return typeof value === 'number' ? <span className="figures flex h-full items-center justify-end font-semibold">{text.money(value)}</span> : null
 }
 
 export function ReferenceCell({ data }: CellProps) {
@@ -67,7 +67,7 @@ export function LedgerGroupLabel({ node }: CellProps) {
   const figure = (label: string, cents: unknown) => `${label} ${text.money(typeof cents === 'number' ? cents : 0)}`
   if (grouping === 'month') {
     return (
-      <span className="flex min-w-0 flex-wrap items-baseline gap-x-4 gap-y-0.5">
+      <span className="flex min-w-0 flex-wrap items-baseline gap-x-4 gap-y-0.5 leading-normal">
         <span className="font-semibold">{text.month(first.month)}</span>
         <span className="figures text-sm text-muted-foreground">
           {[figure(t('group.toShop'), total('toShop')), figure(t('group.backToRenters'), total('back')), t('group.lines', { count: node.allChildrenCount ?? 0 })].join(' · ')}
@@ -78,9 +78,9 @@ export function LedgerGroupLabel({ node }: CellProps) {
   const { money } = first.rental
   const agrees = money.checks.length === 0
   return (
-    <span className="grid min-w-0 gap-0.5 py-1.5 leading-snug">
+    <span className="grid min-w-0 gap-1 py-1.5 leading-snug">
       <span className="flex min-w-0 items-center gap-x-2.5">
-        <span className="truncate font-semibold">{text.renter(first.rental)}</span>
+        <span className="truncate font-bold tracking-tight">{text.renter(first.rental)}</span>
         <span className="shrink-0 text-sm text-muted-foreground">{text.period(first.rental)}</span>
         {first.rental.simulated ? <SampleTag /> : null}
         <span className={agrees ? 'flex min-w-0 items-center gap-1.5 text-sm' : 'flex min-w-0 items-center gap-1.5 text-sm font-semibold text-destructive'}>

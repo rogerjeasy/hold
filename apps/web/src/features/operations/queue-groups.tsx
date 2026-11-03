@@ -18,16 +18,16 @@ type QueueGroupsProps = { entries: readonly QueueEntry[]; clock: ShopClock; canD
 export function QueueGroups({ entries, clock, canDecide, passkeyNeeded }: QueueGroupsProps) {
   const t = useTranslations('operations')
   return (
-    <div className="grid gap-8">
+    <div className="grid gap-10">
       {groupByKind(entries).map((group) => {
         const together = canDecide && !passkeyNeeded && group.kind === 'release_hold' && group.entries.length > 1
         return (
           <section key={group.kind} aria-labelledby={`group-${group.kind}`} className="grid min-w-0 gap-4">
-            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <h2 id={`group-${group.kind}`} className="text-[1.1875rem] font-extrabold tracking-tight">{t(`kinds.${group.kind}.group`)}</h2>
-              <p className="text-sm text-muted-foreground">{t('count', { count: group.entries.length })}</p>
+              <p className="figures rounded-full bg-muted px-2.5 py-0.5 text-[0.8125rem] text-muted-foreground">{t('count', { count: group.entries.length })}</p>
             </div>
-            <ul className="grid gap-4 lg:grid-cols-2">
+            <ul className="grid stagger gap-4 lg:grid-cols-2">
               {group.entries.map((entry) => (
                 <li key={entry.id} className="min-w-0">
                   <QueueEntryCard entry={entry} clock={clock} canDecide={canDecide} passkeyNeeded={passkeyNeeded} together={together ? RELEASE_TOGETHER_FORM : undefined} />

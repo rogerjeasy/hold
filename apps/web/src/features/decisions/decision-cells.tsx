@@ -1,7 +1,7 @@
 'use client'
 
 import type { CustomCellRendererProps } from 'ag-grid-react'
-import { TriangleAlert } from 'lucide-react'
+import { Lock, TriangleAlert, UserCheck } from 'lucide-react'
 import { createContext, useContext } from 'react'
 import { CheckBox } from '@/components/ui/check-box'
 import { SampleTag } from '@/components/ui/sample-tag'
@@ -40,7 +40,10 @@ export function DecisionCell({ data }: CellProps) {
         {data.simulated ? <SampleTag /> : null}
       </div>
       <span className="truncate text-sm text-muted-foreground">{text.subject(data)}</span>
-      <span className={data.decider === 'you' ? 'truncate text-xs font-semibold' : 'truncate text-xs text-muted-foreground'}>{text.deciderLine(data)}</span>
+      <span className={data.decider === 'you' ? 'flex min-w-0 items-center gap-1.5 text-[0.8125rem] font-semibold text-primary' : 'flex min-w-0 items-center gap-1.5 text-[0.8125rem] text-muted-foreground'}>
+        {data.decider === 'you' ? <UserCheck aria-hidden="true" className="size-3.5 shrink-0" /> : <Lock aria-hidden="true" className="size-3.5 shrink-0" />}
+        <span className="truncate">{text.deciderLine(data)}</span>
+      </span>
     </div>
   )
 }
@@ -50,10 +53,10 @@ export function DueCell({ data }: CellProps) {
   const { text } = useGridState()
   if (data === undefined) return null
   return (
-    <div className="grid h-full min-w-0 content-center gap-0.5 text-sm leading-snug">
+    <div className="grid h-full min-w-0 content-center gap-1 text-sm leading-snug">
       <span className="figures truncate">{data.due === null ? text.dueNone() : text.moment(data.due)}</span>
       {data.overdue ? (
-        <span className="flex items-center gap-1 font-semibold text-destructive">
+        <span className="inline-flex w-fit items-center gap-1 rounded-full bg-destructive/10 px-2 py-0.5 text-[0.8125rem] font-semibold text-destructive">
           <TriangleAlert aria-hidden="true" className="size-3.5 shrink-0" />
           {text.overdueWord()}
         </span>
@@ -65,5 +68,5 @@ export function DueCell({ data }: CellProps) {
 export function AmountCell({ data }: CellProps) {
   const { text } = useGridState()
   if (data === undefined) return null
-  return <span className="figures flex h-full items-center justify-end">{text.money(data.amountCents)}</span>
+  return <span className="figures flex h-full items-center justify-end font-semibold">{text.money(data.amountCents)}</span>
 }
