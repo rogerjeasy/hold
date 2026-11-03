@@ -2258,7 +2258,8 @@
         "daily_cap_network": "Su red ya ha usado sus comparaciones reales de ejemplos de hoy. Vuelven a empezar a medianoche UTC; las fotos esperan aquí."
       },
       "sampleTitle": "Fotografías de demostración",
-      "sampleBody": "Estas fotografías son de demostración. El registro de inspección está marcado como simulado."
+      "sampleBody": "Estas fotografías son de demostración. El registro de inspección está marcado como simulado.",
+      "opening": "Abriendo las fotografías de la devolución…"
     },
     "comparison": {
       "title": "Comparación",

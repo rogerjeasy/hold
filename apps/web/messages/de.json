@@ -2258,7 +2258,8 @@
         "daily_cap_network": "Ihr Netzwerk hat seine heutigen echten Vergleiche mit Beispielen verbraucht. Sie beginnen um Mitternacht UTC neu; die Fotos warten hier."
       },
       "sampleTitle": "Beispielfotos",
-      "sampleBody": "Diese Fotos dienen der Demonstration. Der Prüfbericht ist als simuliert gekennzeichnet."
+      "sampleBody": "Diese Fotos dienen der Demonstration. Der Prüfbericht ist als simuliert gekennzeichnet.",
+      "opening": "Die Rückgabefotos werden geöffnet…"
     },
     "comparison": {
       "title": "Vergleich",

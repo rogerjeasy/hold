@@ -2258,7 +2258,8 @@
         "daily_cap_network": "Your network has used its real comparisons on samples for today. They start again at midnight UTC; the photographs wait here."
       },
       "sampleTitle": "Sample photographs",
-      "sampleBody": "These photographs are for demonstration. The inspection record is marked as simulated."
+      "sampleBody": "These photographs are for demonstration. The inspection record is marked as simulated.",
+      "opening": "Opening the return photographs…"
     },
     "comparison": {
       "title": "Comparison",

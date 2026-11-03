@@ -2258,7 +2258,8 @@
         "daily_cap_network": "Votre réseau a utilisé ses vraies comparaisons d’exemples pour aujourd’hui. Elles reprennent à minuit UTC ; les photos attendent ici."
       },
       "sampleTitle": "Photographies de démonstration",
-      "sampleBody": "Ces photographies servent à la démonstration. Le dossier d’inspection est signalé comme simulé."
+      "sampleBody": "Ces photographies servent à la démonstration. Le dossier d’inspection est signalé comme simulé.",
+      "opening": "Ouverture des photographies du retour…"
     },
     "comparison": {
       "title": "Comparaison",
