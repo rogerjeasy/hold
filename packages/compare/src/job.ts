@@ -34,8 +34,10 @@ export async function runComparison(dependencies: ComparisonDependencies, messag
       const originals = await Promise.all([dependencies.evidence.read(before.evidenceKey), dependencies.evidence.read(after.evidenceKey)])
       views.push({ view: view.key, pair: await inspectPair(originals[0], originals[1]) })
     }
-    const result = await compareInspection({ views, marks: work.known, reported: work.reported, priceCodes: work.prices.map((entry) => entry.code), wearPolicy: work.wearPolicy, itemType: work.itemType }, dependencies.model)
-    await finish({ ...result, reason: result.state === 'deferred' ? 'inspection_uncertain' : null, simulated, findings: result.findings.map(({ priceCode, ...finding }) => ({ ...finding, suggestedPriceEntryId: work.prices.find((entry) => entry.code === priceCode)?.id ?? null })) })
+    const { modelUnavailable, ...result } = await compareInspection({ views, marks: work.known, reported: work.reported, priceCodes: work.prices.map((entry) => entry.code), wearPolicy: work.wearPolicy, itemType: work.itemType }, dependencies.model)
+    // A person reads why it waits for them: the model not answering is not the photographs being uncertain.
+    const reason = result.state !== 'deferred' ? null : modelUnavailable ? 'model_unavailable' : 'inspection_uncertain'
+    await finish({ ...result, reason, simulated, findings: result.findings.map(({ priceCode, ...finding }) => ({ ...finding, suggestedPriceEntryId: work.prices.find((entry) => entry.code === priceCode)?.id ?? null })) })
     return 'completed'
   } catch (error) {
     // Unexpected processing failures still leave a visible manual path; the queue records the failure too.

@@ -13,6 +13,9 @@ import { Link } from '@/i18n/navigation'
 import { rentalRoutes } from '@/lib/routes'
 import { ReviewForm } from './review-form'
 
+// What a comparison records when no model answered it (packages/compare pipeline.ts).
+const NO_MODEL = 'not_called'
+
 type DisplayPhoto = { readonly view: string; readonly url: string | null }
 export type ComparisonView = Omit<ComparisonReport, 'before' | 'after' | 'reviews'> & { readonly before: readonly DisplayPhoto[]; readonly after: readonly DisplayPhoto[]; readonly reviews: readonly { readonly actorName: string | null; readonly outcome: 'clean' | 'findings' | 'deferred'; readonly reason: string }[] }
 
@@ -38,7 +41,7 @@ export function ComparisonScreen({ shopName, report, canAct, calibration }: { sh
   return <ShopFrame shopName={shopName} title={report.label}><div className="grid gap-6">
     <Link className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4" href={rentalRoutes.rental(report.rentalId)}>{t('back')}</Link>
     {notice === 'none' ? null : <Notice title={t(`notices.${notice}.title`)} body={t(`notices.${notice}.body`)} />}
-    {pending ? <p role="status">{t('pending')}</p> : <Panel title={t(`outcomes.${outcome}`)}><div className="grid gap-3 px-4 py-4 md:px-5"><p>{t(`bodies.${outcome}`)}</p><p className="text-muted-foreground">{t('boundary')}</p>
+    {pending ? <p role="status">{t('pending')}</p> : <Panel title={t(`outcomes.${outcome}`)}><div className="grid gap-3 px-4 py-4 md:px-5"><p>{report.deferredReason === 'model_unavailable' ? t('modelUnavailable') : t(`bodies.${outcome}`)}</p><p className="text-muted-foreground">{t('boundary')}</p>
       {report.deferredReason === 'reused_photo' ? <p>{t('reused')}</p> : null}
       {report.deferredReason === 'processing_failed' ? <p>{t('unavailable')}</p> : null}
     </div></Panel>}
@@ -54,7 +57,7 @@ export function ComparisonScreen({ shopName, report, canAct, calibration }: { sh
       {finding.reported === null ? null : <p>{finding.reported.agreedCents === null ? t('reportedNotAgreed') : t('reportedAgreed', { amount: formatMoney(money(finding.reported.agreedCents, finding.reported.currency), locale) })} <Link className="font-semibold underline underline-offset-4" href={rentalRoutes.claim(report.rentalId)}>{t(finding.reported.agreedCents === null ? 'claimLink' : 'reportedLink')}</Link></p>}
       {finding.amountCents !== null && finding.currency !== null && finding.class !== 'known_mark' && finding.class !== 'wear' && finding.class !== 'reported' ? <p>{t('price', { description: finding.priceDescription ?? '', amount: formatMoney(money(finding.amountCents, finding.currency), locale) })}</p> : null}
     </li>)}</ul></Panel>}
-    <p className="text-sm text-muted-foreground wrap-long-words">{t('version', { model: report.model ?? t('notRun'), prompt: report.promptVersion ?? t('notRun') })}</p>
+    <p className="text-sm text-muted-foreground wrap-long-words">{t('version', { model: report.model === null || report.model === NO_MODEL ? t('notRun') : report.model, prompt: report.promptVersion ?? t('notRun') })}</p>
     {report.reviews.length === 0 ? null : <Panel title={t('reviewHistory')}><ul className="grid gap-3 px-4 py-4 md:px-5">{report.reviews.map((review, index) => <li key={index} className="min-w-0"><p className="font-semibold wrap-long-words">{review.actorName ?? t('staff')} · {t(`outcomes.${review.outcome}`)}</p><p className="whitespace-pre-wrap wrap-long-words">{review.reason}</p></li>)}</ul></Panel>}
     {canAct ? <Panel title={t('manual')}><div className="px-4 py-4 md:px-5"><ReviewForm comparisonId={report.id} /></div></Panel> : null}
   </div></ShopFrame>

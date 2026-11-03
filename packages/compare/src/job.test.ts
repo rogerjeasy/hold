@@ -74,6 +74,16 @@ describe('comparison queue processing', () => {
     expect((await fixture.database.select().from(comparisons))[0]).toMatchObject({ state: 'clean', model: 'recorded-model', simulated: true, deferredReason: null })
   })
 
+  // A person reads why the comparison waits for them: Bedrock not answering, such as the day's tokens being spent, is
+  // not the photographs being uncertain, and is never recorded in the model's name.
+  it('records a comparison the model never answered as the model being unavailable, under no model', async () => {
+    const before = await textured()
+    const fixture = await queued(before, await sharp(before).linear(1, 3).jpeg().toBuffer(), 'comparison-throttled')
+    const model = { look: () => Promise.resolve({ kind: 'throttled' as const, model: 'recorded-model' }) }
+    expect(await runComparison({ ...fixture, role: 'hold_worker', model, now: () => NOW }, { shopId: fixture.shop.scope.shopId, comparisonId: fixture.comparison.id })).toBe('completed')
+    expect((await fixture.database.select().from(comparisons))[0]).toMatchObject({ state: 'deferred', model: 'not_called', deferredReason: 'model_unavailable' })
+  })
+
   it('persists a deferred result for reused photographs once, without calling a model or changing the hold', async () => {
     const database = await createTestDatabase()
     const shop = await readyRentalShop(database, 'comparison-job', NOW)

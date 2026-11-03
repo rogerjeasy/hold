@@ -29,15 +29,19 @@ export async function compareInspection(input: Input, model: ComparisonModel) {
   const alignedReported: (Mark & { covered: boolean })[] = []
   const alignment: Record<string, number> = {}
   let candidates = 0; let dismissed = 0; let unaccounted = 0
+  // Bedrock throttled a look or could not answer it: not an answer from the model, and not a doubt about the photographs.
+  let modelUnavailable = false
   const finish = (deferred: boolean) => {
     const inspected = inspectFindings(findings, alignedMarks, alignedReported)
-    return { ...inspected, state: deferred ? 'deferred' as const : inspected.state, model: [...models].join(', ') || 'not_called', promptVersion: PROMPT_VERSION, alignment: { ...alignment, calls, inputTokens, outputTokens, candidates, dismissed, unaccounted } }
+    return { ...inspected, state: deferred ? 'deferred' as const : inspected.state, model: [...models].join(', ') || 'not_called', promptVersion: PROMPT_VERSION, modelUnavailable, alignment: { ...alignment, calls, inputTokens, outputTokens, candidates, dismissed, unaccounted } }
   }
   const look: ComparisonModel['look'] = async (request) => {
     if (calls >= INSPECTION_LIMITS.maxCalls || signal.aborted) return { kind: 'unavailable', model: 'not_called' }
     calls += 1
     const reply = await model.look(request, signal)
-    models.add(reply.model)
+    // Only a result or a refusal is the model answering; the comparison is recorded in the name of those models alone.
+    if (reply.kind === 'throttled' || reply.kind === 'unavailable') modelUnavailable = true
+    else models.add(reply.model)
     if (reply.kind === 'result') { inputTokens += reply.inputTokens; outputTokens += reply.outputTokens }
     return reply
   }

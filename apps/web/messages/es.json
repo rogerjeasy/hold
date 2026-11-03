@@ -2252,7 +2252,8 @@
           "title": "Fotografías de demostración, comparación real",
           "body": "El código y Claude compararon de verdad estas fotografías. Son muestras, no este artículo, así que el resultado muestra cómo funciona la comparación y queda fuera de toda cifra de precisión."
         }
-      }
+      },
+      "modelUnavailable": "Claude no respondió a esta comparación, por ejemplo porque se agotó el cupo de llamadas al modelo de hoy. Todavía no se sabe nada de las fotos: inspecciona el artículo tú mismo y anota lo que observes."
     },
     "incidents": {
       "title": "Incidentes",

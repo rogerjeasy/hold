@@ -20,6 +20,13 @@ describe('the comparison review screen', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Comparing photographs')
     expect(screen.queryByLabelText('Your inspection notes')).not.toBeInTheDocument()
   })
+  it('says plainly that Claude did not answer, not that the photographs are uncertain, and names no model', () => {
+    renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={{ ...report, state: 'deferred', deferredReason: 'model_unavailable', model: 'not_called', modelAnswered: false }} canAct />)
+    expect(screen.getByRole('heading', { name: 'Needs a person' })).toBeInTheDocument()
+    expect(screen.getByText(/Claude did not answer this comparison/)).toBeInTheDocument()
+    expect(screen.queryByText(/The photographs or comparison are uncertain/)).not.toBeInTheDocument()
+    expect(screen.getByText('Model: Not run. Prompt: inspection-1.')).toBeInTheDocument()
+  })
   it('says the photographs are demonstration samples, not that the comparison was simulated, when Claude compared them', () => {
     renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={{ ...report, simulated: true, modelAnswered: true }} canAct />)
     expect(screen.getByText('Demonstration photographs, real comparison')).toBeInTheDocument()

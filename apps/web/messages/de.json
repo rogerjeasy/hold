@@ -2252,7 +2252,8 @@
           "title": "Demonstrationsfotos, echter Vergleich",
           "body": "Code und Claude haben diese Fotos wirklich verglichen. Es sind Beispiele, nicht dieser Gegenstand. Das Ergebnis zeigt also, wie der Vergleich arbeitet, und zählt in keiner Genauigkeitszahl."
         }
-      }
+      },
+      "modelUnavailable": "Claude hat auf diesen Vergleich nicht geantwortet, etwa weil das heutige Kontingent an Modellaufrufen aufgebraucht ist. Über die Fotos ist noch nichts bekannt: Prüfen Sie den Artikel selbst und halten Sie fest, was Sie sehen."
     },
     "incidents": {
       "title": "Vorfälle",

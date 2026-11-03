@@ -2252,7 +2252,8 @@
           "title": "Demonstration photographs, real comparison",
           "body": "Code and Claude compared these photographs for real. They are samples, not this item, so the result shows how the comparison works and is left out of every accuracy figure."
         }
-      }
+      },
+      "modelUnavailable": "Claude did not answer this comparison, for example because today's allowance of model calls is spent. Nothing is known yet about the photographs: inspect the item yourself and record what you observe."
     },
     "incidents": {
       "title": "Incidents",
