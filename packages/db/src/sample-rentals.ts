@@ -65,6 +65,13 @@ function samplePlan(category: ItemCategory) {
 // e-bike left at a drop point. Their display keys are reserved: the web app serves them from its own sample images, so
 // no shop's bucket holds them.
 export const SAMPLE_PHOTOS = { handover: 'sample/sample-handover.jpg', damage: 'sample/sample-return-damage.jpg', dropPoint: 'sample/sample-drop-point.jpg' } as const
+
+// The file that holds a reserved sample key's photograph, named as the key without its "sample/" prefix, or nothing for
+// any other key, however it is spelled. Workers that read samples carry these files beside their code.
+const SAMPLE_FILES: ReadonlyMap<string, string> = new Map(Object.values(SAMPLE_PHOTOS).map((key) => [key, key.slice('sample/'.length)]))
+export function sampleFileOf(key: string): string | undefined {
+  return SAMPLE_FILES.get(key)
+}
 const SAMPLE_SHA256 = SAMPLE_PHOTO_SHA256
 // Where each mark is on those photographs, as fractions of the frame.
 const SCUFF: Region = { x: 0.285, y: 0.77, width: 0.04, height: 0.07 }

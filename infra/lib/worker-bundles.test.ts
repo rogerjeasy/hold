@@ -27,7 +27,7 @@ describe('every worker bundle', () => {
 // sample-displays.ts).
 describe('the evidence and comparison workers’ bundles', () => {
   it('carries every sample photograph the seed names, in samples/', () => {
-    expect(WORKERS_WITH_SAMPLES).toEqual(expect.arrayContaining(['evidence-lambda.ts', 'comparisons-lambda.ts']))
+    expect(WORKERS_WITH_SAMPLES).toEqual(expect.arrayContaining(['evidence-lambda.ts', 'comparisons-lambda.ts', 'negotiations-lambda.ts']))
     const output = mkdtempSync(join(tmpdir(), 'hold-bundle-'))
     for (const command of sampleCopyCommands(join(import.meta.dirname, '..', '..'), output)) execSync(command)
     expect(readdirSync(join(output, 'samples')).sort()).toEqual(expect.arrayContaining(['sample-drop-point.jpg', 'sample-handover.jpg', 'sample-return-damage.jpg']))

@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { createDataApiDatabase } from '@hold/db/data-api'
 import { createBedrockAdvocateModel, negotiationMessageSchema, runNegotiation } from '@hold/negotiate'
 import { z } from 'zod'
@@ -14,7 +16,8 @@ const dependencies = {
   database: createDataApiDatabase({ region: value.AWS_REGION, clusterArn: value.HOLD_DATABASE_CLUSTER_ARN, secretArn: value.HOLD_DATABASE_SECRET_ARN, database: value.HOLD_DATABASE_NAME }),
   role: 'hold_worker' as const,
   models: { shop: createBedrockAdvocateModel({ awsRegion: value.AWS_REGION }), renter: createBedrockAdvocateModel({ awsRegion: value.AWS_REGION }) },
-  photos: displayPhotoReader({ region: value.AWS_REGION, bucket: value.HOLD_DISPLAY_BUCKET }),
+  // The sample rentals' photographs are installed beside the code, in samples/ (infra/lib/worker.ts).
+  photos: displayPhotoReader({ region: value.AWS_REGION, bucket: value.HOLD_DISPLAY_BUCKET, readSample: (file) => readFile(join(process.env['LAMBDA_TASK_ROOT'] ?? '.', 'samples', file)) }),
   now: () => new Date(),
 }
 export const handler = createQueueHandler({ schema: negotiationMessageSchema, handle: (message) => runNegotiation(dependencies, message) })

@@ -116,7 +116,7 @@ export const WORKER_NATIVE_MODULES: Readonly<Record<string, readonly (typeof NAT
 
 // Workers that build a sample rental's record or compare a sample return carry the demonstration's own photographs in
 // samples/, since they are in neither bucket (packages/evidence sample-displays.ts).
-export const WORKERS_WITH_SAMPLES: readonly string[] = ['evidence-lambda.ts', 'comparisons-lambda.ts']
+export const WORKERS_WITH_SAMPLES: readonly string[] = ['evidence-lambda.ts', 'comparisons-lambda.ts', 'negotiations-lambda.ts']
 const SAMPLE_IMAGES = join('apps', 'web', 'public', 'images')
 
 // The shell commands that copy them in once the code is bundled, run on the deploying machine.
