@@ -25,5 +25,5 @@ export default async function Page({ params }: { params: Promise<{ rentalId: str
   })
   // Another shop's rental and a made-up address read the same.
   if (rental === undefined) notFound()
-  return <RentalScreen shopName={context.shop.name} clock={{ timeZone: context.shop.timeZone, currency: context.shop.currency }} rental={rental} hold={hold} handovers={handovers} returns={returns} dropOff={(await dropOffEntries(dropOffs))[0]} extensions={extensions} texts={texts} canAct={context.role !== 'read_only'} />
+  return <RentalScreen shopName={context.shop.name} clock={{ timeZone: context.shop.timeZone, currency: context.shop.currency }} rental={rental} hold={hold} handovers={handovers} returns={returns} dropOff={(await dropOffEntries(dropOffs))[0]} extensions={extensions} texts={texts} canAct={context.role !== 'read_only'} canErase={context.role === 'owner'} />
 }

@@ -6,11 +6,35 @@ import { RentalScreen } from './rental-screen'
 
 vi.mock('./actions', () => ({ showRenterLink: () => Promise.resolve(null), sendRenterLinkAgain: () => Promise.resolve(null), letGoOfBooking: () => Promise.resolve(null), askForHold: () => Promise.resolve(null) }))
 vi.mock('@/features/returns/actions', () => ({ startReturn: vi.fn() }))
+vi.mock('@/features/erasure/actions', () => ({ eraseRenter: vi.fn() }))
 vi.mock('@/i18n/navigation', async (original) => ({ ...(await original<object>()), useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }) }))
 
 const clock = { timeZone: 'Europe/Lisbon', currency: 'EUR' }
 
 const walkInHold = { id: 'hold', state: 'requested' as const, strategy: 'combined' as const, reservedCents: 300_00, currency: 'EUR', orderId: null, paypalAuthorizationId: null, assuredUntil: null, validUntil: null, placementFailure: null, ordinaryCents: 300_00, trust: null }
+
+describe('erasing the renter’s personal details', () => {
+  const ERASE = 'Erase the renter’s personal details'
+
+  it('is offered to the owner once the rental has ended, and not before', () => {
+    renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ state: 'closed' })} hold={undefined} handovers={[]} canAct canErase />)
+    expect(screen.getByRole('region', { name: ERASE })).toBeInTheDocument()
+  })
+
+  it('is not offered while the rental is open, nor to anyone but the owner', () => {
+    const { unmount } = renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ state: 'settling' })} hold={undefined} handovers={[]} canAct canErase />)
+    expect(screen.queryByRole('region', { name: ERASE })).not.toBeInTheDocument()
+    unmount()
+    renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ state: 'closed' })} hold={undefined} handovers={[]} canAct />)
+    expect(screen.queryByRole('region', { name: ERASE })).not.toBeInTheDocument()
+  })
+
+  it('names an erased renter as such, not by the marker left in their place', () => {
+    renderWithIntl(<RentalScreen shopName="Ribeira Bikes" clock={clock} rental={detail({ state: 'closed', who: '[erased]', contactName: '[erased]', contactEmail: '[erased]', renterErasedAt: new Date('2026-11-20T10:00:00Z') })} hold={undefined} handovers={[]} canAct />)
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Personal details erased')
+    expect(screen.queryByText(/\[erased\]/)).not.toBeInTheDocument()
+  })
+})
 
 describe('a rental', () => {
   it('tells staff a walk-in approves the fee and the hold together, and asks for no hold at pickup', () => {

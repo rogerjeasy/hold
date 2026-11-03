@@ -37,6 +37,7 @@ export const detail = (overrides: Partial<RentalDetail> = {}): RentalDetail => (
   language: 'en',
   createdAt: new Date('2026-10-15T09:00:00Z'),
   priceListVersion: 2,
+  renterErasedAt: null,
   items: [{ id: 'item-1', label: 'City e-bike 1', typeName: 'City e-bike' }],
   ...overrides,
 })
