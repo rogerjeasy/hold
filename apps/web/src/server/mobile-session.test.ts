@@ -32,6 +32,7 @@ const me = await import('@/app/api/mobile/v1/session/me/route')
 const today = await import('@/app/api/mobile/v1/shop/today/route')
 const { getServices, TEST_SIGN_IN_CODE } = await import('./services')
 const { signIn } = await import('@/test/shop-session')
+const { tampered } = await import('@/test/tampered')
 
 vi.setConfig({ testTimeout: 30_000 })
 
@@ -100,7 +101,7 @@ describe('signing in with an emailed code', () => {
     const started = await post(start, { email: EMAIL, locale: 'en' })
     const attempt = String(started.body.value?.['attempt'])
     expect(await post(verify, { attempt, code: '11111111' })).toEqual({ status: 409, body: { ok: false, failure: 'refused', reason: 'wrong' } })
-    expect(await post(verify, { attempt: `${attempt.slice(0, -2)}xx`, code: TEST_SIGN_IN_CODE })).toEqual({ status: 409, body: { ok: false, failure: 'refused', reason: 'attempt_over' } })
+    expect(await post(verify, { attempt: tampered(attempt), code: TEST_SIGN_IN_CODE })).toEqual({ status: 409, body: { ok: false, failure: 'refused', reason: 'attempt_over' } })
     expect(await post(verify, { attempt, code: 'twelve' })).toMatchObject({ status: 400, body: { ok: false, failure: 'invalid', fields: ['code'] } })
     expect(await post(start, { email: 'not an address', locale: 'en' })).toMatchObject({ status: 400, body: { ok: false, failure: 'invalid', fields: ['email'] } })
     expect(await post(start, { email: EMAIL, locale: 'en', shopId })).toMatchObject({ status: 400, body: { ok: false, failure: 'invalid' } })
@@ -163,7 +164,7 @@ describe('the judges’ demo on the phone', () => {
   it('refuses a demo the phone changed', async () => {
     const started = await post(demo, { account: 'staff' })
     const sealed = String(started.body.value?.['demo'])
-    expect(await post(demo, { account: 'owner', demo: `${sealed.slice(0, -2)}xx` })).toMatchObject({ status: 400, body: { ok: false, failure: 'invalid', fields: ['demo'] } })
+    expect(await post(demo, { account: 'owner', demo: tampered(sealed) })).toMatchObject({ status: 400, body: { ok: false, failure: 'invalid', fields: ['demo'] } })
     expect(await post(demo, { account: 'admin' })).toMatchObject({ status: 400, body: { ok: false, failure: 'invalid' } })
   })
 })
