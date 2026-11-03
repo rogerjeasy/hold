@@ -31,7 +31,7 @@ export function RepairCapture({ session, guides, canAct }: { session: HandoverVi
   }
   return (
     <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,17rem)_minmax(0,1fr)] lg:gap-6">
-      <div className="min-w-0 lg:sticky lg:top-6"><ViewList views={session.plan.map((each) => ({ ...each, done: session.photos.some((shot) => shot.view === each.key) }))} current={current} onChoose={(key) => { setCurrent(key); setRetaking(false) }} /></div>
+      <div className="min-w-0 max-lg:order-last lg:sticky lg:top-6"><ViewList views={session.plan.map((each) => ({ ...each, done: session.photos.some((shot) => shot.view === each.key) }))} current={current} onChoose={(key) => { setCurrent(key); setRetaking(false) }} /></div>
       {view === undefined ? null : (
         <Panel title={view.label} className="min-w-0">
           <div className="grid gap-4 p-3 sm:p-4 md:p-5 xl:grid-cols-2">

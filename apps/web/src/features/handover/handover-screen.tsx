@@ -56,8 +56,8 @@ export function HandoverScreen({ shopName, rentalId, session }: { shopName: stri
       <div className="grid gap-6">
         <div className="surface px-4 py-4 md:px-5"><CaptureProgress done={done} total={session.plan.length} /></div>
         <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,17rem)_minmax(0,1fr)] lg:gap-6">
-          {/* On a phone the views are a row of chips above the camera; from lg, a list beside it that stays in view. */}
-          <div className="min-w-0 lg:sticky lg:top-6">
+          {/* On a phone at the counter, the camera comes first and the list of views after it; from lg, beside it. */}
+          <div className="min-w-0 max-lg:order-last lg:sticky lg:top-6">
             <ViewList views={session.plan.map((each) => ({ ...each, done: session.photos.some((taken) => taken.view === each.key) }))} current={current} onChoose={(key) => { setCurrent(key); setRetaking(false) }} />
           </div>
           {view === undefined ? null : (

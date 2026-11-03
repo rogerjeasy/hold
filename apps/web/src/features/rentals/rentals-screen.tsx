@@ -35,7 +35,7 @@ function ShopPageCard({ url }: { url: string }) {
       </span>
       <div className="grid min-w-0 gap-0.5 text-[0.9375rem]">
         <p className="text-sm text-muted-foreground">{t('shopPageNote')}</p>
-        <a href={url} className="inline-flex min-h-6 min-w-0 items-center font-semibold break-all underline decoration-border-strong underline-offset-4 hover:decoration-primary">
+        <a href={url} className="inline-flex min-h-11 min-w-0 items-center font-semibold break-all underline decoration-border-strong underline-offset-4 hover:decoration-primary">
           {url}
         </a>
       </div>

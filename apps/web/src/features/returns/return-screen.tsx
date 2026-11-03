@@ -46,7 +46,7 @@ export function ReturnScreen({ shopName, rentalId, session, canAct }: { shopName
         {[...session.photos, ...session.baseline].some((photo) => photo.simulated) ? <Notice title={t('sampleTitle')} body={t('sampleBody')} /> : null}
         <div className="surface px-4 py-4 md:px-5"><CaptureProgress done={done} total={session.plan.length} /></div>
         <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,17rem)_minmax(0,1fr)] lg:gap-6">
-          <div className="min-w-0 lg:sticky lg:top-6"><ViewList views={session.plan.map((view) => ({ ...view, done: session.photos.some((photo) => photo.view === view.key) }))} current={current} onChoose={(key) => { setCurrent(key); setRetaking(false) }} /></div>
+          <div className="min-w-0 max-lg:order-last lg:sticky lg:top-6"><ViewList views={session.plan.map((view) => ({ ...view, done: session.photos.some((photo) => photo.view === view.key) }))} current={current} onChoose={(key) => { setCurrent(key); setRetaking(false) }} /></div>
           {view === undefined ? null : (
             <Panel title={view.label} icon={Aperture} className="min-w-0">
               <div key={view.key} className="grid animate-fade gap-4 p-3 sm:p-4 md:p-5">

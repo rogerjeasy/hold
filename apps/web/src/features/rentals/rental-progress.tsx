@@ -55,10 +55,11 @@ export function RentalProgress({ state }: { state: RentalState }) {
               >
                 {done ? <Check className="size-3.5 stroke-3" /> : now ? <span className="size-2 animate-pulse-ring rounded-full bg-primary" /> : null}
               </span>
-              {/* On a phone six names do not fit side by side: the dots stay, and one line under them names the step. */}
-              <span className="grid min-w-0 gap-0.5 max-sm:sr-only">
-                <span className={cn('text-sm leading-tight font-semibold wrap-long-words', !done && !now && 'text-muted-foreground')}>{t(`steps.${step}`)}</span>
-                <span className="text-xs text-muted-foreground">{done ? t('done') : t('toDo')}</span>
+              {/* On a phone six names do not fit side by side: the dots stay, the names are read aloud as one line, and
+                  one line under the dots names the step. From sm each part is a line of its own. */}
+              <span className="min-w-0 max-sm:sr-only sm:grid sm:gap-0.5">
+                <span className={cn('text-sm leading-tight font-semibold wrap-long-words sm:block', !done && !now && 'text-muted-foreground')}>{t(`steps.${step}`)}</span>{' '}
+                <span className="text-xs text-muted-foreground sm:block">{done ? t('done') : t('toDo')}</span>
               </span>
             </li>
           )

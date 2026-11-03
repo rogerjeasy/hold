@@ -51,7 +51,7 @@ function RentalRow({ rental, clock }: { rental: RentalSummary; clock: ShopClock 
       </span>
       <div className="grid min-w-0 gap-0.5 self-center">
         {/* The whole row answers the pointer; the name is its one link, so the row reads once to a screen reader. */}
-        <Link id={nameId} href={rentalRoutes.rental(rental.id)} className="min-w-0 font-semibold wrap-long-words after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-ring">
+        <Link id={nameId} href={rentalRoutes.rental(rental.id)} className="flex min-h-11 min-w-0 items-center font-semibold wrap-long-words after:absolute after:inset-0 after:content-[''] focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-ring">
           {rental.who ?? t('notKnown')}
         </Link>
         {rental.simulated || rental.bookedThrough !== 'staff' ? (
