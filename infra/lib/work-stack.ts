@@ -1,6 +1,7 @@
 import { CfnOutput, Duration, Stack } from 'aws-cdk-lib'
 import type { App, StackProps } from 'aws-cdk-lib'
 import * as cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
+import type * as cognito from 'aws-cdk-lib/aws-cognito'
 import * as iam from 'aws-cdk-lib/aws-iam'
 import * as scheduler from 'aws-cdk-lib/aws-scheduler'
 import * as sqs from 'aws-cdk-lib/aws-sqs'
@@ -12,6 +13,7 @@ import { createAlarmTopic, createMonthlyBudget, reportTo } from './alarms.ts'
 import { name } from './settings.ts'
 import { createWorker } from './worker.ts'
 import { createComparisonWorker } from './comparison-worker.ts'
+import { createDemoCleanup } from './demo-cleanup.ts'
 import { createNegotiationWorker } from './negotiation-worker.ts'
 import { createEvidenceWorkers } from './evidence-worker.ts'
 import { createOperationsWorker } from './ops-worker.ts'
@@ -136,6 +138,8 @@ export type WorkStackProps = StackProps & {
   // The address alarms and the budget email, from the deploy. Without one, nobody is subscribed.
   readonly alarmEmail: string | undefined
   readonly monthlyBudgetUsd: number
+  // Only the demo cleanup reaches it, to remove a retired demo's users.
+  readonly userPool: cognito.IUserPool
 }
 
 export function createWorkStack(app: App, props: WorkStackProps): WorkResources {
@@ -179,6 +183,7 @@ export function createWorkStack(app: App, props: WorkStackProps): WorkResources 
   createNegotiationWorker(stack, workerProps)
   createEvidenceWorkers(stack, workerProps)
   createOperationsWorker(stack, workerProps)
+  createDemoCleanup(stack, { ...workerProps, userPool: props.userPool })
   if (props.texts.reports) createTextReports(stack, workerProps)
 
   for (const [queueName, queue] of queues) {

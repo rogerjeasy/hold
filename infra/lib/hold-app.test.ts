@@ -333,6 +333,49 @@ describe('the worker', () => {
     work.hasResourceProperties('AWS::Scheduler::Schedule', { Name: 'hold-negotiation-sweep', ScheduleExpression: 'rate(5 minutes)', Target: Match.objectLike({ Arn: { 'Fn::GetAtt': [Match.stringLikeRegexp('^NegotiationSweep'), 'Arn'] } }) })
   })
 
+  // A judge's demo is retired a week after it opened (architecture.md section 20.3). Only this function may delete a
+  // user, and only in Hold's pool; it reads no PayPal credential, sends to no queue and calls no model.
+  it('retires old demos once a day with a role of its own, which alone may delete a user, in Hold’s pool only', () => {
+    expect(functionNamed('hold-worker-demo-cleanup')?.Properties).toMatchObject({
+      Runtime: 'nodejs24.x',
+      Role: { 'Fn::GetAtt': [expect.stringMatching(/^DemoCleanupRole/) as unknown, 'Arn'] },
+      Environment: { Variables: expect.objectContaining({ HOLD_USER_POOL_ID: expect.anything() as unknown }) as unknown },
+    })
+    work.hasResourceProperties('AWS::Scheduler::Schedule', { Name: 'hold-demo-cleanup', ScheduleExpression: 'cron(30 3 * * ? *)', FlexibleTimeWindow: { Mode: 'OFF' }, Target: Match.objectLike({ Arn: { 'Fn::GetAtt': [Match.stringLikeRegexp('^DemoCleanup'), 'Arn'] } }) })
+    work.hasResourceProperties('AWS::IAM::Role', { RoleName: 'hold-demo-cleanup' })
+
+    const statements = Object.entries(work.findResources('AWS::IAM::Policy'))
+      .filter(([key]) => key.startsWith('DemoCleanupRole'))
+      .flatMap(([, policy]) => (policy as { Properties: { PolicyDocument: { Statement: { Action: unknown; Resource: unknown }[] } } }).Properties.PolicyDocument.Statement)
+    const deleting = statements.filter((statement) => [statement.Action].flat().includes('cognito-idp:AdminDeleteUser'))
+    expect(deleting).toHaveLength(1)
+    expect([deleting[0]?.Action].flat()).toEqual(['cognito-idp:AdminDeleteUser'])
+    expect(JSON.stringify(deleting[0]?.Resource)).toMatch(/UserPool/)
+    expect(JSON.stringify(deleting[0]?.Resource)).not.toContain('*')
+    const actions = new Set(statements.flatMap((statement) => [statement.Action].flat()))
+    expect(actions).toEqual(
+      new Set([
+        'rds-data:ExecuteStatement',
+        'rds-data:BatchExecuteStatement',
+        'rds-data:BeginTransaction',
+        'rds-data:CommitTransaction',
+        'rds-data:RollbackTransaction',
+        'secretsmanager:GetSecretValue',
+        'secretsmanager:DescribeSecret',
+        'cognito-idp:AdminDeleteUser',
+        'logs:CreateLogGroup',
+        'logs:CreateLogStream',
+        'logs:PutLogEvents',
+      ]),
+    )
+    // No other role of Hold's may delete a user.
+    for (const template of all) {
+      for (const [key, policy] of Object.entries(template.findResources('AWS::IAM::Policy'))) {
+        if (!key.startsWith('DemoCleanupRole')) expect(JSON.stringify(policy)).not.toContain('AdminDeleteUser')
+      }
+    }
+  })
+
   it('runs comparisons from their queue with a separate role that cannot send money work or read PayPal credentials', () => {
     expect(functionNamed('hold-worker-comparisons')?.Properties).toMatchObject({ Runtime: 'nodejs24.x', MemorySize: 1536 })
     work.resourceCountIs('AWS::Lambda::EventSourceMapping', 10)
@@ -520,6 +563,13 @@ describe('the web app', () => {
     expect(policy).not.toMatch(/AdminSetUserPassword|AdminDeleteUser|AdminUpdateUserAttributes|demo-accounts/)
     const boundary = Object.values(delivery.findResources('AWS::IAM::ManagedPolicy', { Properties: { ManagedPolicyName: 'hold-permissions-boundary' } }))[0]
     expect(JSON.stringify(boundary)).toContain('cognito-idp:AdminCreateUser')
+  })
+
+  // The demo cleanup removes a retired demo's accounts. HoldDelivery, deployed by an administrator, must allow it first.
+  it('lets Hold’s roles delete a user only in a user pool that carries Hold’s tag', () => {
+    const boundary = Object.values(delivery.findResources('AWS::IAM::ManagedPolicy', { Properties: { ManagedPolicyName: 'hold-permissions-boundary' } }))[0]
+    const statement = (boundary as { Properties: { PolicyDocument: { Statement: Record<string, unknown>[] } } }).Properties.PolicyDocument.Statement.find((each) => [each['Action']].flat().includes('cognito-idp:AdminDeleteUser'))
+    expect(statement).toMatchObject({ Effect: 'Allow', Resource: 'arn:aws:cognito-idp:us-east-1:707938860881:userpool/*', Condition: { StringEquals: { 'aws:ResourceTag/project': 'hold' } } })
   })
 
   it('logs in to the database as hold_app, never as the owner of the tables', () => {
@@ -794,7 +844,7 @@ describe('delivery', () => {
       .filter((statement) => [statement['Action']].flat().includes('iam:PassRole'))
     const allowed = passing.filter((statement) => statement['Effect'] === 'Allow' && JSON.stringify(statement).includes('role/hold-web'))
     expect(allowed).toHaveLength(1)
-    expect(new Set([allowed[0]?.['Resource']].flat())).toEqual(new Set(['role/hold-web', 'role/hold-web-access', 'role/hold-code-sender', 'role/hold-worker', 'role/hold-comparison', 'role/hold-negotiation', 'role/hold-evidence', 'role/hold-receipts', 'role/hold-operations', 'role/hold-scheduler', 'role/hold-texts'].map((role) => `arn:aws:iam::707938860881:${role}`)))
+    expect(new Set([allowed[0]?.['Resource']].flat())).toEqual(new Set(['role/hold-web', 'role/hold-web-access', 'role/hold-code-sender', 'role/hold-worker', 'role/hold-comparison', 'role/hold-negotiation', 'role/hold-evidence', 'role/hold-receipts', 'role/hold-operations', 'role/hold-scheduler', 'role/hold-texts', 'role/hold-demo-cleanup'].map((role) => `arn:aws:iam::707938860881:${role}`)))
     // App Runner checks the pass with a service name of its own choosing, so none is named here. Both roles trust App
     // Runner alone, so no other service could use them.
     expect(allowed[0]?.['Condition']).toBeUndefined()

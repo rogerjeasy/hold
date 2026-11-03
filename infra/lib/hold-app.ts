@@ -57,6 +57,7 @@ export function createHoldApp(app: App, options: HoldAppOptions) {
     texts,
     alarmEmail: options.alarmEmail,
     monthlyBudgetUsd: options.monthlyBudgetUsd ?? MONTHLY_BUDGET_USD,
+    userPool: identity.userPool,
   })
   const stacks = {
     data,

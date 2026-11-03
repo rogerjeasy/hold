@@ -57,7 +57,7 @@ const at = {
 }
 // The only roles CloudFormation may hand on: the web app's two (infra/lib/web-stack.ts), which trust App Runner alone,
 // and the code sender's (infra/lib/code-sender.ts), which trusts Lambda alone.
-const PASSED_ROLES = [name('web'), name('web', 'access'), name('code', 'sender'), name('worker'), name('comparison'), name('negotiation'), name('evidence'), name('receipts'), name('operations'), name('scheduler'), name('texts')]
+const PASSED_ROLES = [name('web'), name('web', 'access'), name('code', 'sender'), name('worker'), name('comparison'), name('negotiation'), name('evidence'), name('receipts'), name('operations'), name('scheduler'), name('texts'), name('demo', 'cleanup')]
 const HOLD_TAG = { 'aws:ResourceTag/project': PREFIX }
 const HOLD_REQUEST_TAG = { 'aws:RequestTag/project': PREFIX }
 
@@ -70,8 +70,8 @@ const deny = (actions: string[], resources: string[], conditions?: Conditions) =
 // The most any role of Hold's may do, whatever its own policy says: exactly what the app needs and no more. Hold's
 // queues to send to and read, objects in its buckets, its secrets to read and the shops' PayPal credentials to keep,
 // its database through the Data API, its schedules, its image, sending email, Claude on Bedrock, its own logs,
-// putting a person in a group of its user pool, decrypting with its own keys, as the code sender does, and signing
-// with its own keys, as the web app signs Clean Record credentials. The only role it may hand on is the scheduler's, to the scheduler.
+// putting a person in a group of its user pool, removing a retired demo's users from it, decrypting with its own
+// keys, as the code sender does, and signing with its own keys, as the web app signs Clean Record credentials. The only role it may hand on is the scheduler's, to the scheduler.
 // Nothing here manages IAM, CloudFormation or any resource of another project.
 function permissionsBoundary(stack: Stack): iam.ManagedPolicy {
   return new iam.ManagedPolicy(stack, 'PermissionsBoundary', {
@@ -102,7 +102,7 @@ function permissionsBoundary(stack: Stack): iam.ManagedPolicy {
         `arn:aws:logs:${REGION}:${ACCOUNT}:log-group:/${PREFIX}/*`,
       ]),
       statement(['cloudwatch:PutMetricData'], ['*'], { StringEquals: { 'cloudwatch:namespace': 'Hold' } }),
-      statement(['cognito-idp:AdminAddUserToGroup', 'cognito-idp:AdminCreateUser'], [at.userPools], { StringEquals: HOLD_TAG }),
+      statement(['cognito-idp:AdminAddUserToGroup', 'cognito-idp:AdminCreateUser', 'cognito-idp:AdminDeleteUser'], [at.userPools], { StringEquals: HOLD_TAG }),
       statement(['kms:Decrypt', 'kms:GenerateDataKey'], ['*'], { StringEquals: { 'kms:ViaService': [`secretsmanager.${REGION}.amazonaws.com`, `sqs.${REGION}.amazonaws.com`] } }),
       statement(['kms:Decrypt', 'kms:GenerateDataKey'], [at.keys], { StringEquals: { 'kms:ViaService': `s3.${REGION}.amazonaws.com`, 'kms:CallerAccount': ACCOUNT, 'kms:EncryptionContext:aws:s3:arn': [`arn:aws:s3:::${name('evidence', ACCOUNT)}`, `arn:aws:s3:::${name('display', ACCOUNT)}`] }, 'ForAnyValue:StringEquals': { 'kms:ResourceAliases': 'alias/aws/s3' } }),
       statement(['kms:Decrypt'], [at.keys], { StringEquals: HOLD_TAG }),
