@@ -68,9 +68,7 @@ const jsonError = (status: number, message: string) => new Response(JSON.stringi
 const initializeSchema = z.object({ method: z.literal('initialize'), params: z.object({ clientInfo: z.object({ name: z.string() }) }) })
 
 // What a person reads who opens the address in a browser or with curl: what this is and how to connect a client.
-function connectionGuide(request: Request): Response {
-  const url = new URL(request.url)
-  const address = `${url.origin}${url.pathname}`
+function connectionGuide(address: string): Response {
   const guide = {
     ...SERVER_INFO,
     transport: 'streamable-http',
@@ -84,9 +82,10 @@ function connectionGuide(request: Request): Response {
 
 // One HTTP request to /mcp, its body already read. Only POST carries calls: this server offers no stream of its own
 // messages and keeps no session to end, so a client's GET for a stream and DELETE are answered 405, as the transport's
-// specification allows. A GET that asks for no stream is a person, and reads how to connect.
-export async function handleMcpRequest(request: Request, body: string, ports: McpPorts, network: string | undefined): Promise<Response> {
-  if (request.method === 'GET' && !(request.headers.get('accept') ?? '').includes('text/event-stream')) return connectionGuide(request)
+// specification allows. A GET that asks for no stream is a person, and reads how to connect at the public address,
+// which behind a load balancer is not the address the request names.
+export async function handleMcpRequest(request: Request, body: string, ports: McpPorts, network: string | undefined, publicAddress: string = request.url): Promise<Response> {
+  if (request.method === 'GET' && !(request.headers.get('accept') ?? '').includes('text/event-stream')) return connectionGuide(publicAddress)
   if (request.method !== 'POST') return new Response(null, { status: 405, headers: { allow: 'POST' } })
   let parsed: unknown
   try {

@@ -98,7 +98,8 @@ describe('an MCP client given only the server’s address (X3.1)', () => {
 describe('a person who opens the address in a browser or with curl', () => {
   it('reads how to connect an MCP client, while a client asking for a stream is still answered 405', async () => {
     const ports = testPorts(database, logged)
-    const read = await handleMcpRequest(new Request('https://hold.test/mcp', { headers: { accept: 'text/html,*/*' } }), '', ports, '203.0.113.11')
+    // Behind the load balancer the request names the instance, not the address a person reached.
+    const read = await handleMcpRequest(new Request('https://localhost:3000/mcp', { headers: { accept: 'text/html,*/*' } }), '', ports, '203.0.113.11', 'https://hold.test/mcp')
     expect(read.status).toBe(200)
     expect(read.headers.get('content-type')).toContain('application/json')
     expect(await read.json()).toMatchObject({
