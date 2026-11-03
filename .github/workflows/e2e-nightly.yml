@@ -1,0 +1,47 @@
+# The full end-to-end suite, every page at every width (AGENTS.md section 9), each night on main and whenever someone
+# asks. It does not gate a deploy: CI (ci.yml) runs the key flows on every push, and this suite takes the better part
+# of an hour, so a slow or flaky page shows up here the next morning instead of holding a fix back. Like CI it needs no
+# AWS access: the tests run against in-process fakes.
+name: End to end, every page
+
+on:
+  schedule:
+    - cron: '30 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-nightly
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: Every page at every width
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Install Chromium for Playwright
+        run: pnpm --filter @hold/web exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+        # Without their keys AG Grid and AG Studio write a licence notice to the console, which fails every test of them.
+        env:
+          HOLD_AG_GRID_LICENCE_KEY: ${{ secrets.AG_GRID_LICENCE_KEY }}
+          HOLD_AG_STUDIO_LICENCE_KEY: ${{ secrets.AG_STUDIO_LICENCE_KEY }}
+      - name: Keep the report of a failed run
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-nightly
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+          retention-days: 7

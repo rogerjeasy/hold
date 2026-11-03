@@ -1,7 +1,9 @@
-# Type-check, the key unit tests and the key end-to-end flows, on every pull request and every push to main. Deploy
-# (deploy.yml) runs only after this passes on main. It needs no AWS access and no secret: the tests run against
-# in-process fakes. Kept light so it stays quick: lint and every other test run locally in `pnpm check` before a change
-# is done (AGENTS.md section 2).
+# Everything `pnpm check` runs, plus the key end-to-end flows and the container build, on every pull request and every
+# push to main: types, lint, every unit test and the phone app's tests, as parallel jobs. Deploy (deploy.yml) runs only
+# after every job here passes on main, so a change that breaks any unit test, a lint rule or the phone app is never
+# deployed. These are all quick and steady. The full end-to-end suite, every page at every width, runs each night in
+# e2e-nightly.yml instead: it takes the better part of an hour, and one slow or flaky page must not hold a deploy back
+# in the days before a deadline. It needs no AWS access: the tests run against in-process fakes.
 name: CI
 
 on:
@@ -18,7 +20,7 @@ concurrency:
 
 jobs:
   check:
-    name: Types and key tests
+    name: Types
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -33,9 +35,54 @@ jobs:
       - run: pnpm typecheck
         env:
           NODE_OPTIONS: --max-old-space-size=4096
-      # The rules a change must never break: money and state in the domain, settling with PayPal, one shop never
-      # reading another's rows, every route behind the one access wrapper, and no agent tool that moves money.
-      - run: pnpm test:ci
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # The lint script gives ESLint the heap it needs for the whole repository with type information.
+      - run: pnpm lint
+
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Every Vitest test in every package, the rules that must never break among them: money and state in the domain,
+      # settling with PayPal, one shop never reading another's rows, every route behind the one access wrapper, and no
+      # agent tool that moves money (`pnpm test:ci` is that subset, for a ten-second check at a desk).
+      - run: pnpm test
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+
+  mobile:
+    name: Phone app tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:mobile
 
   e2e:
     name: End to end

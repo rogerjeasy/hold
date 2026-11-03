@@ -79,3 +79,28 @@ describe('workspace layout', () => {
     expect(all.filter((name) => appNames.includes(name))).toEqual([])
   })
 })
+
+// What CI enforces (AGENTS.md sections 2 and 12): the whole unit suite, lint and the phone app's tests on every push,
+// with the full end-to-end suite every night. Read as text: the workflows are YAML the tests never execute.
+const workflow = (name: string) => readFileSync(join(root, '.github', 'workflows', name), 'utf8')
+const scriptOf = (name: string): unknown => Reflect.get(field(readManifest('.'), 'scripts') as object, name)
+
+describe('what CI enforces', () => {
+  it('lints with a heap large enough for the whole repository, so pnpm check passes on a default Node', () => {
+    expect(scriptOf('lint')).toMatch(/NODE_OPTIONS=--max-old-space-size=8192 eslint \./)
+  })
+
+  it('runs lint, every unit test and the phone app\'s tests on every push, before main deploys', () => {
+    const ci = workflow('ci.yml')
+    for (const command of ['run: pnpm lint', 'run: pnpm test\n', 'run: pnpm test:mobile', 'run: pnpm typecheck', 'run: pnpm test:e2e:key']) expect(ci).toContain(command)
+    expect(workflow('deploy.yml')).toMatch(/workflow_run:\s+workflows: \[CI\]/)
+  })
+
+  it('runs the full end-to-end suite, every page at every width, each night and on demand', () => {
+    const nightly = workflow('e2e-nightly.yml')
+    expect(nightly).toMatch(/schedule:\s+- cron: /)
+    expect(nightly).toContain('workflow_dispatch:')
+    expect(nightly).toContain('run: pnpm test:e2e\n')
+    expect(nightly).toContain('HOLD_AG_GRID_LICENCE_KEY: ${{ secrets.AG_GRID_LICENCE_KEY }}')
+  })
+})

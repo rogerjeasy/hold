@@ -9,9 +9,9 @@ const FIXTURE_PORT = PORT + 1
 const fixtureURL = `http://localhost:${String(FIXTURE_PORT)}`
 const OPEN_SCORECARD = 'open-scorecard.spec.ts'
 
-// CI runs the key set, kept small so CI stays quick: signing in, and money from booking through the hold to a captured
-// claim, without the width-by-width layout checks. The full suite, every page at every width, runs locally with
-// `pnpm test:e2e` (AGENTS.md section 2).
+// CI runs the key set on every push, kept small so CI stays quick: signing in, and money from booking through the hold
+// to a captured claim, without the width-by-width layout checks. The full suite, every page at every width, runs each
+// night (.github/workflows/e2e-nightly.yml) and locally with `pnpm test:e2e` (AGENTS.md section 2).
 const KEY_FLOWS = ['sign-in', 'rentals', 'claims']
 const keyFlowsOnly = process.env['HOLD_E2E_SCOPE'] === 'key'
 
