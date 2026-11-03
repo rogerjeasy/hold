@@ -5,7 +5,7 @@ import { renderWithIntl } from '@/test/render'
 import { EraseRenter } from './erase-renter'
 
 const erase = vi.fn()
-vi.mock('./actions', () => ({ eraseRenter: (...args: unknown[]) => erase(...args) }))
+vi.mock('./actions', () => ({ eraseRenter: (...args: unknown[]) => erase(...args) as unknown }))
 
 const clock = { timeZone: 'Europe/Lisbon', currency: 'EUR' }
 const RENTAL = '6f1c2a4e-1b2c-4d5e-8f90-1234567890ab'

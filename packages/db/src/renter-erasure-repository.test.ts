@@ -23,7 +23,7 @@ async function ended(rentalId: string, state: 'closed' | 'cancelled' | 'abandone
 
 async function withPhone(rentalId: string) {
   await database.update(rentals).set({ contactChannel: 'text', contactPhone: '+351912345678', phoneConfirmedAt: NOW, phoneCodeHash: 'hash' }).where(eq(rentals.id, rentalId))
-  await shop.act((transaction) => recordText(transaction, { rentalId, purpose: 'renter_link', toPhone: '+351912345678', status: 'simulated', body: 'Priya, your rental: https://hold.example/r/abc' }, NOW))
+  await shop.act((transaction) => recordText(transaction, { rentalId, purpose: 'renter_link', toPhone: '+351912345678', status: 'simulated', providerMessageId: null, body: 'Priya, your rental: https://hold.example/r/abc', failure: null }, NOW))
 }
 
 const personal = (rentalId: string) =>
