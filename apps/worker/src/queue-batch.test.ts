@@ -24,14 +24,13 @@ describe('a queue handler', () => {
     expect(answer).toEqual({ batchItemFailures: [] })
   })
 
-  it('logs which message failed with the error’s text and stack, without the values a query carried', async () => {
+  it('logs which message failed with the error’s name, its query and its stack, never its text or the values', async () => {
     const logged = vi.spyOn(console, 'error').mockImplementation(() => undefined)
-    const failing = new Error('Failed query: select hold_renter_for_payer($1, $2)\nparams: PAYER1,renter@example.com')
-    failing.name = 'DrizzleQueryError'
+    const failing = Object.assign(new Error('Failed query: select hold_renter_for_payer($1, $2)\nparams: PAYER1,renter@example.com'), { name: 'DrizzleQueryError', query: 'select hold_renter_for_payer($1, $2)', params: ['PAYER1', 'renter@example.com'] })
     const answer = await createQueueHandler({ schema: event, handle: () => Promise.reject(failing) })({ Records: [record('7', { shopId: 's', eventId: 'e' })] })
     expect(answer).toEqual({ batchItemFailures: [{ itemIdentifier: '7' }] })
     const lines = logged.mock.calls.flat().join(' ')
-    expect(lines).toContain('Message 7 failed and will be tried again: DrizzleQueryError: Failed query: select hold_renter_for_payer($1, $2)')
+    expect(lines).toContain('Message 7 failed and will be tried again: DrizzleQueryError query="select hold_renter_for_payer($1, $2)"')
     expect(lines).toMatch(/\n\s+at /)
     expect(lines).not.toContain('renter@example.com')
     expect(lines).not.toContain('PAYER1')

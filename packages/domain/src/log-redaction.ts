@@ -1,49 +1,54 @@
-// What may reach a log (AGENTS.md section 7): no tokens, credentials or unmasked personal details. An error's text is
-// still the fastest way to a fault, so it is logged with these taken out rather than not at all.
-
-const REDACTED = '[redacted]'
-
-// A failed query names its values after "params:", and they can be a renter's details; they run to the stack's first
-// frame or the end.
-const QUERY_VALUES = /params:[\s\S]*?(?=\n\s+at |$)/g
-const SIGNED_IN_TOKEN = /\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]*/g
-const AUTHORIZATION = /\b(Bearer|Basic)\s+[A-Za-z0-9._~+/=-]+/gi
-// A named value in a URL, a form or JSON: PayPal's token, ba_token and PayerID in a return URL among them.
-const NAMED_SECRET = /\b([A-Za-z_]*(?:token|secret|password|payerid|payer_id|api_key|apikey))("?\s*[:=]\s*"?)[^\s"&,;]+/gi
-const EMAIL = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g
-const PHONE = /\+\d{8,15}\b/g
-const LONG_HEX = /\b[0-9A-Fa-f]{32,}\b/g
-// Base64 and base64url of 40 or more characters. A path or a long name has the same characters, so a run counts only
-// when it mixes digits with upper and lower case, as random bytes do.
-const LONG_BASE64 = /[A-Za-z0-9+/_-]{40,}={0,2}/g
-const looksRandom = (run: string) => /\d/.test(run) && /[A-Z]/.test(run) && /[a-z]/.test(run)
-
-export function redactForLog(text: string): string {
-  return text
-    .replace(QUERY_VALUES, `params: ${REDACTED}`)
-    .replace(SIGNED_IN_TOKEN, REDACTED)
-    .replace(AUTHORIZATION, `$1 ${REDACTED}`)
-    .replace(NAMED_SECRET, `$1$2${REDACTED}`)
-    .replace(EMAIL, REDACTED)
-    .replace(PHONE, REDACTED)
-    .replace(LONG_HEX, REDACTED)
-    .replace(LONG_BASE64, (run) => (looksRandom(run) ? REDACTED : run))
-}
+// What may reach a log about an error (AGENTS.md section 7): no tokens, credentials or personal details. A message from
+// the database or a provider is free text that can carry a renter's name, an email or a token in a shape no pattern
+// foresees, so no message is ever logged. What is logged is known to be safe: the error's name, codes that are plain
+// identifiers, an HTTP status, a failed query's text with its placeholders but never its values, and the stack frames.
 
 // A cause rarely nests deeper; this keeps a cause that refers back to its error from running on.
 const MAX_CAUSES = 3
+const IDENTIFIER = /^[A-Za-z0-9_.-]{1,64}$/
+const MAX_QUERY = 300
 
-// An error as one redacted text: its name and message, its stack frames, then each cause in the same way.
+function field(error: Error, key: string): unknown {
+  return (error as unknown as Record<string, unknown>)[key]
+}
+
+function identifier(value: unknown): string | undefined {
+  const text = typeof value === 'number' ? String(value) : value
+  return typeof text === 'string' && IDENTIFIER.test(text) ? text : undefined
+}
+
+// The frames after the message, so a line inside a message that only looks like a frame is never taken for one.
+function frames(error: Error): string[] {
+  const stack = error.stack ?? ''
+  const at = error.message === '' ? -1 : stack.indexOf(error.message)
+  const rest = at < 0 ? stack.slice(stack.indexOf('\n') + 1) : stack.slice(at + error.message.length)
+  return rest.split('\n').filter((line) => /^\s+at \S/.test(line))
+}
+
+function describe(error: Error): string {
+  const name = identifier(error.name) ?? 'Error'
+  const parts = [name]
+  for (const key of ['code', 'constraint'] as const) {
+    const value = identifier(field(error, key))
+    if (value !== undefined) parts.push(`${key}=${value}`)
+  }
+  const status = field(error, 'status')
+  if (typeof status === 'number' && Number.isInteger(status)) parts.push(`status=${String(status)}`)
+  // A query's text comes from the code, with its values as placeholders; the values themselves are never read.
+  const query = field(error, 'query')
+  if (typeof query === 'string') parts.push(`query=${JSON.stringify(query.slice(0, MAX_QUERY))}`)
+  return parts.join(' ')
+}
+
+// An error as one text: its safe description and stack frames, then each cause in the same way.
 export function errorForLog(error: unknown): string {
-  if (!(error instanceof Error)) return typeof error === 'string' ? redactForLog(error) : 'unknown error'
+  if (!(error instanceof Error)) return `a ${typeof error} was thrown`
   const parts: string[] = []
   const seen = new Set<unknown>()
   let current: unknown = error
   while (current instanceof Error && !seen.has(current) && seen.size <= MAX_CAUSES) {
     seen.add(current)
-    const frames = (current.stack ?? '').split('\n').filter((line) => /^\s+at /.test(line))
-    // Each on its own, so the values of a failed query end with its own frames, never with its cause.
-    parts.push(redactForLog([`${seen.size === 1 ? '' : 'Caused by '}${current.name}: ${current.message}`, ...frames].join('\n')))
+    parts.push([`${seen.size === 1 ? '' : 'Caused by '}${describe(current)}`, ...frames(current)].join('\n'))
     current = current.cause
   }
   return parts.join('\n')

@@ -128,4 +128,4 @@ export { checkRepairClose, priceRepairStanding, REPAIR_LIMITS, REPAIR_OUTCOMES, 
 export type { RepairClose, RepairCloseProblem, RepairOutcome, RepairState } from './repair.ts'
 
 // What a log may carry (AGENTS.md section 7).
-export { errorForLog, redactForLog } from './log-redaction.ts'
+export { errorForLog } from './log-redaction.ts'
