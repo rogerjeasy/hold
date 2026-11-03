@@ -53,13 +53,9 @@ export function RentalScreen({ shopName, clock, rental, hold, handovers, returns
         {dropOff === undefined ? null : <DropOffCard entry={dropOff} clock={clock} canAct={canAct} />}
         <RentalOverview rental={rental} clock={clock} payer={payer} />
         <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">
-          <div className="stagger grid min-w-0 gap-6">
-            <RentalTerms rental={rental} clock={clock} />
-            <StaffExtensions extensions={extensions} clock={clock} />
-            {paypal === undefined ? null : <PayPalRecordPanel record={paypal} clock={clock} />}
-          </div>
-          {/* At the counter on a phone, what staff act on comes before the terms. */}
-          <div className="stagger grid min-w-0 gap-6 max-lg:order-first">
+          {/* What staff act on comes first in the page itself, so a phone at the counter and a screen reader meet it
+              before the terms; from lg it stands in the right-hand column. */}
+          <div className="stagger grid min-w-0 gap-6 empty:hidden lg:col-start-2 lg:row-start-1">
             {live && ['out', 'overdue', 'dropped_off', 'returned', 'inspecting', 'settling'].includes(rental.state) ? <ReturnPanel rentalId={rental.id} returns={returns} canAct={canAct} /> : null}
             {/* A sample rental photographs nothing, but one that was compared leads to its comparison. */}
             {rental.simulated && returns.some((item) => item.comparisonId !== null) ? <ReturnPanel rentalId={rental.id} returns={returns} canAct={false} /> : null}
@@ -69,6 +65,11 @@ export function RentalScreen({ shopName, clock, rental, hold, handovers, returns
             {canAct && waiting ? <LetGo rentalId={rental.id} /> : null}
             {texts.length > 0 ? <TextsPanel texts={texts} clock={clock} /> : null}
             {canErase && RENTAL_ENDED_STATES.includes(rental.state) ? <EraseRenter rentalId={rental.id} erasedAt={rental.renterErasedAt} clock={clock} /> : null}
+          </div>
+          <div className="stagger grid min-w-0 gap-6 lg:col-start-1 lg:row-start-1">
+            <RentalTerms rental={rental} clock={clock} />
+            <StaffExtensions extensions={extensions} clock={clock} />
+            {paypal === undefined ? null : <PayPalRecordPanel record={paypal} clock={clock} />}
           </div>
         </div>
       </div>
