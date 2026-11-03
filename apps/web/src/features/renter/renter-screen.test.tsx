@@ -29,6 +29,7 @@ const view: RenterView = {
   renterName: null,
   simulated: false,
   paymentLapsed: false,
+  paymentKeptUntil: new Date('2026-10-15T09:15:00Z'),
   feeOrderId: null,
   walkIn: false,
 }
@@ -37,6 +38,16 @@ const view: RenterView = {
 const fakePayPal = () => Object.assign(window, { paypal: { createInstance: () => Promise.resolve({ findEligibleMethods: () => Promise.resolve({ isEligible: () => true }), createPayPalOneTimePaymentSession: () => Promise.resolve({ start: () => Promise.resolve() }) }) } })
 
 describe('the renter’s page', () => {
+  it('says until when the booking keeps its items while the fee is unpaid, in the shop’s time', () => {
+    renderWithIntl(<RenterScreen token="token" view={view} />)
+    expect(screen.getByText('Your items are kept for you until 10:15 AM.')).toBeInTheDocument()
+  })
+
+  it('names no deadline once there is none to meet', () => {
+    renderWithIntl(<RenterScreen token="token" view={{ ...view, paymentKeptUntil: null }} />)
+    expect(screen.queryByText(/kept for you until/)).not.toBeInTheDocument()
+  })
+
   it('says, before the renter pays, that the photographs are kept as evidence and for how long, linking the privacy notice', () => {
     for (const walkIn of [false, true]) {
       const { unmount } = renderWithIntl(<RenterScreen token="t" view={{ ...view, walkIn }} />)

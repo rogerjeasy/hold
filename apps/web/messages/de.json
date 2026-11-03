@@ -2849,7 +2849,8 @@
       "out": "Ihre Miete ist bei Ihnen.",
       "dropped_off": "Sie haben es am Abgabeort zurückgegeben. Eine Person im Laden wird es prüfen.",
       "returnReceipt": "Ihre Rückgabe ansehen",
-      "condition": "Ansehen, wie sie übergeben wurde"
+      "condition": "Ansehen, wie sie übergeben wurde",
+      "keptUntil": "Ihre Artikel sind bis {time} für Sie reserviert."
     },
     "paid": {
       "title": "Ihre Zahlung wird bestätigt",

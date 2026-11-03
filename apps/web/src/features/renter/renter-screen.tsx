@@ -51,11 +51,14 @@ function Status({ token, view, pay }: { token: string; view: RenterView; pay: st
   const t = useTranslations('renter.status')
   const renter = useTranslations('renter')
   const states = useTranslations('rentalStates')
+  const format = useShopFormat({ timeZone: view.timeZone, currency: view.currency })
   // A booking past its time to pay may still be paid while nobody else has its items, so it still asks for payment.
   if (view.state === 'pending_payment') {
     return (
       <div className="grid justify-items-start gap-3">
         <StatusLine icon={Hourglass} tone="waiting" text={t('pending_payment')} />
+        {/* The window is short; saying when it closes keeps it from being a surprise. */}
+        {view.paymentKeptUntil === null ? null : <p className="text-muted-foreground">{t('keptUntil', { time: format.time(view.paymentKeptUntil) })}</p>}
         <a href="#pay" className={quietLink}>
           {renter('reviewAndPay', { amount: pay })}
           <ArrowDown aria-hidden="true" className="size-4" />

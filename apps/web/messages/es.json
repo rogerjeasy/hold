@@ -2849,7 +2849,8 @@
       "out": "Tu alquiler está contigo.",
       "dropped_off": "Lo devolviste en el punto de entrega. Una persona de la tienda lo revisará.",
       "returnReceipt": "Ver tu devolución",
-      "condition": "Ver cómo salió"
+      "condition": "Ver cómo salió",
+      "keptUntil": "Tus artículos están reservados para ti hasta las {time}."
     },
     "paid": {
       "title": "Confirmando tu pago",

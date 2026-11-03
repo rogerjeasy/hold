@@ -190,6 +190,14 @@ describe('a renter link', () => {
     expect(view?.lines).toEqual([{ name: 'Child seat', count: 1, dayRateCents: 8_00, holdCents: 50_00 }])
     expect(view?.prices).toEqual([{ description: 'Scratch', category: 'damage', amountCents: 35_00 }])
   })
+
+  it('tells the renter until when an unpaid booking keeps its items: fifteen minutes from when it was made', async () => {
+    const rentalId = await book([{ itemTypeId: seatTypeId, count: 1 }], at(340), at(350))
+    const view = await act({ role: 'hold_app', shopId }, (transaction) => renterView(transaction, rentalId, NOW))
+    expect(view?.paymentKeptUntil).toEqual(new Date(NOW.getTime() + 15 * 60_000))
+    const lapsed = await act({ role: 'hold_app', shopId }, (transaction) => renterView(transaction, rentalId, new Date(NOW.getTime() + 16 * 60_000)))
+    expect(lapsed).toMatchObject({ paymentLapsed: true, paymentKeptUntil: null })
+  })
 })
 
 describe('paying the fee', () => {

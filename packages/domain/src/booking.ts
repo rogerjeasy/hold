@@ -66,9 +66,14 @@ export function checkBooking(draft: BookingDraft): readonly BookingProblem[] {
   return problems
 }
 
-// An unpaid booking keeps its items only this long.
+// The last moment an unpaid booking keeps its items, shown to the renter so the window is never a surprise.
+export function paymentDeadline(createdAt: Date): Date {
+  return new Date(createdAt.getTime() + PENDING_PAYMENT_MINUTES * MINUTE)
+}
+
+// An unpaid booking keeps its items only until its deadline.
 export function paymentLapsed(createdAt: Date, now: Date): boolean {
-  return now.getTime() - createdAt.getTime() > PENDING_PAYMENT_MINUTES * MINUTE
+  return now.getTime() > paymentDeadline(createdAt).getTime()
 }
 
 const RELEASED: ReadonlySet<RentalState> = new Set(['settling', 'closed', 'cancelled', 'abandoned'])

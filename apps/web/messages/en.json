@@ -2849,7 +2849,8 @@
       "out": "Your rental is with you.",
       "dropped_off": "You returned it at the drop point. A person at the shop will check it.",
       "returnReceipt": "See your return",
-      "condition": "See how it left"
+      "condition": "See how it left",
+      "keptUntil": "Your items are kept for you until {time}."
     },
     "paid": {
       "title": "Confirming your payment",

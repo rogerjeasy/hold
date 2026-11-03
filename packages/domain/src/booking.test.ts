@@ -1,6 +1,6 @@
 import fc from 'fast-check'
 import { describe, expect, it } from 'vitest'
-import { blocksItem, BOOKING_LIMITS, bookingTerms, checkBooking, paymentLapsed, rentalDays } from './booking.ts'
+import { blocksItem, BOOKING_LIMITS, bookingTerms, checkBooking, paymentDeadline, paymentLapsed, rentalDays } from './booking.ts'
 import type { BookingLine } from './booking.ts'
 import { money } from './money.ts'
 
@@ -100,5 +100,13 @@ describe('an unpaid booking', () => {
   it('lapses after the minutes it may keep its item', () => {
     expect(paymentLapsed(at(-0.2), NOW)).toBe(false)
     expect(paymentLapsed(at(-0.26), NOW)).toBe(true)
+  })
+
+  it('keeps its items until a deadline the renter can be shown, the moment after which it has lapsed', () => {
+    const createdAt = at(-0.1)
+    const deadline = paymentDeadline(createdAt)
+    expect(deadline.getTime() - createdAt.getTime()).toBe(15 * 60_000)
+    expect(paymentLapsed(createdAt, deadline)).toBe(false)
+    expect(paymentLapsed(createdAt, new Date(deadline.getTime() + 1))).toBe(true)
   })
 })

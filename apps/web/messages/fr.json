@@ -2849,7 +2849,8 @@
       "out": "Votre location est avec vous.",
       "dropped_off": "Vous l’avez rendu au point de dépôt. Une personne de la boutique va le vérifier.",
       "returnReceipt": "Voir votre retour",
-      "condition": "Voir son état au départ"
+      "condition": "Voir son état au départ",
+      "keptUntil": "Vos articles vous sont réservés jusqu’à {time}."
     },
     "paid": {
       "title": "Confirmation de votre règlement",

@@ -1,4 +1,4 @@
-import { paymentLapsed, rentalDays } from '@hold/domain'
+import { paymentDeadline, paymentLapsed, rentalDays } from '@hold/domain'
 import type { ContactChannel, PriceCategory, RentalState } from '@hold/domain'
 import { asc, count, eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
@@ -55,6 +55,8 @@ export type RenterView = {
   readonly renterName: string | null
   readonly simulated: boolean
   readonly paymentLapsed: boolean
+  // While the fee is unpaid and not yet lapsed, the moment the booking stops keeping its items; otherwise null.
+  readonly paymentKeptUntil: Date | null
   readonly feeOrderId: string | null
   // A walk-in staff let approve the fee and the hold together, in one order (architecture.md section 8.2).
   readonly walkIn: boolean
@@ -122,6 +124,7 @@ export async function renterView(transaction: Transaction, rentalId: string, now
     lines,
     prices,
     paymentLapsed: rental.state === 'pending_payment' && paymentLapsed(rental.createdAt, now),
+    paymentKeptUntil: rental.state === 'pending_payment' && !paymentLapsed(rental.createdAt, now) ? paymentDeadline(rental.createdAt) : null,
   }
 }
 
