@@ -1,6 +1,6 @@
 import { applyNegotiationMove, escalateNegotiation, inShop, isHoldAdvocate, negotiationEvidence, negotiationRecords, RENTER_ADVOCATE, SHOP_ADVOCATE } from '@hold/db'
 import type { Database, DatabaseRole, MoveResult, NegotiationRecords, NegotiationTool } from '@hold/db'
-import { negotiationEnding } from '@hold/domain'
+import { negotiationEnding, SAMPLE_ADVOCATE_RUN_TOKENS } from '@hold/domain'
 import type { AgentActor, NegotiationSide, PassReason } from '@hold/domain'
 import { z } from 'zod'
 import type { AdvocateModel } from './advocate-model.ts'
@@ -19,6 +19,8 @@ import { ADVOCATE_PROMPT_VERSION, MOVE_OPENING, RENTER_ADVOCATE_PROMPT, SHOP_ADV
 // Ceilings on one run, across its moves. A side that reaches one passes, so the claim goes to the owner and nothing is
 // captured. The run and one more move end inside the worker's ten minutes (infra/lib/negotiation-worker.ts).
 export const RUN_LIMITS = { maxCalls: 60, maxTokens: 600_000, maxMilliseconds: 8 * 60_000, perCallMilliseconds: 60_000 } as const
+// A demo's sample claim is argued on the account's shared daily Claude allowance, so its run stops much sooner.
+const tokenCeiling = (records: NegotiationRecords, maxTokens: number) => (records.sample ? Math.min(maxTokens, SAMPLE_ADVOCATE_RUN_TOKENS) : maxTokens)
 type RunLimits = { readonly [Key in keyof typeof RUN_LIMITS]: number }
 
 export const negotiationMessageSchema = z.object({ shopId: z.uuid(), negotiationId: z.uuid() })
@@ -63,7 +65,8 @@ export async function runNegotiation(dependencies: RunDependencies, message: Neg
     // Hold moves only for a side whose mandate names Hold's advocate.
     if (!isHoldAdvocate(mandateOf(records, side)?.grantedTo ?? '')) return { state: 'open', calls, tokens, waitingFor: 'renter_assistant' }
     const spentMilliseconds = dependencies.now().getTime() - started
-    if (calls >= limits.maxCalls || tokens >= limits.maxTokens || spentMilliseconds >= limits.maxMilliseconds) {
+    const maxTokens = tokenCeiling(records, limits.maxTokens)
+    if (calls >= limits.maxCalls || tokens >= maxTokens || spentMilliseconds >= limits.maxMilliseconds) {
       await apply(records, side, 'pass', {}, null, 'ceiling')
       continue
     }
@@ -76,7 +79,7 @@ export async function runNegotiation(dependencies: RunDependencies, message: Neg
       system: side === 'shop' ? SHOP_ADVOCATE_PROMPT : RENTER_ADVOCATE_PROMPT,
       opening: MOVE_OPENING,
       readTool: evidenceReader({ records, side, evidence, photo: dependencies.photos ?? NO_PHOTOS }),
-      limits: { ...moveLimits, maxModelCalls: Math.min(moveLimits.maxModelCalls, limits.maxCalls - calls), maxTokens: Math.min(moveLimits.maxTokens, limits.maxTokens - tokens), maxMilliseconds: Math.min(moveLimits.maxMilliseconds, limits.maxMilliseconds - spentMilliseconds) },
+      limits: { ...moveLimits, maxModelCalls: Math.min(moveLimits.maxModelCalls, limits.maxCalls - calls), maxTokens: Math.min(moveLimits.maxTokens, maxTokens - tokens), maxMilliseconds: Math.min(moveLimits.maxMilliseconds, limits.maxMilliseconds - spentMilliseconds) },
       now: dependencies.now,
       perCallMilliseconds: limits.perCallMilliseconds,
     })

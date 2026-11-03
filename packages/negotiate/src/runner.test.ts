@@ -1,4 +1,4 @@
-import { claims, executions, grantShopSettlement, inShop, negotiationTranscript, openAdvocate, staffRoles, users } from '@hold/db'
+import { claims, executions, grantShopSettlement, inShop, negotiationTranscript, openAdvocate, rentals, staffRoles, users } from '@hold/db'
 import type { Transaction } from '@hold/db'
 import { createTestDatabase } from '@hold/db/testing'
 import type { TestDatabase } from '@hold/db/testing'
@@ -6,6 +6,7 @@ import { connectedAssistant } from '@hold/db/testing/assistant-session'
 import { presentedClaim, twoLinePrices } from '@hold/db/testing/presented-claim'
 import { readyRentalShop } from '@hold/db/testing/ready-rental'
 import type { ReadyRentalShop } from '@hold/db/testing/ready-rental'
+import { SAMPLE_ADVOCATE_RUN_TOKENS } from '@hold/domain'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { AdvocateModel, AdvocateReply, AdvocateRequest, ToolCall } from './advocate-model.ts'
@@ -135,6 +136,21 @@ describe('two advocates negotiating a contested claim', () => {
     expect(outcome).toMatchObject({ state: 'escalated', calls: 1 })
     const transcript = await read((transaction) => negotiationTranscript(transaction, claim.rentalId))
     expect(transcript?.moves.at(-1)).toMatchObject({ kind: 'pass', passReason: 'ceiling' })
+  })
+
+  it('passes at a sample’s lower ceiling on tokens, which a real claim at the same spend never reaches', async () => {
+    // Each call spends 30,000 tokens: a sample's run has room for two, a real claim's for twenty.
+    const heavy = (): AdvocateModel => { const scripted = createScriptedAdvocate(); return { next: async (request, signal) => ({ ...(await scripted.next(request, signal)), inputTokens: 25_000, outputTokens: 5_000 }) } }
+    const ceilingPasses = async (rentalId: string) => (await read((transaction) => negotiationTranscript(transaction, rentalId)))?.moves.filter((move) => move.kind === 'pass' && move.passReason === 'ceiling').length
+    const real = await negotiation({ share: 100, highest: 10_00 })
+    await run(real.negotiationId, { shop: heavy(), renter: heavy() })
+    expect(await ceilingPasses(real.rentalId)).toBe(0)
+    const sample = await negotiation({ share: 100, highest: 10_00 })
+    await database.update(rentals).set({ simulated: true }).where(eq(rentals.id, sample.rentalId))
+    const outcome = await run(sample.negotiationId, { shop: heavy(), renter: heavy() })
+    expect(outcome.state).toBe('escalated')
+    expect(outcome.tokens).toBeLessThanOrEqual(SAMPLE_ADVOCATE_RUN_TOKENS + 30_000)
+    expect(await ceilingPasses(sample.rentalId)).toBeGreaterThan(0)
   })
 
   it('passes when a model only ever reads, at the move’s ceiling', async () => {
