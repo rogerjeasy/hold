@@ -20,9 +20,9 @@ export function AddItemsForm({ itemTypeId, typeName }: { itemTypeId: string; typ
   const one = count.trim() === '1'
 
   return (
-    <details className="group border-t">
-      <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 px-4 font-semibold md:px-5 [&::-webkit-details-marker]:hidden">
-        <Plus aria-hidden="true" className="size-4 transition-transform group-open:rotate-45" />
+    <details className="group border-t border-border/70">
+      <summary className="flex min-h-12 cursor-pointer list-none items-center gap-2 px-4 font-semibold text-primary transition-colors hover:bg-primary/5 md:px-5 [&::-webkit-details-marker]:hidden">
+        <Plus aria-hidden="true" className="size-4 transition-transform duration-300 ease-spring group-open:rotate-45" />
         {t('open')}
       </summary>
       <form action={add} className="grid gap-4 px-4 pb-5 md:px-5">

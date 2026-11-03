@@ -14,7 +14,7 @@ function ItemRow({ item, clock }: { item: CatalogItem; clock: ShopClock }) {
   const t = useTranslations('shop.items.columns')
   const labelId = useId()
   return (
-    <li aria-labelledby={labelId} className={`grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-0.5 border-b px-4 py-3 last:border-b-0 md:px-5 md:py-1.5 ${columns}`}>
+    <li aria-labelledby={labelId} className={`grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-0.5 border-b border-border/70 px-4 py-3 last:border-b-0 md:px-5 md:py-1.5 ${columns}`}>
       <Link id={labelId} href={itemRoutes.item(item.id)} className="inline-flex min-h-11 min-w-0 items-center font-semibold underline-offset-4 wrap-long-words hover:underline">
         {item.label}
       </Link>
@@ -38,7 +38,7 @@ export function ItemList({ items, clock }: { items: readonly CatalogItem[]; cloc
   const t = useTranslations('shop.items.columns')
   return (
     <>
-      <div aria-hidden="true" className={`label hidden border-b px-5 py-2.5 text-[0.6875rem] text-muted-foreground ${columns}`}>
+      <div aria-hidden="true" className={`label hidden border-b border-border/70 px-5 py-2.5 text-[0.6875rem] text-muted-foreground ${columns}`}>
         <span>{t('item')}</span>
         <span>{t('size')}</span>
         <span>{t('serial')}</span>

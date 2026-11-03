@@ -11,6 +11,8 @@ import type { RepairCostRow } from './repair-cost-rows'
 
 registerGridModules()
 
+// The grid sits inside its card, which draws the edge.
+const THEME = holdGridTheme.withParams({ wrapperBorder: false })
 const getRowId = ({ data }: GetRowIdParams<RepairCostRow>) => data.id
 const ROW_HEIGHT = 52
 const HEADER_HEIGHT = 48
@@ -34,7 +36,7 @@ export function RepairCostGrid({ rows, currency }: { rows: readonly RepairCostRo
   return (
     // Sized to its rows: a short list leaves no empty space below it.
     <div className="hold-grid min-w-0" role="region" aria-label={t('title')} style={{ height: HEADER_HEIGHT + rows.length * ROW_HEIGHT + 2 }}>
-      <AgGridReact<RepairCostRow> theme={holdGridTheme} rowData={rowData} columnDefs={columns} getRowId={getRowId} rowHeight={ROW_HEIGHT} headerHeight={HEADER_HEIGHT} ensureDomOrder suppressMovableColumns animateRows={false} />
+      <AgGridReact<RepairCostRow> theme={THEME} rowData={rowData} columnDefs={columns} getRowId={getRowId} rowHeight={ROW_HEIGHT} headerHeight={HEADER_HEIGHT} ensureDomOrder suppressMovableColumns animateRows={false} />
     </div>
   )
 }

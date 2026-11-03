@@ -2,10 +2,12 @@
 
 import { ITEM_CATEGORIES, ITEM_TYPE_LIMITS } from '@hold/domain'
 import type { ItemCategory } from '@hold/domain'
+import { Coins } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Select } from '@/components/ui/select'
+import { FormCard } from '@/components/ui/form-card'
 
 export type Amounts = { readonly value: string; readonly hold: string; readonly dayRate: string }
 
@@ -18,13 +20,13 @@ export function TypeBasics({ name, category, onCategory, amounts, currency }: Ty
   const amount = (field: keyof Amounts, label: string) => (
     <div className="grid content-start gap-1.5">
       <Label htmlFor={field}>{label}</Label>
-      <Input id={field} name={field} inputMode="decimal" defaultValue={amounts[field]} maxLength={20} required />
+      <Input id={field} name={field} inputMode="decimal" className="figures" defaultValue={amounts[field]} maxLength={20} required />
     </div>
   )
 
   return (
     <>
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="surface grid gap-5 p-4 sm:grid-cols-2 md:p-5">
         <div className="grid content-start gap-1.5">
           <Label htmlFor="name">{t('name')}</Label>
           <Input id="name" name="name" defaultValue={name} maxLength={ITEM_TYPE_LIMITS.name} required aria-describedby="name-help" />
@@ -43,15 +45,13 @@ export function TypeBasics({ name, category, onCategory, amounts, currency }: Ty
           </Select>
         </div>
       </div>
-      <fieldset className="grid gap-4">
-        <legend className="text-title">{t('amounts')}</legend>
-        <p className="max-w-prose text-muted-foreground">{t('amountsHelp')}</p>
+      <FormCard title={t('amounts')} help={t('amountsHelp')} icon={Coins}>
         <div className="grid gap-5 sm:grid-cols-3">
           {amount('value', t('value', { currency }))}
           {amount('hold', t('hold', { currency }))}
           {amount('dayRate', t('dayRate', { currency }))}
         </div>
-      </fieldset>
+      </FormCard>
     </>
   )
 }

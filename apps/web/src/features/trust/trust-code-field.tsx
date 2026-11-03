@@ -26,7 +26,7 @@ export function TrustCodeField({ token }: { token: string }) {
   const code = useCodeSender(sendTrustCode, { token, locale })
   const fieldId = useId()
   return (
-    <fieldset className="grid justify-items-start gap-3 border-t pt-4">
+    <fieldset className="grid justify-items-start gap-3 border-t border-border/70 pt-4">
       <legend className="font-semibold">{t('codeTitle')}</legend>
       <p className="max-w-prose text-muted-foreground">{t('codeLead')}</p>
       <Button type="button" onClick={code.send} variant="outline" disabled={code.pending}>
@@ -35,7 +35,7 @@ export function TrustCodeField({ token }: { token: string }) {
       <CodeSent result={code.result} pending={code.pending} onEmailInstead={code.sendByEmail} codeInputId={fieldId} emailWords={{ sent: t('codeSent'), sandbox: t('codeSent') }} wording={wording} />
       <div className="grid gap-1.5">
         <Label htmlFor={fieldId}>{t('code')}</Label>
-        <Input id={fieldId} name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{8}" maxLength={8} required className="max-w-48" />
+        <Input id={fieldId} name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{8}" maxLength={8} required className="figures max-w-48 tracking-[0.2em]" />
       </div>
     </fieldset>
   )

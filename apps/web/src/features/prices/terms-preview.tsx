@@ -1,6 +1,7 @@
 'use client'
 
 import { NextIntlClientProvider, useTimeZone, useTranslations } from 'next-intl'
+import { Eye } from 'lucide-react'
 import { useId, useState } from 'react'
 import { TermsView } from '@/components/booking/terms-view'
 import { Select } from '@/components/ui/select'
@@ -26,9 +27,9 @@ export function TermsPreview({ currency, prices, wearPolicy, terms }: TermsPrevi
   const id = useId()
   const isLocale = (value: string): value is Locale => routing.locales.some((each) => each === value)
   return (
-    <section aria-labelledby={`${id}-title`} className="grid gap-4">
+    <section aria-labelledby={`${id}-title`} className="grid gap-4 rounded-2xl border border-dashed border-border-strong/70 bg-muted/40 p-4 md:p-5">
       <div className="grid gap-1">
-        <h2 id={`${id}-title`} className="text-title">{t('preview.title')}</h2>
+        <h2 id={`${id}-title`} className="flex items-center gap-2 text-[1.0625rem] leading-tight font-extrabold tracking-tight"><Eye aria-hidden="true" className="size-4.5 text-primary" />{t('preview.title')}</h2>
         <p className="text-sm text-muted-foreground">{t('preview.lead')}</p>
       </div>
       <div className="grid max-w-60 gap-1.5">

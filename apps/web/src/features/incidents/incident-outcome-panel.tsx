@@ -20,7 +20,7 @@ export function IncidentOutcomePanel({ token, incident }: { token: string; incid
   const price = incident.offer === null ? '' : formatMoney(money(incident.offer.amountCents, incident.offer.currency), locale)
   if (outcome === 'unsafe') {
     return (
-      <section aria-labelledby="incident-unsafe" className="grid gap-3 border-2 border-destructive p-4 md:p-5">
+      <section aria-labelledby="incident-unsafe" className="grid animate-rise gap-3 rounded-2xl border border-destructive/40 bg-destructive/6 p-4 shadow-card md:p-5">
         <h2 id="incident-unsafe" className="flex items-center gap-2 text-lg font-semibold"><OctagonAlert aria-hidden="true" className="size-5 shrink-0 text-destructive" />{t('unsafe.title')}</h2>
         <p>{t('unsafe.stop')}</p>
         <p>{t('unsafe.contact')}</p>

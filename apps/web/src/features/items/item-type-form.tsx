@@ -49,7 +49,7 @@ export function ItemTypeForm({ currency, values }: { currency: string; values?: 
   }
 
   return (
-    <form action={save} className="grid gap-10">
+    <form action={save} className="grid min-w-0 gap-6">
       <input type="hidden" name="locale" value={locale} />
       <input type="hidden" name="itemTypeId" value={values?.itemTypeId ?? ''} />
       <TypeBasics name={values?.name ?? ''} category={category} onCategory={chooseCategory} amounts={values ?? { value: '', hold: '', dayRate: '' }} currency={currency} />
@@ -64,8 +64,9 @@ export function ItemTypeForm({ currency, values }: { currency: string; values?: 
           views.replace(suggestion(category))
         }}
       />
-      <div className="grid gap-3">
-        <Button type="submit" disabled={pending} className="min-h-12 justify-self-start">
+      {/* The save bar stays in reach while the form scrolls under it, from a tablet up; a phone keeps its screen for the form. */}
+      <div className="glass z-10 md:sticky md:bottom-[calc(var(--shop-bottom-inset,0px)+1rem)] flex flex-wrap items-center gap-3 rounded-2xl border p-2.5 shadow-raised">
+        <Button type="submit" disabled={pending} className="min-h-12">
           {pending ? t('saving') : t('save')}
         </Button>
         <ActionMessage result={result} success={t('saved')} results="shop.items.results" />

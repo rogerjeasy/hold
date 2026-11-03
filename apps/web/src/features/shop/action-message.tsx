@@ -15,8 +15,8 @@ export function ActionMessage({ result, success, results = 'shop.results' }: { r
   if (result === null) return null
   if (result.ok) {
     return (
-      <p role="status" className="flex gap-1.5 text-[0.9375rem]">
-        <CircleCheck aria-hidden="true" className="mt-0.5 size-4.5 shrink-0 text-primary" />
+      <p role="status" className="flex w-fit max-w-full animate-pop gap-2 rounded-xl bg-success/10 px-3 py-2 text-[0.9375rem] font-medium wrap-long-words">
+        <CircleCheck aria-hidden="true" className="mt-0.5 size-4.5 shrink-0 text-success" />
         {success}
       </p>
     )
@@ -27,7 +27,7 @@ export function ActionMessage({ result, success, results = 'shop.results' }: { r
   const sharedKey = reason as Parameters<typeof shared>[0]
   const message = own.has(ownKey) ? own(ownKey, values) : shared.has(sharedKey) ? shared(sharedKey, values) : shared('unavailable')
   return (
-    <p role="alert" className="flex gap-1.5 text-[0.9375rem] text-destructive">
+    <p role="alert" className="flex w-fit max-w-full animate-rise gap-2 rounded-xl bg-destructive/8 px-3 py-2 text-[0.9375rem] font-medium text-destructive wrap-long-words">
       <CircleAlert aria-hidden="true" className="mt-0.5 size-4.5 shrink-0" />
       {message}
     </p>

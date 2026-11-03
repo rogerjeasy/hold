@@ -20,9 +20,8 @@ export default async function Page() {
   const loaded = await inShop(database, { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId }, async (transaction) => ({ settings: await selfReturnSettings(transaction), maxDays: await extensionMaxDays(transaction) }))
   const owner = context.role === 'owner'
   return (
-    <ShopFrame shopName={context.shop.name} title={t('title')}>
-      <div className="grid max-w-5xl gap-12">
-        <p className="max-w-prose text-lead text-pretty">{t('lead')}</p>
+    <ShopFrame shopName={context.shop.name} title={t('title')} description={t('lead')}>
+      <div className="grid max-w-5xl min-w-0 gap-6">
         <SelfReturnSettingsSection shopName={context.shop.name} settings={loaded.settings} canEdit={owner} />
         <ExtensionSettingsSection maxDays={loaded.maxDays} canEdit={owner} />
       </div>

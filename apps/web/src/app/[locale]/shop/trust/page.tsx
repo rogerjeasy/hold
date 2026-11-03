@@ -1,8 +1,8 @@
 import { currentTrustLadder, inShop, shopOutcomes } from '@hold/db'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
-import { readAccessToken } from '@/features/auth/session-cookies'
 import { TrustScreen } from '@/features/trust/trust-screen'
+import { passkeyGate } from '@/server/passkey-gate'
 import { getServices } from '@/server/services'
 import { requireShop } from '@/server/shop-page'
 
@@ -13,11 +13,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Page() {
   const context = await requireShop()
-  const { database, identity } = await getServices()
+  const { database } = await getServices()
   const scope = { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId } as const
-  const [loaded, passkeys] = await Promise.all([
+  const [loaded, gate] = await Promise.all([
     inShop(database, scope, async (transaction) => ({ current: await currentTrustLadder(transaction), ledger: await shopOutcomes(transaction, new Date()) })),
-    identity.listPasskeys((await readAccessToken()) ?? ''),
+    passkeyGate(context),
   ])
   return (
     <TrustScreen
@@ -26,7 +26,7 @@ export default async function Page() {
       current={loaded.current}
       currency={context.shop.currency}
       canPublish={context.role === 'owner'}
-      gate={{ needed: context.passkeyNeeded, hasPasskey: passkeys.ok && passkeys.value.length > 0, email: context.person.email }}
+      gate={gate}
       ledger={loaded.ledger}
     />
   )

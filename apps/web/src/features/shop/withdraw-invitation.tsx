@@ -15,7 +15,7 @@ export function WithdrawInvitation({ invitationId, email }: { invitationId: stri
     <form action={withdraw} className="grid gap-1">
       <input type="hidden" name="invitationId" value={invitationId} />
       <input type="hidden" name="locale" value={locale} />
-      <Button type="submit" variant="ghost" disabled={pending} className="min-h-11" aria-label={t('withdrawFor', { email })}>
+      <Button type="submit" variant="ghost" disabled={pending} className="hover:bg-destructive/10 hover:text-destructive" aria-label={t('withdrawFor', { email })}>
         {t('withdraw')}
       </Button>
       <ActionMessage result={result} success={t('withdrawn')} />

@@ -18,6 +18,9 @@ import { AmountCell, DescriptionCell, PriceGridContext, RemoveCell } from './pri
 
 registerGridModules()
 
+// The grid sits inside the editor's card, which draws the edge.
+const PRICE_THEME = holdGridTheme.withParams({ wrapperBorder: false })
+
 // Choosing cells, copying and pasting them, choosing a kind from a list, the right-click menu and the spreadsheet
 // download: AG Grid Enterprise.
 const MODULES = [CellSelectionModule, ClipboardModule, RichSelectModule, ContextMenuModule, ExcelExportModule]
@@ -106,15 +109,17 @@ export function PriceGrid({ rows, currency, problems, onChange, onRemove, onMove
   }
   return (
     <PriceGridContext.Provider value={state}>
-      <div className="grid min-w-0 gap-3">
-        <Button type="button" variant="outline" className="min-h-11 justify-self-start" disabled={api === null} onClick={download}>
-          <Download aria-hidden="true" />
-          {t('download')}
-        </Button>
+      <div className="grid min-w-0">
+        <div className="flex justify-end border-b border-border/70 px-3 py-1.5">
+          <Button type="button" variant="ghost" disabled={api === null} onClick={download}>
+            <Download aria-hidden="true" />
+            {t('download')}
+          </Button>
+        </div>
         <div className="hold-grid min-w-0" role="region" aria-label={t('grid.label')} onKeyDown={onKeyDown}>
           <AgGridReact<EditorRow>
             modules={MODULES}
-            theme={holdGridTheme}
+            theme={PRICE_THEME}
             popupParent={popupParent}
             rowData={rowData}
             columnDefs={columns}
