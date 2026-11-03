@@ -30,7 +30,8 @@ export async function deliverRenterCode(inLinkShop: InLinkShop, link: { readonly
     const text = `${texts(input.kind, { shop: shop?.name ?? '', code: input.code })}\n\n${await codeLine(input.code)}`
     const email = to.channel === 'email' && emails !== undefined ? { to: to.email, subject: emails('subject'), text: emails('body', { code: input.code }) } : null
     const reached = await reachRenterIn(transaction, link.rentalId, () => ({ purpose: input.kind === 'phone' ? 'phone_code' : 'renter_code', email, text }), to)
-    if (reached === undefined || reached.via === 'none') return new Refusal(to.channel === 'text' ? 'text_unavailable' : 'email_unavailable')
+    // A code held by the day's email allowance reads as one that could not be sent: the renter tries again later.
+    if (reached === undefined || reached.via === 'none') return new Refusal(to.channel === 'text' && reached?.emailHeld !== true ? 'text_unavailable' : 'email_unavailable')
     return {
       via: reached.via === 'text' ? 'text' : 'email',
       phone: reached.via === 'text' && to.channel === 'text' ? maskedPhone(to.phone) : null,

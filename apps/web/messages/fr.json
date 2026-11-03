@@ -1480,7 +1480,8 @@
       "no_price_list": "Publiez d’abord une grille tarifaire. Les réclamations d’exemple utilisent ses prix.",
       "has_rentals": "Cette boutique a déjà des locations, aucun exemple n’a donc été ajouté.",
       "notifications_failed": "PayPal n'a pas accepté l'abonnement. Vérifiez les identifiants de l'app, puis réessayez.",
-      "rate_limited": "Demandé trop souvent. Attendez quelques minutes et réessayez."
+      "rate_limited": "Demandé trop souvent. Attendez quelques minutes et réessayez.",
+      "email_daily_cap": "Les e-mails du jour de cette boutique sont épuisés, l’invitation n’a donc pas été envoyée et rien n’a été conservé. Réessayez demain."
     },
     "security": {
       "title": "Sécurité",
@@ -1666,7 +1667,9 @@
         "paid": "Le prix est réglé. Le même lien montre la location et, au retrait, demande l'empreinte.",
         "walkIn": "Client au comptoir : il approuve les frais et l'empreinte ensemble, en une seule approbation PayPal, puis le vélo est prêt à être remis.",
         "text": "Envoyer par SMS au {phone}",
-        "texted": "Envoyé par SMS au {phone}."
+        "texted": "Envoyé par SMS au {phone}.",
+        "heldTitle": "Le lien n’a pas été envoyé par e-mail",
+        "heldBody": "Les e-mails du jour sont épuisés pour ce locataire ou cette boutique, Hold ne l’a donc pas envoyé. Affichez le lien pour que le locataire le scanne ou le copie. Les e-mails reprennent dans la journée."
       },
       "letGo": {
         "title": "Abandonner cette réservation",
@@ -1696,7 +1699,8 @@
         "rows_mismatched": "Chaque ligne a besoin d'un article et d'un nombre.",
         "not_booked": "Le prix doit être réglé avant de demander l'empreinte.",
         "phone_invalid": "Écrivez le numéro avec son indicatif de pays, par exemple +41 79 123 45 67.",
-        "country_not_texted": "Hold n'envoie pas de SMS dans ce pays. Utilisez un e-mail."
+        "country_not_texted": "Hold n'envoie pas de SMS dans ce pays. Utilisez un e-mail.",
+        "email_daily_cap": "Les e-mails du jour sont épuisés pour ce locataire ou cette boutique, celui-ci n’a donc pas été envoyé. Affichez plutôt le lien ; les e-mails reprennent dans la journée."
       },
       "hold": {
         "title": "Empreinte au retrait",

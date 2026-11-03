@@ -74,6 +74,7 @@ export const sendRenterLinkAgain = shopAction(
     const link = await newRenterLink(rental.endsAt)
     await issueRenterLink(transaction, context.shop.id, rental.id, link, BOOKING_LINK_SCOPES)
     const sent = await sendRenterLink(transaction, rental.id, link.token, readLocale(rental.language), context.shop.name, rental.contactEmail)
+    if (sent === 'held') return new Refusal('email_daily_cap')
     if (sent === null) return new Refusal('email_failed')
     return { via: sent, to: sent === 'text' && contact.phone !== null ? maskedPhone(contact.phone) : (rental.contactEmail ?? '') }
   },

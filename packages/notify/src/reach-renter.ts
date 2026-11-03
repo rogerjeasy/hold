@@ -21,13 +21,17 @@ export type ReachDependencies = {
   readonly recordText: (record: TextRecord) => Promise<void>
   // False once the day's texts to this rental, this number or this shop are spent.
   readonly allowText: (target: { readonly shopId: string; readonly rentalId: string; readonly phone: string }) => Promise<boolean>
+  // False once the day's emails to this rental, this address or this shop, or from every shop, are spent. Absent, every
+  // email goes: the worker's reminders are not asked for by anyone, so they are not counted.
+  readonly allowEmail?: (target: { readonly shopId: string; readonly rentalId: string; readonly to: string; readonly purpose: TextPurpose }) => Promise<boolean>
   // The number replied STOP: the rental goes back to email.
   readonly stopTexts: (rentalId: string) => Promise<void>
   // Pushes the event to the rental's registered phones (architecture.md section 13.9). Absent, nothing is pushed.
   readonly push?: (event: RenterPushEvent) => Promise<void>
 }
 
-export type Reached = { readonly via: 'text' | 'email' | 'none'; readonly simulated: boolean; readonly fellBack: 'limit' | 'unavailable' | 'opted_out' | 'country' | null }
+// emailHeld: the email was not sent because the day's emails are spent, so the caller can say so and offer the link.
+export type Reached = { readonly via: 'text' | 'email' | 'none'; readonly simulated: boolean; readonly fellBack: 'limit' | 'unavailable' | 'opted_out' | 'country' | null; readonly emailHeld?: true }
 
 export async function reachRenter(dependencies: ReachDependencies, target: ReachTarget, message: RenterMessage): Promise<Reached> {
   const reached = await byChoice(dependencies, target, message)
@@ -44,10 +48,10 @@ export async function reachRenter(dependencies: ReachDependencies, target: Reach
 }
 
 async function byChoice(dependencies: ReachDependencies, target: ReachTarget, message: RenterMessage): Promise<Reached> {
-  if (target.channel === 'email') return byEmail(dependencies, message, null)
+  if (target.channel === 'email') return byEmail(dependencies, target, message, null)
   const phone = target.phone
-  if (phone === null || !textAllowed(phone)) return byEmail(dependencies, message, 'country')
-  if (!(await dependencies.allowText({ shopId: target.shopId, rentalId: target.rentalId, phone }))) return byEmail(dependencies, message, 'limit')
+  if (phone === null || !textAllowed(phone)) return byEmail(dependencies, target, message, 'country')
+  if (!(await dependencies.allowText({ shopId: target.shopId, rentalId: target.rentalId, phone }))) return byEmail(dependencies, target, message, 'limit')
   const record = { rentalId: target.rentalId, purpose: message.purpose, toPhone: phone }
   if (target.simulated) {
     await dependencies.recordText({ ...record, status: 'simulated', providerMessageId: null, body: message.text, failure: null })
@@ -60,10 +64,11 @@ async function byChoice(dependencies: ReachDependencies, target: ReachTarget, me
   }
   await dependencies.recordText({ ...record, status: sent.reason === 'opted_out' ? 'opted_out' : 'failed', providerMessageId: null, body: null, failure: sent.reason })
   if (sent.reason === 'opted_out') await dependencies.stopTexts(target.rentalId)
-  return byEmail(dependencies, message, sent.reason)
+  return byEmail(dependencies, target, message, sent.reason)
 }
 
-async function byEmail(dependencies: ReachDependencies, message: RenterMessage, fellBack: Reached['fellBack']): Promise<Reached> {
+async function byEmail(dependencies: ReachDependencies, target: ReachTarget, message: RenterMessage, fellBack: Reached['fellBack']): Promise<Reached> {
+  if (message.email !== null && dependencies.allowEmail !== undefined && !(await dependencies.allowEmail({ shopId: target.shopId, rentalId: target.rentalId, to: message.email.to, purpose: message.purpose }))) return { via: 'none', simulated: false, fellBack, emailHeld: true }
   const sent = message.email !== null && (await dependencies.mailer.send(message.email))
   return { via: sent ? 'email' : 'none', simulated: false, fellBack }
 }

@@ -1480,7 +1480,8 @@
       "no_price_list": "Publica primero una lista de precios. Las reclamaciones de muestra usan sus precios.",
       "has_rentals": "Esta tienda ya tiene alquileres, así que no se añadió ninguna muestra.",
       "notifications_failed": "PayPal no aceptó la suscripción. Revisa las credenciales de la app y vuelve a intentarlo.",
-      "rate_limited": "Demasiadas veces. Espere unos minutos y vuelva a intentarlo."
+      "rate_limited": "Demasiadas veces. Espere unos minutos y vuelva a intentarlo.",
+      "email_daily_cap": "Los correos de hoy de esta tienda se han agotado, así que la invitación no se envió y no se guardó nada. Inténtelo mañana."
     },
     "security": {
       "title": "Seguridad",
@@ -1666,7 +1667,9 @@
         "paid": "El precio está pagado. El mismo enlace muestra el alquiler y, en la recogida, pide la retención.",
         "walkIn": "Cliente en el mostrador: aprueba la tarifa y la retención juntas, con una sola aprobación de PayPal, y la bici queda lista para entregar.",
         "text": "Enviar por SMS a {phone}",
-        "texted": "Enviado por SMS a {phone}."
+        "texted": "Enviado por SMS a {phone}.",
+        "heldTitle": "El enlace no se envió por correo",
+        "heldBody": "Los correos de hoy para este cliente o esta tienda se han agotado, así que Hold no lo envió. Muestre el enlace para que el cliente lo escanee o lo copie. Los correos vuelven a enviarse en un día."
       },
       "letGo": {
         "title": "Abandonar esta reserva",
@@ -1696,7 +1699,8 @@
         "rows_mismatched": "Cada línea necesita un artículo y un número.",
         "not_booked": "El precio debe estar pagado antes de pedir la retención.",
         "phone_invalid": "Escribe el número con su prefijo de país, como +41 79 123 45 67.",
-        "country_not_texted": "Hold no envía SMS a ese país. Usa un correo."
+        "country_not_texted": "Hold no envía SMS a ese país. Usa un correo.",
+        "email_daily_cap": "Los correos de hoy para este cliente o esta tienda se han agotado, así que este no se envió. Muestre el enlace en su lugar; los correos vuelven a enviarse en un día."
       },
       "hold": {
         "title": "Retención en la recogida",

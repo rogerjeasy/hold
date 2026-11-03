@@ -3,6 +3,7 @@ import { claimMessageRecipients, takeRateToken, writeClaimMessage } from '@hold/
 import { renterWroteEmail } from '@hold/notify'
 import { rentalRoutes } from '@/lib/routes'
 import { Refusal } from '@/server/action'
+import { mayEmail } from '@/server/email-allowance'
 import { renterAction, renterInput } from '@/server/renter-access'
 import { pushToStaff } from '@/server/push'
 import { getServices } from '@/server/services'
@@ -20,7 +21,10 @@ export const writeToShop = renterAction({ name: 'renter.claim_message_sent', sco
   try {
     const told = await inLinkShop((transaction) => claimMessageRecipients(transaction, link.rentalId))
     const claimUrl = `${services.config.publicUrl}${rentalRoutes.claim(link.rentalId)}`
-    for (const recipient of told?.recipients ?? []) await services.mailer.send(renterWroteEmail(recipient.email, recipient.language, { shopName: told?.shopName ?? '', renter: told?.renter ?? '—', claimUrl }))
+    for (const recipient of told?.recipients ?? []) {
+      if (!(await inLinkShop((transaction) => mayEmail(transaction, { shopId: link.shopId, rentalId: link.rentalId, to: recipient.email, essential: false })))) continue
+      await services.mailer.send(renterWroteEmail(recipient.email, recipient.language, { shopName: told?.shopName ?? '', renter: told?.renter ?? '—', claimUrl }))
+    }
   } catch {
     // The message is stored and shown on the staff claim page whether or not an email went out.
   }

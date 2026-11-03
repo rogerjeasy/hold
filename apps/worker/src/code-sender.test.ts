@@ -1,3 +1,4 @@
+import { EMAIL_LIMITS } from '@hold/domain'
 import { createMemoryMailer } from '@hold/notify'
 import type { Mailer } from '@hold/notify'
 import { afterEach, describe, expect, it, vi } from 'vitest'
@@ -24,6 +25,16 @@ describe('the code sender Cognito hands each code to', () => {
     expect(mailer.sent).toHaveLength(1)
     expect(mailer.sent[0]?.to).toBe(ADDRESS)
     expect(mailer.sent[0]?.text).toContain(`Your Hold code is ${CODE}.`)
+  })
+
+  // The day's email allowance counts what visitors ask Hold to send (packages/domain EMAIL_LIMITS); a person signing in
+  // must never be locked out by it, so the code sender has no allowance to consult.
+  it('sends every sign-in code, more in a day than any email limit allows, to the same person', async () => {
+    const mailer = createMemoryMailer()
+    const send = createCodeSender({ decrypt, mailer })
+    const moreThanAnyLimit = Math.max(...Object.values(EMAIL_LIMITS)) + 1
+    for (let sent = 0; sent < moreThanAnyLimit; sent += 1) await send(event('CustomEmailSender_Authentication'))
+    expect(mailer.sent).toHaveLength(moreThanAnyLimit)
   })
 
   it('never logs the code or the address', async () => {

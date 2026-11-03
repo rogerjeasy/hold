@@ -4,6 +4,7 @@ import { maskedPhone } from '@hold/domain'
 import { getTranslations } from 'next-intl/server'
 import type { Locale } from '@/i18n/routing'
 import type { InLinkShop } from './renter-access'
+import { mayEmail } from './email-allowance'
 import { getServices } from './services'
 
 export type CopiedDecision = 'claim_accepted' | 'claim_contested' | 'settlement_confirmed' | 'settlement_declined' | 'incident_agreed'
@@ -13,7 +14,7 @@ export type CopiedDecision = 'claim_accepted' | 'claim_contested' | 'settlement_
 async function emailPayer(inLinkShop: InLinkShop, link: { readonly shopId: string; readonly rentalId: string }, compose: (shop: string) => { readonly subject: string; readonly text: string }): Promise<void> {
   await inLinkShop(async (transaction) => {
     const to = await decisionCopyRecipient(transaction, link.rentalId)
-    if (to === undefined) return
+    if (to === undefined || !(await mayEmail(transaction, { shopId: link.shopId, rentalId: link.rentalId, to: to.email, essential: false }))) return
     await (await getServices()).mailer.send({ to: to.email, ...compose((await shopSettings(transaction, link.shopId))?.name ?? '') })
   })
 }
@@ -25,7 +26,7 @@ export async function tellPayerOfPhone(inLinkShop: InLinkShop, link: { readonly 
   const t = await getTranslations({ locale, namespace: 'emails.phoneConfirmed' })
   await inLinkShop(async (transaction) => {
     const due = await phoneNoticeDue(transaction, link.rentalId)
-    if (due === undefined) return
+    if (due === undefined || !(await mayEmail(transaction, { shopId: link.shopId, rentalId: link.rentalId, to: due.email, essential: false }))) return
     const shop = (await shopSettings(transaction, link.shopId))?.name ?? ''
     const phone = maskedPhone(due.phone)
     if (await (await getServices()).mailer.send({ to: due.email, subject: t('subject', { shop }), text: t('body', { shop, phone }) })) await markPhoneNoticeSent(transaction, link.rentalId, new Date())

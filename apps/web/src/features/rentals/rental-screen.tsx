@@ -25,10 +25,10 @@ import { RentalTerms } from './rental-terms'
 // dropOff: the item a renter left at the drop point, while nobody has checked it (architecture.md section 6.13).
 // canErase: the owner, who alone may erase the renter's personal details once the rental has ended (section 15.2).
 // paypal: every call Hold made to PayPal for the rental, shown to everyone who can see it (section 11.9).
-type RentalScreenProps = { shopName: string; clock: ShopClock; rental: RentalDetail; hold: RentalHold | undefined; handovers: readonly RentalHandover[]; returns?: readonly RentalReturn[]; dropOff?: DropOffEntry | undefined; extensions?: readonly RentalExtension[]; texts?: readonly RentalText[]; paypal?: PayPalRecord | undefined; canAct: boolean; canErase?: boolean }
+type RentalScreenProps = { shopName: string; clock: ShopClock; rental: RentalDetail; hold: RentalHold | undefined; handovers: readonly RentalHandover[]; returns?: readonly RentalReturn[]; dropOff?: DropOffEntry | undefined; extensions?: readonly RentalExtension[]; texts?: readonly RentalText[]; paypal?: PayPalRecord | undefined; canAct: boolean; canErase?: boolean; linkHeld?: boolean }
 
 // One rental: where it stands, what was agreed, the renter's link and the hold at pickup.
-export function RentalScreen({ shopName, clock, rental, hold, handovers, returns = [], dropOff, extensions = [], texts = [], paypal, canAct, canErase = false }: RentalScreenProps) {
+export function RentalScreen({ shopName, clock, rental, hold, handovers, returns = [], dropOff, extensions = [], texts = [], paypal, canAct, canErase = false, linkHeld = false }: RentalScreenProps) {
   const t = useTranslations('shop.rentals')
   const claim = useTranslations('claim')
   const records = useTranslations('records')
@@ -67,7 +67,7 @@ export function RentalScreen({ shopName, clock, rental, hold, handovers, returns
             {rental.simulated && returns.some((item) => item.comparisonId !== null) ? <ReturnPanel rentalId={rental.id} returns={returns} canAct={false} /> : null}
             {handingOver ? <HandoverPanel rentalId={rental.id} handovers={handovers} /> : null}
             {asking || hold?.state === 'placed' ? <HoldPanel rentalId={rental.id} state={rental.state} holdCents={rental.holdCents} hold={hold} clock={clock} /> : null}
-            {canAct && live ? <LinkPanel rentalId={rental.id} contact={rental.contactChannel === 'text' && rental.contactPhone !== null ? { channel: 'text', to: rental.contactPhone } : rental.contactEmail === null ? null : { channel: 'email', to: rental.contactEmail }} paid={!waiting} walkIn={waiting && hold?.strategy === 'combined'} /> : null}
+            {canAct && live ? <LinkPanel rentalId={rental.id} contact={rental.contactChannel === 'text' && rental.contactPhone !== null ? { channel: 'text', to: rental.contactPhone } : rental.contactEmail === null ? null : { channel: 'email', to: rental.contactEmail }} paid={!waiting} walkIn={waiting && hold?.strategy === 'combined'} held={linkHeld} /> : null}
             {canAct && waiting ? <LetGo rentalId={rental.id} /> : null}
             {texts.length > 0 ? <TextsPanel texts={texts} clock={clock} /> : null}
             {canErase && RENTAL_ENDED_STATES.includes(rental.state) ? <EraseRenter rentalId={rental.id} erasedAt={rental.renterErasedAt} clock={clock} /> : null}

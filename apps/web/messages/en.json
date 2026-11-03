@@ -1480,7 +1480,8 @@
       "no_price_list": "Publish a price list first. The sample claims use its prices.",
       "has_rentals": "This shop already has rentals, so no samples were added.",
       "notifications_failed": "PayPal did not accept the subscription. Check the app's credentials, then try again.",
-      "rate_limited": "Asked too often. Wait a few minutes and try again."
+      "rate_limited": "Asked too often. Wait a few minutes and try again.",
+      "email_daily_cap": "Today’s emails are used for this shop, so the invitation was not sent and nothing was kept. Try again tomorrow."
     },
     "security": {
       "title": "Security",
@@ -1666,7 +1667,9 @@
         "paid": "The fee is paid. The same link shows the rental and, at pickup, asks for the hold.",
         "walkIn": "A walk-in: the renter approves the fee and the hold together, in one PayPal approval, and the bike is then ready to hand over.",
         "text": "Text it to {phone}",
-        "texted": "Texted to {phone}."
+        "texted": "Texted to {phone}.",
+        "heldTitle": "The link was not emailed",
+        "heldBody": "Today’s emails are used for this renter or this shop, so Hold did not send it. Show the link and let the renter scan it or copy it. Emails start again within a day."
       },
       "letGo": {
         "title": "Let go of this booking",
@@ -1696,7 +1699,8 @@
         "rows_mismatched": "Every line needs an item and a number.",
         "not_booked": "The fee must be paid before the hold is asked for.",
         "phone_invalid": "Write the number with its country code, such as +41 79 123 45 67.",
-        "country_not_texted": "Hold does not text that country. Use an email instead."
+        "country_not_texted": "Hold does not text that country. Use an email instead.",
+        "email_daily_cap": "Today’s emails are used for this renter or this shop, so this one was not sent. Show the link instead; emails start again within a day."
       },
       "hold": {
         "title": "Hold at pickup",
