@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto'
 import { inShop, issueRenterLink, rentalDetail } from '@hold/db'
 import { verifyEvidenceStatement } from '@hold/trust/evidence-verify'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
+import { tampered } from '@/test/tampered'
 
 process.env['HOLD_ENVIRONMENT'] = 'test'
 process.env['HOLD_COOKIE_KEY'] = Buffer.alloc(32, 23).toString('base64')
@@ -58,7 +59,7 @@ describe('checking the evidence from a renter’s link', () => {
     const rental = await inspectedRental(jar, shop)
     jar.clear()
     const itemId = await itemOf(rental.rentalId)
-    expect(await checkEvidence(null, form({ token: `x${rental.token.slice(1)}`, itemId, locale: 'en' }))).toMatchObject({ ok: false, failure: 'link_invalid' })
+    expect(await checkEvidence(null, form({ token: tampered(rental.token), itemId, locale: 'en' }))).toMatchObject({ ok: false, failure: 'link_invalid' })
     const { newRenterLink } = await import('@/server/renter-links')
     const limited = await newRenterLink(new Date())
     await inShop((await getServices()).database, { role: 'hold_app', shopId: shop.shopId }, (transaction) => issueRenterLink(transaction, shop.shopId, rental.rentalId, limited, []))

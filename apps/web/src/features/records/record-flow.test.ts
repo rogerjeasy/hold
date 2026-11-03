@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { beforeAll, beforeEach, expect, it, vi } from 'vitest'
 import { claims, evidencePackFor, evidenceVersions, inShop, issueRenterLink, renterLinks, reserveEvidencePack, staffRoles } from '@hold/db'
+import { tampered } from '@/test/tampered'
 process.env['HOLD_ENVIRONMENT'] = 'test'
 process.env['HOLD_COOKIE_KEY'] = Buffer.alloc(32, 21).toString('base64')
 const jar = new Map<string, string>()
@@ -43,7 +44,7 @@ it('denies a valid token for another rental, forged, revoked and expired links',
   if (!requested.ok) throw new Error(JSON.stringify(requested))
   const fields = { token: rental.token, packId: requested.value.packId, kind: 'pdf', locale: 'en' }
   expect(await downloadRenterRecord(null, form(fields))).toMatchObject({ ok: false })
-  expect(await downloadRenterRecord(null, form({ ...fields, token: `x${rental.token.slice(1)}` }))).toMatchObject({ ok: false, failure: 'link_invalid' })
+  expect(await downloadRenterRecord(null, form({ ...fields, token: tampered(rental.token) }))).toMatchObject({ ok: false, failure: 'link_invalid' })
   const { database } = await getServices()
   await inShop(database, { role: 'hold_app', shopId: shop.shopId }, (transaction) => transaction.update(renterLinks).set({ expiresAt: new Date('2020-01-01') }))
   expect(await downloadRenterRecord(null, form({ ...fields, token: other.token }))).toMatchObject({ ok: false, failure: 'link_invalid' })
