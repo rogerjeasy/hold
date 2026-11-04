@@ -44,6 +44,27 @@ test('an owner adds a passkey, confirms with it, then sets up prices, staff and 
   await expect(page.getByRole('region', { name: 'Set up your shop' }).getByText('Done.')).toHaveCount(3)
 })
 
+// A long address with nothing to break at once pushed the Staff page sideways on a phone (audit finding F-M2).
+test('a long invited address wraps inside the Staff page on a phone', async ({ page }) => {
+  await addVirtualAuthenticator(page)
+  await signUpAs(page, newEmail())
+  await page.goto('/shop/security')
+  await page.getByRole('button', { name: 'Add a passkey on this device' }).click()
+  await expect(page.getByRole('listitem').filter({ hasText: 'Passkey 1' })).toBeVisible()
+  await page.goto('/shop/staff')
+  await page.getByRole('button', { name: 'Confirm with my passkey' }).click()
+  const address = 'averyveryverylongcounterstaffaddresswithnobreaks@ribeirabicicletasecaiaquesdodouro.example'
+  await page.getByLabel('Their work email').fill(address)
+  await page.getByRole('button', { name: 'Send the invitation' }).click()
+  await expect(page.getByText('Invitation sent.')).toBeVisible()
+  await page.setViewportSize({ width: 360, height: 780 })
+  await page.reload()
+  await expect(page.getByText(address)).toBeVisible()
+  await expectNoSidewaysScroll(page)
+  await expectNothingOutsideViewport(page)
+  await page.screenshot({ path: test.info().outputPath('staff-invited-360.png'), fullPage: true })
+})
+
 test('the header says "Your shop" once signed in', async ({ page }) => {
   await signUpAs(page, newEmail())
   await page.goto('/')
