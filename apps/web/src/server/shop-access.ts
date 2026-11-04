@@ -1,7 +1,7 @@
 import 'server-only'
 import { money, needsStrongSignIn, utcDay } from '@hold/domain'
 import type { StaffRole } from '@hold/domain'
-import { findPerson, inShop, shopSettings, staffRoleOf, takeRateToken } from '@hold/db'
+import { personInShop, takeRateToken } from '@hold/db'
 import type { Person, RateLimit, ShopSettings, Transaction } from '@hold/db'
 import { cache } from 'react'
 import { z } from 'zod'
@@ -25,6 +25,8 @@ export type ShopContext = {
   readonly shop: ShopSettings
   readonly role: StaffRole
   readonly approvalLimitCents: number
+  // Whether the shop has connected PayPal in the mode this deployment runs in, read with the rest, for the frame.
+  readonly paypalConnected: boolean
   readonly factor: SessionFactor
   // This person must confirm with a passkey before changing the shop, and this session has not. Always so for the
   // phone, whose session no passkey proves: every step that asks for one is refused there and done on the web.
@@ -47,32 +49,28 @@ type Credential = {
 
 // The one core both sessions share: the person the token names, their role in the shop, and their approval limit.
 async function accessWith(credential: Credential): Promise<ShopAccess> {
-  const { identity, database } = await getServices()
+  const { identity, database, config } = await getServices()
   const verified = await identity.verifyAccessToken(credential.accessToken)
   if (!verified.ok) return { kind: 'signed_out' }
-  const person = await findPerson(database, verified.value.subject)
-  if (person === undefined || person.shops.length === 0) return { kind: 'no_shop', person }
-  const named = person.shops.find((shop) => shop.shopId === credential.shopId)
-  const membership = credential.exactShop ? named : (named ?? person.shops[0])
-  if (membership === undefined) return { kind: 'no_shop', person }
-  const scope = { role: 'hold_app', shopId: membership.shopId, userId: person.userId } as const
-  const loaded = await inShop(database, scope, async (transaction) => ({
-    settings: await shopSettings(transaction, membership.shopId),
-    staff: await staffRoleOf(transaction, person.userId),
-  }))
-  if (loaded.settings === undefined || loaded.staff === undefined) return { kind: 'no_shop', person }
+  const choose = (person: Person) => {
+    const named = person.shops.find((shop) => shop.shopId === credential.shopId)
+    return credential.exactShop ? named : (named ?? person.shops[0])
+  }
+  const { person, entry } = await personInShop(database, verified.value.subject, choose, config.paypalMode)
+  if (person === undefined || entry === undefined) return { kind: 'no_shop', person }
   const factor = await credential.factor(verified.value.subject)
-  const threshold = loaded.settings.ownerApprovalThresholdCents
-  const currency = loaded.settings.currency ?? 'XXX'
-  const strongNeeded = needsStrongSignIn(loaded.staff.role, money(loaded.staff.approvalLimitCents, currency), threshold === null ? undefined : money(threshold, currency))
+  const threshold = entry.settings.ownerApprovalThresholdCents
+  const currency = entry.settings.currency ?? 'XXX'
+  const strongNeeded = needsStrongSignIn(entry.role, money(entry.approvalLimitCents, currency), threshold === null ? undefined : money(threshold, currency))
   return {
     kind: 'in_shop',
     context: {
       subject: verified.value.subject,
       person,
-      shop: loaded.settings,
-      role: loaded.staff.role,
-      approvalLimitCents: loaded.staff.approvalLimitCents,
+      shop: entry.settings,
+      role: entry.role,
+      approvalLimitCents: entry.approvalLimitCents,
+      paypalConnected: entry.paypalConnected,
       factor,
       passkeyNeeded: factor === 'bearer' || (strongNeeded && factor !== 'passkey'),
     },

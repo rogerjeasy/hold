@@ -23,21 +23,30 @@ export type Scope = {
 // Opens a transaction in which row-level security sees only the scope's shop. Every setting ends with the transaction.
 // The role is set even where the connection already logs in as it, so a local owner connection behaves the same.
 export function inShop<Result>(database: Database, scope: Scope, work: (transaction: Transaction) => Promise<Result>): Promise<Result> {
-  if (!DATABASE_ROLES.includes(scope.role)) {
-    throw new RangeError(`Unknown database role ${scope.role}.`)
-  }
+  checkRole(scope.role)
   return database.transaction(async (transaction) => {
-    await transaction.execute(
-      sql`select set_config('role', ${scope.role}, true), set_config('hold.shop_id', ${scope.shopId}, true), set_config('hold.user_id', ${scope.userId ?? ''}, true)`,
-    )
+    await enterShop(transaction, scope)
     return work(transaction)
   })
 }
 
-// A transaction that names no shop, so row-level security shows it nothing. It can only call the functions that
-// answer before a shop is chosen, such as finding which shops a signed-in person belongs to.
-export function outsideShop<Result>(database: Database, work: (transaction: Transaction) => Promise<Result>, role: DatabaseRole = 'hold_app'): Promise<Result> {
+// Binds a transaction already open to the scope's shop, as inShop does as it opens one: for a transaction that first
+// had to find out which shop, such as the one every signed-in page starts with (accounts.ts).
+export async function enterShop(transaction: Transaction, scope: Scope): Promise<void> {
+  checkRole(scope.role)
+  await transaction.execute(
+    sql`select set_config('role', ${scope.role}, true), set_config('hold.shop_id', ${scope.shopId}, true), set_config('hold.user_id', ${scope.userId ?? ''}, true)`,
+  )
+}
+
+function checkRole(role: DatabaseRole): void {
   if (!DATABASE_ROLES.includes(role)) throw new RangeError(`Unknown database role ${role}.`)
+}
+
+// A transaction that names no shop, so row-level security shows it nothing. It can only call the functions that
+// answer before a shop is chosen, such as finding which shops a signed-in person belongs to, until enterShop binds it.
+export function outsideShop<Result>(database: Database, work: (transaction: Transaction) => Promise<Result>, role: DatabaseRole = 'hold_app'): Promise<Result> {
+  checkRole(role)
   return database.transaction(async (transaction) => {
     await transaction.execute(sql`select set_config('role', ${role}, true)`)
     return work(transaction)

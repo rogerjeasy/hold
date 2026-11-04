@@ -1,5 +1,5 @@
-export { findPerson, registerOwner } from './accounts.ts'
-export type { NewOwner, Person, PersonShop, RegisteredOwner } from './accounts.ts'
+export { findPerson, personInShop, registerOwner } from './accounts.ts'
+export type { NewOwner, Person, PersonShop, RegisteredOwner, ShopEntry } from './accounts.ts'
 export { currentPriceList, priceListVersions, publishPriceList } from './price-list-repository.ts'
 export type { PriceListVersion, PublishedPriceList, PublishResult } from './price-list-repository.ts'
 export { rateTokensLeft, takeRateToken, takeRateTokenIn } from './rate-limit.ts'

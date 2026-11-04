@@ -1,9 +1,11 @@
 import { eq, sql } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { findPerson, registerOwner } from './accounts.ts'
-import type { NewOwner } from './accounts.ts'
+import { findPerson, personInShop, registerOwner } from './accounts.ts'
+import type { NewOwner, Person, PersonShop } from './accounts.ts'
 import { auditLog, shops, users } from './schema/index.ts'
 import { inShop } from './scope.ts'
+import { savePayPalAccount } from './shop-repository.ts'
+import { countStatements } from './testing/statement-count.ts'
 import { createTestDatabase } from './testing/test-database.ts'
 import type { TestDatabase } from './testing/test-database.ts'
 
@@ -86,5 +88,39 @@ describe('finding a person', () => {
   it('finds a person with an account and no shop', async () => {
     await database.execute(sql`select hold_register_user('cognito-sub-staff', 'staff@example.test', null, 'en')`)
     expect(await findPerson(database, 'cognito-sub-staff')).toMatchObject({ email: 'staff@example.test', name: null, shops: [] })
+  })
+})
+
+describe('entering a shop as a signed-in person', () => {
+  const first = (person: Person) => person.shops[0]
+
+  it('reads the person, the shop they chose, their role there and whether PayPal is connected, in one transaction of four statements', async () => {
+    const { shopId } = await registerOwner(database, { ...owner, subject: 'cognito-sub-entry', email: 'entry@ribeirabikes.example', shop: { name: 'Entry Bikes', timeZone: 'Europe/Lisbon' } })
+    await inShop(database, { role: 'hold_app', shopId }, (transaction) => savePayPalAccount(transaction, shopId, 'sandbox', 'hold/paypal/shops/entry/sandbox'))
+
+    const { result, count } = await countStatements(database, () => personInShop(database, 'cognito-sub-entry', first, 'sandbox'))
+
+    expect(result.person).toMatchObject({ email: 'entry@ribeirabikes.example', shops: [{ shopId, name: 'Entry Bikes', role: 'owner' }] })
+    expect(result.entry).toMatchObject({ settings: { id: shopId, name: 'Entry Bikes', timeZone: 'Europe/Lisbon' }, role: 'owner', approvalLimitCents: 0, paypalConnected: true })
+    // Choosing the role, finding the person, binding the shop, then the shop with the role: every page waits for these.
+    expect(count).toEqual({ statements: 4, transactions: 1, longest: 4 })
+    expect((await personInShop(database, 'cognito-sub-entry', first, 'live')).entry?.paypalConnected).toBe(false)
+  })
+
+  it('enters no shop the person has no role in, even when it is the one chosen', async () => {
+    const other = await registerOwner(database, { ...owner, subject: 'cognito-sub-elsewhere', email: 'elsewhere@example.test', shop: { name: 'Elsewhere Bikes', timeZone: 'UTC' } })
+    await registerOwner(database, { ...owner, subject: 'cognito-sub-chooser', email: 'chooser@example.test', shop: { name: 'Chooser Bikes', timeZone: 'UTC' } })
+    const elsewhere = (): PersonShop => ({ shopId: other.shopId, name: 'Elsewhere Bikes', role: 'owner' })
+
+    const { person, entry } = await personInShop(database, 'cognito-sub-chooser', elsewhere, 'sandbox')
+
+    expect(person?.email).toBe('chooser@example.test')
+    expect(entry).toBeUndefined()
+  })
+
+  it('enters nothing for a subject Hold has not seen, or for a person with no shop', async () => {
+    expect(await personInShop(database, 'cognito-sub-nobody', first, 'sandbox')).toEqual({ person: undefined, entry: undefined })
+    await database.execute(sql`select hold_register_user('cognito-sub-shopless', 'shopless@example.test', null, 'en')`)
+    expect(await personInShop(database, 'cognito-sub-shopless', first, 'sandbox')).toMatchObject({ person: { shops: [] }, entry: undefined })
   })
 })
