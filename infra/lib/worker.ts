@@ -187,10 +187,12 @@ export function createWorker(stack: Stack, props: WorkerProps): { readonly relay
   const media = workerFunction(stack, 'MediaWorker', name('worker', 'media'), 'media-lambda.ts', role, environment, { memorySize: 1536 })
   const relay = workerFunction(stack, 'OutboxRelayWorker', name('worker', 'outbox', 'relay'), 'outbox-relay-lambda.ts', role, environment)
 
+  // The money queues are FIFO, grouped by hold or rental. One message at a time: in a batch, a failed message is
+  // tried again while the later ones in its group are already done, which breaks the order the group promises.
+  events.addEventSource(new SqsEventSource(queue('paypal-events'), { batchSize: 1, reportBatchItemFailures: true }))
+  executions.addEventSource(new SqsEventSource(queue('executions'), { batchSize: 1, reportBatchItemFailures: true }))
+  upkeep.addEventSource(new SqsEventSource(queue('upkeep'), { batchSize: 1, reportBatchItemFailures: true }))
   // A message whose work failed is named back, so only it is tried again; the rest of the batch is done.
-  events.addEventSource(new SqsEventSource(queue('paypal-events'), { batchSize: 5, reportBatchItemFailures: true }))
-  executions.addEventSource(new SqsEventSource(queue('executions'), { batchSize: 5, reportBatchItemFailures: true }))
-  upkeep.addEventSource(new SqsEventSource(queue('upkeep'), { batchSize: 5, reportBatchItemFailures: true }))
   media.addEventSource(new SqsEventSource(queue('media'), { batchSize: 2, reportBatchItemFailures: true }))
 
   relay.grantInvoke(props.schedulerRole)

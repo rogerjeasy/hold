@@ -1,4 +1,4 @@
-import { queueSettlementReceipts, resolveClaimSettlement, mayExecuteSettlement, beginClaimInvoice, beginSettlementRenewal, findExecution, confirmClaimCaptured, confirmReturnReleased, failExecution, saveSettlementResource, settlementWork } from '@hold/db'
+import { CAPTURE_DECLINED_ONCE, noteCaptureDeclined, queueSettlementReceipts, resolveClaimSettlement, mayExecuteSettlement, beginClaimInvoice, beginSettlementRenewal, findExecution, confirmClaimCaptured, confirmReturnReleased, failExecution, saveSettlementResource, settlementWork } from '@hold/db'
 import type { StoredExecution } from '@hold/db'
 import { money, planCharge } from '@hold/domain'
 import type { PayPalHolds } from '@hold/paypal'
@@ -46,9 +46,18 @@ export async function settleReturn(dependencies: SettleDependencies, shopId: str
   if (work.claim?.state !== 'charging' || work.execution.amountCents === null || work.execution.currency === null) return 'nothing_to_do'
   let captureId = resources['capture']
   if (captureId === undefined) {
-    const captured = await paypal.captureFromHold({ authorizationId, amount: money(work.execution.amountCents, work.execution.currency), finalCapture: true, idempotencyKey: execution.idempotencyKey })
+    // A decline can pass: a capture after the authorization's assured period, when its renewal failed, is not promised
+    // the funds. So the first decline waits for the recheck to try once more, and only the second goes to the invoice.
+    // PayPal answers a repeated PayPal-Request-Id with its first answer, so the second try has a key of its own, as
+    // fixed as the first, and a repeat of it captures nothing twice.
+    const triedAgain = work.execution.lastError === CAPTURE_DECLINED_ONCE
+    const captured = await paypal.captureFromHold({ authorizationId, amount: money(work.execution.amountCents, work.execution.currency), finalCapture: true, idempotencyKey: triedAgain ? `${execution.idempotencyKey}-again` : execution.idempotencyKey })
     if (!captured.ok) {
       if (TRANSIENT.has(captured.error.kind)) throw new PayPalUnavailable(captured.error.kind)
+      if (captured.error.kind === 'declined' && !triedAgain) {
+        await inWorkerShop(dependencies, shopId, (transaction) => noteCaptureDeclined(transaction, execution.id, dependencies.now()))
+        return 'waiting'
+      }
       if (['declined', 'hold_expired', 'hold_voided'].includes(captured.error.kind)) {
         return failedCapture(captured.error.kind)
       }

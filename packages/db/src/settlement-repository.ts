@@ -26,6 +26,16 @@ export async function saveSettlementResource(transaction: Transaction, execution
   await transaction.update(executions).set({ state: 'submitted', paypalResourceIds: { ...work.execution.paypalResourceIds, [kind]: resourceId }, updatedAt: now }).where(eq(executions.id, executionId))
 }
 
+// A capture PayPal declined for the first time (architecture.md section 7.5). It waits, submitted, for the recheck
+// (section 7.6) to run it once more, and only a second decline goes to the invoice.
+export const CAPTURE_DECLINED_ONCE = 'declined_once'
+
+export async function noteCaptureDeclined(transaction: Transaction, executionId: string, now: Date) {
+  const work = await settlementWork(transaction, executionId)
+  if (work === undefined || work.execution.action !== 'capture' || !['pending', 'submitted'].includes(work.execution.state)) return
+  await transaction.update(executions).set({ state: 'submitted', lastError: CAPTURE_DECLINED_ONCE, attempts: work.execution.attempts + 1, updatedAt: now }).where(eq(executions.id, executionId))
+}
+
 export async function closeSettledRental(transaction: Transaction, rentalId: string, holdState: Parameters<typeof mayCloseRental>[0], now: Date) {
   const [rental] = await transaction.select().from(rentals).where(eq(rentals.id, rentalId)).for('update')
   const [claim] = await transaction.select({ state: claims.state }).from(claims).where(eq(claims.rentalId, rentalId))

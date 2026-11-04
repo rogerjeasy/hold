@@ -63,7 +63,10 @@ describe('closing a rental', () => {
 
   it('shows a decided claim open while its invoice waits, unpaid once due, and settled once paid', async () => {
     const rentalId = await returned()
-    await runExecution(declining(), { shopId: fixture.shopId, executionId: await acceptedClaim(rentalId) })
+    const executionId = await acceptedClaim(rentalId)
+    // Declined twice: the first decline is tried once more before the invoice.
+    await runExecution(declining(), { shopId: fixture.shopId, executionId })
+    await runExecution(declining(), { shopId: fixture.shopId, executionId })
     expect(await outcomeOf(rentalId)).toMatchObject({ outcome: 'open', unpaidAfter: addDays(NOW, 30) })
     const bill = (await act((transaction) => transaction.select().from(invoices).where(eq(invoices.rentalId, rentalId))))[0]
     const paid: SettleDependencies = { ...dependencies(), paypalFor: () => ({ ...fixture.fake, invoiceClaim: async (input) => { const result = await fixture.fake.invoiceClaim(input); return result.ok ? { ...result, value: { ...result.value, status: 'paid' as const } } : result } }) }

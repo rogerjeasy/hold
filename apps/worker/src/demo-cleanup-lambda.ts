@@ -1,7 +1,7 @@
 import { createDemoAccountRemoval } from '@hold/auth'
 import { createDataApiDatabase } from '@hold/db/data-api'
 import { z } from 'zod'
-import { retireOldDemos } from './demo-cleanup.ts'
+import { runDailyCleanup } from './demo-cleanup.ts'
 
 // Run once a day by EventBridge Scheduler (infra/lib/demo-cleanup.ts), with a role of its own: the database as
 // hold_worker, and deleting a user in Hold's user pool, nothing else.
@@ -22,6 +22,6 @@ const dependencies = {
   now: () => new Date(),
 }
 
-export async function handler(): Promise<{ readonly retired: number; readonly failed: number }> {
-  return retireOldDemos(dependencies)
+export async function handler(): Promise<{ readonly retired: number; readonly failed: number; readonly prunedLimits: number }> {
+  return runDailyCleanup(dependencies)
 }

@@ -444,7 +444,7 @@ When the owner rejects a proposal with a reason, the agent drafts a rule from it
 | Replacement hold | Orders v2, authorize | Direct REST, after approval |
 | Invoice a balance | Invoicing v2, create and send | Direct REST, by the spine once a charge is settled |
 | Remind about an invoice | Hold's own email reminder | Automatic tier; PayPal's `send_invoice_reminder` is not used |
-| Refund part of a charge | Payments v2, refund | Direct REST, from a decided claim; not from the queue in this build |
+| Refund a charge | Payments v2, refund | Direct REST, from a decided claim, for the whole capture; refunding part of a charge is planned. Not from the queue in this build |
 | Answer a dispute | Disputes v1, provide evidence | Direct REST, after approval |
 
 **How the MCP server is connected.** The worker runs an MCP client and connects to `https://mcp.sandbox.paypal.com/sse` over server-sent events with the shop's own access token (the `/http` path answers 404; `tech-stack.md` trial 10). It lists the server's tools, keeps only those on Hold's read allowlist, and offers them to the model through Hold's gateway. Two reasons:

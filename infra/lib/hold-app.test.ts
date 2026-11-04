@@ -404,6 +404,12 @@ describe('the worker', () => {
     work.hasResourceProperties('AWS::Lambda::EventSourceMapping', { FunctionResponseTypes: ['ReportBatchItemFailures'] })
   })
 
+  it('takes one message at a time from each money queue, so a failure cannot let a later message in the same group run before an earlier one', () => {
+    for (const worker of ['PayPalEventsWorker', 'ExecutionsWorker', 'UpkeepWorker']) {
+      work.hasResourceProperties('AWS::Lambda::EventSourceMapping', { FunctionName: { Ref: Match.stringLikeRegexp(`^${worker}`) }, BatchSize: 1, FunctionResponseTypes: ['ReportBatchItemFailures'] })
+    }
+  })
+
   it('relays the outbox every minute, through the scheduler, in Hold’s schedule group', () => {
     work.hasResourceProperties('AWS::Scheduler::Schedule', { Name: 'hold-outbox-relay', ScheduleExpression: 'rate(1 minute)', GroupName: Match.anyValue(), FlexibleTimeWindow: { Mode: 'OFF' } })
   })

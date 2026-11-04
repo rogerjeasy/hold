@@ -36,3 +36,15 @@ export async function rateTokensLeftIn(transaction: Transaction, limit: RateLimi
   // The RDS Data API may answer an integer as text.
   return Number(row?.left ?? 0)
 }
+
+// Gives back a token taken in the current window, for work that turned out not to be what the limit counts.
+export async function returnRateToken(database: Database, limit: RateLimit, subject: string): Promise<void> {
+  await outsideShop(database, (transaction) => transaction.execute(sql`select hold_return_rate_token(${bucketOf(limit, subject)})`))
+}
+
+// Removes the rows of windows long over, as the worker, the only role allowed to, and says how many went.
+export async function pruneRateLimits(database: Database): Promise<number> {
+  const [row] = await outsideShop(database, (transaction) => transaction.select({ pruned: sql<number | string>`pruned` }).from(sql`hold_prune_rate_limits() as removed(pruned)`), 'hold_worker')
+  // The RDS Data API may answer an integer as text.
+  return Number(row?.pruned ?? 0)
+}

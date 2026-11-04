@@ -10,6 +10,7 @@ import { checkLateExtensionPayment } from './extension-capture.ts'
 import { applyFeeEvent } from './fee-capture.ts'
 import { applyHoldEvent } from './hold-placement.ts'
 import { applyReturnedInPayPal } from './returned-in-paypal.ts'
+import { verifyPayPalDelivery } from './webhook-verification.ts'
 
 // Applying an event PayPal delivered (architecture.md section 8.5). It is verified with PayPal first, and then only
 // the resource it names is read back from PayPal: nothing in the event's body is believed. Applying it again changes
@@ -22,8 +23,6 @@ const eventSchema = z.object({
 })
 
 export type EventOutcome = 'applied' | 'ignored' | 'rejected'
-
-const header = (headers: Readonly<Record<string, string>>, name: string) => headers[name] ?? ''
 
 async function webhookOf(transaction: Transaction, accountId: string) {
   const [account] = await transaction.select({ webhookId: paypalAccounts.webhookId, credentialReference: paypalAccounts.credentialReference }).from(paypalAccounts).where(eq(paypalAccounts.id, accountId))
@@ -49,18 +48,7 @@ export async function applyPayPalEvent(dependencies: SettleDependencies, message
     await mark('rejected', 'ignored')
     return 'rejected'
   }
-  const { headers } = event
-  const verified = await paypal.verifyWebhook({
-    webhookId: account.webhookId,
-    body: event.rawBody,
-    headers: {
-      transmissionId: header(headers, 'paypal-transmission-id'),
-      transmissionTime: header(headers, 'paypal-transmission-time'),
-      transmissionSig: header(headers, 'paypal-transmission-sig'),
-      certUrl: header(headers, 'paypal-cert-url'),
-      authAlgo: header(headers, 'paypal-auth-algo'),
-    },
-  })
+  const verified = await verifyPayPalDelivery(paypal, account.webhookId, event.rawBody, event.headers)
   if (!verified.ok) throw new PayPalUnavailable(verified.error.kind)
   if (verified.value === 'rejected') {
     await mark('rejected', 'ignored')

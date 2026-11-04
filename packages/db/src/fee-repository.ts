@@ -61,13 +61,22 @@ export async function confirmFeeCapture(transaction: Transaction, executionId: s
   const [execution] = await transaction.select().from(executions).where(eq(executions.id, executionId)).for('update')
   if (execution === undefined) return { ok: false, reason: 'not_found' }
   if (execution.state === 'confirmed') return { ok: true }
-  const fail = async (reason: 'amount_mismatch' | 'not_completed', detail: string) => {
-    await transaction.update(executions).set({ state: 'failed', attempts: execution.attempts + 1, lastError: detail, updatedAt: now }).where(eq(executions.id, executionId))
-    return { ok: false, reason } as const
+  if (payment.status !== 'completed') {
+    await transaction.update(executions).set({ state: 'failed', attempts: execution.attempts + 1, lastError: `PayPal shows the capture as ${payment.status}.`, updatedAt: now }).where(eq(executions.id, executionId))
+    return { ok: false, reason: 'not_completed' }
   }
-  if (payment.status !== 'completed') return fail('not_completed', `PayPal shows the capture as ${payment.status}.`)
-  // PayPal's amount must be the fee the rental was booked for, to the cent.
-  if (payment.amount.cents !== execution.amountCents || payment.amount.currency !== execution.currency) return fail('amount_mismatch', `PayPal captured ${String(payment.amount.cents)} ${payment.amount.currency}.`)
+  // PayPal's amount must be the fee the rental was booked for, to the cent, or nothing is booked. Money moved all the
+  // same, and PayPal's record is the truth: the money log gets the line PayPal shows, under its capture, and the
+  // operations run shows the difference to a person (shopSnapshot). Nothing is refunded on its own.
+  if (payment.amount.cents !== execution.amountCents || payment.amount.currency !== execution.currency) {
+    await transaction
+      .insert(moneyEvents)
+      .values({ shopId: execution.shopId, rentalId: execution.rentalId, kind: 'fee_captured', currency: payment.amount.currency, amountCents: payment.amount.cents, paypalReference: payment.captureId, occurredAt: now })
+      .onConflictDoNothing()
+    await transaction.insert(auditLog).values({ shopId: execution.shopId, actorKind: 'system', action: 'fee.capture_mismatch', subjectKind: 'rental', subjectId: execution.rentalId, detail: { captured: payment.amount, captureId: payment.captureId, expectedCents: execution.amountCents }, at: now })
+    await transaction.update(executions).set({ state: 'failed', attempts: execution.attempts + 1, lastError: 'amount_mismatch', paypalResourceIds: { ...execution.paypalResourceIds, capture: payment.captureId }, updatedAt: now }).where(eq(executions.id, executionId))
+    return { ok: false, reason: 'amount_mismatch' }
+  }
 
   const [renter] = await transaction
     .select({ id: sql<string>`renter.id` })

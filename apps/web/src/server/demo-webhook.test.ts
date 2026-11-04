@@ -67,13 +67,13 @@ async function bookedAndApproved(): Promise<{ rentalId: string; orderId: string 
 const stateOf = async (rentalId: string) => (await inShop((await getServices()).database, { role: 'hold_app', shopId: demoShopId }, (transaction) => rentalDetail(transaction, rentalId, new Date())))?.state
 
 describe('an event of the demo’s shared PayPal app', () => {
-  it('books the demo shop’s rental the order names, once PayPal’s signature checks out', async () => {
+  it('books the demo shop’s rental the order names, once PayPal’s signature checks out, and refuses a forged copy', async () => {
     const { database } = await getServices()
     const account = await inShop(database, { role: 'hold_app', shopId: demoShopId }, (transaction) => findPayPalAccount(transaction, demoShopId, 'sandbox'))
     expect(account?.webhookId).toMatch(/^FAKE-WEBHOOK-/)
     const { rentalId, orderId } = await bookedAndApproved()
 
-    expect((await receiveDemoPayPalEvent(approved(orderId, rentalId), signed('forged'))).status).toBe(200)
+    expect((await receiveDemoPayPalEvent(approved(orderId, rentalId), signed('forged'))).status).toBe(401)
     expect(await stateOf(rentalId)).toBe('pending_payment')
     expect((await receiveDemoPayPalEvent(approved(orderId, rentalId), signed())).status).toBe(200)
     expect(await stateOf(rentalId)).toBe('booked')

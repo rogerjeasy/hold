@@ -1,8 +1,9 @@
 import { findPerson, openDemoSession, registerOwner, shops, staffRoles } from '@hold/db'
 import type { Database } from '@hold/db'
 import { createTestDatabase } from '@hold/db/testing'
+import type { TestDatabase } from '@hold/db/testing'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
-import { retireOldDemos } from './demo-cleanup.ts'
+import { retireOldDemos, runDailyCleanup } from './demo-cleanup.ts'
 
 vi.setConfig({ testTimeout: 60_000 })
 
@@ -94,5 +95,17 @@ describe('the daily demo cleanup', () => {
     expect(await retiredAt(next)).toEqual(NOW)
     expect(JSON.stringify(warn.mock.calls)).not.toContain('@demo.hold.example')
     warn.mockRestore()
+  })
+})
+
+describe('the daily cleanup', () => {
+  it('retires old demos and removes the rate limits whose windows ended long ago, so that table stops growing', async () => {
+    const client = (database as TestDatabase).$client
+    await client.query(`insert into rate_limits (key, window_starts_at, count) values ('cleanup-old-window', now() - interval '3 days', 2)`)
+
+    const result = await runDailyCleanup({ database, accounts: removal(), now: () => NOW })
+
+    expect(result.prunedLimits).toBeGreaterThanOrEqual(1)
+    expect((await client.query(`select key from rate_limits where key = 'cleanup-old-window'`)).rows).toEqual([])
   })
 })
