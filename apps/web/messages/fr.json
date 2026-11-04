@@ -1714,6 +1714,11 @@
       "none": "Aucune liste de prix n'est encore publiée. Les clients la voient avant de louer, et chaque réclamation est calculée à partir d'elle.",
       "current": "La version {version} est publiée depuis le {date}. Publier à nouveau crée une nouvelle version. Les locations déjà réservées gardent la version acceptée par leur client.",
       "readOnly": "Seul le propriétaire ou un responsable peut publier les prix.",
+      "inForce": {
+        "title": "Les prix en vigueur",
+        "lead": "Citez au locataire les prix de cette liste. Une réclamation ne peut porter que sur ce qui y figure.",
+        "wearLead": "Les locataires ne sont jamais facturés pour cela."
+      },
       "currency": "Devise",
       "threshold": "Les réclamations au-dessus de ce montant vont au propriétaire ou à un responsable, en {currency}",
       "thresholdHelp": "Facultatif. Laissez vide et c'est la limite de chaque membre de l'équipe qui décide.",

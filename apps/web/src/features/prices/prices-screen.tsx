@@ -4,6 +4,7 @@ import type { PriceListVersion, PublishedPriceList } from '@hold/db'
 import { amountText, money } from '@hold/domain'
 import { Eye } from 'lucide-react'
 import { useFormatter, useTranslations } from 'next-intl'
+import { TermsView } from '@/components/booking/terms-view'
 import type { Locale } from '@/i18n/routing'
 import { shopRoutes } from '@/lib/routes'
 import { PasskeyGate } from '@/features/shop/passkey-gate'
@@ -46,6 +47,8 @@ export function PricesScreen({ shopName, shopId, current, versions, fixedCurrenc
         {!canPublish ? (
           <>
             <p className="flex items-center gap-2 text-muted-foreground"><Eye aria-hidden="true" className="size-4 shrink-0" />{t('readOnly')}</p>
+            {/* Counter staff quote from the list in force; the versions below are for whoever wants what changed. */}
+            {current === undefined ? null : <TermsView currency={current.currency} prices={current.entries} wearPolicy={current.wearPolicy} words={{ prices: t('inForce.title'), pricesLead: t('inForce.lead'), wear: t('wear'), wearLead: t('inForce.wearLead') }} />}
             <VersionsPanel versions={versions} currency={current?.currency ?? fixedCurrency ?? 'EUR'} draft={{ entries: current?.entries ?? [], wearPolicy: current?.wearPolicy ?? '' }} />
           </>
         ) : gate.needed ? (

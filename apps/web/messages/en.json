@@ -1714,6 +1714,11 @@
       "none": "No price list is published yet. Renters see it before they rent, and every claim is priced from it.",
       "current": "Version {version} is published, since {date}. Publishing again makes a new version. Rentals already booked keep the version their renter agreed to.",
       "readOnly": "Only the owner or a manager can publish prices.",
+      "inForce": {
+        "title": "The prices in force",
+        "lead": "Quote a renter from this list. A claim can only be for what is on it.",
+        "wearLead": "Renters are never charged for this."
+      },
       "currency": "Currency",
       "threshold": "Claims above this go to the owner or a manager, in {currency}",
       "thresholdHelp": "Optional. Leave it empty and each staff member's own limit decides.",

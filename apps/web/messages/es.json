@@ -1714,6 +1714,11 @@
       "none": "Aún no hay ninguna lista de precios publicada. Los clientes la ven antes de alquilar, y cada reclamación se calcula con ella.",
       "current": "La versión {version} está publicada desde el {date}. Publicar de nuevo crea otra versión. Los alquileres ya reservados mantienen la versión que aceptó su cliente.",
       "readOnly": "Solo el propietario o un encargado pueden publicar precios.",
+      "inForce": {
+        "title": "Los precios vigentes",
+        "lead": "Da al cliente los precios de esta lista. Una reclamación solo puede ser por lo que figura en ella.",
+        "wearLead": "Nunca se cobra al cliente por esto."
+      },
       "currency": "Moneda",
       "threshold": "Las reclamaciones por encima de esto van al propietario o a un encargado, en {currency}",
       "thresholdHelp": "Opcional. Si lo dejas vacío, decide el límite de cada persona del equipo.",

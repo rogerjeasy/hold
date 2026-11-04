@@ -1714,6 +1714,11 @@
       "none": "Es ist noch keine Preisliste veröffentlicht. Mietende sehen sie vor dem Mieten, und jede Forderung wird danach berechnet.",
       "current": "Version {version} ist seit dem {date} veröffentlicht. Erneut veröffentlichen erstellt eine neue Version. Bereits gebuchte Mieten behalten die Version, der ihre Mietenden zugestimmt haben.",
       "readOnly": "Nur Inhaber oder Leitung können Preise veröffentlichen.",
+      "inForce": {
+        "title": "Die geltenden Preise",
+        "lead": "Nennen Sie Mietern die Preise aus dieser Liste. Eine Forderung kann nur auf dem beruhen, was hier steht.",
+        "wearLead": "Dafür wird Mietern nie etwas berechnet."
+      },
       "currency": "Währung",
       "threshold": "Forderungen darüber gehen an Inhaber oder Leitung, in {currency}",
       "thresholdHelp": "Freiwillig. Bleibt das Feld leer, entscheidet das Limit jeder einzelnen Person.",
