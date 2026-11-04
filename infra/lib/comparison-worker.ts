@@ -1,7 +1,7 @@
 import type { Stack } from 'aws-cdk-lib'
 import * as iam from 'aws-cdk-lib/aws-iam'
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources'
-import { CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES, DATABASE_NAME, name, REGION } from './settings.ts'
+import { CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES, DATABASE_NAME, name } from './settings.ts'
 import { allowPushes, PUSH_ENVIRONMENT } from './pushes.ts'
 import { workerFunction } from './worker.ts'
 import type { WorkerProps } from './worker.ts'
@@ -13,9 +13,7 @@ export function createComparisonWorker(stack: Stack, props: WorkerProps): void {
   role.addToPolicy(new iam.PolicyStatement({ actions: ['rds-data:ExecuteStatement', 'rds-data:BatchExecuteStatement', 'rds-data:BeginTransaction', 'rds-data:CommitTransaction', 'rds-data:RollbackTransaction'], resources: [props.cluster.clusterArn] }))
   props.workerUserSecret.grantRead(role)
   role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:GetObject'], resources: [props.evidenceBucket.arnForObjects('*')] }))
-  // Mantle authorizes by model condition rather than model ARN:
-  // https://docs.aws.amazon.com/bedrock/latest/userguide/bedrock-managed-agents-openai-security.html
-  role.addToPolicy(new iam.PolicyStatement({ actions: ['bedrock-mantle:CreateInference'], resources: ['*'], conditions: { StringEquals: { 'aws:RequestedRegion': REGION, 'bedrock-mantle:Model': ['anthropic.claude-opus-5-5', 'anthropic.claude-opus-4-8'] } } }))
+  // The comparison model, through its inference profile on bedrock-runtime.
   role.addToPolicy(new iam.PolicyStatement({ actions: CLAUDE_INVOKE_ACTIONS, resources: CLAUDE_INVOKE_RESOURCES }))
   // A finished comparison is pushed to the counter's phones to review (architecture.md section 13.9).
   allowPushes(role)

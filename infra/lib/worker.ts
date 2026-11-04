@@ -10,6 +10,7 @@ import type * as s3 from 'aws-cdk-lib/aws-s3'
 import * as scheduler from 'aws-cdk-lib/aws-scheduler'
 import type * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 import type * as sqs from 'aws-cdk-lib/aws-sqs'
+import { functionLogGroup } from './log-groups.ts'
 import { ACCOUNT, DATABASE_NAME, name, REGION, secretName, SMTP_SECRET_NAME } from './settings.ts'
 import { allowPushes, PUSH_ENVIRONMENT } from './pushes.ts'
 import { allowTexting, textEnvironment } from './texts.ts'
@@ -135,6 +136,7 @@ export function workerFunction(stack: Stack, id: string, functionName: string, e
     memorySize: options.memorySize ?? 512,
     timeout: options.timeout ?? WORKER_TIMEOUT,
     role,
+    logGroup: functionLogGroup(stack, id, functionName, role),
     environment,
     bundling: {
       minify: true,

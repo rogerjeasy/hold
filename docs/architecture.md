@@ -283,8 +283,9 @@ Every table except `users`, `renters` and `eval_runs` carries a `shop_id`.
 |---|---|
 | `users` | Cognito subject, contact details, language |
 | `shops` | Name, address for renters (`slug`), timezone, currency, approval thresholds, reply period, whether it is a judge's demo (`demo_session`) and when that demo was retired (`retired_at`, section 20.3) |
-| `locations` | Address, opening hours |
+| `locations` | Planned, not built: address, opening hours |
 | `staff_roles` | User, shop, role, approval limit |
+| `staff_invitations` | Shop, email, role, approval limit, language, who invited, token fingerprint, expiry, accepted by and when, revoked (migration `0007`) |
 | `paypal_accounts` | Shop, merchant ID, credential reference, webhook ID, mode |
 | `item_types` | Name, kind, value to replace, hold amount, day rate, kit, photo plan, whether it is a sample |
 | `items` | Type, label, size, serial, status with its note and date, chain head fingerprint, whether it is a sample |
@@ -312,16 +313,18 @@ Every table except `users`, `renters` and `eval_runs` carries a `shop_id`.
 | `paypal_events` | PayPal event ID, type, raw body, headers, verification state, processing state |
 | `money_events` | Rental, kind, amount, PayPal reference, time. Append-only. |
 | `invoices` | Rental, PayPal invoice ID, amount, state |
-| `shipments` | Rental, direction, carrier, tracking number, status |
-| `disputes` | Rental, PayPal dispute ID, reason, state, evidence sent |
+| `shipments` | Planned, not built: rental, direction, carrier, tracking number, status |
+| `disputes` | Planned, not built: rental, PayPal dispute ID, reason, state, evidence sent. A dispute is read from PayPal and kept as an exception on the morning queue until then |
 | `evidence_packs` | Rental, immutable version and validated frozen snapshot, source fingerprint, renderer version, build state, PDF/manifest hashes and exact S3 object-version references |
 | `receipt_deliveries` | Rental, verified event, receipt kind, exact pack version, recipient identity and language, amounts, delivery state, lease, attempts and sent time |
 | `renter_links` | Rental, token fingerprint, scope, expiry, last used, and two one-time codes kept apart: one for a claim reply, one for changing the Clean Record |
 | `push_devices` | A phone registered for push notifications in the app (section 13.9): its Expo push token, platform and language, and whose it is, a member of staff in this shop (`user_id`) or a rental through the link it registered with (`rental_id`, `renter_link_id`, and the random `reference` a push names it by); the last push's ticket, created, last used, revoked |
+| `ops_rules` | A standing rule the operations agent drafted from a proposal: the rule, its state (`drafted`, `confirmed`, `discarded`), who decided and when (migration `0022`) |
+| `reminders` | One reminder a day per shop, kind (`return_due`, `reply_due`, `invoice`) and renter, so the operations agent never sends the same one twice (migration `0022`) |
 | `outbox` | Pending messages written in the same transaction as state changes |
 | `audit_log` | Who did what, when, from where |
 
-**What the migrations hold so far.** Every table above, with `rentals.simulated` added in `0009`, the item columns in `0010` and the booking columns in `0011`, except `locations`, `shipments` and `disputes`, which arrive with the features that use them. The schema is in `packages/db/src/schema`, the migrations in `packages/db/migrations`.
+**What the migrations hold so far.** Every table above, with `rentals.simulated` added in `0009`, the item columns in `0010` and the booking columns in `0011`, except `locations`, `shipments` and `disputes`, which are planned and not built: no migration creates them. The schema is in `packages/db/src/schema`, the migrations in `packages/db/migrations`.
 
 Migrations `0018`–`0020` add evidence publication metadata and `receipt_deliveries`, shop RLS and publication/delivery guards. A pack must be inserted as `building` without publication metadata; a receipt starts `queued` without a lease or sent time. The web role reserves work; only the worker role may publish artifacts or update delivery metadata. Frozen snapshot/version identity and published metadata cannot be rewritten, and neither service role may delete these records.
 
@@ -1470,7 +1473,7 @@ start with `SIMULATED-` and no call was made. The read is `rentalPayPalRecord` i
   - **An address that already has an account** is sent a sign-in code by the sign-up page, and the new shop is added to that account. One person may own several shops.
   - **The same answer for every address.** An address with no account gets the same "check your email" step, and a code typed for it is simply wrong. The forms cannot be used to find out who has an account.
   - **Between the two steps,** the address, Cognito's session for the attempt and the shop to create travel in a cookie sealed with AES-256-GCM. The browser cannot read or change it. Cognito keeps an attempt open for ten minutes and ends it after three wrong codes.
-  - **The session** is the Cognito access token and refresh token, each in an HTTP-only cookie. Every request checks the access token on the server with `aws-jwt-verify`. When it lapses, the proxy uses the refresh token for a new one. Signing out revokes the refresh token at Cognito.
+  - **The session** is the Cognito access token and refresh token, each in an HTTP-only cookie. Every cookie of Hold's is `Secure`, `Path=/`, `SameSite=Lax` and names no domain, and carries the `__Host-` prefix, so the browser refuses one set by any other host, a neighbour on App Runner's shared domain included, or over plain HTTP (`cookie-settings.ts`). Only on a developer's own machine, which serves plain HTTP, are they plain and unprefixed. Every request checks the access token on the server with `aws-jwt-verify`. When it lapses, the proxy uses the refresh token for a new one. Signing out revokes the refresh token at Cognito.
   - **Rate limits of Hold's own,** on top of Cognito's: five code emails per address and forty sign-in requests per network address in fifteen minutes, counted in `rate_limits` by fingerprint, so no address is stored. The network address is the last entry of `x-forwarded-for`, the one App Runner's load balancer adds; an IPv6 address counts as its /64 prefix, since a host is usually handed a whole /64, and an IPv4 address as itself (`callerNetwork`, used by every per-network limit). A request with none, or from loopback, comes from a developer's machine and is limited by address only.
 - **The test environment.** With `HOLD_ENVIRONMENT=test`, the web app uses an in-memory identity service that sends a fixed code, and a PGlite database. Only the end-to-end tests set it. Every other environment refuses to start without Cognito and Aurora settings.
 - **A passkey as the second factor** for owners and managers, and for staff whose approval limit is above the shop's threshold (`needsStrongSignIn` in `packages/domain`). Cognito cannot follow an emailed code with an authenticator app: a person who turns one on can only sign in with a password from then on. A passkey with user verification is the device and the person's fingerprint, face or PIN together, so it is multi-factor on its own. The user pool requires user verification and its relying party is the host of the web app's address (`webPublicUrl` in `infra/cdk.json`), so passkeys work on the deployed site and not on `localhost`. A developer signs in with an emailed code, which works everywhere. Before the app had an address, the relying party was `localhost`.
@@ -1544,32 +1547,38 @@ A renter's own AI assistant acts through an agent token: signed, bound to one re
 
 ## 13. Interfaces
 
-### 13.1 HTTP API for owners and staff
+### 13.1 Server functions and routes for owners and staff
 
-Served by `web`. All routes require a Cognito token.
+Served by `web`. There is no REST API for staff. The signed-in pages under `/shop` (section 13.6) are server components that read, and every change is a POST server function (a Next.js server action) built by `shopAction` (`apps/web/src/server/shop-access.ts`). That one wrapper authenticates the Cognito session in its HTTP-only cookies, resolves the shop and checks the caller's role and approval limit in it, asks for a passkey where the step needs one, opens the transaction with the caller's identity set so row-level security applies, validates the form against a strict schema, then acts and writes the audit line (AGENTS.md section 7). Each feature's functions live in `apps/web/src/features/<feature>/actions.ts`:
 
-| Group | Purpose |
+| Feature | Server functions |
 |---|---|
-| `/api/shops` | Shop settings, locations, staff and limits |
-| `/api/items` | Item types, items, photo plans, item passports |
-| `/api/prices` | Price lists and wear policies, draft and publish |
-| `/api/rentals` | Create, read, extend, move to another item of the same type, cancel |
-| `/api/holds` | Read state, request a hold, show the approval QR code |
-| `/api/sessions` | Start, add photographs, seal |
-| `/api/uploads` | Short-lived upload links |
-| `/api/comparisons` | Read results and findings |
-| `/api/claims` | Read, edit, approve, waive, decide |
-| `/api/disputes` | Read, confirm the response |
-| `/api/reports` | The insights dashboard's rows: money held, captured and released, damage and recovery, staff consistency |
-| `/api/assistant` | Conversation with the owner's assistant, streamed. Planned, not built (section 10.5) |
-| `/api/paypal/connect` | Connect the shop's PayPal account |
-| `/api/proposals` | The morning queue: read, approve, reject, postpone. Built as the page `/shop/queue` and its POST server functions (`approveProposals`, `rejectProposal`, `postponeProposal`, `checkNow`, `confirmRule`, `discardRule`), not a separate API route |
-| `/api/mandates` | Standing rules and settlement limits. The operations standing rule is `grantStandingRule` and `revokeStandingRule` on `/shop/queue` |
-| `/api/ladder` | The trust ladder: draft, simulate, publish |
-| `/api/incidents` | Incidents reported by renters |
-| `/api/accuracy` | The scorecard |
+| `shop` | `inviteStaff`, `withdrawInvitation`, `publishPrices`, `connectPayPal`, `turnOnPayPalNotifications`, `addSampleRentals` |
+| `items` | `saveItemType`, `addItems`, `editItem`, `changeItemStatus` |
+| `rentals` | `bookRental`, `showRenterLink`, `sendRenterLinkAgain`, `askForHold`, `letGoOfBooking` |
+| `handover`, `returns`, `repairs` | Start, `requestPhotoUpload` (a short-lived upload link), `confirmPhotoUpload`, seal; `recordReview` and `compareSample` for a return; `openRepair`, `startRepair`, `finishRepair` |
+| `claims` | `prepareClaim`, `approveAndPresent`, `confirmClean`, `decide`, `rewriteContestSummary` |
+| `records` | `buildRecord` for owner, manager and counter staff, `downloadRecord` for all four roles. The strict input selects a stored rental and pack and `pdf` or `manifest`; it takes no amount or storage key |
+| `operations` | The morning queue on `/shop/queue`: `approveProposals`, `rejectProposal`, `postponeProposal`, `checkNow`, `investigateSamples`, `confirmRule`, `discardRule`, and the standing rule `grantStandingRule`, `revokeStandingRule` |
+| `negotiation` | `saveSettlementLimits`, `endSettlementLimits`, `confirmSettlementForShop`, `argueSampleClaim` |
+| `trust`, `extension`, `self-return`, `promise`, `incidents` | The trust ladder (`publishLadder`, `replayLadder`); extension and self-return settings with `checkExtensionPayment`, `confirmDropOff`, `reportDropOffMissing`; the decision promise (`savePromiseDays`, `grantPromiseWaiver`, `revokePromiseWaiver`, `writeToRenter`); incidents (`confirmPrice`, `takeOnAsShopMatter`) |
+| `insights`, `erasure`, `push` | `askInsights`, `saveInsightsDashboard`; `eraseRenter`; `registerPush`, `unregisterPush` |
 
-The rental record uses POST server actions through the same access wrapper: `buildRecord` for owner/manager/counter staff, and `downloadRecord` for all four staff roles. The strict input selects a stored rental/pack and `pdf` or `manifest`; it accepts no amounts or storage keys. The record page itself only reads.
+Signing in comes before any shop, so the auth feature's functions (`features/auth/actions.ts`) and `switchShop` (`features/shop/choose-shop.ts`) are the exceptions: the sign-in flow validates and rate limits each one, and those that act on a session verify its tokens first. The owner's assistant (section 10.5) is planned, not built.
+
+The only HTTP routes, beside the pages, are these. Each is built by a wrapper or answers to its own check:
+
+| Route | Who calls it | What checks the caller |
+|---|---|---|
+| `/api/mobile/v1/**` | Hold's phone app (sections 13.7 and 13.8) | `mobileStaffRoute`, `mobileSessionRoute` or `mobileRenterRoute`: the same checks as the web, with a bearer token |
+| `/api/webhooks/paypal/{accountId}`, `/api/webhooks/paypal/demo` | PayPal (section 13.3) | PayPal's signature, then a read-back from PayPal |
+| `/mcp` | Renters' assistants (section 13.4) | The gateway in `packages/mcp` on every tool call |
+| `/api/health` | App Runner's health check | Nothing to check: it reads nothing and changes nothing |
+| `/.well-known/jwks.json` | Anyone checking a Clean Record credential | A public read of the public key |
+| `/api/mobile/v1/paypal-return/{kind}` | PayPal, sending a renter back to the phone app | Rate limited; reads and writes nothing |
+| `/api/simulated-storage/**`, `/simulated-paypal/{order}/approve`, `/simulated-paypal/{order}/review` | The test environment's stand-ins for S3 and PayPal | 404 wherever the in-process fakes are not running |
+
+`apps/web/src/server/every-entry-point.test.ts` finds every route handler and every file that begins with `'use server'`, and fails on any export that is neither built by a wrapper nor named there with why it is public and what checks the caller instead.
 
 ### 13.2 Renter routes
 
@@ -1581,7 +1590,7 @@ Served by `web`. Each requires a valid signed link.
 | `/r/{token}/pay` | Approve the hold at pickup, or its replacement before it ends. PayPal returns the renter here, and the hold is confirmed by a POST, never on arrival. The fee is paid from `/r/{token}` itself. |
 | `/r/{token}/paid` | Where PayPal returns the renter. Confirms the fee by a POST, never on arrival. |
 | `/r/{token}/condition` | How each item left: its photographs and marks. Within 24 hours of the handover, the link sent then may confirm it or add photographs of anything missed. Before the handover, a working link says nothing has been collected yet. |
-| `/r/{token}/session` | Guided photographs for shipped rentals |
+| `/r/{token}/session` | Planned, not built: guided photographs for shipped rentals, with `shipments` (section 6.3) |
 | `/r/{token}/claim` | See a claim, accept or contest it. Each line shows its own photograph pair, or, for a line a person added by hand, every item's sealed handover and return photographs view by view. Before a person approved a claim, a working link says there is none to review. |
 | `/r/{token}/record` | Shared evidence versions and PDF/manifest downloads; `?version={pack UUID}` selects the exact receipt version. Draft and awaiting-approval claims remain staff-only. |
 | `/r/{token}/return` | Returning the item with nobody at the counter (section 6.13): where to leave it and what happens next, the photographs, then a receipt with PayPal's own reading of the hold. Starting, photographing and sending need the scope `return_item`. |
@@ -1646,7 +1655,7 @@ Every call takes one path (`callTool` in `dispatch.ts`): the actor is resolved (
 | `/demo` | The demo shop's entry page. Until the demo is deployed it says so and describes the three sample rentals, the three people to sign in as, and what is real and what is simulated |
 | `/s/{slug}` | A shop's own page: a renter chooses dates and items, sees the prices and wear policy, and books with nobody signed in. Open only once the shop has PayPal connected, a price list and items. Bookings from it are limited per network (`apps/web/src/server/shop-page-access.ts`). |
 | `/simulated-paypal/{order}` | In the test environment only: stands in for PayPal's approval page, says so, and sends the renter back to the order's own return path. Everywhere else it is 404. |
-| `/accuracy` | The comparison's measured accuracy, with counts |
+| `/reliability` | The comparison's measured figures, as counts, and the accepted run case by case (section 10.8); says plainly when no run is accepted |
 | `/verify` | Checks what Hold signed, in the browser, with the published key: a Clean Record credential, or an evidence statement about a rental's sealed photographs (section 9.7). The token comes after the `#`, so it never reaches a server. |
 | `/.well-known/jwks.json` | The public key that credentials are signed with, as a JSON Web Key Set. Reads nothing from the request. |
 | `/privacy` | The privacy notice: what Hold records and why, how long each kind is kept (the evidence periods read from `EVIDENCE_LOCK_DAYS` and `EVIDENCE_KEPT_DAYS` in `packages/domain`, the constants the evidence bucket is built from), who handles it for Hold, and how a renter has their details erased (section 15.2). It says that Hold is a hackathon build in PayPal's sandbox and not a registered business. |
@@ -1822,7 +1831,7 @@ flowchart TB
     worker --> internet
 ```
 
-The CDK code is in `infra/`, as five stacks:
+The CDK code is in `infra/`, as six stacks. The pipeline deploys the first five; `HoldDelivery` holds the pipeline's own roles and is deployed only by an administrator (`docs/deploy.md`):
 
 | Stack | Holds | Protection |
 |---|---|---|
@@ -1831,6 +1840,7 @@ The CDK code is in `infra/`, as five stacks:
 | `HoldWork` | The spine's queues and their dead-letter queues and alarms, the schedule group, the role the scheduler uses, the alarm topic `hold-alarms` every alarm reports to, and the account's monthly budget `hold-account-monthly` (section 17.1) | |
 | `HoldRegistry` | The image repository | Retained |
 | `HoldWeb` | The App Runner service `hold-web`, its instance role and the role it pulls the image with, and a scaling limit of two instances. Its address is App Runner's own, https://p99faar3kp.us-east-1.awsapprunner.com, the stack's `ServiceUrl` output. Its server-error alarm reports to `hold-alarms` | Termination protection, because a new service would get a new address. Set once by an administrator, since the pipeline may not change it |
+| `HoldDelivery` | The roles GitHub Actions deploys with (`hold-github-deploy`, the CloudFormation role `hold-cloudformation-exec` and its three managed policies), the comparison gate's role `hold-github-eval`, and the permissions boundary `hold-permissions-boundary` every other Hold role carries | Deployed only by an administrator; the pipeline's own roles deny it any change to them |
 
 The worker's compute is added with its code. The web app's address is known only once the service exists, so it goes into `infra/cdk.json` as `webPublicUrl` after the first deploy, and the links in Hold's emails use it from the next one.
 
@@ -1856,7 +1866,7 @@ The worker's compute is added with its code. The web app's address is known only
 
 ### 14.5 Data
 
-- **Aurora Serverless v2,** PostgreSQL 17, one writer, with the RDS Data API switched on. The minimum capacity is zero while building, so the cluster pauses when idle, and is raised above zero for judging.
+- **Aurora Serverless v2,** PostgreSQL 17, one writer, with the RDS Data API switched on. The minimum capacity is zero while building, which would let the cluster pause when idle, but the outbox relay's query every minute keeps it at 0.5 capacity units in practice (`docs/tech-stack.md` section 18). The minimum is raised above zero for judging.
 - **The database** is `hold_db`. Aurora reserves `hold`. While the cluster is paused, the first call fails with `DatabaseResumingException` until it resumes, so the adapter retries that error.
 - **Two logins.** `hold_admin` runs migrations. `hold_app` is what the services use. It does not own the tables, so row-level security applies to it.
 - **Backups** kept for 35 days, the most AWS allows for automated backups, with point-in-time recovery. Backup storage up to the cluster's own size costs nothing, and the database is small, so the window costs cents a month at most. No copy is kept outside the cluster's own backups.
@@ -1942,6 +1952,7 @@ The outbox relay carries evidence and receipt identities without tokens or conta
 | **Demo starts are used to make accounts and shops in bulk** | Ten starts per network per hour, and a hundred a day across every network, so many networks together cannot either. Each makes two users on a domain that receives no mail, and a shop that is never listed. Each demo is retired after a week and its two users removed. A demo shop cannot subscribe a webhook address on the shared sandbox app, so it cannot use up PayPal's ten. Tested in `demo-session.test.ts`, `demo-cleanup.test.ts` and `paypal-subscription.test.ts`. |
 | **The public demo spends the account's daily Claude tokens, and every AI feature defers for the rest of the day** | Bedrock limits each model's day on its own, so the agents run on Opus 4.5 (listed at 6,750,000 tokens a day, taken as 6,000,000) and the comparison on Opus 4.6 (about 940,000, measured on 29 October 2026, taken as 900,000). The hosted assistant takes at most 100 questions a day across every network, each within its 30,000-token ceiling, which keeps it to half the agents' day, and one network takes at most 10 of them (section 20.3). Every demo together may hand at most 15 samples a day to the advocates (two per demo, four from one network) and have the operations agent investigate the samples ten times a day (once per demo, twice per network), which at their ceilings (80,000 and 40,000 tokens) stay inside the half the assistant leaves; Claude may compare at most 20 sample returns a day (3 from one network), two thirds of the comparison model's day at 30,000 tokens each; the insights agent takes at most 60 turns a day; a refused attempt rolls back and spends nothing. A retired demo is left out of the nightly operations run. The overnight operations agent never reads sample rentals, so a demo alone never calls the model at night. Tested in `demo-limits.test.ts`, `hosted-flow.test.ts`, `limits.test.ts`, `sample-advocates-flow.test.ts`, `sample-comparison-flow.test.ts`, `actions.test.ts` (insights) and `demo-retirement.test.ts`. |
 | **The demo cleanup removes a real person's account or retires a real shop** | Only the cleanup's own role may delete a user, and only in Hold's pool. It removes only addresses on `demo.hold.example`, refused before Cognito is called otherwise. It marks only a demo shop opened before the cutoff, as `hold_worker` in that shop alone, and a check constraint refuses `retired_at` on any shop that is not a demo. Nothing is deleted from the database. Tested in `demo-account-removal.test.ts`, `demo-retirement.test.ts`, `demo-cleanup.test.ts` and `hold-app.test.ts`. |
+| **A neighbouring host or a plain-HTTP page sets a cookie of Hold's name** (session fixation, a chosen shop or attempt) | Every cookie carries the `__Host-` prefix, which the browser keeps only when it is `Secure`, `Path=/` and names no domain, so no other host can set or shadow one. Tested in `cookie-settings.test.ts`. |
 | **A sign-in attempt is altered or guessed** | The attempt travels in a cookie sealed with AES-256-GCM, so a changed one is refused. It lasts ten minutes and ends after three wrong codes. Tested in `sealed.test.ts`. |
 | **A claim link is forwarded or a reply is replayed** | Signed, expiring rental-scoped links plus a link-bound, three-attempt, single-use payer-email code. Unknown fields and client amounts are rejected. Negative cases are covered in `claim-code-repository.test.ts` and `claim-flow.test.ts`. |
 | **A deadline charges before the renter sees a claim** | Staff approval only creates the private link. A renter POST acknowledges review and starts the reply period; opening/reissuing a link never resets it. Tested in `claim-flow.test.ts`. |
@@ -2062,6 +2073,7 @@ The outbox relay carries evidence and receipt identities without tokens or conta
 
 - **Structured logs** from both services, each line tagged with the shop, the rental, the hold, the execution and PayPal's debug ID. A message the worker fails on is logged with its error's name, safe codes, query text and stack by `errorForLog` (section 15.2), never its message, as is a sign-up whose membership could not be written. Push, text and email failures are still logged by kind only, since their errors can carry a device token.
 - **A correlation ID** follows one piece of work from the first request through every queue.
+- **Retention.** Logs are kept one month (`LOG_RETENTION`, `infra/lib/log-groups.ts`). No log is the only copy of anything a shop or renter relies on: the audit trail, the money log and the approvals are in the database. Each function logs to `/hold/lambda/<function>`, a group CloudFormation makes once `HoldDelivery` lets it and `"logRetention": "on"` is set in `infra/cdk.json`; until then Lambda's own `/aws/lambda/<function>` groups keep logs with no end. App Runner makes its two groups itself, named by the service's ID, so an administrator sets their retention by hand (`docs/deploy.md`).
 
 | Metric | Why |
 |---|---|
@@ -2217,7 +2229,7 @@ Judges have no bike to photograph and cannot wait four days for a hold to age.
   - **The accounts.** Each start makes two new Cognito users, `tomas.<code>@demo.hold.example` and `jonas.<code>@demo.hold.example`, where the code is eight random letters and digits. `demo.hold.example` is a reserved domain, so no mail is ever sent. The web app may only create a user and add it to a group (`createDemoSessionAccounts` in `packages/auth`): it makes the user with a random temporary password, and the user's own first sign-in sets a second random password through `NEW_PASSWORD_REQUIRED`. The app is never allowed `AdminSetUserPassword`, so it cannot change an existing person's password. Addresses outside the demo's domain are refused before Cognito is called.
   - **The shop.** `openDemoSession` in `packages/db/src/demo-session.ts` opens a new Ribeira Bikes as `hold_app`, bound to the new shop alone, as a sign-up is: Tomás as owner, Jonas as counter staff with a €100 limit under the owner's €150 threshold, the published price list and wear policy, four real City bikes a judge can book (`DEMO_SHOP.bookable`, one required photograph, of the frame the sample photographs show), the twelve sample rentals, and returns after hours on with its drop point and hours (`DEMO_SHOP`, `furnishDemoShop`, section 6.13). Its address is `/s/ribeira-bikes-<code>`, so one judge cannot find another's by counting. It is marked `shops.demo_session`, which keeps it out of `hold_public_shops`, so no renter's assistant finds it (migration `0028`). Its first audit line is `demo.session_started`.
   - **PayPal.** Every demo shop shares one sandbox connection by reference to the same secret, `hold/paypal/shops/demo/sandbox`, which an administrator stores once with `pnpm demo:paypal` (`apps/web/scripts/demo-paypal.ts`). The script checks the credentials with PayPal first. PayPal allows an app ten webhook addresses, so no demo shop has its own: each demo start subscribes, or finds, the shared app's one webhook at `/api/webhooks/paypal/demo` and keeps its id on the demo shop's account (`demoPayPalFrom` in `apps/web/src/server/services.ts`). An event there names its rental in the `custom_id` Hold set on the order; `hold_demo_paypal_account` (migration 0029) finds that rental's demo shop, and only a demo shop's, and the event then goes the way of any shop's own (`receiveDemoPayPalEvent` in `apps/web/src/server/demo-webhook.ts`): stored, verified with PayPal against the shared webhook, and applied only after what it names is read back. An event that names no demo shop's rental is answered and dropped. Hold also reads every step back when the renter returns, as before.
-  - **Coming back.** The browser keeps the demo in a sealed cookie, `hold_demo`: the shop and both passwords, AES-256-GCM with the cookie key, for thirty days. Signing out keeps it. The sign-in page then offers **Continue as Tomás** or **as Jonas** (`continueDemo`), so a judge can switch roles in the same shop, and **Start a fresh demo**, which opens a new one and leaves the old one as it was. The passwords exist nowhere else, so no other browser can reach that demo, and once the cookie is gone nobody can.
+  - **Coming back.** The browser keeps the demo in a sealed cookie, `__Host-hold_demo`: the shop and both passwords, AES-256-GCM with the cookie key, for thirty days. Signing out keeps it. The sign-in page then offers **Continue as Tomás** or **as Jonas** (`continueDemo`), so a judge can switch roles in the same shop, and **Start a fresh demo**, which opens a new one and leaves the old one as it was. The passwords exist nowhere else, so no other browser can reach that demo, and once the cookie is gone nobody can.
   - **Sessions.** The session is a real Cognito session, and its record says `demo`. Every check after it is the same as for anyone else, so another demo's shop answers 404, as any other shop's does. A demo session counts as weaker than a passkey, so a step that moves money, or changes prices, staff or PayPal, still asks for one. The judge adds a passkey on their own device from the Security page; after the first, the ordinary rule applies (`mayAddPasskey`). A passkey stays in the browser that made it, so on a demo account that has one, the passkey gate also names the ways out in another browser: start a fresh demo, or sign out (`passkey-gate.tsx`).
   - **Limits.** Ten starts per network per hour (`DEMO_LIMITS.startsPerNetwork`), since each makes two users and a shop, and the ordinary sign-in limit for coming back. Since 3 November 2026 also a hundred starts a day across every network, counted in the UTC day through the same `rate_limits` buckets keyed by the date (`DEMO_LIMITS.startsPerDay`, `DEMO_STARTS_PER_DAY` and `utcDay` in `packages/domain/src/demo-limits.ts`): two hundred users a day keep even a 31-day month under the user pool's 10,000 free monthly active users (Cognito Essentials). Once the day's starts are taken the tap makes nothing and the sign-in page says so, in each language (`notices.demo_cap`); new ones open at midnight UTC. The phone's demo route gets `refused` with the reason `demo_cap`.
   - **The hosted assistant's day.** One network may ask it 10 questions a day (`HOSTED_QUESTIONS_PER_NETWORK`), enough for two or three bookings and a small part of the day's questions, so one visitor never leaves every judge without. Every network together may ask it 100 questions a day (`HOSTED_QUESTION_LIMITS.perDay`, the `dailyCap` of `publicAction`, counted only for valid input). Sized from the account's Bedrock limits, which are per model (`packages/domain/src/claude-models.ts`): every agent runs on Opus 4.5, whose daily limit Service Quotas lists at 6,750,000 tokens; Hold takes 6,000,000 (`AGENT_DAILY_TOKENS`), gives the assistant at most half (`HOSTED_ASSISTANT_SHARE`) and budgets each question at its 30,000-token ceiling (`hostedQuestionsPerDay`): 100 × 30,000 = 3,000,000. The other half is left to the advocates, the operations agent, the insights agent, the contest summaries and the incident sorting, and covers a question that passes its ceiling by its last call. The comparison runs on Opus 4.6, whose daily limit is not listed: on 29 October 2026 it ran out after about 940,000 tokens, after which every comparison defers for the rest of the day; Hold takes 900,000 (`COMPARISON_DAILY_TOKENS`). Until 3 November 2026 every AI step shared that one Opus 4.6 day, and the assistant had 15 questions. The page then says the assistant has answered all it can today (`results.daily_cap`).

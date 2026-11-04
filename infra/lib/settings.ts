@@ -28,16 +28,15 @@ export const TAGS: Readonly<Record<string, string>> = {
 // Compliance mode cannot be undone by anyone, the account's root user included.
 export { BACKUP_KEPT_DAYS, EVIDENCE_KEPT_DAYS, EVIDENCE_LOCK_DAYS } from '@hold/domain'
 
-// Aurora capacity units. Zero lets the cluster pause when idle. Set the minimum to 0.5 for the judging weeks, 1 to 15
-// December 2026, and back to zero on 16 December, so a judge's first visit does not wait for the database to resume
-// (tech-stack.md section 18).
+// Aurora capacity units. Zero would let the cluster pause when idle, but the outbox relay queries it every minute, so in
+// practice it stays at 0.5 (tech-stack.md section 18). Set the minimum to 0.5 for the judging weeks, 1 to 15 December
+// 2026, and back to zero on 16 December, so a judge's first visit can never wait for the database to resume.
 export const DATABASE_MIN_CAPACITY = 0
 export const DATABASE_MAX_CAPACITY = 2
 // The monthly cost the account's budget warns at (infra/lib/alarms.ts), in US dollars, unless the deploy names another
 // with -c monthlyBudgetUsd=<amount>. tech-stack.md section 18 sets no figure. Hold's own share is small: one App Runner
-// instance, Aurora paused when idle or at 0.5 capacity units in December, Lambda and queues at demo traffic, and
-// Claude for the demo. The budget is the whole account's, which Wick and CareCircle share, so the owner raises it to
-// cover them.
+// instance, Aurora at 0.5 capacity units, Lambda and queues at demo traffic, and Claude for the demo. The budget is
+// the whole account's, which Wick and CareCircle share, so the owner raises it to cover them.
 export const MONTHLY_BUDGET_USD = 100
 // Not `hold`, which Aurora PostgreSQL reserves (SQL's WITH HOLD).
 export const DATABASE_NAME = 'hold_db'

@@ -124,7 +124,7 @@ Deny by default. Every check runs on the server. Hiding a button is not access c
 4. Validate the input against its schema. Reject unknown fields.
 5. Act, then write the audit line.
 
-- All routes use the one shared handler wrapper that does steps 1 to 4. No route does its own. A test lists every route and fails on any without it.
+- All routes use the one shared handler wrapper that does steps 1 to 4. No route does its own. A test (`apps/web/src/server/every-entry-point.test.ts`) finds every route handler and every server function and fails on any without a wrapper, unless it is named there with why it is public and what checks the caller instead: a webhook signature, the MCP gateway, the sign-in flow, or nothing to check because it reads and changes nothing.
 - Roles are owner, manager, counter staff and read-only, per shop. Approval limits come from the shop's settings. Check both. `architecture.md` section 7.3 says who may confirm what.
 - Every table with shop data has a row-level security policy and a test that a second shop reads nothing.
 - A renter link is signed, expiring, bound to one rental and scoped. Accepting or contesting a claim needs the one-time code.

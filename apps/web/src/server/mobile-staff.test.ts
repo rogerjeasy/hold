@@ -17,7 +17,7 @@ vi.mock('next/headers', () => ({
     Promise.resolve({
       get: (name: string) => (jar.has(name) ? { name, value: jar.get(name) } : undefined),
       set: (name: string, value: string) => jar.set(name, value),
-      delete: (name: string) => jar.delete(name),
+      delete: (cookie: string | { name: string }) => jar.delete(typeof cookie === 'string' ? cookie : cookie.name),
     }),
   headers: () => Promise.resolve(new Headers({ 'x-forwarded-for': forwarded.value })),
 }))
@@ -46,7 +46,7 @@ let otherShopId: string
 // A person's access token as the phone holds it, with no cookie left behind.
 async function tokenOf(email: string): Promise<string> {
   await signIn(jar, email, 'email_code')
-  const token = jar.get('hold_access') ?? ''
+  const token = jar.get('__Host-hold_access') ?? ''
   jar.clear()
   return token
 }

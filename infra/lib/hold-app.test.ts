@@ -71,6 +71,12 @@ describe('separation from the other projects in the account', () => {
     for (const resourceName of names) expect(resourceName).toMatch(new RegExp(`^${PREFIX}[-/]`))
   })
 
+  // Least privilege: Hold calls Claude through bedrock-runtime on two inference profiles (settings.ts), so no role or
+  // boundary keeps a grant for the Mantle endpoint or for the Opus 5.5 and 4.8 models the design first named.
+  it('grants no model Hold does not call', () => {
+    for (const template of all) expect(JSON.stringify(template.toJSON())).not.toMatch(/bedrock-mantle|claude-opus-5-5|claude-opus-4-8/)
+  })
+
   it('refers to no resource of Wick or CareCircle', () => {
     for (const template of all) expect(JSON.stringify(template.toJSON())).not.toMatch(/wick|carecircle/i)
   })
@@ -317,8 +323,7 @@ describe('the worker', () => {
     work.hasResourceProperties('AWS::Lambda::EventSourceMapping', { FunctionName: { Ref: Match.stringLikeRegexp('^NegotiationWorker') }, BatchSize: 1, FunctionResponseTypes: ['ReportBatchItemFailures'] })
     const statements = Object.entries(work.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('NegotiationRole')).flatMap(([, value]) => (value as { Properties: { PolicyDocument: { Statement: { Action: unknown; Resource: unknown }[] } } }).Properties.PolicyDocument.Statement)
     const policy = JSON.stringify(statements)
-    expect(policy).toContain('bedrock-mantle:CreateInference')
-    expect(policy).toContain('anthropic.claude-opus-5-5')
+    expect(policy).toContain('inference-profile/us.anthropic.claude-opus-4-5-20251101-v1:0')
     // The advocates look at the display copies of a claim's photographs, and at nothing else in storage.
     const storage = statements.filter((statement) => JSON.stringify(statement.Action).includes('s3:'))
     expect(storage.map((statement) => [statement.Action].flat())).toEqual([['s3:GetObject']])
@@ -382,13 +387,10 @@ describe('the worker', () => {
     const policies = Object.entries(work.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('ComparisonRole')).map(([, value]) => value)
     expect(policies.length).toBeGreaterThan(0)
     const policy = JSON.stringify(policies)
-    expect(policy).toContain('bedrock-mantle:CreateInference')
+    expect(policy).toContain('inference-profile/us.anthropic.claude-opus-4-6-v1')
     expect(policy).not.toContain('sqs:SendMessage')
     expect(policy).not.toContain('paypal/shops')
     expect(policy).not.toContain('s3:PutObject')
-    const boundary = JSON.stringify(delivery.findResources('AWS::IAM::ManagedPolicy'))
-    expect(boundary).toContain('bedrock-mantle:CreateInference')
-    expect(boundary).toContain('bedrock-mantle:Model')
   })
 
   it('runs five functions on Node 24: PayPal events, executions, hold upkeep, display copies and the outbox relay', () => {
@@ -581,8 +583,6 @@ describe('the web app', () => {
 
   it('may ask Claude on Bedrock to sort an incident report, with the models named and nothing else of Bedrock', () => {
     const policy = instancePolicy()
-    expect(policy).toContain('bedrock-mantle:CreateInference')
-    expect(policy).toContain('anthropic.claude-opus-5-5')
     expect(policy).toContain('inference-profile/us.anthropic.claude-opus-4-6-v1')
     expect(policy).not.toContain('foundation-model/*')
   })
@@ -627,7 +627,6 @@ describe('the web app', () => {
         's3:GetObject',
         's3:GetObjectVersion',
         's3:PutObject',
-        'bedrock-mantle:CreateInference',
         'bedrock:InvokeModel',
         'bedrock:InvokeModelWithResponseStream',
         'kms:Sign',
@@ -698,10 +697,9 @@ describe('the comparison gate', () => {
 
   it('may call the comparison model, query the database and read the evaluation login, and nothing else', () => {
     const policy = evalPolicy()
-    expect(policy).toContain('bedrock-mantle:CreateInference')
+    expect(policy).toContain('inference-profile/us.anthropic.claude-opus-4-6-v1')
     expect(policy).toContain('cluster:hold-database')
     expect(policy).toContain('secret:hold/database/eval-*')
-    expect(policy).toContain('foundation-model/anthropic.claude-opus-5-5')
     expect(policy).not.toContain('foundation-model/*')
     for (const forbidden of ['database/admin', 'database/app', 'database/worker', 'cloudformation', 'ecr:', 's3:', 'iam:', 'sqs:']) expect(policy).not.toContain(forbidden)
   })
@@ -825,7 +823,7 @@ describe('delivery', () => {
     expect(operationsFunction('hold-worker-operations-nightly')?.Properties).toMatchObject({ Runtime: 'nodejs24.x' })
     expect(operationsFunction('hold-worker-operations-execute')?.Properties).toMatchObject({ Runtime: 'nodejs24.x' })
     const policy = JSON.stringify(Object.entries(work.findResources('AWS::IAM::Policy')).filter(([key]) => key.startsWith('OperationsRole')).map(([, value]) => value))
-    expect(policy).toContain('bedrock-mantle:CreateInference')
+    expect(policy).toContain('inference-profile/us.anthropic.claude-opus-4-5-20251101-v1:0')
     expect(policy).toContain('paypal/shops')
     expect(policy).toContain('sqs:SendMessage')
     // A dispute answer attaches the rental's published record: it may read evidence packs, and no photograph.

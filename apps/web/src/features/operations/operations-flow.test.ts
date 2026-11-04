@@ -8,7 +8,7 @@ process.env['HOLD_COOKIE_KEY'] = Buffer.alloc(32, 41).toString('base64')
 
 const jar = new Map<string, string>()
 vi.mock('next/headers', () => ({
-  cookies: () => Promise.resolve({ get: (name: string) => (jar.has(name) ? { name, value: jar.get(name) } : undefined), set: (name: string, value: string) => jar.set(name, value), delete: (name: string) => jar.delete(name) }),
+  cookies: () => Promise.resolve({ get: (name: string) => (jar.has(name) ? { name, value: jar.get(name) } : undefined), set: (name: string, value: string) => jar.set(name, value), delete: (cookie: string | { name: string }) => jar.delete(typeof cookie === 'string' ? cookie : cookie.name) }),
   headers: () => Promise.resolve(new Headers()),
 }))
 vi.mock('next/cache', () => ({ revalidatePath: () => undefined }))
