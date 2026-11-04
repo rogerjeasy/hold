@@ -524,6 +524,11 @@ describe('the web app', () => {
     web.hasResourceProperties('AWS::AppRunner::AutoScalingConfiguration', { AutoScalingConfigurationName: 'hold-web', MaxSize: 2 })
   })
 
+  it('keeps one instance warm, with 2 vCPU and 4 GB, so a judge never waits for a cold start or a busy processor', () => {
+    web.hasResourceProperties('AWS::AppRunner::AutoScalingConfiguration', { AutoScalingConfigurationName: 'hold-web', MinSize: 1 })
+    web.hasResourceProperties('AWS::AppRunner::Service', { InstanceConfiguration: Match.objectLike({ Cpu: '2 vCPU', Memory: '4 GB' }) })
+  })
+
   it('is told where its services are, and names its secrets without holding them', () => {
     const names = variables().map((variable) => variable.Name)
     for (const setting of ['HOLD_ENVIRONMENT', 'HOLD_AWS_REGION', 'HOLD_COGNITO_USER_POOL_ID', 'HOLD_COGNITO_CLIENT_ID', 'HOLD_DATABASE_CLUSTER_ARN', 'HOLD_DATABASE_SECRET_ARN', 'HOLD_DATABASE_NAME', 'HOLD_COOKIE_KEY_SECRET_ARN', 'HOLD_RENTER_LINK_KEY_SECRET_ARN', 'HOLD_TRUST_KEY_SECRET_ARN', 'HOLD_CREDENTIAL_KEY_ID', 'HOLD_SMTP_SECRET', 'HOLD_PUBLIC_URL', 'HOLD_EXECUTIONS_QUEUE_URL', 'HOLD_PAYPAL_EVENTS_QUEUE_URL']) {

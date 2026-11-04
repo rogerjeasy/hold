@@ -23,6 +23,13 @@ import { reportTo } from './alarms.ts'
 const PORT = 3000
 // Two instances at most, so a burst of traffic cannot run up the bill through judging (tech-stack.md section 18).
 const MAX_INSTANCES = 2
+// Sized for the judging window, decided 4 November 2026: shop pages took 1.4 to 3.5 seconds to their first byte on
+// 1 vCPU and 2 GB, so the instance has twice of each, and one stays provisioned so no judge meets a cold start. An
+// idle provisioned instance is billed for its memory only, about 20 USD a month at 4 GB; a second warm one would cost
+// as much again for traffic one instance carries, so the minimum stays at one. Revisit after 15 December 2026, when
+// judging ends: back to 1 vCPU and 2 GB.
+const INSTANCE = { cpu: '2 vCPU', memory: '4 GB' } as const
+const MIN_INSTANCES = 1
 // The app's health check route (apps/web/src/app/api/health/route.ts): it answers without the database, which pauses
 // when idle and would make a healthy server look failed while it resumed.
 const HEALTH_CHECK_PATH = '/api/health'
@@ -176,7 +183,7 @@ export function createWebStack(app: App, props: WebStackProps): WebResources {
 
   const scaling = new apprunner.CfnAutoScalingConfiguration(stack, 'Scaling', {
     autoScalingConfigurationName: name('web'),
-    minSize: 1,
+    minSize: MIN_INSTANCES,
     maxSize: MAX_INSTANCES,
   })
 
@@ -192,7 +199,7 @@ export function createWebStack(app: App, props: WebStackProps): WebResources {
         imageConfiguration: { port: String(PORT), runtimeEnvironmentVariables: settings(props), runtimeEnvironmentSecrets: [{ name: 'HOLD_AG_GRID_LICENCE_KEY', value: gridLicence.secretArn }, { name: 'HOLD_AG_STUDIO_LICENCE_KEY', value: studioLicence.secretArn }] },
       },
     },
-    instanceConfiguration: { cpu: '1 vCPU', memory: '2 GB', instanceRoleArn: instanceRole(stack, props, [gridLicence, studioLicence]).roleArn },
+    instanceConfiguration: { ...INSTANCE, instanceRoleArn: instanceRole(stack, props, [gridLicence, studioLicence]).roleArn },
     autoScalingConfigurationArn: scaling.attrAutoScalingConfigurationArn,
     // Over HTTP, so a server that accepts connections but cannot answer is replaced. Ten seconds between checks and five
     // to answer leave room for a busy instance; five misses in a row, under a minute, mark it unhealthy.
