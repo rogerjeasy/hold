@@ -67,6 +67,26 @@ describe('a turn of the hosted assistant', () => {
     expect(model.asked[0]?.system).not.toContain('find_shops does not list it')
   })
 
+  // The person tapped "Ask about my latest booking": the page's lookup runs through the same client, before the model.
+  it('runs the page’s lookup through Hold’s server first, as a tool call of the turn, and the model answers from it', async () => {
+    const model = scriptedReplies([turn([{ type: 'text', text: 'It waits for payment.' }])])
+    const client = toolClient({ get_booking: { structuredContent: { status: 'awaiting_payment' } } })
+    const result = await runHostedTurn({ model, client, conversation: start, ...clock(), today: '2026-10-30', lookup: { name: 'get_booking', input: { booking_secret: 'hbs_x' } } })
+    expect(client.called).toEqual(['get_booking'])
+    expect(result).toMatchObject({ reply: 'It waits for payment.', stopped: 'done', toolCalls: [{ name: 'get_booking', ok: true }] })
+    expect(model.asked).toHaveLength(1)
+    expect(result.conversation.map((message) => [message.role, message.content.map((block) => block.type)])).toEqual([['user', ['text']], ['assistant', ['tool_use']], ['user', ['tool_result']], ['assistant', ['text']]])
+    expect(result.conversation[1]?.content[0]).toMatchObject({ type: 'tool_use', name: 'get_booking', input: { booking_secret: 'hbs_x' } })
+    expect(result.conversation[2]?.content[0]).toMatchObject({ type: 'tool_result', content: JSON.stringify({ status: 'awaiting_payment' }), is_error: false })
+  })
+
+  it('keeps the lookup when the model cannot answer, so the booking it found is not lost', async () => {
+    const client = toolClient({ get_booking: { structuredContent: { status: 'paid' } } })
+    const result = await runHostedTurn({ model: scriptedReplies([{ kind: 'unavailable', model: 'test-model' }]), client, conversation: start, ...clock(), today: '2026-10-30', lookup: { name: 'get_booking', input: { booking_secret: 'hbs_x' } } })
+    expect(result.stopped).toBe('unavailable')
+    expect(result.conversation.map((message) => message.role)).toEqual(['user', 'assistant', 'user'])
+  })
+
   it('takes the approval link from Hold’s own result, never from the model’s words', async () => {
     const model = scriptedReplies([turn([useTool('t1', 'create_booking', { quote_id: 'q' })], 'tool_use'), turn([{ type: 'text', text: 'Pay at https://evil.example/pay' }])])
     const client = toolClient({ create_booking: { structuredContent: { status: 'awaiting_payment', approval_url: 'https://www.sandbox.paypal.com/checkoutnow?token=ORDER-1' } } })

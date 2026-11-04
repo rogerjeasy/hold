@@ -86,7 +86,7 @@ function afterTool(conversation: Conversation, now: Date): ModelReply {
       return say(`Booked. The item is kept for fifteen minutes while you approve the fee of ${amount(result['fee'])} in PayPal with the link below. Tell me when you have.`)
     case 'get_booking':
       if (result['status'] === 'paid') return say('PayPal has the fee: your rental is booked. I can now follow its hold and condition report for you.')
-      if (result['status'] === 'awaiting_payment') return say('The fee is not paid yet. Approve it in PayPal with the link I gave you.')
+      if (result['status'] === 'awaiting_payment') return say('The fee is not paid yet. Approve it in PayPal from the booking’s link.')
       return say('That booking is no longer waiting for payment. I can find you another one.')
     default:
       return say('Done.')
