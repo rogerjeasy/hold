@@ -102,20 +102,38 @@ describe('the release gate', () => {
   const measures = (wrong: number, found: number): Measures => ({ ...measureEvaluation([]), cleanWronglyFlagged: { count: wrong, total: 60 }, damageFound: { count: found, total: 40 } })
   const limits = { maxCleanWronglyFlagged: 0.05, maxDamageFoundDrop: 0.05 }
 
-  it('passes the first run, which sets the limits, and says so', () => {
-    expect(checkGate({ current: measures(10, 10), accepted: null, limits })).toEqual({ pass: true, reasons: ['first_run'] })
+  // With nothing accepted there is nothing to be worse than: the run sets no bar and proves nothing, and says so.
+  it('has no baseline to measure the first run against, and says so rather than passing it', () => {
+    expect(checkGate({ current: measures(10, 10), accepted: null, limits })).toEqual({ outcome: 'no_baseline', reasons: [] })
   })
 
   it('fails when clean returns wrongly flagged rise above the limit', () => {
-    expect(checkGate({ current: measures(4, 36), accepted: measures(1, 36), limits })).toEqual({ pass: false, reasons: ['clean_wrongly_flagged_above_limit'] })
+    expect(checkGate({ current: measures(4, 36), accepted: measures(1, 36), limits })).toEqual({ outcome: 'failed', reasons: ['clean_wrongly_flagged_above_limit'] })
   })
 
   it('fails when damage found falls by more than the tolerance against the last accepted run', () => {
-    expect(checkGate({ current: measures(1, 30), accepted: measures(1, 36), limits })).toEqual({ pass: false, reasons: ['damage_found_fell'] })
+    expect(checkGate({ current: measures(1, 30), accepted: measures(1, 36), limits })).toEqual({ outcome: 'failed', reasons: ['damage_found_fell'] })
   })
 
   it('passes a run that holds both lines', () => {
-    expect(checkGate({ current: measures(2, 35), accepted: measures(1, 36), limits })).toEqual({ pass: true, reasons: [] })
+    expect(checkGate({ current: measures(2, 35), accepted: measures(1, 36), limits })).toEqual({ outcome: 'passed', reasons: [] })
+  })
+
+  // X0.4, shown on the gate rule itself: the same pairs, measured once as the accepted run saw them and once as a
+  // weakened prompt would answer, missing small marks and calling shadows damage. No live run is involved.
+  it('fails a run measurably worse than the accepted one, on the pairs themselves, with both reasons', () => {
+    const labelled = (index: number) => ({ id: `damage-${String(index)}`, group: 'damage' as const, labels: [{ kind: 'damage' as const, region: box(0.4, 0.4) }] })
+    const clean = (index: number) => ({ id: `clean-${String(index)}`, group: 'clean_hard' as const })
+    const accepted = measureEvaluation([
+      ...Array.from({ length: 10 }, (_, index) => pair({ ...labelled(index), state: 'findings', findings: [damage(box(0.42, 0.42))] })),
+      ...Array.from({ length: 10 }, (_, index) => pair({ ...clean(index), state: 'clean' })),
+    ])
+    const weakened = measureEvaluation([
+      ...Array.from({ length: 10 }, (_, index) => (index < 6 ? pair({ ...labelled(index), state: 'findings', findings: [damage(box(0.42, 0.42))] }) : pair({ ...labelled(index), state: 'clean' }))),
+      ...Array.from({ length: 10 }, (_, index) => (index < 3 ? pair({ ...clean(index), state: 'findings', findings: [damage(box(0.7, 0.7))] }) : pair({ ...clean(index), state: 'clean' }))),
+    ])
+    expect(checkGate({ current: weakened, accepted, limits: { maxCleanWronglyFlagged: 0.2, maxDamageFoundDrop: 0.15 } })).toEqual({ outcome: 'failed', reasons: ['clean_wrongly_flagged_above_limit', 'damage_found_fell'] })
+    expect(checkGate({ current: accepted, accepted, limits: { maxCleanWronglyFlagged: 0.2, maxDamageFoundDrop: 0.15 } })).toEqual({ outcome: 'passed', reasons: [] })
   })
 })
 

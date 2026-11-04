@@ -4,14 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "compare:bare": "node --env-file-if-exists=../.env bare/compare.ts",
     "eval": "node --env-file-if-exists=../.env src/cli.ts",
     "augment": "node src/augment-cli.ts",
     "readme": "node src/readme.ts"
   },
   "dependencies": {
-    "@anthropic-ai/bedrock-sdk": "^0.34.4",
-    "@anthropic-ai/sdk": "^0.133.0",
     "@hold/compare": "workspace:*",
     "@hold/db": "workspace:*",
     "@hold/domain": "workspace:*",

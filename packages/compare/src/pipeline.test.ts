@@ -28,6 +28,17 @@ describe('the return comparison pipeline', () => {
     const dismissed = [{ candidate: 0, reason: 'shadow' }]
     expect(await compareInspection(await input(), { look: () => Promise.resolve(reply(result([], dismissed))) })).toMatchObject({ state: 'clean', findings: [], model: 'recorded-model' })
   })
+  // On the tuning half the first look named damage on views where code found no candidate (architecture.md section
+  // 10.2, step 5), so such a view is still looked at, and without an answer it goes to a person, never to clean.
+  it('still asks the model about a view where code found no candidate, and defers it when the model cannot answer', async () => {
+    const given = await input()
+    const quiet = { ...given, views: given.views.map((each) => ({ ...each, pair: { ...each.pair, candidates: [] } })) }
+    const asked: LookRequest[] = []
+    const compared = await compareInspection(quiet, { look: (request) => { asked.push(request); return Promise.resolve(reply(result([damage]))) } })
+    expect(asked.map((each) => [each.kind, each.images.length])).toEqual([['first', 2], ['second', 2]])
+    expect(compared).toMatchObject({ state: 'findings', findings: [{ class: 'new_damage', secondLookConfirmed: true }] })
+    expect(await compareInspection(quiet, { look: () => Promise.resolve({ kind: 'unavailable', model: 'recorded-model' }) })).toMatchObject({ state: 'deferred', modelUnavailable: true })
+  })
   // Code finds the candidate areas, so the model may not pass over one in silence (AGENTS.md section 8).
   it('sends a candidate the model neither reported nor dismissed to a person, as an uncertain finding over it', async () => {
     const compared = await compareInspection(await input(), { look: () => Promise.resolve(reply(result())) })

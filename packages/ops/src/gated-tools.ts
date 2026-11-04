@@ -10,6 +10,8 @@ export type RunBudget = { toolCalls: number; tokens: number }
 export type GateContext = {
   readonly database: Database
   readonly shopId: string
+  // The person the agent acts for: the shop's owner, resolved once for the run. None, and every call is refused.
+  readonly actsFor: string | null
   readonly runId: string
   readonly subject: { readonly kind: string; readonly id: string }
   readonly reader: PayPalReader | undefined
@@ -28,7 +30,7 @@ const isArguments = (value: unknown): value is Readonly<Record<string, unknown>>
 export function gatedTools(context: GateContext): GatedTools {
   const audit = (tool: string, outcome: string, milliseconds: number) =>
     inShop(context.database, { role: 'hold_worker', shopId: context.shopId }, (transaction) =>
-      auditAgentCall(transaction, { runId: context.runId, tool: `paypal.${tool}`, subjectKind: context.subject.kind, subjectId: context.subject.id, outcome, milliseconds }, context.now()))
+      auditAgentCall(transaction, { runId: context.runId, tool: `paypal.${tool}`, subjectKind: context.subject.kind, subjectId: context.subject.id, actsFor: context.actsFor, outcome, milliseconds }, context.now()))
   return {
     tools: context.reader?.tools ?? [],
     async call(name, args) {
@@ -39,7 +41,7 @@ export function gatedTools(context: GateContext): GatedTools {
         return `Refused: the tool ${name} is not offered. Only the listed read tools exist.`
       }
       const decision = gatewayDecision({
-        actor: { kind: 'shop_agent', shopId: context.shopId, actsFor: 'owner' },
+        actor: { kind: 'shop_agent', shopId: context.shopId, actsFor: context.actsFor },
         tool: { name, tier: 'read' },
         subjectShopId: context.shopId,
         mandate: null,

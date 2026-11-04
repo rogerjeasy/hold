@@ -1,4 +1,4 @@
-import { completeOpsRun, exceptionFacts, inShop, recordSampleInvestigation, sampleEntriesToInvestigate } from '@hold/db'
+import { completeOpsRun, exceptionFacts, inShop, operationsPrincipal, recordSampleInvestigation, sampleEntriesToInvestigate } from '@hold/db'
 import type { Transaction } from '@hold/db'
 import { SAMPLE_INVESTIGATION_TOKENS } from '@hold/domain'
 import type { RunBudget } from './gated-tools.ts'
@@ -21,6 +21,7 @@ export async function investigateSamples(dependencies: InvestigateDependencies &
   const now = dependencies.now()
   const asWorker = <Result>(work: (transaction: Transaction) => Promise<Result>) => inShop(dependencies.database, { role: 'hold_worker', shopId }, work)
   const entries = await asWorker((transaction) => sampleEntriesToInvestigate(transaction))
+  const actsFor = await asWorker((transaction) => operationsPrincipal(transaction))
   const budget: RunBudget = { toolCalls: 0, tokens: 0 }
   const usage = { inputTokens: 0, outputTokens: 0, model: null as string | null }
   const stopAt = Date.now() + limits.maxMilliseconds
@@ -29,7 +30,7 @@ export async function investigateSamples(dependencies: InvestigateDependencies &
     if (budget.toolCalls >= limits.maxToolCalls || budget.tokens >= limits.maxTokens || Date.now() >= stopAt) break
     const { exception } = entry
     const facts = await asWorker((transaction) => (exception.rentalId === null ? Promise.resolve(null) : exceptionFacts(transaction, 'rental', exception.rentalId)))
-    const choice = await investigate(dependencies, { shopId, exception, currency: entry.currency ?? undefined, candidates: exception.allowed, rules: [], reader: samplePayPalReader(facts), runId, budget, limits, stopAt, usage })
+    const choice = await investigate(dependencies, { shopId, actsFor, exception, currency: entry.currency ?? undefined, candidates: exception.allowed, rules: [], reader: samplePayPalReader(facts), runId, budget, limits, stopAt, usage })
     // Only an answer of the entry's own kind is written over it; a fallback or a steered kind leaves it as it was.
     if (choice.reason === null || choice.model === null || choice.kind !== entry.kind) continue
     const answer = { reason: choice.reason, references: choice.references, draft: choice.draft, model: choice.model, promptVersion: OPS_PROMPT_VERSION, runId }

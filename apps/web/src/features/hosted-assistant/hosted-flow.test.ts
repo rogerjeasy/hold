@@ -1,6 +1,6 @@
 // @vitest-environment node
-import { auditLog, inShop, itemCatalog, openDemoSession, registerOwner, retireDemoSession, takeRateToken } from '@hold/db'
-import { hostedQuestionsPerDay, utcDay } from '@hold/domain'
+import { auditLog, createBooking, inShop, itemCatalog, openDemoSession, registerOwner, retireDemoSession, takeRateToken } from '@hold/db'
+import { addDays, hostedQuestionsPerDay, utcDay } from '@hold/domain'
 import { beforeAll, describe, expect, it, vi } from 'vitest'
 
 process.env['HOLD_ENVIRONMENT'] = 'test'
@@ -28,6 +28,7 @@ const { getServices } = await import('@/server/services')
 const { form, signIn } = await import('@/test/shop-session')
 const { writeDemoSession } = await import('@/features/auth/session-cookies')
 const { HOSTED_QUESTION_LIMITS } = await import('./limits')
+const { latestBookingToAsk } = await import('./demo-shop')
 
 vi.setConfig({ testTimeout: 30_000 })
 
@@ -96,6 +97,47 @@ describe('the hosted assistant’s page', () => {
     const lines = await inShop(database, { role: 'hold_app', shopId: demo.shopId }, (transaction) => transaction.select().from(auditLog))
     expect(lines.map((line) => line.action)).toContain('assistant.create_booking')
     jar.clear()
+  })
+
+  // The judge booked at their demo shop's counter, then asks the assistant about it (JW-M2).
+  it('looks up the judge’s own latest booking through get_booking when they tap to ask, and only once', async () => {
+    forwarded.value = '203.0.113.123'
+    const { database } = await getServices()
+    const demo = await openDemoSession(database, {
+      owner: { subject: 'owner-hosted3', email: 'tomas.hosted3@demo.hold.example' },
+      staff: { subject: 'staff-hosted3', email: 'jonas.hosted3@demo.hold.example' },
+      slug: 'ribeira-bikes-hosted3',
+      paypal: { credentialReference: 'hold/paypal/shops/demo/sandbox', mode: 'sandbox' },
+      now: new Date(),
+    })
+    const password = 'x'.repeat(24)
+    await writeDemoSession({ shopId: demo.shopId, owner: { email: 'tomas.hosted3@demo.hold.example', password }, staff: { email: 'jonas.hosted3@demo.hold.example', password } })
+    const inDemo = { role: 'hold_app', shopId: demo.shopId } as const
+    expect(await latestBookingToAsk()).toBe(false)
+    // A type the shop rents for real, not one of its samples.
+    const typeId = (await inShop(database, inDemo, itemCatalog)).types.find((type) => !type.simulated)?.id ?? ''
+    const startsAt = addDays(new Date(), 60)
+    const booked = await inShop(database, inDemo, (transaction) => createBooking(transaction, demo.shopId, { lines: [{ itemTypeId: typeId, count: 1 }], startsAt, endsAt: addDays(startsAt, 1), contact: { name: 'Judge', email: 'judge@example.com' }, language: 'en', bookedThrough: 'staff', link: { fingerprint: 'judge-hosted3', expiresAt: addDays(startsAt, 60) } }, new Date()))
+    if (!booked.ok) throw new Error(booked.reason)
+    expect(await latestBookingToAsk()).toBe(true)
+
+    const asked = await askAssistant(null, form({ conversation: '[]', text: 'Where does my latest booking stand?', locale: 'en', lookup: 'latest_booking' }))
+    if (!asked.ok) throw new Error(JSON.stringify(asked))
+    expect(asked.value).toMatchObject({ stopped: 'done', toolCalls: [{ name: 'get_booking', ok: true }] })
+    expect(asked.value.reply).toMatch(/not paid yet/i)
+    const lines = await inShop(database, inDemo, (transaction) => transaction.select().from(auditLog))
+    expect(lines.filter((line) => line.action === 'assistant.get_booking').map((line) => [line.subjectId, line.detail['client']])).toEqual([[booked.rentalId, 'Hold hosted assistant (demonstration)']])
+    expect(await latestBookingToAsk()).toBe(false)
+
+    // Its secret was given once, to that conversation; asking again in another calls neither Hold nor the model.
+    const again = await askAssistant(null, form({ conversation: '[]', text: 'Where does my latest booking stand?', locale: 'en', lookup: 'latest_booking' }))
+    expect(again).toMatchObject({ ok: true, value: { stopped: 'already_followed', toolCalls: [], conversation: [] } })
+    jar.clear()
+  })
+
+  it('says there is no booking to look up for a browser that started no demo', async () => {
+    forwarded.value = '203.0.113.124'
+    expect(await askAssistant(null, form({ conversation: '[]', text: 'Where does my latest booking stand?', locale: 'en', lookup: 'latest_booking' }))).toMatchObject({ ok: true, value: { stopped: 'no_booking', toolCalls: [], conversation: [] } })
   })
 
   it('refuses a conversation that is not one, and a network that asks too often', async () => {

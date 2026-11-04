@@ -186,7 +186,7 @@ Each tool is declared with a tier. The gateway refuses a call whose actor is not
 |---|---|---|
 | `read` | Returns records the actor may see | `get_hold`, PayPal's `list_transaction` |
 | `draft` | Produces text for a person to send or discard | `draft_message_to_renter` |
-| `propose` | Writes a proposal | `propose_release` |
+| `propose` | Writes a proposal, or a request, that a person must approve before anything happens | `propose_release`; `request_extension`, whose PayPal order for more days the person approves in PayPal |
 | `notify` | Sends a fixed-template message without approval, rate capped | A return-due reminder |
 | `act_under_mandate` | Acts on money inside a live mandate | `submit_offer` |
 
@@ -290,6 +290,7 @@ The pipeline in GitHub Actions runs the gate half whenever a prompt, a threshold
 - The run is stored in `eval_runs` with the model ID, prompt version and thresholds.
 - The build fails if clean returns wrongly flagged rises above its limit, or if damage found falls by more than its tolerance against the last accepted run.
 - **The limits are set after the first run, not before.** The gate's job is to stop the comparison getting worse without anyone noticing.
+- **With no accepted run, the gate has nothing to compare against** (`no_baseline`, since 4 November 2026). It stops nothing, so the first run can become the baseline, and it is never reported as a pass: the report says "no accepted run to compare against", the run is recorded with the reason `no_baseline`, and in GitHub Actions the step adds a warning to the run. Before then it was a pass with the reason `first_run`.
 - **Set 1 November 2026** in `eval/gate-limits.json`: at most 5 percent of clean returns wrongly flagged, which keeps the scorecard's "below about 6 percent" true, and damage found falling by no more than 10 points. Before then the file was missing, and every gate run after the first accepted run (29 October) stopped with an error.
 
 ### 5.7 The field record
@@ -343,6 +344,8 @@ A gate run on that set still found no damage. The first look named 9 large chips
 That change answered what the gate half showed, so the gate half was refreshed with new pairs (`augment --seed 2`) before the next accepted run, as section 5.5 requires.
 
 **3 November 2026.** The run accepted by mistake is withdrawn. Migration 0042 adds `withdrawn_at` and `withdrawn_reason` to `eval_runs` and withdraws every accepted gate run whose pairs reached the model less than half the time (`model_not_asked`). The run stays on record. The public and owner scorecards show no run, say which run was withdrawn and why, and say that the gate half was rebuilt after a threshold was set from a gate run; the next run is not measured against the withdrawn one. No run is accepted yet, so Hold claims no accuracy.
+
+**X0.4, 4 November 2026: shown on the gate rule, not on a live run.** A unit test measures the same pairs twice, once as an accepted run saw them and once as a weakened prompt would answer, missing small marks and calling shadows damage, and `checkGate` fails the weaker run with both reasons, `clean_wrongly_flagged_above_limit` and `damage_found_fell` (`packages/domain/src/evaluation.test.ts`); `eval/src/evaluate.test.ts` shows the runner refuses to accept such a run. No weakened prompt has been run through the real model in continuous integration: the gate half has no accepted run to fail against, and the workflow depends on repository variables that cannot be checked from the repository. Until a person accepts a run, every gate run in CI reports `no_baseline`.
 ### 5.10 In the video
 
 Four seconds on the scorecard while the damage comparison runs, with the real numbers on screen.
@@ -511,7 +514,7 @@ PayPal's write tools, such as `create_invoice`, `create_refund` and `accept_disp
 - **X1.4** Approving a `release_hold` proposal voids the authorization in the sandbox, the verified `PAYMENT.AUTHORIZATION.VOIDED` event marks the hold released, and the renter is told.
 - **X1.5** Approving a proposal whose hold has already been released is refused as superseded.
 - **X1.6** With the Claude key removed, the queue still lists every exception.
-- **X1.7** Every PayPal MCP tool call appears in the audit log with its shop, run and tool name.
+- **X1.7** Every PayPal MCP tool call appears in the audit log with its shop, run and tool name. Since 4 November 2026 the line also names the person the agent acted for: the shop's owner, read from the shop's staff when the run begins (`operationsPrincipal`). A shop with no owner gets no PayPal read at all, since the gateway refuses an agent that acts for nobody, and its queue is still written from the detectors (`run-operations.test.ts`).
 - **X1.8** The containment test in 6.10 passes.
 - **X1.9** A rejection with a reason produces a drafted rule. Once confirmed, the next run does not make that proposal.
 - **X1.10** Amounts on the queue screen equal the database values for the records they name: the hold for a release or a replacement hold, what the claim still leaves uncaptured for an invoice or a refund, and what was captured for an answer to a dispute, since that is the money disputed.
@@ -832,6 +835,10 @@ This is listed so the mapping is known. It is built only if everything else in t
 
 **The hosted assistant is a client, not a shortcut.** It connects to the same MCP server with the same tools as any outside assistant. It exists so a judge can see the flow without setting up an MCP client.
 
+**Asking about one's own booking (4 November 2026).** A judge who booked at their demo shop's counter and then asks the hosted assistant "what about my booking?" used to be asked for a rental ID. When this browser's demo shop has a booking of its own, not a sample, that no assistant follows yet, the page offers **Ask about my latest booking**. The tap binds a new booking secret to that booking, exactly as `create_booking` binds one (`followOwnBooking` in `packages/db` and `packages/mcp`), and the turn begins with Hold's page calling `get_booking` with it through the same MCP client before the model's first reply (`lookup` in `runHostedTurn`, counted as one of the turn's eight calls). The model reads the result as quoted data, as it reads any tool result: the status and the time to pay by, and, once the fee is paid, the agent token `get_booking` issues, with which it reads the rental through `get_rental` and the gateway. No amount is put in the prompt. A rental has one assistant at most and its secrets are issued once (migration 0026), so the offer is made once per booking: asked again, the page says an assistant already follows it, and neither Hold's tools nor the model are asked. A turn the model could not answer keeps the lookup, so the secret is not lost. The renter's link shows the hosted assistant connected once its token is issued, and can disconnect it.
+
+**While an answer is on its way.** The person's message shows at once, with how many seconds the assistant has been working and why it takes a while (an answer usually takes 10 to 20 seconds: Claude and Hold's tools in turn). Streaming was considered and not built: the page's one way in is `publicAction`, which returns one checked result, and a streaming route would have been a second way in with its own limits. The page cannot see which tool is being called until the answer returns, so it does not pretend to; the transcript then lists each tool used.
+
 ### 8.11 Tests
 
 - **Contract.** Every tool's input and output shape, checked against its schema.
@@ -839,6 +846,7 @@ This is listed so the mapping is known. It is built only if everything else in t
 - **Money.** A test lists every tool and fails if any leads to a capture of a hold, or accepts an amount as input other than the advocate's offer lines.
 - **Limits.** The unpaid booking cap and the rate limits.
 - **Two clients.** The flow is run with the hosted assistant and with one outside MCP client.
+- **Hostile words, an obedient model.** The shop's price list and wear policy, and the person's message, tell the hosted assistant to capture a hold, quote a lower fee and reveal the shop's settlement limits; a stand-in model obeys every word. Through the real MCP server, no tool it is offered is named for moving money, each call the injection asks for is refused (`unknown_tool`, `invalid_arguments` or `not_authorized`), nothing reaches the money log, an execution, the outbox or a quote, the injected words come back only inside `merchant_words`, and the shop's limits appear in no request (`packages/mcp/src/hosted/adversarial.test.ts`). It proves what Hold's server allows, not how Claude itself answers; no live hosted turn is recorded.
 
 ### 8.12 Done when
 
@@ -1066,6 +1074,7 @@ In the hackathon build Hold runs both advocates, and Hold's customer is the shop
   - no settlement exists unless both mandates were live at the moment of agreement
 - **Privacy.** A test searches every message sent to one advocate for the other side's limits and must find none.
 - **Hostile input.** An outside assistant sending malformed offers. A renter comment that instructs the shop's advocate to accept. An argument text that states a limit.
+- **The recorded live run, replayed.** The run the site shows (`apps/web/src/features/negotiation/recorded-run.json`, Claude on Bedrock, 3 November 2026) is set up again on the same demonstration claim, and two stand-ins answer each turn with the move Claude made then. The runner and the referee accept the same moves, line for line, reach the same agreement, and plain code finds it inside both mandates (`packages/negotiate/src/recorded-run.test.ts`). It replays the moves, not Claude's reasoning: it shows the referee's side of the recording.
 - **Quality.** A set of claims with known evidence strength. Measured: how often the waived lines are the weak ones, the share that settle, and the number of rounds.
 
 ### 9.16 Done when

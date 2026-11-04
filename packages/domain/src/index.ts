@@ -79,7 +79,7 @@ export type { ContactChannel, RenterCodeRecipient, TextPurpose, TextStatus } fro
 export { isExpoPushToken, isStaffPushPath, PUSH_FOR_TEXT, PUSH_PLATFORMS, RENTER_PUSH_EVENTS, RENTER_PUSH_PAGES, STAFF_PUSH_EVENTS, STAFF_PUSH_ROLES, staffPushPath } from './push.ts'
 export type { PushPlatform, RenterPushEvent, RenterPushPage, StaffPushEvent, StaffPushTarget } from './push.ts'
 export { checkGate, confidenceLevel, CONFIDENCE_LEVELS, EVALUATION_GROUPS, EVALUATION_OVERLAP, measureEvaluation, sharePercent, zeroUpperBound } from './evaluation.ts'
-export type { ConfidenceLevel, EvaluatedCase, EvaluatedFinding, EvaluationGroup, GateLimits, Measures, Share, Spread } from './evaluation.ts'
+export type { ConfidenceLevel, EvaluatedCase, EvaluatedFinding, EvaluationGroup, GateLimits, GateOutcome, GateResult, Measures, Share, Spread } from './evaluation.ts'
 export { caseVerdict, expectedOutcome, outcomeMatrix, runTrend } from './scorecard-cases.ts'
 export type { CaseVerdict, OutcomeMatrix, PairOutcome, TrendPoint, TrendRun } from './scorecard-cases.ts'
 export { FINDING_VERDICTS, verdictForFinding } from './finding-outcome.ts'

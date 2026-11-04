@@ -3955,8 +3955,12 @@
     "used": "Hat {tool} benutzt",
     "message": "Ihre Nachricht",
     "placeholder": "Buche mir ein E-Bike für drei Tage",
+    "askBooking": "Nach meiner letzten Buchung fragen",
+    "askBookingQuestion": "Wie steht es um meine letzte Buchung?",
     "send": "Senden",
     "sending": "Denkt nach…",
+    "working": "Der Assistent arbeitet daran · {seconds} s",
+    "workingNote": "Er fragt abwechselnd Claude und Holds Werkzeuge; eine Antwort dauert meist 10 bis 20 Sekunden.",
     "approveTitle": "Die Mietgebühr freigeben",
     "approveBody": "Die Buchung hält ihren Artikel fünfzehn Minuten. Geben Sie die Gebühr auf PayPals eigener Seite frei; vorher wird nichts belastet.",
     "approve": "Gebühr bei PayPal freigeben",
@@ -3964,7 +3968,9 @@
     "stopped": {
       "ceiling": "Der Assistent hat an seiner Grenze für Aufrufe, Tokens oder Zeit pro Nachricht angehalten. Fragen Sie erneut, um fortzufahren.",
       "refused": "Das Modell hat die Antwort abgelehnt. Es wurde nichts gebucht.",
-      "unavailable": "Der Assistent war nicht erreichbar. Es wurde nichts gebucht."
+      "unavailable": "Der Assistent war nicht erreichbar. Es wurde nichts gebucht.",
+      "no_booking": "Es gibt keine Buchung von Ihnen, die sich nachschlagen ließe. Buchen Sie in Ihrem Demo-Shop oder bitten Sie den Assistenten zu buchen. Es wurde nichts nachgeschlagen.",
+      "already_followed": "Ein Assistent verfolgt Ihre letzte Buchung bereits, daher kann dieser sie nicht übernehmen. Fragen Sie im Gespräch, in dem sie nachgeschlagen oder gebucht wurde, oder buchen Sie neu. Es wurde nichts nachgeschlagen."
     },
     "results": {
       "rate_limited": "Zu viele Nachrichten aus diesem Netz. Warten Sie einige Minuten und versuchen Sie es erneut.",

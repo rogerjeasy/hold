@@ -184,8 +184,10 @@ export const TOOLS = {
     input: z.strictObject(rental),
     output: z.strictObject({ rental_id: z.uuid(), status: z.enum(['awaiting_approval', 'not_requested', 'placed', 'unavailable']), approval_url: z.url().nullable() }),
   }),
+  // A proposal, not a draft: it writes a priced quote and its PayPal order, and nothing happens until the person
+  // approves that order in PayPal.
   request_extension: tool({
-    tier: 'draft',
+    tier: 'propose',
     audience: 'rental',
     scope: 'extend',
     description:

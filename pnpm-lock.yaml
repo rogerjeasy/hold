@@ -589,12 +589,6 @@ importers:
 
   eval:
     dependencies:
-      '@anthropic-ai/bedrock-sdk':
-        specifier: ^0.34.4
-        version: 0.34.4(zod@4.6.7)
-      '@anthropic-ai/sdk':
-        specifier: ^0.133.0
-        version: 0.133.0(zod@4.6.7)
       '@hold/compare':
         specifier: workspace:*
         version: link:../packages/compare

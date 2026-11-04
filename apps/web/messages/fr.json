@@ -3955,8 +3955,12 @@
     "used": "A utilisé {tool}",
     "message": "Votre message",
     "placeholder": "Réserve-moi un vélo électrique pour trois jours",
+    "askBooking": "Demander où en est ma dernière réservation",
+    "askBookingQuestion": "Où en est ma dernière réservation ?",
     "send": "Envoyer",
     "sending": "Réflexion…",
+    "working": "L'assistant s'en occupe · {seconds} s",
+    "workingNote": "Il interroge tour à tour Claude et les outils de Hold ; une réponse prend en général 10 à 20 secondes.",
     "approveTitle": "Approuver les frais de location",
     "approveBody": "La réservation garde son article quinze minutes. Approuvez les frais sur la page de PayPal ; rien n'est prélevé avant.",
     "approve": "Approuver les frais dans PayPal",
@@ -3964,7 +3968,9 @@
     "stopped": {
       "ceiling": "L'assistant s'est arrêté à sa limite d'appels, de jetons ou de temps pour un message. Redemandez pour continuer.",
       "refused": "Le modèle a refusé de répondre. Rien n'a été réservé.",
-      "unavailable": "L'assistant n'a pas pu être joint. Rien n'a été réservé."
+      "unavailable": "L'assistant n'a pas pu être joint. Rien n'a été réservé.",
+      "no_booking": "Aucune réservation à votre nom à consulter. Réservez dans votre boutique de démonstration, ou demandez à l'assistant de réserver. Rien n'a été consulté.",
+      "already_followed": "Un assistant suit déjà votre dernière réservation : celui-ci ne peut pas la reprendre. Posez la question dans la conversation où elle a été consultée ou réservée, ou faites une nouvelle réservation. Rien n'a été consulté."
     },
     "results": {
       "rate_limited": "Trop de messages depuis ce réseau. Attendez quelques minutes et réessayez.",

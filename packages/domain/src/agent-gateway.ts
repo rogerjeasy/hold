@@ -15,8 +15,9 @@ export type ToolTier = (typeof TOOL_TIERS)[number]
 const ENTITLED: Readonly<Record<AgentActor['kind'], readonly ToolTier[]>> = {
   // The owner's assistant, the operations agent and the shop's advocate.
   shop_agent: ['read', 'draft', 'propose', 'notify', 'act_under_mandate'],
-  // A renter's own assistant, or the renter's advocate, on one rental.
-  renter_agent: ['read', 'draft', 'act_under_mandate'],
+  // A renter's own assistant, or the renter's advocate, on one rental. It proposes only what the person then approves
+  // in PayPal themselves: more days, priced by Hold.
+  renter_agent: ['read', 'draft', 'propose', 'act_under_mandate'],
   // Any assistant that has paid for nothing: public information, quotes and bookings awaiting payment.
   public_agent: ['read', 'draft'],
 }

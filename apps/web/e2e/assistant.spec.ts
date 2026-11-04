@@ -1,6 +1,7 @@
 import { expectFitsEveryWidth } from './support/responsive'
-import { renterBrowser } from './support/rental'
+import { bookAtTheCounter, renterBrowser } from './support/rental'
 import { shopReadyToBook } from './support/shop'
+import { startDemo } from './support/sign-in'
 import { expect, test } from './support/test'
 
 // Renting through an assistant (extensions.md section 8): the hosted assistant, a client of the app's own /mcp, books
@@ -60,4 +61,19 @@ test('a judge rents through the hosted assistant, approves the fee in PayPal, an
   await expect(page.getByText("Booked by the renter's assistant")).toBeVisible()
   await judge.context().close()
   await renter.context().close()
+})
+
+// JW-M2: a judge books at their demo shop's counter, then asks the hosted assistant about it, with one tap.
+test('a judge asks the hosted assistant about the booking they just made at their demo shop, and sees it working meanwhile', async ({ page }) => {
+  await startDemo(page, 'Jonas, at the counter')
+  await bookAtTheCounter(page, 'City bike')
+  await page.goto('/assistant')
+  await expectFitsEveryWidth(page)
+  await page.getByRole('button', { name: 'Ask about my latest booking' }).click()
+  await expect(page.getByText('Where does my latest booking stand?')).toBeVisible()
+  await expect(page.getByText('Used get_booking')).toBeVisible()
+  await expect(page.getByText('The fee is not paid yet.', { exact: false })).toBeVisible()
+  // Offered once: the booking's secret now belongs to this conversation.
+  await expect(page.getByRole('button', { name: 'Ask about my latest booking' })).toHaveCount(0)
+  await expectFitsEveryWidth(page)
 })

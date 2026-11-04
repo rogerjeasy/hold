@@ -41,11 +41,12 @@ describe('one command over one half of the set', () => {
   it('runs every pair, writes the report and records the run', async () => {
     const resultsDir = await mkdtemp(join(tmpdir(), 'hold-results-'))
     const outcome = await runEvaluation({ root, half: 'gate', resultsDir, accept: true, limits: null }, { model: quietModel, fingerprint, database, now: () => new Date('2026-10-28T10:00:00Z'), pipelineVersion: 'inspection-1+test' })
-    expect(outcome.gate).toEqual({ pass: true, reasons: ['first_run'] })
+    expect(outcome.gate).toEqual({ outcome: 'no_baseline', reasons: [] })
     const report = await readFile(outcome.reportPath, 'utf8')
+    expect(report).toContain('Gate: no accepted run to compare against.')
     expect(report).toContain('| Clean returns wrongly flagged | 0 of 2 (below about 84% at 95% confidence, not "never")')
     const [row] = await database.select().from(evalRuns)
-    expect(row).toMatchObject({ half: 'gate', caseCount: 2, syntheticCount: 0, accepted: true, gatePassed: true, pipelineVersion: 'inspection-1+test', model: 'recorded-model' })
+    expect(row).toMatchObject({ half: 'gate', caseCount: 2, syntheticCount: 0, accepted: true, gatePassed: true, gateReasons: ['no_baseline'], pipelineVersion: 'inspection-1+test', model: 'recorded-model' })
     expect(row?.thresholds).toEqual({ minConfidence: 0.9, secondLookMinConfidence: 0.6, knownMarkOverlap: 0.5 })
     expect(row?.measures.cleanWronglyFlagged).toEqual({ count: 0, total: 2 })
     // Every pair is kept with the run, for the open scorecard to show case by case.
@@ -56,7 +57,7 @@ describe('one command over one half of the set', () => {
     const flagging: ComparisonModel = { look: () => Promise.resolve({ kind: 'result', model: 'recorded-model', inputTokens: 500, outputTokens: 50, data: { sameItem: true, sameView: true, findings: [{ region: { x: 0.4, y: 0.4, width: 0.1, height: 0.1 }, class: 'new_damage', confidence: 0.97, description: 'A scratch.', priceCode: null }], dismissed: [] } }) }
     const resultsDir = await mkdtemp(join(tmpdir(), 'hold-results-'))
     const outcome = await runEvaluation({ root, half: 'gate', resultsDir, accept: true, limits: { maxCleanWronglyFlagged: 0.05, maxDamageFoundDrop: 0.05 } }, { model: flagging, fingerprint, database, now: () => new Date('2026-10-28T11:00:00Z'), pipelineVersion: 'inspection-1+weakened' })
-    expect(outcome.gate).toEqual({ pass: false, reasons: ['clean_wrongly_flagged_above_limit'] })
+    expect(outcome.gate).toEqual({ outcome: 'failed', reasons: ['clean_wrongly_flagged_above_limit'] })
     expect((await database.select().from(evalRuns)).filter((each) => each.accepted)).toHaveLength(1)
   })
 })

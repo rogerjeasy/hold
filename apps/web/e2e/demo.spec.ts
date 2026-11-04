@@ -4,17 +4,11 @@ import { acceptClaim, handedOverAndReturned } from './support/claim'
 import { addVirtualAuthenticator } from './support/passkey'
 import { expectFitsEveryWidth } from './support/responsive'
 import { bookAtTheCounter, feePaidAndHoldPlaced, renterBrowser } from './support/rental'
-import { expectInShop } from './support/sign-in'
+import { expectInShop, startDemo } from './support/sign-in'
 import { expect, test } from './support/test'
 
 // Each judge's demo is their own (architecture.md section 20.3): one tap opens a new Ribeira Bikes with new accounts,
 // and nobody else's demo is reachable from it.
-
-async function startDemo(page: Page, as: 'Tomás, the owner' | 'Jonas, at the counter'): Promise<void> {
-  await page.goto('/sign-in')
-  await page.getByRole('region', { name: 'Try the demo shop' }).getByRole('button', { name: `Start a demo as ${as}` }).click()
-  await expectInShop(page, 'Ribeira Bikes')
-}
 
 // The address of one sample rental in the shop the page is signed in to.
 async function aRental(page: Page): Promise<string> {

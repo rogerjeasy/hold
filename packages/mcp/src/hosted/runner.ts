@@ -48,7 +48,12 @@ async function callOrFail(client: ToolClient, name: string, input: Record<string
   }
 }
 
-export async function runHostedTurn(input: { readonly model: AssistantModel; readonly client: ToolClient; readonly conversation: Conversation; readonly now: () => Date; readonly today: string; readonly ownShop?: OwnShop }): Promise<HostedTurn> {
+// A lookup the person asked for with a tap on the page, such as their own latest booking: one call of Hold's tools,
+// made through the same client before the model's first reply and counted as one of the turn's calls. The model reads
+// its result as the answer to a call of its own.
+export type HostedLookup = { readonly name: string; readonly input: Record<string, unknown> }
+
+export async function runHostedTurn(input: { readonly model: AssistantModel; readonly client: ToolClient; readonly conversation: Conversation; readonly now: () => Date; readonly today: string; readonly ownShop?: OwnShop; readonly lookup?: HostedLookup }): Promise<HostedTurn> {
   const { model, client, now } = input
   const started = now().getTime()
   const listed = await client.listTools()
@@ -60,6 +65,16 @@ export async function runHostedTurn(input: { readonly model: AssistantModel; rea
   let modelName = ''
   const finish = (stopped: HostedTurn['stopped'], reply = ''): HostedTurn => ({ conversation, reply, toolCalls, approvalUrl, stopped, simulated: model.simulated, model: modelName, promptVersion: HOSTED_PROMPT_VERSION })
   const outOfRoom = () => tokens >= HOSTED_LIMITS.tokens || now().getTime() - started >= HOSTED_LIMITS.milliseconds
+
+  if (input.lookup !== undefined) {
+    const { name } = input.lookup
+    const id = `hold-lookup-${String(started)}`
+    const result = await callOrFail(client, name, input.lookup.input)
+    const ok = result['isError'] !== true
+    toolCalls.push({ name, ok })
+    conversation.push({ role: 'assistant', content: [{ type: 'tool_use', id, name, input: input.lookup.input }] })
+    conversation.push({ role: 'user', content: [{ type: 'tool_result', tool_use_id: id, content: textOf(result['content']), is_error: !ok }] })
+  }
 
   for (;;) {
     if (outOfRoom()) return finish('ceiling')

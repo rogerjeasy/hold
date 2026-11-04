@@ -48,6 +48,14 @@ describe('the one gateway every agent passes', () => {
     expect(gatewayDecision({ ...base, actor: { kind: 'public_agent', shopId: null, actsFor: null }, tool: { name: 'propose_release', tier: 'propose' }, subjectShopId: null })).toEqual({ ok: false, reason: 'tier' })
   })
 
+  // request_extension writes a priced PayPal order the person approves in PayPal; nothing moves until they do.
+  it('lets a renter’s assistant propose on its own rental, and still lets no unidentified assistant propose', () => {
+    const assistant = { kind: 'renter_agent' as const, shopId: 'shop-1', actsFor: 'renter-1', rentalId: 'rental-1' }
+    expect(gatewayDecision({ ...base, actor: assistant, subjectRentalId: 'rental-1', tool: { name: 'request_extension', tier: 'propose' } })).toEqual({ ok: true })
+    expect(gatewayDecision({ ...base, actor: assistant, subjectRentalId: 'rental-2', tool: { name: 'request_extension', tier: 'propose' } })).toEqual({ ok: false, reason: 'rental' })
+    expect(gatewayDecision({ ...base, actor: { kind: 'public_agent', shopId: null, actsFor: null }, tool: { name: 'request_extension', tier: 'propose' }, subjectShopId: null })).toEqual({ ok: false, reason: 'tier' })
+  })
+
   it('refuses acting under a mandate without a live one', () => {
     const advocate = { kind: 'renter_agent' as const, shopId: 'shop-1', actsFor: 'renter-1' }
     expect(gatewayDecision({ ...base, actor: advocate, tool: { name: 'submit_offer', tier: 'act_under_mandate' } })).toEqual({ ok: false, reason: 'mandate' })

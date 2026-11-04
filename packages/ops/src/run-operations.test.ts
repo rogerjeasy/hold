@@ -1,4 +1,4 @@
-import { addSampleRentals, auditLog, authorizations, captureSessions, comparisons, decideProposal, decideRule, draftRule, grantStandingRule, holds, inShop, itemTypes, opsRuns, proposals, rentalItems, rentals, shopExceptions } from '@hold/db'
+import { addSampleRentals, auditLog, authorizations, captureSessions, comparisons, decideProposal, decideRule, draftRule, grantStandingRule, holds, inShop, itemTypes, opsRuns, proposals, rentalItems, rentals, shopExceptions, staffRoles } from '@hold/db'
 import { createTestDatabase } from '@hold/db/testing'
 import type { TestDatabase } from '@hold/db/testing'
 import { readyRentalShop } from '@hold/db/testing/ready-rental'
@@ -156,6 +156,26 @@ describe('a nightly run', () => {
     expect(investigator.toolAnswers[1]).toMatch(/not offered/i)
     const lines = await inShop(database, { role: 'hold_worker', shopId: shop.scope.shopId }, (transaction) => transaction.select().from(auditLog).where(eq(auditLog.source, runId)))
     expect(lines.map((line) => [line.action, line.actorKind, (line.detail as { outcome: string }).outcome])).toEqual([['agent.tool.paypal.get_order', 'shop_agent', 'ok'], ['agent.tool.paypal.create_refund', 'shop_agent', 'refused']])
+  })
+
+  // An agent always names the person it acts for (extensions.md section 4.1): the owner, as the shop records them.
+  it('acts for the shop\'s owner, by their account, and names them on every PayPal call\'s audit line', async () => {
+    await holdEnding()
+    const investigator = scripted(() => ({ calls: [{ name: 'get_order', args: { id: 'HOLD-1' } }], answer: answer({ proposalKind: 'request_replacement_hold' }) }))
+    const runId = await run({ investigator })
+    const lines = await inShop(database, { role: 'hold_worker', shopId: shop.scope.shopId }, (transaction) => transaction.select().from(auditLog).where(eq(auditLog.source, runId)))
+    expect(lines.map((line) => (line.detail as { actsFor?: string }).actsFor)).toEqual([shop.scope.userId])
+  })
+
+  it('reads nothing from PayPal for a shop with no owner to act for, and still writes the queue', async () => {
+    await holdEnding()
+    await database.delete(staffRoles).where(eq(staffRoles.shopId, shop.scope.shopId))
+    const investigator = scripted(() => ({ calls: [{ name: 'get_order', args: { id: 'HOLD-1' } }], answer: answer({ proposalKind: 'request_replacement_hold' }) }))
+    const runId = await run({ investigator })
+    expect(investigator.toolAnswers).toEqual(['Refused: actor.'])
+    const lines = await inShop(database, { role: 'hold_worker', shopId: shop.scope.shopId }, (transaction) => transaction.select().from(auditLog).where(eq(auditLog.source, runId)))
+    expect(lines.map((line) => [(line.detail as { outcome: string }).outcome, (line.detail as { actsFor?: string | null }).actsFor])).toEqual([['refused_actor', null]])
+    expect(await inShopProposals()).toHaveLength(1)
   })
 })
 

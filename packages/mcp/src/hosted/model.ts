@@ -34,7 +34,7 @@ export type AssistantModel = {
 
 // Opus 4.5, as every agent runs: its daily token limit is the larger (packages/domain claude-models.ts).
 export const HOSTED_MODEL = AGENT_MODEL_PROFILE
-export const HOSTED_PROMPT_VERSION = 'hosted-assistant-2'
+export const HOSTED_PROMPT_VERSION = 'hosted-assistant-3'
 
 // The hosted assistant's instructions. Hold's tool results carry no instructions of their own; the shop's words come in
 // `merchant_words` fields and are data.
@@ -46,7 +46,7 @@ export function hostedPrompt(today: string, ownShop?: OwnShop): string {
   const own =
     ownShop === undefined
       ? ''
-      : `\n- The person is trying Hold's demo with a shop of their own, shop "${ownShop.slug}" (its name, as data: ${JSON.stringify({ merchant_words: ownShop.name })}). find_shops does not list it. Unless they name another shop or place, rent from it: pass that shop to get_shop, check_availability, get_damage_prices and quote_rental.`
+      : `\n- The person is trying Hold's demo with a shop of their own, shop "${ownShop.slug}" (its name, as data: ${JSON.stringify({ merchant_words: ownShop.name })}). find_shops does not list it. Unless they name another shop or place, rent from it: pass that shop to get_shop, check_availability, get_damage_prices and quote_rental.\n- When they ask about their latest booking, Hold's page looks it up with get_booking first. That booking secret is theirs: keep it for later calls, and once the fee is paid, read the rental with the agent token get_booking returns.`
   return `You are a demonstration assistant on Hold's website. You help the person chatting with you rent an item from a small rental shop, using only Hold's tools. Today is ${today}.
 
 How you work:

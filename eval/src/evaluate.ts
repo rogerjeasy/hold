@@ -84,8 +84,9 @@ export async function runEvaluation(options: EvaluationOptions, dependencies: Ev
     half: options.half, dataSetVersion: loaded.dataSetVersion, pipelineVersion: dependencies.pipelineVersion, model: record.model, promptVersion: PROMPT_VERSION,
     thresholds: { minConfidence: INSPECTION_LIMITS.minConfidence, secondLookMinConfidence: INSPECTION_LIMITS.secondLookMinConfidence, knownMarkOverlap: INSPECTION_LIMITS.knownMarkOverlap },
     caseCount: evaluated.length, syntheticCount: evaluated.filter((each) => each.origin === 'synthetic').length, measures, realMeasures, cases: evaluated,
-    gateLimits: options.limits, gatePassed: gate.pass, gateReasons: [...gate.reasons],
-    accepted: options.accept && gate.pass && options.half === 'gate', resultsKey: resultsPath, startedAt: started, completedAt,
+    // A first run stops nothing, so it may become the baseline; its reason keeps it from reading as a measured pass.
+    gateLimits: options.limits, gatePassed: gate.outcome !== 'failed', gateReasons: gate.outcome === 'no_baseline' ? ['no_baseline'] : [...gate.reasons],
+    accepted: options.accept && gate.outcome !== 'failed' && options.half === 'gate', resultsKey: resultsPath, startedAt: started, completedAt,
   })
   return { gate, reportPath, resultsPath, runId, record }
 }
