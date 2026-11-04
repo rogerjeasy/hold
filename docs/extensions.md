@@ -186,7 +186,7 @@ Each tool is declared with a tier. The gateway refuses a call whose actor is not
 |---|---|---|
 | `read` | Returns records the actor may see | `get_hold`, PayPal's `list_transaction` |
 | `draft` | Produces text for a person to send or discard | `draft_message_to_renter` |
-| `propose` | Writes a proposal | `propose_release` |
+| `propose` | Writes a proposal, or a request, that a person must approve before anything happens | `propose_release`; `request_extension`, whose PayPal order for more days the person approves in PayPal |
 | `notify` | Sends a fixed-template message without approval, rate capped | A return-due reminder |
 | `act_under_mandate` | Acts on money inside a live mandate | `submit_offer` |
 

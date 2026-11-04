@@ -47,6 +47,16 @@ describe('each tool’s contract', () => {
     expect(takesToken).toBe(definition.audience === 'rental')
   })
 
+  // Listed in full, so a tier is never changed without this test. A tool that writes something a person must approve
+  // before anything happens, such as request_extension's PayPal order for more days, proposes; it does not draft.
+  it('gives every tool the tier that says what it does', () => {
+    expect(Object.fromEntries(TOOL_NAMES.map((name) => [name, TOOLS[name].tier]))).toEqual({
+      find_shops: 'read', get_shop: 'read', check_availability: 'read', get_damage_prices: 'read', quote_rental: 'draft', create_booking: 'draft', get_booking: 'read',
+      get_rental: 'read', get_hold: 'read', get_hold_approval_link: 'read', request_extension: 'propose', get_condition_report: 'read', get_claim: 'read', draft_claim_reply: 'draft', submit_claim_reply: 'act_under_mandate', get_record: 'read',
+      get_negotiation: 'read', get_claim_lines: 'read', get_line_photos: 'read', get_price_list: 'read', get_known_marks: 'read', submit_offer: 'act_under_mandate',
+    })
+  })
+
   it('rejects an argument the tool does not name', () => {
     expect(TOOLS.quote_rental.input.safeParse({ shop: 'ribeira-bikes', starts_at: '2026-11-01T10:00', ends_at: '2026-11-04T10:00', items: [{ item_type_id: '0b6d4c2e-0000-4000-8000-000000000001', count: 1 }], fee: { cents: 1, currency: 'EUR' } }).success).toBe(false)
   })
