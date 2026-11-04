@@ -3413,6 +3413,8 @@
     "draftGuidance": "Seleccione hallazgos confirmados o añada un precio publicado con un motivo escrito. Las líneas manuales vacías se omiten.",
     "manualLine": "Línea manual {number}",
     "priceEntry": "Precio acordado",
+    "findingPrice": "Precio acordado para este hallazgo",
+    "choosePrice": "Elija un precio acordado",
     "lineReason": "¿Qué encontró y por qué corresponde este precio?",
     "addLine": "Añadir otra línea",
     "prepare": "Preparar reclamación para revisión",

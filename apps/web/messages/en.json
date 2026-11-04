@@ -3413,6 +3413,8 @@
     "draftGuidance": "Select confirmed findings, or add a published price with your written reason. Blank manual lines are ignored.",
     "manualLine": "Manual line {number}",
     "priceEntry": "Agreed price",
+    "findingPrice": "Agreed price for this finding",
+    "choosePrice": "Choose an agreed price",
     "lineReason": "What did you find, and why does this price apply?",
     "addLine": "Add another line",
     "prepare": "Prepare claim for review",

@@ -64,6 +64,19 @@ describe('claim preparation and settlement screen', () => {
     expect(screen.getByRole('checkbox', { name: 'A chip in the paint on the down tube. Sample' })).toBeInTheDocument()
     expect(screen.getByRole('checkbox', { name: 'A bent brake lever.' })).toBeInTheDocument()
   })
+  // A confirmed finding no agreed price matched is still evidence: staff choose its price, and the line keeps the finding.
+  it('lets staff choose the agreed price of a confirmed finding no price matched, and sends nothing until they do', () => {
+    const possibleFindings = [{ id: 'finding', description: 'A dent in the rear rim.', suggestedPriceEntryId: null, comparisonId: 'comparison', view: 'left-side', simulated: false }]
+    const { container } = renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={{ ...workspace, possibleFindings }} canAct />)
+    const lines = () => JSON.parse(container.querySelector<HTMLInputElement>('input[name="lines"]')?.value ?? '[]') as unknown
+    expect(screen.queryByLabelText('Agreed price for this finding')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('checkbox', { name: 'A dent in the rear rim.' }))
+    expect(lines()).toEqual([])
+    expect(screen.getByRole('button', { name: 'Prepare claim for review' })).toBeDisabled()
+    fireEvent.change(screen.getByLabelText('Agreed price for this finding'), { target: { value: 'price' } })
+    expect(lines()).toEqual([{ priceEntryId: 'price', findingId: 'finding' }])
+    expect(screen.getByRole('button', { name: 'Prepare claim for review' })).toBeEnabled()
+  })
   it('shows the stored settlement amounts and leaves read-only staff no money controls', () => {
     renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={{ ...workspace, claim: { id: 'claim', state: 'awaiting_approval', totalCents: 3500, raisedByUserId: 'staff', replyDueAt: null }, amounts: { ...workspace.amounts, capture: { cents: 3500, currency: 'EUR' }, release: { cents: 26500, currency: 'EUR' } } }} canAct={false} />)
     expect(screen.getByText('€35.00')).toBeInTheDocument()

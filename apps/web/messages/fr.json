@@ -3413,6 +3413,8 @@
     "draftGuidance": "Sélectionnez des constats confirmés ou ajoutez un prix publié avec votre justification. Les lignes manuelles vides sont ignorées.",
     "manualLine": "Ligne manuelle {number}",
     "priceEntry": "Prix convenu",
+    "findingPrice": "Prix convenu pour ce constat",
+    "choosePrice": "Choisir un prix convenu",
     "lineReason": "Quel est le constat et pourquoi ce prix s’applique-t-il ?",
     "addLine": "Ajouter une ligne",
     "prepare": "Préparer la réclamation à vérifier",

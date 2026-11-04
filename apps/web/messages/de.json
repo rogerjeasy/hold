@@ -3413,6 +3413,8 @@
     "draftGuidance": "Wählen Sie bestätigte Befunde oder einen veröffentlichten Preis mit schriftlicher Begründung. Leere manuelle Zeilen werden ignoriert.",
     "manualLine": "Manueller Posten {number}",
     "priceEntry": "Vereinbarter Preis",
+    "findingPrice": "Vereinbarter Preis für diesen Befund",
+    "choosePrice": "Vereinbarten Preis wählen",
     "lineReason": "Was wurde festgestellt und warum gilt dieser Preis?",
     "addLine": "Weiteren Posten hinzufügen",
     "prepare": "Forderung zur Prüfung vorbereiten",
