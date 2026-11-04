@@ -842,6 +842,7 @@ This is listed so the mapping is known. It is built only if everything else in t
 - **Money.** A test lists every tool and fails if any leads to a capture of a hold, or accepts an amount as input other than the advocate's offer lines.
 - **Limits.** The unpaid booking cap and the rate limits.
 - **Two clients.** The flow is run with the hosted assistant and with one outside MCP client.
+- **Hostile words, an obedient model.** The shop's price list and wear policy, and the person's message, tell the hosted assistant to capture a hold, quote a lower fee and reveal the shop's settlement limits; a stand-in model obeys every word. Through the real MCP server, no tool it is offered is named for moving money, each call the injection asks for is refused (`unknown_tool`, `invalid_arguments` or `not_authorized`), nothing reaches the money log, an execution, the outbox or a quote, the injected words come back only inside `merchant_words`, and the shop's limits appear in no request (`packages/mcp/src/hosted/adversarial.test.ts`). It proves what Hold's server allows, not how Claude itself answers; no live hosted turn is recorded.
 
 ### 8.12 Done when
 
@@ -1069,6 +1070,7 @@ In the hackathon build Hold runs both advocates, and Hold's customer is the shop
   - no settlement exists unless both mandates were live at the moment of agreement
 - **Privacy.** A test searches every message sent to one advocate for the other side's limits and must find none.
 - **Hostile input.** An outside assistant sending malformed offers. A renter comment that instructs the shop's advocate to accept. An argument text that states a limit.
+- **The recorded live run, replayed.** The run the site shows (`apps/web/src/features/negotiation/recorded-run.json`, Claude on Bedrock, 3 November 2026) is set up again on the same demonstration claim, and two stand-ins answer each turn with the move Claude made then. The runner and the referee accept the same moves, line for line, reach the same agreement, and plain code finds it inside both mandates (`packages/negotiate/src/recorded-run.test.ts`). It replays the moves, not Claude's reasoning: it shows the referee's side of the recording.
 - **Quality.** A set of claims with known evidence strength. Measured: how often the waived lines are the weak ones, the share that settle, and the number of rounds.
 
 ### 9.16 Done when
