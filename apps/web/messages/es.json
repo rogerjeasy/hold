@@ -3944,8 +3944,12 @@
     "used": "Usó {tool}",
     "message": "Tu mensaje",
     "placeholder": "Resérvame una bici eléctrica para tres días",
+    "askBooking": "Preguntar por mi última reserva",
+    "askBookingQuestion": "¿Cómo va mi última reserva?",
     "send": "Enviar",
     "sending": "Pensando…",
+    "working": "El asistente está en ello · {seconds} s",
+    "workingNote": "Consulta por turnos a Claude y a las herramientas de Hold; una respuesta suele tardar de 10 a 20 segundos.",
     "approveTitle": "Aprobar la tarifa del alquiler",
     "approveBody": "La reserva guarda su artículo quince minutos. Aprueba la tarifa en la página de PayPal; no se cobra nada hasta entonces.",
     "approve": "Aprobar la tarifa en PayPal",
@@ -3953,7 +3957,9 @@
     "stopped": {
       "ceiling": "El asistente se detuvo en su límite de llamadas, tokens o tiempo para un mensaje. Pregunta de nuevo para seguir.",
       "refused": "El modelo se negó a responder. No se reservó nada.",
-      "unavailable": "No se pudo contactar con el asistente. No se reservó nada."
+      "unavailable": "No se pudo contactar con el asistente. No se reservó nada.",
+      "no_booking": "No hay ninguna reserva tuya que consultar. Reserva en tu tienda de demostración o pide al asistente que reserve. No se consultó nada.",
+      "already_followed": "Un asistente ya sigue tu última reserva, así que este no puede encargarse de ella. Pregunta en la conversación donde se consultó o se reservó, o haz una reserva nueva. No se consultó nada."
     },
     "results": {
       "rate_limited": "Demasiados mensajes desde esta red. Espera unos minutos y vuelve a intentarlo.",

@@ -63,6 +63,43 @@ describe('the hosted assistant’s page', () => {
     expect(await screen.findByText('The assistant has answered all the questions it can today. Try again after midnight UTC. Nothing was booked.')).toBeInTheDocument()
   })
 
+  it('offers to ask about the demo’s latest booking only when there is one, and sends that question with the lookup', async () => {
+    asked.mockClear()
+    const { unmount } = renderWithIntl(<HostedAssistantScreen mcpUrl="https://hold.example/mcp" />)
+    expect(screen.queryByRole('button', { name: 'Ask about my latest booking' })).not.toBeInTheDocument()
+    unmount()
+    asked.mockResolvedValueOnce({ ok: true, value: { ...answer, conversation: [{ role: 'user', content: [{ type: 'text', text: 'Where does my latest booking stand?' }] }, { role: 'assistant', content: [{ type: 'text', text: 'The fee is not paid yet.' }] }], approvalUrl: null, approvalQr: null } })
+    renderWithIntl(<HostedAssistantScreen mcpUrl="https://hold.example/mcp" canAskAboutBooking />)
+    await userEvent.click(screen.getByRole('button', { name: 'Ask about my latest booking' }))
+    expect(await screen.findByText('The fee is not paid yet.')).toBeInTheDocument()
+    expect(asked.mock.calls[0]?.[1].get('lookup')).toBe('latest_booking')
+    expect(asked.mock.calls[0]?.[1].get('text')).toBe('Where does my latest booking stand?')
+    // Its secret was given to this conversation once; the offer is not made again.
+    expect(screen.queryByRole('button', { name: 'Ask about my latest booking' })).not.toBeInTheDocument()
+  })
+
+  it('says plainly when there was no booking of theirs to look up, and that nothing was asked', async () => {
+    asked.mockResolvedValueOnce({ ok: true, value: { ...answer, conversation: [], reply: '', approvalUrl: null, approvalQr: null, stopped: 'already_followed', toolCalls: [] } })
+    renderWithIntl(<HostedAssistantScreen mcpUrl="https://hold.example/mcp" canAskAboutBooking />)
+    await userEvent.click(screen.getByRole('button', { name: 'Ask about my latest booking' }))
+    expect(await screen.findByText(/An assistant already follows your latest booking/)).toBeInTheDocument()
+  })
+
+  // An answer takes several calls to Claude and to Hold's tools; the page shows the person's words at once and how
+  // long the assistant has been at it, never a silent wait.
+  it('shows the message at once, and how long the assistant has been working, while the answer is on its way', async () => {
+    let answered: (value: unknown) => void = () => undefined
+    asked.mockImplementationOnce(() => new Promise((resolve) => { answered = resolve }))
+    renderWithIntl(<HostedAssistantScreen mcpUrl="https://hold.example/mcp" />)
+    await userEvent.type(screen.getByLabelText('Your message'), 'Book me an e-bike.')
+    await userEvent.click(screen.getByRole('button', { name: 'Send' }))
+    expect(await screen.findByText('Book me an e-bike.')).toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent(/The assistant is working on it · \d+ s/)
+    answered({ ok: true, value: answer })
+    expect(await screen.findByText('Booked. Approve the fee of €120.00 in PayPal.')).toBeInTheDocument()
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+  })
+
   it('sends with Enter, keeps Shift+Enter for a new line, and empties the box once sent', async () => {
     asked.mockClear()
     renderWithIntl(<HostedAssistantScreen mcpUrl="https://hold.example/mcp" />)

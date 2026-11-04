@@ -3944,8 +3944,12 @@
     "used": "Used {tool}",
     "message": "Your message",
     "placeholder": "Book me an e-bike for three days",
+    "askBooking": "Ask about my latest booking",
+    "askBookingQuestion": "Where does my latest booking stand?",
     "send": "Send",
     "sending": "Thinking…",
+    "working": "The assistant is working on it · {seconds} s",
+    "workingNote": "It asks Claude and Hold's tools in turn; an answer usually takes 10 to 20 seconds.",
     "approveTitle": "Approve the rental fee",
     "approveBody": "The booking keeps its item for fifteen minutes. Approve the fee in PayPal's own page; nothing is charged until you do.",
     "approve": "Approve the fee in PayPal",
@@ -3953,7 +3957,9 @@
     "stopped": {
       "ceiling": "The assistant stopped at its limit of tool calls, tokens or time for one message. Ask again to go on.",
       "refused": "The model declined to answer that. Nothing was booked.",
-      "unavailable": "The assistant could not be reached. Nothing was booked."
+      "unavailable": "The assistant could not be reached. Nothing was booked.",
+      "no_booking": "There is no booking of yours to look up. Book one in your demo shop, or ask the assistant to book. Nothing was looked up.",
+      "already_followed": "An assistant already follows your latest booking, so this one cannot take it up. Ask in the conversation where it was looked up or booked, or make a new booking. Nothing was looked up."
     },
     "results": {
       "rate_limited": "Too many messages from this network. Wait a few minutes and try again.",
