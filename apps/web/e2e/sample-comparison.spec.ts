@@ -18,6 +18,8 @@ test('counter staff start the real comparison on the sample return, and the page
   await page.getByRole('button', { name: 'Run the real comparison on this sample' }).click()
   await expect(page.getByRole('heading', { name: 'Needs a person', exact: true })).toBeVisible({ timeout: 30_000 })
   await expect(page.getByText(/Claude did not answer this comparison/)).toBeVisible()
+  // Which model and prompt made the result sits behind its own disclosure.
+  await page.getByText('How this was produced').click()
   await expect(page.getByText('Model: Not run. Prompt: inspection-3.')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Run the real comparison on this sample' })).toHaveCount(0)
   await page.reload()

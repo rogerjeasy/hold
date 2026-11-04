@@ -3,7 +3,7 @@
 import type { ComparisonReport } from '@hold/db'
 import { comparisonNotice, DROP_POINT_VIEW } from '@hold/domain'
 import type { ConfidenceLevel, Share } from '@hold/domain'
-import { CircleCheck, CircleHelp, ClipboardPen, Cpu, History, LoaderCircle, MapPin, Sparkles, TriangleAlert } from 'lucide-react'
+import { ChevronDown, CircleCheck, CircleHelp, ClipboardPen, Cpu, History, LoaderCircle, MapPin, Sparkles, TriangleAlert } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { PhotoWithMarks } from '@/components/photo-with-marks'
 import { BackLink } from '@/components/ui/back-link'
@@ -122,14 +122,19 @@ export function ComparisonScreen({ shopName, report, canAct, calibration, sample
           </Panel>
         )}
         {canAct ? <Panel title={t('manual')} icon={ClipboardPen}><div className="px-4 py-5 md:px-5"><ReviewForm comparisonId={report.id} /></div></Panel> : null}
-        {/* Which model and prompt made this result, and what it took: kept quiet, kept with the result. */}
-        <footer className="flex min-w-0 items-start gap-3 rounded-2xl border border-dashed border-border-strong/70 px-4 py-3.5 text-sm text-muted-foreground md:px-5">
-          <Cpu aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-          <div className="grid min-w-0 gap-0.5">
+        {/* Which model and prompt made this result, and what it took: kept with the result, behind a disclosure, so it
+            is there for whoever asks and not read as the page's message (audit finding F-L1). */}
+        <details className="group min-w-0 rounded-2xl border border-dashed border-border-strong/70 text-sm text-muted-foreground">
+          <summary className="flex min-h-11 cursor-pointer items-center gap-3 rounded-2xl px-4 py-2.5 font-medium transition-colors hover:text-foreground md:px-5 [&::-webkit-details-marker]:hidden">
+            <Cpu aria-hidden="true" className="size-4 shrink-0" />
+            <span className="min-w-0 flex-1">{t('produced')}</span>
+            <ChevronDown aria-hidden="true" className="size-4 shrink-0 transition-transform duration-300 ease-spring group-open:rotate-180" />
+          </summary>
+          <div className="grid min-w-0 gap-0.5 px-4 pb-3.5 pl-11 md:px-5 md:pl-12">
             <p className="figures text-[0.8125rem] wrap-long-words">{t('version', { model: report.model === null || report.model === NO_MODEL ? t('notRun') : report.model, prompt: report.promptVersion ?? t('notRun') })}</p>
             {report.modelAnswered ? <p>{t('usage', { calls: report.usage.calls, read: report.usage.inputTokens, written: report.usage.outputTokens })}</p> : null}
           </div>
-        </footer>
+        </details>
       </div>
     </ShopFrame>
   )

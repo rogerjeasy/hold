@@ -2502,6 +2502,7 @@
       "secondLook": "Confirmado por una segunda revisión independiente.",
       "price": "Tarifa acordada: {description} — {amount}. Es una sugerencia para revisar, no un cobro.",
       "version": "Modelo: {model}. Versión de instrucciones: {prompt}.",
+      "produced": "Cómo se obtuvo este resultado",
       "notRun": "No ejecutado",
       "manual": "Registrar una inspección manual",
       "yourOutcome": "Resultado de tu inspección",

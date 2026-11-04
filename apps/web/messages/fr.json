@@ -2502,6 +2502,7 @@
       "secondLook": "Confirmé par une seconde vérification indépendante.",
       "price": "Tarif convenu : {description} — {amount}. Suggestion à examiner, aucun débit.",
       "version": "Modèle : {model}. Version des instructions : {prompt}.",
+      "produced": "Comment ce résultat a été produit",
       "notRun": "Non exécuté",
       "manual": "Consigner une inspection manuelle",
       "yourOutcome": "Résultat de votre inspection",

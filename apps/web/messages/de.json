@@ -2502,6 +2502,7 @@
       "secondLook": "Durch eine unabhängige zweite Prüfung bestätigt.",
       "price": "Vereinbarte Preisliste: {description} — {amount}. Ein Vorschlag zur Prüfung, keine Abbuchung.",
       "version": "Modell: {model}. Anweisungsversion: {prompt}.",
+      "produced": "Wie dieses Ergebnis entstand",
       "notRun": "Nicht ausgeführt",
       "manual": "Manuelle Prüfung festhalten",
       "yourOutcome": "Ihr Prüfungsergebnis",

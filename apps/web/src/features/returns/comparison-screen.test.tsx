@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { renderWithIntl } from '@/test/render'
 import { ComparisonScreen } from './comparison-screen'
@@ -33,6 +33,15 @@ describe('the comparison review screen', () => {
     expect(screen.getByText(/Claude did not answer this comparison/)).toBeInTheDocument()
     expect(screen.queryByText(/The photographs or comparison are uncertain/)).not.toBeInTheDocument()
     expect(screen.getByText('Model: Not run. Prompt: inspection-1.')).toBeInTheDocument()
+  })
+  // A judge who wants the model, the prompt and the tokens opens them; nobody else reads them as the page's message (F-L1).
+  it('keeps which model and prompt made the result behind a disclosure that opens to show them', () => {
+    renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={report} canAct />)
+    const model = screen.getByText('Model: recorded. Prompt: inspection-1.')
+    expect(model).not.toBeVisible()
+    fireEvent.click(screen.getByText('How this was produced'))
+    expect(model).toBeVisible()
+    expect(screen.getByText('2 model calls, 9,100 tokens read, 1,240 written.')).toBeVisible()
   })
   it('says the photographs are demonstration samples, not that the comparison was simulated, when Claude compared them', () => {
     renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={{ ...report, simulated: true, modelAnswered: true }} canAct />)

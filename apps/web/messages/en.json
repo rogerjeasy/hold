@@ -2502,6 +2502,7 @@
       "secondLook": "Confirmed by an independent second look.",
       "price": "Agreed price list: {description} — {amount}. This is a suggestion for review, not a charge.",
       "version": "Model: {model}. Prompt: {prompt}.",
+      "produced": "How this was produced",
       "notRun": "Not run",
       "manual": "Record a manual inspection",
       "yourOutcome": "Your inspection outcome",
