@@ -1851,12 +1851,12 @@ The worker's compute is added with its code. The web app's address is known only
 
 | Service | Runs on | Notes |
 |---|---|---|
-| web | App Runner, 1 vCPU and 2 GB, one to two instances | Checked over HTTP at `/api/health` every ten seconds, five seconds to answer, unhealthy after five misses. The route answers without the database, which pauses when idle. Runs the image named by the deploy, never the newest pushed |
+| web | App Runner, 1 vCPU and 2 GB, one to two instances | Checked over HTTP at `/api/health` every ten seconds, five seconds to answer, unhealthy after five misses. The route answers without the database, which may be slow or resuming. Runs the image named by the deploy, never the newest pushed |
 | worker | Lambda, Node 24, 512 MB, four minutes per message | App Runner throttles CPU between requests, so it cannot poll queues. Five functions: `hold-worker-paypal-events`, `hold-worker-executions` and `hold-worker-upkeep` fed by their FIFO queues, `hold-worker-media` (1.5 GB, with sharp) fed by the standard `media` queue, each message read with its queue's schema and naming only the messages that failed so only those are tried again, and `hold-worker-outbox-relay` started every minute by EventBridge Scheduler. The worker makes schedules only in `hold-schedules`, hands them only the scheduler's role, and emails through Hold's SMTP login. The four minutes allow a paused Aurora cluster to wake. Each queue hides a message for six minutes, longer than a function may run on it. Code in `apps/worker`, deployed by `infra/lib/worker.ts` |
 
 ### 14.5 Data
 
-- **Aurora Serverless v2,** PostgreSQL 17, one writer, with the RDS Data API switched on. The minimum capacity is zero while building, so the cluster pauses when idle, and is raised above zero for judging.
+- **Aurora Serverless v2,** PostgreSQL 17, one writer, with the RDS Data API switched on. The minimum capacity is zero while building, which would let the cluster pause when idle, but the outbox relay's query every minute keeps it at 0.5 capacity units in practice (`docs/tech-stack.md` section 18). The minimum is raised above zero for judging.
 - **The database** is `hold_db`. Aurora reserves `hold`. While the cluster is paused, the first call fails with `DatabaseResumingException` until it resumes, so the adapter retries that error.
 - **Two logins.** `hold_admin` runs migrations. `hold_app` is what the services use. It does not own the tables, so row-level security applies to it.
 - **Backups** kept for 35 days, the most AWS allows for automated backups, with point-in-time recovery. Backup storage up to the cluster's own size costs nothing, and the database is small, so the window costs cents a month at most. No copy is kept outside the cluster's own backups.
