@@ -5,7 +5,7 @@ import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 import type { Accessory } from '@hold/domain'
 import { appRole, shopIsolation, workerRole } from './access.ts'
 import { items, priceLists, wearPolicies } from './catalog.ts'
-import { at, cents, createdAt, currency, id, reference } from './columns.ts'
+import { at, cents, createdAt, currency, id, nonNegative, reference } from './columns.ts'
 import { allowed, AUTHORIZATION_STATES, authorizationState, BOOKING_CHANNELS, bookingChannel, CONDITION_REPLIES, conditionReply, extensionState, holdState, PLACEMENT_STRATEGIES, placementStrategy, rentalState } from './enums.ts'
 import { shopReference, users } from './shops.ts'
 import { trustLadders } from './trust.ts'
@@ -191,7 +191,7 @@ export const holds = pgTable(
     cleanReturns: integer(),
     createdAt: createdAt(),
   },
-  (table) => [allowed(table.strategy, PLACEMENT_STRATEGIES), allowed(table.state, HOLD_STATES), shopIsolation(table.shopId)],
+  (table) => [allowed(table.strategy, PLACEMENT_STRATEGIES), allowed(table.state, HOLD_STATES), nonNegative(table.reservedCents), nonNegative(table.ordinaryCents), shopIsolation(table.shopId)],
 )
 
 // One PayPal authorization behind a hold. A renewal adds a new one, which names the one it renewed; a replacement, a new

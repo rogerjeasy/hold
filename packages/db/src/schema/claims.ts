@@ -4,7 +4,7 @@ import { sql } from 'drizzle-orm'
 import { boolean, check, integer, jsonb, pgTable, text } from 'drizzle-orm/pg-core'
 import { shopIsolation } from './access.ts'
 import { priceEntries } from './catalog.ts'
-import { at, cents, createdAt, currency, id, reference } from './columns.ts'
+import { at, cents, createdAt, currency, id, nonNegative, reference } from './columns.ts'
 import { allowed, APPROVAL_DECISIONS, APPROVAL_METHODS, APPROVAL_SUBJECTS, approvalDecision, approvalMethod, approvalSubject, CLAIM_LINE_SOURCES, CLAIM_REPLY_DECISIONS, claimLineSource, claimReplyDecision, claimState } from './enums.ts'
 import { findings } from './evidence.ts'
 import { incidents } from './incidents.ts'
@@ -34,7 +34,7 @@ export const claims = pgTable(
     promiseMissedAt: at(),
     createdAt: createdAt(),
   },
-  (table) => [allowed(table.state, CLAIM_STATES), check('promise_days_allowed', sql`${table.promiseDays} is null or ${table.promiseDays} between 1 and 14`), shopIsolation(table.shopId)],
+  (table) => [allowed(table.state, CLAIM_STATES), nonNegative(table.totalCents), check('promise_days_allowed', sql`${table.promiseDays} is null or ${table.promiseDays} between 1 and 14`), shopIsolation(table.shopId)],
 )
 
 // Each line has a finding with photographs, a named person and their written reason, or the renter's agreement during
@@ -60,7 +60,7 @@ export const claimLines = pgTable(
     reason: text(),
     createdAt: createdAt(),
   },
-  (table) => [allowed(table.source, CLAIM_LINE_SOURCES), shopIsolation(table.shopId)],
+  (table) => [allowed(table.source, CLAIM_LINE_SOURCES), nonNegative(table.amountCents), shopIsolation(table.shopId)],
 )
 
 export const claimReplies = pgTable(

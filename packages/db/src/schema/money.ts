@@ -2,7 +2,7 @@ import { MONEY_EVENT_KINDS } from '@hold/domain'
 import { integer, jsonb, pgTable, text } from 'drizzle-orm/pg-core'
 import { shopIsolation } from './access.ts'
 import { claims } from './claims.ts'
-import { at, cents, createdAt, currency, id, reference } from './columns.ts'
+import { at, cents, createdAt, currency, id, nonNegative, reference } from './columns.ts'
 import { allowed, EXECUTION_ACTIONS, EXECUTION_STATES, executionAction, executionState, INVOICE_STATES, invoiceState, moneyEventKind, PROCESSING_STATES, processingState, VERIFICATION_STATES, verificationState } from './enums.ts'
 import { holds, rentals } from './rentals.ts'
 import { paypalAccounts, shopReference } from './shops.ts'
@@ -30,7 +30,7 @@ export const executions = pgTable(
     createdAt: createdAt(),
     updatedAt: createdAt(),
   },
-  (table) => [allowed(table.action, EXECUTION_ACTIONS), allowed(table.state, EXECUTION_STATES), shopIsolation(table.shopId)],
+  (table) => [allowed(table.action, EXECUTION_ACTIONS), allowed(table.state, EXECUTION_STATES), nonNegative(table.amountCents), shopIsolation(table.shopId)],
 )
 
 // Stored once PayPal says it signed the exact bytes received, before PayPal is answered, so no event is lost.
@@ -76,7 +76,7 @@ export const moneyEvents = pgTable(
     occurredAt: at().notNull(),
     recordedAt: createdAt(),
   },
-  (table) => [allowed(table.kind, MONEY_EVENT_KINDS), shopIsolation(table.shopId)],
+  (table) => [allowed(table.kind, MONEY_EVENT_KINDS), nonNegative(table.amountCents), nonNegative(table.paypalFeeCents), shopIsolation(table.shopId)],
 )
 
 export const invoices = pgTable(

@@ -769,6 +769,7 @@ Acting on a hold involves a database and an outside API, which cannot share a tr
 - The amount captured never exceeds the approved claim.
 - Captured plus released never exceeds reserved.
 - A hold reaches exactly one final state.
+- No amount is negative. Beside `money` in `packages/domain`, the database refuses one itself: every amount column of the money log, holds, executions, claims and claim lines has a `CHECK (... >= 0)` (migration `0050`, `nonNegative` in the schema). They were added `NOT VALID`, so the deploy reads no old row and takes no long lock on the money log, and each still guards every row written or changed after it. None requires a positive amount, since the domain allows nothing owed, as on a claim agreed to nothing.
 
 ---
 
