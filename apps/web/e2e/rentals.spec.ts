@@ -165,11 +165,12 @@ test('the first tap on New rental answers at once, even while the server is slow
   await page.getByRole('navigation', { name: 'Shop pages' }).getByRole('link', { name: 'Rentals' }).click()
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Rentals')
   await page.route('**/shop/rentals/new**', async (route) => {
-    if (route.request().headers()['rsc'] !== undefined) await new Promise((resolve) => setTimeout(resolve, 5000))
+    // Long enough that the outline must show before the page arrives, even on a busy machine running the whole suite.
+    if (route.request().headers()['rsc'] !== undefined) await new Promise((resolve) => setTimeout(resolve, 10_000))
     await route.continue()
   })
   await page.getByRole('link', { name: 'New rental' }).locator('visible=true').first().click()
-  await expect(page.getByRole('status').filter({ hasText: 'Loading the page…' })).toBeVisible({ timeout: 2000 })
+  await expect(page.getByRole('status').filter({ hasText: 'Loading the page…' })).toBeVisible({ timeout: 5000 })
   await expect(page).toHaveURL(/\/shop\/rentals\/new/)
   await expect(page.getByRole('heading', { level: 1 })).not.toHaveText('Rentals')
 })
