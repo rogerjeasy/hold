@@ -1,9 +1,10 @@
 import { HOLD_VALIDITY_DAYS } from '@hold/domain'
-import { ArrowRight, ChevronRight, CircleCheck, Clock, Lock, MapPin, MessageSquareQuote, Scale } from 'lucide-react'
+import { ArrowRight, ChevronRight, CircleCheck, Clock, ListChecks, Lock, MapPin, MessageSquareQuote, Scale } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import type { ReactNode } from 'react'
 import type { Decision } from './decisions'
+import { useRowText } from '@/features/decisions/use-row-text'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Panel } from '@/components/ui/panel'
 import { SampleTag } from '@/components/ui/sample-tag'
@@ -21,14 +22,27 @@ const KINDS: Readonly<Record<Decision['kind'], { readonly icon: LucideIcon; read
   hold_ending: { icon: Lock, tone: 'attention', tile: 'bg-warning/12 text-warning' },
   late: { icon: Clock, tone: 'danger', tile: 'bg-destructive/10 text-destructive' },
   contested: { icon: MessageSquareQuote, tone: 'danger', tile: 'bg-destructive/10 text-destructive' },
+  board: { icon: ListChecks, tone: 'neutral', tile: 'bg-muted text-foreground' },
 }
 
 // A claim is decided on its claim page; an item dropped off, a hold near its end or a late rental, on the rental's own
-// page. The whole row is the link, named by its title, so it is a large target on a phone.
-const placeOf = (decision: Decision) => (decision.kind === 'claim' || decision.kind === 'contested' ? rentalRoutes.claim(decision.rentalId) : rentalRoutes.rental(decision.rentalId))
+// page; anything else on the decision board, with its evidence. The whole row is the link, named by its title, so it
+// is a large target on a phone.
+function placeOf(decision: Decision): string {
+  switch (decision.kind) {
+    case 'claim':
+    case 'contested':
+      return rentalRoutes.claim(decision.rentalId)
+    case 'board':
+      return decision.row.kind === 'escalated' && decision.row.rentalId !== null ? rentalRoutes.claim(decision.row.rentalId) : shopRoutes.decisions
+    default:
+      return rentalRoutes.rental(decision.rentalId)
+  }
+}
 
 function Row({ decision, title, children }: { decision: Decision; title: string; children: ReactNode }) {
   const t = useTranslations('today.decisions.kinds')
+  const board = useTranslations('decisions.groups')
   const { icon: Icon, tone, tile } = KINDS[decision.kind]
   const titleId = `decision-${decision.key}`
   return (
@@ -46,7 +60,7 @@ function Row({ decision, title, children }: { decision: Decision; title: string;
             <h3 id={titleId} className="min-w-0 leading-snug font-bold wrap-long-words">
               {title}
             </h3>
-            <StatusPill tone={tone}>{t(decision.kind)}</StatusPill>
+            <StatusPill tone={tone}>{decision.kind === 'board' ? board(decision.row.group) : t(decision.kind)}</StatusPill>
             {decision.simulated ? <SampleTag /> : null}
           </div>
           <div className="mt-1 text-[0.9375rem] text-muted-foreground">{children}</div>
@@ -61,6 +75,7 @@ function Row({ decision, title, children }: { decision: Decision; title: string;
 export function DecisionList({ decisions, clock }: { decisions: readonly Decision[]; clock: ShopClock }) {
   const t = useTranslations('today')
   const format = useShopFormat(clock)
+  const text = useRowText(clock)
   const renter = (name: string | null) => name ?? t('renter')
 
   return (
@@ -123,6 +138,12 @@ export function DecisionList({ decisions, clock }: { decisions: readonly Decisio
                         <blockquote className="rounded-lg border-l-2 border-border-strong bg-muted/50 py-1.5 pr-3 pl-3 italic wrap-long-words">“{decision.renterComment}”</blockquote>
                       </figure>
                     )}
+                  </Row>
+                )
+              case 'board':
+                return (
+                  <Row key={decision.key} decision={decision} title={text.heading(decision.row)}>
+                    <span className="wrap-long-words">{text.subject(decision.row)}</span>
                   </Row>
                 )
             }

@@ -1,8 +1,9 @@
 import { shopDay } from '@hold/domain'
-import { currentPriceList, findPayPalAccount, inShop, itemCatalog, listStaff, shopToday } from '@hold/db'
+import { currentPriceList, decisionRecords, findPayPalAccount, inShop, itemCatalog, listStaff, shopToday } from '@hold/db'
 import type { Metadata } from 'next'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { readAccessToken } from '@/features/auth/session-cookies'
+import { boardRows } from '@/features/decisions/board'
 import { NoShop } from '@/features/shop/shop-home'
 import { TodayScreen } from '@/features/today/today-screen'
 import { redirect } from '@/i18n/navigation'
@@ -32,6 +33,8 @@ export default async function Page() {
       staff: await listStaff(transaction),
       catalog: await itemCatalog(transaction),
       today: await shopToday(transaction, { now, day }),
+      // What waits on a person is read as the decision board reads it, so both pages count the same (JW-L3).
+      decisions: await decisionRecords(transaction, now),
     })),
     identity.listPasskeys((await readAccessToken()) ?? ''),
   ])
@@ -55,6 +58,7 @@ export default async function Page() {
       part={day.part}
       setup={setup}
       today={loaded.today}
+      board={boardRows(loaded.decisions, { userId: context.person.userId, role: context.role, approvalLimitCents: context.approvalLimitCents }, now)}
       samples={samples}
     />
   )

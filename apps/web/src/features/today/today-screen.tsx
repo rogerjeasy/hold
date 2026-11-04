@@ -1,6 +1,7 @@
 import { shopDay } from '@hold/domain'
 import type { PartOfDay } from '@hold/domain'
 import type { ShopToday } from '@hold/db'
+import type { BoardRow } from '@/features/decisions/board'
 import { Notice } from '@/components/ui/notice'
 import { useTranslations } from 'next-intl'
 import { ActivityList } from './activity-list'
@@ -22,16 +23,18 @@ type TodayScreenProps = {
   readonly part: PartOfDay
   readonly setup: SetupStatus
   readonly today: ShopToday
+  // What waits on a person, as the decision board lists it for this viewer.
+  readonly board: readonly BoardRow[]
   // Sample rentals are offered to an owner whose shop has none. They need a published price list.
   readonly samples: 'offer' | 'needs_prices' | 'none'
 }
 
 // The first page after signing in: the shop's day at a glance, and what waits on a person.
-export function TodayScreen({ firstName, shop, now, part, setup, today, samples }: TodayScreenProps) {
+export function TodayScreen({ firstName, shop, now, part, setup, today, board, samples }: TodayScreenProps) {
   const t = useTranslations('today.sample')
   const clock = { timeZone: shop.timeZone, currency: shop.currency }
   const day = shopDay(shop.timeZone, now)
-  const decisions = decisionsFor(today, now)
+  const decisions = decisionsFor(board)
   const holds = holdSummary(today.activeHolds, now)
   const setupComplete = Object.values(setupDone(setup)).every(Boolean)
 

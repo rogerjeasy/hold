@@ -1,7 +1,8 @@
 import { addDays } from '@hold/domain'
-import type { ShopToday } from '@hold/db'
+import type { DecisionRecords, QueueEntry, ShopToday } from '@hold/db'
 import { screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
+import { boardRows } from '@/features/decisions/board'
 import { renderWithIntl } from '@/test/render'
 import { TodayScreen } from './today-screen'
 
@@ -56,7 +57,25 @@ const busy: ShopToday = {
 
 const allDone = { passkey: true, paypal: true, prices: true, items: 3, staff: 2 }
 
-function show(today: ShopToday, options: { setup?: typeof allDone; samples?: 'offer' | 'needs_prices' | 'none' } = {}) {
+// The same day as the decision board reads it: Today lists what waits on a person through the board's own rows.
+function boardOf(today: ShopToday, proposals: readonly QueueEntry[]) {
+  const records: DecisionRecords = {
+    claims: today.claimsWaiting.map((claim) => ({ ...claim, currency: 'EUR', raisedByUserId: 'staff', createdAt: addDays(NOW, -1), reservedCents: 300_00, holdValidUntil: addDays(NOW, 20), decideBy: null, promiseMissedAt: null, lines: claim.firstLine === null ? [] : [{ id: `${claim.claimId}-line`, description: claim.firstLine, amountCents: claim.totalCents, source: 'finding' as const, reason: null, region: null, beforeKey: null, afterKey: null }] })),
+    proposals,
+    incidents: [],
+    holds: today.activeHolds,
+    late: today.late,
+    dropOffs: today.droppedOff.map((rental) => ({ ...rental, onTime: true, missingAt: null, missingBy: null, holdCents: 300_00, currency: 'EUR', items: [] })),
+    repairs: [],
+    extensionPayments: [],
+    staffCount: 2,
+  }
+  return boardRows(records, { userId: 'owner', role: 'owner', approvalLimitCents: 1000_00 }, NOW)
+}
+
+const dispute: QueueEntry = { id: 'p1', kind: 'respond_to_dispute', subjectKind: 'dispute', subjectId: 'd1', rentalId: 'r9', reason: 'PayPal opened a dispute on this rental.', references: [], draft: null, raisedByAgent: true, model: null, deadline: addDays(NOW, 5), exceptionKind: null, amountCents: null, currency: null, moneyCents: 0, payload: { simulated: 'yes' } }
+
+function show(today: ShopToday, options: { setup?: typeof allDone; samples?: 'offer' | 'needs_prices' | 'none'; proposals?: readonly QueueEntry[] } = {}) {
   return renderWithIntl(
     <TodayScreen
       firstName="Tomás"
@@ -65,6 +84,7 @@ function show(today: ShopToday, options: { setup?: typeof allDone; samples?: 'of
       part="morning"
       setup={options.setup ?? allDone}
       today={today}
+      board={boardOf(today, options.proposals ?? [])}
       samples={options.samples ?? 'none'}
     />,
   )
@@ -115,6 +135,17 @@ describe('the Today page', () => {
     expect(region.getByRole('link', { name: /^The hold for Marco Rossi ends / })).toHaveAttribute('href', '/shop/rentals/r2')
     expect(region.getByRole('link', { name: 'Lea Fischer is late' })).toHaveAttribute('href', '/shop/rentals/r5')
     expect(region.getByRole('link', { name: 'Tom Becker contested a claim of €45.00' })).toHaveAttribute('href', '/shop/rentals/r4/claim')
+  })
+
+  // Today once counted 5 where the board listed 7 (audit finding JW-L3): the agent's proposals are counted and listed too.
+  it('counts and lists what the decision board lists, an agent’s proposal leading to the board', () => {
+    show(busy, { proposals: [dispute] })
+    expect(screen.getByText('6 things need a decision.')).toBeInTheDocument()
+    const region = within(screen.getByRole('region', { name: 'Needs a decision' }))
+    expect(region.getAllByRole('listitem')).toHaveLength(6)
+    const proposal = region.getByRole('link', { name: 'Send this answer to PayPal on the dispute' })
+    expect(proposal).toHaveAttribute('href', '/shop/decisions')
+    expect(within(proposal).getByText('From the agent')).toBeInTheDocument()
   })
 
   it('leads to the decision board, where everything waiting on a person is in one place', () => {
