@@ -46,6 +46,12 @@ describe('claim preparation and settlement screen', () => {
     renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={waiting} canAct canDecide sampleAdvocates={{ allowance: { left: 1, refusal: null }, recording: undefined }} />)
     expect(screen.queryByText('A recorded live run')).not.toBeInTheDocument()
   })
+  // The renter's page says "your reply"; the shop's page names whose reply it waits for (audit finding JW-M3).
+  it('tells staff a presented claim waits for the renter, in the shop’s words and not the renter’s', () => {
+    renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={waiting} canAct />)
+    expect(screen.getByRole('heading', { name: 'Waiting for the renter’s reply' })).toBeInTheDocument()
+    expect(screen.queryByText('Waiting for your reply')).not.toBeInTheDocument()
+  })
   it('links the shared claim record from staff review', () => {
     renderWithIntl(<ClaimScreen shopName="Ribeira Bikes" data={workspace} canAct={false} />)
     expect(screen.getByRole('link', { name: 'Your rental record' })).toHaveAttribute('href', '/shop/rentals/rental/record')
