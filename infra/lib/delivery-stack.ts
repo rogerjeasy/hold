@@ -175,9 +175,9 @@ function textsPolicy(stack: Stack): iam.ManagedPolicy {
   })
 }
 
-// What CloudFormation needs to tell people (infra/lib/alarms.ts): Hold's topics and their subscriptions, for the alarms and
-// the text reports, and Hold's budget on the account's cost. It may not publish to a topic, and touches no topic or
-// budget of another project's.
+// What CloudFormation needs to tell people and keep what ran (infra/lib/alarms.ts, log-groups.ts): Hold's topics and their
+// subscriptions, for the alarms and the text reports, Hold's budget on the account's cost, and the log groups of Hold's
+// functions. It may not publish to a topic or read a log, and touches no topic, budget or log group of another project's.
 function monitoringPolicy(stack: Stack): iam.ManagedPolicy {
   return new iam.ManagedPolicy(stack, 'MonitoringPolicy', {
     managedPolicyName: name('cloudformation', 'monitoring'),
@@ -189,6 +189,13 @@ function monitoringPolicy(stack: Stack): iam.ManagedPolicy {
       ),
       // Budgets are the account's, named in no region. Making one is ModifyBudget; there is no separate action for it.
       statement(['budgets:ModifyBudget', 'budgets:ViewBudget', 'budgets:TagResource', 'budgets:UntagResource', 'budgets:ListTagsForResource'], [`arn:aws:budgets::${ACCOUNT}:budget/${PREFIX}-*`]),
+      // The functions' log groups and how long they keep logs (infra/lib/log-groups.ts), under Hold's own prefix only.
+      // It may not read a log. Describing groups names no group.
+      statement(
+        ['logs:CreateLogGroup', 'logs:DeleteLogGroup', 'logs:PutRetentionPolicy', 'logs:DeleteRetentionPolicy', 'logs:TagResource', 'logs:UntagResource', 'logs:ListTagsForResource', 'logs:TagLogGroup', 'logs:UntagLogGroup', 'logs:ListTagsLogGroup'],
+        [`arn:aws:logs:${REGION}:${ACCOUNT}:log-group:/${PREFIX}/*`],
+      ),
+      statement(['logs:DescribeLogGroups'], ['*']),
     ],
   })
 }

@@ -2062,6 +2062,7 @@ The outbox relay carries evidence and receipt identities without tokens or conta
 
 - **Structured logs** from both services, each line tagged with the shop, the rental, the hold, the execution and PayPal's debug ID. A message the worker fails on is logged with its error's name, safe codes, query text and stack by `errorForLog` (section 15.2), never its message, as is a sign-up whose membership could not be written. Push, text and email failures are still logged by kind only, since their errors can carry a device token.
 - **A correlation ID** follows one piece of work from the first request through every queue.
+- **Retention.** Logs are kept one month (`LOG_RETENTION`, `infra/lib/log-groups.ts`). No log is the only copy of anything a shop or renter relies on: the audit trail, the money log and the approvals are in the database. Each function logs to `/hold/lambda/<function>`, a group CloudFormation makes once `HoldDelivery` lets it and `"logRetention": "on"` is set in `infra/cdk.json`; until then Lambda's own `/aws/lambda/<function>` groups keep logs with no end. App Runner makes its two groups itself, named by the service's ID, so an administrator sets their retention by hand (`docs/deploy.md`).
 
 | Metric | Why |
 |---|---|

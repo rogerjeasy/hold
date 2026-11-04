@@ -6,6 +6,7 @@ import * as kms from 'aws-cdk-lib/aws-kms'
 import * as lambda from 'aws-cdk-lib/aws-lambda'
 import * as nodejs from 'aws-cdk-lib/aws-lambda-nodejs'
 import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
+import { functionLogGroup } from './log-groups.ts'
 import { ACCOUNT, CODE_KEY_ARN, name, REGION, SMTP_SECRET_NAME } from './settings.ts'
 
 // Cognito's custom email sender (apps/worker/src/code-sender.ts). Cognito encrypts each sign-up and sign-in code with
@@ -51,6 +52,7 @@ export function createCodeSender(stack: Stack): CodeSender {
     // Long enough to read the secret and reach the SMTP server on a cold start. Cognito waits no longer than this.
     timeout: Duration.seconds(10),
     role,
+    logGroup: functionLogGroup(stack, 'CodeSender', functionName, role),
     environment: { HOLD_CODE_KEY_ARN: key.keyArn, HOLD_SMTP_SECRET: SMTP_SECRET_NAME },
     bundling: { minify: true, sourceMap: false },
   })
