@@ -179,47 +179,64 @@ export type WaitingDropOff = {
   }[]
 }
 
-// Every item renters dropped off that nobody has checked yet, oldest first: the morning's first job.
+// Every item renters dropped off that nobody has checked yet, oldest first: the morning's first job. Four reads however
+// many drop-offs wait and however many items each brought: the board, the queue and the rental page all read it, and
+// deployed, each statement is a call to the Data API they wait for.
 export async function dropOffsWaiting(transaction: Transaction): Promise<readonly WaitingDropOff[]> {
   const rows = await transaction
     .select({ rentalId: rentals.id, renterName: rentalName, droppedOffAt: rentals.droppedOffAt, endsAt: rentals.endsAt, missingAt: rentals.dropOffMissingAt, missingBy: users.name, holdCents: holds.reservedCents, currency: rentals.currency, simulated: rentals.simulated })
     .from(rentals).leftJoin(renters, eq(renters.id, rentals.renterId)).leftJoin(holds, eq(holds.rentalId, rentals.id)).leftJoin(users, eq(users.id, rentals.dropOffMissingByUserId))
     .where(and(eq(rentals.state, 'dropped_off'), isNotNull(rentals.droppedOffAt))).orderBy(asc(rentals.droppedOffAt))
-  const waiting: WaitingDropOff[] = []
-  for (const row of rows) {
-    if (row.droppedOffAt === null) continue
-    const lines = await transaction.select({ rentalItemId: rentalItems.id, label: items.label }).from(rentalItems).innerJoin(items, eq(items.id, rentalItems.itemId)).where(eq(rentalItems.rentalId, row.rentalId)).orderBy(asc(rentalItems.id))
-    const itemsOf = []
-    for (const line of lines) itemsOf.push({ label: line.label, ...(await droppedItem(transaction, line.rentalItemId)) })
-    waiting.push({ rentalId: row.rentalId, renterName: row.renterName, droppedOffAt: row.droppedOffAt, onTime: returnedOnTime(row.droppedOffAt, row.endsAt), missingAt: row.missingAt, missingBy: row.missingBy, holdCents: row.holdCents, currency: row.currency, simulated: row.simulated, items: itemsOf })
+  if (rows.length === 0) return []
+  // Each item of those rentals, with its sealed handover and return sessions and the comparison of the return.
+  const lines = await transaction
+    .select({ rentalId: rentalItems.rentalId, rentalItemId: rentalItems.id, label: items.label, sessionId: captureSessions.id, kind: captureSessions.kind, plan: photoPlans.views, comparisonId: comparisons.id, comparisonState: comparisons.state })
+    .from(rentalItems).innerJoin(items, eq(items.id, rentalItems.itemId))
+    .leftJoin(captureSessions, and(eq(captureSessions.rentalItemId, rentalItems.id), inArray(captureSessions.kind, ['handover', 'return']), isNotNull(captureSessions.sealedAt)))
+    .leftJoin(photoPlans, eq(photoPlans.id, captureSessions.photoPlanId))
+    .leftJoin(comparisons, eq(comparisons.returnSessionId, captureSessions.id))
+    .where(inArray(rentalItems.rentalId, rows.map((row) => row.rentalId))).orderBy(asc(rentalItems.id), asc(captureSessions.sealedAt))
+  const sessionIds = [...new Set(lines.flatMap((line) => (line.sessionId === null ? [] : [line.sessionId])))]
+  const shot = sessionIds.length === 0 ? [] : await transaction.select({ sessionId: photos.sessionId, view: photos.view, displayKey: photos.displayKey }).from(photos)
+    .where(and(inArray(photos.sessionId, sessionIds), isNull(photos.supersededAt))).orderBy(asc(photos.view))
+  const comparisonIds = [...new Set(lines.flatMap((line) => (line.comparisonId === null ? [] : [line.comparisonId])))]
+  const notable = comparisonIds.length === 0 ? [] : await transaction.select({ comparisonId: findings.comparisonId, view: findings.view, region: findings.region }).from(findings)
+    .where(and(inArray(findings.comparisonId, comparisonIds), inArray(findings.class, [...NOTABLE]))).orderBy(asc(findings.view), asc(findings.id))
+  const photosOf = (sessionId: string | undefined): readonly DropOffPhoto[] => (sessionId === undefined ? [] : shot.filter((photo) => photo.sessionId === sessionId).map(({ view, displayKey }) => ({ view, displayKey })))
+  const itemsOf = (rentalId: string) => {
+    const ofRental = lines.filter((line) => line.rentalId === rentalId)
+    return [...new Set(ofRental.map((line) => line.rentalItemId))].map((rentalItemId) => {
+      const sessions = ofRental.filter((line) => line.rentalItemId === rentalItemId)
+      return droppedItem(sessions, photosOf, notable)
+    })
   }
-  return waiting
+  return rows.flatMap((row) => (row.droppedOffAt === null ? [] : [{
+    rentalId: row.rentalId, renterName: row.renterName, droppedOffAt: row.droppedOffAt, onTime: returnedOnTime(row.droppedOffAt, row.endsAt), missingAt: row.missingAt, missingBy: row.missingBy, holdCents: row.holdCents, currency: row.currency, simulated: row.simulated, items: itemsOf(row.rentalId),
+  }]))
 }
 
-async function sessionPhotos(transaction: Transaction, sessionId: string): Promise<readonly DropOffPhoto[]> {
-  return transaction.select({ view: photos.view, displayKey: photos.displayKey }).from(photos).where(and(eq(photos.sessionId, sessionId), isNull(photos.supersededAt))).orderBy(asc(photos.view))
-}
+type DroppedItemSession = { readonly label: string; readonly sessionId: string | null; readonly kind: string | null; readonly plan: readonly PhotoPlanView[] | null; readonly comparisonId: string | null; readonly comparisonState: string | null }
 
-async function droppedItem(transaction: Transaction, rentalItemId: string) {
-  const sessions = await transaction.select({ id: captureSessions.id, kind: captureSessions.kind, plan: photoPlans.views }).from(captureSessions).innerJoin(photoPlans, eq(photoPlans.id, captureSessions.photoPlanId))
-    .where(and(eq(captureSessions.rentalItemId, rentalItemId), inArray(captureSessions.kind, ['handover', 'return']), isNotNull(captureSessions.sealedAt)))
+// One item as the morning's check shows it: the view to look at first, and its photographs from both sessions.
+function droppedItem(sessions: readonly DroppedItemSession[], photosOf: (sessionId: string | undefined) => readonly DropOffPhoto[], notable: readonly { readonly comparisonId: string; readonly view: string; readonly region: Region | null }[]) {
+  const label = sessions[0]?.label ?? ''
   const handover = sessions.find((session) => session.kind === 'handover')
   const returned = sessions.find((session) => session.kind === 'return')
-  const after = returned === undefined ? [] : await sessionPhotos(transaction, returned.id)
-  const before = handover === undefined ? [] : await sessionPhotos(transaction, handover.id)
-  const [comparison] = returned === undefined ? [] : await transaction.select({ id: comparisons.id, state: comparisons.state }).from(comparisons).where(eq(comparisons.returnSessionId, returned.id))
-  const found = comparison === undefined ? [] : await transaction.select({ view: findings.view, region: findings.region }).from(findings)
-    .where(and(eq(findings.comparisonId, comparison.id), inArray(findings.class, [...NOTABLE]))).orderBy(asc(findings.view), asc(findings.id))
+  const after = photosOf(returned?.sessionId ?? undefined)
+  const before = photosOf(handover?.sessionId ?? undefined)
+  const comparison = returned?.comparisonId === null || returned?.comparisonId === undefined ? undefined : { id: returned.comparisonId, state: returned.comparisonState }
+  const found = comparison === undefined ? [] : notable.filter((finding) => finding.comparisonId === comparison.id)
   const compared = after.filter((photo) => photo.view !== DROP_POINT_VIEW)
   const first = found[0]
   const shown = first?.view ?? compared[0]?.view
   return {
+    label,
     views: compared.length,
     findings: found.length,
     comparison: comparison?.state ?? null,
     comparisonId: comparison?.id ?? null,
     dropPoint: after.find((photo) => photo.view === DROP_POINT_VIEW) ?? null,
-    viewLabel: handover?.plan.find((view) => view.key === shown)?.label ?? null,
+    viewLabel: handover?.plan?.find((view) => view.key === shown)?.label ?? null,
     before: before.find((photo) => photo.view === shown) ?? null,
     after: compared.find((photo) => photo.view === shown) ?? null,
     region: first?.region ?? null,

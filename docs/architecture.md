@@ -1861,7 +1861,7 @@ The worker's compute is added with its code. The web app's address is known only
 
 | Service | Runs on | Notes |
 |---|---|---|
-| web | App Runner, 1 vCPU and 2 GB, one to two instances | Checked over HTTP at `/api/health` every ten seconds, five seconds to answer, unhealthy after five misses. The route answers without the database, which pauses when idle. Runs the image named by the deploy, never the newest pushed |
+| web | App Runner, 2 vCPU and 4 GB through judging (1 vCPU and 2 GB again after 15 December 2026), one instance always provisioned, two at most | Checked over HTTP at `/api/health` every ten seconds, five seconds to answer, unhealthy after five misses. The route answers without the database, which pauses when idle. Runs the image named by the deploy, never the newest pushed |
 | worker | Lambda, Node 24, 512 MB, four minutes per message | App Runner throttles CPU between requests, so it cannot poll queues. Five functions: `hold-worker-paypal-events`, `hold-worker-executions` and `hold-worker-upkeep` fed by their FIFO queues, `hold-worker-media` (1.5 GB, with sharp) fed by the standard `media` queue, each message read with its queue's schema and naming only the messages that failed so only those are tried again, and `hold-worker-outbox-relay` started every minute by EventBridge Scheduler. The worker makes schedules only in `hold-schedules`, hands them only the scheduler's role, and emails through Hold's SMTP login. The four minutes allow a paused Aurora cluster to wake. Each queue hides a message for six minutes, longer than a function may run on it. Code in `apps/worker`, deployed by `infra/lib/worker.ts` |
 
 ### 14.5 Data

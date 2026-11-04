@@ -1,5 +1,5 @@
 import { shopDay } from '@hold/domain'
-import { currentPriceList, findPayPalAccount, inShop, itemCatalog, listStaff, shopToday } from '@hold/db'
+import { inShop, shopSetup, shopToday } from '@hold/db'
 import type { Metadata } from 'next'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { readAccessToken } from '@/features/auth/session-cookies'
@@ -21,31 +21,25 @@ export default async function Page() {
   if (access.kind === 'signed_out') return redirect({ href: routes.signIn, locale: await getLocale() })
   if (access.kind === 'no_shop') return <NoShop person={access.person} />
   const { context } = access
-  const { database, identity, config } = await getServices()
+  const { database, identity } = await getServices()
   const now = new Date()
   const day = shopDay(context.shop.timeZone, now)
   const scope = { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId } as const
   const [loaded, passkeys] = await Promise.all([
-    inShop(database, scope, async (transaction) => ({
-      paypal: await findPayPalAccount(transaction, context.shop.id, config.paypalMode),
-      prices: await currentPriceList(transaction),
-      staff: await listStaff(transaction),
-      catalog: await itemCatalog(transaction),
-      today: await shopToday(transaction, { now, day }),
-    })),
+    inShop(database, scope, async (transaction) => ({ setup: await shopSetup(transaction), today: await shopToday(transaction, { now, day }) })),
     identity.listPasskeys((await readAccessToken()) ?? ''),
   ])
   const setup = {
     passkey: passkeys.ok && passkeys.value.length > 0,
-    paypal: loaded.paypal !== undefined,
-    prices: loaded.prices !== undefined,
+    paypal: context.paypalConnected,
+    prices: loaded.setup.pricesPublished,
     // The shop's own items, not the samples, and none it has retired.
-    items: loaded.catalog.items.filter((item) => !item.simulated && item.status !== 'retired').length,
-    staff: loaded.staff.length,
+    items: loaded.setup.ownItems,
+    staff: loaded.setup.staff,
   }
   // Only the owner may add sample rentals, and only to a shop with none (features/shop/actions.ts checks both again).
   const offerSamples = context.role === 'owner' && loaded.today.rentals.total === 0
-  const samples = !offerSamples ? 'none' : loaded.prices === undefined ? 'needs_prices' : 'offer'
+  const samples = !offerSamples ? 'none' : !loaded.setup.pricesPublished ? 'needs_prices' : 'offer'
   const firstName = context.person.name?.trim().split(/\s+/)[0] ?? context.shop.name
   return (
     <TodayScreen

@@ -29,26 +29,31 @@ export default async function Page() {
   const context = await requireShop()
   const { database } = await getServices()
   const now = new Date()
-  const loaded = await inShop(database, { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId }, async (transaction) => ({
-    entries: await morningQueue(transaction, now),
-    recent: await recentDecisions(transaction, now),
-    rules: await rulesWithAmounts(transaction),
-    standingRule: await liveStandingRule(transaction, now),
-    dropOffs: await dropOffsWaiting(transaction),
-    // A demo's sample entries no model has looked at yet, and how the last investigation of them stands (section 6.14).
-    samples: { waiting: (await sampleEntriesToInvestigate(transaction)).length, status: await sampleInvestigation(transaction, now) },
-  }))
+  const scope = { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId } as const
+  // Side by side, each transaction bound to the shop, with the passkey the page may ask for: deployed, each statement
+  // is a call to the Data API, and these reads need not see one moment together.
+  const [decisions, dropOffs, standing, gate] = await Promise.all([
+    inShop(database, scope, async (transaction) => ({ entries: await morningQueue(transaction, now), recent: await recentDecisions(transaction, now), rules: await rulesWithAmounts(transaction) })),
+    inShop(database, scope, dropOffsWaiting),
+    inShop(database, scope, async (transaction) => ({
+      standingRule: await liveStandingRule(transaction, now),
+      // A demo's sample entries no model has looked at yet, and how the last investigation of them stands (section 6.14).
+      samples: { waiting: (await sampleEntriesToInvestigate(transaction)).length, status: await sampleInvestigation(transaction, now) },
+    })),
+    passkeyGate(context),
+  ])
+  const loaded = { ...decisions, ...standing }
   return (
     <QueueScreen
       shopName={context.shop.name}
       clock={{ timeZone: context.shop.timeZone, currency: context.shop.currency }}
       endOfDay={shopDay(context.shop.timeZone, now).end}
       {...loaded}
-      dropOffs={await dropOffEntries(loaded.dropOffs)}
+      dropOffs={await dropOffEntries(dropOffs)}
       canCheck={context.role !== 'read_only'}
       canDecide={context.role === 'owner' || context.role === 'manager'}
       isOwner={context.role === 'owner'}
-      gate={await passkeyGate(context)}
+      gate={gate}
     />
   )
 }

@@ -3,10 +3,9 @@ import { shopDay } from '@hold/domain'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { GridLicence } from '@/components/grid/grid-licence'
-import type { ContestView } from '@/features/contest/contest-summary-panel'
 import { boardRows } from '@/features/decisions/board'
 import { DecisionsScreen } from '@/features/decisions/decisions-screen'
-import { contestViewFor } from '@/server/contest-view'
+import { boardContestViews } from '@/server/contest-view'
 import { passkeyGate } from '@/server/passkey-gate'
 import { getServices } from '@/server/services'
 import { requireShop } from '@/server/shop-page'
@@ -22,15 +21,9 @@ export default async function Page() {
   const context = await requireShop()
   const { config, database, evidence } = await getServices()
   const now = new Date()
-  const { records, contests } = await inShop(database, { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId }, async (transaction) => {
-    const read = await decisionRecords(transaction, now)
-    const views: Record<string, ContestView> = {}
-    for (const claim of read.claims) {
-      const view = claim.state === 'awaiting_approval' ? undefined : await contestViewFor(transaction, claim.rentalId, 'shop')
-      if (view !== undefined) views[claim.claimId] = view
-    }
-    return { records: read, contests: views }
-  })
+  const scope = { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId } as const
+  // Side by side: the board's reads, the contests' summaries and the passkey the page may ask for.
+  const [records, contests, gate] = await Promise.all([decisionRecords(database, scope, now), inShop(database, scope, boardContestViews), passkeyGate(context)])
   const rows = boardRows(records, { userId: context.person.userId, role: context.role, approvalLimitCents: context.approvalLimitCents }, now, contests)
   const keys = [...new Set([
     ...records.claims.flatMap((claim) => claim.lines.flatMap((line) => [line.beforeKey, line.afterKey])),
@@ -46,7 +39,7 @@ export default async function Page() {
         endOfDay={shopDay(context.shop.timeZone, now).end}
         rows={rows}
         photoUrls={photoUrls}
-        gate={await passkeyGate(context)}
+        gate={gate}
       />
     </>
   )

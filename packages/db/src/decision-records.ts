@@ -12,7 +12,8 @@ import type { ShopIncident } from './incident-repository.ts'
 import { morningQueue } from './ops-repository.ts'
 import type { QueueEntry } from './ops-repository.ts'
 import { authorizations, claimLines, claimReplies, claims, comparisons, findings, holds, photos, priceEntries, rentals, renters, staffRoles } from './schema/index.ts'
-import type { Transaction } from './scope.ts'
+import { inShop } from './scope.ts'
+import type { Database, Scope, Transaction } from './scope.ts'
 import { activeHolds, lateRentals } from './shop-today.ts'
 import type { ActiveHold, LateRental } from './shop-today.ts'
 import { rentalName } from './rental-name.ts'
@@ -152,17 +153,33 @@ async function linesOf(transaction: Transaction, claimIds: readonly string[]): P
   return byClaim
 }
 
-export async function decisionRecords(transaction: Transaction, now: Date): Promise<DecisionRecords> {
-  const [staff] = await transaction.select({ count: count() }).from(staffRoles)
-  return {
-    claims: await waitingClaims(transaction),
-    proposals: await morningQueue(transaction, now),
-    incidents: await incidentsWaitingForStaff(transaction),
-    holds: await activeHolds(transaction),
-    late: await lateRentals(transaction, now),
-    dropOffs: await dropOffsWaiting(transaction),
-    repairs: await openRepairs(transaction),
-    extensionPayments: await extensionPaymentsToCheck(transaction),
-    staffCount: staff?.count ?? 0,
-  }
+// Four transactions side by side, each bound to the caller's shop as one would be: deployed, the Data API answers a
+// transaction's statements one after another, and the board's parts need not be read at the same moment, so the page
+// waits for the longest part rather than for all seventeen statements in a row (extensions.md section 12.5).
+export async function decisionRecords(database: Database, scope: Scope, now: Date): Promise<DecisionRecords> {
+  const read = <Result>(work: (transaction: Transaction) => Promise<Result>) => inShop(database, scope, work)
+  const [claimsWaiting, proposals, dropOffs, rest] = await Promise.all([
+    read(waitingClaims),
+    read((transaction) => morningQueue(transaction, now)),
+    read(dropOffsWaiting),
+    read(async (transaction) => {
+      const [staff] = await transaction.select({ count: count() }).from(staffRoles)
+      return {
+        incidents: await incidentsWaitingForStaff(transaction),
+        holds: await activeHolds(transaction),
+        late: await lateRentals(transaction, now),
+        repairs: await openRepairs(transaction),
+        extensionPayments: await extensionPaymentsToCheck(transaction),
+        staffCount: staff?.count ?? 0,
+      }
+    }),
+  ])
+  return { claims: claimsWaiting, proposals, dropOffs, ...rest }
+}
+
+// The board's claims the renter contested, beside which it shows the contest's neutral summary. Read apart from the
+// rest of the board, so the summaries need not wait for it.
+export function contestedOnBoard(transaction: Transaction): Promise<readonly { readonly claimId: string; readonly rentalId: string }[]> {
+  const contested = DECISION_CLAIM_STATES.filter((state) => state !== 'awaiting_approval')
+  return transaction.select({ claimId: claims.id, rentalId: claims.rentalId }).from(claims).where(inArray(claims.state, contested)).orderBy(asc(claims.createdAt), asc(claims.id))
 }
