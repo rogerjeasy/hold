@@ -57,6 +57,16 @@ describe('the open scorecard', () => {
     expect(screen.getByRole('link', { name: 'CC BY-SA 4.0' })).toHaveAttribute('href', 'https://creativecommons.org/licenses/by-sa/4.0/')
   })
 
+  // The damage on synthetic pairs is cut from other people's photographs: each is credited with its own licence.
+  it('credits the photographers of the real damage pasted on synthetic pairs, each with its licence', () => {
+    show()
+    for (const [author, file] of [['XoMEoX', 'Scratches_(14779773577)'], ['Mariojan photo', 'Tense_bird_on_blue_sm'], ['Si Griffiths', 'Didcot_Railway_Centre_UK'], ['Fornax', 'Stahltr']] as const) {
+      expect(screen.getByRole('link', { name: author })).toHaveAttribute('href', expect.stringContaining(`commons.wikimedia.org/wiki/File:${file}`))
+    }
+    expect(screen.getByRole('link', { name: 'CC BY 2.0' })).toHaveAttribute('href', 'https://creativecommons.org/licenses/by/2.0/')
+    expect(screen.getByRole('link', { name: 'CC BY-SA 3.0' })).toHaveAttribute('href', 'https://creativecommons.org/licenses/by-sa/3.0/')
+  })
+
   it('shows each group with how many of its pairs the comparison got right, and filters the pairs by group', async () => {
     const user = userEvent.setup()
     show()

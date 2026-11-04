@@ -3664,7 +3664,7 @@
   "openScorecard": {
     "title": "Chaque paire, cas par cas",
     "lead": "Chaque paire de la moitié de contrôle d’où viennent les chiffres ci-dessus : comment elle aurait dû finir, ce qu’a fait la comparaison et si c’était juste. Choisissez-en une pour voir ses deux photos.",
-    "credit": "Photographies : un vélo électrique Urwahn de <urwahn>Writtenby</urwahn> et un Riese und Müller de <rm>Sänger</rm>, issues de Wikimedia Commons, sous licence <licence>CC BY-SA 4.0</licence>. Sur les paires marquées synthétiques, les outils de test de Hold ont dessiné les dégâts, la boue ou les marques.",
+    "credit": "Photographies : un vélo électrique Urwahn de <urwahn>Writtenby</urwahn> et un Riese und Müller de <rm>Sänger</rm>, issues de Wikimedia Commons, sous licence <licence>CC BY-SA 4.0</licence>. Sur les paires marquées synthétiques, les outils de test de Hold ont ajouté les dégâts, la boue ou les marques. Les dégâts sont dessinés ou découpés dans des photographies de vrais dégâts de <scratches>XoMEoX</scratches> sous licence <by20>CC BY 2.0</by20>, de <gouge>Mariojan photo</gouge> sous licence CC BY-SA 4.0, et de <rust>Si Griffiths</rust> et <chip>Fornax</chip> sous licence <bysa30>CC BY-SA 3.0</bysa30>, également issues de Wikimedia Commons.",
     "ownerLink": "Chaque paire, cas par cas",
     "filters": "Afficher les paires",
     "groups": {

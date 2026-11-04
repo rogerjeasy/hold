@@ -37,6 +37,12 @@ export function OpenScorecard({ cases, history }: { cases: readonly EvaluatedCas
             urwahn: (chunks) => <CreditLink href={EVAL_PHOTO_CREDITS.urwahn}>{chunks}</CreditLink>,
             rm: (chunks) => <CreditLink href={EVAL_PHOTO_CREDITS.rm}>{chunks}</CreditLink>,
             licence: (chunks) => <CreditLink href={EVAL_PHOTO_CREDITS.licence}>{chunks}</CreditLink>,
+            scratches: (chunks) => <CreditLink href={EVAL_PHOTO_CREDITS.scratches}>{chunks}</CreditLink>,
+            gouge: (chunks) => <CreditLink href={EVAL_PHOTO_CREDITS.gouge}>{chunks}</CreditLink>,
+            rust: (chunks) => <CreditLink href={EVAL_PHOTO_CREDITS.rust}>{chunks}</CreditLink>,
+            chip: (chunks) => <CreditLink href={EVAL_PHOTO_CREDITS.chip}>{chunks}</CreditLink>,
+            by20: (chunks) => <CreditLink href={EVAL_PHOTO_CREDITS.by20}>{chunks}</CreditLink>,
+            bysa30: (chunks) => <CreditLink href={EVAL_PHOTO_CREDITS.bysa30}>{chunks}</CreditLink>,
           })}
         </p>
         <CaseExplorer rows={caseRows(cases)} />
