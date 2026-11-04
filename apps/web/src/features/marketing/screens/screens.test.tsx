@@ -97,6 +97,16 @@ describe('HomeScreen', () => {
 })
 
 describe('HowItWorksScreen', () => {
+  it('opens on a film of the booking and the four moments, each named with who acts in it', () => {
+    renderWithIntl(<HowItWorksScreen />)
+    expect(screen.getByRole('heading', { level: 1, name: 'One rental, four moments.' })).toBeInTheDocument()
+    const chapters = screen.getAllByRole('button', { name: /^Play the film from / })
+    expect(chapters.map((chapter) => chapter.getAttribute('aria-label'))).toEqual(['Play the film from Book', 'Play the film from Reserve', 'Play the film from Hand over', 'Play the film from Return', 'Play the film from Settle'])
+    expect(chapters[0]).toHaveTextContent('Priya\'s assistant, over MCP')
+    expect(chapters[1]).toHaveTextContent('Priya, the renter')
+    expect(chapters[4]).toHaveTextContent('Tomás, the owner, then Priya')
+  })
+
   it('lets the reader try the comparison', () => {
     renderWithIntl(<HowItWorksScreen />)
     expect(screen.getByRole('slider')).toBeInTheDocument()

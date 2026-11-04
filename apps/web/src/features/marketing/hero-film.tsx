@@ -4,13 +4,11 @@ import { cn } from 'cn'
 import { Pause, Play } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { FilmChapters, type FilmChapter } from './film-chapters'
+import type { Film } from './films'
 
-// An original render: a city bike and an e-scooter on a dark floor, a sheet of light that scans them, and brackets
-// that close on a chip in the paint while its finding rises. Twelve seconds that loop without a seam.
-const FILM = { wide: '/video/hero-wide.mp4', tall: '/video/hero-tall.mp4' } as const
-const STILL = { wide: '/images/hero/hero-wide-still.webp', tall: '/images/hero/hero-tall-still.webp' } as const
-// Below lg the film is a window at the top of the stage, and gets the cut framed for it, the bike and the scooter
-// near its top. The query matches the lg breakpoint, where the words move beside the film.
+// Below lg the film is a window at the top of the stage, and gets the cut framed for it, its subject near its top.
+// The query matches the lg breakpoint, where the words move beside the film.
 const TALL = '(max-width: 1023.98px)'
 const LESS_MOTION = '(prefers-reduced-motion: reduce)'
 const FINE_POINTER = '(pointer: fine)'
@@ -24,10 +22,11 @@ function useMediaQuery(query: string, onServer: boolean): boolean {
   return useSyncExternalStore(subscribe, () => window.matchMedia(query).matches, () => onServer)
 }
 
-// Behind the hero: the film, or for a person who asks for less motion one still frame of it, under the scrims that
+// Behind a stage: the film, or for a person who asks for less motion one still frame of it, under the scrims that
 // keep the words readable. The server sends the still, so the page paints at once; the film fades in over it once it
 // plays. It plays only while it is on screen, and leans a little away from the pointer, so the stage reads as deep.
-export function HeroFilm() {
+// A film told in chapters names them along the stage's foot, and plays from the one chosen.
+export function HeroFilm({ film: source, chapters }: { film: Film; chapters?: readonly FilmChapter[] }) {
   const t = useTranslations('hero.film')
   // Until the browser says otherwise the page assumes less motion, so nothing moves before it is allowed to.
   const lessMotion = useMediaQuery(LESS_MOTION, true)
@@ -75,6 +74,13 @@ export function HeroFilm() {
     }
   }, [lessMotion, finePointer])
 
+  const seek = (seconds: number) => {
+    const film = video.current
+    if (film === null) return
+    film.currentTime = seconds
+    if (!paused) void film.play().catch(() => undefined)
+  }
+
   const toggle = () => {
     const film = video.current
     if (film === null) return
@@ -86,11 +92,11 @@ export function HeroFilm() {
   return (
     <>
       <div ref={root} aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-clip">
-        <div className="absolute inset-x-0 top-0 h-[min(calc((100vw-1rem)*1.25),38rem)] overflow-clip lg:inset-0 lg:h-auto">
+        <div className="absolute inset-x-0 top-0 h-[min(125vw,38rem)] overflow-clip lg:inset-0 lg:h-auto">
           <div className="absolute -inset-4 transition-transform duration-700 ease-out [transform:translate3d(calc(var(--lean-x,0)*-18px),calc(var(--lean-y,0)*-12px),0)_scale(1.03)]">
             <picture>
-              <source media={TALL} srcSet={STILL.tall} />
-              <img src={STILL.wide} alt="" fetchPriority="high" decoding="async" className="absolute inset-0 size-full object-cover object-top lg:object-center" />
+              <source media={TALL} srcSet={source.still.tall} />
+              <img src={source.still.wide} alt="" fetchPriority="high" decoding="async" className="absolute inset-0 size-full object-cover object-top lg:object-center" />
             </picture>
             {lessMotion ? null : (
               <video
@@ -105,8 +111,8 @@ export function HeroFilm() {
                 onPlaying={() => { setShowing(true) }}
                 className={cn('absolute inset-0 size-full object-cover object-top transition-opacity duration-1000 lg:object-center', showing ? 'opacity-100' : 'opacity-0')}
               >
-                <source media={TALL} src={FILM.tall} type="video/mp4" />
-                <source src={FILM.wide} type="video/mp4" />
+                <source media={TALL} src={source.tall} type="video/mp4" />
+                <source src={source.wide} type="video/mp4" />
               </video>
             )}
           </div>
@@ -117,12 +123,13 @@ export function HeroFilm() {
         <div className="absolute inset-x-0 bottom-0 hidden h-1/3 bg-linear-to-t from-band/90 to-transparent lg:block" />
         <div className="absolute inset-x-0 top-0 hidden h-24 bg-linear-to-b from-band/60 to-transparent lg:block" />
       </div>
+      {lessMotion || chapters === undefined ? null : <FilmChapters video={video} chapters={chapters} onSeek={seek} />}
       {lessMotion ? null : (
         <button
           type="button"
           onClick={toggle}
           aria-label={paused ? t('play') : t('pause')}
-          className="absolute top-3 right-3 z-10 grid size-11 place-items-center rounded-full bg-band-foreground/10 text-band-foreground ring-1 ring-band-foreground/20 backdrop-blur-md transition-colors hover:bg-band-foreground/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-band-accent md:top-5 md:right-5 lg:top-auto lg:bottom-5"
+          className={cn('absolute top-3 right-3 z-10 grid size-11 place-items-center rounded-full bg-band-foreground/10 text-band-foreground ring-1 ring-band-foreground/20 backdrop-blur-md transition-colors hover:bg-band-foreground/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-band-accent md:top-5 md:right-5', chapters === undefined && 'lg:top-auto lg:bottom-5')}
         >
           {paused ? <Play aria-hidden="true" className="size-4.5" /> : <Pause aria-hidden="true" className="size-4.5" />}
         </button>

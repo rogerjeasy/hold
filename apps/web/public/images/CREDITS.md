@@ -17,6 +17,8 @@ The scratches, the scuff and the chip on the frame are drawn on. They are not re
 
 Replace `frame-handover.jpg` and `frame-return.jpg` with a real handover and return pair before submission. `docs/tech-stack.md` section 16, item 4 asks for that pair. Keep the 21:9 crop, and update the mark positions in `src/features/marketing/evidence-photo.ts`.
 
-## The hero film
+## The films
 
 `public/video/hero-wide.mp4`, `public/video/hero-tall.mp4`, `hero/hero-wide-still.webp` and `hero/hero-tall-still.webp` are Hold's own work: a Three.js scene of a city bike and an e-scooter modelled in code, rendered frame by frame in a browser and encoded with ffmpeg. No photograph, model or music from anyone else is in them. The still is frame 186 of the 360, where the brackets have closed on the chip.
+
+`public/video/how-wide.mp4`, `public/video/how-tall.mp4`, `hero/how-wide-still.webp` and `hero/how-tall-still.webp` are made the same way: three people modelled in code (Priya, Jonas and Tomás), the e-bike, the counter and the owner's desk, Hold's MCP server and PayPal's sandbox as two panels at the back, with every screen drawn in Hold's own type and colours and every photograph on them rendered from the 3D e-bike. The still is frame 335 of the 1,185, the hold just authorized.

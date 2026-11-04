@@ -161,7 +161,8 @@
     "lead": "Hold réserve la caution avec PayPal et ne débite rien. Au retour, du code trouve ce qui a changé entre deux photographies avant que Claude ne l'explique, une personne nommée approuve chaque centime d'après une liste de prix publiée, et le client voit les mêmes preuves. Quand les deux parties ne sont pas d'accord, deux défenseurs en débattent dans les limites fixées par chacune.",
     "film": {
       "pause": "Mettre en pause le film d’arrière-plan",
-      "play": "Lire le film d’arrière-plan"
+      "play": "Lire le film d’arrière-plan",
+      "playFrom": "Lire le film à partir de « {step} »"
     }
   },
   "evidence": {
@@ -412,6 +413,17 @@
     "howItWorks": {
       "title": "Une location, quatre moments.",
       "lead": "Le personnel et les clients utilisent le téléphone qu'ils ont déjà. Personne n'installe rien, et le loueur n'achète aucun matériel.",
+      "film": {
+        "eyebrow": "Une location, du début à la fin",
+        "book": "Commander",
+        "who": {
+          "book": "L’assistant de Priya, via MCP",
+          "reserve": "Priya, la cliente",
+          "handOver": "Jonas, au comptoir",
+          "return": "Jonas, et la comparaison",
+          "settle": "Tomás, le propriétaire, puis Priya"
+        }
+      },
       "stepsHeading": "Les quatre moments",
       "comparison": {
         "title": "Ce que montre la comparaison.",

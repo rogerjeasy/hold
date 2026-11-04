@@ -16,6 +16,16 @@ test.describe('with motion allowed', () => {
     await expect.poll(() => film.evaluate((video: HTMLVideoElement) => video.paused)).toBe(false)
   })
 
+  test('How it works plays its own film of the booking and the four moments, and a chapter plays it from there', async ({ page }) => {
+    await page.goto('/how-it-works')
+    const film = page.locator('section video')
+    await expect.poll(() => film.evaluate((video: HTMLVideoElement) => !video.paused && video.currentSrc.endsWith('/video/how-wide.mp4'))).toBe(true)
+    await expect(page.getByRole('button', { name: 'Play the film from Book' })).toHaveAttribute('aria-current', 'step')
+    await page.getByRole('button', { name: 'Play the film from Settle' }).click()
+    await expect.poll(() => film.evaluate((video: HTMLVideoElement) => video.currentTime)).toBeGreaterThanOrEqual(26.2)
+    await expect(page.getByRole('button', { name: 'Play the film from Settle' })).toHaveAttribute('aria-current', 'step')
+  })
+
   test('a phone gets the film cut for a tall screen', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 })
     await page.goto('/')

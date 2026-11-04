@@ -161,7 +161,8 @@
     "lead": "Hold reserves the deposit with PayPal and charges nothing. At return, code finds what changed between two photographs before Claude explains it, a named person approves every cent from a published price list, and the renter sees the same evidence. When the two sides disagree, two advocates argue it inside limits each side set.",
     "film": {
       "pause": "Pause the background film",
-      "play": "Play the background film"
+      "play": "Play the background film",
+      "playFrom": "Play the film from {step}"
     }
   },
   "evidence": {
@@ -412,6 +413,17 @@
     "howItWorks": {
       "title": "One rental, four moments.",
       "lead": "Staff and renters use the phone they already carry. Nobody installs anything, and the shop buys no hardware.",
+      "film": {
+        "eyebrow": "One rental, start to finish",
+        "book": "Book",
+        "who": {
+          "book": "Priya's assistant, over MCP",
+          "reserve": "Priya, the renter",
+          "handOver": "Jonas, at the counter",
+          "return": "Jonas, and the comparison",
+          "settle": "Tomás, the owner, then Priya"
+        }
+      },
       "stepsHeading": "The four moments",
       "comparison": {
         "title": "What the comparison shows.",

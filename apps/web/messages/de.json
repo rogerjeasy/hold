@@ -161,7 +161,8 @@
     "lead": "Hold reserviert die Kaution über PayPal und bucht nichts ab. Bei der Rückgabe findet Code, was sich zwischen zwei Fotos verändert hat, bevor Claude es erklärt. Ein namentlich genannter Mensch genehmigt jeden Cent aus einer veröffentlichten Preisliste, und der Mieter sieht dieselben Belege. Sind sich beide Seiten uneinig, verhandeln zwei Fürsprecher innerhalb der Limits, die jede Seite gesetzt hat.",
     "film": {
       "pause": "Hintergrundfilm anhalten",
-      "play": "Hintergrundfilm abspielen"
+      "play": "Hintergrundfilm abspielen",
+      "playFrom": "Den Film ab „{step}“ abspielen"
     }
   },
   "evidence": {
@@ -412,6 +413,17 @@
     "howItWorks": {
       "title": "Eine Miete, vier Momente.",
       "lead": "Personal und Mietende nutzen das Telefon, das sie ohnehin dabeihaben. Niemand installiert etwas, und der Verleih kauft keine Geräte.",
+      "film": {
+        "eyebrow": "Eine Miete, von Anfang bis Ende",
+        "book": "Buchen",
+        "who": {
+          "book": "Priyas Assistent, über MCP",
+          "reserve": "Priya, die Mieterin",
+          "handOver": "Jonas, an der Theke",
+          "return": "Jonas und der Vergleich",
+          "settle": "Tomás, der Inhaber, dann Priya"
+        }
+      },
       "stepsHeading": "Die vier Momente",
       "comparison": {
         "title": "Was der Vergleich zeigt.",
