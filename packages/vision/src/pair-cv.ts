@@ -1,4 +1,6 @@
+import { existsSync } from 'node:fs'
 import { createRequire } from 'node:module'
+import { join } from 'node:path'
 import { readyOpenCv } from './measure.ts'
 import type { Mat as MeasuredMat, OpenCv } from './measure.ts'
 
@@ -39,7 +41,14 @@ export type PairCv = Omit<OpenCv, 'Mat'> & {
 // Both photographs may arrive while WebAssembly is initializing; share its one initialization callback. Required, not
 // imported: an import of OpenCV.js is taken for a promise and never settles (see readyOpenCv).
 let runtime: Promise<{ readonly cv: PairCv }> | undefined
-export const pairCv = () => runtime ??= readyOpenCv(createRequire(typeof __filename === 'string' ? __filename : import.meta.url)('@techstark/opencv-js')).then((ready) => ({ cv: ready.cv as PairCv }))
+export const pairCv = () => runtime ??= readyOpenCv(createRequire(requireFrom())('@techstark/opencv-js')).then((ready) => ({ cv: ready.cv as PairCv }))
+
+// Where OpenCV.js is looked up from: this file, or, once a bundler has written this file's path as one that exists only
+// while building (Next.js writes "/ROOT/packages/..."), the running app's own dependencies, which name it (apps/web).
+function requireFrom(): string {
+  const here = typeof __filename === 'string' ? __filename : import.meta.url
+  return here.startsWith('file:') || existsSync(here) ? here : join(process.cwd(), 'package.json')
+}
 
 // Runs work with OpenCV matrices and frees every one it made, whatever happens.
 export function withMats<T>(work: (made: <M extends { delete(): void }>(value: M) => M) => T): T {
