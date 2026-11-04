@@ -11,6 +11,7 @@ import { Notice } from '@/components/ui/notice'
 import { Panel } from '@/components/ui/panel'
 import { ShopFrame } from '@/features/shop/shop-frame'
 import { PasskeyGate } from '@/features/shop/passkey-gate'
+import type { PasskeyGateState } from '@/features/shop/passkey-gate'
 import { useLookAgain } from '@/hooks/use-look-again'
 import { Link } from '@/i18n/navigation'
 import { rentalRoutes } from '@/lib/routes'
@@ -31,11 +32,9 @@ import type { ClaimViewer } from './claim-permissions'
 import { ClaimStart } from './claim-start'
 import { SettlementMeter } from './settlement-meter'
 
-// Whether this session must still be proven by a passkey before a money decision, and how to offer it.
-type PasskeyState = { readonly needed: boolean; readonly hasPasskey: boolean; readonly email: string }
 type SampleAdvocates = { readonly allowance: SampleAdvocatesAllowance; readonly recording: RecordedRun | undefined }
 
-type ClaimScreenProps = { shopName: string; timeZone?: string; data: ClaimWorkspace; canAct: boolean; canDecide?: boolean; photoUrls?: Readonly<Record<string, string>>; passkey?: PasskeyState; negotiation?: ShopNegotiation; contest?: ContestView; promise?: ClaimPromise | null; messages?: readonly ClaimMessage[]; renterName?: string | null; isOwner?: boolean; now?: Date | undefined; sampleAdvocates?: SampleAdvocates; viewer?: ClaimViewer }
+type ClaimScreenProps = { shopName: string; timeZone?: string; data: ClaimWorkspace; canAct: boolean; canDecide?: boolean; photoUrls?: Readonly<Record<string, string>>; passkey?: PasskeyGateState; negotiation?: ShopNegotiation; contest?: ContestView; promise?: ClaimPromise | null; messages?: readonly ClaimMessage[]; renterName?: string | null; isOwner?: boolean; now?: Date | undefined; sampleAdvocates?: SampleAdvocates; viewer?: ClaimViewer }
 
 const SENIOR = ['owner', 'manager']
 

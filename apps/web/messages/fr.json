@@ -1489,7 +1489,8 @@
       "problems": {
         "email": "Saisissez d'abord votre e-mail professionnel, puis utilisez votre clé d'accès.",
         "unsupported": "Ce navigateur ne prend pas en charge les clés d'accès. Utilisez le code reçu par e-mail, ou un navigateur plus récent.",
-        "cancelled": "La clé d'accès n'a pas été utilisée. Réessayez quand vous êtes prêt.",
+        "cancelled": "La clé d'accès n'a pas été utilisée. Si elle se trouve sur un autre appareil ou navigateur, utilisez celui-ci, ou réessayez ici.",
+        "not_made": "Aucune clé d'accès n'a été créée. Réessayez quand vous êtes prêt.",
         "unavailable": "Hold n'a pas pu joindre son service de connexion. Réessayez dans un instant.",
         "wrong": "Cette clé d'accès n'est pas une clé que Hold connaît pour cette adresse.",
         "expired": "Cela a pris trop de temps. Réessayez.",
@@ -1500,7 +1501,7 @@
         "invitation_closed": "Cette invitation n'est plus utilisable.",
         "missing": "Saisissez d'abord votre e-mail professionnel.",
         "invalid": "Saisissez d'abord votre e-mail professionnel.",
-        "confirm_first": "Pour ajouter une autre clé d'accès, il faut une clé que vous avez déjà. Confirmez d'abord avec elle."
+        "confirm_first": "Ce compte a déjà une clé d'accès. Confirmez d'abord avec elle, sur l'appareil ou le navigateur qui la détient, puis ajoutez-en une ici."
       }
     },
     "invite": {
@@ -1624,6 +1625,7 @@
       "add": "Ajouter une clé d'accès",
       "addHere": "Pas de clé d’accès sur cet appareil ? En ajouter une",
       "stays": "Une clé d'accès reste sur l'appareil ou le navigateur qui l'a créée. Utilisez celui-ci, ou ajoutez-en une ici.",
+      "staysConfirm": "Une clé d'accès reste sur l'appareil ou le navigateur qui l'a créée. Confirmez sur l'appareil ou le navigateur qui la détient ; la demande de votre navigateur peut aussi atteindre une clé sur votre téléphone.",
       "demo": {
         "title": "Vous testez la démo ?",
         "body": "Une clé d'accès ajoutée dans un autre navigateur ne vous suit pas. Lancez une nouvelle démo ici, ou déconnectez-vous et revenez dans le navigateur qui la détient.",

@@ -1489,7 +1489,8 @@
       "problems": {
         "email": "Geben Sie zuerst Ihre geschäftliche E-Mail ein und verwenden Sie dann Ihren Passkey.",
         "unsupported": "Dieser Browser unterstützt keine Passkeys. Verwenden Sie den Code aus der E-Mail oder einen neueren Browser.",
-        "cancelled": "Der Passkey wurde nicht verwendet. Versuchen Sie es erneut, wenn Sie so weit sind.",
+        "cancelled": "Der Passkey wurde nicht verwendet. Liegt er auf einem anderen Gerät oder in einem anderen Browser, nutzen Sie diesen, oder versuchen Sie es hier erneut.",
+        "not_made": "Es wurde kein Passkey erstellt. Versuchen Sie es erneut, wenn Sie so weit sind.",
         "unavailable": "Hold konnte die Anmeldung nicht erreichen. Versuchen Sie es gleich noch einmal.",
         "wrong": "Dieser Passkey ist Hold für diese Adresse nicht bekannt.",
         "expired": "Das hat zu lange gedauert. Versuchen Sie es erneut.",
@@ -1500,7 +1501,7 @@
         "invitation_closed": "Diese Einladung gilt nicht mehr.",
         "missing": "Geben Sie zuerst Ihre geschäftliche E-Mail ein.",
         "invalid": "Geben Sie zuerst Ihre geschäftliche E-Mail ein.",
-        "confirm_first": "Für einen weiteren Passkey braucht es einen, den Sie schon haben. Bestätigen Sie zuerst damit."
+        "confirm_first": "Dieses Konto hat schon einen Passkey. Bestätigen Sie zuerst damit, auf dem Gerät oder im Browser, wo er liegt, und fügen Sie dann hier einen hinzu."
       }
     },
     "invite": {
@@ -1624,6 +1625,7 @@
       "add": "Passkey hinzufügen",
       "addHere": "Kein Passkey auf diesem Gerät? Einen hinzufügen",
       "stays": "Ein Passkey bleibt auf dem Gerät oder im Browser, wo er erstellt wurde. Nutzen Sie diesen oder fügen Sie hier einen hinzu.",
+      "staysConfirm": "Ein Passkey bleibt auf dem Gerät oder im Browser, wo er erstellt wurde. Bestätigen Sie auf dem Gerät oder im Browser, wo er liegt; die Abfrage Ihres Browsers erreicht auch einen Passkey auf Ihrem Telefon.",
       "demo": {
         "title": "In der Demo?",
         "body": "Ein Passkey aus einem anderen Browser kommt nicht mit. Starten Sie hier eine neue Demo, oder melden Sie sich ab und kehren Sie im Browser mit dem Passkey zurück.",

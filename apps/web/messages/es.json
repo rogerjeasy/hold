@@ -1489,7 +1489,8 @@
       "problems": {
         "email": "Escribe primero tu correo de trabajo y luego usa tu llave de acceso.",
         "unsupported": "Este navegador no admite llaves de acceso. Usa el código del correo o un navegador más reciente.",
-        "cancelled": "No se usó la llave de acceso. Vuelve a intentarlo cuando quieras.",
+        "cancelled": "No se usó la llave de acceso. Si está en otro dispositivo o navegador, usa ese, o vuelve a intentarlo aquí.",
+        "not_made": "No se creó ninguna llave de acceso. Vuelve a intentarlo cuando quieras.",
         "unavailable": "Hold no ha podido conectar con el inicio de sesión. Inténtalo de nuevo en un momento.",
         "wrong": "Esa llave de acceso no es una que Hold conozca para esta dirección.",
         "expired": "Ha tardado demasiado. Inténtalo de nuevo.",
@@ -1500,7 +1501,7 @@
         "invitation_closed": "Esta invitación ya no sirve.",
         "missing": "Escribe primero tu correo de trabajo.",
         "invalid": "Escribe primero tu correo de trabajo.",
-        "confirm_first": "Para añadir otra llave de acceso hace falta una que ya tengas. Confirma primero con ella."
+        "confirm_first": "Esta cuenta ya tiene una llave de acceso. Confirma primero con ella, en el dispositivo o navegador que la guarda, y luego añade una aquí."
       }
     },
     "invite": {
@@ -1624,6 +1625,7 @@
       "add": "Añadir una llave de acceso",
       "addHere": "¿No hay llave de acceso en este dispositivo? Añade una",
       "stays": "Una llave de acceso se queda en el dispositivo o navegador que la creó. Usa ese, o añade una aquí.",
+      "staysConfirm": "Una llave de acceso se queda en el dispositivo o navegador que la creó. Confirma en el dispositivo o navegador que la guarda; la ventana de tu navegador también puede llegar a una llave en tu teléfono.",
       "demo": {
         "title": "¿Estás en la demo?",
         "body": "Una llave de acceso añadida en otro navegador no viene contigo. Empieza una demo nueva aquí, o cierra sesión y vuelve en el navegador que la tiene.",

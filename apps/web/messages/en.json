@@ -1489,7 +1489,8 @@
       "problems": {
         "email": "Enter your work email first, then use your passkey.",
         "unsupported": "This browser cannot use passkeys. Use the emailed code, or a newer browser.",
-        "cancelled": "The passkey was not used. Try again when you are ready.",
+        "cancelled": "The passkey was not used. If it is on another device or browser, use that one, or try again here.",
+        "not_made": "No passkey was made. Try again when you are ready.",
         "unavailable": "Hold could not reach its sign-in service. Try again in a moment.",
         "wrong": "That passkey is not one Hold knows for this address.",
         "expired": "That took too long. Try again.",
@@ -1500,7 +1501,7 @@
         "invitation_closed": "This invitation can no longer be used.",
         "missing": "Enter your work email first.",
         "invalid": "Enter your work email first.",
-        "confirm_first": "Adding another passkey needs one you already have. Confirm with it first."
+        "confirm_first": "This account already has a passkey. Confirm with it first, on the device or browser that holds it, then add one here."
       }
     },
     "invite": {
@@ -1624,6 +1625,7 @@
       "add": "Add a passkey",
       "addHere": "No passkey on this device? Add one",
       "stays": "A passkey stays on the device or browser that made it. Use that one, or add a passkey here.",
+      "staysConfirm": "A passkey stays on the device or browser that made it. Confirm on the device or browser that holds it; your browser's prompt can also reach a passkey on your phone.",
       "demo": {
         "title": "On the demo?",
         "body": "A passkey you added in another browser does not come with you. Start a fresh demo here, or sign out and come back in the browser that has it.",
