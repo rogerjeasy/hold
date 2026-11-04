@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Button } from '@/components/ui/button'
+import { LinkPendingIcon } from '@/components/ui/link-pending-icon'
 import { Link } from '@/i18n/navigation'
 import { rentalRoutes } from '@/lib/routes'
 
@@ -10,7 +11,7 @@ export function NewRentalLink() {
   return (
     <Button asChild>
       <Link href={rentalRoutes.new}>
-        <Plus aria-hidden="true" />
+        <LinkPendingIcon opening={t('openingPage')}><Plus aria-hidden="true" /></LinkPendingIcon>
         {t('newRental')}
       </Link>
     </Button>

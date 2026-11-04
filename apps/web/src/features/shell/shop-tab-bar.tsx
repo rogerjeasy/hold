@@ -4,6 +4,7 @@ import { cn } from 'cn'
 import { CalendarRange, Inbox, LayoutDashboard, Menu, Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useState } from 'react'
+import { LinkPendingIcon } from '@/components/ui/link-pending-icon'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Link, usePathname } from '@/i18n/navigation'
 import { rentalRoutes, shopRoutes } from '@/lib/routes'
@@ -42,8 +43,8 @@ export function ShopTabBar({ person, shop, role, paypalConnected }: ShellProps) 
       {role === 'read_only' ? null : (
         <Link href={rentalRoutes.new} aria-current={pathname === rentalRoutes.new ? 'page' : undefined} className="grid min-h-14 flex-1 place-items-center">
           <span className="sr-only">{t('newRental')}</span>
-          <span aria-hidden="true" className="grid size-12 place-items-center rounded-2xl bg-band-accent text-mark-foreground shadow-glow transition-transform duration-200 active:scale-95">
-            <Plus className="size-6" strokeWidth={2.5} />
+          <span className="grid size-12 place-items-center rounded-2xl bg-band-accent text-mark-foreground shadow-glow transition-transform duration-200 active:scale-95">
+            <LinkPendingIcon opening={t('openingPage')}><Plus aria-hidden="true" className="size-6" strokeWidth={2.5} /></LinkPendingIcon>
           </span>
         </Link>
       )}

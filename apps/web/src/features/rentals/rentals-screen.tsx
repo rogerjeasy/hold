@@ -3,6 +3,7 @@ import { CalendarPlus, Globe, Plus, SearchX } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { buttonVariants } from '@/components/ui/button'
 import { EmptyState } from '@/components/ui/empty-state'
+import { LinkPendingIcon } from '@/components/ui/link-pending-icon'
 import { ShopFrame } from '@/features/shop/shop-frame'
 import type { ShopClock } from '@/hooks/use-shop-format'
 import { Link } from '@/i18n/navigation'
@@ -17,9 +18,10 @@ export type RentalsScreenProps = { shopName: string; clock: ShopClock; rentals: 
 // From lg the shell's own bar offers a new rental beside the page, so the page's own shows only below it.
 function NewRentalLink({ className }: { className?: string }) {
   const t = useTranslations('shop.rentals')
+  const shell = useTranslations('shell')
   return (
     <Link href={rentalRoutes.new} className={buttonVariants({ className })}>
-      <Plus aria-hidden="true" />
+      <LinkPendingIcon opening={shell('openingPage')}><Plus aria-hidden="true" /></LinkPendingIcon>
       {t('new')}
     </Link>
   )
