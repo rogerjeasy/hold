@@ -16,8 +16,8 @@ const { form, signIn } = await import('@/test/shop-session')
 const { SAMPLE_COMPARISON_LIMITS, sampleComparisonAllowance } = await import('./limits')
 
 // A judge has Claude compare the demonstration's own photographs on the sample return that waits for its comparison,
-// with no PayPal login (architecture.md section 20.3). In the test environment the model is the stand-in, which never
-// answers, so the comparison says the model did not answer, having read both sample photographs.
+// with no PayPal login (architecture.md section 20.3). In the test environment the model is the simulated stand-in: code
+// finds the chip on the sample photographs, and the stand-in words it as a finding over that area, priced by no one.
 let shopId = ''
 const scoped = async <Result>(work: Parameters<typeof inShop<Result>>[2]) => inShop((await getServices()).database, { role: 'hold_app', shopId }, work)
 const rentalOf = async (name: string) => {
@@ -50,7 +50,9 @@ describe('the real comparison on the demo’s sample return', () => {
   it('may be started by counter staff, reads the sample photographs, and moves no money', async () => {
     await signIn(jar, started.staff, 'email_code')
     expect(await actions.compareSample(null, form({ rentalId: started.rentalId, locale: 'en' }))).toMatchObject({ ok: true })
-    expect(await comparisonOf(started.rentalId)).toMatchObject({ state: 'deferred', deferredReason: 'model_unavailable', model: 'not_called', simulated: true, waitsForStart: false })
+    const report = await comparisonOf(started.rentalId)
+    expect(report).toMatchObject({ state: 'findings', deferredReason: null, model: 'simulated', simulated: true, modelAnswered: false, waitsForStart: false })
+    expect(report?.findings).toEqual([expect.objectContaining({ class: 'new_damage', secondLookConfirmed: true, amountCents: null })])
     expect((await scoped((transaction) => transaction.select().from(moneyEvents))).filter((event) => event.rentalId === started.rentalId).map((event) => event.kind)).toEqual(['fee_captured', 'hold_placed'])
   })
 

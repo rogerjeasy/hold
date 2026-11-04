@@ -1,4 +1,5 @@
 export { createBedrockComparisonModel } from './bedrock-model.ts'
+export { createSimulatedComparisonModel } from './simulated-model.ts'
 export { comparisonMessageSchema, runComparison } from './job.ts'
 export type { ComparisonDependencies } from './job.ts'
 export { compareInspection } from './pipeline.ts'

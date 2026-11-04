@@ -1,5 +1,5 @@
 import 'server-only'
-import { comparisonMessageSchema, createBedrockContestModel, createBedrockIncidentModel, createSimulatedContestModel, createSimulatedIncidentModel, runComparison } from '@hold/compare'
+import { comparisonMessageSchema, createBedrockContestModel, createBedrockIncidentModel, createSimulatedComparisonModel, createSimulatedContestModel, createSimulatedIncidentModel, runComparison } from '@hold/compare'
 import type { ContestModel, IncidentModel } from '@hold/compare'
 import { createCognitoIdentity, createDemoSessionAccounts, createFakeIdentity, readKeySecret } from '@hold/auth'
 import type { Identity } from '@hold/auth'
@@ -93,9 +93,10 @@ function credentialSigner(source: CredentialKeySource, region: string): () => Pr
 function runAtOnce(settle: () => SettleDependencies, media: DisplayJobDependencies, records: ReturnType<typeof simulatedRecords>, operations: OpsDependencies): (message: QueueMessage) => Promise<void> {
   return async (message) => {
     if (message.queue === 'media') await makeDisplayCopy(media, mediaMessageSchema.parse(message.body))
-    // This environment's model is explicitly simulated and never calls Bedrock. The same pipeline still rejects
-    // reused, unreadable or poorly aligned photographs before any model result is considered.
-    if (message.queue === 'comparisons') await runComparison({ database: media.database, role: media.role ?? 'hold_worker', evidence: media.evidence, model: { look: () => Promise.resolve({ kind: 'unavailable', model: 'simulated' }) }, simulated: true, now: () => new Date() }, comparisonMessageSchema.parse(message.body))
+    // This environment's model is the simulated stand-in, which never calls Bedrock: it words what code found and adds
+    // nothing. The same pipeline still finds the changed areas, and rejects reused, unreadable or poorly aligned
+    // photographs before any answer is considered.
+    if (message.queue === 'comparisons') await runComparison({ database: media.database, role: media.role ?? 'hold_worker', evidence: media.evidence, model: createSimulatedComparisonModel(), simulated: true, now: () => new Date() }, comparisonMessageSchema.parse(message.body))
     if (message.queue === 'executions') await runExecution(settle(), executionMessageSchema.parse(message.body))
     if (message.queue === 'paypal-events') await applyPayPalEvent(settle(), paypalEventMessageSchema.parse(message.body))
     if (message.queue === 'upkeep') await runUpkeep(settle(), upkeepMessageSchema.parse(message.body))

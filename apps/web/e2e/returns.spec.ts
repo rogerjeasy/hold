@@ -5,7 +5,7 @@ import { expect, test } from './support/test'
 // A camera that shows Chromium's test pattern, so the return shows the handover ghost over a live preview.
 test.use({ launchOptions: { args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'] } })
 
-test('staff photograph a return against the handover, review uncertainty and record a manual inspection', async ({ page, browser }) => {
+test('staff photograph a return against the handover, review what the comparison found and record a manual inspection', async ({ page, browser }) => {
   test.setTimeout(240_000)
   await readyForHandover(page, browser, 'Porto Return Bikes')
   await page.getByRole('region', { name: 'Handover' }).getByRole('button', { name: /^Photograph / }).click()
@@ -43,10 +43,14 @@ test('staff photograph a return against the handover, review uncertainty and rec
   await page.getByRole('button', { name: 'Seal return photographs' }).click()
   await expect(page.getByText(/These return photographs are sealed/)).toBeVisible()
   await page.getByRole('link', { name: 'Review comparison' }).click()
-  await expect(page.getByRole('heading', { name: 'Needs a person', exact: true })).toBeVisible({ timeout: 30_000 })
-  // Samples are compared like any photograph, and the record and screen disclose the simulation. The test environment
-  // has no model, so the comparison waits for a person.
+  // Samples are compared like any photograph, and the record and screen disclose the simulation. The test environment's
+  // model is the simulated stand-in: code finds the chip on the sample with damage, the stand-in words it as a finding
+  // over that area, and the page says no model answered.
+  await expect(page.getByRole('heading', { name: 'Findings', exact: true })).toBeVisible({ timeout: 30_000 })
   await expect(page.getByText('Simulated comparison', { exact: true })).toBeVisible()
+  await expect(page.getByText('1 mark found', { exact: true })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Observations' })).toContainText(/Possible new damage.*Simulated: code found a change in this area/)
+  await expect(page.getByText('Model: simulated. Prompt: inspection-3.')).toBeVisible()
   await expect(page.getByText(/A return photograph matches earlier evidence/)).toHaveCount(0)
   await expectFitsEveryWidth(page)
   await page.getByLabel('Your inspection outcome').selectOption('clean')
