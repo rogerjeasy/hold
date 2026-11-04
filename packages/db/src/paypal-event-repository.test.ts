@@ -5,7 +5,7 @@ import { registerOwner } from './accounts.ts'
 import { createBooking } from './booking-repository.ts'
 import { saveFeeOrder } from './fee-repository.ts'
 import { addItems, saveItemType } from './item-repository.ts'
-import { feeRentalByOrder, markOutboxSent, markPayPalEvent, payPalEvent, pendingOutbox, recordPayPalEvent } from './paypal-event-repository.ts'
+import { deliveryAccount, feeRentalByOrder, markOutboxSent, markPayPalEvent, payPalEvent, pendingOutbox, recordPayPalEvent } from './paypal-event-repository.ts'
 import { publishPriceList } from './price-list-repository.ts'
 import { findPayPalAccount, savePayPalAccount, saveWebhookId } from './shop-repository.ts'
 import { inShop } from './scope.ts'
@@ -45,6 +45,18 @@ describe('a shop’s webhook subscription', () => {
   it('is kept beside its PayPal account', async () => {
     await inShop(database, owner, (transaction) => saveWebhookId(transaction, shopId, 'sandbox', 'WEBHOOK-1'))
     expect(await inShop(database, owner, (transaction) => findPayPalAccount(transaction, shopId, 'sandbox'))).toMatchObject({ webhookId: 'WEBHOOK-1' })
+  })
+})
+
+describe('the account a delivery’s address names', () => {
+  it('gives the shop, the subscription to verify against and the credentials to ask with, before any shop is chosen', async () => {
+    await inShop(database, owner, (transaction) => saveWebhookId(transaction, shopId, 'sandbox', 'WEBHOOK-1'))
+    expect(await deliveryAccount(database, accountId)).toEqual({ shopId, webhookId: 'WEBHOOK-1', credentialReference: 'hold/paypal/shops/a/sandbox' })
+  })
+
+  it('is nothing for an address that names no account', async () => {
+    expect(await deliveryAccount(database, '00000000-0000-4000-8000-000000000000')).toBeUndefined()
+    expect(await deliveryAccount(database, 'not-an-id')).toBeUndefined()
   })
 })
 

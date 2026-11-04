@@ -1,12 +1,12 @@
 import { and, eq, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { readJson } from './read-json.ts'
-import { outbox, paypalEvents, rentals } from './schema/index.ts'
+import { outbox, paypalAccounts, paypalEvents, rentals } from './schema/index.ts'
 import { inShop, outsideShop } from './scope.ts'
 import type { Database, Transaction } from './scope.ts'
 
-// Events PayPal delivers (architecture.md section 8.5). Each is stored first, with its exact body and headers and an
-// outbox message, before anything in it is believed. The worker verifies it with PayPal and reads back what it names.
+// Events PayPal delivers (architecture.md section 8.5). The intake has PayPal verify each one before it is stored, with
+// its exact body and headers and an outbox message. The worker verifies it again and reads back what it names.
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
@@ -29,11 +29,25 @@ export type RecordResult =
   | { readonly ok: true; readonly stored: false }
   | { readonly ok: false; readonly reason: 'unknown_account' }
 
-export async function recordPayPalEvent(database: Database, accountId: string, delivery: Delivery, now: Date): Promise<RecordResult> {
-  if (!UUID.test(accountId)) return { ok: false, reason: 'unknown_account' }
-  const [account] = await outsideShop(database, (transaction) =>
+export type DeliveryAccount = { readonly shopId: string; readonly webhookId: string | null; readonly credentialReference: string }
+
+// The account a delivery's address names, read before any shop is chosen: its shop, the subscription PayPal signs for,
+// and the credentials to ask PayPal with.
+export async function deliveryAccount(database: Database, accountId: string): Promise<DeliveryAccount | undefined> {
+  if (!UUID.test(accountId)) return undefined
+  const [owner] = await outsideShop(database, (transaction) =>
     transaction.select({ shopId: sql<string>`account.shop_id` }).from(sql`hold_paypal_account(${accountId}::uuid) as account`),
   )
+  if (owner === undefined) return undefined
+  const { shopId } = owner
+  const [account] = await inShop(database, { role: 'hold_app', shopId }, (transaction) =>
+    transaction.select({ webhookId: paypalAccounts.webhookId, credentialReference: paypalAccounts.credentialReference }).from(paypalAccounts).where(eq(paypalAccounts.id, accountId)),
+  )
+  return account === undefined ? undefined : { shopId, ...account }
+}
+
+export async function recordPayPalEvent(database: Database, accountId: string, delivery: Delivery, now: Date): Promise<RecordResult> {
+  const account = await deliveryAccount(database, accountId)
   if (account === undefined) return { ok: false, reason: 'unknown_account' }
   const { shopId } = account
   return inShop(database, { role: 'hold_app', shopId }, async (transaction): Promise<RecordResult> => {

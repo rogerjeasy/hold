@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { findPayPalAccount, inShop, itemCatalog, paypalEvents, registerOwner, rentalDetail } from '@hold/db'
+import { findPayPalAccount, inShop, itemCatalog, paypalEvents, rateTokensLeft, registerOwner, rentalDetail } from '@hold/db'
 import { FAKE_SIGNATURE } from '@hold/paypal'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -19,7 +19,7 @@ vi.mock('next/headers', () => ({
 vi.mock('next/cache', () => ({ revalidatePath: () => undefined }))
 vi.mock('next-intl/server', () => ({ getTranslations: () => Promise.resolve((key: string) => key) }))
 
-const { receivePayPalEvent } = await import('./paypal-webhook')
+const { FORGED_DELIVERIES, receivePayPalEvent } = await import('./paypal-webhook')
 const shop = await import('@/features/shop/actions')
 const items = await import('@/features/items/actions')
 const rentals = await import('@/features/rentals/actions')
@@ -55,6 +55,8 @@ async function approvedButGone(offset: number): Promise<{ rentalId: string; orde
   ;(await getServices()).simulatedPayPal?.approveOrder(orderId)
   return { rentalId: booked.value.rentalId, orderId }
 }
+
+const storedWithId = async (paypalEventId: string) => (await (await getServices()).database.select().from(paypalEvents)).filter((row) => row.paypalEventId === paypalEventId).length
 
 const stateOf = async (rentalId: string) => (await inShop((await getServices()).database, { role: 'hold_app', shopId }, (transaction) => rentalDetail(transaction, rentalId, new Date())))?.state
 
@@ -98,15 +100,57 @@ describe('an event PayPal delivers', () => {
     expect((await database.select().from(paypalEvents)).filter((row) => row.paypalEventId === 'WH-REPEATED')).toHaveLength(1)
   })
 
-  it('is stored but never applied when its signature is not PayPal’s', async () => {
+  it('is refused and never stored when its signature is not PayPal’s', async () => {
     const { rentalId, orderId } = await approvedButGone(6)
-    expect((await receivePayPalEvent(accountId, event('CHECKOUT.ORDER.APPROVED', { id: orderId }), signed('forged'))).status).toBe(200)
+    const forged = event('CHECKOUT.ORDER.APPROVED', { id: orderId }, 'WH-FORGED')
+    expect((await receivePayPalEvent(accountId, forged, signed('forged'))).status).toBe(401)
     expect(await stateOf(rentalId)).toBe('pending_payment')
+    expect(await storedWithId('WH-FORGED')).toBe(0)
+  })
+
+  it('cannot be kept out by a forged post that took its event id first', async () => {
+    const { rentalId, orderId } = await approvedButGone(9)
+    const body = event('CHECKOUT.ORDER.APPROVED', { id: orderId }, 'WH-SQUATTED')
+    expect((await receivePayPalEvent(accountId, body, signed('forged'))).status).toBe(401)
+    expect((await receivePayPalEvent(accountId, body, signed())).status).toBe(200)
+    expect(await stateOf(rentalId)).toBe('booked')
+    expect(await storedWithId('WH-SQUATTED')).toBe(1)
+  })
+
+  it('is answered 503 and stored nowhere when PayPal cannot say whether it signed it, so PayPal sends it again', async () => {
+    const { simulatedPayPal } = await getServices()
+    if (simulatedPayPal === undefined) throw new Error('No simulated PayPal.')
+    const down = vi.spyOn(simulatedPayPal, 'verifyWebhook').mockResolvedValue({ ok: false, error: { kind: 'unavailable', issue: undefined, description: undefined, debugId: undefined } })
+    expect((await receivePayPalEvent(accountId, event('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-2' }, 'WH-UNCHECKED'), signed())).status).toBe(503)
+    down.mockRestore()
+    expect(await storedWithId('WH-UNCHECKED')).toBe(0)
   })
 
   it('is refused for an address that names no account, and for a body that is not an event', async () => {
     expect((await receivePayPalEvent('00000000-0000-4000-8000-000000000000', event('CHECKOUT.ORDER.APPROVED', { id: 'X' }), signed())).status).toBe(404)
     expect((await receivePayPalEvent(accountId, 'not json', signed())).status).toBe(400)
     expect((await receivePayPalEvent(accountId, 'x'.repeat(70_000), signed())).status).toBe(413)
+  })
+})
+
+// Last, since it uses up the account's allowance of forged deliveries for the hour.
+describe('a flood of forged deliveries to one account’s address', () => {
+  it('costs PayPal one check each up to the hour’s allowance, and after that is refused unchecked, the real event too, so PayPal sends it again later', async () => {
+    const { database, simulatedPayPal } = await getServices()
+    if (simulatedPayPal === undefined) throw new Error('No simulated PayPal.')
+    // The forged posts of the tests above count already.
+    const left = await rateTokensLeft(database, FORGED_DELIVERIES, accountId)
+    expect(left).toBeGreaterThan(0)
+    expect(left).toBeLessThan(FORGED_DELIVERIES.max)
+    const checks = vi.spyOn(simulatedPayPal, 'verifyWebhook')
+    for (let each = 0; each < left; each += 1) {
+      expect((await receivePayPalEvent(accountId, event('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-3' }), signed('forged'))).status).toBe(401)
+    }
+    expect(checks).toHaveBeenCalledTimes(left)
+    expect((await receivePayPalEvent(accountId, event('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-3' }), signed('forged'))).status).toBe(429)
+    expect((await receivePayPalEvent(accountId, event('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-3' }, 'WH-AFTER-FLOOD'), signed())).status).toBe(429)
+    expect(checks).toHaveBeenCalledTimes(left)
+    expect(await storedWithId('WH-AFTER-FLOOD')).toBe(0)
+    checks.mockRestore()
   })
 })

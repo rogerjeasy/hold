@@ -33,7 +33,7 @@ export const executions = pgTable(
   (table) => [allowed(table.action, EXECUTION_ACTIONS), allowed(table.state, EXECUTION_STATES), shopIsolation(table.shopId)],
 )
 
-// Stored before anything else, so no event is lost and the signature is checked against the exact bytes received.
+// Stored once PayPal says it signed the exact bytes received, before PayPal is answered, so no event is lost.
 export const paypalEvents = pgTable(
   'paypal_events',
   {
