@@ -40,22 +40,39 @@ export function listOpenDisputes(client: PayPalClient): PayPalHolds['listOpenDis
   }
 }
 
-// The evidence type each dispute reason takes. PayPal's sandbox, 28 October 2026 (tech-stack.md section 16, item 6):
-// for an item not received it refused OTHER with EVIDENCE_TYPE_IS_NOT_ALLOWED and took PROOF_OF_FULFILLMENT, which a
-// rental's handover record is. Any other reason sends OTHER until a sandbox dispute shows what it takes.
+// The evidence type each dispute reason takes when PayPal names none. PayPal's sandbox, 28 October 2026 (tech-stack.md
+// section 16, item 6): for an item not received it refused OTHER with EVIDENCE_TYPE_IS_NOT_ALLOWED and took
+// PROOF_OF_FULFILLMENT, which a rental's handover record is. Any other reason sends OTHER.
 const EVIDENCE_FOR_REASON: Readonly<Record<string, string>> = { MERCHANDISE_OR_SERVICE_NOT_RECEIVED: 'PROOF_OF_FULFILLMENT' }
-const reasonSchema = z.object({ dispute_id: z.string().min(1), reason: z.string().optional() })
+// What a rental's evidence pack can be, best first for a damage claim: the photographs of the damage, the terms the
+// renter accepted, the item as handed over, the shop's wear policy, the handover itself.
+const RECORD_EVIDENCE = ['PROOF_OF_DAMAGE', 'COPY_OF_CONTRACT', 'ITEM_DESCRIPTION', 'RETURN_POLICY', 'PROOF_OF_FULFILLMENT', 'OTHER'] as const
+const reasonSchema = z.object({
+  dispute_id: z.string().min(1),
+  reason: z.string().optional(),
+  evidences: z.array(z.object({ evidence_type: z.string().optional(), source: z.string().optional() })).default([]),
+})
+
+// The type PayPal asked the seller for (an evidence with the source REQUESTED_FROM_SELLER) that the pack can be, the
+// reason's own type first; PayPal refuses a type it did not ask for. When it asked for none the pack can be, the
+// reason's type, so the pack is never sent as something it is not.
+function evidenceTypeFor(dispute: z.infer<typeof reasonSchema>): string {
+  const own = EVIDENCE_FOR_REASON[dispute.reason ?? '']
+  const requested = new Set(dispute.evidences.filter((evidence) => evidence.source === 'REQUESTED_FROM_SELLER').flatMap((evidence) => evidence.evidence_type ?? []))
+  const preferred = own === undefined ? RECORD_EVIDENCE : [own, ...RECORD_EVIDENCE]
+  return preferred.find((type) => requested.has(type)) ?? own ?? 'OTHER'
+}
 
 // Answers a dispute with evidence (Disputes v1 provide-evidence): the shop's notes as JSON in "input", and the rental's
 // evidence pack, when there is one, as a PDF in "evidence-file", both confirmed in the sandbox. The dispute is read
-// back first, as its reason decides the evidence type. It moves no money.
+// back first, as what it asks of the seller and its reason decide the evidence type. It moves no money.
 export function provideDisputeEvidence(client: PayPalClient): PayPalHolds['provideDisputeEvidence'] {
   return async (input) => {
     const read = await client.send({ method: 'GET', path: `/v1/customer/disputes/${encodeURIComponent(input.disputeId)}` })
     if (!read.ok) return read
     const dispute = reasonSchema.safeParse(read.value.body)
     if (!dispute.success || dispute.data.dispute_id !== input.disputeId) return unreadable()
-    const evidenceType = EVIDENCE_FOR_REASON[dispute.data.reason ?? ''] ?? 'OTHER'
+    const evidenceType = evidenceTypeFor(dispute.data)
     const form = new FormData()
     form.append('input', new Blob([JSON.stringify({ evidences: [{ evidence_type: evidenceType, notes: input.notes }] })], { type: 'application/json' }))
     if (input.document !== undefined) form.append('evidence-file', new Blob([Uint8Array.from(input.document.bytes)], { type: 'application/pdf' }), input.document.fileName)

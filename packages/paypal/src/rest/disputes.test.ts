@@ -60,6 +60,47 @@ it('answers a dispute for any other reason with the evidence type other', async 
   expect(JSON.parse(await input.text())).toMatchObject({ evidences: [{ evidence_type: 'OTHER' }] })
 })
 
+// A dispute names what PayPal asks of the seller: evidences with the source REQUESTED_FROM_SELLER, in the shape of
+// PayPal's dispute details (Disputes v1). Hold answers with the type it asked for that best fits a rental's record.
+const asking = (reason: string, requested: readonly string[]) => ({
+  status: 200,
+  body: {
+    dispute_id: 'PP-D-1',
+    status: 'WAITING_FOR_SELLER_RESPONSE',
+    reason,
+    evidences: [
+      { evidence_type: 'PROOF_OF_REFUND', source: 'SUBMITTED_BY_BUYER', date: '2026-11-01T09:00:00.000Z' },
+      ...requested.map((type) => ({ evidence_type: type, source: 'REQUESTED_FROM_SELLER' })),
+    ],
+  },
+})
+const evidenceTypeSent = async (reply: ReturnType<typeof asking>) => {
+  const server = stubServer([TOKEN_REPLY, reply, { status: 200, body: { links: [] } }])
+  await createRestPayPalHolds(client(server)).provideDisputeEvidence({ disputeId: 'PP-D-1', notes: 'Notes.', document: undefined, idempotencyKey: 'proposal-4' })
+  const input = (server.apiCalls()[1]?.body as FormData).get('input') as Blob
+  return (JSON.parse(await input.text()) as { evidences: { evidence_type: string }[] }).evidences[0]?.evidence_type
+}
+
+it('answers with proof of damage when PayPal asks the seller for it, before anything else a damage claim could send', async () => {
+  expect(await evidenceTypeSent(asking('MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED', ['OTHER', 'RETURN_POLICY', 'PROOF_OF_DAMAGE']))).toBe('PROOF_OF_DAMAGE')
+})
+
+it('answers with the rental contract, the item’s description or the return policy, in that order, when PayPal asks for one of them', async () => {
+  expect(await evidenceTypeSent(asking('INCORRECT_AMOUNT', ['RETURN_POLICY', 'COPY_OF_CONTRACT']))).toBe('COPY_OF_CONTRACT')
+  expect(await evidenceTypeSent(asking('INCORRECT_AMOUNT', ['RETURN_POLICY', 'ITEM_DESCRIPTION']))).toBe('ITEM_DESCRIPTION')
+  expect(await evidenceTypeSent(asking('INCORRECT_AMOUNT', ['RETURN_POLICY']))).toBe('RETURN_POLICY')
+})
+
+it('never sends other when PayPal asks for something else, as for an item not received', async () => {
+  expect(await evidenceTypeSent(asking('MERCHANDISE_OR_SERVICE_NOT_RECEIVED', ['PROOF_OF_FULFILLMENT']))).toBe('PROOF_OF_FULFILLMENT')
+  expect(await evidenceTypeSent(asking('MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED', ['OTHER']))).toBe('OTHER')
+})
+
+it('falls back to the reason’s own type when PayPal asks for none a rental’s record can be', async () => {
+  expect(await evidenceTypeSent(asking('MERCHANDISE_OR_SERVICE_NOT_RECEIVED', ['PROOF_OF_REFUND']))).toBe('PROOF_OF_FULFILLMENT')
+  expect(await evidenceTypeSent(asking('MERCHANDISE_OR_SERVICE_NOT_AS_DESCRIBED', []))).toBe('OTHER')
+})
+
 it('answers with notes alone when there is no evidence pack yet', async () => {
   const server = stubServer([TOKEN_REPLY, disputeOf('MERCHANDISE_OR_SERVICE_NOT_RECEIVED'), { status: 200, body: { links: [] } }])
   await createRestPayPalHolds(client(server)).provideDisputeEvidence({ disputeId: 'PP-D-1', notes: 'Notes only.', document: undefined, idempotencyKey: 'proposal-2' })
