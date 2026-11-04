@@ -627,7 +627,7 @@ stateDiagram-v2
 ```
 
 - **lapsed:** the renter's reply period ended without a reply.
-- **adjusted:** part of a charge was refunded after review.
+- **adjusted:** a charge was refunded after review. As built, the refund is the whole capture: a claim captured early to protect the shop (section 7.5) and then waived by the person deciding it gets its capture refunded in full (`queueClaimRefund`). Refunding only part of a charge is planned, not built.
 - **negotiating:** both sides gave an advocate limits, and the advocates are exchanging offers.
 - **agreed:** the advocates agreed. Each person confirms, unless their mandate waives it.
 - **escalated:** the advocates did not agree, a person declined the result, or the shop did not decide by the date it promised the renter (section 6.16). The owner decides. A claim never returns to `contested`.
@@ -657,7 +657,7 @@ Before any action on a hold, the approval rules decide who must confirm it.
 | Reduce or waive a claim | The owner, a manager, or the staff member who raised it |
 | Decide a contested claim | The owner or a manager, and not the person who raised it where the shop has more than one |
 | Decide a contested claim after the shop missed the date it promised the renter | The owner alone, even for a claim they raised. The renter reads the written reason (section 6.16) |
-| Refund part of a charge | The owner or a manager |
+| Refund a charge in full, by waiving a claim that was captured early | Whoever may decide that contested claim (the rows above). Refunding only part of a charge is planned, not built |
 | Move a booking that has not started to another item of the same type | Any staff member |
 
 **Rules that always hold**
