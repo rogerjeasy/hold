@@ -12,7 +12,7 @@ vi.mock('next/headers', () => ({
     Promise.resolve({
       get: (name: string) => (jar.has(name) ? { name, value: jar.get(name) } : undefined),
       set: (name: string, value: string) => jar.set(name, value),
-      delete: (name: string) => jar.delete(name),
+      delete: (cookie: string | { name: string }) => jar.delete(typeof cookie === 'string' ? cookie : cookie.name),
     }),
   headers: () => Promise.resolve(new Headers()),
 }))
@@ -75,7 +75,7 @@ describe('confirming with a passkey', () => {
   it('uses the signed-in person’s own address, whatever the page sent', async () => {
     await signIn('confirming@shop.example', 'email_code')
     const { identity, database } = await getServices()
-    const verified = await identity.verifyAccessToken(jar.get('hold_access') ?? '')
+    const verified = await identity.verifyAccessToken(jar.get('__Host-hold_access') ?? '')
     if (!verified.ok) throw new Error('Not signed in.')
     await registerOwner(database, { subject: verified.value.subject, email: 'confirming@shop.example', name: 'C', language: 'en', shop: { name: 'C shop', timeZone: 'UTC' } })
     // The person has no passkey, which a confirmation may say plainly, since it is their own account.

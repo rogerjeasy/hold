@@ -12,7 +12,7 @@ vi.mock('next/headers', () => ({
     Promise.resolve({
       get: (name: string) => (jar.has(name) ? { name, value: jar.get(name) } : undefined),
       set: (name: string, value: string) => jar.set(name, value),
-      delete: (name: string) => jar.delete(name),
+      delete: (cookie: string | { name: string }) => jar.delete(typeof cookie === 'string' ? cookie : cookie.name),
     }),
   headers: () => Promise.resolve(new Headers()),
 }))
@@ -74,10 +74,10 @@ describe('a shop action', () => {
 
   it('does not count a passkey record carried over from another account’s session', async () => {
     await signIn('attacker@elsewhere.example', 'passkey')
-    const carried = { factor: jar.get('hold_factor'), refresh: jar.get('hold_refresh') }
+    const carried = { factor: jar.get('__Host-hold_factor'), refresh: jar.get('__Host-hold_refresh') }
     await signIn('owner@douro.example', 'email_code')
-    jar.set('hold_factor', carried.factor ?? '')
-    jar.set('hold_refresh', carried.refresh ?? '')
+    jar.set('__Host-hold_factor', carried.factor ?? '')
+    jar.set('__Host-hold_refresh', carried.refresh ?? '')
 
     expect(await shopActions.inviteStaff(null, form(invite))).toEqual({ ok: false, failure: 'passkey_needed' })
   })
