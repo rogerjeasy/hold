@@ -102,6 +102,53 @@ it('never voids the original authorization of a renewed hold, which would void t
   expect(queued.filter((row) => row.action === 'release' && row.paypalResourceIds['authorization'] === original.paypalAuthorizationId)).toEqual([])
 })
 
+// A claim the renter accepted, with its capture requested and not yet run.
+async function acceptedCapture(): Promise<{ rentalId: string; executionId: string }> {
+  const rentalId = await returned()
+  const price = (await act((transaction) => claimWorkspace(transaction, rentalId)))?.prices[0]?.id ?? ''
+  const drafted = await act((transaction) => draftClaim(transaction, rentalId, userId, [{ priceEntryId: price, reason: 'Verified scratch.' }], NOW))
+  if (!drafted.ok) throw new Error(drafted.reason)
+  await act((transaction) => approveClaim(transaction, drafted.claimId, userId, NOW))
+  await act((transaction) => presentClaim(transaction, drafted.claimId, userId, NOW))
+  const accepted = await act((transaction) => replyToClaim(transaction, rentalId, 'accept', '', NOW))
+  if (!accepted.ok || accepted.executionId === null) throw new Error('No capture')
+  return { rentalId, executionId: accepted.executionId }
+}
+
+it('tries a declined capture once more on the next run, with a key of its own, before any invoice', async () => {
+  const { fail } = await import('@hold/domain')
+  const { invoices } = await import('@hold/db')
+  const { rentalId, executionId } = await acceptedCapture()
+  const declinedOnce = { ...dependencies(), paypalFor: () => ({ ...fixture.fake, captureFromHold: () => Promise.resolve(fail({ kind: 'declined' as const, issue: 'INSTRUMENT_DECLINED', description: undefined, debugId: undefined })) }) }
+
+  expect(await runExecution(declinedOnce, { shopId: fixture.shopId, executionId })).toBe('waiting')
+  expect(await act((transaction) => transaction.select().from(invoices).where(eq(invoices.rentalId, rentalId)))).toEqual([])
+  expect((await act((transaction) => transaction.select().from(holds).where(eq(holds.rentalId, rentalId))))[0]?.state).toBe('capturing')
+  const [waiting] = await act((transaction) => transaction.select().from(executions).where(eq(executions.id, executionId)))
+  expect(waiting).toMatchObject({ state: 'submitted', lastError: 'declined_once' })
+
+  const keys: string[] = []
+  const recording = { ...dependencies(), paypalFor: () => ({ ...fixture.fake, captureFromHold: (input: Parameters<typeof fixture.fake.captureFromHold>[0]) => { keys.push(input.idempotencyKey); return fixture.fake.captureFromHold(input) } }) }
+  expect(await runExecution(recording, { shopId: fixture.shopId, executionId })).toBe('confirmed')
+  expect(keys).toEqual([`${waiting?.idempotencyKey ?? ''}-again`])
+  expect((await act((transaction) => transaction.select().from(moneyEvents).where(eq(moneyEvents.rentalId, rentalId)))).filter((row) => row.kind === 'hold_captured').map((row) => row.amountCents)).toEqual([3500])
+  expect(await act((transaction) => transaction.select().from(invoices).where(eq(invoices.rentalId, rentalId)))).toEqual([])
+})
+
+it('falls back to the invoice when the capture is declined a second time, and tries no third', async () => {
+  const { fail } = await import('@hold/domain')
+  const { invoices } = await import('@hold/db')
+  const { rentalId, executionId } = await acceptedCapture()
+  let calls = 0
+  const declining = { ...dependencies(), paypalFor: () => ({ ...fixture.fake, captureFromHold: () => { calls += 1; return Promise.resolve(fail({ kind: 'declined' as const, issue: 'TRANSACTION_REFUSED', description: undefined, debugId: undefined })) } }) }
+  expect(await runExecution(declining, { shopId: fixture.shopId, executionId })).toBe('waiting')
+  await runExecution(declining, { shopId: fixture.shopId, executionId })
+  await runExecution(declining, { shopId: fixture.shopId, executionId })
+  expect(calls).toBe(2)
+  expect((await act((transaction) => transaction.select().from(invoices).where(eq(invoices.rentalId, rentalId)))).map((row) => row.amountCents)).toEqual([3500])
+  expect((await act((transaction) => transaction.select().from(executions).where(eq(executions.id, executionId))))[0]).toMatchObject({ state: 'failed', lastError: 'declined' })
+})
+
 it('falls back to a verified invoice on a refused capture and releases the authorization', async () => {
   const { fail } = await import('@hold/domain')
   const rentalId = await returned()
@@ -113,6 +160,7 @@ it('falls back to a verified invoice on a refused capture and releases the autho
   const accepted = await act((transaction) => replyToClaim(transaction, rentalId, 'accept', '', NOW))
   if (!accepted.ok || accepted.executionId === null) throw new Error('No capture')
   const dependenciesWithDecline = { ...dependencies(), paypalFor: () => ({ ...fixture.fake, captureFromHold: () => Promise.resolve(fail({ kind: 'declined' as const, issue: undefined, description: undefined, debugId: undefined })) }) }
+  await runExecution(dependenciesWithDecline, { shopId: fixture.shopId, executionId: accepted.executionId })
   await runExecution(dependenciesWithDecline, { shopId: fixture.shopId, executionId: accepted.executionId })
   const { invoices } = await import('@hold/db')
   expect((await act((transaction) => transaction.select().from(invoices).where(eq(invoices.rentalId, rentalId)))).map((row) => ({ state: row.state, amount: row.amountCents }))).toEqual([{ state: 'sent', amount: 3500 }])
@@ -211,7 +259,9 @@ it('records an invoice as paid only after the verified PayPal invoice event is r
   await act((transaction) => presentClaim(transaction, drafted.claimId, userId, NOW))
   const accepted = await act((transaction) => replyToClaim(transaction, rentalId, 'accept', '', NOW))
   if (!accepted.ok || accepted.executionId === null) throw new Error('No capture')
-  await runExecution({ ...dependencies(), paypalFor: () => ({ ...fixture.fake, captureFromHold: () => Promise.resolve(fail({ kind: 'declined' as const, issue: undefined, description: undefined, debugId: undefined })) }) }, { shopId: fixture.shopId, executionId: accepted.executionId })
+  const declining = { ...dependencies(), paypalFor: () => ({ ...fixture.fake, captureFromHold: () => Promise.resolve(fail({ kind: 'declined' as const, issue: undefined, description: undefined, debugId: undefined })) }) }
+  await runExecution(declining, { shopId: fixture.shopId, executionId: accepted.executionId })
+  await runExecution(declining, { shopId: fixture.shopId, executionId: accepted.executionId })
   const bill = (await act((transaction) => transaction.select().from(invoices).where(eq(invoices.rentalId, rentalId))))[0]
   const delivered = await fixture.delivered('INVOICING.INVOICE.PAID', { id: bill?.paypalInvoiceId ?? '' })
   const paid: SettleDependencies = { ...dependencies(), paypalFor: () => ({ ...fixture.fake, invoiceClaim: async (input) => { const result = await fixture.fake.invoiceClaim(input); return result.ok ? { ...result, value: { ...result.value, status: 'paid' as const } } : result } }) }

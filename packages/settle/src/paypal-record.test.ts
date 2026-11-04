@@ -36,6 +36,8 @@ async function charged(rentalId: string, paypal: SettleDependencies['paypalFor']
   const accepted = await act((transaction) => replyToClaim(transaction, rentalId, 'accept', '', NOW))
   if (!accepted.ok || accepted.executionId === null) throw new Error('No capture requested')
   await runExecution({ ...dependencies(), paypalFor: paypal }, { shopId: fixture.shopId, executionId: accepted.executionId })
+  // A first decline waits to be tried once more, as the recheck would run it.
+  await runExecution({ ...dependencies(), paypalFor: paypal }, { shopId: fixture.shopId, executionId: accepted.executionId })
 }
 
 beforeAll(async () => {

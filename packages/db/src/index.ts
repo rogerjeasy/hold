@@ -76,7 +76,7 @@ export type { ComparisonPhoto, ComparisonReport, StoredInspection } from './comp
 export { acknowledgeClaimReview, approveClaim, confirmCleanReturn, draftClaim, presentClaim } from './claim-repository.ts'
 
 export { replyToClaim, queueClaimCapture } from './claim-reply-repository.ts'
-export { settlementWork, saveSettlementResource, confirmClaimCaptured, confirmReturnReleased } from './settlement-repository.ts'
+export { CAPTURE_DECLINED_ONCE, noteCaptureDeclined, settlementWork, saveSettlementResource, confirmClaimCaptured, confirmReturnReleased } from './settlement-repository.ts'
 
 export { issueClaimCode, useClaimCode } from './claim-code-repository.ts'
 export { decideClaim } from './claim-decision-repository.ts'
