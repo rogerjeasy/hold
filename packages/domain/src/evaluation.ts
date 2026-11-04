@@ -38,6 +38,10 @@ export type EvaluatedCase = {
   readonly milliseconds: number
   readonly inputTokens: number
   readonly outputTokens: number
+  // The areas code found that changed, how many the model dismissed, and how many it neither reported nor dismissed,
+  // so a miss shows whether code found nothing or the model set aside what code found. Null when the pair never
+  // reached the comparison; absent from runs recorded before 4 November 2026.
+  readonly codeAreas?: { readonly found: number; readonly dismissed: number; readonly unaccounted: number } | null
 }
 
 // A share is always shown with its count: "57 of 60", never a bare percentage.

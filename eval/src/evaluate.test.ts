@@ -53,6 +53,23 @@ describe('one command over one half of the set', () => {
     expect(row?.cases.map((each) => [each.id, each.before, each.state])).toEqual([['c1', 'gate/c1-before.jpg', 'clean'], ['c2', 'gate/c2-before.jpg', 'clean']])
   })
 
+  // A look at some groups, such as the damage pairs alone, costs a fraction of a half and must never count as a run.
+  it('runs only the groups asked for, and neither records nor accepts that run', async () => {
+    const mixed = await mkdtemp(join(tmpdir(), 'hold-groups-'))
+    await mkdir(join(mixed, 'tuning'))
+    for (const name of ['d1-before', 'd1-after', 'c1-before', 'c1-after']) await copyFile(SAMPLE, join(mixed, 'tuning', `${name}.jpg`))
+    const pair = (id: string, group: string, labels: unknown[]) => ({ id, half: 'tuning', group, origin: 'synthetic', view: 'frame-left', before: `tuning/${id}-before.jpg`, after: `tuning/${id}-after.jpg`, labels, knownMarks: [] })
+    await writeFile(join(mixed, 'manifest.json'), JSON.stringify({ version: 1, itemType: 'City e-bike', wearPolicy: 'Scuffs are wear.', priceCodes: [], cases: [pair('d1', 'damage', [{ kind: 'damage', region: { x: 0.4, y: 0.4, width: 0.1, height: 0.1 } }]), pair('c1', 'clean_easy', [])] }))
+    const resultsDir = await mkdtemp(join(tmpdir(), 'hold-results-'))
+    const before = (await database.select().from(evalRuns)).length
+    const dependencies = { model: quietModel, fingerprint, database, now: () => new Date('2026-11-04T12:00:00Z'), pipelineVersion: 'inspection-3+groups' }
+    const outcome = await runEvaluation({ root: mixed, half: 'tuning', resultsDir, accept: false, limits: null, groups: ['damage'] }, dependencies)
+    expect(outcome.record.cases.map((each) => each.id)).toEqual(['d1'])
+    expect(outcome.runId).toBeUndefined()
+    expect(await database.select().from(evalRuns)).toHaveLength(before)
+    await expect(runEvaluation({ root: mixed, half: 'tuning', resultsDir, accept: true, limits: null, groups: ['damage'] }, dependencies)).rejects.toThrow('never accepted')
+  })
+
   it('does not accept a run that fails the gate against the accepted one', async () => {
     const flagging: ComparisonModel = { look: () => Promise.resolve({ kind: 'result', model: 'recorded-model', inputTokens: 500, outputTokens: 50, data: { sameItem: true, sameView: true, findings: [{ region: { x: 0.4, y: 0.4, width: 0.1, height: 0.1 }, class: 'new_damage', confidence: 0.97, description: 'A scratch.', priceCode: null }], dismissed: [] } }) }
     const resultsDir = await mkdtemp(join(tmpdir(), 'hold-results-'))

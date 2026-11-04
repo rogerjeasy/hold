@@ -58,6 +58,27 @@ describe('running one case of the evaluation set', () => {
     expect(model.requests).toEqual([])
   })
 
+  // A miss is either code finding nothing or the model setting aside what code found; the record must tell them apart.
+  it('keeps how many areas code found and how many the model dismissed', async () => {
+    const requests: LookRequest[] = []
+    const dismissing: ComparisonModel = {
+      look(request) {
+        requests.push(request)
+        return Promise.resolve({ kind: 'result', model: 'recorded-model', inputTokens: 1000, outputTokens: 100, data: { sameItem: true, sameView: true, findings: [], dismissed: [{ candidate: 0, reason: 'reflection' }] } })
+      },
+    }
+    const result = await runCase({ ...files(() => scratched), ...distinctShots, model: dismissing, now: () => 0 }, pair({}), context)
+    expect(result.state).toBe('clean')
+    expect(result.codeAreas).toEqual({ found: expect.any(Number) as number, dismissed: 1, unaccounted: expect.any(Number) as number })
+    expect(result.codeAreas?.found).toBeGreaterThanOrEqual(1)
+  })
+
+  it('records no code areas for a pair that never reached the comparison', async () => {
+    const copied = { fingerprint: () => Promise.resolve({ sha256: 'same', perceptualHash: 'same' }) }
+    const result = await runCase({ ...files(() => before), ...copied, model: recordedModel(), now: () => 0 }, pair({ group: 'identity', labels: [], earlier: ['gate/earlier.jpg'] }), context)
+    expect(result.codeAreas).toBeNull()
+  })
+
   it('passes the known marks to the pipeline so it can set them aside', async () => {
     const model = recordedModel()
     const result = await runCase({ ...files(() => scratched), ...distinctShots, model, now: () => 0 }, pair({ group: 'known_mark', labels: [], knownMarks: [{ x: 0.4, y: 0.42, width: 0.12, height: 0.1 }] }), context)

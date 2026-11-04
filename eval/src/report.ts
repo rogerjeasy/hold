@@ -1,5 +1,5 @@
 import { CONFIDENCE_LEVELS, EVALUATION_GROUPS, sharePercent, zeroUpperBound } from '@hold/domain'
-import type { EvaluatedCase, GateResult, Measures, Share } from '@hold/domain'
+import type { EvaluatedCase, EvaluationGroup, GateResult, Measures, Share } from '@hold/domain'
 import { SET_TARGETS } from './manifest.ts'
 
 export type RunRecord = {
@@ -12,6 +12,15 @@ export type RunRecord = {
   readonly cases: readonly EvaluatedCase[]
   readonly measures: Measures
   readonly realMeasures: Measures
+  // Present when only some groups were run, which measures nothing.
+  readonly groups?: readonly EvaluationGroup[]
+}
+
+// What code found on the pair and what became of it; older runs did not record it.
+function codeAreasText(areas: EvaluatedCase['codeAreas']): string {
+  if (areas === undefined) return 'not recorded'
+  if (areas === null) return 'not compared'
+  return `${String(areas.found)} found, ${String(areas.dismissed)} dismissed, ${String(areas.unaccounted)} left to a person`
 }
 
 const percent = (fraction: number) => `${String(Math.round(fraction * 100))}%`
@@ -68,12 +77,13 @@ function gateLine(gate: GateResult): string {
 
 export function renderReport(run: RunRecord): string {
   const counts = EVALUATION_GROUPS.map((group) => `| ${group} | ${String(run.cases.filter((each) => each.group === group).length)} | ${String(SET_TARGETS[group])} |`)
-  const caseRows = run.cases.map((each) => `| ${each.id} | ${each.group} | ${each.origin} | ${each.state} | ${String(each.findings.length)} |`)
+  const caseRows = run.cases.map((each) => `| ${each.id} | ${each.group} | ${each.origin} | ${each.state} | ${String(each.findings.length)} | ${codeAreasText(each.codeAreas)} |`)
   return [
     `# Comparison evaluation, ${run.half} half`,
     '',
     gateLine(run.gate),
     '',
+    ...(run.groups === undefined ? [] : [`Only these groups were run: ${run.groups.join(', ')}. This run measures nothing and is never recorded or accepted.`, '']),
     readmeTable(run),
     '',
     '## Pairs per group',
@@ -84,8 +94,8 @@ export function renderReport(run: RunRecord): string {
     '',
     '## Every pair',
     '',
-    '| Case | Group | Origin | Result | Findings |',
-    '|---|---|---|---|---|',
+    '| Case | Group | Origin | Result | Findings | Code areas |',
+    '|---|---|---|---|---|---|',
     ...caseRows,
     '',
   ].join('\n')

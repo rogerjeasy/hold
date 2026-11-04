@@ -41,6 +41,22 @@ describe('the run report', () => {
     expect(renderReport({ ...run, cases, measures: older, realMeasures: older })).toContain('| Damage passed as clean | not recorded in this run | not recorded in this run |')
   })
 
+  it('shows for every pair what code found and what the model dismissed', () => {
+    const cases = [pair({ id: 'seen', codeAreas: { found: 3, dismissed: 2, unaccounted: 1 } }), pair({ id: 'stopped', state: 'deferred', codeAreas: null }), pair({ id: 'older' })]
+    const report = renderReport({ ...run, cases, measures: measureEvaluation(cases), realMeasures: measureEvaluation(cases) })
+    expect(report).toContain('| Case | Group | Origin | Result | Findings | Code areas |')
+    expect(report).toContain('| seen | clean_easy | real | clean | 0 | 3 found, 2 dismissed, 1 left to a person |')
+    expect(report).toContain('| stopped | clean_easy | real | deferred | 0 | not compared |')
+    expect(report).toContain('| older | clean_easy | real | clean | 0 | not recorded |')
+  })
+
+  // A run over some groups is a look at those pairs, not a measurement of the comparison.
+  it('says when only some groups were run', () => {
+    const cases = [pair({ id: 'd1', group: 'damage' })]
+    const report = renderReport({ ...run, groups: ['damage'], cases, measures: measureEvaluation(cases), realMeasures: measureEvaluation(cases) })
+    expect(report).toContain('Only these groups were run: damage. This run measures nothing and is never recorded or accepted.')
+  })
+
   it('renders the same figures for the README table', () => {
     const cases = [pair({ id: 'r1' })]
     const table = readmeTable({ ...run, cases, measures: measureEvaluation(cases), realMeasures: measureEvaluation(cases) })
