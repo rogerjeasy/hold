@@ -151,6 +151,21 @@ describe('building the set', () => {
     for (const region of [...damage, ...marks]) expect(centre(region)).toBeLessThan(1 / 3 + 0.02)
   })
 
+  // Drawn strokes can read as dirt to the model; photographs of real damage, pasted on the item, read as damage.
+  it('pastes photographs of real damage when it has them, names the photograph in each pair, and keeps them on the item', async () => {
+    const mask = await leftThirdMask(photo)
+    const blob = await sharp(Buffer.from('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="90"><ellipse cx="60" cy="45" rx="50" ry="35" fill="#6b3a1e"/></svg>')).png().toBuffer()
+    const patches = [{ name: 'rust-spot', kind: 'chip' as const, image: blob }, { name: 'gouge-blue', kind: 'scratch' as const, image: blob }]
+    const built = await buildSet({ raw, read: () => Promise.resolve(photo), readMask: () => Promise.resolve(mask), seed: 5, perGroup: 2, patches })
+    const damage = built.cases.filter((each) => each.group === 'damage')
+    expect(damage.length).toBeGreaterThan(0)
+    for (const each of damage) {
+      expect(each.note).toMatch(/^synthetic: .*a photograph of real damage \((rust-spot|gouge-blue)\), pasted/)
+      for (const label of each.labels) expect(label.region.x + label.region.width / 2).toBeLessThan(1 / 3 + 0.02)
+    }
+    expect(new Set(damage.map((each) => /\((rust-spot|gouge-blue)\)/.exec(each.note ?? '')?.[1]))).toEqual(new Set(['rust-spot', 'gouge-blue']))
+  })
+
   it('never calls a pair real when its return is a generated re-shot', async () => {
     const generated = rawCatalog(['A-s1-v1.jpg', 'A-s2-v1.generated.jpg', 'A-s3-v1.generated.jpg', 'A-s1-v2.jpg', 'A-s2-v2.generated.jpg', 'A-s3-v2.generated.jpg', 'B-s1-v1.jpg', 'B-s1-v2.jpg'])
     const built = await buildSet({ raw: generated, read: () => Promise.resolve(photo), seed: 2, perGroup: 1 })

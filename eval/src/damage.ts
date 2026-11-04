@@ -1,6 +1,7 @@
 import type { Region } from '@hold/domain'
 import sharp from 'sharp'
 import type { OverlayOptions } from 'sharp'
+import { z } from 'zod'
 
 // Synthetic damage for the evaluation set (extensions.md section 5.3). Damage is drawn from the photograph's own pixels,
 // so it keeps the light that falls on the item: bare metal is darker in shadow and brighter where lit, a scratch
@@ -230,4 +231,92 @@ function markedPart(box: Box, alpha: Buffer): Box {
   }
   if (right < 0) return box
   return { left: box.left + left, top: box.top + top, width: right - left + 1, height: bottom - top + 1 }
+}
+
+// Photographs of real damage, cut from freely licensed photographs (eval/raw/damage/sources.json, eval/raw/SOURCES.md).
+// A licence must let Hold change the photograph and share the result, commercially too: no NC and no ND licences.
+const FREE_LICENCE = /^(CC0|Public domain|CC BY(-SA)? [0-9.]+)$/
+const damagePatchSource = z.strictObject({
+  file: z.string().regex(/^[\w-]+\.png$/),
+  kind: z.enum(['scratch', 'chip']),
+  shows: z.string().min(1),
+  title: z.string().min(1),
+  author: z.string().min(1),
+  licence: z.string().regex(FREE_LICENCE),
+  licenceUrl: z.url(),
+  source: z.string().startsWith('https://commons.wikimedia.org/wiki/File:'),
+  // The part of the original the patch was cut from, as fractions: left, top, right, bottom.
+  crop: z.tuple([z.number(), z.number(), z.number(), z.number()]),
+})
+export type DamagePatchSource = z.infer<typeof damagePatchSource>
+export function damagePatchSources(data: unknown): DamagePatchSource[] {
+  return z.array(damagePatchSource).min(1).parse(data)
+}
+
+// One cut photograph of damage: the damage opaque, the paint it was on transparent.
+export type DamagePatch = { readonly name: string; readonly kind: DamagePatchSource['kind']; readonly image: Buffer }
+
+const luminance = (r: number, g: number, b: number) => 0.299 * r + 0.587 * g + 0.114 * b
+
+// Pastes a photograph of real damage onto the item, turned, mirrored and sized at random, and returns the region it
+// changed. The damage takes on the light where it lands: its brightness is scaled by how bright the item is there
+// against how bright the paint around it was in its own photograph. Only what the mask marks as the item changes, and a
+// place where most of the damage would fall off the item is passed over for another, so no label covers a sliver.
+const WHOLE_ON_ITEM = 0.85
+const PLACES_TRIED = 12
+
+export async function pasteDamage(photo: Buffer, patch: DamagePatch, size: DamageSpec['size'], random: () => number, at?: { readonly x: number; readonly y: number }, within?: Buffer): Promise<Drawn & { readonly onItem: number }> {
+  const { width, height } = await sharp(photo).metadata()
+  const extent = Math.max(8, Math.round(width * (size === 'small' ? between(random, 0.05, 0.08) : between(random, 0.11, 0.17))))
+  const angle = between(random, 0, 360)
+  const mirrored = random() < 0.5
+  const turned = await sharp(patch.image).ensureAlpha().rotate(angle, { background: { r: 0, g: 0, b: 0, alpha: 0 } }).png().toBuffer()
+  const flipped = mirrored ? await sharp(turned).flop().png().toBuffer() : turned
+  const piece = await sharp(flipped).resize({ width: extent, height: Math.min(extent, height), fit: 'inside' }).raw().toBuffer({ resolveWithObject: true })
+  const item = within === undefined ? undefined : await sharp(within).resize({ width, height, fit: 'fill' }).greyscale().raw().toBuffer()
+  const placed = (center: { readonly x: number; readonly y: number }) => placePatch(photo, { width, height }, piece, item, center)
+  let best = await placed(at ?? await busiestPlace(photo, random, within))
+  for (let tried = 1; at === undefined && item !== undefined && tried < PLACES_TRIED && best.onItem < WHOLE_ON_ITEM; tried += 1) {
+    const next = await placed(await busiestPlace(photo, random, within))
+    if (next.onItem > best.onItem) best = next
+  }
+  const image = await sharp(photo).removeAlpha().composite([{ input: best.out, raw: { width: best.box.width, height: best.box.height, channels: 3 }, left: best.box.left, top: best.box.top }]).jpeg({ quality: 92 }).toBuffer()
+  return { image, center: best.center, region: fraction(best.changed, width, height), onItem: best.onItem }
+}
+
+// The patch blended into the photograph at one place, before anything is saved: the pixels, the box they go in, the
+// region the damage covers and how much of the damage landed on the item.
+async function placePatch(photo: Buffer, size: { readonly width: number; readonly height: number }, piece: { readonly data: Buffer; readonly info: { readonly width: number; readonly height: number } }, item: Buffer | undefined, center: { readonly x: number; readonly y: number }) {
+  const { width: pieceWidth, height: pieceHeight } = piece.info
+  const left = Math.min(Math.max(0, Math.round(center.x * size.width - pieceWidth / 2)), size.width - pieceWidth)
+  const top = Math.min(Math.max(0, Math.round(center.y * size.height - pieceHeight / 2)), size.height - pieceHeight)
+  const box = { left, top, width: pieceWidth, height: pieceHeight }
+  const target = await sharp(photo).removeAlpha().extract(box).raw().toBuffer()
+  const pixels = pieceWidth * pieceHeight
+  const onItemAt = (index: number) => item === undefined ? 1 : (item[(top + Math.floor(index / pieceWidth)) * size.width + left + (index % pieceWidth)] ?? 0) / 255
+  let lit = 0; let paint = 0; let paintCount = 0; let damage = 0; let damageCount = 0; let landed = 0
+  for (let index = 0; index < pixels; index += 1) {
+    lit += luminance(target[index * 3] ?? 0, target[index * 3 + 1] ?? 0, target[index * 3 + 2] ?? 0)
+    const [r, g, b, a] = [0, 1, 2, 3].map((channel) => piece.data[index * 4 + channel] ?? 0) as [number, number, number, number]
+    // The turn fills the corners with nothing: neither paint nor damage.
+    if (a < 26 && r + g + b > 0) { paint += luminance(r, g, b); paintCount += 1 } else if (a >= 128) { damage += luminance(r, g, b); damageCount += 1; if (onItemAt(index) >= 0.5) landed += 1 }
+  }
+  const surround = paintCount > 0 ? paint / paintCount : damage / Math.max(1, damageCount)
+  const gain = Math.min(1.6, Math.max(0.45, lit / pixels / Math.max(1, surround)))
+  const out = Buffer.alloc(pixels * 3)
+  let minX = pieceWidth; let minY = pieceHeight; let maxX = -1; let maxY = -1
+  for (let index = 0; index < pixels; index += 1) {
+    const weight = ((piece.data[index * 4 + 3] ?? 0) / 255) * onItemAt(index)
+    for (let channel = 0; channel < 3; channel += 1) {
+      const before = target[index * 3 + channel] ?? 0
+      const pasted = Math.min(255, (piece.data[index * 4 + channel] ?? 0) * gain)
+      out[index * 3 + channel] = Math.round(before * (1 - weight) + pasted * weight)
+    }
+    if (weight >= 0.25) {
+      const x = index % pieceWidth; const y = Math.floor(index / pieceWidth)
+      minX = Math.min(minX, x); minY = Math.min(minY, y); maxX = Math.max(maxX, x); maxY = Math.max(maxY, y)
+    }
+  }
+  const changed = maxX < 0 ? box : { left: left + minX, top: top + minY, width: maxX - minX + 1, height: maxY - minY + 1 }
+  return { out, box, changed, center, onItem: landed / Math.max(1, damageCount) }
 }

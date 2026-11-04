@@ -3,7 +3,8 @@ import type { EvaluationGroup } from '@hold/domain'
 import { mapPoint } from '@hold/vision/homography'
 import { inspectPair } from '@hold/vision/inspect-pair'
 import sharp from 'sharp'
-import { DAMAGE_KINDS, drawDamage } from './damage.ts'
+import { DAMAGE_KINDS, drawDamage, pasteDamage } from './damage.ts'
+import type { DamagePatch } from './damage.ts'
 import type { EvaluationCase, Half } from './manifest.ts'
 
 // Turns real photographs of one bike into labelled pairs (extensions.md section 5.3, the hybrid set agreed on
@@ -83,6 +84,9 @@ type BuildInput = {
   readonly seed: number
   // Synthetic pairs per view and group: one number for every group, or one per group.
   readonly perGroup: number | Readonly<Partial<Record<EvaluationGroup, number>>>
+  // Photographs of real damage (eval/raw/damage). When there are any, damage pairs paste them in turn instead of
+  // drawing damage, which the model can take for dirt.
+  readonly patches?: readonly DamagePatch[]
 }
 
 export async function buildSet(input: BuildInput): Promise<BuiltSet> {
@@ -131,10 +135,13 @@ export async function buildSet(input: BuildInput): Promise<BuiltSet> {
       const { photo, bytes } = await base()
       const kind = DAMAGE_KINDS[(number - 1) % DAMAGE_KINDS.length] ?? 'scratch'
       const size = number % 2 === 0 ? 'large' as const : 'small' as const
-      const drawn = await drawDamage(bytes, { kind, size }, random, undefined, await input.readMask?.(photo.file))
+      const patch = input.patches === undefined || input.patches.length === 0 ? undefined : input.patches[(number - 1) % input.patches.length]
+      const mask = await input.readMask?.(photo.file)
+      const drawn = patch === undefined ? await drawDamage(bytes, { kind, size }, random, undefined, mask) : await pasteDamage(bytes, patch, size, random, undefined, mask)
       const poorLight = number % 3 === 0
       const image = poorLight ? (await relight(drawn.image, random, 'hard')).image : drawn.image
-      pair('damage', number, put(`damage-${String(number)}`, image, label(photo)), { labels: [{ kind: 'damage', region: drawn.region }], note: `synthetic: ${label(photo)}, ${size} ${kind}${poorLight ? ', poor light' : ''}` })
+      const what = patch === undefined ? `${size} ${kind}` : `${size} ${patch.kind}, a photograph of real damage (${patch.name}), pasted`
+      pair('damage', number, put(`damage-${String(number)}`, image, label(photo)), { labels: [{ kind: 'damage', region: drawn.region }], note: `synthetic: ${label(photo)}, ${what}${poorLight ? ', poor light' : ''}` })
     }
     for (let number = 1; number <= count('known_mark'); number += 1) {
       const { photo, bytes } = await base()

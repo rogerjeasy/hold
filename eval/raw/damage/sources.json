@@ -1,0 +1,66 @@
+[
+  {
+    "file": "scratches-yellow.png",
+    "kind": "scratch",
+    "shows": "Scratches and cracks through yellow paint, showing the coat beneath",
+    "title": "Scratches (14779773577).jpg",
+    "author": "XoMEoX",
+    "licence": "CC BY 2.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by/2.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Scratches_(14779773577).jpg",
+    "crop": [
+      0.06,
+      0.04,
+      0.98,
+      0.96
+    ]
+  },
+  {
+    "file": "gouge-blue.png",
+    "kind": "scratch",
+    "shows": "A rusty gouge through blue paint",
+    "title": "Tense bird on blue sm.jpg",
+    "author": "Mariojan photo",
+    "licence": "CC BY-SA 4.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Tense_bird_on_blue_sm.jpg",
+    "crop": [
+      0.4,
+      0.12,
+      0.66,
+      0.86
+    ]
+  },
+  {
+    "file": "rust-spot.png",
+    "kind": "chip",
+    "shows": "A rust spot where the paint has broken away",
+    "title": "Didcot Railway Centre UK.jpg",
+    "author": "Si Griffiths",
+    "licence": "CC BY-SA 3.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Didcot_Railway_Centre_UK.jpg",
+    "crop": [
+      0.38,
+      0.42,
+      0.62,
+      0.8
+    ]
+  },
+  {
+    "file": "chip-blue.png",
+    "kind": "chip",
+    "shows": "A chip in blue paint, down to orange primer",
+    "title": "Stahlträger Farbe abgeplatzt W.jpg",
+    "author": "Fornax",
+    "licence": "CC BY-SA 3.0",
+    "licenceUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "source": "https://commons.wikimedia.org/wiki/File:Stahltr%C3%A4ger_Farbe_abgeplatzt_W.jpg",
+    "crop": [
+      0.1,
+      0.17,
+      0.46,
+      0.46
+    ]
+  }
+]

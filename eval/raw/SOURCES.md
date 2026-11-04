@@ -77,9 +77,28 @@ The masks were made by colour:
 - **Cleanup.** Specks were removed, and only the frame's large connected pieces were kept.
 - **Margin.** The mask was eroded slightly, so a mark's centre sits on the tube rather than its edge.
 
+## The photographs of real damage
+
+Since 4 November 2026, damage pairs paste photographs of real damage onto the frame instead of drawing it. A model can take a drawn stroke for dirt or an edit; a photograph of a real scratch or chip reads as damage. The damage is still pasted, not damage on this bike, so every such pair stays marked synthetic and no accuracy figure counts as measured on real damage.
+
+The photographs are in `damage/`, with their credits in `damage/sources.json`. Each is a cut from a freely licensed photograph on Wikimedia Commons:
+
+| Patch | Shows | Original (title, author, source) | Licence |
+|---|---|---|---|
+| `scratches-yellow.png` | Scratches and cracks through yellow paint, showing the coat beneath | [Scratches (14779773577).jpg](https://commons.wikimedia.org/wiki/File:Scratches_(14779773577).jpg), by XoMEoX | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| `gouge-blue.png` | A rusty gouge through blue paint | [Tense bird on blue sm.jpg](https://commons.wikimedia.org/wiki/File:Tense_bird_on_blue_sm.jpg), by Mariojan photo | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| `rust-spot.png` | A rust spot where the paint has broken away | [Didcot Railway Centre UK.jpg](https://commons.wikimedia.org/wiki/File:Didcot_Railway_Centre_UK.jpg), by Si Griffiths | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| `chip-blue.png` | A chip in blue paint, down to orange primer | [Stahlträger Farbe abgeplatzt W.jpg](https://commons.wikimedia.org/wiki/File:Stahltr%C3%A4ger_Farbe_abgeplatzt_W.jpg), by Fornax | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+
+**Licences.** Only licences that allow changes and commercial use are taken: CC0, public domain, CC BY and CC BY-SA, never NC or ND. `damagePatchSources` in `eval/src/damage.ts` refuses any other, and a test checks every entry. Each patch is changed from its original: cut, scaled and given a transparent ground. CC BY 2.0 and CC BY-SA 3.0 material may be adapted into a CC BY-SA 4.0 work, so the patches and every pair made with them are shared under CC BY-SA 4.0, like the rest of the set. `/reliability` credits each author with a link to the original and its licence.
+
+**How each patch was cut.** From Commons' 1600-pixel rendering of the original, the part named by `crop` in `sources.json` (left, top, right, bottom, as fractions) was cut and scaled to 520 pixels on its long side. The paint around the damage was made transparent by colour: the colour at one sample point was taken as the paint, and pixels far from it in CIELAB kept as damage (for the primer chip, pixels near the primer's colour were kept instead). Specks under 40 pixels were dropped, the edge was faded towards the patch's border, and the transparency softened by 0.7 pixels. Six patches were cut from five photographs and four kept: a peeling-paint patch broke up into specks, and a chipped-paint patch kept too much of its own beige paint.
+
+**How a patch is pasted.** `pasteDamage` turns the patch at random, mirrors it half the time, and sizes it to 5 to 8 percent of the photograph's width for small damage or 11 to 17 percent for large. It is placed where the frame's mask has most detail, as drawn damage is. Its brightness is scaled by how bright the frame is where it lands against how bright the paint around the damage was in its own photograph, so rust in shadow is darker than rust in the light. Only pixels the mask marks as the frame change, and the label is the box of pixels the damage covers. Damage pairs take the patches in turn.
+
 ## The drawn damage
 
-All damage is drawn by `eval/src/damage.ts` on the return photograph, inside the frame's mask, and labelled with the exact box it changed. It is drawn from the photograph's own pixels, so it keeps the light on the tube:
+Known marks, and damage when no photographs of real damage are given, are drawn by `eval/src/damage.ts` on the return photograph, inside the frame's mask, and labelled with the exact box it changed. It is drawn from the photograph's own pixels, so it keeps the light on the tube:
 - **Chip.** Bare aluminium, the photograph's light without its colour, with grain, a pale primer ring, a broken paint edge and shading across the tube.
 - **Scratch.** A thin, broken line that lightens the paint, with a faint shadow.
 - **Crack.** A fine dark line with a branch.
