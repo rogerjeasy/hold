@@ -1,6 +1,6 @@
 import { utcDay } from '@hold/domain'
 import { beforeAll, describe, expect, it } from 'vitest'
-import { rateTokensLeft, takeRateToken } from './rate-limit.ts'
+import { pruneRateLimits, rateTokensLeft, returnRateToken, takeRateToken } from './rate-limit.ts'
 import { createTestDatabase } from './testing/test-database.ts'
 import type { TestDatabase } from './testing/test-database.ts'
 
@@ -58,5 +58,38 @@ describe('the tokens left', () => {
     expect(await rateTokensLeft(database, short, 'later')).toBe(0)
     await new Promise((resolve) => setTimeout(resolve, 1100))
     expect(await rateTokensLeft(database, short, 'later')).toBe(1)
+  })
+})
+
+// A token taken before work whose outcome decides whether it should count, such as a webhook only a forgery costs.
+describe('a token given back', () => {
+  const limit = { name: 'given_back_test', max: 2, windowSeconds: 60 * 60 }
+
+  it('is free to take again, and giving back never makes more than the limit', async () => {
+    await takeRateToken(database, limit, 'caller')
+    await takeRateToken(database, limit, 'caller')
+    expect(await rateTokensLeft(database, limit, 'caller')).toBe(0)
+    await returnRateToken(database, limit, 'caller')
+    expect(await rateTokensLeft(database, limit, 'caller')).toBe(1)
+    await returnRateToken(database, limit, 'caller')
+    await returnRateToken(database, limit, 'caller')
+    await returnRateToken(database, limit, 'never-took')
+    expect(await rateTokensLeft(database, limit, 'caller')).toBe(2)
+    expect(await rateTokensLeft(database, limit, 'never-took')).toBe(2)
+  })
+})
+
+// Every limit's window is a day at most, so a row whose window began two days ago counts nothing any more.
+describe('pruning the limits', () => {
+  it('removes the rows of windows long over and keeps every window that could still count', async () => {
+    const limit = { name: 'pruned_test', max: 5, windowSeconds: 24 * 60 * 60 }
+    await takeRateToken(database, limit, 'today')
+    await database.$client.query(`insert into rate_limits (key, window_starts_at, count) values ('prune-three-days', now() - interval '3 days', 4), ('prune-thirty-hours', now() - interval '30 hours', 4)`)
+    const keys = async () => (await database.$client.query<{ key: string }>(`select key from rate_limits where key like 'prune-%'`)).rows.map((row) => row.key)
+
+    expect(await pruneRateLimits(database)).toBe(1)
+
+    expect(await keys()).toEqual(['prune-thirty-hours'])
+    expect(await rateTokensLeft(database, limit, 'today')).toBe(4)
   })
 })

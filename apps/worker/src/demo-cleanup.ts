@@ -1,6 +1,6 @@
 import { isDemoSessionAddress } from '@hold/auth'
 import type { DemoAccountRemoval } from '@hold/auth'
-import { demoSessionsDue, retireDemoSession } from '@hold/db'
+import { demoSessionsDue, pruneRateLimits, retireDemoSession } from '@hold/db'
 import type { Database } from '@hold/db'
 import { demoRetirementCutoff } from '@hold/domain'
 
@@ -31,4 +31,10 @@ export async function retireOldDemos(dependencies: DemoCleanupDependencies): Pro
     }
   }
   return { retired, failed }
+}
+
+// The daily run: old demos, then the rate limits whose windows ended long ago, which nothing else removes.
+export async function runDailyCleanup(dependencies: DemoCleanupDependencies): Promise<{ readonly retired: number; readonly failed: number; readonly prunedLimits: number }> {
+  const demos = await retireOldDemos(dependencies)
+  return { ...demos, prunedLimits: await pruneRateLimits(dependencies.database) }
 }

@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { findPayPalAccount, inShop, itemCatalog, paypalEvents, rateTokensLeft, registerOwner, rentalDetail } from '@hold/db'
+import { findPayPalAccount, inShop, itemCatalog, paypalEvents, registerOwner, rentalDetail } from '@hold/db'
 import { FAKE_SIGNATURE } from '@hold/paypal'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -7,6 +7,9 @@ process.env['HOLD_ENVIRONMENT'] = 'test'
 process.env['HOLD_COOKIE_KEY'] = Buffer.alloc(32, 9).toString('base64')
 
 const jar = new Map<string, string>()
+// The network a delivery comes from, as the load balancer names it. PayPal's own, unless a test says otherwise.
+const PAYPAL_NETWORK = '203.0.113.50'
+let caller = PAYPAL_NETWORK
 vi.mock('next/headers', () => ({
   cookies: () =>
     Promise.resolve({
@@ -14,7 +17,7 @@ vi.mock('next/headers', () => ({
       set: (name: string, value: string) => jar.set(name, value),
       delete: (name: string) => jar.delete(name),
     }),
-  headers: () => Promise.resolve(new Headers({ 'x-forwarded-for': '203.0.113.50' })),
+  headers: () => Promise.resolve(new Headers({ 'x-forwarded-for': caller })),
 }))
 vi.mock('next/cache', () => ({ revalidatePath: () => undefined }))
 vi.mock('next-intl/server', () => ({ getTranslations: () => Promise.resolve((key: string) => key) }))
@@ -133,24 +136,42 @@ describe('an event PayPal delivers', () => {
   })
 })
 
-// Last, since it uses up the account's allowance of forged deliveries for the hour.
 describe('a flood of forged deliveries to one account’s address', () => {
-  it('costs PayPal one check each up to the hour’s allowance, and after that is refused unchecked, the real event too, so PayPal sends it again later', async () => {
-    const { database, simulatedPayPal } = await getServices()
+  const FORGER = '198.51.100.7'
+
+  it('costs PayPal one check each up to the hour’s allowance for the network it comes from, and after that is refused unchecked', async () => {
+    const { simulatedPayPal } = await getServices()
     if (simulatedPayPal === undefined) throw new Error('No simulated PayPal.')
-    // The forged posts of the tests above count already.
-    const left = await rateTokensLeft(database, FORGED_DELIVERIES, accountId)
-    expect(left).toBeGreaterThan(0)
-    expect(left).toBeLessThan(FORGED_DELIVERIES.max)
     const checks = vi.spyOn(simulatedPayPal, 'verifyWebhook')
-    for (let each = 0; each < left; each += 1) {
-      expect((await receivePayPalEvent(accountId, event('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-3' }), signed('forged'))).status).toBe(401)
+    caller = FORGER
+    try {
+      for (let each = 0; each < FORGED_DELIVERIES.max; each += 1) {
+        expect((await receivePayPalEvent(accountId, event('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-3' }), signed('forged'))).status).toBe(401)
+      }
+      expect(checks).toHaveBeenCalledTimes(FORGED_DELIVERIES.max)
+      expect((await receivePayPalEvent(accountId, event('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-3' }), signed('forged'))).status).toBe(429)
+      expect(checks).toHaveBeenCalledTimes(FORGED_DELIVERIES.max)
+    } finally {
+      caller = PAYPAL_NETWORK
+      checks.mockRestore()
     }
-    expect(checks).toHaveBeenCalledTimes(left)
-    expect((await receivePayPalEvent(accountId, event('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-3' }), signed('forged'))).status).toBe(429)
-    expect((await receivePayPalEvent(accountId, event('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-3' }, 'WH-AFTER-FLOOD'), signed())).status).toBe(429)
-    expect(checks).toHaveBeenCalledTimes(left)
-    expect(await storedWithId('WH-AFTER-FLOOD')).toBe(0)
-    checks.mockRestore()
+  })
+
+  it('is counted only for posts PayPal refused, so PayPal’s own deliveries never use it up', async () => {
+    caller = '192.0.2.14'
+    try {
+      for (let each = 0; each <= FORGED_DELIVERIES.max; each += 1) {
+        expect((await receivePayPalEvent(accountId, event('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-4' }), signed())).status).toBe(200)
+      }
+    } finally {
+      caller = PAYPAL_NETWORK
+    }
+  })
+
+  it('never stops PayPal’s own event, which comes from another network', async () => {
+    const { rentalId, orderId } = await approvedButGone(12)
+    expect((await receivePayPalEvent(accountId, event('CHECKOUT.ORDER.APPROVED', { id: orderId }, 'WH-AFTER-FLOOD'), signed())).status).toBe(200)
+    expect(await storedWithId('WH-AFTER-FLOOD')).toBe(1)
+    expect(await stateOf(rentalId)).toBe('booked')
   })
 })

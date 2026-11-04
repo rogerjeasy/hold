@@ -337,6 +337,20 @@
       "when": 1793675000000,
       "tag": "0047_execution_rechecks",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1793680000000,
+      "tag": "0048_rate_token_return",
+      "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1793680500000,
+      "tag": "0049_rate_limit_pruning",
+      "breakpoints": true
     }
   ]
 }

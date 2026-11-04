@@ -1,5 +1,5 @@
 import 'server-only'
-import { deliveryAccount, inShop, markOutboxSent, PAYPAL_EVENTS_QUEUE, rateTokensLeft, recordPayPalEvent, takeRateToken } from '@hold/db'
+import { deliveryAccount, inShop, markOutboxSent, PAYPAL_EVENTS_QUEUE, recordPayPalEvent, returnRateToken, takeRateToken } from '@hold/db'
 import { verifyPayPalDelivery } from '@hold/settle'
 import { z } from 'zod'
 import { callerNetwork } from './network'
@@ -13,8 +13,10 @@ import { getServices } from './services'
 export const PAYPAL_EVENT_MAX_BYTES = 64 * 1024
 // PayPal's own delivery rate is far below this. It only stops a flood of made-up posts from one network.
 const DELIVERIES = { name: 'paypal-webhook', max: 600, windowSeconds: 60 } as const
-// Each forged post costs one call to PayPal. Past this many in an hour, one address's posts are refused unchecked, and
-// PayPal sends its own again later: it retries for three days, so a real event is late, never lost.
+// Each forged post costs one call to PayPal. Past this many in an hour from one network to one address, that network's
+// posts there are refused unchecked. Counted per network, so forgeries never block PayPal's own deliveries, which come
+// from PayPal's networks; a forger cannot post from those. A token is taken before the check, so posts in flight
+// together cannot overrun the count, and given back unless PayPal refused the post, so only forgeries count.
 export const FORGED_DELIVERIES = { name: 'paypal-webhook-forged', max: 30, windowSeconds: 3600 } as const
 
 const eventSchema = z.object({
@@ -27,7 +29,8 @@ const answer = (status: number) => new Response(null, { status })
 
 export async function receivePayPalEvent(accountId: string, rawBody: string, headers: Headers): Promise<Response> {
   const { database, settle, paypalFor } = await getServices()
-  if (!(await takeRateToken(database, DELIVERIES, (await callerNetwork()) ?? 'local'))) return answer(429)
+  const network = (await callerNetwork()) ?? 'local'
+  if (!(await takeRateToken(database, DELIVERIES, network))) return answer(429)
   if (rawBody.length > PAYPAL_EVENT_MAX_BYTES) return answer(413)
   let parsed: z.infer<typeof eventSchema>
   try {
@@ -37,17 +40,16 @@ export async function receivePayPalEvent(accountId: string, rawBody: string, hea
   }
   const account = await deliveryAccount(database, accountId)
   if (account === undefined) return answer(404)
-  if ((await rateTokensLeft(database, FORGED_DELIVERIES, accountId)) === 0) return answer(429)
+  const forger = `${accountId}:${network}`
+  if (!(await takeRateToken(database, FORGED_DELIVERIES, forger))) return answer(429)
   // Only PayPal's own headers are kept: they are what its signature check needs.
   const signing = Object.fromEntries([...headers.entries()].filter(([name]) => name.startsWith('paypal-')))
   const verified = account.webhookId === null ? undefined : await verifyPayPalDelivery(paypalFor(account.credentialReference), account.webhookId, rawBody, signing)
+  // Not 2xx, so a real event PayPal's check refused by mistake is sent again.
+  if (verified === undefined || (verified.ok && verified.value === 'rejected')) return answer(401)
+  await returnRateToken(database, FORGED_DELIVERIES, forger)
   // PayPal could not say. Answered as a failure, so PayPal sends the event again.
-  if (verified !== undefined && !verified.ok) return answer(503)
-  if (verified === undefined || verified.value === 'rejected') {
-    await takeRateToken(database, FORGED_DELIVERIES, accountId)
-    // Not 2xx, so a real event PayPal's check refused by mistake is sent again.
-    return answer(401)
-  }
+  if (!verified.ok) return answer(503)
   // Events about one order are handled in order: a capture is grouped with the order it was made on.
   const resourceId = parsed.resource?.supplementary_data?.related_ids?.order_id ?? parsed.resource?.id
   const recorded = await recordPayPalEvent(database, accountId, { eventId: parsed.id, type: parsed.event_type, resourceId, rawBody, headers: signing }, new Date())
