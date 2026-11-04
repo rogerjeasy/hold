@@ -42,7 +42,12 @@ const outcome = await runEvaluation(
 )
 console.log(await readFile(outcome.reportPath, 'utf8'))
 console.log(`Report: ${outcome.reportPath}`)
-if (half === 'gate' && !outcome.gate.pass) {
+if (half === 'gate' && outcome.gate.outcome === 'failed') {
   console.error(`The comparison failed the gate: ${outcome.gate.reasons.join(', ')}.`)
   process.exitCode = 1
+}
+// Not a failure, since the first run must be able to become the baseline, and not a pass either. In GitHub Actions the
+// line is an annotation on the run, so nobody reads a green build as a measured one.
+if (half === 'gate' && outcome.gate.outcome === 'no_baseline') {
+  console.warn(`${process.env['GITHUB_ACTIONS'] === 'true' ? '::warning title=No baseline::' : ''}No accepted run to compare against: the gate checked nothing. A person accepts a run with --accept to set the baseline.`)
 }

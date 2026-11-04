@@ -111,11 +111,16 @@ const rate = (each: Share) => (each.total === 0 ? 0 : each.count / each.total)
 
 export type GateLimits = { readonly maxCleanWronglyFlagged: number; readonly maxDamageFoundDrop: number }
 
+// no_baseline: no run was accepted yet, so there is nothing to be worse than. It stops nothing, since the first run
+// must be able to become the baseline, and it proves nothing about accuracy, so it is never reported as a pass.
+export type GateOutcome = 'passed' | 'failed' | 'no_baseline'
+export type GateResult = { readonly outcome: GateOutcome; readonly reasons: readonly string[] }
+
 // A release that makes the comparison worse does not ship (section 5.6). The limits are set after the first run.
-export function checkGate(input: { readonly current: Measures; readonly accepted: Measures | null; readonly limits: GateLimits }): { readonly pass: boolean; readonly reasons: readonly string[] } {
-  if (input.accepted === null) return { pass: true, reasons: ['first_run'] }
+export function checkGate(input: { readonly current: Measures; readonly accepted: Measures | null; readonly limits: GateLimits }): GateResult {
+  if (input.accepted === null) return { outcome: 'no_baseline', reasons: [] }
   const reasons: string[] = []
   if (rate(input.current.cleanWronglyFlagged) > input.limits.maxCleanWronglyFlagged) reasons.push('clean_wrongly_flagged_above_limit')
   if (rate(input.accepted.damageFound) - rate(input.current.damageFound) > input.limits.maxDamageFoundDrop) reasons.push('damage_found_fell')
-  return { pass: reasons.length === 0, reasons }
+  return { outcome: reasons.length === 0 ? 'passed' : 'failed', reasons }
 }

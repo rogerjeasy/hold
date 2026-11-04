@@ -4,9 +4,20 @@ import { describe, expect, it } from 'vitest'
 import { readmeTable, renderReport, shareText } from './report.ts'
 
 const pair = (overrides: Partial<EvaluatedCase>): EvaluatedCase => ({ id: 'case', group: 'clean_easy', origin: 'real', view: 'frame', before: 'gate/b.jpg', after: 'gate/a.jpg', alignment: 0.9, labels: [], knownMarks: [], state: 'clean', findings: [], milliseconds: 2000, inputTokens: 900, outputTokens: 100, ...overrides })
-const run = { half: 'gate' as const, dataSetVersion: 'a'.repeat(64), pipelineVersion: 'inspection-1+abc123', model: 'anthropic.claude-opus-5-5', completedAt: new Date('2026-10-28T10:00:00Z'), gate: { pass: true, reasons: ['first_run'] } }
+const run = { half: 'gate' as const, dataSetVersion: 'a'.repeat(64), pipelineVersion: 'inspection-1+abc123', model: 'anthropic.claude-opus-5-5', completedAt: new Date('2026-10-28T10:00:00Z'), gate: { outcome: 'passed' as const, reasons: [] } }
 
 describe('the run report', () => {
+  // A first run has nothing to be worse than, so the report never calls it a pass.
+  it('says whether the gate passed, failed or had no accepted run to compare against', () => {
+    const cases = [pair({ id: 'r1' })]
+    const report = (gate: typeof run.gate | { outcome: 'failed' | 'no_baseline'; reasons: string[] }) => renderReport({ ...run, gate, cases, measures: measureEvaluation(cases), realMeasures: measureEvaluation(cases) })
+    expect(report(run.gate)).toContain('Gate: passed against the accepted run.')
+    expect(report({ outcome: 'failed', reasons: ['damage_found_fell'] })).toContain('Gate: failed (damage_found_fell).')
+    const first = report({ outcome: 'no_baseline', reasons: [] })
+    expect(first).toContain('Gate: no accepted run to compare against. This run measures the comparison; it proves nothing against a baseline until a person accepts one.')
+    expect(first).not.toMatch(/Gate: passed/)
+  })
+
   it('prints a share with its count, never a bare percentage', () => {
     expect(shareText({ count: 57, total: 60 })).toBe('57 of 60 (95%)')
   })

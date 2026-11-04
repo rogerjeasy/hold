@@ -1,5 +1,5 @@
 import { CONFIDENCE_LEVELS, EVALUATION_GROUPS, sharePercent, zeroUpperBound } from '@hold/domain'
-import type { EvaluatedCase, Measures, Share } from '@hold/domain'
+import type { EvaluatedCase, GateResult, Measures, Share } from '@hold/domain'
 import { SET_TARGETS } from './manifest.ts'
 
 export type RunRecord = {
@@ -8,7 +8,7 @@ export type RunRecord = {
   readonly pipelineVersion: string
   readonly model: string
   readonly completedAt: Date
-  readonly gate: { readonly pass: boolean; readonly reasons: readonly string[] }
+  readonly gate: GateResult
   readonly cases: readonly EvaluatedCase[]
   readonly measures: Measures
   readonly realMeasures: Measures
@@ -59,13 +59,20 @@ export function readmeTable(run: RunRecord): string {
   ].join('\n')
 }
 
+// A first run has nothing to be worse than: it is reported as such, never as a pass.
+function gateLine(gate: GateResult): string {
+  if (gate.outcome === 'no_baseline') return 'Gate: no accepted run to compare against. This run measures the comparison; it proves nothing against a baseline until a person accepts one.'
+  if (gate.outcome === 'passed') return 'Gate: passed against the accepted run.'
+  return `Gate: failed (${gate.reasons.join(', ')}).`
+}
+
 export function renderReport(run: RunRecord): string {
   const counts = EVALUATION_GROUPS.map((group) => `| ${group} | ${String(run.cases.filter((each) => each.group === group).length)} | ${String(SET_TARGETS[group])} |`)
   const caseRows = run.cases.map((each) => `| ${each.id} | ${each.group} | ${each.origin} | ${each.state} | ${String(each.findings.length)} |`)
   return [
     `# Comparison evaluation, ${run.half} half`,
     '',
-    `Gate: ${run.gate.pass ? 'passed' : 'failed'}${run.gate.reasons.length > 0 ? ` (${run.gate.reasons.join(', ')})` : ''}.`,
+    gateLine(run.gate),
     '',
     readmeTable(run),
     '',

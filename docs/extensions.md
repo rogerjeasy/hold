@@ -290,6 +290,7 @@ The pipeline in GitHub Actions runs the gate half whenever a prompt, a threshold
 - The run is stored in `eval_runs` with the model ID, prompt version and thresholds.
 - The build fails if clean returns wrongly flagged rises above its limit, or if damage found falls by more than its tolerance against the last accepted run.
 - **The limits are set after the first run, not before.** The gate's job is to stop the comparison getting worse without anyone noticing.
+- **With no accepted run, the gate has nothing to compare against** (`no_baseline`, since 4 November 2026). It stops nothing, so the first run can become the baseline, and it is never reported as a pass: the report says "no accepted run to compare against", the run is recorded with the reason `no_baseline`, and in GitHub Actions the step adds a warning to the run. Before then it was a pass with the reason `first_run`.
 - **Set 1 November 2026** in `eval/gate-limits.json`: at most 5 percent of clean returns wrongly flagged, which keeps the scorecard's "below about 6 percent" true, and damage found falling by no more than 10 points. Before then the file was missing, and every gate run after the first accepted run (29 October) stopped with an error.
 
 ### 5.7 The field record
@@ -343,6 +344,8 @@ A gate run on that set still found no damage. The first look named 9 large chips
 That change answered what the gate half showed, so the gate half was refreshed with new pairs (`augment --seed 2`) before the next accepted run, as section 5.5 requires.
 
 **3 November 2026.** The run accepted by mistake is withdrawn. Migration 0042 adds `withdrawn_at` and `withdrawn_reason` to `eval_runs` and withdraws every accepted gate run whose pairs reached the model less than half the time (`model_not_asked`). The run stays on record. The public and owner scorecards show no run, say which run was withdrawn and why, and say that the gate half was rebuilt after a threshold was set from a gate run; the next run is not measured against the withdrawn one. No run is accepted yet, so Hold claims no accuracy.
+
+**X0.4, 4 November 2026: shown on the gate rule, not on a live run.** A unit test measures the same pairs twice, once as an accepted run saw them and once as a weakened prompt would answer, missing small marks and calling shadows damage, and `checkGate` fails the weaker run with both reasons, `clean_wrongly_flagged_above_limit` and `damage_found_fell` (`packages/domain/src/evaluation.test.ts`); `eval/src/evaluate.test.ts` shows the runner refuses to accept such a run. No weakened prompt has been run through the real model in continuous integration: the gate half has no accepted run to fail against, and the workflow depends on repository variables that cannot be checked from the repository. Until a person accepts a run, every gate run in CI reports `no_baseline`.
 ### 5.10 In the video
 
 Four seconds on the scorecard while the damage comparison runs, with the real numbers on screen.
