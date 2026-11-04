@@ -115,6 +115,17 @@ describe('the price list editor', () => {
     expect(data.get('wearPolicy')).toBe('Scuffs on tyres are wear.')
   })
 
+  // Counter staff quote prices to renters, so they read the list in force, not only the changes between versions (JW-M4).
+  it('shows counter staff the prices in force to quote from, and no editor', () => {
+    renderWithIntl(<PricesScreen {...props({ canPublish: false })} />)
+    const inForce = screen.getByRole('region', { name: 'The prices in force' })
+    expect(within(inForce).getByText('Deep scratch on the frame')).toBeInTheDocument()
+    expect(within(inForce).getByText('€35.00')).toBeInTheDocument()
+    expect(within(screen.getByRole('region', { name: 'What counts as ordinary wear' })).getByText('Scuffs on tyres are wear.')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'What changed' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Publish this price list' })).not.toBeInTheDocument()
+  })
+
   it('brings back a draft left unpublished in this browser', () => {
     localStorage.setItem('hold.priceDraft.shop-1', JSON.stringify({ baseVersion: 1, draft: { rows: [{ key: 0, description: 'Cracked display', category: 'damage', amount: '80' }], wearPolicy: 'Scuffs are wear.' } }))
     renderWithIntl(<PricesScreen {...props()} />)

@@ -60,6 +60,20 @@ test('an owner works through the morning by keyboard: grouped by kind, the late 
   await expect(page).toHaveURL(/\/shop\/rentals\/[0-9a-f-]{36}\/claim$/)
 })
 
+// Today once said 5 where the board listed 7 on the same demo (audit finding JW-L3).
+test('Today counts what the decision board lists, and the marks that say a row is a sample are at least 12 pixels', async ({ page }) => {
+  await startDemo(page, 'Tomás, the owner')
+  await expect(page.getByText('7 things need a decision.')).toBeVisible()
+  const today = page.getByRole('region', { name: 'Needs a decision' })
+  await expect(today.getByRole('listitem')).toHaveCount(7)
+  // The words that say a row is not real carry the weight, so they are never the smallest on the page (F-M7).
+  const sizes = await today.getByText('Sample', { exact: true }).evaluateAll((tags) => tags.map((tag) => Number.parseFloat(getComputedStyle(tag).fontSize)))
+  expect(sizes.length).toBeGreaterThan(0)
+  expect(Math.min(...sizes)).toBeGreaterThanOrEqual(12)
+  await openBoard(page)
+  await expect(page.getByTestId('decisions-brief')).toHaveText(/^7 decisions wait/)
+})
+
 test('a demo owner decides the contested claim, and finds the agent’s sample proposals, which move nothing', async ({ page }) => {
   await startDemo(page, 'Tomás, the owner')
   await openBoard(page)

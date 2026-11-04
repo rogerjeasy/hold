@@ -1,8 +1,9 @@
 import { shopDay } from '@hold/domain'
-import { inShop, shopSetup, shopToday } from '@hold/db'
+import { decisionRecords, inShop, shopSetup, shopToday } from '@hold/db'
 import type { Metadata } from 'next'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { readAccessToken } from '@/features/auth/session-cookies'
+import { boardRows } from '@/features/decisions/board'
 import { NoShop } from '@/features/shop/shop-home'
 import { TodayScreen } from '@/features/today/today-screen'
 import { redirect } from '@/i18n/navigation'
@@ -25,8 +26,10 @@ export default async function Page() {
   const now = new Date()
   const day = shopDay(context.shop.timeZone, now)
   const scope = { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId } as const
-  const [loaded, passkeys] = await Promise.all([
+  const [loaded, decisions, passkeys] = await Promise.all([
     inShop(database, scope, async (transaction) => ({ setup: await shopSetup(transaction), today: await shopToday(transaction, { now, day }) })),
+    // What waits on a person is read as the decision board reads it, so both pages count the same.
+    decisionRecords(database, scope, now),
     identity.listPasskeys((await readAccessToken()) ?? ''),
   ])
   const setup = {
@@ -49,6 +52,7 @@ export default async function Page() {
       part={day.part}
       setup={setup}
       today={loaded.today}
+      board={boardRows(decisions, { userId: context.person.userId, role: context.role, approvalLimitCents: context.approvalLimitCents }, now)}
       samples={samples}
     />
   )

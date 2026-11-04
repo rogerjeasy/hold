@@ -12,16 +12,18 @@ type SecurityScreenProps = {
   shopName: string
   passkeys: readonly Passkey[] | undefined
   required: boolean
-  // True when this session was proven by an emailed code: a person with a passkey confirms with it before adding more.
-  // A demo session is not: every judge adds their own passkey to the shared demo account.
-  emailCodeSession: boolean
+  // True when a passkey proved this session. Otherwise a person who has one confirms with it before adding more, as
+  // the server requires of every account, a demo session's included.
+  confirmedByPasskey: boolean
   email: string
+  // A demo session's account, whose passkey stays in the browser that made it: the gate names a fresh demo as the way out.
+  demo: boolean
 }
 
-export function SecurityScreen({ shopName, passkeys, required, emailCodeSession, email }: SecurityScreenProps) {
+export function SecurityScreen({ shopName, passkeys, required, confirmedByPasskey, email, demo }: SecurityScreenProps) {
   const t = useTranslations('shop.security')
   const format = useFormatter()
-  const gated = emailCodeSession && (passkeys?.length ?? 0) > 0
+  const gated = !confirmedByPasskey && (passkeys?.length ?? 0) > 0
 
   return (
     <ShopFrame shopName={shopName} title={t('title')} description={required ? t('leadRequired') : t('lead')}>
@@ -56,7 +58,7 @@ export function SecurityScreen({ shopName, passkeys, required, emailCodeSession,
           </Panel>
         )}
         {/* The gate is a card of its own, so it stands below the list rather than inside it. */}
-        {gated ? <PasskeyGate needed hasPasskey email={email} returnTo="/shop/security" body={t('confirmToAdd')}>{null}</PasskeyGate> : null}
+        {gated ? <PasskeyGate needed hasPasskey email={email} demo={demo} offerAdd={false} returnTo="/shop/security" body={t('confirmToAdd')}>{null}</PasskeyGate> : null}
         <p className="flex gap-2.5 text-sm text-muted-foreground">
           <ShieldCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-success" />
           {t('how')}

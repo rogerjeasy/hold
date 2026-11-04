@@ -87,6 +87,9 @@
     "shop": {
       "title": "Heute"
     },
+    "notFound": {
+      "title": "Seite nicht gefunden"
+    },
     "invite": {
       "title": "Eine Einladung"
     },
@@ -1489,7 +1492,8 @@
       "problems": {
         "email": "Geben Sie zuerst Ihre geschäftliche E-Mail ein und verwenden Sie dann Ihren Passkey.",
         "unsupported": "Dieser Browser unterstützt keine Passkeys. Verwenden Sie den Code aus der E-Mail oder einen neueren Browser.",
-        "cancelled": "Der Passkey wurde nicht verwendet. Versuchen Sie es erneut, wenn Sie so weit sind.",
+        "cancelled": "Der Passkey wurde nicht verwendet. Liegt er auf einem anderen Gerät oder in einem anderen Browser, nutzen Sie diesen, oder versuchen Sie es hier erneut.",
+        "not_made": "Es wurde kein Passkey erstellt. Versuchen Sie es erneut, wenn Sie so weit sind.",
         "unavailable": "Hold konnte die Anmeldung nicht erreichen. Versuchen Sie es gleich noch einmal.",
         "wrong": "Dieser Passkey ist Hold für diese Adresse nicht bekannt.",
         "expired": "Das hat zu lange gedauert. Versuchen Sie es erneut.",
@@ -1500,7 +1504,7 @@
         "invitation_closed": "Diese Einladung gilt nicht mehr.",
         "missing": "Geben Sie zuerst Ihre geschäftliche E-Mail ein.",
         "invalid": "Geben Sie zuerst Ihre geschäftliche E-Mail ein.",
-        "confirm_first": "Für einen weiteren Passkey braucht es einen, den Sie schon haben. Bestätigen Sie zuerst damit."
+        "confirm_first": "Dieses Konto hat schon einen Passkey. Bestätigen Sie zuerst damit, auf dem Gerät oder im Browser, wo er liegt, und fügen Sie dann hier einen hinzu."
       }
     },
     "invite": {
@@ -1624,6 +1628,7 @@
       "add": "Passkey hinzufügen",
       "addHere": "Kein Passkey auf diesem Gerät? Einen hinzufügen",
       "stays": "Ein Passkey bleibt auf dem Gerät oder im Browser, wo er erstellt wurde. Nutzen Sie diesen oder fügen Sie hier einen hinzu.",
+      "staysConfirm": "Ein Passkey bleibt auf dem Gerät oder im Browser, wo er erstellt wurde. Bestätigen Sie auf dem Gerät oder im Browser, wo er liegt; die Abfrage Ihres Browsers erreicht auch einen Passkey auf Ihrem Telefon.",
       "demo": {
         "title": "In der Demo?",
         "body": "Ein Passkey aus einem anderen Browser kommt nicht mit. Starten Sie hier eine neue Demo, oder melden Sie sich ab und kehren Sie im Browser mit dem Passkey zurück.",
@@ -1712,6 +1717,11 @@
       "none": "Es ist noch keine Preisliste veröffentlicht. Mietende sehen sie vor dem Mieten, und jede Forderung wird danach berechnet.",
       "current": "Version {version} ist seit dem {date} veröffentlicht. Erneut veröffentlichen erstellt eine neue Version. Bereits gebuchte Mieten behalten die Version, der ihre Mietenden zugestimmt haben.",
       "readOnly": "Nur Inhaber oder Leitung können Preise veröffentlichen.",
+      "inForce": {
+        "title": "Die geltenden Preise",
+        "lead": "Nennen Sie Mietern die Preise aus dieser Liste. Eine Forderung kann nur auf dem beruhen, was hier steht.",
+        "wearLead": "Dafür wird Mietern nie etwas berechnet."
+      },
       "currency": "Währung",
       "threshold": "Forderungen darüber gehen an Inhaber oder Leitung, in {currency}",
       "thresholdHelp": "Freiwillig. Bleibt das Feld leer, entscheidet das Limit jeder einzelnen Person.",
@@ -2492,6 +2502,7 @@
       "secondLook": "Durch eine unabhängige zweite Prüfung bestätigt.",
       "price": "Vereinbarte Preisliste: {description} — {amount}. Ein Vorschlag zur Prüfung, keine Abbuchung.",
       "version": "Modell: {model}. Anweisungsversion: {prompt}.",
+      "produced": "Wie dieses Ergebnis entstand",
       "notRun": "Nicht ausgeführt",
       "manual": "Manuelle Prüfung festhalten",
       "yourOutcome": "Ihr Prüfungsergebnis",
@@ -3453,7 +3464,7 @@
       "draft": "Entwurf",
       "awaiting_approval": "Genehmigung ausstehend",
       "approved": "Genehmigt",
-      "presented": "Ihre Antwort steht aus",
+      "presented": "Wartet auf die Antwort des Mieters",
       "accepted": "Akzeptiert",
       "contested": "Bestritten — Prüfung ausstehend",
       "lapsed": "Antwortfrist abgelaufen",

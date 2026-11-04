@@ -1,10 +1,10 @@
 import 'server-only'
 import { shopDay } from '@hold/domain'
-import { captureSession, dropOffsWaiting, rentalDetail, rentalHandovers, rentalHold, rentalList, rentalReturns, returnBaseline, shopToday } from '@hold/db'
+import { captureSession, decisionRecordsIn, dropOffsWaiting, rentalDetail, rentalHandovers, rentalHold, rentalList, rentalReturns, returnBaseline, shopToday } from '@hold/db'
 import type { RentalSummary, Transaction } from '@hold/db'
 import { captureSessionSchema, rentalsQuery, rentalsSchema, rentalViewSchema, todaySchema } from '@hold/mobile-api'
 import type { z } from 'zod'
-import { decisionsFor } from '@/features/today/decisions'
+import { boardRows } from '@/features/decisions/board'
 import type { StaffView } from './mobile-staff'
 import { getServices } from './services'
 
@@ -19,13 +19,15 @@ export const todayView: StaffView<unknown, typeof todaySchema> = {
   async load(context, transaction) {
     const now = new Date()
     const today = await shopToday(transaction, { now, day: shopDay(context.shop.timeZone, now) })
+    // Counted by the decision board's own rule, so the phone, Today and the board say the same number.
+    const board = boardRows(await decisionRecordsIn(transaction, now), { userId: context.person.userId, role: context.role, approvalLimitCents: context.approvalLimitCents }, now)
     return {
       shop: { id: context.shop.id, name: context.shop.name, timeZone: context.shop.timeZone, currency: context.shop.currency },
       role: context.role,
       counter: today.counter.map((visit) => ({ ...visit, at: iso(visit.at), hold: visit.hold === null ? null : { state: visit.hold.state, reservedCents: visit.hold.reservedCents }, items: [...visit.items] })),
       dropOffs: today.droppedOff.map((rental) => ({ ...rental, droppedOffAt: iso(rental.droppedOffAt) })),
       // A drop-off is checked at the counter, on the phone too. Everything else waiting is a decision for the web.
-      decisions: { waiting: decisionsFor(today, now).filter((decision) => decision.kind !== 'dropped_off').length, decidedOn: 'web' as const },
+      decisions: { waiting: board.filter((row) => row.kind !== 'dropped_off').length, decidedOn: 'web' as const },
     }
   },
 }

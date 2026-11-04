@@ -24,6 +24,9 @@ type PasskeyGateProps = {
   demo?: boolean
   // Inside a settings card the gate is drawn flat, as a tinted well, so it is not a card inside a card.
   inline?: boolean
+  // False on the page that adds passkeys, where adding one is the very step the gate guards, so a link to add one
+  // would lead back to this gate.
+  offerAdd?: boolean
   children: ReactNode
 }
 
@@ -56,7 +59,7 @@ function DemoWayOut() {
 
 // Shows what changes the shop only once the person has proven it is them with a passkey. The server checks the same
 // thing again on every change, so this is a courtesy, not the control.
-export function PasskeyGate({ needed, hasPasskey, email, returnTo, body, demo = false, inline = false, children }: PasskeyGateProps) {
+export function PasskeyGate({ needed, hasPasskey, email, returnTo, body, demo = false, inline = false, offerAdd = true, children }: PasskeyGateProps) {
   const t = useTranslations('shop.passkeyGate')
   if (!needed) return children
 
@@ -70,17 +73,17 @@ export function PasskeyGate({ needed, hasPasskey, email, returnTo, body, demo = 
           <div className="min-w-0 wrap-long-words">
             <h2 className="text-[1.0625rem] leading-tight font-extrabold tracking-tight">{t('title')}</h2>
             <p className="mt-1.5 text-muted-foreground">{body ?? t('body')}</p>
-            <p className="mt-1.5 text-muted-foreground">{hasPasskey ? t('stays') : t('addFirst')}</p>
+            <p className="mt-1.5 text-muted-foreground">{!hasPasskey ? t('addFirst') : offerAdd ? t('stays') : t('staysConfirm')}</p>
           </div>
         </div>
         {hasPasskey ? (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <PasskeyButton label={t('confirm')} email={email} returnTo={returnTo} variant="default" />
-            {/* A person on a new device, or a judge on the shared demo account, has none here yet. */}
-            <Link href={shopRoutes.security} className="inline-flex min-h-11 items-center gap-1.5 font-semibold text-primary underline-offset-4 hover:underline">
+            {/* A person on a new device has none here yet. */}
+            {offerAdd ? <Link href={shopRoutes.security} className="inline-flex min-h-11 items-center gap-1.5 font-semibold text-primary underline-offset-4 hover:underline">
               {t('addHere')}
               <ArrowRight aria-hidden="true" className="size-4" />
-            </Link>
+            </Link> : null}
           </div>
         ) : (
           <Link href={shopRoutes.security} className={buttonVariants({ className: 'justify-self-start' })}>

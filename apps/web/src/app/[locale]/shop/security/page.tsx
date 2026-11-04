@@ -1,3 +1,4 @@
+import { isDemoSessionAddress } from '@hold/auth'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { readAccessToken } from '@/features/auth/session-cookies'
@@ -19,8 +20,9 @@ export default async function Page() {
       shopName={context.shop.name}
       passkeys={listed.ok ? listed.value : undefined}
       required={required}
-      emailCodeSession={context.factor === 'email_code'}
+      confirmedByPasskey={context.factor === 'passkey'}
       email={context.person.email}
+      demo={isDemoSessionAddress(context.person.email)}
     />
   )
 }

@@ -87,6 +87,9 @@
     "shop": {
       "title": "Hoy"
     },
+    "notFound": {
+      "title": "Página no encontrada"
+    },
     "invite": {
       "title": "Una invitación"
     },
@@ -1489,7 +1492,8 @@
       "problems": {
         "email": "Escribe primero tu correo de trabajo y luego usa tu llave de acceso.",
         "unsupported": "Este navegador no admite llaves de acceso. Usa el código del correo o un navegador más reciente.",
-        "cancelled": "No se usó la llave de acceso. Vuelve a intentarlo cuando quieras.",
+        "cancelled": "No se usó la llave de acceso. Si está en otro dispositivo o navegador, usa ese, o vuelve a intentarlo aquí.",
+        "not_made": "No se creó ninguna llave de acceso. Vuelve a intentarlo cuando quieras.",
         "unavailable": "Hold no ha podido conectar con el inicio de sesión. Inténtalo de nuevo en un momento.",
         "wrong": "Esa llave de acceso no es una que Hold conozca para esta dirección.",
         "expired": "Ha tardado demasiado. Inténtalo de nuevo.",
@@ -1500,7 +1504,7 @@
         "invitation_closed": "Esta invitación ya no sirve.",
         "missing": "Escribe primero tu correo de trabajo.",
         "invalid": "Escribe primero tu correo de trabajo.",
-        "confirm_first": "Para añadir otra llave de acceso hace falta una que ya tengas. Confirma primero con ella."
+        "confirm_first": "Esta cuenta ya tiene una llave de acceso. Confirma primero con ella, en el dispositivo o navegador que la guarda, y luego añade una aquí."
       }
     },
     "invite": {
@@ -1624,6 +1628,7 @@
       "add": "Añadir una llave de acceso",
       "addHere": "¿No hay llave de acceso en este dispositivo? Añade una",
       "stays": "Una llave de acceso se queda en el dispositivo o navegador que la creó. Usa ese, o añade una aquí.",
+      "staysConfirm": "Una llave de acceso se queda en el dispositivo o navegador que la creó. Confirma en el dispositivo o navegador que la guarda; la ventana de tu navegador también puede llegar a una llave en tu teléfono.",
       "demo": {
         "title": "¿Estás en la demo?",
         "body": "Una llave de acceso añadida en otro navegador no viene contigo. Empieza una demo nueva aquí, o cierra sesión y vuelve en el navegador que la tiene.",
@@ -1712,6 +1717,11 @@
       "none": "Aún no hay ninguna lista de precios publicada. Los clientes la ven antes de alquilar, y cada reclamación se calcula con ella.",
       "current": "La versión {version} está publicada desde el {date}. Publicar de nuevo crea otra versión. Los alquileres ya reservados mantienen la versión que aceptó su cliente.",
       "readOnly": "Solo el propietario o un encargado pueden publicar precios.",
+      "inForce": {
+        "title": "Los precios vigentes",
+        "lead": "Da al cliente los precios de esta lista. Una reclamación solo puede ser por lo que figura en ella.",
+        "wearLead": "Nunca se cobra al cliente por esto."
+      },
       "currency": "Moneda",
       "threshold": "Las reclamaciones por encima de esto van al propietario o a un encargado, en {currency}",
       "thresholdHelp": "Opcional. Si lo dejas vacío, decide el límite de cada persona del equipo.",
@@ -2492,6 +2502,7 @@
       "secondLook": "Confirmado por una segunda revisión independiente.",
       "price": "Tarifa acordada: {description} — {amount}. Es una sugerencia para revisar, no un cobro.",
       "version": "Modelo: {model}. Versión de instrucciones: {prompt}.",
+      "produced": "Cómo se obtuvo este resultado",
       "notRun": "No ejecutado",
       "manual": "Registrar una inspección manual",
       "yourOutcome": "Resultado de tu inspección",
@@ -3453,7 +3464,7 @@
       "draft": "Borrador",
       "awaiting_approval": "Pendiente de aprobación",
       "approved": "Aprobada",
-      "presented": "Esperando su respuesta",
+      "presented": "Esperando la respuesta del cliente",
       "accepted": "Aceptada",
       "contested": "Impugnada — pendiente de revisión",
       "lapsed": "Plazo de respuesta finalizado",

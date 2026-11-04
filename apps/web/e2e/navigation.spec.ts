@@ -116,6 +116,10 @@ test('an address with no page answers 404 in the site frame', async ({ page, bro
   expect(response?.status()).toBe(404)
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('This page does not exist.')
   await expect(page.getByRole('link', { name: 'Back to the home page' })).toHaveAttribute('href', '/')
+  // A 404 once kept the landing page's title in the tab (audit finding JW-L2).
+  await expect(page).toHaveTitle('Page not found · Hold')
+  await page.goto('/de/no-such-page')
+  await expect(page).toHaveTitle('Seite nicht gefunden · Hold')
   // The browser logs the 404 response itself as a console error. That one is the point of this test.
   browserErrors.length = 0
 })

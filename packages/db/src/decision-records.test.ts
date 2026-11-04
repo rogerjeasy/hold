@@ -2,7 +2,7 @@ import { money } from '@hold/domain'
 import { eq } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { registerOwner } from './accounts.ts'
-import { contestedOnBoard, decisionRecords } from './decision-records.ts'
+import { contestedOnBoard, decisionRecords, decisionRecordsIn } from './decision-records.ts'
 import { publishPriceList } from './price-list-repository.ts'
 import { addSampleRentals, SAMPLE_PHOTOS } from './sample-rentals.ts'
 import { claims, rentals, renters } from './schema/index.ts'
@@ -96,6 +96,10 @@ describe('the records a decision board reads', () => {
     const tomClaim = await claimOf('Tom Becker')
     expect(await inShop(database, shop, contestedOnBoard)).toEqual([{ claimId: tomClaim, rentalId: expect.any(String) as unknown }])
     expect(await inShop(database, other, contestedOnBoard)).toEqual([])
+  })
+
+  it('reads the same board inside a transaction the caller holds, as the phone does', async () => {
+    expect(await inShop(database, shop, (transaction) => decisionRecordsIn(transaction, NOW))).toEqual(await read(shop))
   })
 
   it('reads nothing of another shop', async () => {

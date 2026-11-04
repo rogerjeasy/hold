@@ -153,6 +153,19 @@ async function linesOf(transaction: Transaction, claimIds: readonly string[]): P
   return byClaim
 }
 
+// The board's parts, each read in a transaction of its own or all in one.
+const restOfBoard = async (transaction: Transaction, now: Date) => {
+  const [staff] = await transaction.select({ count: count() }).from(staffRoles)
+  return {
+    incidents: await incidentsWaitingForStaff(transaction),
+    holds: await activeHolds(transaction),
+    late: await lateRentals(transaction, now),
+    repairs: await openRepairs(transaction),
+    extensionPayments: await extensionPaymentsToCheck(transaction),
+    staffCount: staff?.count ?? 0,
+  }
+}
+
 // Four transactions side by side, each bound to the caller's shop as one would be: deployed, the Data API answers a
 // transaction's statements one after another, and the board's parts need not be read at the same moment, so the page
 // waits for the longest part rather than for all seventeen statements in a row (extensions.md section 12.5).
@@ -162,19 +175,17 @@ export async function decisionRecords(database: Database, scope: Scope, now: Dat
     read(waitingClaims),
     read((transaction) => morningQueue(transaction, now)),
     read(dropOffsWaiting),
-    read(async (transaction) => {
-      const [staff] = await transaction.select({ count: count() }).from(staffRoles)
-      return {
-        incidents: await incidentsWaitingForStaff(transaction),
-        holds: await activeHolds(transaction),
-        late: await lateRentals(transaction, now),
-        repairs: await openRepairs(transaction),
-        extensionPayments: await extensionPaymentsToCheck(transaction),
-        staffCount: staff?.count ?? 0,
-      }
-    }),
+    read((transaction) => restOfBoard(transaction, now)),
   ])
   return { claims: claimsWaiting, proposals, dropOffs, ...rest }
+}
+
+// The same board read inside a transaction the caller already holds, as the phone's views are.
+export async function decisionRecordsIn(transaction: Transaction, now: Date): Promise<DecisionRecords> {
+  const claimsWaiting = await waitingClaims(transaction)
+  const proposals = await morningQueue(transaction, now)
+  const dropOffs = await dropOffsWaiting(transaction)
+  return { claims: claimsWaiting, proposals, dropOffs, ...(await restOfBoard(transaction, now)) }
 }
 
 // The board's claims the renter contested, beside which it shows the contest's neutral summary. Read apart from the

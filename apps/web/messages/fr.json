@@ -87,6 +87,9 @@
     "shop": {
       "title": "Aujourd’hui"
     },
+    "notFound": {
+      "title": "Page introuvable"
+    },
     "invite": {
       "title": "Une invitation"
     },
@@ -1489,7 +1492,8 @@
       "problems": {
         "email": "Saisissez d'abord votre e-mail professionnel, puis utilisez votre clé d'accès.",
         "unsupported": "Ce navigateur ne prend pas en charge les clés d'accès. Utilisez le code reçu par e-mail, ou un navigateur plus récent.",
-        "cancelled": "La clé d'accès n'a pas été utilisée. Réessayez quand vous êtes prêt.",
+        "cancelled": "La clé d'accès n'a pas été utilisée. Si elle se trouve sur un autre appareil ou navigateur, utilisez celui-ci, ou réessayez ici.",
+        "not_made": "Aucune clé d'accès n'a été créée. Réessayez quand vous êtes prêt.",
         "unavailable": "Hold n'a pas pu joindre son service de connexion. Réessayez dans un instant.",
         "wrong": "Cette clé d'accès n'est pas une clé que Hold connaît pour cette adresse.",
         "expired": "Cela a pris trop de temps. Réessayez.",
@@ -1500,7 +1504,7 @@
         "invitation_closed": "Cette invitation n'est plus utilisable.",
         "missing": "Saisissez d'abord votre e-mail professionnel.",
         "invalid": "Saisissez d'abord votre e-mail professionnel.",
-        "confirm_first": "Pour ajouter une autre clé d'accès, il faut une clé que vous avez déjà. Confirmez d'abord avec elle."
+        "confirm_first": "Ce compte a déjà une clé d'accès. Confirmez d'abord avec elle, sur l'appareil ou le navigateur qui la détient, puis ajoutez-en une ici."
       }
     },
     "invite": {
@@ -1624,6 +1628,7 @@
       "add": "Ajouter une clé d'accès",
       "addHere": "Pas de clé d’accès sur cet appareil ? En ajouter une",
       "stays": "Une clé d'accès reste sur l'appareil ou le navigateur qui l'a créée. Utilisez celui-ci, ou ajoutez-en une ici.",
+      "staysConfirm": "Une clé d'accès reste sur l'appareil ou le navigateur qui l'a créée. Confirmez sur l'appareil ou le navigateur qui la détient ; la demande de votre navigateur peut aussi atteindre une clé sur votre téléphone.",
       "demo": {
         "title": "Vous testez la démo ?",
         "body": "Une clé d'accès ajoutée dans un autre navigateur ne vous suit pas. Lancez une nouvelle démo ici, ou déconnectez-vous et revenez dans le navigateur qui la détient.",
@@ -1712,6 +1717,11 @@
       "none": "Aucune liste de prix n'est encore publiée. Les clients la voient avant de louer, et chaque réclamation est calculée à partir d'elle.",
       "current": "La version {version} est publiée depuis le {date}. Publier à nouveau crée une nouvelle version. Les locations déjà réservées gardent la version acceptée par leur client.",
       "readOnly": "Seul le propriétaire ou un responsable peut publier les prix.",
+      "inForce": {
+        "title": "Les prix en vigueur",
+        "lead": "Citez au locataire les prix de cette liste. Une réclamation ne peut porter que sur ce qui y figure.",
+        "wearLead": "Les locataires ne sont jamais facturés pour cela."
+      },
       "currency": "Devise",
       "threshold": "Les réclamations au-dessus de ce montant vont au propriétaire ou à un responsable, en {currency}",
       "thresholdHelp": "Facultatif. Laissez vide et c'est la limite de chaque membre de l'équipe qui décide.",
@@ -2492,6 +2502,7 @@
       "secondLook": "Confirmé par une seconde vérification indépendante.",
       "price": "Tarif convenu : {description} — {amount}. Suggestion à examiner, aucun débit.",
       "version": "Modèle : {model}. Version des instructions : {prompt}.",
+      "produced": "Comment ce résultat a été produit",
       "notRun": "Non exécuté",
       "manual": "Consigner une inspection manuelle",
       "yourOutcome": "Résultat de votre inspection",
@@ -3453,7 +3464,7 @@
       "draft": "Brouillon",
       "awaiting_approval": "Approbation en attente",
       "approved": "Approuvée",
-      "presented": "Votre réponse est attendue",
+      "presented": "En attente de la réponse du locataire",
       "accepted": "Acceptée",
       "contested": "Contestée — examen en attente",
       "lapsed": "Délai de réponse terminé",
