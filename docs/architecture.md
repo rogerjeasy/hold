@@ -283,8 +283,9 @@ Every table except `users`, `renters` and `eval_runs` carries a `shop_id`.
 |---|---|
 | `users` | Cognito subject, contact details, language |
 | `shops` | Name, address for renters (`slug`), timezone, currency, approval thresholds, reply period, whether it is a judge's demo (`demo_session`) and when that demo was retired (`retired_at`, section 20.3) |
-| `locations` | Address, opening hours |
+| `locations` | Planned, not built: address, opening hours |
 | `staff_roles` | User, shop, role, approval limit |
+| `staff_invitations` | Shop, email, role, approval limit, language, who invited, token fingerprint, expiry, accepted by and when, revoked (migration `0007`) |
 | `paypal_accounts` | Shop, merchant ID, credential reference, webhook ID, mode |
 | `item_types` | Name, kind, value to replace, hold amount, day rate, kit, photo plan, whether it is a sample |
 | `items` | Type, label, size, serial, status with its note and date, chain head fingerprint, whether it is a sample |
@@ -312,16 +313,18 @@ Every table except `users`, `renters` and `eval_runs` carries a `shop_id`.
 | `paypal_events` | PayPal event ID, type, raw body, headers, verification state, processing state |
 | `money_events` | Rental, kind, amount, PayPal reference, time. Append-only. |
 | `invoices` | Rental, PayPal invoice ID, amount, state |
-| `shipments` | Rental, direction, carrier, tracking number, status |
-| `disputes` | Rental, PayPal dispute ID, reason, state, evidence sent |
+| `shipments` | Planned, not built: rental, direction, carrier, tracking number, status |
+| `disputes` | Planned, not built: rental, PayPal dispute ID, reason, state, evidence sent. A dispute is read from PayPal and kept as an exception on the morning queue until then |
 | `evidence_packs` | Rental, immutable version and validated frozen snapshot, source fingerprint, renderer version, build state, PDF/manifest hashes and exact S3 object-version references |
 | `receipt_deliveries` | Rental, verified event, receipt kind, exact pack version, recipient identity and language, amounts, delivery state, lease, attempts and sent time |
 | `renter_links` | Rental, token fingerprint, scope, expiry, last used, and two one-time codes kept apart: one for a claim reply, one for changing the Clean Record |
 | `push_devices` | A phone registered for push notifications in the app (section 13.9): its Expo push token, platform and language, and whose it is, a member of staff in this shop (`user_id`) or a rental through the link it registered with (`rental_id`, `renter_link_id`, and the random `reference` a push names it by); the last push's ticket, created, last used, revoked |
+| `ops_rules` | A standing rule the operations agent drafted from a proposal: the rule, its state (`drafted`, `confirmed`, `discarded`), who decided and when (migration `0022`) |
+| `reminders` | One reminder a day per shop, kind (`return_due`, `reply_due`, `invoice`) and renter, so the operations agent never sends the same one twice (migration `0022`) |
 | `outbox` | Pending messages written in the same transaction as state changes |
 | `audit_log` | Who did what, when, from where |
 
-**What the migrations hold so far.** Every table above, with `rentals.simulated` added in `0009`, the item columns in `0010` and the booking columns in `0011`, except `locations`, `shipments` and `disputes`, which arrive with the features that use them. The schema is in `packages/db/src/schema`, the migrations in `packages/db/migrations`.
+**What the migrations hold so far.** Every table above, with `rentals.simulated` added in `0009`, the item columns in `0010` and the booking columns in `0011`, except `locations`, `shipments` and `disputes`, which are planned and not built: no migration creates them. The schema is in `packages/db/src/schema`, the migrations in `packages/db/migrations`.
 
 Migrations `0018`–`0020` add evidence publication metadata and `receipt_deliveries`, shop RLS and publication/delivery guards. A pack must be inserted as `building` without publication metadata; a receipt starts `queued` without a lease or sent time. The web role reserves work; only the worker role may publish artifacts or update delivery metadata. Frozen snapshot/version identity and published metadata cannot be rewritten, and neither service role may delete these records.
 
@@ -1544,32 +1547,38 @@ A renter's own AI assistant acts through an agent token: signed, bound to one re
 
 ## 13. Interfaces
 
-### 13.1 HTTP API for owners and staff
+### 13.1 Server functions and routes for owners and staff
 
-Served by `web`. All routes require a Cognito token.
+Served by `web`. There is no REST API for staff. The signed-in pages under `/shop` (section 13.6) are server components that read, and every change is a POST server function (a Next.js server action) built by `shopAction` (`apps/web/src/server/shop-access.ts`). That one wrapper authenticates the Cognito session in its HTTP-only cookies, resolves the shop and checks the caller's role and approval limit in it, asks for a passkey where the step needs one, opens the transaction with the caller's identity set so row-level security applies, validates the form against a strict schema, then acts and writes the audit line (AGENTS.md section 7). Each feature's functions live in `apps/web/src/features/<feature>/actions.ts`:
 
-| Group | Purpose |
+| Feature | Server functions |
 |---|---|
-| `/api/shops` | Shop settings, locations, staff and limits |
-| `/api/items` | Item types, items, photo plans, item passports |
-| `/api/prices` | Price lists and wear policies, draft and publish |
-| `/api/rentals` | Create, read, extend, move to another item of the same type, cancel |
-| `/api/holds` | Read state, request a hold, show the approval QR code |
-| `/api/sessions` | Start, add photographs, seal |
-| `/api/uploads` | Short-lived upload links |
-| `/api/comparisons` | Read results and findings |
-| `/api/claims` | Read, edit, approve, waive, decide |
-| `/api/disputes` | Read, confirm the response |
-| `/api/reports` | The insights dashboard's rows: money held, captured and released, damage and recovery, staff consistency |
-| `/api/assistant` | Conversation with the owner's assistant, streamed. Planned, not built (section 10.5) |
-| `/api/paypal/connect` | Connect the shop's PayPal account |
-| `/api/proposals` | The morning queue: read, approve, reject, postpone. Built as the page `/shop/queue` and its POST server functions (`approveProposals`, `rejectProposal`, `postponeProposal`, `checkNow`, `confirmRule`, `discardRule`), not a separate API route |
-| `/api/mandates` | Standing rules and settlement limits. The operations standing rule is `grantStandingRule` and `revokeStandingRule` on `/shop/queue` |
-| `/api/ladder` | The trust ladder: draft, simulate, publish |
-| `/api/incidents` | Incidents reported by renters |
-| `/api/accuracy` | The scorecard |
+| `shop` | `inviteStaff`, `withdrawInvitation`, `publishPrices`, `connectPayPal`, `turnOnPayPalNotifications`, `addSampleRentals` |
+| `items` | `saveItemType`, `addItems`, `editItem`, `changeItemStatus` |
+| `rentals` | `bookRental`, `showRenterLink`, `sendRenterLinkAgain`, `askForHold`, `letGoOfBooking` |
+| `handover`, `returns`, `repairs` | Start, `requestPhotoUpload` (a short-lived upload link), `confirmPhotoUpload`, seal; `recordReview` and `compareSample` for a return; `openRepair`, `startRepair`, `finishRepair` |
+| `claims` | `prepareClaim`, `approveAndPresent`, `confirmClean`, `decide`, `rewriteContestSummary` |
+| `records` | `buildRecord` for owner, manager and counter staff, `downloadRecord` for all four roles. The strict input selects a stored rental and pack and `pdf` or `manifest`; it takes no amount or storage key |
+| `operations` | The morning queue on `/shop/queue`: `approveProposals`, `rejectProposal`, `postponeProposal`, `checkNow`, `investigateSamples`, `confirmRule`, `discardRule`, and the standing rule `grantStandingRule`, `revokeStandingRule` |
+| `negotiation` | `saveSettlementLimits`, `endSettlementLimits`, `confirmSettlementForShop`, `argueSampleClaim` |
+| `trust`, `extension`, `self-return`, `promise`, `incidents` | The trust ladder (`publishLadder`, `replayLadder`); extension and self-return settings with `checkExtensionPayment`, `confirmDropOff`, `reportDropOffMissing`; the decision promise (`savePromiseDays`, `grantPromiseWaiver`, `revokePromiseWaiver`, `writeToRenter`); incidents (`confirmPrice`, `takeOnAsShopMatter`) |
+| `insights`, `erasure`, `push` | `askInsights`, `saveInsightsDashboard`; `eraseRenter`; `registerPush`, `unregisterPush` |
 
-The rental record uses POST server actions through the same access wrapper: `buildRecord` for owner/manager/counter staff, and `downloadRecord` for all four staff roles. The strict input selects a stored rental/pack and `pdf` or `manifest`; it accepts no amounts or storage keys. The record page itself only reads.
+Signing in comes before any shop, so the auth feature's functions (`features/auth/actions.ts`) and `switchShop` (`features/shop/choose-shop.ts`) are the exceptions: the sign-in flow validates and rate limits each one, and those that act on a session verify its tokens first. The owner's assistant (section 10.5) is planned, not built.
+
+The only HTTP routes, beside the pages, are these. Each is built by a wrapper or answers to its own check:
+
+| Route | Who calls it | What checks the caller |
+|---|---|---|
+| `/api/mobile/v1/**` | Hold's phone app (sections 13.7 and 13.8) | `mobileStaffRoute`, `mobileSessionRoute` or `mobileRenterRoute`: the same checks as the web, with a bearer token |
+| `/api/webhooks/paypal/{accountId}`, `/api/webhooks/paypal/demo` | PayPal (section 13.3) | PayPal's signature, then a read-back from PayPal |
+| `/mcp` | Renters' assistants (section 13.4) | The gateway in `packages/mcp` on every tool call |
+| `/api/health` | App Runner's health check | Nothing to check: it reads nothing and changes nothing |
+| `/.well-known/jwks.json` | Anyone checking a Clean Record credential | A public read of the public key |
+| `/api/mobile/v1/paypal-return/{kind}` | PayPal, sending a renter back to the phone app | Rate limited; reads and writes nothing |
+| `/api/simulated-storage/**`, `/simulated-paypal/{order}/approve`, `/simulated-paypal/{order}/review` | The test environment's stand-ins for S3 and PayPal | 404 wherever the in-process fakes are not running |
+
+`apps/web/src/server/every-entry-point.test.ts` finds every route handler and every file that begins with `'use server'`, and fails on any export that is neither built by a wrapper nor named there with why it is public and what checks the caller instead.
 
 ### 13.2 Renter routes
 
@@ -1581,7 +1590,7 @@ Served by `web`. Each requires a valid signed link.
 | `/r/{token}/pay` | Approve the hold at pickup, or its replacement before it ends. PayPal returns the renter here, and the hold is confirmed by a POST, never on arrival. The fee is paid from `/r/{token}` itself. |
 | `/r/{token}/paid` | Where PayPal returns the renter. Confirms the fee by a POST, never on arrival. |
 | `/r/{token}/condition` | How each item left: its photographs and marks. Within 24 hours of the handover, the link sent then may confirm it or add photographs of anything missed. Before the handover, a working link says nothing has been collected yet. |
-| `/r/{token}/session` | Guided photographs for shipped rentals |
+| `/r/{token}/session` | Planned, not built: guided photographs for shipped rentals, with `shipments` (section 6.3) |
 | `/r/{token}/claim` | See a claim, accept or contest it. Each line shows its own photograph pair, or, for a line a person added by hand, every item's sealed handover and return photographs view by view. Before a person approved a claim, a working link says there is none to review. |
 | `/r/{token}/record` | Shared evidence versions and PDF/manifest downloads; `?version={pack UUID}` selects the exact receipt version. Draft and awaiting-approval claims remain staff-only. |
 | `/r/{token}/return` | Returning the item with nobody at the counter (section 6.13): where to leave it and what happens next, the photographs, then a receipt with PayPal's own reading of the hold. Starting, photographing and sending need the scope `return_item`. |
@@ -1646,7 +1655,7 @@ Every call takes one path (`callTool` in `dispatch.ts`): the actor is resolved (
 | `/demo` | The demo shop's entry page. Until the demo is deployed it says so and describes the three sample rentals, the three people to sign in as, and what is real and what is simulated |
 | `/s/{slug}` | A shop's own page: a renter chooses dates and items, sees the prices and wear policy, and books with nobody signed in. Open only once the shop has PayPal connected, a price list and items. Bookings from it are limited per network (`apps/web/src/server/shop-page-access.ts`). |
 | `/simulated-paypal/{order}` | In the test environment only: stands in for PayPal's approval page, says so, and sends the renter back to the order's own return path. Everywhere else it is 404. |
-| `/accuracy` | The comparison's measured accuracy, with counts |
+| `/reliability` | The comparison's measured figures, as counts, and the accepted run case by case (section 10.8); says plainly when no run is accepted |
 | `/verify` | Checks what Hold signed, in the browser, with the published key: a Clean Record credential, or an evidence statement about a rental's sealed photographs (section 9.7). The token comes after the `#`, so it never reaches a server. |
 | `/.well-known/jwks.json` | The public key that credentials are signed with, as a JSON Web Key Set. Reads nothing from the request. |
 | `/privacy` | The privacy notice: what Hold records and why, how long each kind is kept (the evidence periods read from `EVIDENCE_LOCK_DAYS` and `EVIDENCE_KEPT_DAYS` in `packages/domain`, the constants the evidence bucket is built from), who handles it for Hold, and how a renter has their details erased (section 15.2). It says that Hold is a hackathon build in PayPal's sandbox and not a registered business. |
@@ -1822,7 +1831,7 @@ flowchart TB
     worker --> internet
 ```
 
-The CDK code is in `infra/`, as five stacks:
+The CDK code is in `infra/`, as six stacks. The pipeline deploys the first five; `HoldDelivery` holds the pipeline's own roles and is deployed only by an administrator (`docs/deploy.md`):
 
 | Stack | Holds | Protection |
 |---|---|---|
@@ -1831,6 +1840,7 @@ The CDK code is in `infra/`, as five stacks:
 | `HoldWork` | The spine's queues and their dead-letter queues and alarms, the schedule group, the role the scheduler uses, the alarm topic `hold-alarms` every alarm reports to, and the account's monthly budget `hold-account-monthly` (section 17.1) | |
 | `HoldRegistry` | The image repository | Retained |
 | `HoldWeb` | The App Runner service `hold-web`, its instance role and the role it pulls the image with, and a scaling limit of two instances. Its address is App Runner's own, https://p99faar3kp.us-east-1.awsapprunner.com, the stack's `ServiceUrl` output. Its server-error alarm reports to `hold-alarms` | Termination protection, because a new service would get a new address. Set once by an administrator, since the pipeline may not change it |
+| `HoldDelivery` | The roles GitHub Actions deploys with (`hold-github-deploy`, the CloudFormation role `hold-cloudformation-exec` and its three managed policies), the comparison gate's role `hold-github-eval`, and the permissions boundary `hold-permissions-boundary` every other Hold role carries | Deployed only by an administrator; the pipeline's own roles deny it any change to them |
 
 The worker's compute is added with its code. The web app's address is known only once the service exists, so it goes into `infra/cdk.json` as `webPublicUrl` after the first deploy, and the links in Hold's emails use it from the next one.
 
@@ -1851,7 +1861,7 @@ The worker's compute is added with its code. The web app's address is known only
 
 | Service | Runs on | Notes |
 |---|---|---|
-| web | App Runner, 1 vCPU and 2 GB, one to two instances | Checked over HTTP at `/api/health` every ten seconds, five seconds to answer, unhealthy after five misses. The route answers without the database, which may be slow or resuming. Runs the image named by the deploy, never the newest pushed |
+| web | App Runner, 1 vCPU and 2 GB, one to two instances | Checked over HTTP at `/api/health` every ten seconds, five seconds to answer, unhealthy after five misses. The route answers without the database, which pauses when idle. Runs the image named by the deploy, never the newest pushed |
 | worker | Lambda, Node 24, 512 MB, four minutes per message | App Runner throttles CPU between requests, so it cannot poll queues. Five functions: `hold-worker-paypal-events`, `hold-worker-executions` and `hold-worker-upkeep` fed by their FIFO queues, `hold-worker-media` (1.5 GB, with sharp) fed by the standard `media` queue, each message read with its queue's schema and naming only the messages that failed so only those are tried again, and `hold-worker-outbox-relay` started every minute by EventBridge Scheduler. The worker makes schedules only in `hold-schedules`, hands them only the scheduler's role, and emails through Hold's SMTP login. The four minutes allow a paused Aurora cluster to wake. Each queue hides a message for six minutes, longer than a function may run on it. Code in `apps/worker`, deployed by `infra/lib/worker.ts` |
 
 ### 14.5 Data
