@@ -99,6 +99,17 @@ describe('evidence record screen', () => {
     expect(await screen.findByRole('status')).toHaveTextContent('Your record is being prepared. This page updates automatically.')
   })
 
+  // The page draws again from the server while the record is prepared; once its version is ready, it says only that.
+  it('stops saying the record is being prepared once the requested version is ready', async () => {
+    const build: RecordAction = () => Promise.resolve({ ok: true, value: { packId: 'pack-1' } })
+    const view = renderWithIntl(<EvidenceRecordScreen {...props} build={build} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Prepare current record' }))
+    expect(await screen.findByText('Your record is being prepared. This page updates automatically.')).toBeInTheDocument()
+    view.rerender(<EvidenceRecordScreen {...props} build={build} versions={[version]} />)
+    expect(screen.getByText('Ready to download')).toBeInTheDocument()
+    expect(screen.queryByText('Your record is being prepared. This page updates automatically.')).not.toBeInTheDocument()
+  })
+
   it('shows pending action feedback and a safe failure without raw internal details', async () => {
     let finish: (value: RecordActionResult) => void = () => undefined
     const build: RecordAction = () => new Promise((resolve) => { finish = resolve })

@@ -11,7 +11,7 @@ afterEach(() => { vi.useRealTimers(); refresh.mockClear() })
 it('refreshes a building record for read-only viewers while hiding document preparation controls', () => {
   vi.useFakeTimers()
   const action: RecordAction = () => Promise.resolve({ ok: true, value: {} })
-  renderWithIntl(<RecordBuildForm action={action} rentalId="rental-1" building hasVersions failed={false} canBuild={false} />)
+  renderWithIntl(<RecordBuildForm action={action} rentalId="rental-1" building hasVersions failed={false} settled={[]} canBuild={false} />)
   expect(screen.queryByRole('button')).not.toBeInTheDocument()
   act(() => { vi.advanceTimersByTime(2000) })
   expect(refresh).toHaveBeenCalledOnce()

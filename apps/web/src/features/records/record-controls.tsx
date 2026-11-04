@@ -13,16 +13,18 @@ function IdentityFields({ rentalId, token }: Identity) {
   return <><input type="hidden" name="locale" value={locale} />{token === undefined ? <input type="hidden" name="rentalId" value={rentalId} /> : <input type="hidden" name="token" value={token} />}</>
 }
 
-export function RecordBuildForm({ action, rentalId, token, building, hasVersions, failed, canBuild = true }: Identity & { action: RecordAction; building: boolean; hasVersions: boolean; failed: boolean; canBuild?: boolean }) {
+// settled: the versions the server shows ready or failed. A requested version is waited for until it is one of them.
+export function RecordBuildForm({ action, rentalId, token, building, hasVersions, failed, settled, canBuild = true }: Identity & { action: RecordAction; building: boolean; hasVersions: boolean; failed: boolean; settled: readonly string[]; canBuild?: boolean }) {
   const t = useTranslations('records')
   const [result, submit, pending] = useActionState<RecordActionResult | null, FormData>(action, null)
-  useLookAgain(building || result?.ok === true, { forMs: 180000 })
+  const waiting = result?.ok === true && (result.value.packId === undefined || !settled.includes(result.value.packId))
+  useLookAgain(building || waiting, { forMs: 180000 })
   if (!canBuild) return null
   return <form action={submit} className="grid min-w-0 gap-3">
     <IdentityFields rentalId={rentalId} token={token} />
     <Button type="submit" disabled={pending || building} className="w-full whitespace-normal sm:w-auto sm:justify-self-start">{pending ? t('preparing') : failed ? t('retry') : hasVersions ? t('update') : t('prepare')}</Button>
     {result?.ok === false ? <p role="alert" className="text-destructive">{t('requestFailed')}</p> : null}
-    {result?.ok === true ? <p role="status">{t('requested')}</p> : null}
+    {waiting ? <p role="status">{t('requested')}</p> : null}
   </form>
 }
 

@@ -36,7 +36,7 @@ export function EvidenceRecordScreen({ shopName, rentalId, backHref, token, vers
   return <RecordFrame shopName={shopName} title={t('title')} renter={token !== undefined}><div className="grid min-w-0 gap-6">
     <Link href={backHref} referrerPolicy="no-referrer" className="inline-flex min-h-11 items-center justify-self-start font-semibold underline underline-offset-4">{t('back')}</Link>
     <p className="max-w-prose text-pretty">{t('lead')}</p>
-    <RecordBuildForm action={build} rentalId={rentalId} token={token} building={building} hasVersions={versions.length > 0} failed={failed} canBuild={canBuild} />
+    <RecordBuildForm action={build} rentalId={rentalId} token={token} building={building} hasVersions={versions.length > 0} failed={failed} settled={versions.filter((version) => version.state === 'ready' || version.state === 'failed').map((version) => version.id)} canBuild={canBuild} />
     {versions.length === 0 ? <p>{t('empty')}</p> : null}
     {versions.map((version) => <Panel key={version.id} title={t('version', { number: version.version })}>
       <div className="grid min-w-0 gap-4 p-4 md:p-5">
