@@ -1,6 +1,7 @@
 import { expectFitsEveryWidth } from './support/responsive'
 import { bookAtTheCounter, feePaidAndHoldPlaced, payFee, renterBrowser } from './support/rental'
 import { shopReadyToBook } from './support/shop'
+import { expectInShop } from './support/sign-in'
 import { expect, test } from './support/test'
 
 test('staff book at the counter, the renter pays the fee from the link, and the rental is booked', async ({ page, browser }) => {
@@ -153,4 +154,22 @@ test('the rental page shows each PayPal call with its ids and PayPal-Request-Id,
   await expect(record.getByRole('listitem').nth(1)).toContainText('CREATED')
   await expect(record.getByText('PayPal-Request-Id', { exact: true })).toHaveCount(2)
   await expectFitsEveryWidth(page)
+})
+
+// On a slow server the first tap on "New rental" seemed to do nothing, and a judge tapped again (audit finding JW-L10):
+// the page answers at once with its outline, while the booking form is read.
+test('the first tap on New rental answers at once, even while the server is slow', async ({ page }) => {
+  await page.goto('/sign-in')
+  await page.getByRole('region', { name: 'Try the demo shop' }).getByRole('button', { name: 'Start a demo as Jonas, at the counter' }).click()
+  await expectInShop(page, 'Ribeira Bikes')
+  await page.getByRole('navigation', { name: 'Shop pages' }).getByRole('link', { name: 'Rentals' }).click()
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Rentals')
+  await page.route('**/shop/rentals/new**', async (route) => {
+    if (route.request().headers()['rsc'] !== undefined) await new Promise((resolve) => setTimeout(resolve, 5000))
+    await route.continue()
+  })
+  await page.getByRole('link', { name: 'New rental' }).locator('visible=true').first().click()
+  await expect(page.getByRole('status').filter({ hasText: 'Loading the page…' })).toBeVisible({ timeout: 2000 })
+  await expect(page).toHaveURL(/\/shop\/rentals\/new/)
+  await expect(page.getByRole('heading', { level: 1 })).not.toHaveText('Rentals')
 })
