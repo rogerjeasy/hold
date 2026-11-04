@@ -6,6 +6,7 @@ import { registerOwner } from './accounts.ts'
 import { abandonBooking, bookableTypes, createBooking, issueRenterLink, rentalDetail, rentalList } from './booking-repository.ts'
 import { beginFeeCapture, confirmFeeCapture, saveFeeOrder } from './fee-repository.ts'
 import { rentalHold } from './hold-repository.ts'
+import { shopSnapshot } from './ops-repository.ts'
 import { addItems, changeStatus, itemCatalog, saveItemType } from './item-repository.ts'
 import { publishPriceList } from './price-list-repository.ts'
 import { findRenterLink, renterContact, renterView } from './renter-repository.ts'
@@ -258,6 +259,21 @@ describe('paying the fee', () => {
     const confirmed = await act({ role: 'hold_app', shopId }, (transaction) => confirmFeeCapture(transaction, begun.execution.id, payment(rentalId, 1_00), NOW))
     expect(confirmed).toEqual({ ok: false, reason: 'amount_mismatch' })
     expect((await database.select({ state: rentals.state }).from(rentals).where(eq(rentals.id, rentalId)))[0]?.state).toBe('pending_payment')
+  })
+
+  it('records what PayPal captured for another amount in the money log, once, and shows the difference to a person', async () => {
+    const rentalId = await pending()
+    const begun = await act({ role: 'hold_app', shopId }, (transaction) => beginFeeCapture(transaction, rentalId, NOW))
+    if (!begun.ok) throw new Error(begun.reason)
+    const confirm = () => act({ role: 'hold_app', shopId }, (transaction) => confirmFeeCapture(transaction, begun.execution.id, payment(rentalId, 1_00), NOW))
+    expect(await confirm()).toEqual({ ok: false, reason: 'amount_mismatch' })
+    expect(await confirm()).toEqual({ ok: false, reason: 'amount_mismatch' })
+
+    expect(await database.select({ kind: moneyEvents.kind, amountCents: moneyEvents.amountCents, paypalReference: moneyEvents.paypalReference }).from(moneyEvents).where(eq(moneyEvents.rentalId, rentalId))).toEqual([{ kind: 'fee_captured', amountCents: 1_00, paypalReference: `CAPTURE-${rentalId}` }])
+    expect((await database.select().from(executions).where(eq(executions.id, begun.execution.id)))[0]).toMatchObject({ state: 'failed', lastError: 'amount_mismatch', paypalResourceIds: { capture: `CAPTURE-${rentalId}` } })
+    const snapshot = await act({ role: 'hold_worker', shopId }, (transaction) => shopSnapshot(transaction, NOW, { disputes: [], differences: [] }))
+    expect(snapshot.differences).toContainEqual({ id: `CAPTURE-${rentalId}:fee_amount`, subjectKind: 'fee_capture', subjectId: `CAPTURE-${rentalId}`, rentalId })
+    expect(snapshot.differences.filter((difference) => difference.rentalId === rentalId)).toHaveLength(1)
   })
 
   it('goes ahead after the time to pay lapsed, while nobody else has taken the items', async () => {

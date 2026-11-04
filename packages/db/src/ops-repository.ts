@@ -31,6 +31,12 @@ export async function shopSnapshot(transaction: Transaction, now: Date, fromPayP
   // An incident waits for staff from when it was sorted to them (extensions.md section 10).
   const incidentRows = await transaction.select({ id: incidents.id, rentalId: incidents.rentalId, waitingSince: sql<Date | null>`coalesce(${incidents.sortedAt}, ${incidents.sentAt})`.mapWith(incidents.sortedAt) })
     .from(incidents).where(and(eq(incidents.state, 'awaiting_staff'), eq(incidents.simulated, false)))
+  // A fee PayPal captured for another amount than the rental's: recorded as PayPal shows it, never booked, and shown
+  // to a person as a difference from PayPal's record (architecture.md section 8.6).
+  const feeRows = await transaction.select({ captureId: moneyEvents.paypalReference, rentalId: moneyEvents.rentalId })
+    .from(moneyEvents).innerJoin(rentals, eq(rentals.id, moneyEvents.rentalId))
+    .where(and(real, eq(moneyEvents.kind, 'fee_captured'), or(sql`${moneyEvents.amountCents} <> ${rentals.feeCents}`, sql`${moneyEvents.currency} <> ${rentals.currency}`)))
+  const feeDifferences = feeRows.map((row) => ({ id: `${row.captureId}:fee_amount`, subjectKind: 'fee_capture', subjectId: row.captureId, rentalId: row.rentalId }))
   return {
     now,
     settings: { ...DEFAULT_SETTINGS, ...shop?.opsSettings },
@@ -40,7 +46,8 @@ export async function shopSnapshot(transaction: Transaction, now: Date, fromPayP
     claims: claimRows.map(({ decideBy, decidedAt, promiseMissedAt, ...claim }) => ({ ...claim, promise: { decideBy, decidedAt, promiseMissedAt } })),
     invoices: invoiceRows,
     incidents: incidentRows,
-    ...fromPayPal,
+    disputes: fromPayPal.disputes,
+    differences: [...fromPayPal.differences, ...feeDifferences],
   }
 }
 
