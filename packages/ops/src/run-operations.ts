@@ -1,4 +1,4 @@
-import { beginOpsRun, completeOpsRun, confirmedRules, decideProposal, exceptionsAwaitingOwner, inShop, liveStandingRule, recordExceptions, recordReminder, shopSnapshot, writeProposal } from '@hold/db'
+import { beginOpsRun, completeOpsRun, confirmedRules, decideProposal, exceptionsAwaitingOwner, inShop, liveStandingRule, operationsPrincipal, recordExceptions, recordReminder, shopSnapshot, writeProposal } from '@hold/db'
 import type { Database, RecordedException, Transaction } from '@hold/db'
 import { detectExceptions, orderQueue, suppressedByRule } from '@hold/domain'
 import type { DetectorKind, ReminderKind } from '@hold/domain'
@@ -66,6 +66,7 @@ export async function runOperations(dependencies: OpsDependencies, input: z.infe
   const currencies = new Map(snapshot.holds.map((hold) => [hold.rentalId, hold.currency]))
   const recorded = await asWorker((transaction) => recordExceptions(transaction, runId, found, now))
   const rules = await asWorker((transaction) => confirmedRules(transaction))
+  const actsFor = await asWorker((transaction) => operationsPrincipal(transaction))
 
   let reminders = 0
   let remindersFailed = 0
@@ -99,7 +100,7 @@ export async function runOperations(dependencies: OpsDependencies, input: z.infe
       if (first === undefined) continue
       const withinCeilings = budget.toolCalls < limits.maxToolCalls && budget.tokens < limits.maxTokens && Date.now() < stopAt
       const choice = dependencies.investigator !== undefined && withinCeilings
-        ? await investigate(dependencies, { shopId, exception, currency: exception.rentalId === null ? undefined : currencies.get(exception.rentalId), candidates, rules, reader, runId, budget, limits, stopAt, usage })
+        ? await investigate(dependencies, { shopId, actsFor, exception, currency: exception.rentalId === null ? undefined : currencies.get(exception.rentalId), candidates, rules, reader, runId, budget, limits, stopAt, usage })
         : fixedChoice(first, false)
       proposals += await asWorker((transaction) => writeChoice(transaction, { exception, choice, runId, paypalChecked: choice.paypalConfirmed }, now))
     }

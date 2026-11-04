@@ -514,7 +514,7 @@ PayPal's write tools, such as `create_invoice`, `create_refund` and `accept_disp
 - **X1.4** Approving a `release_hold` proposal voids the authorization in the sandbox, the verified `PAYMENT.AUTHORIZATION.VOIDED` event marks the hold released, and the renter is told.
 - **X1.5** Approving a proposal whose hold has already been released is refused as superseded.
 - **X1.6** With the Claude key removed, the queue still lists every exception.
-- **X1.7** Every PayPal MCP tool call appears in the audit log with its shop, run and tool name.
+- **X1.7** Every PayPal MCP tool call appears in the audit log with its shop, run and tool name. Since 4 November 2026 the line also names the person the agent acted for: the shop's owner, read from the shop's staff when the run begins (`operationsPrincipal`). A shop with no owner gets no PayPal read at all, since the gateway refuses an agent that acts for nobody, and its queue is still written from the detectors (`run-operations.test.ts`).
 - **X1.8** The containment test in 6.10 passes.
 - **X1.9** A rejection with a reason produces a drafted rule. Once confirmed, the next run does not make that proposal.
 - **X1.10** Amounts on the queue screen equal the database values for the records they name: the hold for a release or a replacement hold, what the claim still leaves uncaptured for an invoice or a refund, and what was captured for an answer to a dispute, since that is the money disputed.

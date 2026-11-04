@@ -26,6 +26,8 @@ export type InvestigateDependencies = { readonly database: Database; readonly no
 
 export type Investigation = {
   readonly shopId: string
+  // The owner the agent acts for, as the run resolved it.
+  readonly actsFor: string | null
   readonly exception: RecordedException
   // The currency of the amount the exception names; unknown, no number may stand in a draft.
   readonly currency: string | undefined
@@ -50,7 +52,7 @@ export async function investigate(dependencies: InvestigateDependencies, work: I
   const facts = await inShop<unknown>(dependencies.database, { role: 'hold_worker', shopId: work.shopId }, (transaction) =>
     exception.rentalId === null ? Promise.resolve({ subjectKind: exception.subjectKind, subjectId: exception.subjectId }) : exceptionFacts(transaction, 'rental', exception.rentalId))
   const answered = { count: 0 }
-  const tools = gatedTools({ database: dependencies.database, shopId: work.shopId, runId: work.runId, subject: { kind: exception.subjectKind, id: exception.subjectId }, reader: work.reader, budget: work.budget, answered, maxToolCalls: work.limits.maxToolCalls, now: dependencies.now })
+  const tools = gatedTools({ database: dependencies.database, shopId: work.shopId, actsFor: work.actsFor, runId: work.runId, subject: { kind: exception.subjectKind, id: exception.subjectId }, reader: work.reader, budget: work.budget, answered, maxToolCalls: work.limits.maxToolCalls, now: dependencies.now })
   const signal = AbortSignal.timeout(Math.max(1, work.stopAt - Date.now()))
   const result = await investigator.investigate(
     { exceptionKind: exception.kind, allowed: candidates, deadline: exception.deadline, facts: JSON.stringify({ exception: { kind: exception.kind, subjectKind: exception.subjectKind, subjectId: exception.subjectId, moneyCents: exception.moneyCents }, records: facts }), rules: work.rules, paypalAvailable: work.reader !== undefined },

@@ -2,7 +2,7 @@ import { detectExceptions } from '@hold/domain'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { auditLog, authorizations, captureSessions, executions, holds, incidents, itemTypes, moneyEvents, outbox, proposals, rentalItems, rentals, shopExceptions } from './schema/index.ts'
-import { auditAgentCall, beginOpsRun, finishProposal, proposalToCarryOut, completeOpsRun, decideProposal, exceptionFacts, holdsToReconcile, morningQueue, proposalAmount, queueOperationsCheck, recentDecisions, recordExceptions, rentalsForCaptures, shopSnapshot, writeProposal } from './ops-repository.ts'
+import { auditAgentCall, operationsPrincipal, beginOpsRun, finishProposal, proposalToCarryOut, completeOpsRun, decideProposal, exceptionFacts, holdsToReconcile, morningQueue, proposalAmount, queueOperationsCheck, recentDecisions, recordExceptions, rentalsForCaptures, shopSnapshot, writeProposal } from './ops-repository.ts'
 import { grantStandingRule, revokeMandate } from './ops-settings-repository.ts'
 import { outboxWrittenAt } from './paypal-event-repository.ts'
 import { inShop } from './scope.ts'
@@ -231,9 +231,11 @@ describe('what the operations run reads', () => {
     expect(holdsToCheck).toContainEqual(expect.objectContaining({ holdId, rentalId, state: 'placed' }))
     await database.insert(moneyEvents).values({ shopId: shop.scope.shopId, rentalId, holdId, kind: 'hold_captured', currency: 'EUR', amountCents: 3500, paypalReference: 'CAPTURE-DISPUTED', occurredAt: now })
     expect(await asWorker((transaction) => rentalsForCaptures(transaction, ['CAPTURE-DISPUTED', 'CAPTURE-UNKNOWN']))).toEqual({ 'CAPTURE-DISPUTED': rentalId })
-    await asWorker((transaction) => auditAgentCall(transaction, { runId: null, tool: 'paypal.list_transactions', subjectKind: 'hold', subjectId: holdId, outcome: 'ok', milliseconds: 12 }, now))
+    const owner = await asWorker((transaction) => operationsPrincipal(transaction))
+    expect(owner).toBe(shop.scope.userId)
+    await asWorker((transaction) => auditAgentCall(transaction, { runId: null, tool: 'paypal.list_transactions', subjectKind: 'hold', subjectId: holdId, actsFor: owner, outcome: 'ok', milliseconds: 12 }, now))
     const [line] = await database.select().from(auditLog).where(eq(auditLog.action, 'agent.tool.paypal.list_transactions'))
-    expect(line).toMatchObject({ actorKind: 'shop_agent', shopId: shop.scope.shopId, detail: { outcome: 'ok', milliseconds: 12 } })
+    expect(line).toMatchObject({ actorKind: 'shop_agent', shopId: shop.scope.shopId, detail: { outcome: 'ok', actsFor: shop.scope.userId, milliseconds: 12 } })
   })
 
   it('gives an investigation the records an exception names, with no name or address in them', async () => {

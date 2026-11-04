@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto'
 import { DETECTOR_PROPOSALS, orderQueue, proposalFingerprintInput, withinMandate } from '@hold/domain'
 import type { ProposalKind, ShopException, ShopSnapshot } from '@hold/domain'
-import { and, desc, eq, gt, gte, inArray, isNull, lt, or, sql } from 'drizzle-orm'
-import { approvals, auditLog, authorizations, captureSessions, claims, comparisons, holds, incidents, invoices, moneyEvents, opsRuns, outbox, proposals, rentalItems, rentals, shopExceptions, shops } from './schema/index.ts'
+import { and, asc, desc, eq, gt, gte, inArray, isNull, lt, or, sql } from 'drizzle-orm'
+import { approvals, auditLog, authorizations, captureSessions, claims, comparisons, holds, incidents, invoices, moneyEvents, opsRuns, outbox, proposals, rentalItems, rentals, shopExceptions, shops, staffRoles } from './schema/index.ts'
 import { releaseCleanReturn } from './claim-repository.ts'
 import { mandateForUse } from './ops-settings-repository.ts'
 import { outsideShop } from './scope.ts'
@@ -326,13 +326,21 @@ export async function rentalsForCaptures(transaction: Transaction, captureIds: r
   return Object.fromEntries(rows.map((row) => [row.reference, row.rentalId]))
 }
 
-export type AgentCallLine = { readonly runId: string | null; readonly tool: string; readonly subjectKind: string | null; readonly subjectId: string | null; readonly outcome: string; readonly milliseconds: number }
+// The person the operations agent acts for (extensions.md section 4.1): the shop's owner, the first if it has several.
+// None means the agent acts for nobody, and the gateway refuses its every call.
+export async function operationsPrincipal(transaction: Transaction): Promise<string | null> {
+  const [owner] = await transaction.select({ userId: staffRoles.userId }).from(staffRoles).where(eq(staffRoles.role, 'owner')).orderBy(asc(staffRoles.createdAt), asc(staffRoles.id)).limit(1)
+  return owner?.userId ?? null
+}
+
+// actsFor: the person the agent acted for, as the gateway saw it.
+export type AgentCallLine = { readonly runId: string | null; readonly tool: string; readonly subjectKind: string | null; readonly subjectId: string | null; readonly actsFor: string | null; readonly outcome: string; readonly milliseconds: number }
 
 // One audit line for each tool call an agent makes, allowed or refused (extensions.md section 4.4, X1.7).
 export async function auditAgentCall(transaction: Transaction, line: AgentCallLine, now: Date): Promise<void> {
   const [shop] = await transaction.select({ id: shops.id }).from(shops).limit(1)
   if (shop === undefined) throw new Error('No shop in scope.')
-  await transaction.insert(auditLog).values({ shopId: shop.id, actorKind: 'shop_agent', actorId: 'operations_agent', action: `agent.tool.${line.tool}`, subjectKind: line.subjectKind, subjectId: line.subjectId, source: line.runId, detail: { outcome: line.outcome, milliseconds: line.milliseconds }, at: now })
+  await transaction.insert(auditLog).values({ shopId: shop.id, actorKind: 'shop_agent', actorId: 'operations_agent', action: `agent.tool.${line.tool}`, subjectKind: line.subjectKind, subjectId: line.subjectId, source: line.runId, detail: { outcome: line.outcome, actsFor: line.actsFor, milliseconds: line.milliseconds }, at: now })
 }
 
 // The records an exception names, for the model to read: states, amounts, dates and PayPal references. No name,
