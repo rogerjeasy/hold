@@ -87,6 +87,9 @@
     "shop": {
       "title": "Today"
     },
+    "notFound": {
+      "title": "Page not found"
+    },
     "invite": {
       "title": "An invitation"
     },
