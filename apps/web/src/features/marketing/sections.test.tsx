@@ -17,6 +17,11 @@ describe('Hero', () => {
     renderWithIntl(<Hero />)
     expect(screen.getByRole('heading', { level: 1, name: 'One photograph settles it.' })).toBeInTheDocument()
   })
+
+  it('names who it is for above the claim', () => {
+    renderWithIntl(<Hero />)
+    expect(screen.getByText('For bike, scooter and gear rental shops')).toBeInTheDocument()
+  })
 })
 
 describe('AudienceDoors', () => {
@@ -24,6 +29,12 @@ describe('AudienceDoors', () => {
     renderWithIntl(<AudienceDoors />)
     expect(screen.getByRole('link', { name: "For shops See the shop's view" })).toHaveAttribute('href', '/for-shops')
     expect(screen.getByRole('link', { name: "For renters See the renter's view" })).toHaveAttribute('href', '/for-renters')
+  })
+
+  it('frosts the renters’ door over the hero’s dark stage, where a dark card would vanish', () => {
+    renderWithIntl(<AudienceDoors tone="stage" />)
+    expect(screen.getByRole('link', { name: "For renters See the renter's view" })).toHaveClass('backdrop-blur-md')
+    expect(screen.getByRole('link', { name: "For renters See the renter's view" })).not.toHaveClass('bg-contrast')
   })
 })
 

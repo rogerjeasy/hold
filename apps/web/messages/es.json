@@ -156,8 +156,13 @@
     }
   },
   "hero": {
+    "eyebrow": "Para tiendas de alquiler de bicicletas, patinetes y equipo",
     "title": "Una fotografía lo resuelve.",
-    "lead": "Hold reserva la fianza con PayPal y no cobra nada. En la devolución, el código encuentra lo que cambió entre dos fotografías antes de que Claude lo explique, una persona con nombre aprueba cada céntimo según una lista de precios publicada y el cliente ve las mismas pruebas. Cuando las dos partes no están de acuerdo, dos defensores lo discuten dentro de los límites que fijó cada parte."
+    "lead": "Hold reserva la fianza con PayPal y no cobra nada. En la devolución, el código encuentra lo que cambió entre dos fotografías antes de que Claude lo explique, una persona con nombre aprueba cada céntimo según una lista de precios publicada y el cliente ve las mismas pruebas. Cuando las dos partes no están de acuerdo, dos defensores lo discuten dentro de los límites que fijó cada parte.",
+    "film": {
+      "pause": "Pausar el vídeo de fondo",
+      "play": "Reproducir el vídeo de fondo"
+    }
   },
   "evidence": {
     "handover": "Entrega",

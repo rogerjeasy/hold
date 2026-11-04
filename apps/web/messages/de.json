@@ -156,8 +156,13 @@
     }
   },
   "hero": {
+    "eyebrow": "Für Verleihe von Fahrrädern, Scootern und Ausrüstung",
     "title": "Ein Foto klärt es.",
-    "lead": "Hold reserviert die Kaution über PayPal und bucht nichts ab. Bei der Rückgabe findet Code, was sich zwischen zwei Fotos verändert hat, bevor Claude es erklärt. Ein namentlich genannter Mensch genehmigt jeden Cent aus einer veröffentlichten Preisliste, und der Mieter sieht dieselben Belege. Sind sich beide Seiten uneinig, verhandeln zwei Fürsprecher innerhalb der Limits, die jede Seite gesetzt hat."
+    "lead": "Hold reserviert die Kaution über PayPal und bucht nichts ab. Bei der Rückgabe findet Code, was sich zwischen zwei Fotos verändert hat, bevor Claude es erklärt. Ein namentlich genannter Mensch genehmigt jeden Cent aus einer veröffentlichten Preisliste, und der Mieter sieht dieselben Belege. Sind sich beide Seiten uneinig, verhandeln zwei Fürsprecher innerhalb der Limits, die jede Seite gesetzt hat.",
+    "film": {
+      "pause": "Hintergrundfilm anhalten",
+      "play": "Hintergrundfilm abspielen"
+    }
   },
   "evidence": {
     "handover": "Übergabe",

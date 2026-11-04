@@ -156,8 +156,13 @@
     }
   },
   "hero": {
+    "eyebrow": "For bike, scooter and gear rental shops",
     "title": "One photograph settles it.",
-    "lead": "Hold reserves the deposit with PayPal and charges nothing. At return, code finds what changed between two photographs before Claude explains it, a named person approves every cent from a published price list, and the renter sees the same evidence. When the two sides disagree, two advocates argue it inside limits each side set."
+    "lead": "Hold reserves the deposit with PayPal and charges nothing. At return, code finds what changed between two photographs before Claude explains it, a named person approves every cent from a published price list, and the renter sees the same evidence. When the two sides disagree, two advocates argue it inside limits each side set.",
+    "film": {
+      "pause": "Pause the background film",
+      "play": "Play the background film"
+    }
   },
   "evidence": {
     "handover": "Handover",

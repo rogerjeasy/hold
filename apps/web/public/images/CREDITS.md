@@ -1,6 +1,6 @@
 # Photograph credits
 
-All eight files come from Unsplash, whose license allows free commercial use without attribution. Credit is given anyway, here and in the site footer.
+The eight photographs come from Unsplash, whose license allows free commercial use without attribution. Credit is given anyway, here and in the site footer.
 
 | File | Source | Photographer | Edits |
 |---|---|---|---|
@@ -16,3 +16,7 @@ All eight files come from Unsplash, whose license allows free commercial use wit
 The scratches, the scuff and the chip on the frame are drawn on. They are not real damage. The site says "Illustrative photographs" beside them.
 
 Replace `frame-handover.jpg` and `frame-return.jpg` with a real handover and return pair before submission. `docs/tech-stack.md` section 16, item 4 asks for that pair. Keep the 21:9 crop, and update the mark positions in `src/features/marketing/evidence-photo.ts`.
+
+## The hero film
+
+`public/video/hero-wide.mp4`, `public/video/hero-tall.mp4`, `hero/hero-wide-still.webp` and `hero/hero-tall-still.webp` are Hold's own work: a Three.js scene of a city bike and an e-scooter modelled in code, rendered frame by frame in a browser and encoded with ffmpeg. No photograph, model or music from anyone else is in them. The still is frame 186 of the 360, where the brackets have closed on the chip.
