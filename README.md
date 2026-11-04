@@ -22,12 +22,21 @@ and each can be seen without signing in:
 
 | What | Where to see it |
 |---|---|
-| **Two advocates under separate mandates.** When a renter contests a claim, Claude argues the shop's side and the renter's side in separate calls, each inside a limit its own person set and never shown the other's. A referee in plain code ([`referee.ts`](packages/domain/src/referee.ts), proven with fast-check properties) refuses any added line, any price above the published list, any reduction without a ground, and any offer that widens the gap. An agreement can only lower an approved claim, both people confirm it, and every move is fingerprinted over the one before. | [`/advocates`](https://p99faar3kp.us-east-1.awsapprunner.com/advocates): a live run recorded from Bedrock, move by move. In a demo shop: **Rentals**, **Elena Duarte**, **Let the advocates argue it**, live |
+| **Two advocates under separate mandates.** When a renter contests a claim, Claude argues the shop's side and the renter's side in separate calls, each inside a limit its own person set and never shown the other's. A referee in plain code ([`referee.ts`](packages/domain/src/referee.ts), proven with fast-check properties) refuses any added line, any price above the published list, any reduction without a ground, and any offer that widens the gap. An agreement can only lower an approved claim, both people confirm it, and every move is fingerprinted over the one before. | [`/advocates`](https://p99faar3kp.us-east-1.awsapprunner.com/advocates): a live run recorded from Bedrock, move by move. In a demo shop, as Tomás, the owner: **Rentals**, **Elena Duarte**, **Let the advocates argue it**, live |
 | **Code finds, the model explains, a second look checks.** OpenCV aligns each pair and finds every change before Claude is asked; each damage finding then gets an independent second look on a wider crop. With the model down nothing is missed: the change waits for a person. | [`/ai`](https://p99faar3kp.us-east-1.awsapprunner.com/ai), and the real comparison on the demo's sample return |
 | **An operations agent that reads PayPal and cannot charge.** Overnight it checks every hold, claim and dispute against PayPal through PayPal's own MCP server with read-only tools, and leaves a short queue a person decides. None of its proposal kinds takes money. | [`/ai`](https://p99faar3kp.us-east-1.awsapprunner.com/ai): one night's queue as it wrote it, recorded from Bedrock. As the owner in a demo shop: **Morning queue**, **Investigate the samples**, live |
 | **Evidence anyone can check.** The handover photographs are sealed into a signed statement that anyone can verify in the browser against Hold's published key, without trusting Hold. | [`/verify`](https://p99faar3kp.us-east-1.awsapprunner.com/verify) and [`/.well-known/jwks.json`](https://p99faar3kp.us-east-1.awsapprunner.com/.well-known/jwks.json) |
 | **Accuracy counted, not claimed.** The comparison is scored on a held-out half it is never tuned on, and every pair behind every count is published. No run is accepted yet, and the page says so. | [`/reliability`](https://p99faar3kp.us-east-1.awsapprunner.com/reliability) |
 | **Bookable by any assistant, unable to charge.** Hold's own MCP server lets any assistant find a shop, quote and book; the person approves in PayPal, and none of its 22 tools takes an amount. | [`/mcp`](https://p99faar3kp.us-east-1.awsapprunner.com/mcp) and the [hosted assistant](https://p99faar3kp.us-east-1.awsapprunner.com/assistant) |
+
+| | |
+|---|---|
+| ![The renter's page asking to approve a €250 hold, which reads "A reservation, never a charge"](docs/images/renter-hold.webp) | ![A comparison of a handover and a return photograph, with the new chip boxed, confirmed by a second look and priced from the shop's list; the page says it is a simulated comparison](docs/images/comparison-finding.webp) |
+| The renter approves the hold in their own PayPal account. Nothing is charged. | Code boxes what changed, Claude says what it is, a second look confirms it, and the price comes from the shop's list. This one is the local run's simulated comparison, and says so. |
+| ![The two advocates' offers on a sample claim, €50 down to an agreed €25, beside the note that the run was recorded from Bedrock and the renter is made up](docs/images/advocates-ladder.webp) | ![A sample rental's page with its PayPal record: the fee captured and the hold placed, each with PayPal's id and status, marked Sample](docs/images/paypal-record.webp) |
+| The advocates' offers on `/advocates`, from a run recorded live on Bedrock. The renter and her limit are made up. | Every PayPal call behind a rental, with PayPal's own ids. This is a sample rental, marked **Sample**, whose ids are made up. |
+
+The screenshots are from the app running on its in-process fakes, 1280 pixels wide.
 
 **What Hold builds on, and how it differs.** Rental software already reserves deposits with card holds, mostly
 through Stripe, where a hold lasts about a week and is captured once. Under Visa's rules an estimated authorization
@@ -61,7 +70,7 @@ to its owner, and Jonas approves up to €100. Keep two things to hand: the PayP
    and say what you see. Tap **Prepare claim for review**, then **Approve and show renter link**. The screen says
    **Demonstration photographs, real comparison**: the photographs are samples, but code and Claude really compared
    them, and the result is kept out of every accuracy figure.
-5. Open the renter's link, as the renter would on their phone. Tap **I have reviewed this claim** and **Email me a
+5. Open the renter's link, as the renter would on their phone. Tap **I have reviewed this claim** and **Send me a
    verification code**: it goes to your email, because the sandbox buyer has no inbox. Accept the claim. PayPal
    captures €35 of the hold and releases the other €215, in the sandbox, and the rental shows **Settlement
    confirmed**. For a clean return, use **Use the sample photograph** at the return instead and release the hold.
@@ -74,8 +83,9 @@ need a decision, **Calendar** shows every bike as a row and every rental as a ba
 stands, and one sample claim is one the renter contested. Tomás's own money decisions ask for a passkey,
 which **Add a passkey** sets up on your device. **Start a fresh demo** opens a new shop.
 
-**Watch the two advocates argue.** Open **Rentals**, then **Elena Duarte**, then her claim: a scratch and a cleaning
-charge, still waiting for her reply. Tap **Let the advocates argue it**. Claude argues the renter's side and the shop's
+**Watch the two advocates argue.** Still signed in as Tomás, the owner (the button is for owners and managers, so
+Jonas does not see it), open **Rentals**, then **Elena Duarte**, then her claim: a scratch and a cleaning charge, still
+waiting for her reply. Tap **Let the advocates argue it**. It needs no passkey, since a sample moves no money. Claude argues the renter's side and the shop's
 side separately, each from the evidence and within its own limit, and plain code checks every offer. The moves appear on
 the page as they are made, usually within a few minutes. Elena and her limit are made up for the demonstration, so
 nothing is ever taken from this sample. In a real contest the renter starts their own advocate from their claim link.
@@ -238,8 +248,9 @@ passkey on your own device, which **Add a passkey** on the Security page sets up
 
 ## Run it yourself
 
-You need Node 24 and pnpm 12. The tests need no AWS account: they run against a real PostgreSQL in WebAssembly and
-in-process fakes for PayPal, Cognito and email.
+You need Node 24 and pnpm 12. The clone is large, about 190 MB to download and 400 MB on disk, most of it the
+evaluation set's photographs under `eval/`. The tests need no AWS account: they run against a real PostgreSQL in
+WebAssembly and in-process fakes for PayPal, Cognito and email.
 
 ```sh
 pnpm install
@@ -249,7 +260,10 @@ pnpm test:e2e     # builds the app and runs Playwright against the fakes
 
 **Run the whole app with no account.** The same fakes run the built app on your machine: a database in memory, a
 simulated PayPal approval page, stand-ins for Claude that say they are stand-ins, and a fixed sign-in code,
-`24681357`. **Start a demo as Tomás, the owner** works as it does on the hosted demo.
+`24681357`. **Start a demo as Jonas, at the counter** runs the whole money loop as on the hosted demo, with no
+passkey. **Start a demo as Tomás, the owner** opens the same kind of shop, and his money steps ask for a passkey, as
+they do on the hosted demo: **Add a passkey** on the Security page makes one for `localhost` in Chrome, which the
+fake sign-in service accepts. The cookies are `Secure` here too, which Chrome allows on `localhost`.
 
 ```sh
 pnpm install
@@ -262,7 +276,9 @@ HOLD_ENVIRONMENT=test HOLD_COOKIE_KEY="$(openssl rand -base64 32)" HOLD_PUBLIC_U
 Everything lives in memory and is gone when the server stops.
 
 To run the app against your own AWS services, copy `apps/web/.env.example` to `apps/web/.env.local`, fill it in, and
-run `pnpm dev`. The infrastructure is in `infra/` as CDK stacks, all named `hold-*`.
+run `pnpm dev`. The infrastructure is in `infra/` as six CDK stacks, every resource named `hold-*`. To recreate the
+whole deployment in an AWS account of your own, follow [`docs/deploy.md`](docs/deploy.md): what to change, what an
+administrator makes by hand, and in what order.
 
 **Connecting the demo to PayPal's sandbox** (administrators, once, with AWS credentials for the account):
 
@@ -285,6 +301,19 @@ Hold runs end to end in PayPal's sandbox. Before a shop takes real money, these 
   link. If they do not, the shop is unprotected for the rest of the rental. The plan is to save the renter's PayPal
   wallet with their consent and place the next hold from it.
 - **A measured comparison.** No accuracy is claimed until a run on real photographs of real damage is accepted.
+- **Live PayPal.** Hold runs in PayPal's sandbox only, and the configuration accepts nothing else
+  (`HOLD_PAYPAL_MODE` is `sandbox`). Going live needs a live mode per shop, PayPal's app review and a verified business
+  account, and partial capture switched on for each shop's PayPal account ([`docs/deploy.md`](docs/deploy.md)
+  section 11).
+- **Terms.** The terms today are a hackathon notice. A shop needs terms it signs, with a data processing agreement,
+  and a renter needs deposit terms, each accepted and stored with its version and time.
+- **A price, and billing.** None is built. The proposal is a fee per protected rental, about €1.50 to €3, with a
+  few free rentals a month for a single shop. A flat €49 to €99 a month, the usual price of small-shop rental
+  software, would not cover a busy shop's model calls today: about $0.40 per return typically, up to $1.40 at the
+  ceiling. The plans are in [`docs/project-description.md`](docs/project-description.md) section 11. It is a
+  proposal to test with shops, not a price.
+- **A deployment of their own.** Today the demo shops and any real shop share one deployment, one user pool and one
+  database, walled off from each other by row-level security. Real shops should not share them with public demos.
 
 A phone app for iOS and Android is in `apps/mobile`. It is not part of this submission's demonstration.
 
