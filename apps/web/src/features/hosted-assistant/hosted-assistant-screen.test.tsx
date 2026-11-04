@@ -97,7 +97,8 @@ describe('the hosted assistant’s page', () => {
     expect(screen.getByRole('status')).toHaveTextContent(/The assistant is working on it · \d+ s/)
     answered({ ok: true, value: answer })
     expect(await screen.findByText('Booked. Approve the fee of €120.00 in PayPal.')).toBeInTheDocument()
-    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    // The answer can render a moment before the action stops pending, so the status is awaited, not read once.
+    await waitFor(() => { expect(screen.queryByRole('status')).not.toBeInTheDocument() })
   })
 
   it('sends with Enter, keeps Shift+Enter for a new line, and empties the box once sent', async () => {
