@@ -1,5 +1,5 @@
 // @vitest-environment node
-import { findPayPalAccount, inShop, itemCatalog, paypalEvents, registerOwner, rentalDetail } from '@hold/db'
+import { findPayPalAccount, inShop, itemCatalog, paypalEvents, rateTokensLeft, registerOwner, rentalDetail } from '@hold/db'
 import { FAKE_SIGNATURE } from '@hold/paypal'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -22,7 +22,7 @@ vi.mock('next/headers', () => ({
 vi.mock('next/cache', () => ({ revalidatePath: () => undefined }))
 vi.mock('next-intl/server', () => ({ getTranslations: () => Promise.resolve((key: string) => key) }))
 
-const { FORGED_DELIVERIES, receivePayPalEvent } = await import('./paypal-webhook')
+const { ACCOUNT_VERIFICATIONS, FORGED_DELIVERIES, forgedDeliverySubject, receivePayPalEvent } = await import('./paypal-webhook')
 const shop = await import('@/features/shop/actions')
 const items = await import('@/features/items/actions')
 const rentals = await import('@/features/rentals/actions')
@@ -173,5 +173,63 @@ describe('a flood of forged deliveries to one account’s address', () => {
     expect((await receivePayPalEvent(accountId, event('CHECKOUT.ORDER.APPROVED', { id: orderId }, 'WH-AFTER-FLOOD'), signed())).status).toBe(200)
     expect(await storedWithId('WH-AFTER-FLOOD')).toBe(1)
     expect(await stateOf(rentalId)).toBe('booked')
+  })
+})
+
+describe('what a delivery costs its network’s allowance', () => {
+  const PAYPAL_FAILURE = { issue: undefined, description: undefined, debugId: undefined }
+  const leftFor = async (network: string) => rateTokensLeft((await getServices()).database, FORGED_DELIVERIES, forgedDeliverySubject(accountId, network))
+
+  async function from<Result>(network: string, verify: 'unavailable' | 'rejected' | undefined, work: () => Promise<Result>): Promise<Result> {
+    const { simulatedPayPal } = await getServices()
+    if (simulatedPayPal === undefined) throw new Error('No simulated PayPal.')
+    const check = verify === undefined ? undefined : vi.spyOn(simulatedPayPal, 'verifyWebhook').mockResolvedValue({ ok: false, error: { kind: verify, ...PAYPAL_FAILURE } })
+    caller = network
+    try {
+      return await work()
+    } finally {
+      caller = PAYPAL_NETWORK
+      check?.mockRestore()
+    }
+  }
+
+  it('is nothing for a delivery PayPal verified', async () => {
+    expect(await from('192.0.2.21', undefined, async () => (await receivePayPalEvent(accountId, event('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-5' }), signed())).status)).toBe(200)
+    expect(await leftFor('192.0.2.21')).toBe(FORGED_DELIVERIES.max)
+  })
+
+  it('is one token, kept, when PayPal cannot be reached to check, and PayPal is answered 503 to send it again', async () => {
+    expect(await from('192.0.2.22', 'unavailable', async () => (await receivePayPalEvent(accountId, event('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-5' }), signed())).status)).toBe(503)
+    expect(await leftFor('192.0.2.22')).toBe(FORGED_DELIVERIES.max - 1)
+  })
+
+  it('is one token, as for a forgery, when PayPal refuses the check itself as a bad request', async () => {
+    expect(await from('192.0.2.23', 'rejected', async () => (await receivePayPalEvent(accountId, event('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-5' }), signed())).status)).toBe(401)
+    expect(await leftFor('192.0.2.23')).toBe(FORGED_DELIVERIES.max - 1)
+  })
+})
+
+// Last, since it uses up the account's ceiling for the hour.
+describe('forged deliveries to one address from many networks', () => {
+  it('stop costing PayPal checks at the account’s hourly ceiling, after which the address is refused unchecked from every network', async () => {
+    const { simulatedPayPal } = await getServices()
+    if (simulatedPayPal === undefined) throw new Error('No simulated PayPal.')
+    let refused = 0
+    for (let network = 0; refused === 0 && network < ACCOUNT_VERIFICATIONS.max; network += 1) {
+      caller = `198.18.${String(Math.floor(network / 200))}.${String(network % 200)}`
+      for (let each = 0; each < FORGED_DELIVERIES.max && refused === 0; each += 1) {
+        if ((await receivePayPalEvent(accountId, event('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-6' }), signed('forged'))).status === 429) refused += 1
+      }
+    }
+    expect(refused).toBe(1)
+    const checks = vi.spyOn(simulatedPayPal, 'verifyWebhook')
+    caller = '198.19.0.1'
+    expect((await receivePayPalEvent(accountId, event('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-6' }), signed('forged'))).status).toBe(429)
+    // The residual risk, said in the threat table: PayPal's own event is refused too until the hour is over, and PayPal
+    // sends it again for days.
+    caller = PAYPAL_NETWORK
+    expect((await receivePayPalEvent(accountId, event('CUSTOMER.DISPUTE.CREATED', { id: 'PP-D-6' }), signed())).status).toBe(429)
+    expect(checks).not.toHaveBeenCalled()
+    checks.mockRestore()
   })
 })

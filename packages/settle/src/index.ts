@@ -1,4 +1,4 @@
-export { PayPalUnavailable } from './dependencies.ts'
+export { PayPalUnavailable, TRANSIENT } from './dependencies.ts'
 export type { Notice, Notifier, QueueMessage, RenterAsk, RequestDependencies, Scheduler, SettleDependencies } from './dependencies.ts'
 export { executionMessage } from './execution-queue.ts'
 export { EXECUTION_RECHECK_MINUTES, recheckWaitingExecutions } from './execution-recheck.ts'
