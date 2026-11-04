@@ -2537,7 +2537,13 @@
         "starting": "Der Vergleich wird gestartet…",
         "started": "Der Vergleich hat begonnen.",
         "left": "{count, plural, one {# echter Vergleich heute aus Ihrem Netzwerk übrig} other {# echte Vergleiche heute aus Ihrem Netzwerk übrig}}. Jeder verbraucht einen Teil des täglichen Claude-Kontingents des Kontos.",
-        "noneTitle": "Heute kein echter Vergleich mehr"
+        "noneTitle": "Heute kein echter Vergleich mehr",
+        "standIn": {
+          "title": "Sehen Sie den simulierten Vergleich laufen",
+          "body": "Der Vergleich dieser Beispielrückgabe ist noch nicht gelaufen. Diese Kopie von Hold läuft mit ihren Testdiensten im Prozess, ohne Claude: Starten Sie ihn, und Code findet, was sich zwischen diesen Demonstrationsfotos verändert hat; dann beschreibt ein Platzhalter, nicht Claude, jede von Code gefundene Veränderung. Das Ergebnis ist als simuliert gekennzeichnet. Kein PayPal-Login ist nötig, und nichts wird belastet.",
+          "start": "Den simulierten Vergleich mit diesem Beispiel ausführen",
+          "left": "{count, plural, one {# simulierter Vergleich heute aus Ihrem Netzwerk übrig} other {# simulierte Vergleiche heute aus Ihrem Netzwerk übrig}}."
+        }
       },
       "marked": "{count, plural, one {# Stelle gefunden} other {# Stellen gefunden}}"
     },
@@ -3424,6 +3430,8 @@
     "draftGuidance": "Wählen Sie bestätigte Befunde oder einen veröffentlichten Preis mit schriftlicher Begründung. Leere manuelle Zeilen werden ignoriert.",
     "manualLine": "Manueller Posten {number}",
     "priceEntry": "Vereinbarter Preis",
+    "findingPrice": "Vereinbarter Preis für diesen Befund",
+    "choosePrice": "Vereinbarten Preis wählen",
     "lineReason": "Was wurde festgestellt und warum gilt dieser Preis?",
     "addLine": "Weiteren Posten hinzufügen",
     "prepare": "Forderung zur Prüfung vorbereiten",

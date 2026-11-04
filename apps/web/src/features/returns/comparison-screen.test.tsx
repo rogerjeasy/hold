@@ -61,6 +61,16 @@ describe('the demo’s sample return, waiting for its comparison', () => {
     // Nothing has run yet, so the page does not also say no model answered.
     expect(screen.queryByText('Simulated comparison')).not.toBeInTheDocument()
   })
+  // On the in-process fakes no Claude runs: the panel says a stand-in will, and that the result is simulated.
+  it('says a stand-in, not Claude, compares the sample where the app runs on its fakes', () => {
+    renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={waiting} canAct sampleAllowance={{ left: 2, refusal: null }} standIn />)
+    expect(screen.getByRole('heading', { name: 'Watch the simulated comparison run' })).toBeInTheDocument()
+    expect(screen.getByText(/a stand-in, not Claude, words each change code found/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Run the simulated comparison on this sample' })).toBeInTheDocument()
+    expect(screen.getByText(/2 simulated comparisons left today from your network/)).toBeInTheDocument()
+    expect(screen.queryByText(/Claude Opus 4.6/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/real comparison/)).not.toBeInTheDocument()
+  })
   it('offers no button once none is left today, and says which share is spent and when it starts again', () => {
     renderWithIntl(<ComparisonScreen shopName="Ribeira Bikes" report={waiting} canAct sampleAllowance={{ left: 0, refusal: 'daily_cap_network' }} />)
     expect(screen.queryByRole('button', { name: 'Run the real comparison on this sample' })).not.toBeInTheDocument()

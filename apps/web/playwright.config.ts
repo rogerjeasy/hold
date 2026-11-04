@@ -42,15 +42,16 @@ export default defineConfig({
       reuseExistingServer: false,
       timeout: 60_000,
       // The built app runs against in-process fakes: an identity service that sends the code in e2e/support/sign-in.ts,
-      // and a database in memory. The key seals cookies for this run only.
-      env: { HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: Buffer.alloc(32, 7).toString('base64'), HOLD_PUBLIC_URL: baseURL },
+      // and a database in memory. The key seals cookies for this run only. pnpm puts its package store on NODE_PATH
+      // for the test runner; the README's command has none, so neither does the server under test.
+      env: { HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: Buffer.alloc(32, 7).toString('base64'), HOLD_PUBLIC_URL: baseURL, NODE_PATH: '' },
     },
     ...(keyFlowsOnly ? [] : [{
       command: `node node_modules/next/dist/bin/next start --port ${String(FIXTURE_PORT)}`,
       url: fixtureURL,
       reuseExistingServer: false,
       timeout: 60_000,
-      env: { HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: Buffer.alloc(32, 7).toString('base64'), HOLD_PUBLIC_URL: fixtureURL, HOLD_EVAL_FIXTURE: 'on' },
+      env: { HOLD_ENVIRONMENT: 'test', HOLD_COOKIE_KEY: Buffer.alloc(32, 7).toString('base64'), HOLD_PUBLIC_URL: fixtureURL, HOLD_EVAL_FIXTURE: 'on', NODE_PATH: '' },
     }]),
   ],
 })

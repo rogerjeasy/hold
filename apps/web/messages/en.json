@@ -2537,7 +2537,13 @@
         "starting": "Starting the comparison…",
         "started": "The comparison has started.",
         "left": "{count, plural, one {# real comparison left today from your network} other {# real comparisons left today from your network}}. Each spends part of the account's daily Claude allowance.",
-        "noneTitle": "No real comparison left today"
+        "noneTitle": "No real comparison left today",
+        "standIn": {
+          "title": "Watch the simulated comparison run",
+          "body": "This sample return's comparison has not run yet. This copy of Hold runs on its in-process fakes, with no Claude: start it and code finds what changed between these demonstration photographs, then a stand-in, not Claude, words each change code found. The result is labelled simulated. No PayPal login is needed and nothing is charged.",
+          "start": "Run the simulated comparison on this sample",
+          "left": "{count, plural, one {# simulated comparison left today from your network} other {# simulated comparisons left today from your network}}."
+        }
       },
       "marked": "{count, plural, one {# mark found} other {# marks found}}"
     },
@@ -3424,6 +3430,8 @@
     "draftGuidance": "Select confirmed findings, or add a published price with your written reason. Blank manual lines are ignored.",
     "manualLine": "Manual line {number}",
     "priceEntry": "Agreed price",
+    "findingPrice": "Agreed price for this finding",
+    "choosePrice": "Choose an agreed price",
     "lineReason": "What did you find, and why does this price apply?",
     "addLine": "Add another line",
     "prepare": "Prepare claim for review",

@@ -2537,7 +2537,13 @@
         "starting": "Iniciando la comparación…",
         "started": "La comparación ha empezado.",
         "left": "{count, plural, one {Queda # comparación real hoy desde su red} other {Quedan # comparaciones reales hoy desde su red}}. Cada una gasta parte de la asignación diaria de Claude de la cuenta.",
-        "noneTitle": "No queda ninguna comparación real hoy"
+        "noneTitle": "No queda ninguna comparación real hoy",
+        "standIn": {
+          "title": "Mira cómo se ejecuta la comparación simulada",
+          "body": "La comparación de esta devolución de ejemplo aún no se ha hecho. Esta copia de Hold funciona con sus servicios simulados en memoria, sin Claude: iníciela y el código encuentra lo que cambió entre estas fotos de demostración; después un sustituto, no Claude, describe cada cambio que encontró el código. El resultado se marca como simulado. No hace falta iniciar sesión en PayPal y no se cobra nada.",
+          "start": "Ejecutar la comparación simulada en este ejemplo",
+          "left": "{count, plural, one {Queda # comparación simulada hoy desde su red} other {Quedan # comparaciones simuladas hoy desde su red}}."
+        }
       },
       "marked": "{count, plural, one {# marca encontrada} other {# marcas encontradas}}"
     },
@@ -3424,6 +3430,8 @@
     "draftGuidance": "Seleccione hallazgos confirmados o añada un precio publicado con un motivo escrito. Las líneas manuales vacías se omiten.",
     "manualLine": "Línea manual {number}",
     "priceEntry": "Precio acordado",
+    "findingPrice": "Precio acordado para este hallazgo",
+    "choosePrice": "Elija un precio acordado",
     "lineReason": "¿Qué encontró y por qué corresponde este precio?",
     "addLine": "Añadir otra línea",
     "prepare": "Preparar reclamación para revisión",

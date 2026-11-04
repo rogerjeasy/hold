@@ -16,11 +16,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Page({ params }: { params: Promise<{ rentalId: string; comparisonId: string }> }) {
   const { rentalId, comparisonId } = await params
   const context = await requireShop()
-  const { database, evidence } = await getServices()
+  const { database, evidence, config } = await getServices()
   const { report, run } = await inShop(database, { role: 'hold_app', shopId: context.shop.id, userId: context.person.userId }, async (transaction) => ({ report: await comparisonReport(transaction, comparisonId), run: await acceptedEvalRun(transaction) }))
   if (report === undefined || report.rentalId !== rentalId) notFound()
   const display = async (photo: { view: string; displayKey: string | null }) => ({ view: photo.view, url: photo.displayKey === null || evidence === undefined ? null : await evidence.displayLink(photo.displayKey) })
   const reviews = report.reviews.map((review) => ({ actorName: review.actorName, ...reviewNote.parse(review.detail) }))
   const sampleAllowance = report.waitsForStart ? await sampleComparisonAllowance() : undefined
-  return <ComparisonScreen shopName={context.shop.name} report={{ ...report, reviews, before: await Promise.all(report.before.map(display)), after: await Promise.all(report.after.map(display)) }} canAct={context.role !== 'read_only'} calibration={run?.measures.confidence} sampleAllowance={sampleAllowance} />
+  return <ComparisonScreen shopName={context.shop.name} report={{ ...report, reviews, before: await Promise.all(report.before.map(display)), after: await Promise.all(report.after.map(display)) }} canAct={context.role !== 'read_only'} calibration={run?.measures.confidence} sampleAllowance={sampleAllowance} standIn={config.services === 'fake'} />
 }

@@ -30,6 +30,17 @@ test('a judge starts a demo of their own with one tap, and finds the shop alread
   await expect(page.getByText('Priya Natarajan').first()).toBeVisible()
 })
 
+// A sample rental's photographs are the demonstration's own images, and its record is prepared from them (audit F-M1).
+test('a judge prepares the current record of a sample rental, from the demonstration’s own photographs', async ({ page }) => {
+  await startDemo(page, 'Tomás, the owner')
+  await aRental(page)
+  await page.getByRole('link', { name: 'Your rental record', exact: true }).click()
+  await page.getByRole('button', { name: 'Prepare current record', exact: true }).click()
+  await expect(page.getByRole('region', { name: /^Version [0-9]+$/ }).first().getByText('Ready to download')).toBeVisible({ timeout: 30000 })
+  await expect(page.getByText('The record could not be prepared. Please try again.')).toHaveCount(0)
+  await expectFitsEveryWidth(page)
+})
+
 test('a judge starts a demo at the counter, as Jonas', async ({ page }) => {
   await startDemo(page, 'Jonas, at the counter')
   await expect(page.getByRole('button', { name: 'Account of Jonas' })).toContainText(/jonas\.[a-z0-9]+@demo\.hold\.example/)
@@ -82,8 +93,9 @@ test('as Jonas, a judge takes a damaged return to a PayPal capture without addin
   await bookAtTheCounter(page, 'City bike')
   await feePaidAndHoldPlaced(page, browser)
   await handedOverAndReturned(page, 'Use the sample with damage')
-  await page.getByLabel('Agreed price').selectOption({ label: 'Scratch on the frame, through the paint · €35.00' })
-  await page.getByLabel('What did you find, and why does this price apply?').fill('A chip in the paint on the down tube, new since the handover.')
+  // The comparison found the chip; the stand-in prices nothing, so Jonas chooses the agreed price for the finding.
+  await page.getByRole('checkbox', { name: /^Simulated: code found a change in this area/ }).first().check()
+  await page.getByLabel('Agreed price for this finding').selectOption({ label: 'Scratch on the frame, through the paint · €35.00' })
   await page.getByRole('button', { name: 'Prepare claim for review', exact: true }).click()
   await page.getByRole('button', { name: 'Approve and show renter link', exact: true }).click()
   const link = (await page.getByTestId('renter-link').textContent()) ?? ''

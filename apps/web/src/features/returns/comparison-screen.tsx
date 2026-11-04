@@ -65,7 +65,8 @@ function ViewPair({ view, name, report }: { view: string; name: string; report: 
 }
 
 // sampleAllowance: the real comparisons on samples left today, read by the server while the sample return waits.
-export function ComparisonScreen({ shopName, report, canAct, calibration, sampleAllowance }: { shopName: string; report: ComparisonView; canAct: boolean; calibration?: Calibration | undefined; sampleAllowance?: SampleComparisonAllowance | undefined }) {
+// standIn: the app runs on its in-process fakes, where a stand-in answers for Claude, so the sample panel says so.
+export function ComparisonScreen({ shopName, report, canAct, calibration, sampleAllowance, standIn = false }: { shopName: string; report: ComparisonView; canAct: boolean; calibration?: Calibration | undefined; sampleAllowance?: SampleComparisonAllowance | undefined; standIn?: boolean }) {
   const t = useTranslations('shop.comparison')
   const notice = comparisonNotice(report)
   // The demo's sample return waits for a person to start its comparison; any other is on its way once sealed.
@@ -82,11 +83,11 @@ export function ComparisonScreen({ shopName, report, canAct, calibration, sample
       <div className="grid gap-6">
         {notice === 'none' || waiting ? null : <Notice title={t(`notices.${notice}.title`)} body={t(`notices.${notice}.body`)} />}
         {waiting ? (
-          <Panel title={t('sample.title')} icon={Sparkles}>
+          <Panel title={t(standIn ? 'sample.standIn.title' : 'sample.title')} icon={Sparkles}>
             <div className="grid gap-3 px-4 py-5 md:px-5">
-              <p className="max-w-prose text-pretty">{t('sample.body')}</p>
+              <p className="max-w-prose text-pretty">{t(standIn ? 'sample.standIn.body' : 'sample.body')}</p>
               <p className="text-sm text-muted-foreground">{t('boundary')}</p>
-              {canAct && sampleAllowance !== undefined ? <SampleComparisonForm rentalId={report.rentalId} allowance={sampleAllowance} /> : null}
+              {canAct && sampleAllowance !== undefined ? <SampleComparisonForm rentalId={report.rentalId} allowance={sampleAllowance} standIn={standIn} /> : null}
             </div>
           </Panel>
         ) : pending ? (

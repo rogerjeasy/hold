@@ -22,7 +22,10 @@ export function ClaimDraftForm({ data, leading = false }: { data: ClaimWorkspace
   const [rows, setRows] = useState([{ priceEntryId: data.prices[0]?.id ?? '', reason: '' }])
   const [selected, setSelected] = useState<readonly string[]>([])
   const [agreed, setAgreed] = useState<Readonly<Record<string, AgreedChoice>>>(Object.fromEntries(data.agreedIncidents.map((incident) => [incident.id, { keep: true, amount: amountText(money(incident.agreedCents ?? 0, data.currency)) }])))
-  const findings = data.possibleFindings.filter((finding) => finding.suggestedPriceEntryId !== null)
+  // A confirmed finding no agreed price matched is offered too: staff choose its price, and the line keeps its evidence.
+  const findings = data.possibleFindings
+  const [chosen, setChosen] = useState<Readonly<Record<string, string>>>({})
+  const priceOf = (finding: (typeof findings)[number]) => finding.suggestedPriceEntryId ?? chosen[finding.id] ?? ''
   // A kept agreed line at its amount or lower. A raised or unreadable amount is never sent: the form waits for a fix.
   const kept = data.agreedIncidents.flatMap((incident) => {
     const choice = agreed[incident.id]
@@ -30,11 +33,13 @@ export function ClaimDraftForm({ data, leading = false }: { data: ClaimWorkspace
     const amount = parseAmount(choice.amount, data.currency)
     return [{ incidentId: incident.id, amountCents: amount?.cents ?? -1, raised: amount === undefined || amount.cents > (incident.agreedCents ?? 0) || amount.cents === 0 }]
   })
-  const blocked = kept.some((line) => line.raised)
-  const lines = [...kept.map(({ incidentId, amountCents }) => ({ incidentId, amountCents })), ...selected.flatMap((id) => {
+  const pricedFindings = selected.flatMap((id) => {
     const finding = findings.find((finding) => finding.id === id)
-    return finding?.suggestedPriceEntryId == null ? [] : [{ priceEntryId: finding.suggestedPriceEntryId, findingId: id }]
-  }), ...rows.filter((row) => row.reason.trim() !== '')]
+    return finding === undefined ? [] : [{ priceEntryId: priceOf(finding), findingId: id }]
+  })
+  // A chosen finding without its price is never sent: the form waits for one.
+  const blocked = kept.some((line) => line.raised) || pricedFindings.some((line) => line.priceEntryId === '')
+  const lines = [...kept.map(({ incidentId, amountCents }) => ({ incidentId, amountCents })), ...pricedFindings.filter((line) => line.priceEntryId !== ''), ...rows.filter((row) => row.reason.trim() !== '')]
   return <form action={prepare} className="grid gap-5">
     <input type="hidden" name="locale" value={locale} /><input type="hidden" name="rentalId" value={data.rentalId} /><input type="hidden" name="lines" value={JSON.stringify(lines)} />
     <p className="text-pretty text-muted-foreground">{t('draftGuidance')}</p>
@@ -47,6 +52,7 @@ export function ClaimDraftForm({ data, leading = false }: { data: ClaimWorkspace
         <input type="checkbox" className="mt-1 min-h-11 min-w-11 shrink-0 accent-primary" checked={selected.includes(finding.id)} onChange={(event) => { setSelected(event.target.checked ? [...selected, finding.id] : selected.filter((id) => id !== finding.id)) }} />
         <span className="min-w-0 self-center text-pretty wrap-long-words">{finding.description}</span>{finding.simulated ? <>{' '}<span className="self-center"><SampleTag /></span></> : null}
       </label>
+      {finding.suggestedPriceEntryId === null && selected.includes(finding.id) ? <div className="grid gap-1.5 px-3 pt-2"><Label htmlFor={`claim-finding-price-${finding.id}`}>{t('findingPrice')}</Label><Select id={`claim-finding-price-${finding.id}`} value={chosen[finding.id] ?? ''} onChange={(event) => { setChosen({ ...chosen, [finding.id]: event.target.value }) }}><option value="">{t('choosePrice')}</option>{data.prices.map((entry) => <option key={entry.id} value={entry.id}>{entry.description} · {formatMoney(money(entry.amountCents, data.currency), locale)}</option>)}</Select></div> : null}
     </li>)}</ul>}
     {rows.map((row, index) => <fieldset key={index} className="grid min-w-0 gap-3 rounded-xl border border-border/70 p-4"><legend className="px-1.5 text-sm font-semibold">{t('manualLine', { number: index + 1 })}</legend>
       <div className="grid gap-1.5"><Label htmlFor={`claim-price-${String(index)}`}>{t('priceEntry')}</Label><Select id={`claim-price-${String(index)}`} value={row.priceEntryId} onChange={(event) => { setRows(rows.map((each, position) => position === index ? { ...each, priceEntryId: event.target.value } : each)) }}>{data.prices.map((entry) => <option key={entry.id} value={entry.id}>{entry.description} · {formatMoney(money(entry.amountCents, data.currency), locale)}</option>)}</Select></div>
