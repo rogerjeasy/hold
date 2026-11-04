@@ -2526,7 +2526,13 @@
         "starting": "Lancement de la comparaison…",
         "started": "La comparaison a commencé.",
         "left": "{count, plural, one {# vraie comparaison restante aujourd’hui depuis votre réseau} other {# vraies comparaisons restantes aujourd’hui depuis votre réseau}}. Chacune consomme une part de l’allocation quotidienne de Claude du compte.",
-        "noneTitle": "Plus de vraie comparaison aujourd’hui"
+        "noneTitle": "Plus de vraie comparaison aujourd’hui",
+        "standIn": {
+          "title": "Regardez la comparaison simulée se dérouler",
+          "body": "La comparaison de ce retour d'exemple n'a pas encore été lancée. Cette copie de Hold fonctionne avec ses services simulés en mémoire, sans Claude : lancez-la et le code trouve ce qui a changé entre ces photos de démonstration, puis un substitut, pas Claude, décrit chaque changement trouvé par le code. Le résultat est marqué comme simulé. Aucune connexion PayPal n'est nécessaire et rien n'est débité.",
+          "start": "Lancer la comparaison simulée sur cet exemple",
+          "left": "{count, plural, one {# comparaison simulée restante aujourd’hui depuis votre réseau} other {# comparaisons simulées restantes aujourd’hui depuis votre réseau}}."
+        }
       },
       "marked": "{count, plural, one {# marque trouvée} other {# marques trouvées}}"
     },
