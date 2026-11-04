@@ -108,8 +108,6 @@ function instanceRole(stack: Stack, props: WebStackProps, licences: readonly sec
   role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:GetObject'], resources: [props.displayBucket.arnForObjects('*')] }))
   // Sorting a renter's incident report: one Claude call with no tools, while the renter waits (extensions.md section 10).
   // The hosted assistant (section 8.10) uses the same model; its tools are Hold's MCP server, reached over HTTP.
-  // Mantle authorizes by model condition rather than model ARN, as for the comparison worker.
-  role.addToPolicy(new iam.PolicyStatement({ actions: ['bedrock-mantle:CreateInference'], resources: ['*'], conditions: { StringEquals: { 'aws:RequestedRegion': REGION, 'bedrock-mantle:Model': ['anthropic.claude-opus-5-5', 'anthropic.claude-opus-4-8'] } } }))
   role.addToPolicy(new iam.PolicyStatement({ actions: CLAUDE_INVOKE_ACTIONS, resources: CLAUDE_INVOKE_RESOURCES }))
   // Links, notices and one-time codes to a renter who chose texts (architecture.md section 12.3).
   allowTexting(role)

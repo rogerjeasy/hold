@@ -95,7 +95,6 @@ function permissionsBoundary(stack: Stack): iam.ManagedPolicy {
       statement(['ses:SendEmail', 'ses:SendRawEmail'], [`arn:aws:ses:${REGION}:${ACCOUNT}:identity/*`]),
       statement(['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream'], [`arn:aws:bedrock:${REGION}::foundation-model/*`, `arn:aws:bedrock:*:${ACCOUNT}:inference-profile/*`]),
       statement(CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES),
-      statement(['bedrock-mantle:CreateInference'], ['*'], { StringEquals: { 'aws:RequestedRegion': REGION, 'bedrock-mantle:Model': ['anthropic.claude-opus-5-5', 'anthropic.claude-opus-4-8'] } }),
       statement(['logs:CreateLogGroup', 'logs:CreateLogStream', 'logs:PutLogEvents'], [
         `arn:aws:logs:${REGION}:${ACCOUNT}:log-group:/aws/apprunner/${PREFIX}-*`,
         `arn:aws:logs:${REGION}:${ACCOUNT}:log-group:/aws/lambda/${PREFIX}-*`,
@@ -341,11 +340,8 @@ export function createDeliveryStack(app: App, props: StackProps): DeliveryResour
       },
     }),
   })
-  // The comparison's model and its fallback only.
-  const models = ['anthropic.claude-opus-5-5', 'anthropic.claude-opus-4-8']
-  evalRole.addToPolicy(statement(['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream'], models.flatMap((model) => [`arn:aws:bedrock:${REGION}::foundation-model/${model}*`, `arn:aws:bedrock:*:${ACCOUNT}:inference-profile/*${model}*`])))
+  // The comparison's model only, through its inference profile.
   evalRole.addToPolicy(statement(CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES))
-  evalRole.addToPolicy(statement(['bedrock-mantle:CreateInference'], ['*'], { StringEquals: { 'aws:RequestedRegion': REGION, 'bedrock-mantle:Model': ['anthropic.claude-opus-5-5', 'anthropic.claude-opus-4-8'] } }))
   evalRole.addToPolicy(statement(['rds-data:ExecuteStatement', 'rds-data:BeginTransaction', 'rds-data:CommitTransaction', 'rds-data:RollbackTransaction'], [`arn:aws:rds:${REGION}:${ACCOUNT}:cluster:${name('database')}`]))
   evalRole.addToPolicy(statement(['secretsmanager:GetSecretValue'], [`${at.secrets('database/eval')}-*`]))
 

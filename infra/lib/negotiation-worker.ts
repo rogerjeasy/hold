@@ -3,7 +3,7 @@ import type { Stack } from 'aws-cdk-lib'
 import * as iam from 'aws-cdk-lib/aws-iam'
 import { SqsEventSource } from 'aws-cdk-lib/aws-lambda-event-sources'
 import * as scheduler from 'aws-cdk-lib/aws-scheduler'
-import { CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES, DATABASE_NAME, name, REGION } from './settings.ts'
+import { CLAUDE_INVOKE_ACTIONS, CLAUDE_INVOKE_RESOURCES, DATABASE_NAME, name } from './settings.ts'
 import { workerFunction } from './worker.ts'
 import type { WorkerProps } from './worker.ts'
 
@@ -19,8 +19,7 @@ export function createNegotiationWorker(stack: Stack, props: WorkerProps): void 
   const role = new iam.Role(stack, 'NegotiationRole', { roleName: name('negotiation'), description: 'Hold negotiation: runs the two advocates through the referee; no PayPal access', assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com') })
   role.addToPolicy(new iam.PolicyStatement({ actions: ['rds-data:ExecuteStatement', 'rds-data:BatchExecuteStatement', 'rds-data:BeginTransaction', 'rds-data:CommitTransaction', 'rds-data:RollbackTransaction'], resources: [props.cluster.clusterArn] }))
   props.workerUserSecret.grantRead(role)
-  // The advocates' model, and the model a refusal falls back to.
-  role.addToPolicy(new iam.PolicyStatement({ actions: ['bedrock-mantle:CreateInference'], resources: ['*'], conditions: { StringEquals: { 'aws:RequestedRegion': REGION, 'bedrock-mantle:Model': ['anthropic.claude-opus-5-5', 'anthropic.claude-opus-4-8'] } } }))
+  // The advocates' model, through its inference profile on bedrock-runtime.
   role.addToPolicy(new iam.PolicyStatement({ actions: CLAUDE_INVOKE_ACTIONS, resources: CLAUDE_INVOKE_RESOURCES }))
   // The photographs of a disputed line, as the advocates' get_line_photos returns them: display copies, read only.
   role.addToPolicy(new iam.PolicyStatement({ actions: ['s3:GetObject'], resources: [props.displayBucket.arnForObjects('*')] }))
