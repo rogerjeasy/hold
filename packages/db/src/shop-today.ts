@@ -1,6 +1,7 @@
 import { counterRoutine } from '@hold/domain'
 import type { ClaimState, HoldState, RentalState, RoutineTime } from '@hold/domain'
-import { and, asc, desc, eq, gte, inArray, lt, lte, notInArray, or, sql } from 'drizzle-orm'
+import { and, asc, desc, eq, gte, inArray, isNotNull, lt, lte, ne, notInArray, or, sql } from 'drizzle-orm'
+import type { SQLWrapper } from 'drizzle-orm'
 import {
   auditLog,
   authorizations,
@@ -13,9 +14,11 @@ import {
   photos,
   moneyEvents,
   priceEntries,
+  priceLists,
   rentalItems,
   rentals,
   renters,
+  staffRoles,
   users,
 } from './schema/index.ts'
 import type { Transaction } from './scope.ts'
@@ -102,18 +105,33 @@ const ITEM_SEPARATOR = '\u001f'
 const count = sql<number>`count(*)::int`
 const total = (column: typeof moneyEvents.amountCents | typeof claims.totalCents) => sql<number>`coalesce(sum(${column}), 0)::bigint`.mapWith(Number)
 
-async function outFigures(transaction: Transaction, window: TodayWindow) {
-  const [out] = await transaction.select({ rentals: count }).from(rentals).where(inArray(rentals.state, OUT))
-  const [dueBack] = await transaction
-    .select({ rentals: count })
-    .from(rentals)
-    .where(and(inArray(rentals.state, OUT), gte(rentals.endsAt, window.day.start), lt(rentals.endsAt, window.day.end)))
-  const [itemsOut] = await transaction
-    .select({ items: count })
-    .from(rentalItems)
-    .innerJoin(rentals, eq(rentals.id, rentalItems.rentalId))
-    .where(inArray(rentals.state, OUT))
-  return { rentalsOut: out?.rentals ?? 0, dueBackToday: dueBack?.rentals ?? 0, itemsOut: itemsOut?.items ?? 0 }
+// The day's counts and the month's sums, each a subquery of one statement: deployed, every statement is a call to the
+// Data API that the page waits for.
+async function figures(transaction: Transaction, window: TodayWindow) {
+  const scalar = (query: SQLWrapper) => sql<number>`(${query})`.mapWith(Number)
+  const inMonth = and(gte(moneyEvents.occurredAt, window.day.monthStart), lt(moneyEvents.occurredAt, window.now))
+  const sumOf = (kinds: (typeof moneyEvents.kind.enumValues)[number][]) =>
+    scalar(transaction.select({ cents: total(moneyEvents.amountCents) }).from(moneyEvents).where(and(inMonth, inArray(moneyEvents.kind, kinds))))
+  const [row] = await transaction
+    .select({
+      rentals: scalar(transaction.select({ rentals: count }).from(rentals)),
+      simulated: scalar(transaction.select({ rentals: sql<number>`(count(*) filter (where ${rentals.simulated}))::int` }).from(rentals)),
+      rentalsOut: scalar(transaction.select({ rentals: count }).from(rentals).where(inArray(rentals.state, OUT))),
+      dueBackToday: scalar(transaction.select({ rentals: count }).from(rentals).where(and(inArray(rentals.state, OUT), gte(rentals.endsAt, window.day.start), lt(rentals.endsAt, window.day.end)))),
+      itemsOut: scalar(transaction.select({ items: count }).from(rentalItems).innerJoin(rentals, eq(rentals.id, rentalItems.rentalId)).where(inArray(rentals.state, OUT))),
+      feesCents: sumOf(['fee_captured', 'extension_captured']),
+      releasedCents: sumOf(['hold_released']),
+      claimedCents: scalar(
+        transaction
+          .select({ cents: total(claims.totalCents) })
+          .from(claims)
+          .where(and(gte(claims.createdAt, window.day.monthStart), lt(claims.createdAt, window.now), notInArray(claims.state, ['draft', 'waived']))),
+      ),
+      recoveredCents: sumOf(['hold_captured', 'invoice_paid']),
+    })
+    .from(sql`(select 1) as one`)
+  if (row === undefined) throw new Error('The figures returned no row.')
+  return row
 }
 
 // Every hold still reserved, the one nearest its end first. The decision board reads it too.
@@ -228,27 +246,6 @@ async function counter(transaction: Transaction, window: TodayWindow): Promise<C
   return visits.sort((a, b) => a.at.getTime() - b.at.getTime())
 }
 
-async function month(transaction: Transaction, window: TodayWindow) {
-  const inMonth = and(gte(moneyEvents.occurredAt, window.day.monthStart), lt(moneyEvents.occurredAt, window.now))
-  const sumOf = async (kinds: (typeof moneyEvents.kind.enumValues)[number][]) => {
-    const [row] = await transaction
-      .select({ cents: total(moneyEvents.amountCents) })
-      .from(moneyEvents)
-      .where(and(inMonth, inArray(moneyEvents.kind, kinds)))
-    return row?.cents ?? 0
-  }
-  const [claimed] = await transaction
-    .select({ cents: total(claims.totalCents) })
-    .from(claims)
-    .where(and(gte(claims.createdAt, window.day.monthStart), lt(claims.createdAt, window.now), notInArray(claims.state, ['draft', 'waived'])))
-  return {
-    feesCents: await sumOf(['fee_captured', 'extension_captured']),
-    releasedCents: await sumOf(['hold_released']),
-    claimedCents: claimed?.cents ?? 0,
-    recoveredCents: await sumOf(['hold_captured', 'invoice_paid']),
-  }
-}
-
 // The month's sealed sessions. One of a sample rental, or holding a sample photograph, is the demonstration's, and
 // counterRoutine leaves it out.
 async function routine(transaction: Transaction, window: TodayWindow) {
@@ -285,17 +282,35 @@ async function activity(transaction: Transaction): Promise<ActivityLine[]> {
 }
 
 export async function shopToday(transaction: Transaction, window: TodayWindow): Promise<ShopToday> {
-  const [rentalCount] = await transaction.select({ total: count, simulated: sql<number>`(count(*) filter (where ${rentals.simulated}))::int` }).from(rentals)
+  const { rentals: total, simulated, rentalsOut, dueBackToday, itemsOut, ...month } = await figures(transaction, window)
   return {
-    ...(await outFigures(transaction, window)),
+    rentalsOut,
+    dueBackToday,
+    itemsOut,
     activeHolds: await activeHolds(transaction),
     claimsWaiting: await claimsWaiting(transaction),
     droppedOff: await droppedOff(transaction),
     late: await lateRentals(transaction, window.now),
     counter: await counter(transaction, window),
-    month: await month(transaction, window),
+    month,
     routine: await routine(transaction, window),
     activity: await activity(transaction),
-    rentals: { total: rentalCount?.total ?? 0, simulated: rentalCount?.simulated ?? 0 },
+    rentals: { total, simulated },
   }
+}
+
+// What the Today page's setup list checks: a published price list, the shop's own items still in use (the samples left
+// aside), and how many people are on its staff. One statement, where reading the lists themselves took seven.
+export type ShopSetup = { readonly pricesPublished: boolean; readonly ownItems: number; readonly staff: number }
+
+export async function shopSetup(transaction: Transaction): Promise<ShopSetup> {
+  const [row] = await transaction
+    .select({
+      pricesPublished: sql<boolean>`exists (${transaction.select({ id: priceLists.id }).from(priceLists).where(isNotNull(priceLists.publishedAt))})`,
+      ownItems: sql<number>`(${transaction.select({ items: count }).from(items).where(and(eq(items.simulated, false), ne(items.status, 'retired')))})`.mapWith(Number),
+      staff: sql<number>`(${transaction.select({ people: count }).from(staffRoles)})`.mapWith(Number),
+    })
+    .from(sql`(select 1) as one`)
+  if (row === undefined) throw new Error('The setup returned no row.')
+  return row
 }

@@ -2,7 +2,7 @@ import { money } from '@hold/domain'
 import { eq } from 'drizzle-orm'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { registerOwner } from './accounts.ts'
-import { decisionRecords } from './decision-records.ts'
+import { contestedOnBoard, decisionRecords } from './decision-records.ts'
 import { publishPriceList } from './price-list-repository.ts'
 import { addSampleRentals, SAMPLE_PHOTOS } from './sample-rentals.ts'
 import { claims, rentals, renters } from './schema/index.ts'
@@ -25,7 +25,7 @@ async function owner(subject: string, name: string) {
   return { role: 'hold_app' as const, shopId: registered.shopId, userId: registered.userId }
 }
 
-const read = (scope: Scope) => inShop(database, scope, (transaction) => decisionRecords(transaction, NOW))
+const read = (scope: Scope) => decisionRecords(database, scope, NOW)
 
 async function claimOf(renterName: string) {
   const [row] = await inShop(database, shop, (transaction) =>
@@ -90,6 +90,12 @@ describe('the records a decision board reads', () => {
     expect(records.incidents).toEqual([])
     expect(records.proposals.map((entry) => entry.kind).sort()).toEqual(['request_replacement_hold', 'respond_to_dispute'])
     expect(records.staffCount).toBe(1)
+  })
+
+  it('names the contested claims on the board, whose contest summary it shows, and not the one waiting for approval', async () => {
+    const tomClaim = await claimOf('Tom Becker')
+    expect(await inShop(database, shop, contestedOnBoard)).toEqual([{ claimId: tomClaim, rentalId: expect.any(String) as unknown }])
+    expect(await inShop(database, other, contestedOnBoard)).toEqual([])
   })
 
   it('reads nothing of another shop', async () => {

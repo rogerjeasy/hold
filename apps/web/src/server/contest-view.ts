@@ -1,5 +1,5 @@
 import 'server-only'
-import { contestRecord, latestContestSummary } from '@hold/db'
+import { contestedOnBoard, contestRecord, latestContestSummary } from '@hold/db'
 import type { Transaction } from '@hold/db'
 import type { ContestView } from '@/features/contest/contest-summary-panel'
 
@@ -18,4 +18,15 @@ export async function contestViewFor(transaction: Transaction, rentalId: string,
     lines: record.lines,
     rental: { conditionReply: record.conditionReply, conditionRepliedAt: record.conditionRepliedAt, renterPhotos: record.renterPhotos, incidentsReported: record.incidentsReported },
   }
+}
+
+// The shop's version of each contest on the decision board, by claim, read in a transaction of its own beside the
+// board's other reads.
+export async function boardContestViews(transaction: Transaction): Promise<Readonly<Record<string, ContestView>>> {
+  const views: Record<string, ContestView> = {}
+  for (const claim of await contestedOnBoard(transaction)) {
+    const view = await contestViewFor(transaction, claim.rentalId, 'shop')
+    if (view !== undefined) views[claim.claimId] = view
+  }
+  return views
 }

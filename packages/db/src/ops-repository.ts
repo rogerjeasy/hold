@@ -157,29 +157,69 @@ export type QueueEntry = {
   readonly payload: Readonly<Record<string, string>>
 }
 
-// The amount approving a proposal would act on, read from the database at this moment (X1.10).
-async function amountFor(transaction: Transaction, kind: ProposalKind, subjectKind: string, subjectId: string, rentalId: string | null): Promise<{ amountCents: number | null; currency: string | null }> {
-  if (kind === 'note' || kind === 'send_message' || rentalId === null) return { amountCents: null, currency: null }
-  const [hold] = await transaction.select({ reservedCents: holds.reservedCents, currency: holds.currency, state: holds.state }).from(holds).where(eq(holds.rentalId, rentalId))
-  if (kind === 'release_hold' || kind === 'request_replacement_hold') return hold === undefined ? { amountCents: null, currency: null } : { amountCents: hold.reservedCents, currency: hold.currency }
-  const [claim] = await transaction.select({ totalCents: claims.totalCents, currency: claims.currency }).from(claims).where(subjectKind === 'claim' ? eq(claims.id, subjectId) : eq(claims.rentalId, rentalId))
-  if (claim === undefined) return { amountCents: null, currency: null }
-  const captured = (await transaction.select({ amountCents: moneyEvents.amountCents }).from(moneyEvents).where(and(eq(moneyEvents.rentalId, rentalId), eq(moneyEvents.kind, 'hold_captured')))).reduce((sum, event) => sum + event.amountCents, 0)
+// What a proposal's amount is read from: what it is about, and the rental it concerns.
+type AmountSubject = { readonly kind: ProposalKind; readonly subjectKind: string; readonly subjectId: string; readonly rentalId: string | null }
+type Amount = { readonly amountCents: number | null; readonly currency: string | null }
+type AmountFacts = {
+  readonly holds: ReadonlyMap<string, { readonly reservedCents: number; readonly currency: string }>
+  readonly claimsById: ReadonlyMap<string, { readonly totalCents: number; readonly currency: string }>
+  readonly claimsByRental: ReadonlyMap<string, { readonly totalCents: number; readonly currency: string }>
+  readonly captured: ReadonlyMap<string, number>
+}
+
+const NO_AMOUNT: Amount = { amountCents: null, currency: null }
+const namesNoAmount = (subject: AmountSubject) => subject.kind === 'note' || subject.kind === 'send_message' || subject.rentalId === null
+const namesHold = (subject: AmountSubject) => subject.kind === 'release_hold' || subject.kind === 'request_replacement_hold'
+
+// The holds, claims and captures the given proposals' amounts are read from: at most three reads however many there
+// are, each skipped when no proposal needs it.
+async function amountFacts(transaction: Transaction, subjects: readonly AmountSubject[]): Promise<AmountFacts> {
+  const priced = subjects.filter((subject) => !namesNoAmount(subject))
+  const holdRentals = [...new Set(priced.filter(namesHold).flatMap((subject) => (subject.rentalId === null ? [] : [subject.rentalId])))]
+  const claimed = priced.filter((subject) => !namesHold(subject))
+  const claimIds = [...new Set(claimed.filter((subject) => subject.subjectKind === 'claim').map((subject) => subject.subjectId))]
+  const claimRentals = [...new Set(claimed.filter((subject) => subject.subjectKind !== 'claim').flatMap((subject) => (subject.rentalId === null ? [] : [subject.rentalId])))]
+  const heldRows = holdRentals.length === 0 ? [] : await transaction.select({ rentalId: holds.rentalId, reservedCents: holds.reservedCents, currency: holds.currency }).from(holds).where(inArray(holds.rentalId, holdRentals))
+  const claimRows = claimIds.length === 0 && claimRentals.length === 0 ? [] : await transaction.select({ id: claims.id, rentalId: claims.rentalId, totalCents: claims.totalCents, currency: claims.currency }).from(claims)
+    .where(or(...(claimIds.length === 0 ? [] : [inArray(claims.id, claimIds)]), ...(claimRentals.length === 0 ? [] : [inArray(claims.rentalId, claimRentals)])))
+  const capturedRentals = [...new Set(claimed.flatMap((subject) => (subject.rentalId === null ? [] : [subject.rentalId])))]
+  const capturedRows = claimRows.length === 0 || capturedRentals.length === 0 ? [] : await transaction
+    .select({ rentalId: moneyEvents.rentalId, amountCents: sql<number>`coalesce(sum(${moneyEvents.amountCents}), 0)::bigint`.mapWith(Number) })
+    .from(moneyEvents).where(and(inArray(moneyEvents.rentalId, capturedRentals), eq(moneyEvents.kind, 'hold_captured'))).groupBy(moneyEvents.rentalId)
+  return {
+    holds: new Map(heldRows.map((row) => [row.rentalId, row])),
+    claimsById: new Map(claimRows.map((row) => [row.id, row])),
+    claimsByRental: new Map(claimRows.map((row) => [row.rentalId, row])),
+    captured: new Map(capturedRows.map((row) => [row.rentalId, row.amountCents])),
+  }
+}
+
+// The amount approving a proposal would act on, from records read at this moment (X1.10).
+function amountOf(subject: AmountSubject, facts: AmountFacts): Amount {
+  if (namesNoAmount(subject) || subject.rentalId === null) return NO_AMOUNT
+  if (namesHold(subject)) {
+    const hold = facts.holds.get(subject.rentalId)
+    return hold === undefined ? NO_AMOUNT : { amountCents: hold.reservedCents, currency: hold.currency }
+  }
+  const claim = subject.subjectKind === 'claim' ? facts.claimsById.get(subject.subjectId) : facts.claimsByRental.get(subject.rentalId)
+  if (claim === undefined) return NO_AMOUNT
+  const captured = facts.captured.get(subject.rentalId) ?? 0
   // An answer to a dispute is about the money the renter disputes, which is what was captured.
-  if (kind === 'respond_to_dispute') return { amountCents: captured, currency: claim.currency }
+  if (subject.kind === 'respond_to_dispute') return { amountCents: captured, currency: claim.currency }
   return { amountCents: Math.max(0, claim.totalCents - captured), currency: claim.currency }
 }
 
-// The morning queue: every pending proposal, including those postponed until now, nearest deadline first.
+// The morning queue: every pending proposal, including those postponed until now, nearest deadline first. Four reads
+// however many entries wait: the proposals, then the facts of every entry's amount together.
 export async function morningQueue(transaction: Transaction, now: Date): Promise<QueueEntry[]> {
   const rows = await transaction.select({ proposal: proposals, deadline: shopExceptions.deadline, exceptionKind: shopExceptions.kind, moneyCents: shopExceptions.moneyCents })
     .from(proposals).leftJoin(shopExceptions, eq(shopExceptions.id, proposals.exceptionId))
     .where(and(eq(proposals.state, 'pending'), or(isNull(proposals.postponedUntil), lt(proposals.postponedUntil, now))))
-  const entries: QueueEntry[] = []
-  for (const { proposal, deadline, exceptionKind, moneyCents } of rows) {
-    const amount = await amountFor(transaction, proposal.kind, proposal.subjectKind, proposal.subjectId, proposal.rentalId)
-    entries.push({ id: proposal.id, kind: proposal.kind, subjectKind: proposal.subjectKind, subjectId: proposal.subjectId, rentalId: proposal.rentalId, reason: proposal.reason, references: proposal.references, draft: proposal.draft, raisedByAgent: proposal.raisedByAgent, model: proposal.model, deadline, exceptionKind, ...amount, moneyCents: amount.amountCents ?? moneyCents ?? 0, payload: proposal.payload })
-  }
+  const facts = await amountFacts(transaction, rows.map(({ proposal }) => proposal))
+  const entries = rows.map(({ proposal, deadline, exceptionKind, moneyCents }): QueueEntry => {
+    const amount = amountOf(proposal, facts)
+    return { id: proposal.id, kind: proposal.kind, subjectKind: proposal.subjectKind, subjectId: proposal.subjectId, rentalId: proposal.rentalId, reason: proposal.reason, references: proposal.references, draft: proposal.draft, raisedByAgent: proposal.raisedByAgent, model: proposal.model, deadline, exceptionKind, ...amount, moneyCents: amount.amountCents ?? moneyCents ?? 0, payload: proposal.payload }
+  })
   return orderQueue(entries)
 }
 
@@ -187,7 +227,7 @@ export async function morningQueue(transaction: Transaction, now: Date): Promise
 // rejection starts from.
 export async function proposalAmount(transaction: Transaction, proposalId: string): Promise<{ amountCents: number | null; currency: string | null }> {
   const [proposal] = await transaction.select().from(proposals).where(eq(proposals.id, proposalId))
-  return proposal === undefined ? { amountCents: null, currency: null } : amountFor(transaction, proposal.kind, proposal.subjectKind, proposal.subjectId, proposal.rentalId)
+  return proposal === undefined ? NO_AMOUNT : amountOf(proposal, await amountFacts(transaction, [proposal]))
 }
 
 // What was decided in the last day, and what is put off until later, so the owner sees each outcome after the entry
