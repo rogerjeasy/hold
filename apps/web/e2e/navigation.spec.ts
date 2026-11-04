@@ -96,7 +96,7 @@ test.describe('on a phone', () => {
     await expect(page.getByRole('navigation', { name: 'Main' })).toBeHidden()
     await page.getByRole('button', { name: 'Open menu' }).click()
     const menu = page.getByRole('dialog', { name: 'Menu' })
-    await expect(menu.getByRole('link')).toHaveCount(7)
+    await expect(menu.getByRole('link')).toHaveCount(8)
     await menu.getByRole('link', { name: 'For shops' }).click()
     await expect(page).toHaveURL('/for-shops')
     await expect(menu).toBeHidden()
