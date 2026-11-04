@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { beforeAll, beforeEach, expect, it, vi } from 'vitest'
-import { claims, evidencePackFor, evidenceVersions, inShop, issueRenterLink, renterLinks, reserveEvidencePack, staffRoles } from '@hold/db'
+import { claims, evidencePackFor, evidenceVersions, inShop, issueRenterLink, openDemoSession, rentals, renterLinks, renters, reserveEvidencePack, staffRoles } from '@hold/db'
 import { tampered } from '@/test/tampered'
 process.env['HOLD_ENVIRONMENT'] = 'test'
 process.env['HOLD_COOKIE_KEY'] = Buffer.alloc(32, 21).toString('base64')
@@ -80,4 +80,21 @@ it('denies missing scope, another shop, unapproved claim packs and read-only bui
   await inShop(database, { role: 'hold_app', shopId: shop.shopId }, (transaction) => transaction.update(staffRoles).set({ role: 'owner' }))
   await handoverShop(jar, 'other-owner@record-flow.example', 'Other Record Bikes')
   expect(await downloadRecord(null, form({ rentalId: current.rentalId, packId: requested.value.packId, kind: 'pdf', locale: 'en' }))).toMatchObject({ ok: false })
+})
+
+// A sample rental's photographs are the demonstration's own images, which no bucket holds (architecture.md section
+// 20.3). The test environment builds its record from them, as the evidence worker does once deployed (audit F-M1).
+it('builds the record of a sample rental from the demonstration’s own photographs', async () => {
+  const { buildRecord } = await import('./actions')
+  const { database } = await getServices()
+  const owner = await signIn(jar, 'tomas@record-sample.example', 'email_code')
+  const staff = await signIn(jar, 'jonas@record-sample.example', 'email_code')
+  const opened = await openDemoSession(database, { owner: { subject: owner, email: 'tomas@record-sample.example' }, staff: { subject: staff, email: 'jonas@record-sample.example' }, slug: 'ribeira-bikes-record-sample', paypal: { credentialReference: 'hold/paypal/shops/demo/sandbox', mode: 'sandbox' }, now: new Date() })
+  const scope = { role: 'hold_app', shopId: opened.shopId } as const
+  const priya = (await inShop(database, scope, (transaction) => transaction.select().from(renters))).find((row) => row.name === 'Priya Natarajan')
+  const rentalId = (await inShop(database, scope, (transaction) => transaction.select().from(rentals))).find((row) => row.renterId === priya?.id)?.id ?? ''
+  await signIn(jar, 'tomas@record-sample.example', 'email_code')
+  const requested = await buildRecord(null, form({ rentalId, locale: 'en' }))
+  if (!requested.ok) throw new Error(JSON.stringify(requested))
+  expect(await inShop(database, scope, (transaction) => evidencePackFor(transaction, rentalId, requested.value.packId))).toMatchObject({ state: 'ready' })
 })

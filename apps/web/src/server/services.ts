@@ -94,9 +94,8 @@ function runAtOnce(settle: () => SettleDependencies, media: DisplayJobDependenci
   return async (message) => {
     if (message.queue === 'media') await makeDisplayCopy(media, mediaMessageSchema.parse(message.body))
     // This environment's model is explicitly simulated and never calls Bedrock. The same pipeline still rejects
-    // reused, unreadable or poorly aligned photographs before any model result is considered. A sample return's
-    // photographs are the demonstration's own, read from public/images as the comparison worker reads its copies.
-    if (message.queue === 'comparisons') await runComparison({ database: media.database, role: media.role ?? 'hold_worker', evidence: withSampleDisplays(media.evidence, readSampleImage), model: { look: () => Promise.resolve({ kind: 'unavailable', model: 'simulated' }) }, simulated: true, now: () => new Date() }, comparisonMessageSchema.parse(message.body))
+    // reused, unreadable or poorly aligned photographs before any model result is considered.
+    if (message.queue === 'comparisons') await runComparison({ database: media.database, role: media.role ?? 'hold_worker', evidence: media.evidence, model: { look: () => Promise.resolve({ kind: 'unavailable', model: 'simulated' }) }, simulated: true, now: () => new Date() }, comparisonMessageSchema.parse(message.body))
     if (message.queue === 'executions') await runExecution(settle(), executionMessageSchema.parse(message.body))
     if (message.queue === 'paypal-events') await applyPayPalEvent(settle(), paypalEventMessageSchema.parse(message.body))
     if (message.queue === 'upkeep') await runUpkeep(settle(), upkeepMessageSchema.parse(message.body))
@@ -185,10 +184,13 @@ async function build(): Promise<Services> {
     }
     // Photographs go to a store in memory, through the app's own simulated storage route.
     const simulatedEvidence = createMemoryEvidenceStore({ baseUrl: `${config.publicUrl}/api/simulated-storage` })
+    // What the work done in this process reads, as the deployed worker reads its store: a sample rental's photographs
+    // are the demonstration's own, read from public/images, for its comparisons and its records alike.
+    const workerEvidence = withSampleDisplays(simulatedEvidence, readSampleImage)
     const documents = createMemoryDocumentStore()
     const mailer = createMemoryMailer()
     const push = createMemoryPushSender()
-    const records = simulatedRecords({ database, documents, evidence: simulatedEvidence, mailer })
+    const records = simulatedRecords({ database, documents, evidence: workerEvidence, mailer })
     // Schedules are kept, never fired: nothing in the test environment runs long enough to reach them.
     // What the worker would tell people is kept, not sent.
     const notices: Notice[] = []
@@ -197,7 +199,7 @@ async function build(): Promise<Services> {
       role: 'hold_app',
       paypalFor,
       paypalMode: config.paypalMode,
-      send: runAtOnce(() => settle, { database, role: 'hold_app', evidence: simulatedEvidence, faces: noFaces }, records, simulatedOperations(database, simulatedPayPal)),
+      send: runAtOnce(() => settle, { database, role: 'hold_app', evidence: workerEvidence, faces: noFaces }, records, simulatedOperations(database, simulatedPayPal)),
       scheduler: createMemoryScheduler(),
       notifier: { tell: (notice) => Promise.resolve(void notices.push(notice)) },
       renterAsk: createRenterAsk(database),
