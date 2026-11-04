@@ -73,7 +73,7 @@ describe('the recorded live advocates run, replayed through the runner and the r
 
     expect(outcome.state).toBe('agreed')
     const replayed = await inShop(database, scope, (transaction) => negotiationTranscript(transaction, rentalId))
-    const shape = (moves: readonly { readonly side: string; readonly kind: string; readonly totalCents: number | null; readonly lines: readonly z.infer<typeof line>[] }[], renamed: (lineId: string) => string) =>
+    const shape = (moves: readonly { readonly side: string; readonly kind: string; readonly totalCents: number | null; readonly lines: readonly { readonly lineId: string; readonly cents: number; readonly ground: string | null; readonly evidence: readonly string[] }[] }[], renamed: (lineId: string) => string) =>
       moves.map((move) => ({ side: move.side, kind: move.kind, totalCents: move.totalCents, lines: move.lines.map((each) => ({ ...each, lineId: renamed(each.lineId) })).sort((first, second) => first.lineId.localeCompare(second.lineId)) }))
     expect(shape(replayed?.moves ?? [], (lineId) => lineId)).toEqual(shape(recorded.transcript.moves, rename))
     expect(replayed?.agreedCents).toBe(recorded.transcript.agreedCents)
