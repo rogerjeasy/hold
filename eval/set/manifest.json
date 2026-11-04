@@ -67,7 +67,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-cockpit, brightness 0.98"
+      "note": "synthetic: A-s4-cockpit, brightness 0.94"
     },
     {
       "id": "tuning-cockpit-clean-easy-2",
@@ -80,7 +80,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-cockpit, brightness 1.00"
+      "note": "synthetic: A-s3-cockpit, brightness 0.95"
     },
     {
       "id": "tuning-cockpit-clean-easy-3",
@@ -93,7 +93,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-cockpit, brightness 1.02"
+      "note": "synthetic: A-s4-cockpit, brightness 1.00"
     },
     {
       "id": "tuning-cockpit-clean-easy-4",
@@ -106,7 +106,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-cockpit, brightness 0.98"
+      "note": "synthetic: A-s3-cockpit, brightness 0.96"
     },
     {
       "id": "tuning-cockpit-clean-easy-5",
@@ -119,7 +119,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-cockpit, brightness 0.95"
+      "note": "synthetic: A-s2-cockpit, brightness 1.01"
     },
     {
       "id": "tuning-cockpit-clean-easy-6",
@@ -132,7 +132,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-cockpit, brightness 0.96"
+      "note": "synthetic: A-s2-cockpit, brightness 0.95"
     },
     {
       "id": "tuning-cockpit-clean-easy-7",
@@ -145,7 +145,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-cockpit, brightness 1.04"
+      "note": "synthetic: A-s4-cockpit, brightness 1.00"
     },
     {
       "id": "tuning-cockpit-clean-easy-8",
@@ -158,7 +158,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-cockpit, brightness 0.96"
+      "note": "synthetic: A-s4-cockpit, brightness 1.05"
     },
     {
       "id": "tuning-cockpit-clean-easy-9",
@@ -171,7 +171,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-cockpit, brightness 0.98"
+      "note": "synthetic: A-s2-cockpit, brightness 1.02"
     },
     {
       "id": "tuning-cockpit-clean-hard-1",
@@ -184,7 +184,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-cockpit, brightness 0.72, colour warmer, shadow band, tilted -1.8°"
+      "note": "synthetic: A-s2-cockpit, brightness 1.04, colour warmer, shadow band, tilted 1.3°"
     },
     {
       "id": "tuning-cockpit-clean-hard-2",
@@ -197,7 +197,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-cockpit, brightness 0.70, colour warmer, shadow band, tilted -0.2°"
+      "note": "synthetic: A-s2-cockpit, brightness 1.14, colour cooler, shadow band, tilted 1.7°"
     },
     {
       "id": "tuning-cockpit-clean-hard-3",
@@ -210,7 +210,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-cockpit, brightness 0.82, colour cooler, shadow band, tilted -0.6°"
+      "note": "synthetic: A-s3-cockpit, brightness 1.06, colour cooler, shadow band, tilted -0.5°"
     },
     {
       "id": "tuning-cockpit-clean-hard-4",
@@ -223,7 +223,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-cockpit, brightness 0.75, colour cooler, shadow band, tilted 1.8°"
+      "note": "synthetic: A-s2-cockpit, brightness 0.70, colour cooler, shadow band, tilted 1.5°"
     },
     {
       "id": "tuning-cockpit-clean-hard-5",
@@ -236,7 +236,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-cockpit, brightness 1.19, colour cooler, shadow band, tilted 1.9°"
+      "note": "synthetic: A-s4-cockpit, brightness 1.09, colour warmer, shadow band, tilted 0.3°"
     },
     {
       "id": "tuning-cockpit-clean-hard-6",
@@ -249,7 +249,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-cockpit, brightness 1.04, colour cooler, shadow band, tilted 1.1°"
+      "note": "synthetic: A-s3-cockpit, brightness 0.97, colour warmer, shadow band, tilted -0.3°"
     },
     {
       "id": "tuning-cockpit-clean-hard-7",
@@ -262,7 +262,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-cockpit, brightness 0.92, colour warmer, shadow band, tilted -1.7°"
+      "note": "synthetic: A-s3-cockpit, brightness 0.99, colour warmer, shadow band, tilted 1.4°"
     },
     {
       "id": "tuning-cockpit-clean-hard-8",
@@ -275,7 +275,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-cockpit, brightness 1.12, colour warmer, shadow band, tilted 0.1°"
+      "note": "synthetic: A-s3-cockpit, brightness 1.04, colour warmer, shadow band, tilted -0.1°"
     },
     {
       "id": "tuning-cockpit-clean-hard-9",
@@ -288,7 +288,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-cockpit, brightness 1.12, colour warmer, shadow band, tilted -0.7°"
+      "note": "synthetic: A-s4-cockpit, brightness 1.06, colour warmer, shadow band, tilted 1.8°"
     },
     {
       "id": "tuning-cockpit-wear-1",
@@ -301,7 +301,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-cockpit, mud and dust"
+      "note": "synthetic: A-s2-cockpit, mud and dust"
     },
     {
       "id": "tuning-cockpit-wear-2",
@@ -327,7 +327,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-cockpit, mud and dust"
+      "note": "synthetic: A-s4-cockpit, mud and dust"
     },
     {
       "id": "tuning-cockpit-wear-4",
@@ -340,7 +340,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-cockpit, mud and dust"
+      "note": "synthetic: A-s2-cockpit, mud and dust"
     },
     {
       "id": "tuning-cockpit-wear-5",
@@ -353,7 +353,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-cockpit, mud and dust"
+      "note": "synthetic: A-s3-cockpit, mud and dust"
     },
     {
       "id": "tuning-cockpit-wear-6",
@@ -394,15 +394,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.4410480349344978,
-            "y": 0.5539358600583091,
-            "width": 0.025109170305676855,
-            "height": 0.08309037900874636
+            "x": 0.4737991266375546,
+            "y": 0.6034985422740525,
+            "width": 0.034934497816593885,
+            "height": 0.0597667638483965
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-cockpit, small scratch"
+      "note": "synthetic: A-s2-cockpit, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "tuning-cockpit-damage-2",
@@ -417,15 +417,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.39082969432314413,
-            "y": 0.5408163265306123,
-            "width": 0.1146288209606987,
-            "height": 0.08163265306122448
+            "x": 0.4923580786026201,
+            "y": 0.8425655976676385,
+            "width": 0.04475982532751092,
+            "height": 0.15160349854227406
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-cockpit, large dent"
+      "note": "synthetic: A-s3-cockpit, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "tuning-cockpit-damage-3",
@@ -440,15 +440,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.4148471615720524,
-            "y": 0.5539358600583091,
-            "width": 0.03056768558951965,
-            "height": 0.07142857142857142
+            "x": 0.4574235807860262,
+            "y": 0.9081632653061225,
+            "width": 0.05349344978165939,
+            "height": 0.06268221574344024
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-cockpit, small crack, poor light"
+      "note": "synthetic: A-s3-cockpit, small chip, a photograph of real damage (rust-spot), pasted, poor light"
     },
     {
       "id": "tuning-cockpit-damage-4",
@@ -463,15 +463,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.4650655021834061,
-            "y": 0.5743440233236151,
-            "width": 0.056768558951965066,
-            "height": 0.1282798833819242
+            "x": 0.47489082969432317,
+            "y": 0.8848396501457726,
+            "width": 0.07969432314410481,
+            "height": 0.08309037900874636
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-cockpit, large chip"
+      "note": "synthetic: A-s4-cockpit, large chip, a photograph of real damage (chip-blue), pasted"
     },
     {
       "id": "tuning-cockpit-damage-5",
@@ -486,15 +486,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.31986899563318777,
-            "y": 0.9110787172011662,
-            "width": 0.06768558951965066,
-            "height": 0.05830903790087463
+            "x": 0.5283842794759825,
+            "y": 0.902332361516035,
+            "width": 0.034934497816593885,
+            "height": 0.06851311953352769
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-cockpit, small scuff"
+      "note": "synthetic: A-s4-cockpit, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "tuning-cockpit-damage-6",
@@ -509,15 +509,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.36790393013100436,
-            "y": 0.5481049562682215,
-            "width": 0.14410480349344978,
-            "height": 0.09475218658892129
+            "x": 0.39956331877729256,
+            "y": 0.8352769679300291,
+            "width": 0.10589519650655022,
+            "height": 0.1326530612244898
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-cockpit, large scratch, poor light"
+      "note": "synthetic: A-s3-cockpit, large scratch, a photograph of real damage (gouge-blue), pasted, poor light"
     },
     {
       "id": "tuning-cockpit-damage-7",
@@ -532,15 +532,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.3962882096069869,
-            "y": 0.892128279883382,
-            "width": 0.07205240174672489,
-            "height": 0.09037900874635568
+            "x": 0.5338427947598253,
+            "y": 0.9067055393586005,
+            "width": 0.0425764192139738,
+            "height": 0.0641399416909621
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-cockpit, small dent"
+      "note": "synthetic: A-s3-cockpit, small chip, a photograph of real damage (rust-spot), pasted"
     },
     {
       "id": "tuning-cockpit-damage-8",
@@ -555,15 +555,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.35262008733624456,
-            "y": 0.5451895043731778,
-            "width": 0.11899563318777293,
-            "height": 0.06705539358600583
+            "x": 0.4497816593886463,
+            "y": 0.8454810495626822,
+            "width": 0.060043668122270744,
+            "height": 0.13411078717201166
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-cockpit, large crack"
+      "note": "synthetic: A-s2-cockpit, large chip, a photograph of real damage (chip-blue), pasted"
     },
     {
       "id": "tuning-cockpit-damage-9",
@@ -578,15 +578,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.37445414847161573,
-            "y": 0.9125364431486881,
-            "width": 0.04694323144104803,
-            "height": 0.0597667638483965
+            "x": 0.4268558951965066,
+            "y": 0.5670553935860059,
+            "width": 0.03165938864628821,
+            "height": 0.04518950437317784
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-cockpit, small chip, poor light"
+      "note": "synthetic: A-s3-cockpit, small scratch, a photograph of real damage (scratches-yellow), pasted, poor light"
     },
     {
       "id": "tuning-cockpit-damage-10",
@@ -601,15 +601,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.35917030567685587,
-            "y": 0.5408163265306123,
-            "width": 0.12663755458515283,
-            "height": 0.21574344023323616
+            "x": 0.462882096069869,
+            "y": 0.8731778425655977,
+            "width": 0.08406113537117904,
+            "height": 0.10204081632653061
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-cockpit, large scuff"
+      "note": "synthetic: A-s3-cockpit, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "tuning-cockpit-damage-11",
@@ -624,15 +624,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.5152838427947598,
-            "y": 0.8892128279883382,
-            "width": 0.02074235807860262,
-            "height": 0.09620991253644315
+            "x": 0.4847161572052402,
+            "y": 0.6865889212827988,
+            "width": 0.04039301310043668,
+            "height": 0.056851311953352766
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-cockpit, small scratch"
+      "note": "synthetic: A-s3-cockpit, small chip, a photograph of real damage (rust-spot), pasted"
     },
     {
       "id": "tuning-cockpit-damage-12",
@@ -647,15 +647,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.38973799126637554,
-            "y": 0.8192419825072886,
-            "width": 0.16812227074235808,
-            "height": 0.18075801749271136
+            "x": 0.37117903930131,
+            "y": 0.8746355685131195,
+            "width": 0.09934497816593886,
+            "height": 0.09912536443148688
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-cockpit, large dent, poor light"
+      "note": "synthetic: A-s2-cockpit, large chip, a photograph of real damage (chip-blue), pasted, poor light"
     },
     {
       "id": "tuning-cockpit-damage-13",
@@ -670,15 +670,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.35262008733624456,
-            "y": 0.9183673469387755,
-            "width": 0.055676855895196505,
-            "height": 0.03498542274052478
+            "x": 0.4672489082969432,
+            "y": 0.5626822157434402,
+            "width": 0.03275109170305677,
+            "height": 0.052478134110787174
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-cockpit, small crack"
+      "note": "synthetic: A-s2-cockpit, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "tuning-cockpit-damage-14",
@@ -693,15 +693,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.3941048034934498,
-            "y": 0.8892128279883382,
-            "width": 0.08951965065502183,
-            "height": 0.10641399416909621
+            "x": 0.4181222707423581,
+            "y": 0.8615160349854227,
+            "width": 0.11135371179039301,
+            "height": 0.11224489795918367
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-cockpit, large chip"
+      "note": "synthetic: A-s3-cockpit, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "tuning-cockpit-known-mark-1",
@@ -715,13 +715,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.47707423580786024,
+          "x": 0.33406113537117904,
           "y": 0.9154518950437318,
-          "width": 0.09934497816593886,
-          "height": 0.04081632653061224
+          "width": 0.0927947598253275,
+          "height": 0.043731778425655975
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-cockpit)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-cockpit)"
     },
     {
       "id": "tuning-cockpit-known-mark-2",
@@ -735,13 +735,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.5185589519650655,
-          "y": 0.6953352769679301,
-          "width": 0.014192139737991267,
-          "height": 0.1239067055393586
+          "x": 0.4574235807860262,
+          "y": 0.5481049562682215,
+          "width": 0.05021834061135371,
+          "height": 0.08454810495626822
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-cockpit)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-cockpit)"
     },
     {
       "id": "tuning-cockpit-known-mark-3",
@@ -755,13 +755,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.5262008733624454,
-          "y": 0.8935860058309038,
-          "width": 0.04039301310043668,
-          "height": 0.08746355685131195
+          "x": 0.3351528384279476,
+          "y": 0.9037900874635568,
+          "width": 0.0906113537117904,
+          "height": 0.06559766763848396
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-cockpit)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-cockpit)"
     },
     {
       "id": "tuning-cockpit-known-mark-4",
@@ -775,13 +775,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.37445414847161573,
-          "y": 0.8833819241982507,
-          "width": 0.03275109170305677,
-          "height": 0.10787172011661808
+          "x": 0.4421397379912664,
+          "y": 0.5481049562682215,
+          "width": 0.060043668122270744,
+          "height": 0.05102040816326531
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-cockpit)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-cockpit)"
     },
     {
       "id": "tuning-cockpit-known-mark-5",
@@ -795,13 +795,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.4585152838427948,
-          "y": 0.9256559766763849,
-          "width": 0.0927947598253275,
-          "height": 0.023323615160349854
+          "x": 0.5229257641921398,
+          "y": 0.89067055393586,
+          "width": 0.048034934497816595,
+          "height": 0.09183673469387756
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-cockpit)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-cockpit)"
     },
     {
       "id": "tuning-cockpit-identity-2",
@@ -892,7 +892,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-drivetrain, brightness 1.04"
+      "note": "synthetic: A-s2-drivetrain, brightness 0.97"
     },
     {
       "id": "gate-drivetrain-clean-easy-2",
@@ -905,7 +905,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-drivetrain, brightness 1.04"
+      "note": "synthetic: A-s3-drivetrain, brightness 0.99"
     },
     {
       "id": "gate-drivetrain-clean-easy-3",
@@ -918,7 +918,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-drivetrain, brightness 1.03"
+      "note": "synthetic: A-s2-drivetrain, brightness 1.02"
     },
     {
       "id": "gate-drivetrain-clean-easy-4",
@@ -931,7 +931,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-drivetrain, brightness 0.97"
+      "note": "synthetic: A-s3-drivetrain, brightness 0.98"
     },
     {
       "id": "gate-drivetrain-clean-easy-5",
@@ -944,7 +944,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-drivetrain, brightness 1.02"
+      "note": "synthetic: A-s2-drivetrain, brightness 1.06"
     },
     {
       "id": "gate-drivetrain-clean-easy-6",
@@ -957,7 +957,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-drivetrain, brightness 1.03"
+      "note": "synthetic: A-s3-drivetrain, brightness 0.98"
     },
     {
       "id": "gate-drivetrain-clean-easy-7",
@@ -970,7 +970,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-drivetrain, brightness 0.98"
+      "note": "synthetic: A-s4-drivetrain, brightness 1.00"
     },
     {
       "id": "gate-drivetrain-clean-easy-8",
@@ -983,7 +983,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-drivetrain, brightness 1.06"
+      "note": "synthetic: A-s4-drivetrain, brightness 0.98"
     },
     {
       "id": "gate-drivetrain-clean-easy-9",
@@ -1009,7 +1009,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-drivetrain, brightness 0.88, colour warmer, shadow band, tilted -0.0°"
+      "note": "synthetic: A-s3-drivetrain, brightness 0.72, colour cooler, shadow band, tilted -0.9°"
     },
     {
       "id": "gate-drivetrain-clean-hard-2",
@@ -1022,7 +1022,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-drivetrain, brightness 1.07, colour cooler, shadow band, tilted -1.3°"
+      "note": "synthetic: A-s4-drivetrain, brightness 1.16, colour cooler, shadow band, tilted 1.2°"
     },
     {
       "id": "gate-drivetrain-clean-hard-3",
@@ -1035,7 +1035,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-drivetrain, brightness 0.92, colour warmer, shadow band, tilted 1.0°"
+      "note": "synthetic: A-s3-drivetrain, brightness 1.04, colour cooler, shadow band, tilted 0.8°"
     },
     {
       "id": "gate-drivetrain-clean-hard-4",
@@ -1048,7 +1048,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-drivetrain, brightness 0.97, colour warmer, shadow band, tilted 0.4°"
+      "note": "synthetic: A-s2-drivetrain, brightness 1.19, colour warmer, shadow band, tilted 1.1°"
     },
     {
       "id": "gate-drivetrain-clean-hard-5",
@@ -1061,7 +1061,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-drivetrain, brightness 1.18, colour warmer, shadow band, tilted -0.1°"
+      "note": "synthetic: A-s3-drivetrain, brightness 0.79, colour cooler, shadow band, tilted -0.5°"
     },
     {
       "id": "gate-drivetrain-clean-hard-6",
@@ -1074,7 +1074,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-drivetrain, brightness 1.03, colour cooler, shadow band, tilted -0.9°"
+      "note": "synthetic: A-s2-drivetrain, brightness 0.84, colour cooler, shadow band, tilted -0.4°"
     },
     {
       "id": "gate-drivetrain-clean-hard-7",
@@ -1087,7 +1087,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-drivetrain, brightness 0.78, colour cooler, shadow band, tilted -0.8°"
+      "note": "synthetic: A-s4-drivetrain, brightness 0.83, colour cooler, shadow band, tilted 1.5°"
     },
     {
       "id": "gate-drivetrain-clean-hard-8",
@@ -1100,7 +1100,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-drivetrain, brightness 0.92, colour warmer, shadow band, tilted 1.3°"
+      "note": "synthetic: A-s2-drivetrain, brightness 0.99, colour warmer, shadow band, tilted -1.3°"
     },
     {
       "id": "gate-drivetrain-clean-hard-9",
@@ -1113,7 +1113,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-drivetrain, brightness 0.99, colour warmer, shadow band, tilted 1.0°"
+      "note": "synthetic: A-s4-drivetrain, brightness 1.13, colour warmer, shadow band, tilted -1.1°"
     },
     {
       "id": "gate-drivetrain-wear-1",
@@ -1139,7 +1139,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-drivetrain, mud and dust"
+      "note": "synthetic: A-s3-drivetrain, mud and dust"
     },
     {
       "id": "gate-drivetrain-wear-3",
@@ -1152,7 +1152,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-drivetrain, mud and dust"
+      "note": "synthetic: A-s2-drivetrain, mud and dust"
     },
     {
       "id": "gate-drivetrain-wear-4",
@@ -1165,7 +1165,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-drivetrain, mud and dust"
+      "note": "synthetic: A-s4-drivetrain, mud and dust"
     },
     {
       "id": "gate-drivetrain-wear-5",
@@ -1191,7 +1191,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-drivetrain, mud and dust"
+      "note": "synthetic: A-s2-drivetrain, mud and dust"
     },
     {
       "id": "gate-drivetrain-wear-7",
@@ -1204,7 +1204,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-drivetrain, mud and dust"
+      "note": "synthetic: A-s4-drivetrain, mud and dust"
     },
     {
       "id": "gate-drivetrain-damage-1",
@@ -1219,15 +1219,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.31072961373390556,
-            "y": 0.4839816933638444,
-            "width": 0.055793991416309016,
-            "height": 0.04233409610983982
+            "x": 0.4128755364806867,
+            "y": 0.4805491990846682,
+            "width": 0.03690987124463519,
+            "height": 0.04805491990846682
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-drivetrain, small scratch"
+      "note": "synthetic: A-s2-drivetrain, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "gate-drivetrain-damage-2",
@@ -1242,15 +1242,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.3296137339055794,
-            "y": 0.41990846681922195,
-            "width": 0.11931330472103004,
-            "height": 0.10869565217391304
+            "x": 0.3682403433476395,
+            "y": 0.43249427917620137,
+            "width": 0.07725321888412018,
+            "height": 0.09382151029748284
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-drivetrain, large dent"
+      "note": "synthetic: A-s4-drivetrain, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "gate-drivetrain-damage-3",
@@ -1265,15 +1265,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.3579399141630901,
-            "y": 0.4759725400457666,
-            "width": 0.04463519313304721,
-            "height": 0.05034324942791762
+            "x": 0.40429184549356223,
+            "y": 0.45537757437070936,
+            "width": 0.03261802575107296,
+            "height": 0.04576659038901602
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-drivetrain, small crack, poor light"
+      "note": "synthetic: A-s4-drivetrain, small chip, a photograph of real damage (rust-spot), pasted, poor light"
     },
     {
       "id": "gate-drivetrain-damage-4",
@@ -1288,15 +1288,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.35107296137339056,
-            "y": 0.43592677345537756,
-            "width": 0.09785407725321889,
-            "height": 0.09267734553775744
+            "x": 0.39570815450643776,
+            "y": 0.43707093821510296,
+            "width": 0.05836909871244635,
+            "height": 0.09725400457665904
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-drivetrain, large chip"
+      "note": "synthetic: A-s3-drivetrain, large chip, a photograph of real damage (chip-blue), pasted"
     },
     {
       "id": "gate-drivetrain-damage-5",
@@ -1311,15 +1311,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.32274678111587984,
-            "y": 0.4588100686498856,
-            "width": 0.06781115879828326,
-            "height": 0.06750572082379863
+            "x": 0.38197424892703863,
+            "y": 0.4691075514874142,
+            "width": 0.036051502145922745,
+            "height": 0.057208237986270026
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-drivetrain, small scuff"
+      "note": "synthetic: A-s4-drivetrain, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "gate-drivetrain-damage-6",
@@ -1334,15 +1334,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.34678111587982835,
-            "y": 0.41647597254004576,
-            "width": 0.06523605150214593,
-            "height": 0.11212814645308924
+            "x": 0.34935622317596565,
+            "y": 0.448512585812357,
+            "width": 0.050643776824034335,
+            "height": 0.07208237986270023
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-drivetrain, large scratch, poor light"
+      "note": "synthetic: A-s4-drivetrain, large scratch, a photograph of real damage (gouge-blue), pasted, poor light"
     },
     {
       "id": "gate-drivetrain-damage-7",
@@ -1357,15 +1357,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.2849785407725322,
-            "y": 0.47139588100686497,
-            "width": 0.04463519313304721,
-            "height": 0.04691075514874142
+            "x": 0.3536480686695279,
+            "y": 0.47254004576659037,
+            "width": 0.05150214592274678,
+            "height": 0.05606407322654462
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-drivetrain, small dent"
+      "note": "synthetic: A-s3-drivetrain, small chip, a photograph of real damage (rust-spot), pasted"
     },
     {
       "id": "gate-drivetrain-damage-8",
@@ -1380,15 +1380,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.30643776824034336,
-            "y": 0.511441647597254,
-            "width": 0.12446351931330472,
-            "height": 0.017162471395881007
+            "x": 0.3811158798283262,
+            "y": 0.4302059496567506,
+            "width": 0.0703862660944206,
+            "height": 0.10068649885583524
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-drivetrain, large crack"
+      "note": "synthetic: A-s3-drivetrain, large chip, a photograph of real damage (chip-blue), pasted"
     },
     {
       "id": "gate-drivetrain-damage-9",
@@ -1403,15 +1403,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.32532188841201715,
-            "y": 0.494279176201373,
-            "width": 0.06437768240343347,
-            "height": 0.032036613272311214
+            "x": 0.31931330472103003,
+            "y": 0.4782608695652174,
+            "width": 0.060085836909871244,
+            "height": 0.04462242562929062
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-drivetrain, small chip, poor light"
+      "note": "synthetic: A-s2-drivetrain, small scratch, a photograph of real damage (scratches-yellow), pasted, poor light"
     },
     {
       "id": "gate-drivetrain-damage-10",
@@ -1426,15 +1426,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.34763948497854075,
-            "y": 0.4691075514874142,
-            "width": 0.11330472103004292,
-            "height": 0.06521739130434782
+            "x": 0.351931330472103,
+            "y": 0.4668192219679634,
+            "width": 0.096137339055794,
+            "height": 0.06407322654462243
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-drivetrain, large scuff"
+      "note": "synthetic: A-s3-drivetrain, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "gate-drivetrain-damage-11",
@@ -1449,15 +1449,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.3802575107296137,
-            "y": 0.4610983981693364,
-            "width": 0.041201716738197426,
-            "height": 0.06521739130434782
+            "x": 0.38798283261802574,
+            "y": 0.4782608695652174,
+            "width": 0.045493562231759654,
+            "height": 0.04805491990846682
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-drivetrain, small scratch"
+      "note": "synthetic: A-s4-drivetrain, small chip, a photograph of real damage (rust-spot), pasted"
     },
     {
       "id": "gate-drivetrain-damage-12",
@@ -1472,15 +1472,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.35450643776824037,
-            "y": 0.41647597254004576,
-            "width": 0.09871244635193133,
-            "height": 0.11212814645308924
+            "x": 0.3905579399141631,
+            "y": 0.45194508009153317,
+            "width": 0.06266094420600858,
+            "height": 0.06636155606407322
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-drivetrain, large dent, poor light"
+      "note": "synthetic: A-s2-drivetrain, large chip, a photograph of real damage (chip-blue), pasted, poor light"
     },
     {
       "id": "gate-drivetrain-damage-13",
@@ -1495,15 +1495,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.31072961373390556,
+            "x": 0.4034334763948498,
             "y": 0.4862700228832952,
-            "width": 0.07467811158798283,
-            "height": 0.036613272311212815
+            "width": 0.034334763948497854,
+            "height": 0.04004576659038902
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-drivetrain, small crack"
+      "note": "synthetic: A-s4-drivetrain, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "gate-drivetrain-damage-14",
@@ -1518,15 +1518,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.351931330472103,
-            "y": 0.43135011441647597,
-            "width": 0.09699570815450644,
-            "height": 0.09725400457665904
+            "x": 0.38626609442060084,
+            "y": 0.4416475972540046,
+            "width": 0.06094420600858369,
+            "height": 0.08695652173913043
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-drivetrain, large chip"
+      "note": "synthetic: A-s3-drivetrain, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "gate-drivetrain-known-mark-1",
@@ -1540,13 +1540,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.04206008583690987,
-          "y": 0.4302059496567506,
-          "width": 0.010300429184549357,
-          "height": 0.05034324942791762
+          "x": 0.3587982832618026,
+          "y": 0.4610983981693364,
+          "width": 0.04291845493562232,
+          "height": 0.06521739130434782
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-drivetrain)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-drivetrain)"
     },
     {
       "id": "gate-drivetrain-known-mark-2",
@@ -1560,13 +1560,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.40858369098712444,
-          "y": 0.4633867276887872,
-          "width": 0.048068669527897,
-          "height": 0.05835240274599542
+          "x": 0.40772532188841204,
+          "y": 0.4610983981693364,
+          "width": 0.048927038626609444,
+          "height": 0.06750572082379863
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-drivetrain)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-drivetrain)"
     },
     {
       "id": "gate-drivetrain-known-mark-3",
@@ -1580,13 +1580,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.23862660944206007,
-          "y": 0.4691075514874142,
-          "width": 0.03347639484978541,
-          "height": 0.04691075514874142
+          "x": 0.4111587982832618,
+          "y": 0.43478260869565216,
+          "width": 0.045493562231759654,
+          "height": 0.059496567505720827
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-drivetrain)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-drivetrain)"
     },
     {
       "id": "gate-drivetrain-known-mark-4",
@@ -1600,13 +1600,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.4068669527896996,
-          "y": 0.43478260869565216,
-          "width": 0.04978540772532189,
-          "height": 0.07551487414187644
+          "x": 0.40171673819742487,
+          "y": 0.45308924485125857,
+          "width": 0.054935622317596564,
+          "height": 0.05263157894736842
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-drivetrain)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-drivetrain)"
     },
     {
       "id": "gate-drivetrain-known-mark-5",
@@ -1620,13 +1620,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.38540772532188844,
-          "y": 0.4805491990846682,
-          "width": 0.07124463519313305,
-          "height": 0.04805491990846682
+          "x": 0.3236051502145923,
+          "y": 0.45080091533180777,
+          "width": 0.07210300429184549,
+          "height": 0.07551487414187644
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-drivetrain)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-drivetrain)"
     },
     {
       "id": "gate-drivetrain-identity-2",
@@ -1717,7 +1717,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-frame, brightness 1.03"
+      "note": "synthetic: A-s2-frame, brightness 1.05"
     },
     {
       "id": "tuning-frame-clean-easy-2",
@@ -1730,7 +1730,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-frame, brightness 0.96"
+      "note": "synthetic: A-s2-frame, brightness 0.99"
     },
     {
       "id": "tuning-frame-clean-easy-3",
@@ -1743,7 +1743,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-frame, brightness 0.98"
+      "note": "synthetic: A-s3-frame, brightness 1.05"
     },
     {
       "id": "tuning-frame-clean-easy-4",
@@ -1756,7 +1756,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-frame, brightness 0.97"
+      "note": "synthetic: A-s3-frame, brightness 0.94"
     },
     {
       "id": "tuning-frame-clean-easy-5",
@@ -1769,7 +1769,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-frame, brightness 0.96"
+      "note": "synthetic: A-s4-frame, brightness 0.95"
     },
     {
       "id": "tuning-frame-clean-easy-6",
@@ -1782,7 +1782,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-frame, brightness 1.05"
+      "note": "synthetic: A-s3-frame, brightness 1.04"
     },
     {
       "id": "tuning-frame-clean-easy-7",
@@ -1795,7 +1795,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-frame, brightness 1.06"
+      "note": "synthetic: A-s4-frame, brightness 0.99"
     },
     {
       "id": "tuning-frame-clean-easy-8",
@@ -1808,7 +1808,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-frame, brightness 0.95"
+      "note": "synthetic: A-s4-frame, brightness 1.04"
     },
     {
       "id": "tuning-frame-clean-easy-9",
@@ -1821,7 +1821,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-frame, brightness 1.04"
+      "note": "synthetic: A-s3-frame, brightness 0.99"
     },
     {
       "id": "tuning-frame-clean-hard-1",
@@ -1834,7 +1834,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-frame, brightness 0.85, colour cooler, shadow band, tilted 0.0°"
+      "note": "synthetic: A-s3-frame, brightness 1.13, colour cooler, shadow band, tilted 0.3°"
     },
     {
       "id": "tuning-frame-clean-hard-2",
@@ -1847,7 +1847,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-frame, brightness 0.74, colour warmer, shadow band, tilted -1.6°"
+      "note": "synthetic: A-s3-frame, brightness 1.08, colour warmer, shadow band, tilted -0.9°"
     },
     {
       "id": "tuning-frame-clean-hard-3",
@@ -1860,7 +1860,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-frame, brightness 1.19, colour cooler, shadow band, tilted -0.8°"
+      "note": "synthetic: A-s4-frame, brightness 0.85, colour cooler, shadow band, tilted 0.1°"
     },
     {
       "id": "tuning-frame-clean-hard-4",
@@ -1873,7 +1873,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-frame, brightness 0.76, colour warmer, shadow band, tilted 1.6°"
+      "note": "synthetic: A-s3-frame, brightness 1.00, colour warmer, shadow band, tilted -1.6°"
     },
     {
       "id": "tuning-frame-clean-hard-5",
@@ -1886,7 +1886,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-frame, brightness 0.76, colour cooler, shadow band, tilted -1.5°"
+      "note": "synthetic: A-s2-frame, brightness 1.18, colour cooler, shadow band, tilted -1.8°"
     },
     {
       "id": "tuning-frame-clean-hard-6",
@@ -1899,7 +1899,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-frame, brightness 1.01, colour warmer, shadow band, tilted -0.7°"
+      "note": "synthetic: A-s2-frame, brightness 1.19, colour cooler, shadow band, tilted 1.6°"
     },
     {
       "id": "tuning-frame-clean-hard-7",
@@ -1912,7 +1912,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-frame, brightness 1.06, colour warmer, shadow band, tilted -0.4°"
+      "note": "synthetic: A-s2-frame, brightness 0.97, colour cooler, shadow band, tilted -1.6°"
     },
     {
       "id": "tuning-frame-clean-hard-8",
@@ -1925,7 +1925,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-frame, brightness 0.87, colour cooler, shadow band, tilted 0.3°"
+      "note": "synthetic: A-s4-frame, brightness 0.98, colour warmer, shadow band, tilted 1.4°"
     },
     {
       "id": "tuning-frame-clean-hard-9",
@@ -1938,7 +1938,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-frame, brightness 1.01, colour warmer, shadow band, tilted -1.6°"
+      "note": "synthetic: A-s3-frame, brightness 0.84, colour warmer, shadow band, tilted -1.8°"
     },
     {
       "id": "tuning-frame-wear-1",
@@ -1951,7 +1951,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-frame, mud and dust"
+      "note": "synthetic: A-s2-frame, mud and dust"
     },
     {
       "id": "tuning-frame-wear-2",
@@ -1964,7 +1964,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-frame, mud and dust"
+      "note": "synthetic: A-s2-frame, mud and dust"
     },
     {
       "id": "tuning-frame-wear-3",
@@ -1977,7 +1977,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-frame, mud and dust"
+      "note": "synthetic: A-s2-frame, mud and dust"
     },
     {
       "id": "tuning-frame-wear-4",
@@ -1990,7 +1990,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-frame, mud and dust"
+      "note": "synthetic: A-s4-frame, mud and dust"
     },
     {
       "id": "tuning-frame-wear-5",
@@ -2003,7 +2003,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-frame, mud and dust"
+      "note": "synthetic: A-s3-frame, mud and dust"
     },
     {
       "id": "tuning-frame-wear-6",
@@ -2016,7 +2016,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-frame, mud and dust"
+      "note": "synthetic: A-s4-frame, mud and dust"
     },
     {
       "id": "tuning-frame-wear-7",
@@ -2044,15 +2044,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.3062015503875969,
-            "y": 0.18510858324715615,
-            "width": 0.06511627906976744,
-            "height": 0.0703205791106515
+            "x": 0.9356589147286821,
+            "y": 0.05480868665977249,
+            "width": 0.034108527131782945,
+            "height": 0.04239917269906929
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-frame, small scratch"
+      "note": "synthetic: A-s4-frame, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "tuning-frame-damage-2",
@@ -2067,15 +2067,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.4449612403100775,
-            "y": 0.8190279214064116,
-            "width": 0.14108527131782947,
-            "height": 0.1809720785935884
+            "x": 0.5170542635658915,
+            "y": 0.8490175801447777,
+            "width": 0.05891472868217054,
+            "height": 0.13857290589451912
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-frame, large dent"
+      "note": "synthetic: A-s3-frame, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "tuning-frame-damage-3",
@@ -2090,15 +2090,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.19844961240310077,
-            "y": 0.20062047569803515,
-            "width": 0.050387596899224806,
-            "height": 0.04860392967942089
+            "x": 0.5465116279069767,
+            "y": 0.16339193381592554,
+            "width": 0.043410852713178294,
+            "height": 0.05170630816959669
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-frame, small crack, poor light"
+      "note": "synthetic: A-s4-frame, small chip, a photograph of real damage (rust-spot), pasted, poor light"
     },
     {
       "id": "tuning-frame-damage-4",
@@ -2113,15 +2113,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.4317829457364341,
-            "y": 0.8614270941054809,
-            "width": 0.10930232558139535,
-            "height": 0.13857290589451912
+            "x": 0.5232558139534884,
+            "y": 0.859358841778697,
+            "width": 0.05581395348837209,
+            "height": 0.10444674250258532
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-frame, large chip"
+      "note": "synthetic: A-s4-frame, large chip, a photograph of real damage (chip-blue), pasted"
     },
     {
       "id": "tuning-frame-damage-5",
@@ -2136,15 +2136,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.47364341085271316,
-            "y": 0.8945191313340227,
-            "width": 0.07054263565891473,
-            "height": 0.09720785935884178
+            "x": 0.46744186046511627,
+            "y": 0.9017580144777663,
+            "width": 0.03875968992248062,
+            "height": 0.0734229576008273
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-frame, small scuff"
+      "note": "synthetic: A-s2-frame, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "tuning-frame-damage-6",
@@ -2159,15 +2159,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.5031007751937985,
+            "x": 0.35891472868217056,
             "y": 0.16132368148914167,
-            "width": 0.043410852713178294,
-            "height": 0.06514994829369183
+            "width": 0.12868217054263567,
+            "height": 0.0734229576008273
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-frame, large scratch, poor light"
+      "note": "synthetic: A-s2-frame, large scratch, a photograph of real damage (gouge-blue), pasted, poor light"
     },
     {
       "id": "tuning-frame-damage-7",
@@ -2182,15 +2182,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.22015503875968992,
-            "y": 0.20062047569803515,
-            "width": 0.04961240310077519,
-            "height": 0.038262668045501554
+            "x": 0.4992248062015504,
+            "y": 0.9079627714581179,
+            "width": 0.05426356589147287,
+            "height": 0.06514994829369183
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-frame, small dent"
+      "note": "synthetic: A-s4-frame, small chip, a photograph of real damage (rust-spot), pasted"
     },
     {
       "id": "tuning-frame-damage-8",
@@ -2205,15 +2205,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.17209302325581396,
-            "y": 0.20268872802481902,
-            "width": 0.04961240310077519,
-            "height": 0.06825232678386763
+            "x": 0.506201550387597,
+            "y": 0.8107549120992761,
+            "width": 0.07209302325581396,
+            "height": 0.16028955532574973
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-frame, large crack"
+      "note": "synthetic: A-s3-frame, large chip, a photograph of real damage (chip-blue), pasted"
     },
     {
       "id": "tuning-frame-damage-9",
@@ -2228,15 +2228,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.4782945736434108,
-            "y": 0.9007238883143743,
-            "width": 0.03643410852713178,
-            "height": 0.06514994829369183
+            "x": 0.1434108527131783,
+            "y": 0.2109617373319545,
+            "width": 0.034108527131782945,
+            "height": 0.06101344364012409
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-frame, small chip, poor light"
+      "note": "synthetic: A-s3-frame, small scratch, a photograph of real damage (scratches-yellow), pasted, poor light"
     },
     {
       "id": "tuning-frame-damage-10",
@@ -2251,15 +2251,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.044186046511627906,
-            "y": 0.18717683557394002,
-            "width": 0.19689922480620156,
-            "height": 0.16442605997931747
+            "x": 0.49224806201550386,
+            "y": 0.859358841778697,
+            "width": 0.08527131782945736,
+            "height": 0.11789038262668046
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-frame, large scuff"
+      "note": "synthetic: A-s3-frame, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "tuning-frame-damage-11",
@@ -2274,15 +2274,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.16434108527131783,
-            "y": 0.20579110651499483,
-            "width": 0.056589147286821705,
-            "height": 0.01861427094105481
+            "x": 0.6488372093023256,
+            "y": 0.1375387797311272,
+            "width": 0.04961240310077519,
+            "height": 0.06308169596690796
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-frame, small scratch"
+      "note": "synthetic: A-s4-frame, small chip, a photograph of real damage (rust-spot), pasted"
     },
     {
       "id": "tuning-frame-damage-12",
@@ -2297,15 +2297,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.07984496124031008,
-            "y": 0.18717683557394002,
-            "width": 0.1635658914728682,
-            "height": 0.13029989658738367
+            "x": 0.48527131782945737,
+            "y": 0.8697001034126164,
+            "width": 0.08372093023255814,
+            "height": 0.08169596690796277
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-frame, large dent, poor light"
+      "note": "synthetic: A-s4-frame, large chip, a photograph of real damage (chip-blue), pasted, poor light"
     },
     {
       "id": "tuning-frame-damage-13",
@@ -2320,15 +2320,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.1558139534883721,
-            "y": 0.2078593588417787,
-            "width": 0.05271317829457364,
-            "height": 0.04343329886246122
+            "x": 0.3891472868217054,
+            "y": 0.1768355739400207,
+            "width": 0.043410852713178294,
+            "height": 0.05170630816959669
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-frame, small crack"
+      "note": "synthetic: A-s4-frame, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "tuning-frame-damage-14",
@@ -2343,15 +2343,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.23488372093023255,
-            "y": 0.18717683557394002,
-            "width": 0.10542635658914729,
-            "height": 0.0734229576008273
+            "x": 0.9069767441860465,
+            "y": 0.04136504653567735,
+            "width": 0.07054263565891473,
+            "height": 0.140641158221303
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-frame, large chip"
+      "note": "synthetic: A-s4-frame, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "tuning-frame-known-mark-1",
@@ -2365,13 +2365,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.04961240310077519,
-          "y": 0.25232678386763185,
-          "width": 0.015503875968992248,
-          "height": 0.07859358841778696
+          "x": 0.4503875968992248,
+          "y": 0.9038262668045501,
+          "width": 0.04883720930232558,
+          "height": 0.06928645294725956
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-frame)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-frame)"
     },
     {
       "id": "tuning-frame-known-mark-2",
@@ -2385,10 +2385,10 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.45891472868217054,
-          "y": 0.8862461220268872,
-          "width": 0.04961240310077519,
-          "height": 0.10134436401240951
+          "x": 0.9217054263565891,
+          "y": 0.0734229576008273,
+          "width": 0.06356589147286822,
+          "height": 0.06101344364012409
         }
       ],
       "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-frame)"
@@ -2405,13 +2405,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.01627906976744186,
-          "y": 0.6328852119958635,
-          "width": 0.06124031007751938,
-          "height": 0.05170630816959669
+          "x": 0.2364341085271318,
+          "y": 0.21509824198552224,
+          "width": 0.037209302325581395,
+          "height": 0.050672182006204755
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-frame)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-frame)"
     },
     {
       "id": "tuning-frame-known-mark-4",
@@ -2425,13 +2425,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.017829457364341085,
-          "y": 0.6080661840744571,
-          "width": 0.07829457364341086,
-          "height": 0.07755946225439504
+          "x": 0.9100775193798449,
+          "y": 0.0703205791106515,
+          "width": 0.043410852713178294,
+          "height": 0.03929679420889348
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-frame)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-frame)"
     },
     {
       "id": "tuning-frame-known-mark-5",
@@ -2445,13 +2445,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.2565891472868217,
-          "y": 0.20268872802481902,
-          "width": 0.018604651162790697,
-          "height": 0.05997931747673216
+          "x": 0.4635658914728682,
+          "y": 0.8976215098241985,
+          "width": 0.04108527131782946,
+          "height": 0.08066184074457083
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-frame)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-frame)"
     },
     {
       "id": "tuning-frame-identity-2",
@@ -2542,7 +2542,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-front-wheel, brightness 0.98"
+      "note": "synthetic: A-s4-front-wheel, brightness 0.96"
     },
     {
       "id": "gate-front-wheel-clean-easy-2",
@@ -2555,7 +2555,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-front-wheel, brightness 1.00"
+      "note": "synthetic: A-s4-front-wheel, brightness 1.05"
     },
     {
       "id": "gate-front-wheel-clean-easy-3",
@@ -2568,7 +2568,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-front-wheel, brightness 0.96"
+      "note": "synthetic: A-s4-front-wheel, brightness 1.05"
     },
     {
       "id": "gate-front-wheel-clean-easy-4",
@@ -2581,7 +2581,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-front-wheel, brightness 0.99"
+      "note": "synthetic: A-s4-front-wheel, brightness 1.03"
     },
     {
       "id": "gate-front-wheel-clean-easy-5",
@@ -2594,7 +2594,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-front-wheel, brightness 1.03"
+      "note": "synthetic: A-s3-front-wheel, brightness 1.01"
     },
     {
       "id": "gate-front-wheel-clean-easy-6",
@@ -2607,7 +2607,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-front-wheel, brightness 1.02"
+      "note": "synthetic: A-s2-front-wheel, brightness 0.96"
     },
     {
       "id": "gate-front-wheel-clean-easy-7",
@@ -2620,7 +2620,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-front-wheel, brightness 0.96"
+      "note": "synthetic: A-s4-front-wheel, brightness 0.97"
     },
     {
       "id": "gate-front-wheel-clean-easy-8",
@@ -2633,7 +2633,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-front-wheel, brightness 1.05"
+      "note": "synthetic: A-s2-front-wheel, brightness 1.01"
     },
     {
       "id": "gate-front-wheel-clean-easy-9",
@@ -2646,7 +2646,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-front-wheel, brightness 1.05"
+      "note": "synthetic: A-s4-front-wheel, brightness 1.02"
     },
     {
       "id": "gate-front-wheel-clean-hard-1",
@@ -2659,7 +2659,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-front-wheel, brightness 0.80, colour warmer, shadow band, tilted -1.0°"
+      "note": "synthetic: A-s2-front-wheel, brightness 0.92, colour warmer, shadow band, tilted 0.3°"
     },
     {
       "id": "gate-front-wheel-clean-hard-2",
@@ -2672,7 +2672,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-front-wheel, brightness 0.85, colour warmer, shadow band, tilted 1.3°"
+      "note": "synthetic: A-s3-front-wheel, brightness 0.85, colour cooler, shadow band, tilted 1.8°"
     },
     {
       "id": "gate-front-wheel-clean-hard-3",
@@ -2685,7 +2685,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-front-wheel, brightness 0.87, colour cooler, shadow band, tilted 0.0°"
+      "note": "synthetic: A-s4-front-wheel, brightness 0.92, colour warmer, shadow band, tilted -1.9°"
     },
     {
       "id": "gate-front-wheel-clean-hard-4",
@@ -2698,7 +2698,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-front-wheel, brightness 0.92, colour warmer, shadow band, tilted -1.4°"
+      "note": "synthetic: A-s4-front-wheel, brightness 0.75, colour warmer, shadow band, tilted -1.7°"
     },
     {
       "id": "gate-front-wheel-clean-hard-5",
@@ -2711,7 +2711,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-front-wheel, brightness 1.06, colour cooler, shadow band, tilted 1.2°"
+      "note": "synthetic: A-s2-front-wheel, brightness 1.20, colour warmer, shadow band, tilted 1.0°"
     },
     {
       "id": "gate-front-wheel-clean-hard-6",
@@ -2724,7 +2724,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-front-wheel, brightness 1.11, colour warmer, shadow band, tilted -1.1°"
+      "note": "synthetic: A-s2-front-wheel, brightness 0.88, colour warmer, shadow band, tilted -1.5°"
     },
     {
       "id": "gate-front-wheel-clean-hard-7",
@@ -2737,7 +2737,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-front-wheel, brightness 0.87, colour cooler, shadow band, tilted 1.9°"
+      "note": "synthetic: A-s2-front-wheel, brightness 0.88, colour warmer, shadow band, tilted 1.3°"
     },
     {
       "id": "gate-front-wheel-clean-hard-8",
@@ -2750,7 +2750,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-front-wheel, brightness 0.72, colour warmer, shadow band, tilted 0.7°"
+      "note": "synthetic: A-s4-front-wheel, brightness 0.79, colour warmer, shadow band, tilted 1.5°"
     },
     {
       "id": "gate-front-wheel-clean-hard-9",
@@ -2763,7 +2763,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-front-wheel, brightness 0.99, colour cooler, shadow band, tilted -1.8°"
+      "note": "synthetic: A-s2-front-wheel, brightness 1.03, colour cooler, shadow band, tilted 1.7°"
     },
     {
       "id": "gate-front-wheel-wear-1",
@@ -2789,7 +2789,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-front-wheel, mud and dust"
+      "note": "synthetic: A-s4-front-wheel, mud and dust"
     },
     {
       "id": "gate-front-wheel-wear-3",
@@ -2815,7 +2815,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-front-wheel, mud and dust"
+      "note": "synthetic: A-s2-front-wheel, mud and dust"
     },
     {
       "id": "gate-front-wheel-wear-5",
@@ -2828,7 +2828,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-front-wheel, mud and dust"
+      "note": "synthetic: A-s3-front-wheel, mud and dust"
     },
     {
       "id": "gate-front-wheel-wear-6",
@@ -2841,7 +2841,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-front-wheel, mud and dust"
+      "note": "synthetic: A-s2-front-wheel, mud and dust"
     },
     {
       "id": "gate-front-wheel-wear-7",
@@ -2854,7 +2854,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-front-wheel, mud and dust"
+      "note": "synthetic: A-s4-front-wheel, mud and dust"
     },
     {
       "id": "gate-front-wheel-damage-1",
@@ -2869,15 +2869,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.51,
-            "y": 0.484375,
-            "width": 0.0325,
-            "height": 0.036875
+            "x": 0.336875,
+            "y": 0.1175,
+            "width": 0.038125,
+            "height": 0.048125
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-front-wheel, small scratch"
+      "note": "synthetic: A-s3-front-wheel, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "gate-front-wheel-damage-2",
@@ -2892,15 +2892,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.273125,
-            "y": 0.005,
-            "width": 0.129375,
-            "height": 0.188125
+            "x": 0.31625,
+            "y": 0.1225,
+            "width": 0.065625,
+            "height": 0.041875
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-front-wheel, large dent"
+      "note": "synthetic: A-s4-front-wheel, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "gate-front-wheel-damage-3",
@@ -2915,15 +2915,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.348125,
-            "y": 0.0875,
-            "width": 0.023125,
-            "height": 0.045
+            "x": 0.3325,
+            "y": 0.125,
+            "width": 0.0525,
+            "height": 0.048125
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-front-wheel, small crack, poor light"
+      "note": "synthetic: A-s4-front-wheel, small chip, a photograph of real damage (rust-spot), pasted, poor light"
     },
     {
       "id": "gate-front-wheel-damage-4",
@@ -2938,15 +2938,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.34875,
-            "y": 0.09375,
-            "width": 0.07125,
-            "height": 0.11875
+            "x": 0.316875,
+            "y": 0.064375,
+            "width": 0.076875,
+            "height": 0.136875
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-front-wheel, large chip"
+      "note": "synthetic: A-s2-front-wheel, large chip, a photograph of real damage (chip-blue), pasted"
     },
     {
       "id": "gate-front-wheel-damage-5",
@@ -2961,15 +2961,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.305,
-            "y": 0.0875,
-            "width": 0.070625,
-            "height": 0.06125
+            "x": 0.323125,
+            "y": 0.103125,
+            "width": 0.033125,
+            "height": 0.053125
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-front-wheel, small scuff"
+      "note": "synthetic: A-s2-front-wheel, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "gate-front-wheel-damage-6",
@@ -2984,15 +2984,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.36625,
-            "y": 0.07625,
-            "width": 0.046875,
-            "height": 0.175625
+            "x": 0.29875,
+            "y": 0.083125,
+            "width": 0.060625,
+            "height": 0.036875
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-front-wheel, large scratch, poor light"
+      "note": "synthetic: A-s3-front-wheel, large scratch, a photograph of real damage (gouge-blue), pasted, poor light"
     },
     {
       "id": "gate-front-wheel-damage-7",
@@ -3007,15 +3007,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.336875,
-            "y": 0.081875,
+            "x": 0.325625,
+            "y": 0.11375,
             "width": 0.051875,
-            "height": 0.055
+            "height": 0.051875
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-front-wheel, small dent"
+      "note": "synthetic: A-s2-front-wheel, small chip, a photograph of real damage (rust-spot), pasted"
     },
     {
       "id": "gate-front-wheel-damage-8",
@@ -3030,15 +3030,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.313125,
-            "y": 0.0775,
-            "width": 0.06375,
-            "height": 0.061875
+            "x": 0.306875,
+            "y": 0.116875,
+            "width": 0.07125,
+            "height": 0.0575
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-front-wheel, large crack"
+      "note": "synthetic: A-s3-front-wheel, large chip, a photograph of real damage (chip-blue), pasted"
     },
     {
       "id": "gate-front-wheel-damage-9",
@@ -3053,15 +3053,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.34125,
-            "y": 0.07875,
-            "width": 0.05125,
-            "height": 0.065625
+            "x": 0.325625,
+            "y": 0.1,
+            "width": 0.04375,
+            "height": 0.04
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-front-wheel, small chip, poor light"
+      "note": "synthetic: A-s4-front-wheel, small scratch, a photograph of real damage (scratches-yellow), pasted, poor light"
     },
     {
       "id": "gate-front-wheel-damage-10",
@@ -3076,15 +3076,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.20875,
-            "y": 0.01625,
-            "width": 0.195625,
-            "height": 0.20125
+            "x": 0.28625,
+            "y": 0.059375,
+            "width": 0.090625,
+            "height": 0.100625
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-front-wheel, large scuff"
+      "note": "synthetic: A-s3-front-wheel, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "gate-front-wheel-damage-11",
@@ -3099,15 +3099,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.33875,
-            "y": 0.099375,
-            "width": 0.04,
-            "height": 0.063125
+            "x": 0.3075,
+            "y": 0.110625,
+            "width": 0.0425,
+            "height": 0.04
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-front-wheel, small scratch"
+      "note": "synthetic: A-s3-front-wheel, small chip, a photograph of real damage (rust-spot), pasted"
     },
     {
       "id": "gate-front-wheel-damage-12",
@@ -3122,15 +3122,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.310625,
-            "y": 0.07625,
-            "width": 0.085625,
-            "height": 0.12875
+            "x": 0.303125,
+            "y": 0.098125,
+            "width": 0.075625,
+            "height": 0.0725
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-front-wheel, large dent, poor light"
+      "note": "synthetic: A-s3-front-wheel, large chip, a photograph of real damage (chip-blue), pasted, poor light"
     },
     {
       "id": "gate-front-wheel-damage-13",
@@ -3145,15 +3145,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.32625,
-            "y": 0.10625,
-            "width": 0.026875,
-            "height": 0.05
+            "x": 0.333125,
+            "y": 0.135625,
+            "width": 0.034375,
+            "height": 0.033125
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-front-wheel, small crack"
+      "note": "synthetic: A-s2-front-wheel, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "gate-front-wheel-damage-14",
@@ -3168,15 +3168,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.30875,
-            "y": 0.10625,
-            "width": 0.088125,
-            "height": 0.08625
+            "x": 0.328125,
+            "y": 0.128125,
+            "width": 0.043125,
+            "height": 0.041875
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-front-wheel, large chip"
+      "note": "synthetic: A-s4-front-wheel, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "gate-front-wheel-known-mark-1",
@@ -3190,13 +3190,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.355,
-          "y": 0.073125,
-          "width": 0.029375,
-          "height": 0.071875
+          "x": 0.33625,
+          "y": 0.13375,
+          "width": 0.054375,
+          "height": 0.014375
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-front-wheel)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-front-wheel)"
     },
     {
       "id": "gate-front-wheel-known-mark-2",
@@ -3210,10 +3210,10 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.34375,
-          "y": 0.105625,
-          "width": 0.04875,
-          "height": 0.049375
+          "x": 0.324375,
+          "y": 0.1275,
+          "width": 0.068125,
+          "height": 0.02625
         }
       ],
       "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-front-wheel)"
@@ -3230,10 +3230,10 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.3475,
-          "y": 0.100625,
-          "width": 0.046875,
-          "height": 0.05875
+          "x": 0.3125,
+          "y": 0.084375,
+          "width": 0.03,
+          "height": 0.08
         }
       ],
       "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-front-wheel)"
@@ -3250,10 +3250,10 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.453125,
-          "y": 0.38375,
-          "width": 0.025625,
-          "height": 0.055625
+          "x": 0.333125,
+          "y": 0.07875,
+          "width": 0.05375,
+          "height": 0.06125
         }
       ],
       "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-front-wheel)"
@@ -3270,13 +3270,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.31875,
-          "y": 0.11625,
-          "width": 0.04,
-          "height": 0.049375
+          "x": 0.33375,
+          "y": 0.145,
+          "width": 0.05875,
+          "height": 0.0125
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-front-wheel)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-front-wheel)"
     },
     {
       "id": "gate-front-wheel-identity-2",
@@ -3367,7 +3367,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-full-side, brightness 1.02"
+      "note": "synthetic: A-s4-full-side, brightness 1.06"
     },
     {
       "id": "tuning-full-side-clean-easy-2",
@@ -3380,7 +3380,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-full-side, brightness 0.99"
+      "note": "synthetic: A-s4-full-side, brightness 0.99"
     },
     {
       "id": "tuning-full-side-clean-easy-3",
@@ -3393,7 +3393,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-full-side, brightness 1.05"
+      "note": "synthetic: A-s4-full-side, brightness 1.04"
     },
     {
       "id": "tuning-full-side-clean-easy-4",
@@ -3406,7 +3406,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-full-side, brightness 1.01"
+      "note": "synthetic: A-s3-full-side, brightness 1.05"
     },
     {
       "id": "tuning-full-side-clean-easy-5",
@@ -3419,7 +3419,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-full-side, brightness 1.05"
+      "note": "synthetic: A-s3-full-side, brightness 1.05"
     },
     {
       "id": "tuning-full-side-clean-easy-6",
@@ -3432,7 +3432,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-full-side, brightness 0.99"
+      "note": "synthetic: A-s3-full-side, brightness 0.95"
     },
     {
       "id": "tuning-full-side-clean-easy-7",
@@ -3445,7 +3445,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-full-side, brightness 1.04"
+      "note": "synthetic: A-s2-full-side, brightness 1.05"
     },
     {
       "id": "tuning-full-side-clean-easy-8",
@@ -3458,7 +3458,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-full-side, brightness 1.01"
+      "note": "synthetic: A-s4-full-side, brightness 0.98"
     },
     {
       "id": "tuning-full-side-clean-easy-9",
@@ -3471,7 +3471,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-full-side, brightness 1.03"
+      "note": "synthetic: A-s2-full-side, brightness 0.99"
     },
     {
       "id": "tuning-full-side-clean-hard-1",
@@ -3484,7 +3484,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-full-side, brightness 1.13, colour warmer, shadow band, tilted -0.3°"
+      "note": "synthetic: A-s2-full-side, brightness 0.91, colour cooler, shadow band, tilted 1.6°"
     },
     {
       "id": "tuning-full-side-clean-hard-2",
@@ -3497,7 +3497,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-full-side, brightness 0.94, colour warmer, shadow band, tilted -0.8°"
+      "note": "synthetic: A-s2-full-side, brightness 0.74, colour warmer, shadow band, tilted -1.0°"
     },
     {
       "id": "tuning-full-side-clean-hard-3",
@@ -3510,7 +3510,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-full-side, brightness 0.74, colour warmer, shadow band, tilted -0.9°"
+      "note": "synthetic: A-s4-full-side, brightness 0.73, colour cooler, shadow band, tilted 0.7°"
     },
     {
       "id": "tuning-full-side-clean-hard-4",
@@ -3523,7 +3523,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-full-side, brightness 1.04, colour cooler, shadow band, tilted -0.1°"
+      "note": "synthetic: A-s4-full-side, brightness 0.87, colour cooler, shadow band, tilted 1.9°"
     },
     {
       "id": "tuning-full-side-clean-hard-5",
@@ -3536,7 +3536,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-full-side, brightness 1.18, colour cooler, shadow band, tilted 1.6°"
+      "note": "synthetic: A-s2-full-side, brightness 1.06, colour cooler, shadow band, tilted 2.0°"
     },
     {
       "id": "tuning-full-side-clean-hard-6",
@@ -3549,7 +3549,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-full-side, brightness 0.89, colour cooler, shadow band, tilted 1.3°"
+      "note": "synthetic: A-s4-full-side, brightness 1.09, colour cooler, shadow band, tilted 1.9°"
     },
     {
       "id": "tuning-full-side-clean-hard-7",
@@ -3562,7 +3562,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-full-side, brightness 1.03, colour warmer, shadow band, tilted 1.1°"
+      "note": "synthetic: A-s4-full-side, brightness 0.77, colour cooler, shadow band, tilted -0.9°"
     },
     {
       "id": "tuning-full-side-clean-hard-8",
@@ -3575,7 +3575,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-full-side, brightness 0.75, colour cooler, shadow band, tilted 1.0°"
+      "note": "synthetic: A-s2-full-side, brightness 1.01, colour warmer, shadow band, tilted 0.8°"
     },
     {
       "id": "tuning-full-side-clean-hard-9",
@@ -3588,7 +3588,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-full-side, brightness 0.82, colour warmer, shadow band, tilted 1.7°"
+      "note": "synthetic: A-s4-full-side, brightness 1.15, colour warmer, shadow band, tilted -0.8°"
     },
     {
       "id": "tuning-full-side-wear-1",
@@ -3614,7 +3614,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-full-side, mud and dust"
+      "note": "synthetic: A-s2-full-side, mud and dust"
     },
     {
       "id": "tuning-full-side-wear-3",
@@ -3627,7 +3627,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-full-side, mud and dust"
+      "note": "synthetic: A-s4-full-side, mud and dust"
     },
     {
       "id": "tuning-full-side-wear-4",
@@ -3640,7 +3640,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-full-side, mud and dust"
+      "note": "synthetic: A-s2-full-side, mud and dust"
     },
     {
       "id": "tuning-full-side-wear-5",
@@ -3666,7 +3666,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-full-side, mud and dust"
+      "note": "synthetic: A-s4-full-side, mud and dust"
     },
     {
       "id": "tuning-full-side-wear-7",
@@ -3694,15 +3694,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.705,
-            "y": 0.4676663542642924,
-            "width": 0.0175,
-            "height": 0.01874414245548266
+            "x": 0.66875,
+            "y": 0.4076850984067479,
+            "width": 0.04625,
+            "height": 0.07403936269915651
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-full-side, small scratch"
+      "note": "synthetic: A-s3-full-side, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "tuning-full-side-damage-2",
@@ -3717,15 +3717,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.635625,
-            "y": 0.3458294283036551,
-            "width": 0.09875,
-            "height": 0.19868791002811623
+            "x": 0.5525,
+            "y": 0.42830365510777885,
+            "width": 0.09,
+            "height": 0.14432989690721648
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-full-side, large dent"
+      "note": "synthetic: A-s4-full-side, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "tuning-full-side-damage-3",
@@ -3740,15 +3740,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.68375,
-            "y": 0.42830365510777885,
-            "width": 0.025,
-            "height": 0.026241799437675725
+            "x": 0.584375,
+            "y": 0.4526710402999063,
+            "width": 0.044375,
+            "height": 0.07216494845360824
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-full-side, small crack, poor light"
+      "note": "synthetic: A-s4-full-side, small chip, a photograph of real damage (rust-spot), pasted, poor light"
     },
     {
       "id": "tuning-full-side-damage-4",
@@ -3763,15 +3763,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.6075,
-            "y": 0.36363636363636365,
-            "width": 0.085,
-            "height": 0.13495782567947517
+            "x": 0.655625,
+            "y": 0.36457357075913777,
+            "width": 0.076875,
+            "height": 0.17713214620431114
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-full-side, large chip"
+      "note": "synthetic: A-s2-full-side, large chip, a photograph of real damage (chip-blue), pasted"
     },
     {
       "id": "tuning-full-side-damage-5",
@@ -3786,15 +3786,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.685625,
-            "y": 0.42924086223055297,
-            "width": 0.045,
-            "height": 0.10121836925960637
+            "x": 0.675625,
+            "y": 0.37582005623242737,
+            "width": 0.03125,
+            "height": 0.07310215557638237
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-full-side, small scuff"
+      "note": "synthetic: A-s4-full-side, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "tuning-full-side-damage-6",
@@ -3809,15 +3809,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.618125,
-            "y": 0.37582005623242737,
-            "width": 0.10625,
-            "height": 0.1358950328022493
+            "x": 0.700625,
+            "y": 0.45173383317713217,
+            "width": 0.021875,
+            "height": 0.11433926897844424
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-full-side, large scratch, poor light"
+      "note": "synthetic: A-s3-full-side, large scratch, a photograph of real damage (gouge-blue), pasted, poor light"
     },
     {
       "id": "tuning-full-side-damage-7",
@@ -3832,15 +3832,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.566875,
-            "y": 0.4554826616682287,
-            "width": 0.06375,
-            "height": 0.1049671977507029
+            "x": 0.67,
+            "y": 0.38144329896907214,
+            "width": 0.03875,
+            "height": 0.07029053420805999
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-full-side, small dent"
+      "note": "synthetic: A-s2-full-side, small chip, a photograph of real damage (rust-spot), pasted"
     },
     {
       "id": "tuning-full-side-damage-8",
@@ -3855,15 +3855,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.689375,
-            "y": 0.44704779756326146,
-            "width": 0.035,
-            "height": 0.06466729147141519
+            "x": 0.654375,
+            "y": 0.37207122774133083,
+            "width": 0.061875,
+            "height": 0.10684161199625117
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-full-side, large crack"
+      "note": "synthetic: A-s4-full-side, large chip, a photograph of real damage (chip-blue), pasted"
     },
     {
       "id": "tuning-full-side-damage-9",
@@ -3878,15 +3878,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.695625,
-            "y": 0.4639175257731959,
-            "width": 0.03125,
-            "height": 0.05435801312089972
+            "x": 0.69,
+            "y": 0.3964386129334583,
+            "width": 0.0225,
+            "height": 0.06935332708528585
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-full-side, small chip, poor light"
+      "note": "synthetic: A-s4-full-side, small scratch, a photograph of real damage (scratches-yellow), pasted, poor light"
     },
     {
       "id": "tuning-full-side-damage-10",
@@ -3901,15 +3901,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.645,
-            "y": 0.29615745079662603,
-            "width": 0.113125,
-            "height": 0.3486410496719775
+            "x": 0.673125,
+            "y": 0.32427366447985007,
+            "width": 0.045625,
+            "height": 0.18556701030927836
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-full-side, large scuff"
+      "note": "synthetic: A-s4-full-side, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "tuning-full-side-damage-11",
@@ -3924,15 +3924,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.70125,
-            "y": 0.48078725398313027,
-            "width": 0.02125,
-            "height": 0.023430178069353328
+            "x": 0.703125,
+            "y": 0.45454545454545453,
+            "width": 0.0275,
+            "height": 0.06935332708528585
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-full-side, small scratch"
+      "note": "synthetic: A-s4-full-side, small chip, a photograph of real damage (rust-spot), pasted"
     },
     {
       "id": "tuning-full-side-damage-12",
@@ -3947,15 +3947,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.56125,
-            "y": 0.3701968134957826,
-            "width": 0.1175,
-            "height": 0.21274601686972822
+            "x": 0.6475,
+            "y": 0.3345829428303655,
+            "width": 0.073125,
+            "height": 0.19775070290534208
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-full-side, large dent, poor light"
+      "note": "synthetic: A-s3-full-side, large chip, a photograph of real damage (chip-blue), pasted, poor light"
     },
     {
       "id": "tuning-full-side-damage-13",
@@ -3970,15 +3970,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.674375,
-            "y": 0.40112464854732893,
-            "width": 0.03125,
-            "height": 0.09090909090909091
+            "x": 0.67875,
+            "y": 0.4076850984067479,
+            "width": 0.02625,
+            "height": 0.038425492033739454
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-full-side, small crack"
+      "note": "synthetic: A-s3-full-side, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "tuning-full-side-damage-14",
@@ -3993,15 +3993,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.6525,
-            "y": 0.37300843486410495,
-            "width": 0.071875,
-            "height": 0.14058106841611998
+            "x": 0.64,
+            "y": 0.3823805060918463,
+            "width": 0.065,
+            "height": 0.05248359887535145
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-full-side, large chip"
+      "note": "synthetic: A-s2-full-side, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "tuning-full-side-known-mark-1",
@@ -4015,13 +4015,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.653125,
-          "y": 0.41237113402061853,
-          "width": 0.06,
-          "height": 0.06466729147141519
+          "x": 0.685625,
+          "y": 0.4339268978444236,
+          "width": 0.023125,
+          "height": 0.023430178069353328
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-full-side)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-full-side)"
     },
     {
       "id": "tuning-full-side-known-mark-2",
@@ -4035,13 +4035,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.69875,
-          "y": 0.41611996251171507,
-          "width": 0.00875,
-          "height": 0.08059981255857544
+          "x": 0.7075,
+          "y": 0.45454545454545453,
+          "width": 0.011875,
+          "height": 0.09559512652296158
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-full-side)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-full-side)"
     },
     {
       "id": "tuning-full-side-known-mark-3",
@@ -4055,13 +4055,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.676875,
-          "y": 0.408622305529522,
-          "width": 0.038125,
-          "height": 0.07310215557638237
+          "x": 0.67875,
+          "y": 0.380506091846298,
+          "width": 0.04375,
+          "height": 0.13120899718837864
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-full-side)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-full-side)"
     },
     {
       "id": "tuning-full-side-known-mark-4",
@@ -4075,10 +4075,10 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.68375,
-          "y": 0.4301780693533271,
-          "width": 0.043125,
-          "height": 0.09184629803186505
+          "x": 0.649375,
+          "y": 0.42361761949390814,
+          "width": 0.061875,
+          "height": 0.04311152764761012
         }
       ],
       "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-full-side)"
@@ -4095,13 +4095,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.65,
-          "y": 0.4311152764761012,
-          "width": 0.05875,
-          "height": 0.026241799437675725
+          "x": 0.68375,
+          "y": 0.42736644798500467,
+          "width": 0.0275,
+          "height": 0.03748828491096532
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-full-side)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-full-side)"
     },
     {
       "id": "tuning-full-side-identity-2",
@@ -4192,7 +4192,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-rear-wheel, brightness 0.97"
+      "note": "synthetic: A-s2-rear-wheel, brightness 1.02"
     },
     {
       "id": "gate-rear-wheel-clean-easy-2",
@@ -4205,7 +4205,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-rear-wheel, brightness 1.05"
+      "note": "synthetic: A-s3-rear-wheel, brightness 0.99"
     },
     {
       "id": "gate-rear-wheel-clean-easy-3",
@@ -4218,7 +4218,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-rear-wheel, brightness 1.03"
+      "note": "synthetic: A-s3-rear-wheel, brightness 1.04"
     },
     {
       "id": "gate-rear-wheel-clean-easy-4",
@@ -4231,7 +4231,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-rear-wheel, brightness 0.99"
+      "note": "synthetic: A-s2-rear-wheel, brightness 1.02"
     },
     {
       "id": "gate-rear-wheel-clean-easy-5",
@@ -4244,7 +4244,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-rear-wheel, brightness 1.02"
+      "note": "synthetic: A-s2-rear-wheel, brightness 1.00"
     },
     {
       "id": "gate-rear-wheel-clean-easy-6",
@@ -4257,7 +4257,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-rear-wheel, brightness 1.03"
+      "note": "synthetic: A-s4-rear-wheel, brightness 0.95"
     },
     {
       "id": "gate-rear-wheel-clean-easy-7",
@@ -4270,7 +4270,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-rear-wheel, brightness 0.99"
+      "note": "synthetic: A-s2-rear-wheel, brightness 1.02"
     },
     {
       "id": "gate-rear-wheel-clean-easy-8",
@@ -4283,7 +4283,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-rear-wheel, brightness 0.94"
+      "note": "synthetic: A-s4-rear-wheel, brightness 0.95"
     },
     {
       "id": "gate-rear-wheel-clean-easy-9",
@@ -4296,7 +4296,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-rear-wheel, brightness 0.96"
+      "note": "synthetic: A-s2-rear-wheel, brightness 1.00"
     },
     {
       "id": "gate-rear-wheel-clean-hard-1",
@@ -4309,7 +4309,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-rear-wheel, brightness 0.95, colour warmer, shadow band, tilted -0.6°"
+      "note": "synthetic: A-s2-rear-wheel, brightness 1.10, colour warmer, shadow band, tilted 1.6°"
     },
     {
       "id": "gate-rear-wheel-clean-hard-2",
@@ -4322,7 +4322,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-rear-wheel, brightness 0.80, colour warmer, shadow band, tilted 0.1°"
+      "note": "synthetic: A-s3-rear-wheel, brightness 0.72, colour cooler, shadow band, tilted 0.3°"
     },
     {
       "id": "gate-rear-wheel-clean-hard-3",
@@ -4335,7 +4335,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-rear-wheel, brightness 1.18, colour cooler, shadow band, tilted 0.3°"
+      "note": "synthetic: A-s2-rear-wheel, brightness 0.88, colour warmer, shadow band, tilted -0.6°"
     },
     {
       "id": "gate-rear-wheel-clean-hard-4",
@@ -4348,7 +4348,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-rear-wheel, brightness 1.13, colour warmer, shadow band, tilted -0.8°"
+      "note": "synthetic: A-s3-rear-wheel, brightness 1.20, colour warmer, shadow band, tilted -1.9°"
     },
     {
       "id": "gate-rear-wheel-clean-hard-5",
@@ -4361,7 +4361,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-rear-wheel, brightness 1.06, colour cooler, shadow band, tilted 0.9°"
+      "note": "synthetic: A-s4-rear-wheel, brightness 1.19, colour warmer, shadow band, tilted -0.9°"
     },
     {
       "id": "gate-rear-wheel-clean-hard-6",
@@ -4374,7 +4374,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-rear-wheel, brightness 1.12, colour cooler, shadow band, tilted -0.1°"
+      "note": "synthetic: A-s4-rear-wheel, brightness 0.71, colour warmer, shadow band, tilted -1.5°"
     },
     {
       "id": "gate-rear-wheel-clean-hard-7",
@@ -4387,7 +4387,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-rear-wheel, brightness 1.02, colour cooler, shadow band, tilted -1.4°"
+      "note": "synthetic: A-s3-rear-wheel, brightness 0.84, colour warmer, shadow band, tilted -0.6°"
     },
     {
       "id": "gate-rear-wheel-clean-hard-8",
@@ -4400,7 +4400,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-rear-wheel, brightness 1.15, colour cooler, shadow band, tilted 1.7°"
+      "note": "synthetic: A-s3-rear-wheel, brightness 0.73, colour warmer, shadow band, tilted -1.1°"
     },
     {
       "id": "gate-rear-wheel-clean-hard-9",
@@ -4413,7 +4413,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-rear-wheel, brightness 1.07, colour cooler, shadow band, tilted 1.3°"
+      "note": "synthetic: A-s2-rear-wheel, brightness 0.72, colour cooler, shadow band, tilted 0.8°"
     },
     {
       "id": "gate-rear-wheel-wear-1",
@@ -4426,7 +4426,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-rear-wheel, mud and dust"
+      "note": "synthetic: A-s2-rear-wheel, mud and dust"
     },
     {
       "id": "gate-rear-wheel-wear-2",
@@ -4439,7 +4439,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-rear-wheel, mud and dust"
+      "note": "synthetic: A-s2-rear-wheel, mud and dust"
     },
     {
       "id": "gate-rear-wheel-wear-3",
@@ -4452,7 +4452,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s2-rear-wheel, mud and dust"
+      "note": "synthetic: A-s3-rear-wheel, mud and dust"
     },
     {
       "id": "gate-rear-wheel-wear-4",
@@ -4465,7 +4465,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-rear-wheel, mud and dust"
+      "note": "synthetic: A-s4-rear-wheel, mud and dust"
     },
     {
       "id": "gate-rear-wheel-wear-5",
@@ -4478,7 +4478,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-rear-wheel, mud and dust"
+      "note": "synthetic: A-s4-rear-wheel, mud and dust"
     },
     {
       "id": "gate-rear-wheel-wear-6",
@@ -4491,7 +4491,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s3-rear-wheel, mud and dust"
+      "note": "synthetic: A-s2-rear-wheel, mud and dust"
     },
     {
       "id": "gate-rear-wheel-wear-7",
@@ -4504,7 +4504,7 @@
       "earlier": [],
       "labels": [],
       "knownMarks": [],
-      "note": "synthetic: A-s4-rear-wheel, mud and dust"
+      "note": "synthetic: A-s2-rear-wheel, mud and dust"
     },
     {
       "id": "gate-rear-wheel-damage-1",
@@ -4519,15 +4519,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.5425,
-            "y": 0.43875,
-            "width": 0.029375,
-            "height": 0.070625
+            "x": 0.761875,
+            "y": 0.226875,
+            "width": 0.0325,
+            "height": 0.028125
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-rear-wheel, small scratch"
+      "note": "synthetic: A-s4-rear-wheel, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "gate-rear-wheel-damage-2",
@@ -4542,15 +4542,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.738125,
-            "y": 0.129375,
-            "width": 0.146875,
-            "height": 0.1475
+            "x": 0.78875,
+            "y": 0.51875,
+            "width": 0.0875,
+            "height": 0.04375
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-rear-wheel, large dent"
+      "note": "synthetic: A-s2-rear-wheel, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "gate-rear-wheel-damage-3",
@@ -4565,15 +4565,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.775,
-            "y": 0.213125,
-            "width": 0.021875,
-            "height": 0.0375
+            "x": 0.818125,
+            "y": 0.508125,
+            "width": 0.060625,
+            "height": 0.050625
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-rear-wheel, small crack, poor light"
+      "note": "synthetic: A-s3-rear-wheel, small chip, a photograph of real damage (rust-spot), pasted, poor light"
     },
     {
       "id": "gate-rear-wheel-damage-4",
@@ -4588,15 +4588,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.74,
-            "y": 0.1725,
-            "width": 0.109375,
-            "height": 0.094375
+            "x": 0.791875,
+            "y": 0.15375,
+            "width": 0.080625,
+            "height": 0.073125
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-rear-wheel, large chip"
+      "note": "synthetic: A-s3-rear-wheel, large chip, a photograph of real damage (chip-blue), pasted"
     },
     {
       "id": "gate-rear-wheel-damage-5",
@@ -4611,15 +4611,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.79375,
-            "y": 0.184375,
-            "width": 0.04875,
-            "height": 0.05375
+            "x": 0.82625,
+            "y": 0.511875,
+            "width": 0.03875,
+            "height": 0.048125
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-rear-wheel, small scuff"
+      "note": "synthetic: A-s4-rear-wheel, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "gate-rear-wheel-damage-6",
@@ -4634,15 +4634,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.549375,
-            "y": 0.41625,
-            "width": 0.015,
-            "height": 0.126875
+            "x": 0.754375,
+            "y": 0.153125,
+            "width": 0.11,
+            "height": 0.114375
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-rear-wheel, large scratch, poor light"
+      "note": "synthetic: A-s3-rear-wheel, large scratch, a photograph of real damage (gouge-blue), pasted, poor light"
     },
     {
       "id": "gate-rear-wheel-damage-7",
@@ -4657,15 +4657,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.805625,
-            "y": 0.171875,
-            "width": 0.045,
-            "height": 0.056875
+            "x": 0.791875,
+            "y": 0.1775,
+            "width": 0.051875,
+            "height": 0.04625
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-rear-wheel, small dent"
+      "note": "synthetic: A-s3-rear-wheel, small chip, a photograph of real damage (rust-spot), pasted"
     },
     {
       "id": "gate-rear-wheel-damage-8",
@@ -4680,15 +4680,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.76375,
-            "y": 0.178125,
-            "width": 0.091875,
-            "height": 0.065625
+            "x": 0.81875,
+            "y": 0.50375,
+            "width": 0.06,
+            "height": 0.055
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-rear-wheel, large crack"
+      "note": "synthetic: A-s3-rear-wheel, large chip, a photograph of real damage (chip-blue), pasted"
     },
     {
       "id": "gate-rear-wheel-damage-9",
@@ -4703,15 +4703,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.761875,
-            "y": 0.2,
-            "width": 0.064375,
-            "height": 0.044375
+            "x": 0.776875,
+            "y": 0.21,
+            "width": 0.028125,
+            "height": 0.03625
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-rear-wheel, small chip, poor light"
+      "note": "synthetic: A-s4-rear-wheel, small scratch, a photograph of real damage (scratches-yellow), pasted, poor light"
     },
     {
       "id": "gate-rear-wheel-damage-10",
@@ -4726,15 +4726,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.730625,
-            "y": 0.085,
-            "width": 0.15625,
-            "height": 0.21375
+            "x": 0.795625,
+            "y": 0.50625,
+            "width": 0.0775,
+            "height": 0.053125
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-rear-wheel, large scuff"
+      "note": "synthetic: A-s4-rear-wheel, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "gate-rear-wheel-damage-11",
@@ -4749,15 +4749,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.54875,
-            "y": 0.481875,
-            "width": 0.01375,
-            "height": 0.02625
+            "x": 0.823125,
+            "y": 0.511875,
+            "width": 0.048125,
+            "height": 0.05125
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-rear-wheel, small scratch"
+      "note": "synthetic: A-s2-rear-wheel, small chip, a photograph of real damage (rust-spot), pasted"
     },
     {
       "id": "gate-rear-wheel-damage-12",
@@ -4772,15 +4772,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.75125,
-            "y": 0.120625,
-            "width": 0.133125,
-            "height": 0.155
+            "x": 0.80625,
+            "y": 0.175625,
+            "width": 0.0375,
+            "height": 0.04125
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s3-rear-wheel, large dent, poor light"
+      "note": "synthetic: A-s4-rear-wheel, large chip, a photograph of real damage (chip-blue), pasted, poor light"
     },
     {
       "id": "gate-rear-wheel-damage-13",
@@ -4795,15 +4795,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.795,
-            "y": 0.20125,
-            "width": 0.036875,
-            "height": 0.023125
+            "x": 0.824375,
+            "y": 0.528125,
+            "width": 0.045,
+            "height": 0.034375
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s4-rear-wheel, small crack"
+      "note": "synthetic: A-s4-rear-wheel, small scratch, a photograph of real damage (scratches-yellow), pasted"
     },
     {
       "id": "gate-rear-wheel-damage-14",
@@ -4818,15 +4818,15 @@
         {
           "kind": "damage",
           "region": {
-            "x": 0.51125,
-            "y": 0.468125,
-            "width": 0.061875,
-            "height": 0.07875
+            "x": 0.5375,
+            "y": 0.4225,
+            "width": 0.03875,
+            "height": 0.114375
           }
         }
       ],
       "knownMarks": [],
-      "note": "synthetic: A-s2-rear-wheel, large chip"
+      "note": "synthetic: A-s3-rear-wheel, large scratch, a photograph of real damage (gouge-blue), pasted"
     },
     {
       "id": "gate-rear-wheel-known-mark-1",
@@ -4840,10 +4840,10 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.769375,
-          "y": 0.22125,
-          "width": 0.05125,
-          "height": 0.025
+          "x": 0.54,
+          "y": 0.438125,
+          "width": 0.0325,
+          "height": 0.07125
         }
       ],
       "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-rear-wheel)"
@@ -4860,13 +4860,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.560625,
-          "y": 0.510625,
-          "width": 0.0175,
-          "height": 0.01
+          "x": 0.529375,
+          "y": 0.43875,
+          "width": 0.043125,
+          "height": 0.0275
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-rear-wheel)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-rear-wheel)"
     },
     {
       "id": "gate-rear-wheel-known-mark-3",
@@ -4880,13 +4880,13 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.55375,
-          "y": 0.458125,
-          "width": 0.0075,
-          "height": 0.05375
+          "x": 0.810625,
+          "y": 0.511875,
+          "width": 0.054375,
+          "height": 0.045
         }
       ],
-      "note": "synthetic: a scratch on the item at handover, still there at return (A-s2-rear-wheel)"
+      "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-rear-wheel)"
     },
     {
       "id": "gate-rear-wheel-known-mark-4",
@@ -4900,10 +4900,10 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.7725,
-          "y": 0.1975,
-          "width": 0.049375,
-          "height": 0.065
+          "x": 0.7425,
+          "y": 0.213125,
+          "width": 0.06625,
+          "height": 0.061875
         }
       ],
       "note": "synthetic: a scratch on the item at handover, still there at return (A-s4-rear-wheel)"
@@ -4920,10 +4920,10 @@
       "labels": [],
       "knownMarks": [
         {
-          "x": 0.783125,
-          "y": 0.21375,
+          "x": 0.77125,
+          "y": 0.225625,
           "width": 0.045,
-          "height": 0.020625
+          "height": 0.01875
         }
       ],
       "note": "synthetic: a scratch on the item at handover, still there at return (A-s3-rear-wheel)"
