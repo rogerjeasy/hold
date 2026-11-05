@@ -56,7 +56,8 @@ export function FleetGrid({ rows, clock, canManage }: FleetGridProps) {
     { colId: 'name', headerName: t('columns.item'), valueGetter: ({ data }) => (data?.kind === 'item' ? data.item.label : ''), hide: true },
     // The signal shows beside the item's name, and has a column of its own in the spreadsheet.
     { colId: 'signal', headerName: t('columns.signal'), valueGetter: ({ data }) => (data?.kind === 'item' && data.fastest ? t('fastest') : ''), hide: true },
-    { colId: 'standing', headerName: t('columns.standing'), cellRenderer: FleetStandingCell, valueGetter: ({ data }) => (data?.kind === 'item' ? items(`standing.${data.item.standing}`) : ''), width: 156, minWidth: 148, sortable: false },
+    // Room for the longest standing in any language, French's "En vérification", and for Linux drawing type a little wider.
+    { colId: 'standing', headerName: t('columns.standing'), cellRenderer: FleetStandingCell, valueGetter: ({ data }) => (data?.kind === 'item' ? items(`standing.${data.item.standing}`) : ''), width: 180, minWidth: 172, sortable: false },
     { colId: 'rentals', headerName: t('columns.rentals'), cellRenderer: FleetCountCell, valueGetter: itemFigure((row) => row.wear.rentals), aggFunc: total, width: 100, minWidth: 96, type: 'rightAligned' },
     { colId: 'daysOut', headerName: t('columns.daysOut'), cellRenderer: FleetCountCell, valueGetter: itemFigure((row) => row.wear.daysOut), aggFunc: total, width: 108, minWidth: 104, type: 'rightAligned' },
     {

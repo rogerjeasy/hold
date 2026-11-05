@@ -77,6 +77,14 @@ test('the fleet fits every width, and on a phone each type keeps its list of ite
   await expect(page.getByRole('region', { name: 'Hybrid bike' }).getByRole('link', { name: 'Hybrid bike 3' })).toBeVisible()
 })
 
+// The longest word for where an item is, "En vérification", still fits its column.
+test('the fleet in French fits every width', async ({ page }) => {
+  await openItems(page)
+  await page.goto('/fr/shop/items')
+  await expect(page.getByRole('region', { name: 'Flotte' }).getByText('En vérification').first()).toBeVisible()
+  await expectFitsEveryWidth(page)
+})
+
 for (const theme of ['light', 'dark'] as const) {
   test(`the fleet passes the accessibility checks in the ${theme} theme`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' })
