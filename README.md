@@ -19,7 +19,7 @@
 
 <p align="center">
   <strong>Live demo: <a href="https://p99faar3kp.us-east-1.awsapprunner.com">p99faar3kp.us-east-1.awsapprunner.com</a></strong>
-  · <strong>Video:</strong> <em>(YouTube link)</em> · Built for the PayPal AI Hackathon 2026<br>
+  · <strong>Video: <a href="https://youtu.be/CXARDN_l2H8">watch on YouTube</a></strong> · Built for the PayPal AI Hackathon 2026<br>
   One tap builds a demo shop of your own in about 25 seconds, with nothing to type.
 </p>
 
@@ -252,7 +252,7 @@ flowchart LR
 |---|---|
 | A working build, hosted or with run instructions | The [live demo](https://p99faar3kp.us-east-1.awsapprunner.com), and [Run it yourself](#run-it-yourself) with no account |
 | A public repository with an open-source licence | [MIT](LICENSE) |
-| A public video under three minutes | The link at the top |
+| A public video under three minutes | [The video on YouTube](https://youtu.be/CXARDN_l2H8) |
 | PayPal central to the project | [How Hold uses PayPal](#how-hold-uses-paypal) |
 | An AI tool, model or platform | [How Hold uses Claude](#how-hold-uses-claude) |
 | Test credentials for judges | [Testing instructions](#testing-instructions) |
