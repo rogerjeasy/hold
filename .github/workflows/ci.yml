@@ -1,9 +1,9 @@
 # Everything `pnpm check` runs, plus the key end-to-end flows and the container build, on every pull request and every
 # push to main: types, lint, every unit test and the phone app's tests, as parallel jobs. Deploy (deploy.yml) runs only
 # after every job here passes on main, so a change that breaks any unit test, a lint rule or the phone app is never
-# deployed. These are all quick and steady. The full end-to-end suite, every page at every width, runs each night in
-# e2e-nightly.yml instead: it takes the better part of an hour, and one slow or flaky page must not hold a deploy back
-# in the days before a deadline. It needs no AWS access: the tests run against in-process fakes.
+# deployed. These are all quick and steady. The full end-to-end suite, every page at every width, runs beside this in
+# e2e-full.yml instead: it takes about twenty minutes, and one slow or flaky page must not hold a deploy back in the days
+# before a deadline. It needs no AWS access: the tests run against in-process fakes.
 name: CI
 
 on:

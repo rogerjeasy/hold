@@ -96,11 +96,13 @@ describe('what CI enforces', () => {
     expect(workflow('deploy.yml')).toMatch(/workflow_run:\s+workflows: \[CI\]/)
   })
 
-  it('runs the full end-to-end suite, every page at every width, each night and on demand', () => {
-    const nightly = workflow('e2e-nightly.yml')
-    expect(nightly).toMatch(/schedule:\s+- cron: /)
-    expect(nightly).toContain('workflow_dispatch:')
-    expect(nightly).toContain('run: pnpm test:e2e\n')
-    expect(nightly).toContain('HOLD_AG_GRID_LICENCE_KEY: ${{ secrets.AG_GRID_LICENCE_KEY }}')
+  it('runs the full end-to-end suite, every page at every width, on every push to main and on demand, not on a timer', () => {
+    const full = workflow('e2e-full.yml')
+    expect(full).toMatch(/push:\s+branches: \[main\]/)
+    expect(full).not.toContain('schedule:')
+    expect(full).toContain('workflow_dispatch:')
+    expect(full).toMatch(/concurrency:\s+group: e2e-full\s+cancel-in-progress: true/)
+    expect(full).toContain('run: pnpm test:e2e\n')
+    expect(full).toContain('HOLD_AG_GRID_LICENCE_KEY: ${{ secrets.AG_GRID_LICENCE_KEY }}')
   })
 })

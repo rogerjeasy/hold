@@ -29,7 +29,7 @@ pnpm dev                 # the web app (next dev) against your own AWS services;
 pnpm test                # Vitest, every package
 pnpm test <path>         # one file or folder
 pnpm test:e2e            # Playwright, the full suite: run it locally before work that touches a screen is done
-pnpm test:e2e:key        # the key flows only (sign-in, booking, claims), without the width checks: CI runs these; the full suite runs nightly
+pnpm test:e2e:key        # the key flows only (sign-in, booking, claims), without the width checks: CI runs these; the full suite runs on every push to main
 pnpm test:ci             # the key unit tests (domain, settling, row-level security, route access, agent tools): a quick check; CI runs every unit test
 pnpm lint
 pnpm typecheck

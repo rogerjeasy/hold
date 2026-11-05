@@ -1,19 +1,20 @@
-# The full end-to-end suite, every page at every width (AGENTS.md section 9), each night on main and whenever someone
-# asks. It does not gate a deploy: CI (ci.yml) runs the key flows on every push, and this suite takes the better part
-# of an hour, so a slow or flaky page shows up here the next morning instead of holding a fix back. Like CI it needs no
-# AWS access: the tests run against in-process fakes.
+# The full end-to-end suite, every page at every width (AGENTS.md section 9), on every push to main and whenever someone
+# asks; not on a timer, since a day with no push has nothing new to check. It does not gate a deploy: CI (ci.yml) runs
+# the key flows on every push, and this suite takes about twenty minutes, so a slow or flaky page shows up here instead
+# of holding a fix back. A newer push cancels the run of the one before it. Like CI it needs no AWS access: the tests
+# run against in-process fakes.
 name: End to end, every page
 
 on:
-  schedule:
-    - cron: '30 2 * * *'
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: e2e-nightly
+  group: e2e-full
   cancel-in-progress: true
 
 jobs:
@@ -40,7 +41,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-nightly
+          name: playwright-report-full
           path: |
             apps/web/playwright-report
             apps/web/test-results
