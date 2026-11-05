@@ -201,7 +201,6 @@ Next.js, React, Tailwind CSS and shadcn/ui. One app serves a phone at the counte
 
 - Commit only when asked. Small commits, one purpose each, tests and code together.
 - Conventional commit messages: `feat:`, `fix:`, `test:`, `refactor:`, `docs:`, `chore:`.
-- No `Co-Authored-By` trailer and no "Generated with" line in any commit or pull request.
 - Never commit secrets, `.env` files, sandbox credentials or real customer data.
 - Database changes are migrations in the repository. Never edit a migration that has run.
 
