@@ -177,16 +177,18 @@ test('the first tap on New rental answers at once, even while the server is slow
   await expect(page.getByRole('heading', { level: 1 })).not.toHaveText('Rentals')
 })
 
-// On a phone the tap is on the tab bar's "+", which must answer the same way.
+// On a phone the tap is on the tab bar's "+", which must answer the same way. The server is slowed before signing in:
+// the shop's first page links to the booking form and prefetches it, and a form already fetched opens with nothing to
+// wait for.
 test('on a phone, the first tap on the tab bar\'s New rental answers at once, even while the server is slow', async ({ page }) => {
-  await page.goto('/sign-in')
-  await page.getByRole('region', { name: 'Try the demo shop' }).getByRole('button', { name: 'Start a demo as Jonas, at the counter' }).click()
-  await expectInShop(page, 'Ribeira Bikes')
-  await page.setViewportSize({ width: 390, height: 844 })
   await page.route('**/shop/rentals/new**', async (route) => {
     if (route.request().headers()['rsc'] !== undefined) await new Promise((resolve) => setTimeout(resolve, 10_000))
     await route.continue()
   })
+  await page.goto('/sign-in')
+  await page.getByRole('region', { name: 'Try the demo shop' }).getByRole('button', { name: 'Start a demo as Jonas, at the counter' }).click()
+  await expectInShop(page, 'Ribeira Bikes')
+  await page.setViewportSize({ width: 390, height: 844 })
   await page.getByRole('navigation', { name: 'Quick links' }).getByRole('link', { name: 'New rental' }).click()
   await expect(page.getByRole('navigation', { name: 'Quick links' }).getByRole('status').filter({ hasText: 'Opening the page…' })).toBeAttached({ timeout: 2000 })
   await expect(page).toHaveURL(/\/shop\/rentals\/new/, { timeout: 30_000 })
