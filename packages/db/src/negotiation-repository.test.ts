@@ -14,6 +14,7 @@ import { approvals, auditLog, claims, executions, mandates, negotiationMoves, ne
 import { inShop } from './scope.ts'
 import type { Transaction } from './scope.ts'
 import { connectedAssistant } from './testing/assistant-session.ts'
+import { mentionOf } from './testing/mention-of.ts'
 import { presentedClaim, twoLinePrices } from './testing/presented-claim.ts'
 import { readyRentalShop } from './testing/ready-rental.ts'
 import type { ReadyRentalShop } from './testing/ready-rental.ts'
@@ -110,7 +111,7 @@ describe('a negotiation between two advocates', () => {
     const transcript = await shop.act((transaction) => negotiationTranscript(transaction, claim.rentalId))
     expect(transcript?.moves.map((each) => [each.side, each.kind, each.totalCents])).toEqual([['shop', 'offer', 70_00], ['renter', 'offer', 20_00], ['shop', 'offer', 45_00], ['renter', 'offer', 40_00], ['shop', 'accept', null]])
     expect(transcript).toMatchObject({ state: 'agreed', agreedCents: 40_00, chainVerified: true })
-    expect(JSON.stringify(transcript)).not.toMatch(/highestTotal|lowestShare|largestClaim|5000|"50\.00"/)
+    expect(JSON.stringify(transcript)).not.toMatch(mentionOf(['highestTotal', 'lowestShare', 'largestClaim', '"50\\.00"'], [5000]))
     expect((await shop.act((transaction) => transaction.select().from(claims).where(eq(claims.id, claim.claimId))))[0]?.state).toBe('agreed')
 
     // The counter staff member may not confirm a contested claim's result; the owner may.
@@ -188,8 +189,8 @@ describe('a negotiation between two advocates', () => {
     const forRenter = await shop.act((transaction) => renterNegotiation(transaction, claim.rentalId))
     expect(forShop).toMatchObject({ awaitingShop: true, transcript: { state: 'agreed', agreedCents: 35_00 } })
     expect(forRenter).toMatchObject({ awaitingRenter: true, highestTotalCents: 50_00, stopped: false, transcript: { state: 'agreed' } })
-    expect(JSON.stringify(forShop)).not.toMatch(/highestTotal|awaitingRenter|5000/)
-    expect(JSON.stringify(forRenter)).not.toMatch(/lowestShare|largestClaim|awaitingShop|evidenceRequired|20000/)
+    expect(JSON.stringify(forShop)).not.toMatch(mentionOf(['highestTotal', 'awaitingRenter'], [5000]))
+    expect(JSON.stringify(forRenter)).not.toMatch(mentionOf(['lowestShare', 'largestClaim', 'awaitingShop', 'evidenceRequired'], [20000]))
     expect(await other.act((transaction) => shopNegotiation(transaction, claim.rentalId))).toBeUndefined()
   })
 
@@ -219,7 +220,7 @@ describe('the transcript in the evidence pack (X4.8)', () => {
     expect(snapshot?.negotiation).toMatchObject({ kind: 'negotiation', state: 'agreed', agreedCents: 35_00, moves: [{ sequence: 1, side: 'shop', totalCents: 70_00 }, { sequence: 2, side: 'renter', totalCents: 35_00, lines: [{ cents: 35_00, ground: null, evidence: [] }, { cents: 0, ground: 'ordinary_wear', evidence: ['wear-1'] }] }, { sequence: 3, kind: 'accept' }] })
     const moves = snapshot?.negotiation?.moves.map((each) => ({ ...each, createdAt: new Date(each.createdAt) })) ?? []
     expect(verifyTranscript(moves)).toEqual({ ok: true })
-    expect(JSON.stringify(snapshot?.negotiation)).not.toMatch(/highestTotal|lowestShare|largestClaim|finalTap|evidenceRequired|5000/)
+    expect(JSON.stringify(snapshot?.negotiation)).not.toMatch(mentionOf(['highestTotal', 'lowestShare', 'largestClaim', 'finalTap', 'evidenceRequired'], [5000]))
   })
 })
 

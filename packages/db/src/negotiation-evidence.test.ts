@@ -8,6 +8,7 @@ import { negotiationEvidence } from './negotiation-evidence.ts'
 import { openAdvocate } from './negotiation-repository.ts'
 import { comparisons, paypalAccounts, photos, priceEntries } from './schema/index.ts'
 import { grantShopSettlement } from './settlement-mandate-repository.ts'
+import { mentionOf } from './testing/mention-of.ts'
 import { readyRentalShop } from './testing/ready-rental.ts'
 import type { ReadyRentalShop } from './testing/ready-rental.ts'
 import { createTestDatabase } from './testing/test-database.ts'
@@ -76,7 +77,7 @@ describe('the evidence an advocate may read', () => {
       conditionReport: { reply: null },
     })
     // The renter's highest total, 31.23, and the shop's limits are nowhere in it.
-    expect(JSON.stringify(evidence)).not.toMatch(/3123|31\.23|highestTotal|lowestShare|largestClaim|50000/)
+    expect(JSON.stringify(evidence)).not.toMatch(mentionOf(['31\\.23', 'highestTotal', 'lowestShare', 'largestClaim'], [3123, 50000]))
     expect(await other.act((transaction) => negotiationEvidence(transaction, claim.negotiationId))).toBeUndefined()
     expect(await other.act((transaction) => transaction.select().from(photos))).toEqual([])
   })
