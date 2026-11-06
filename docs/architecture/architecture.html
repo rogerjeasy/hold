@@ -1,0 +1,283 @@
+<!doctype html>
+<!--
+  Hold's architecture, as deployed: the source of architecture-light.png and
+  architecture-dark.png, which the README shows. Every box is something in
+  apps/, packages/ or infra/lib; the counts are the CDK app's.
+
+  To draw the pictures again after a change:
+    docs/architecture/render.sh
+  (Chrome headless, at twice the size, once per theme: ?theme=light|dark.)
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Hold architecture</title>
+<style>
+  /* Hold's own tokens, from packages/design-tokens. */
+  :root {
+    --ground: #F4F2ED; --panel: #FFFFFF; --ink: #141412; --dim: #5C5952; --line: #8A857A; --edge: #E2DED5;
+    --hold: #B93F08; --hold-soft: #FBEADF; --aws: #232F3E; --aws-soft: #ECEEF1;
+    --paypal: #1D5FAF; --paypal-soft: #E6EFFA; --renter: #1B6B45; --renter-soft: #E3F1EA; --gate: #A32A1A; --gate-soft: #F8E5E1;
+  }
+  :root[data-theme="dark"] {
+    --ground: #0E0E0D; --panel: #171715; --ink: #F2EFE8; --dim: #B2ADA2; --line: #8C877C; --edge: #34342F;
+    --hold: #FF6A2B; --hold-soft: #2B190F; --aws: #C9D3DF; --aws-soft: #1A1E24;
+    --paypal: #6FA8EE; --paypal-soft: #142133; --renter: #6FCF9D; --renter-soft: #13241B; --gate: #F08A76; --gate-soft: #2E1915;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--ground); }
+  body { font: 15px/1.35 -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif; color: var(--ink); }
+  code { font-size: .92em; }
+  #canvas { position: relative; width: 1600px; height: 940px; padding: 28px 32px; }
+  h1 { margin: 0; font-size: 26px; letter-spacing: .2px; }
+  .lede { margin: 4px 0 0; color: var(--dim); font-size: 15px; }
+  .zone { position: absolute; border: 1.5px solid var(--edge); border-radius: 14px; background: var(--panel); padding: 30px 14px 14px; }
+  .zone > .label { position: absolute; top: 9px; left: 14px; font-size: 12.5px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--dim); }
+  .zone.people { background: var(--hold-soft); border-color: var(--hold); }
+  .zone.people > .label { color: var(--hold); }
+  .zone.paypal { background: var(--paypal-soft); border-color: var(--paypal); }
+  .zone.paypal > .label { color: var(--paypal); }
+  .zone.aws { background: var(--aws-soft); border-color: var(--aws); border-style: dashed; }
+  .zone.aws > .label { color: var(--aws); }
+  .box { position: absolute; border-radius: 10px; border: 1.5px solid var(--edge); background: var(--panel); padding: 9px 11px; }
+  .box b { display: block; font-size: 15px; margin-bottom: 2px; }
+  .box span { display: block; color: var(--dim); font-size: 12.5px; }
+  .box.staff { border-color: var(--hold); }
+  .box.renter { border-color: var(--renter); }
+  .box.renter b { color: var(--renter); }
+  .box.paypal { border-color: var(--paypal); }
+  .box.paypal b { color: var(--paypal); }
+  .box.gate { border-color: var(--gate); background: var(--gate-soft); }
+  .box.gate b { color: var(--gate); }
+  .box.model { border-color: var(--hold); }
+  .chips { margin-top: 5px; display: flex; flex-wrap: wrap; gap: 4px; }
+  .chips i { font-style: normal; font-size: 11.5px; padding: 1px 6px; border-radius: 6px; border: 1px solid var(--edge); color: var(--dim); background: var(--ground); }
+  .chips i.money { border-color: var(--paypal); color: var(--paypal); }
+  svg#wires { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+  .wire { fill: none; stroke: var(--line); stroke-width: 1.8; }
+  .wire.money { stroke: var(--paypal); stroke-width: 2.2; }
+  .wire.people { stroke: var(--hold); stroke-width: 2.2; }
+  .wire.renterw { stroke: var(--renter); stroke-width: 2.2; }
+  .tag { font-size: 12px; fill: var(--ink); }
+  .tagbg { fill: var(--ground); stroke: var(--edge); }
+  .foot { position: absolute; left: 32px; right: 32px; bottom: 18px; display: flex; justify-content: space-between; color: var(--dim); font-size: 12.5px; }
+</style>
+</head>
+<body>
+<div id="canvas">
+  <h1>Hold — how it fits together</h1>
+  <p class="lede">People decide, code checks, PayPal holds the money. Models describe and never charge. One AWS account, <code>us-east-1</code>, six CDK stacks.</p>
+
+  <!-- People -->
+  <div class="zone people" style="left:32px; top:100px; width:270px; height:760px"><div class="label">People</div></div>
+  <div class="box staff" id="staff" style="left:48px; top:136px; width:238px">
+    <b>Owner and staff</b>
+    <span>a browser at the counter or in the office, or the phone app (Expo)</span>
+    <div class="chips"><i>owner · manager · counter · read-only</i><i>an approval limit per role</i><i>a passkey on every money step</i></div>
+  </div>
+  <div class="box renter" id="renter" style="left:48px; top:330px; width:238px">
+    <b>Renter</b>
+    <span>no account: a signed link bound to one rental, and a one-time code to accept, contest or agree</span>
+  </div>
+  <div class="box renter" id="assistant" style="left:48px; top:470px; width:238px">
+    <b>Any AI assistant</b>
+    <span>a traveller's own, over MCP: find, quote, book; after booking, an agent token for that one rental</span>
+  </div>
+  <div class="box" id="inbox" style="left:48px; top:690px; width:238px">
+    <b>Renter's inbox and phone</b>
+    <span>email over SMTP · texts through AWS End User Messaging · pushes through Expo</span>
+  </div>
+
+  <!-- AWS -->
+  <div class="zone aws" style="left:342px; top:100px; width:916px; height:760px"><div class="label">Hold on AWS</div></div>
+
+  <div class="zone" style="left:362px; top:136px; width:420px; height:404px"><div class="label">Web app · App Runner</div></div>
+  <div class="box" id="web" style="left:376px; top:170px; width:392px">
+    <b>Next.js, one image</b>
+    <span>screens, renter pages, the phone app's API, PayPal webhook intake, the owner's assistant</span>
+    <div class="chips"><i>one wrapper on every route: authenticate → shop and role → row-level security → schema</i><i>then act, then audit</i></div>
+  </div>
+  <div class="box" id="mcp" style="left:376px; top:322px; width:186px">
+    <b>MCP server · <code>/mcp</code></b>
+    <span>22 tools · streamable HTTP, stateless · 21 take no amount</span>
+  </div>
+  <div class="box gate" id="gateway" style="left:578px; top:322px; width:190px">
+    <b>Agent gateway</b>
+    <span>actor, shop, tier, mandate, rate, argument shape, then the audit line. No tier charges.</span>
+  </div>
+  <div class="box" id="cognito" style="left:376px; top:456px; width:392px">
+    <b>Amazon Cognito</b>
+    <span>staff accounts, passkeys · sign-in codes sent by a Lambda over SMTP</span>
+  </div>
+
+  <div class="zone" style="left:802px; top:136px; width:436px; height:404px"><div class="label">Work</div></div>
+  <div class="box" id="outbox" style="left:816px; top:170px; width:408px">
+    <b>Outbox relay → 11 SQS queues</b>
+    <span>a money step is written with its change, then sent with an idempotency key (<code>PayPal-Request-Id</code>); FIFO per rental</span>
+  </div>
+  <div class="box" id="sched" style="left:816px; top:276px; width:144px">
+    <b>EventBridge Scheduler</b>
+    <span>renews each hold in time · nightly queue · sweeps</span>
+  </div>
+  <div class="box gate" id="referee" style="left:816px; top:400px; width:144px">
+    <b>Referee, in code</b>
+    <span>an offer only lowers an approved claim, within listed prices and both mandates</span>
+  </div>
+  <div class="box" id="workers" style="left:976px; top:276px; width:248px">
+    <b>16 Lambda workers</b>
+    <div class="chips"><i class="money">PayPal events</i><i class="money">executions</i><i class="money">hold upkeep</i><i>comparisons</i><i>face blur</i><i>evidence packs</i><i>receipts</i><i>texts</i><i>operations agent</i><i>advocates</i></div>
+  </div>
+
+  <div class="zone" style="left:362px; top:560px; width:876px; height:120px"><div class="label">Models</div></div>
+  <div class="box" id="rekognition" style="left:376px; top:594px; width:272px">
+    <b>Amazon Rekognition</b>
+    <span>finds faces, blurred before any photograph reaches a screen</span>
+  </div>
+  <div class="box model" id="claude" style="left:664px; top:594px; width:560px">
+    <b>Claude on Amazon Bedrock</b>
+    <span>Opus 4.6 compares handover and return photographs and suggests a price code · Opus 4.5 runs the owner's assistant, the operations agent, both advocates and the contest summary</span>
+  </div>
+
+  <div class="zone" style="left:362px; top:700px; width:876px; height:146px"><div class="label">Records</div></div>
+  <div class="box" id="aurora" style="left:376px; top:734px; width:260px">
+    <b>Aurora PostgreSQL</b>
+    <span>Serverless v2 · row-level security walls off each shop · the money log, approvals and audit are append-only</span>
+  </div>
+  <div class="box" id="evidence" style="left:652px; top:734px; width:206px">
+    <b>S3 evidence</b>
+    <span>original photographs and packs, Object Lock for 180 days</span>
+  </div>
+  <div class="box" id="display" style="left:874px; top:734px; width:170px">
+    <b>S3 display</b>
+    <span>smaller, face-blurred copies</span>
+  </div>
+  <div class="box" id="secrets" style="left:1060px; top:734px; width:164px">
+    <b>Secrets Manager</b>
+    <span>every credential and signing key</span>
+  </div>
+
+  <!-- PayPal -->
+  <div class="zone paypal" style="left:1298px; top:100px; width:270px; height:760px"><div class="label">PayPal</div></div>
+  <div class="box paypal" id="orders" style="left:1314px; top:136px; width:238px">
+    <b>Orders · Authorizations</b>
+    <span>the fee captured, the hold authorized, renewed, captured in part or voided</span>
+  </div>
+  <div class="box paypal" id="hooks" style="left:1314px; top:262px; width:238px">
+    <b>Webhooks</b>
+    <span>signature verified, then the resource read back: PayPal's record is the truth</span>
+  </div>
+  <div class="box paypal" id="invoices" style="left:1314px; top:388px; width:238px">
+    <b>Invoicing · Refunds · Disputes</b>
+    <span>costs above the hold, money back, the evidence pack for a dispute</span>
+  </div>
+  <div class="box paypal" id="ppmcp" style="left:1314px; top:520px; width:238px">
+    <b>PayPal's MCP server</b>
+    <span>read tools only, for the operations agent</span>
+  </div>
+  <div class="box" id="login" style="left:1314px; top:630px; width:238px">
+    <b>Log in with PayPal</b>
+    <span>connects the shop's own PayPal account</span>
+  </div>
+
+  <svg id="wires"></svg>
+
+  <div class="foot">
+    <span>Delivered by AWS CDK and GitHub Actions over OIDC, no long-lived keys · CloudWatch alarms → SNS · AWS Budgets</span>
+    <span>github.com/rogerjeasy/hold</span>
+  </div>
+</div>
+
+<script>
+  const theme = new URLSearchParams(location.search).get('theme');
+  if (theme) document.documentElement.dataset.theme = theme;
+
+  const svg = document.getElementById('wires');
+  const NS = 'http://www.w3.org/2000/svg';
+  const canvas = document.getElementById('canvas').getBoundingClientRect();
+  const box = (id) => {
+    const r = document.getElementById(id).getBoundingClientRect();
+    return { l: r.left - canvas.left, r: r.right - canvas.left, t: r.top - canvas.top, b: r.bottom - canvas.top, cx: (r.left + r.right) / 2 - canvas.left, cy: (r.top + r.bottom) / 2 - canvas.top };
+  };
+  const at = (b, side, f = 0.5) => ({
+    l: [b.l, b.t + (b.b - b.t) * f], r: [b.r, b.t + (b.b - b.t) * f],
+    t: [b.l + (b.r - b.l) * f, b.t], b: [b.l + (b.r - b.l) * f, b.b],
+  })[side];
+
+  const defs = document.createElementNS(NS, 'defs');
+  for (const [name, color] of [['plain', 'var(--line)'], ['money', 'var(--paypal)'], ['people', 'var(--hold)'], ['renterw', 'var(--renter)']]) {
+    const m = document.createElementNS(NS, 'marker');
+    m.setAttribute('id', `arrow-${name}`); m.setAttribute('viewBox', '0 0 10 10'); m.setAttribute('refX', '9'); m.setAttribute('refY', '5');
+    m.setAttribute('markerWidth', '7'); m.setAttribute('markerHeight', '7'); m.setAttribute('orient', 'auto-start-reverse');
+    const p = document.createElementNS(NS, 'path'); p.setAttribute('d', 'M0,0 L10,5 L0,10 z'); p.setAttribute('style', `fill:${color}`);
+    m.appendChild(p); defs.appendChild(m);
+  }
+  svg.appendChild(defs);
+
+  /** A wire from point a to point b through optional corners, arrowheads at the ends asked for, and a label. */
+  function wire(points, { kind = 'plain', start = false, end = true, label, labelAt = 0.5, dx = 0, dy = 0 } = {}) {
+    const path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', points.map((p, i) => `${i ? 'L' : 'M'}${p[0]},${p[1]}`).join(' '));
+    path.setAttribute('class', `wire ${kind === 'plain' ? '' : kind}`);
+    if (end) path.setAttribute('marker-end', `url(#arrow-${kind})`);
+    if (start) path.setAttribute('marker-start', `url(#arrow-${kind})`);
+    svg.appendChild(path);
+    if (label) {
+      const total = path.getTotalLength();
+      const p = path.getPointAtLength(total * labelAt);
+      const g = document.createElementNS(NS, 'g');
+      const lines = label.split('\n');
+      const t = document.createElementNS(NS, 'text');
+      t.setAttribute('class', 'tag'); t.setAttribute('text-anchor', 'middle');
+      lines.forEach((line, i) => {
+        const s = document.createElementNS(NS, 'tspan');
+        s.setAttribute('x', p.x + dx); s.setAttribute('y', p.y + dy + 4 + (i - (lines.length - 1) / 2) * 15);
+        s.textContent = line; t.appendChild(s);
+      });
+      g.appendChild(t); svg.appendChild(g);
+      const bb = t.getBBox();
+      const bg = document.createElementNS(NS, 'rect');
+      bg.setAttribute('x', bb.x - 6); bg.setAttribute('y', bb.y - 3); bg.setAttribute('width', bb.width + 12); bg.setAttribute('height', bb.height + 6);
+      bg.setAttribute('rx', 6); bg.setAttribute('class', 'tagbg');
+      g.insertBefore(bg, t);
+    }
+  }
+
+  const staff = box('staff'), renter = box('renter'), assistant = box('assistant'), inbox = box('inbox');
+  const web = box('web'), mcp = box('mcp'), gateway = box('gateway');
+  const outbox = box('outbox'), workers = box('workers'), sched = box('sched');
+  const claude = box('claude');
+  const orders = box('orders'), hooks = box('hooks'), invoices = box('invoices'), ppmcp = box('ppmcp');
+  const LEFT = 322;  // the channel between people and AWS
+  const MONEY = 1270; // the channel between AWS and PayPal, for money steps
+  const READ = 1286;  // beside it, for the operations agent's reads
+  const ROW = 550;    // the channel between the web and work zones and the models
+  const TOP = 122;    // above the zones inside AWS
+
+  // People in.
+  wire([at(staff, 'r', 0.3), [LEFT, at(staff, 'r', 0.3)[1]], [LEFT, web.t + 30], [web.l, web.t + 30]], { kind: 'people' });
+  wire([at(renter, 'r', 0.35), [LEFT - 8, at(renter, 'r', 0.35)[1]], [LEFT - 8, web.b - 18], [web.l, web.b - 18]], { kind: 'renterw', label: 'signed link', labelAt: 0.5 });
+  wire([at(assistant, 'r', 0.35), [LEFT + 8, at(assistant, 'r', 0.35)[1]], [LEFT + 8, mcp.cy], [mcp.l, mcp.cy]], { kind: 'renterw', label: 'MCP', labelAt: 0.5 });
+  wire([at(mcp, 'r'), at(gateway, 'l')]);
+  // The web app hands work on through the outbox; the scheduler adds timed work.
+  wire([at(web, 'r', 0.3), [outbox.l, at(web, 'r', 0.3)[1]]]);
+  wire([[workers.cx, outbox.b], [workers.cx, workers.t]]);
+  wire([at(sched, 't'), [sched.cx, outbox.b]]);
+  // PayPal's events come back into the web app, which reads each one back.
+  wire([at(hooks, 'l'), [1250, hooks.cy], [1250, TOP], [700, TOP], [700, web.t]], { kind: 'money', label: 'webhooks, then read back', labelAt: 0.55 });
+  // Money steps to PayPal.
+  const out = at(workers, 'r', 0.2);
+  wire([[MONEY, out[1]], [MONEY, invoices.cy], [invoices.l, invoices.cy]], { kind: 'money' });
+  wire([out, [MONEY, out[1]], [MONEY, orders.cy], [orders.l, orders.cy]], { kind: 'money', label: 'money\nsteps', labelAt: 0.12, dy: -24 });
+  // The operations agent reads PayPal.
+  const read = at(workers, 'r', 0.8);
+  wire([read, [READ, read[1]], [READ, ppmcp.cy], [ppmcp.l, ppmcp.cy]], { label: 'read only', labelAt: 0.75, dx: -2 });
+  // Models.
+  wire([[workers.cx + 40, workers.b], [workers.cx + 40, claude.t]], { label: 'compare, explain', labelAt: 0.76, dx: -64 });
+  // Records.
+  wire([[656, 540], [656, 700]], { start: true });
+  // Messages out.
+  wire([[workers.l + 24, workers.b], [workers.l + 24, ROW], [LEFT, ROW], [LEFT, inbox.cy], [inbox.r, inbox.cy]], { kind: 'renterw', label: 'receipts, codes, texts, pushes', labelAt: 0.4 });
+</script>
+
+</body>
+</html>

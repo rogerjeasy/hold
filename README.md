@@ -38,10 +38,16 @@ other €215, with PayPal's ids on the rental's page.
 |---|---|
 | ![The renter's page asking to approve a €250 hold, which reads "A reservation, never a charge"](docs/images/renter-hold.webp) | ![A comparison of a handover and a return photograph, with the new chip boxed, confirmed by a second look and priced from the shop's list; the page says it is a simulated comparison](docs/images/comparison-finding.webp) |
 | The renter approves the hold in PayPal. Nothing is charged. | Code boxes the change, a look names it, a second look confirms it, the list prices it. This one is a simulated run, and says so. |
-| ![The two advocates' offers on a sample claim, €50 down to an agreed €25, beside the note that the run was recorded from Bedrock and the renter is made up](docs/images/advocates-ladder.webp) | ![A sample rental's page with its PayPal record: the fee captured and the hold placed, each with PayPal's id and status, marked Sample](docs/images/paypal-record.webp) |
-| The advocates' offers, recorded on Bedrock. The renter is made up. | Every PayPal call behind a rental, with PayPal's ids (made up on this sample). |
+| ![A closed claim for a deep scratch on the frame, approved by a named person: CHF 35.00 charged from a CHF 300.00 hold and CHF 265.00 released to the renter, with "Settlement confirmed: PayPal confirmed settlement"](docs/images/claim-settled.webp) | ![The rental's PayPal record: the CHF 35.00 capture with its authorization id, capture id, status COMPLETED, final_capture true and PayPal-Request-Id, read back from PayPal and confirmed by a verified PAYMENT.CAPTURE.COMPLETED event, then the CHF 265.00 released by that same final capture](docs/images/paypal-capture.webp) |
+| A named person approves the charge, and PayPal confirms the settlement. | PayPal's own ids for the capture, and the rest of the hold released by the same final capture. |
+| ![The advocates' page: the shop's advocate opens at €50.00, the renter's offers €15.00, then €40.00 and €25.00, and the shop's accepts at €25.00, beside the note that Claude on Bedrock argued both sides of a sample claim and nothing is taken until both people confirm](docs/images/advocates-run.webp) | ![The operations agent's night queue: two proposals, ask the renter for a new hold and answer a PayPal dispute, each with what code found, what the agent wrote and the PayPal references it read with read-only tools](docs/images/operations-queue.webp) |
+| When the renter contests, two advocates close the gap move by move. Recorded on Bedrock; the renter is made up. | Overnight, the operations agent reads PayPal and proposes. A person approves, rejects or postpones each line. |
+| ![The Money page: CHF 300.00 held on renters' accounts now, CHF 110.00 to the shop and CHF 565.00 back to renters, then each rental's movements, such as rental fee taken, hold placed and released to the renter, with PayPal's reference for each](docs/images/money.webp) | ![The Insights page: the same three totals, money by month, damage priced and recovered by item type, holds by trust rung, each hold on its 29 days, and reserved, captured and released, with an AI assistant panel at the side](docs/images/insights.webp) |
+| Every movement of the shop's money, as PayPal recorded it and Hold read it back. | Built from the shop's own records. The insights agent arranges the charts and changes no record. |
 
-Screenshots from the app on its in-process fakes. Simulated parts say so on screen.
+The first two screenshots come from the app on its in-process fakes. The claim and its PayPal record are a real
+sandbox rental in our own shop, in Swiss francs, and so are the money and insights pages. The advocates and the
+operations agent are recorded runs, and they say so on screen.
 
 ## Why it matters
 
@@ -212,39 +218,16 @@ evidence is locked for 180 days under S3 Object Lock, and the money log is appen
 
 ## How it fits together
 
-```mermaid
-flowchart LR
-  subgraph People
-    staff["Owner and staff<br/>phone or laptop"]
-    renter["Renter<br/>signed link, no account"]
-    assistant["Any AI assistant"]
-  end
-  subgraph AWS["AWS, us-east-1"]
-    web["Web app<br/>Next.js on App Runner"]
-    mcp["MCP server<br/>/mcp"]
-    db[("Aurora PostgreSQL<br/>row-level security")]
-    queues["SQS queues"]
-    worker["Workers<br/>Lambda"]
-    photos[("S3 evidence<br/>Object Lock")]
-    cognito["Cognito<br/>passkeys"]
-  end
-  paypal["PayPal<br/>Orders, authorizations, webhooks,<br/>invoicing, disputes, MCP server"]
-  claude["Claude on<br/>Amazon Bedrock"]
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/architecture/architecture-dark.png">
+  <img src="docs/architecture/architecture-light.png" alt="Hold's architecture. People: owner and staff in a browser or the phone app, a renter with a signed link and a one-time code, and any AI assistant over MCP. On AWS in us-east-1, the Next.js web app on App Runner wraps every route in one check (authenticate, shop and role, row-level security, schema), serves the MCP server with 22 tools behind the agent gateway, and signs staff in with Cognito passkeys. Work goes through an outbox relay to 11 SQS queues and 16 Lambda workers, with EventBridge Scheduler renewing holds and a referee in code bounding the advocates' offers. Models: Claude on Amazon Bedrock (Opus 4.6 compares photographs, Opus 4.5 runs the agents) and Rekognition for face blurring. Records: Aurora PostgreSQL with row-level security and an append-only money log, S3 evidence under Object Lock for 180 days, S3 display copies and Secrets Manager. PayPal: workers send money steps with an idempotency key to Orders and Authorizations and to Invoicing, Refunds and Disputes; webhooks come back to the web app and are read back before use; the operations agent reads PayPal's MCP server with read tools only. Receipts, codes, texts and pushes go out to the renter.">
+</picture>
 
-  staff --> web
-  renter --> web
-  assistant --> mcp
-  mcp --> web
-  web --> cognito
-  web --> db
-  web -- outbox --> queues
-  queues --> worker
-  worker -- "idempotent calls" --> paypal
-  paypal -- "webhooks, then read back" --> web
-  worker --> claude
-  worker --> photos
-  web --> photos
-```
+<sub>Drawn from <a href="docs/architecture/architecture.html"><code>docs/architecture/architecture.html</code></a>; every box is in <code>apps/</code>, <code>packages/</code> or <code>infra/lib</code>, and the counts are the CDK app's. <code>docs/architecture/render.sh</code> draws it again.</sub>
+
+A request never moves money. The web app writes each money step to the outbox with the change that caused it, and a
+worker sends it to PayPal with an idempotency key. A hold counts as placed, captured or released only once PayPal's
+webhook is verified and the resource is read back. The full design is in [`docs/architecture.md`](docs/architecture.md).
 
 ## Hackathon requirements
 
